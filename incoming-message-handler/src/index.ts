@@ -19,7 +19,7 @@ export const sendMessage = async (event: SQSEvent, context: Context): Promise<vo
     const response = await gateway.execute(JSON.stringify(record))
 
     if (!response) {
-      console.log("+++ NO RESPONSE +++")
+      console.log("No response received")
     }
     else {
       console.log(`Response received: ${response.status}`)

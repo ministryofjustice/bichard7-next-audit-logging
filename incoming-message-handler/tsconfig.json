@@ -1,8 +1,10 @@
 {
   "extends": "../tsconfig.json",
   "compilerOptions": {
-    "outDir": "build"
+    "outDir": "build",
+    "watch": true
   },
+  "compileOnSave": true,
   "include": [
     "src/**/*.ts"
   ],
