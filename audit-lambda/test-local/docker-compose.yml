@@ -6,7 +6,7 @@ services:
     ports:
       - 1414:1414
       - 9157:9157
-      - 9443:9443
+      - 10443:9443
     environment:
       - LICENSE=accept
       - MQ_QMGR_NAME=BR7_QM

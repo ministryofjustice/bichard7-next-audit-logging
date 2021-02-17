@@ -17,7 +17,7 @@
   },
   "scripts": {
     "build": "tsc",
-    "build-prod": "tsc -p tsconfig.prod.json",
+    "build:prod": "tsc -p tsconfig.prod.json",
     "test": "jest",
     "lint": "npx eslint src/**/*.ts",
     "zip": "zip -r sqs.zip index.js node_modules"
