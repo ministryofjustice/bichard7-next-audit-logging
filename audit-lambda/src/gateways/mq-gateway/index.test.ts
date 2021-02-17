@@ -9,7 +9,7 @@ const AxiosInstanceMock = {
       }
     }
   });
-  import MqGateway from "..";
+  import MqGateway from ".";
   
   const env = {
     MQ_HOST: 'a-host',
