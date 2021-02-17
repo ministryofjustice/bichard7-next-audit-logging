@@ -1,0 +1,10 @@
+{
+  "Variables": {
+    "MQ_HOST": "ibmmq",
+    "MQ_PORT": "9443",
+    "MQ_QUEUE": "DEV.QUEUE.1",
+    "MQ_USER": "app",
+    "MQ_PASSWORD": "passw0rd",
+    "MQ_QUEUE_MANAGER": "BR7_QM"
+  }
+}

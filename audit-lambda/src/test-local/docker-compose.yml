@@ -1,4 +1,4 @@
-version: "3.2"
+version: '3.2'
 services:
   ibmmq:
     image: ibmcom/mq
@@ -10,18 +10,23 @@ services:
     environment:
       - LICENSE=accept
       - MQ_QMGR_NAME=BR7_QM
+
   localstack:
     image: localstack/localstack:latest
-    container_name: aws-learning
+    container_name: localstack_main
     ports:
-      - "4563-4599:4563-4599"
-      - "8055:8080"
+      - 4563-4599:4563-4599
+      - 8055:8080
     environment:
       - SERVICES=sqs,lambda,s3
       - DEBUG=1
       - LAMBDA_REMOTE_DOCKER=false
       - NODE_TLS_REJECT_UNAUTHORIZED=0
-      - DATA_DIR=/tmp/localstack/data
+      - LAMBDA_DOCKER_NETWORK=mq_network
     volumes:
-      - "./.localstack:/tmp/localstack"
-      - "/var/run/docker.sock:/var/run/docker.sock"
+      - /var/run/docker.sock:/var/run/docker.sock
+      
+networks:
+  default:
+    name: mq_network
+    driver: bridge
