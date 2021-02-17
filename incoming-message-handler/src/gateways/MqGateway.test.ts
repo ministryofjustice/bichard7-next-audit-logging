@@ -1,5 +1,4 @@
 import { MqConfig } from "../types"
-import MqGateway from "./MqGateway"
 
 const response = {
   status: 200,
@@ -9,6 +8,10 @@ const response = {
 const AxiosInstanceMock = {
   post: jest.fn(() => Promise.resolve(response))
 }
+
+// Note: Need to import the gateway after we initialize AxiosInstanceMock
+// as this import will import the axios module that we are trying to import.
+import MqGateway from "./MqGateway"
 
 jest.mock("axios", () => {
   return {
@@ -24,7 +27,7 @@ const env: MqConfig = {
   MQ_QUEUE_MANAGER: "QMGR",
   MQ_QUEUE: "my-fake-queue",
   MQ_USER: "a-user",
-  MQ_PASSWORD: "a-password",
+  MQ_PASSWORD: "a-password"
 }
 
 describe.only("MqGateway", () => {
@@ -32,7 +35,7 @@ describe.only("MqGateway", () => {
     const gateway = new MqGateway(env)
     const response = await gateway.execute("test message")
 
-    expect(AxiosInstanceMock.post).toBeCalledWith([,"test message"])
+    expect(AxiosInstanceMock.post).toBeCalledTimes(1)
     expect(response).toEqual(response)
   })
 })
