@@ -1,4 +1,4 @@
-import { SQSEvent } from "aws-lambda"
+import { SQSEvent, Context } from "aws-lambda"
 import MqGateway from "./gateways/MqGateway"
 import { MqConfig } from "./types"
 
@@ -11,7 +11,7 @@ const env: MqConfig = {
   MQ_QUEUE: process.env.MQ_QUEUE
 }
 
-export const sendMessage = async (event: SQSEvent): Promise<void> => {
+export const sendMessage = async (event: SQSEvent, context: Context): Promise<void> => {
   console.info(`Received ${event.Records.length} records`)
 
   const gateway = new MqGateway(env)
@@ -22,7 +22,11 @@ export const sendMessage = async (event: SQSEvent): Promise<void> => {
       console.log("+++ NO RESPONSE +++")
     }
     else {
-      console.log(response.status)
+      console.log(`Response received: ${response.status}`)
+      
+      if (response.status !== 201) {
+        throw new Error(response.statusText)
+      }
     }
   }))
 
