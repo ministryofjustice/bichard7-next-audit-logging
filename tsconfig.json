@@ -4,6 +4,10 @@
     "target": "ES2017",
     "noImplicitAny": true,
     "preserveConstEnums": true,
-    "sourceMap": false
+    "sourceMap": false,
+    "strict": true,
+    "esModuleInterop": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true
   }
 }

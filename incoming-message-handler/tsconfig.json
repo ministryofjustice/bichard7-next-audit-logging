@@ -1,8 +1,7 @@
 {
   "extends": "../tsconfig.json",
   "compilerOptions": {
-    "outDir": "build",
-    "watch": true
+    "outDir": "build"
   },
   "compileOnSave": true,
   "include": [

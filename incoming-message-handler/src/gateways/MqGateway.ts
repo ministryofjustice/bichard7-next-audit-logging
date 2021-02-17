@@ -12,7 +12,7 @@ class MqGateway {
   private URL: string
   private instance: AxiosInstance
 
-  constructor(private env: MqConfig) {
+  constructor(env: MqConfig) {
     this.URL = `https://${env.MQ_USER}:${env.MQ_PASSWORD}@${env.MQ_HOST}:${env.MQ_PORT}/ibmmq/rest/v2/messaging/qmgr/${env.MQ_QUEUE_MANAGER}/queue/${env.MQ_QUEUE}/message`
     this.instance = axiosInstance
   }
