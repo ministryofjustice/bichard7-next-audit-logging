@@ -1,18 +1,62 @@
 {
-  "env": {
-    "browser": true,
-    "jest": true,
-    "es6": true
-  },
-  "plugins": ["import"],
-  "extends": ["plugin:prettier/recommended"],
+  "parser": "babel-eslint",
+  "extends": [
+    "prettier"
+  ],
+  "plugins": [
+    "prettier"
+  ],
   "parserOptions": {
-    "ecmaVersion": 2020,
+    "ecmaVersion": 2017,
     "sourceType": "module"
   },
+  "env": {
+    "es6": true
+  },
   "rules": {
-    "no-console": "warn",
-    "no-eval": "error",
-    "import/first": "error"
-  }
+    "prettier/prettier": [
+      "error"
+    ],
+    "@typescript-eslint/no-explicit-any": "off",
+    "@typescript-eslint/explicit-function-return-type": "off",
+    "compat/compat": "off",
+    "import/prefer-default-export": "off",
+    "@typescript-eslint/camelcase": "off",
+    "@typescript-eslint/no-namespace": "off",
+    "no-console": "off",
+    "prefer-promise-reject-errors": "off",
+    "no-underscore-dangle": "off",
+    "no-void": "off",
+    "no-restricted-globals": "off",
+    "no-param-reassign": "off",
+    "no-plusplus": "off",
+    "no-shadow": "off",
+    "@typescript-eslint/ban-ts-ignore": "off",
+    "no-restricted-syntax": "off",
+    "@typescript-eslint/no-unused-vars": "off",
+    "global-require": "off",
+    "max-classes-per-file": "off",
+    "react/display-name": "off",
+    "@typescript-eslint/no-empty-function": "off",
+    "func-names": "off",
+    "jest/no-disabled-tests": "off",
+    "no-unused-expressions": "off",
+    "import/no-webpack-loader-syntax": "off",
+    "import/no-unresolved": "off",
+    "react/prop-types": "off",
+    "import/no-dynamic-require": "off",
+    "no-prototype-builtins": "off"
+  },
+  "overrides": [
+    {
+      "files": [
+        "*.test.ts",
+        "*.test.tsx"
+      ],
+      "rules": {
+        "@typescript-eslint/no-var-requires": "off",
+        "import/first": "off"
+      }
+    }
+  ]
 }

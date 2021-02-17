@@ -1,14 +1,18 @@
-import { IncomingMessage } from "http";
-import * as https from "https";
+import { IncomingMessage } from 'http';
+import * as https from 'https';
 import { HandlerContext, HandlerEvent } from '../../handlers-common';
 
-const handler = (event: HandlerEvent, context: HandlerContext, callback: (error: Error, result: any) => void) => {
+const handler = (
+  event: HandlerEvent,
+  context: HandlerContext,
+  callback: (error: Error, result: any) => void,
+) => {
   const message = formatMessage(event.Records[0].body);
 
   const req = https.request(postOptions(), (res: IncomingMessage) => {
     let body = '';
     res.setEncoding('utf8');
-    res.on('data', (chunk: any) => body += chunk);
+    res.on('data', (chunk: any) => (body += chunk));
     res.on('end', () => {
       // If we know it's JSON, parse it
       if (res.headers['content-type'] === 'application/json') {
@@ -20,7 +24,6 @@ const handler = (event: HandlerEvent, context: HandlerContext, callback: (error:
         context.fail('Could not create MQ message');
       }
       callback(null, body);
-
     });
   });
   req.on('error', callback);
@@ -33,11 +36,16 @@ const formatMessage = (incomingMessage: string) => {
 
   const formatMessageFeed = (messageFeed: any) => {
     const addOpeningBrackets = messageFeed.replace(/&lt;/g, '<');
-    const addClosingBrackets = addOpeningBrackets.replace(/&gt;/g, '>\n');
+    const addClosingBrackets = addOpeningBrackets.replace(
+      /&gt;/g,
+      '>\n',
+    );
     return addClosingBrackets;
-  }
+  };
 
-  const formattedMessageFeed = formatMessageFeed(extractedMessageFeed);
+  const formattedMessageFeed = formatMessageFeed(
+    extractedMessageFeed,
+  );
 
   const convertedMessage = `<?xml version="1.0" encoding="UTF-8"?>
 <DeliverRequest xmlns="http://schemas.cjse.gov.uk/messages/deliver/2006-05" xmlns:ex="http://schemas.cjse.gov.uk/messages/exception/2006-06" xmlns:mf="http://schemas.cjse.gov.uk/messages/format/2006-05" xmlns:mm="http://schemas.cjse.gov.uk/messages/metadata/2006-05" xmlns:msg="http://schemas.cjse.gov.uk/messages/messaging/2006-05" xmlns:xmime="http://www.w3.org/2005/05/xmlmime" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://schemas.cjse.gov.uk/messages/deliver/2006-05 C:\ClearCase\kel-masri_BR7_0_1_intg\BR7\XML_Converter\Source\ClassGeneration\schemas\ReceiveDeliverService\DeliverService-v1-0.xsd">
@@ -75,10 +83,10 @@ const formatMessage = (incomingMessage: string) => {
 	<Message>
 		${formattedMessageFeed}
 	</Message>
-</DeliverRequest>`
+</DeliverRequest>`;
 
   return convertedMessage;
-}
+};
 
 const postOptions = () => {
   const options: https.RequestOptions = {
@@ -86,11 +94,20 @@ const postOptions = () => {
     port: process.env.MQ_PortNumber,
     method: 'POST',
     headers: {
-      'Authorization': 'Basic ' + Buffer.from(process.env.MQ_Username + ':' + process.env.MQ_Password).toString('base64'),
+      Authorization:
+        'Basic ' +
+        Buffer.from(
+          process.env.MQ_Username + ':' + process.env.MQ_Password,
+        ).toString('base64'),
       'Content-Type': 'text/plain',
-      'ibm-mq-rest-csrf-token': 'blank' // Need this header for POST operations even if it has no content
+      'ibm-mq-rest-csrf-token': 'blank', // Need this header for POST operations even if it has no content
     },
-    path: '/ibmmq/rest/v2/messaging/qmgr/' + process.env.MQ_QueueManager + '/queue/' + process.env.MQ_Queue + '/message'
+    path:
+      '/ibmmq/rest/v2/messaging/qmgr/' +
+      process.env.MQ_QueueManager +
+      '/queue/' +
+      process.env.MQ_Queue +
+      '/message',
   };
 
   // For test purposes, permit the qmgr to use a self-signed cert. Would
@@ -98,6 +115,6 @@ const postOptions = () => {
   options.rejectUnauthorized = false;
 
   return options;
-}
+};
 
 export default handler;

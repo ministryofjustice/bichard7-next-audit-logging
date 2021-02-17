@@ -1,7 +1,7 @@
 export type HandlerEvent = {
-    Records: Record[];
-}
+  Records: Record[];
+};
 
 export type Record = {
-    body: string;
-}
+  body: string;
+};

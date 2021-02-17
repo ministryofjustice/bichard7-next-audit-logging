@@ -1,11 +1,11 @@
-import axios, { AxiosInstance, AxiosResponse } from "axios";
-import * as https from "https";
-import { MqConfig } from "../../types";
+import axios, { AxiosInstance, AxiosResponse } from 'axios';
+import * as https from 'https';
+import { MqConfig } from '../../types';
 
 const axiosInstance = axios.create({
   httpsAgent: new https.Agent({
-    rejectUnauthorized: false
-  })
+    rejectUnauthorized: false,
+  }),
 });
 
 class MqGateway {
@@ -19,16 +19,12 @@ class MqGateway {
 
   async execute(message: string): Promise<AxiosResponse> {
     console.log(`Posting to: ${this.URL}`);
-    const response = this.instance.post(
-      this.URL,
-      message,
-      {
-        headers: {
-          "ibm-mq-rest-csrf-token": "blank",
-          "Content-Type": "text/plain;charset=utf-8"
-        }
-      }
-    )
+    const response = this.instance.post(this.URL, message, {
+      headers: {
+        'ibm-mq-rest-csrf-token': 'blank',
+        'Content-Type': 'text/plain;charset=utf-8',
+      },
+    });
     return response;
   }
 }
