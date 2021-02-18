@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tns1:SubmitResponseMes xmlns:tns1="http://hello.gov.uk/endpoint/types/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://hello.gov.uk/endpoint/types/">
+	<tns1:RequestID>123456789</tns1:RequestID>
+	<tns1:ResponseCode>42</tns1:ResponseCode>
+	<tns1:ResponseText>Submit was successful</tns1:ResponseText>
+</tns1:SubmitResponseMes>

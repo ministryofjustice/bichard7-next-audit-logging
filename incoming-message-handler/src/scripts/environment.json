@@ -1,0 +1,10 @@
+{
+  "Variables": {
+    "MQ_HOST": "host.docker.internal",
+    "MQ_PORT": "10443",
+    "MQ_QUEUE": "COURT_RESULT_INPUT_QUEUE",
+    "MQ_USER": "app",
+    "MQ_PASSWORD": "passw0rd",
+    "MQ_QUEUE_MANAGER": "BR7_QM"
+  }
+}
