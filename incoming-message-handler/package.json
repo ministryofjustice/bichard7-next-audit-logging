@@ -17,15 +17,15 @@
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "postbuild": "cp package.json build/package.json && cd build && npm i --only=production",
+    "postbuild": "cp package.json build/ && cp -RL node_modules build",
     "test": "npm run test:all",
     "test:all": "jest --watch",
     "test:integration": "jest --watch -t 'integration'",
     "lint": "eslint --ext ts ."
   },
   "dependencies": {
+    "@handlers/common": "file:../handlers-common",
     "axios": "^0.21.1",
-    "handlers-common": "file:../handlers-common",
     "https": "^1.0.0"
   }
 }

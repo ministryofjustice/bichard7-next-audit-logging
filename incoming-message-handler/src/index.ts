@@ -1,5 +1,5 @@
 import { SQSEvent } from "aws-lambda"
-import { isError } from "handlers-common"
+import { isError } from "@handlers/common"
 import MqGateway from "./gateways/MqGateway"
 import { MqConfig } from "./types"
 
@@ -16,6 +16,8 @@ const env: MqConfig = {
 export const sendMessage = async (event: SQSEvent): Promise<void> => {
   const gateway = new MqGateway(env)
 
+  console.log("Starting...")
+
   await Promise.allSettled(
     event.Records.map(async (record) => {
       const result = await gateway.execute(JSON.stringify(record))
@@ -28,4 +30,6 @@ export const sendMessage = async (event: SQSEvent): Promise<void> => {
       }
     })
   )
+
+  console.log("Finished!")
 }
