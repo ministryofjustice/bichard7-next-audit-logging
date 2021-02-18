@@ -18,7 +18,9 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "postbuild": "cp package.json build/package.json && cd build && npm i --only=production",
-    "test": "jest --watch",
+    "test": "npm run test:all",
+    "test:all": "jest --watch",
+    "test:integration": "jest --watch -t 'integration'",
     "lint": "eslint --ext ts ."
   },
   "dependencies": {
