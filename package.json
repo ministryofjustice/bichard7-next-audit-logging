@@ -14,7 +14,8 @@
     "eslint-plugin-prettier": "^3.3.1",
     "eslint-plugin-react": "^7.20.3",
     "eslint-plugin-react-hooks": "^4.0.8",
-    "husky": "^5.0.9",
+    "husky": "^4.3.8",
+    "lint-staged": "^10.5.4",
     "prettier": "^2.2.1",
     "ts-jest": "^26.4.4",
     "typescript": "^4.1.2"
@@ -24,15 +25,14 @@
     "lint:fix": "eslint --ext ts . --fix"
   },
   "lint-staged": {
-    "*.{ts}": [
-      "eslint --fix",
-      "git add"
+    "*.ts": [
+      "eslint --fix"
     ]
   },
-  "dependencies": {},
   "husky": {
     "hooks": {
       "pre-commit": "lint-staged"
     }
-  }
+  },
+  "dependencies": {}
 }
