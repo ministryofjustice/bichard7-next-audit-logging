@@ -1,1 +1,1 @@
-export * from './MqConfig';
+export * from "./MqConfig"

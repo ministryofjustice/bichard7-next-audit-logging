@@ -1,4 +1,5 @@
 ## Testing locally
+
 Follow these steps to run the lambda locally.
 
 1. Spin up the environment using Docker Compose. This creates a Docker network within which to run the local infrastructure and spins up Local Stack and a local IBM MQ instance.
@@ -28,6 +29,7 @@ $ ./send_message.sh
 ```
 
 5. Check that the message has been received in the IBM MQ console.
+
 - Go to the URL https://localhost:10443/ in the browser, and login with the following credentials:
   **Username:** admin
   **Password:** passw0rd

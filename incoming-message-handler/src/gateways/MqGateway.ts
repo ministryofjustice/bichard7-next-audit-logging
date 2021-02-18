@@ -19,17 +19,13 @@ class MqGateway {
 
   async execute(message: string): Promise<AxiosResponse> {
     console.log(`Posting to: ${this.URL}`)
-    
-    const response = this.instance.post(
-      this.URL,
-      message,
-      {
-        headers: {
-          "ibm-mq-rest-csrf-token": "blank",
-          "Content-Type": "text/plain;charset=utf-8"
-        }
+
+    const response = this.instance.post(this.URL, message, {
+      headers: {
+        "ibm-mq-rest-csrf-token": "blank",
+        "Content-Type": "text/plain;charset=utf-8"
       }
-    )
+    })
 
     return response
   }

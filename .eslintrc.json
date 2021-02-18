@@ -1,11 +1,7 @@
 {
   "parser": "babel-eslint",
-  "extends": [
-    "prettier"
-  ],
-  "plugins": [
-    "prettier"
-  ],
+  "extends": ["prettier"],
+  "plugins": ["prettier"],
   "parserOptions": {
     "ecmaVersion": 2017,
     "sourceType": "module"
@@ -14,9 +10,7 @@
     "es6": true
   },
   "rules": {
-    "prettier/prettier": [
-      "error"
-    ],
+    "prettier/prettier": ["error"],
     "@typescript-eslint/no-explicit-any": "off",
     "@typescript-eslint/explicit-function-return-type": "off",
     "compat/compat": "off",
@@ -49,10 +43,7 @@
   },
   "overrides": [
     {
-      "files": [
-        "*.test.ts",
-        "*.test.tsx"
-      ],
+      "files": ["*.test.ts", "*.test.tsx"],
       "rules": {
         "@typescript-eslint/no-var-requires": "off",
         "import/first": "off"

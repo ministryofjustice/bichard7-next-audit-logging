@@ -1,0 +1,16 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"type": "npm",
+			"script": "build",
+			"path": "incoming-message-handler/",
+			"problemMatcher": [
+				"$tsc"
+			],
+			"group": "build",
+			"label": "npm: build - incoming-message-handler",
+			"detail": "tsc -p tsconfig.json"
+		}
+	]
+}

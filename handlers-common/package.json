@@ -18,6 +18,5 @@
     "lint": "npx eslint src/**/*.ts",
     "zip": "zip -r sqs.zip index.js node_modules"
   },
-  "dependencies": {
-  }
+  "dependencies": {}
 }

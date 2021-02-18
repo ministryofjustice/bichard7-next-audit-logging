@@ -4,16 +4,9 @@
     "outDir": "build"
   },
   "compileOnSave": true,
-  "include": [
-    "src/**/*.ts"
-  ],
-  "exclude": [
-    "node_modules",
-    "build"
-  ],
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules", "build"],
   "paths": {
-    "*": [
-      "node_modules/*"
-    ]
+    "*": ["node_modules/*"]
   }
 }
