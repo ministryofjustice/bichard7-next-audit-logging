@@ -1,22 +1,7 @@
+jest.mock("axios")
+
+import axios from "axios"
 import { MqConfig } from "../types"
-
-const response = {
-  status: 200,
-  statusMessage: "Success!"
-}
-
-const AxiosInstanceMock = {
-  post: jest.fn(() => Promise.resolve(response))
-}
-
-jest.mock("axios", () => {
-  return {
-    create: jest.fn(() => AxiosInstanceMock)
-  }
-})
-
-// Note: Need to import the gateway after we initialize AxiosInstanceMock
-// as this import will import the axios module that we are trying to import.
 import MqGateway from "./MqGateway"
 
 const env: MqConfig = {
@@ -28,12 +13,33 @@ const env: MqConfig = {
   MQ_PASSWORD: "a-password"
 }
 
-describe.only("MqGateway", () => {
-  it.only("makes correct call to the MQ API returns the response", async () => {
-    const gateway = new MqGateway(env)
+describe("MqGateway", () => {
+  let gateway: MqGateway
+
+  beforeAll(() => {
+    gateway = new MqGateway(env)
+  })
+
+  it("makes correct call to the MQ API and returns undefined on success", async () => {
+    const expectedResponse = {
+      status: 200,
+      statusMessage: "Success!"
+    }
+
+    axios.post = jest.fn().mockResolvedValue(expectedResponse)
+
     const actual = await gateway.execute("test message")
 
-    expect(AxiosInstanceMock.post).toBeCalledTimes(1)
-    expect(actual).toEqual(response)
+    expect(actual).toBeUndefined()
+  })
+
+  it("makes an incorrect call to the MQ API and returns an error", async () => {
+    const expectedError = new Error("test error")
+
+    axios.post = jest.fn().mockRejectedValue(expectedError)
+
+    const actual = await gateway.execute("failing message")
+
+    expect(actual).toBe(expectedError)
   })
 })

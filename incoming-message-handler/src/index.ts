@@ -1,4 +1,5 @@
 import { SQSEvent } from "aws-lambda"
+import { isError } from "handlers-common"
 import MqGateway from "./gateways/MqGateway"
 import { MqConfig } from "./types"
 
@@ -14,12 +15,16 @@ const env: MqConfig = {
 // eslint-disable-next-line import/prefer-default-export
 export const sendMessage = async (event: SQSEvent): Promise<void> => {
   const gateway = new MqGateway(env)
-  await Promise.all(
-    event.Records.map(async (record) => {
-      const response = await gateway.execute(JSON.stringify(record))
 
-      if (response && response.status !== 201) {
-        throw new Error(response.statusText)
+  await Promise.allSettled(
+    event.Records.map(async (record) => {
+      const result = await gateway.execute(JSON.stringify(record))
+
+      if (isError(result)) {
+        // eslint-disable-next-line no-console
+        console.log(result)
+
+        throw result
       }
     })
   )

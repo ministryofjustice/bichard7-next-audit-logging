@@ -23,6 +23,7 @@
   },
   "dependencies": {
     "axios": "^0.21.1",
+    "handlers-common": "file:../handlers-common",
     "https": "^1.0.0"
   }
 }
