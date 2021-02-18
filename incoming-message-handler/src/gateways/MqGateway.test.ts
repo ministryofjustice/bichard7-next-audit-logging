@@ -9,17 +9,15 @@ const AxiosInstanceMock = {
   post: jest.fn(() => Promise.resolve(response)),
 };
 
+jest.mock('axios', () => {
+  return {
+    create: jest.fn(() => AxiosInstanceMock),
+  };
+});
+
 // Note: Need to import the gateway after we initialize AxiosInstanceMock
 // as this import will import the axios module that we are trying to import.
 import MqGateway from './MqGateway';
-
-jest.mock('axios', () => {
-  return {
-    default: {
-      create: jest.fn(() => AxiosInstanceMock),
-    },
-  };
-});
 
 const env: MqConfig = {
   MQ_HOST: 'a-host',
