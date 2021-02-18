@@ -1,49 +1,30 @@
 {
-  "parser": "babel-eslint",
-  "extends": ["prettier"],
-  "plugins": ["prettier"],
+  "parser": "@typescript-eslint/parser",
+  "extends": [
+    "airbnb-typescript",
+    "plugin:@typescript-eslint/recommended",
+    "prettier/@typescript-eslint",
+    "plugin:prettier/recommended" 
+  ],
   "parserOptions": {
-    "ecmaVersion": 2017,
-    "sourceType": "module"
+    "ecmaVersion": 2020,
+    "sourceType": "module",
+    "project": "./tsconfig.json"
   },
   "env": {
     "es6": true
   },
   "rules": {
-    "prettier/prettier": ["error"],
-    "@typescript-eslint/no-explicit-any": "off",
-    "@typescript-eslint/explicit-function-return-type": "off",
-    "compat/compat": "off",
-    "import/prefer-default-export": "off",
-    "@typescript-eslint/camelcase": "off",
-    "@typescript-eslint/no-namespace": "off",
-    "no-console": "off",
-    "prefer-promise-reject-errors": "off",
-    "no-underscore-dangle": "off",
-    "no-void": "off",
-    "no-restricted-globals": "off",
-    "no-param-reassign": "off",
-    "no-plusplus": "off",
-    "no-shadow": "off",
-    "@typescript-eslint/ban-ts-ignore": "off",
-    "no-restricted-syntax": "off",
-    "@typescript-eslint/no-unused-vars": "off",
-    "global-require": "off",
-    "max-classes-per-file": "off",
-    "react/display-name": "off",
-    "@typescript-eslint/no-empty-function": "off",
-    "func-names": "off",
-    "jest/no-disabled-tests": "off",
-    "no-unused-expressions": "off",
-    "import/no-webpack-loader-syntax": "off",
-    "import/no-unresolved": "off",
-    "react/prop-types": "off",
-    "import/no-dynamic-require": "off",
-    "no-prototype-builtins": "off"
+    "prettier/prettier": [
+      "error"
+    ],
+    "@typescript-eslint/ban-ts-comment": "off"
   },
   "overrides": [
     {
-      "files": ["*.test.ts", "*.test.tsx"],
+      "files": [
+        "*.test.ts"
+      ],
       "rules": {
         "@typescript-eslint/no-var-requires": "off",
         "import/first": "off"
