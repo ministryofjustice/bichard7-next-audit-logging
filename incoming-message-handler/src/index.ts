@@ -1,4 +1,4 @@
-import { SQSEvent, Context } from "aws-lambda"
+import { SQSEvent } from "aws-lambda"
 import MqGateway from "./gateways/MqGateway"
 import { MqConfig } from "./types"
 
@@ -11,28 +11,16 @@ const env: MqConfig = {
   MQ_QUEUE: process.env.MQ_QUEUE
 }
 
-export const sendMessage = async (
-  event: SQSEvent,
-  context: Context
-): Promise<void> => {
-  console.info(`Received ${event.Records.length} records`)
-  console.info(`From context ${context}`)
+// eslint-disable-next-line import/prefer-default-export
+export const sendMessage = async (event: SQSEvent): Promise<void> => {
   const gateway = new MqGateway(env)
   await Promise.all(
     event.Records.map(async (record) => {
       const response = await gateway.execute(JSON.stringify(record))
 
-      if (!response) {
-        console.log("No response received")
-      } else {
-        console.log(`Response received: ${response.status}`)
-
-        if (response.status !== 201) {
-          throw new Error(response.statusText)
-        }
+      if (response && response.status !== 201) {
+        throw new Error(response.statusText)
       }
     })
   )
-
-  console.log("Finished executing lambda")
 }

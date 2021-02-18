@@ -10,6 +10,7 @@ const axiosInstance = axios.create({
 
 class MqGateway {
   private URL: string
+
   private instance: AxiosInstance
 
   constructor(env: MqConfig) {
@@ -18,8 +19,6 @@ class MqGateway {
   }
 
   async execute(message: string): Promise<AxiosResponse> {
-    console.log(`Posting to: ${this.URL}`)
-
     const response = this.instance.post(this.URL, message, {
       headers: {
         "ibm-mq-rest-csrf-token": "blank",

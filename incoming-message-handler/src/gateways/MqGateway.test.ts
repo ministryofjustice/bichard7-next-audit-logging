@@ -31,9 +31,9 @@ const env: MqConfig = {
 describe.only("MqGateway", () => {
   it.only("makes correct call to the MQ API returns the response", async () => {
     const gateway = new MqGateway(env)
-    const response = await gateway.execute("test message")
+    const actual = await gateway.execute("test message")
 
     expect(AxiosInstanceMock.post).toBeCalledTimes(1)
-    expect(response).toEqual(response)
+    expect(actual).toEqual(response)
   })
 })
