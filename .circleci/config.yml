@@ -29,10 +29,15 @@ jobs:
   test: 
     docker: 
       - image: cimg/node:15.9.0
-    working_directory: ~
+    working_directory: ~/incoming-message-handler
     steps:
       - checkout
-      - run: cd ./incoming-message-handler && npm run test:c
+      - run:
+          name: "Install root dependencies"
+          command: npm install --save
+      - run:
+          name: "Test incoming message handler"
+          command: npm run test:c
 
 workflows:
   version: 2
