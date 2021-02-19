@@ -1,17 +1,44 @@
 version: 2.1
 
-jobs:
-  build:
-    docker:
+jobs: 
+  build: 
+    docker: 
       - image: cimg/node:15.9.0
+    working_directory: ~
     steps:
       - checkout
       - run:
-        name: Install root npm dependencies
-        command: npm install --save
+          name: "Install root dependencies"
+          command: npm install --save
+      - run: 
+          name: "Run lint"
+          command: npm run lint
       - run:
-        name: linting
-        command: npm run lint
+          name: "Install message handler dependencies"
+          command: cd ./incoming-message-handler && npm install --save
+      - run:
+          name: "Build message handler"
+          command: cd ./incoming-message-handler && npm run build
+      - run:
+          name: "Install common handlers dependencies"
+          command: cd ./handlers-common && npm install --save
+      - run:
+          name: "Build common handlers"
+          command: cd ./handlers-common && npm run build
+
+  test: 
+    docker: 
+      - image: cimg/node:15.9.0
+    working_directory: ~
+    steps:
+      - checkout
+      - run: cd ./incoming-message-handler && npm run test:c
 
 workflows:
-  
+  version: 2
+  build-and-test:
+    jobs:
+        - build
+        - test:
+            requires:
+              - build
