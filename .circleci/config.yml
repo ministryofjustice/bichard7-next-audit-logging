@@ -1,0 +1,17 @@
+version: 2.1
+
+jobs:
+  build:
+    docker:
+      - image: cimg/node:15.9.0
+    steps:
+      - checkout
+      - run:
+        name: Install root npm dependencies
+        command: npm install --save
+      - run:
+        name: linting
+        command: npm run lint
+
+workflows:
+  
