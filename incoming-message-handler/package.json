@@ -20,7 +20,7 @@
     "postbuild": "cp package.json build/ && cp -RL node_modules build",
     "test": "npm run test:all",
     "test:all": "jest --watch",
-    "test:integration": "jest --watch -t 'integration'",
+    "test:integration": "docker-compose -f ./tests/environment/docker-compose.integration.yml up",
     "lint": "eslint --ext ts ."
   },
   "dependencies": {
