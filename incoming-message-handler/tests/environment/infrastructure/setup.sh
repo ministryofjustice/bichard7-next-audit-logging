@@ -8,19 +8,27 @@ fi
 
 INFRA_PATH=$PWD/tests/environment/infrastructure
 QUEUE_NAME=incoming_message_queue
+DLQ_NAME=incoming_message_dead_letter_queue
 LAMBDA_NAME=IncomingMessageHandler
 
 # Create the lambda function
-LAMBDA_REMOTE_DOCKER=false awslocal lambda create-function \
-  --function-name $LAMBDA_NAME \
-  --code S3Bucket="__local__",S3Key=$PWD/build \
-  --handler index.sendMessage \
-  --runtime nodejs12.x \
-  --role whatever
+if [[ -z $(awslocal lambda list-functions | grep $LAMBDA_NAME) ]]; then
+  LAMBDA_REMOTE_DOCKER=false awslocal lambda create-function \
+    --function-name $LAMBDA_NAME \
+    --code S3Bucket="__local__",S3Key=$PWD/build \
+    --handler index.sendMessage \
+    --runtime nodejs12.x \
+    --role whatever
+fi
 
 # Create the queue and a dead letter queue
-awslocal sqs create-queue --queue-name $QUEUE_NAME
-awslocal sqs create-queue --queue-name incoming_message_dead_letter_queue
+if [[ -z $(awslocal sqs list-queues | grep $QUEUE_NAME) ]]; then
+  awslocal sqs create-queue --queue-name $QUEUE_NAME
+fi
+
+if [[ -z $(awslocal sqs list-queues | grep $DLQ_NAME) ]]; then
+  awslocal sqs create-queue --queue-name $DLQ_NAME
+fi
 
 awslocal sqs set-queue-attributes \
   --queue-url="$LOCALSTACK_URL/000000000000/$QUEUE_NAME" \
