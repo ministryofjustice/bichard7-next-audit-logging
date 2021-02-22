@@ -23,6 +23,7 @@ services:
       - LAMNDA_REMOVE_CONTAINERS=false
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+      - ../../build:/code
 
   infrastructure:
     build: ./infrastructure
@@ -30,6 +31,8 @@ services:
       - localstack
     environment:
       - LOCALSTACK_URL=http://localstack:4566
+    volumes:
+      - ../../build:/code
 
 networks:
   default:

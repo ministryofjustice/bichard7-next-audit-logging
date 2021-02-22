@@ -1,7 +1,6 @@
 FROM ubuntu:20.04
 
-RUN mkdir /code
-WORKDIR /code
+WORKDIR /app
 
 # Install curl, unzip, python3 and pip3
 RUN apt update
