@@ -1,20 +1,34 @@
-import { exec, ExecException } from "child_process"
+import { SQS } from "aws-sdk"
+
+jest.setTimeout(30000)
 
 const AWS_URL = "http://localhost:4566"
 
-const sendMessage = async (): Promise<void> => {
-  const command = `awslocal sqs send-message --queue-url=${AWS_URL}/000000000000/incoming_message_queue --message-body "HelloWorld"`
+const queue = new SQS({
+  endpoint: AWS_URL,
+  region: "us-east-1",
+  credentials: {
+    accessKeyId: "test",
+    secretAccessKey: "test"
+  }
+})
 
-  return new Promise<void>((resolve, reject) => {
-    exec(command, (error: ExecException | null) => {
-      if (error) {
-        reject(error)
+const sendMessage = async (): Promise<void> =>
+  new Promise<void>((resolve, reject) => {
+    queue.sendMessage(
+      {
+        QueueUrl: `${AWS_URL}/000000000000/incoming_message_queue`,
+        MessageBody: "Hello, World"
+      },
+      (error) => {
+        if (error) {
+          reject(error)
+        }
+
+        resolve()
       }
-
-      resolve()
-    })
+    )
   })
-}
 
 describe("integration tests", () => {
   it("should receive a message on the target queue when the message is sent to the AWS SQS queue", async () => {
