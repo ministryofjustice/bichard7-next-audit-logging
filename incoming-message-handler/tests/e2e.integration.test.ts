@@ -1,4 +1,6 @@
 import { SQS } from "aws-sdk"
+import axios, { AxiosError } from "axios"
+import * as https from "https"
 
 jest.setTimeout(30000)
 
@@ -13,12 +15,12 @@ const queue = new SQS({
   }
 })
 
-const sendMessage = async (): Promise<void> =>
+const sendMessage = async (message: string): Promise<void> =>
   new Promise<void>((resolve, reject) => {
     queue.sendMessage(
       {
         QueueUrl: `${AWS_URL}/000000000000/incoming_message_queue`,
-        MessageBody: "Hello, World"
+        MessageBody: message
       },
       (error) => {
         if (error) {
@@ -30,17 +32,45 @@ const sendMessage = async (): Promise<void> =>
     )
   })
 
+const waitFor = (milliseconds: number): Promise<void> =>
+  new Promise<void>((resolve) => setTimeout(() => resolve(), milliseconds))
+
+const getMessage = async (): Promise<any> =>
+  new Promise<any>((resolve, reject) => {
+    const httpsAgent = new https.Agent({
+      rejectUnauthorized: false
+    })
+
+    const url = "https://app:passw0rd@localhost:10443/ibmmq/rest/v1/messaging/qmgr/BR7_QM/queue/DEV.QUEUE.1/message"
+
+    axios
+      .delete(url, {
+        headers: {
+          "ibm-mq-rest-csrf-token": "blank",
+          "Content-Type": "text/plain;charset=utf-8"
+        },
+        httpsAgent
+      })
+      .then((response: any) => {
+        const body = response && response.data && response.data.body
+        if (body) {
+          resolve(body)
+        } else {
+          console.log(response)
+          reject("Received a response but no body")
+        }
+      })
+      .catch((error: AxiosError) => reject(error))
+  })
+
 describe("integration tests", () => {
   it("should receive a message on the target queue when the message is sent to the AWS SQS queue", async () => {
-    // TODO: Subscribe to IBM MQ queue.
-    // TODO: Send a message to SQS.
-    // TODO: Did we get a message?
-    //          Yes - verify the message is correct
-    //          No - timeout and fail
-    // TODO: Can we setup some special logging mechanism and read the logs here?
+    const expectedMessage = "Hello, World!"
 
-    await sendMessage()
+    await sendMessage(expectedMessage)
+    await waitFor(3000)
 
-    expect(true).toBe(true)
+    const actualMessage = await getMessage()
+    expect(actualMessage).toBe(expectedMessage)
   })
 })

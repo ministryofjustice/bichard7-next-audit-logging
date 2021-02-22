@@ -4,6 +4,7 @@ services:
     image: ibmcom/mq
     container_name: ibmmq
     ports:
+      - 1414:1414
       - 10443:9443
     environment:
       - LICENSE=accept
