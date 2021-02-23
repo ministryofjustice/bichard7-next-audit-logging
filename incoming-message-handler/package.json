@@ -17,10 +17,10 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "postbuild": "cp package.json build/ && cp -RL node_modules build",
-    "test": "npm run test:all",
-    "test:all": "jest --watch",
-    "test:integration": "./tests/environment/setup.sh && jest --watch -t integration",
-    "test:ci": "jest --coverage",
+    "test": "npm run test:unit",
+    "test:unit": "jest --watch --testPathPattern=src",
+    "test:integration": "./tests/environment/setup.sh && jest --watch --testPathPattern=tests",
+    "test:ci": "jest --coverage --ci",
     "lint": "eslint --ext ts ."
   },
   "dependencies": {
