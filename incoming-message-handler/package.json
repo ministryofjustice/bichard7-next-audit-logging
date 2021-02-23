@@ -20,7 +20,7 @@
     "test": "npm run test:unit",
     "test:unit": "jest --watch --testPathPattern=src",
     "test:integration": "./tests/environment/setup.sh && jest --watch --testPathPattern=tests",
-    "test:ci": "jest --testPathPattern=src --coverage --ci",
+    "test:ci": "mkdir -p ./test-results/jest && jest --testPathPattern=src --coverage --ci --json --outputFile ./test-results/jest/results.json",
     "lint": "eslint --ext ts ."
   },
   "dependencies": {
