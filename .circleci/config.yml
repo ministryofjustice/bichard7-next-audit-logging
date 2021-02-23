@@ -47,8 +47,6 @@ jobs:
       - run:
         name: Run all unit tests for the Incoming Message Handler project
         command: cd ./incoming-message-handler && npm run test:ci
-      - store_test_results:
-        path: ./incoming-message-handler/test-results/jest/
 
 workflows:
   version: 2
