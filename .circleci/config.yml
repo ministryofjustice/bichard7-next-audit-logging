@@ -1,49 +1,58 @@
 version: 2.1
 
-jobs: 
-  build: 
-    docker: 
+jobs:
+  build:
+    docker:
       - image: cimg/node:15.9.0
     working_directory: ~
     steps:
       - checkout
       - run:
-          name: "Install root dependencies"
-          command: npm install --save
-      - run: 
-          name: "Run lint"
-          command: npm run lint
+          name: Install root dependencies
+          command: npm i
       - run:
-          name: "Install message handler dependencies"
-          command: cd ./incoming-message-handler && npm install --save
+          name: Install the dependencies for the Handlers Common module
+          command: cd ./handlers-common && npm i
       - run:
-          name: "Build message handler"
+          name: Build the Handlers Common module
+          command: cd ./handlers-common && npm run build
+      - run:
+          name: Install the dependencies for the Incoming Message Handler project
+          command: cd ./incoming-message-handler && npm i
+      - run:
+          name: Build the Incoming Message Handler project
           command: cd ./incoming-message-handler && npm run build
       - run:
-          name: "Install common handlers dependencies"
-          command: cd ./handlers-common && npm install --save
-      - run:
-          name: "Build common handlers"
-          command: cd ./handlers-common && npm run build
+          name: Run lint
+          command: npm run lint
 
-  test: 
-    docker: 
+  test:
+    docker:
       - image: cimg/node:15.9.0
     working_directory: ~/incoming-message-handler
     steps:
       - checkout
       - run:
-          name: "Install root dependencies"
-          command: npm install --save
+          name: Install the dependencies for the Handlers Common module
+          command: cd ../handlers-common && npm i
       - run:
-          name: "Test incoming message handler"
-          command: npm run test:c
+          name: Build the Handlers Common module
+          command: cd ../handlers-common && npm run build
+      - run:
+          name: Install the dependencies for the Incoming Message Handler project
+          command: npm i
+      - run:
+          name: Build the Incoming Message Handler project
+          command: npm run build
+      - run:
+          name: Run all unit tests for the Incoming Message Handler project
+          command: npm run test:ci
 
 workflows:
   version: 2
   build-and-test:
     jobs:
-        - build
-        - test:
-            requires:
-              - build
+      - build
+      - test:
+          requires:
+            - build
