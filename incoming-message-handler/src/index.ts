@@ -1,5 +1,5 @@
 import { SQSEvent } from "aws-lambda"
-import { isError } from "handlers-common"
+import { isError } from "@handlers/common"
 import MqGateway from "./gateways/MqGateway"
 import { MqConfig } from "./types"
 
