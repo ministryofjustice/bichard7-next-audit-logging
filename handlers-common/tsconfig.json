@@ -1,12 +1,10 @@
 {
   "extends": "../tsconfig.json",
   "compilerOptions": {
-    "outDir": "build",
-    "types": ["node", "jest"],
-    "typeRoots": ["node_modules/@types", "src/@types"]
+    "outDir": "dist"
   },
   "compileOnSave": true,
-  "include": ["src/**/*.ts"],
+  "include": ["**/*.ts"],
   "exclude": ["node_modules", "build"],
   "paths": {
     "*": ["node_modules/*"]

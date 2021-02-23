@@ -3,6 +3,7 @@
   "description": "Hosts common types and services",
   "version": "0.0.1",
   "private": true,
+  "main": "./dist/index.js",
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^4.9.0",
     "@typescript-eslint/parser": "^4.9.0",
@@ -15,8 +16,7 @@
   "scripts": {
     "build": "tsc",
     "test": "jest",
-    "lint": "npx eslint src/**/*.ts",
-    "zip": "zip -r sqs.zip index.js node_modules"
+    "lint": "npx eslint src/**/*.ts"
   },
   "dependencies": {}
 }
