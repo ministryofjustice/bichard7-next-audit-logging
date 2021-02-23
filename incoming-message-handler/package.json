@@ -11,6 +11,7 @@
     "@typescript-eslint/eslint-plugin": "^4.15.1",
     "@typescript-eslint/parser": "^4.9.0",
     "jest": "^26.6.3",
+    "jest-junit": "^12.0.0",
     "ts-jest": "^26.4.4",
     "typescript": "^4.1.2"
   },
@@ -20,7 +21,7 @@
     "test": "npm run test:unit",
     "test:unit": "jest --watch --testPathPattern=src",
     "test:integration": "./tests/environment/setup.sh && jest --watch --testPathPattern=tests",
-    "test:ci": "mkdir -p ./test-results/jest && jest --testPathPattern=src --coverage --ci --json --outputFile ./test-results/jest/results.json",
+    "test:ci": "JEST_JUNIT_OUTPUT_DIR=./test-results/jest jest --testPathPattern=src --coverage --ci --runInBand --reporters=default --reporters=jest-junit",
     "lint": "eslint --ext ts ."
   },
   "dependencies": {
