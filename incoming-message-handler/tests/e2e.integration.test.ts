@@ -1,18 +1,9 @@
-import { SQS } from "aws-sdk"
+import { IncomingMessageSimulator } from "./IncomingMessageSimulator"
 import { IbmMqService } from "./IbmMqService"
 
 jest.setTimeout(30000)
 
-const AWS_URL = "http://localhost:4566"
-
-const queue = new SQS({
-  endpoint: AWS_URL,
-  region: "us-east-1",
-  credentials: {
-    accessKeyId: "test",
-    secretAccessKey: "test"
-  }
-})
+const simulator = new IncomingMessageSimulator("http://localhost:4566")
 
 const mq = new IbmMqService({
   MQ_HOST: "localhost",
@@ -23,23 +14,6 @@ const mq = new IbmMqService({
   MQ_PASSWORD: "passw0rd"
 })
 
-const sendMessage = async (message: string): Promise<void> =>
-  new Promise<void>((resolve, reject) => {
-    queue.sendMessage(
-      {
-        QueueUrl: `${AWS_URL}/000000000000/incoming_message_queue`,
-        MessageBody: message
-      },
-      (error) => {
-        if (error) {
-          reject(error)
-        }
-
-        resolve()
-      }
-    )
-  })
-
 const waitFor = (milliseconds: number): Promise<void> =>
   new Promise<void>((resolve) => setTimeout(() => resolve(), milliseconds))
 
@@ -48,7 +22,7 @@ describe("integration tests", () => {
     const expectedMessage = "Hello, World!"
 
     await mq.clearQueue()
-    await sendMessage(expectedMessage)
+    await simulator.sendMessage(expectedMessage)
     await waitFor(3000)
 
     const actualMessage = await mq.getMessage()
