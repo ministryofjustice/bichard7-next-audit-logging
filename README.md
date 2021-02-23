@@ -6,12 +6,12 @@ A collection of service components to be hosted within AWS that will run as new 
 
 The following requirements must be installed to develop on and run the projects in this repository.
 
-- NodeJS and npm
-- Python3 and pip
-- Docker
-- Docker Compose
-- AWS CLI
-- AWS CLI Local
+- [NodeJS and npm](https://nodejs.org/en/download/)
+- [Python3 and pip](https://www.python.org/downloads/)
+- [Docker](https://docs.docker.com/get-docker/)
+- [Docker Compose](https://docs.docker.com/compose/install/)
+- [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2.html)
+- [AWS CLI Local](https://github.com/localstack/awscli-local)
 
 ## Development
 

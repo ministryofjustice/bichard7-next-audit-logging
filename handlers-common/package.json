@@ -17,6 +17,5 @@
     "build": "tsc",
     "test": "jest",
     "lint": "npx eslint src/**/*.ts"
-  },
-  "dependencies": {}
+  }
 }

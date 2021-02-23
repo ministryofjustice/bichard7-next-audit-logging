@@ -1,0 +1,60 @@
+version: 2.1
+
+jobs:
+  build:
+    docker:
+      - image: cimg/node:15.9.0
+    working_directory: ~
+    steps:
+      - checkout
+      - run:
+          name: Install root dependencies
+          command: npm i
+      - run:
+          name: Install the dependencies for the Handlers Common module
+          command: cd ./handlers-common && npm i
+      - run:
+          name: Build the Handlers Common module
+          command: cd ./handlers-common && npm run build
+      - run:
+          name: Install the dependencies for the Incoming Message Handler project
+          command: cd ./incoming-message-handler && npm i -f
+      - run:
+          name: Build the Incoming Message Handler project
+          command: cd ./incoming-message-handler && npm run build
+      - run:
+          name: Run lint
+          command: npm run lint
+
+  test:
+    docker:
+      - image: cimg/node:15.9.0
+    working_directory: ~
+    steps:
+      - checkout
+      - run:
+          name: Install the dependencies for the Handlers Common module
+          command: cd ./handlers-common && npm i
+      - run:
+          name: Build the Handlers Common module
+          command: cd ./handlers-common && npm run build
+      - run:
+          name: Install the dependencies for the Incoming Message Handler project
+          command: cd ./incoming-message-handler && npm i -f
+      - run:
+          name: Build the Incoming Message Handler project
+          command: cd ./incoming-message-handler && npm run build
+      - run:
+          name: Run all unit tests for the Incoming Message Handler project
+          command: cd ./incoming-message-handler && npm run test:ci
+      - store_test_results:
+          path: ./incoming-message-handler/test-results/jest/
+
+workflows:
+  version: 2
+  build-and-test:
+    jobs:
+      - build
+      - test:
+          requires:
+            - build
