@@ -1,13 +1,14 @@
 import * as https from "https"
-import axios, { AxiosError } from "axios"
+import axios, { AxiosError, AxiosResponse } from "axios"
 import { PromiseResult } from "@handlers/common"
 import { MqConfig } from "../src/types"
 
 const getQueueUrl = (config: MqConfig): string =>
   `https://${config.MQ_USER}:${config.MQ_PASSWORD}@${config.MQ_HOST}:${config.MQ_PORT}/ibmmq/rest/v1/messaging/qmgr/${config.MQ_QUEUE_MANAGER}/queue/${config.MQ_QUEUE}`
 
-const sendDeleteRequest = (url: string, httpsAgent: any): Promise<any> =>
-  new Promise<any>((resolve, reject) => {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const sendDeleteRequest = (url: string, httpsAgent: any): Promise<AxiosResponse> =>
+  new Promise<AxiosResponse>((resolve, reject) => {
     axios
       .delete(url, {
         headers: {
@@ -16,11 +17,12 @@ const sendDeleteRequest = (url: string, httpsAgent: any): Promise<any> =>
         },
         httpsAgent
       })
-      .then((response: any) => resolve(response))
+      .then((response: AxiosResponse) => resolve(response))
       .catch((error: AxiosError) => reject(error))
   })
 
-export class IbmMqService {
+export default class IbmMqService {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private httpsAgent: any
 
   constructor(private config: MqConfig) {
@@ -29,7 +31,7 @@ export class IbmMqService {
     })
   }
 
-  async getMessage(): PromiseResult<any> {
+  async getMessage(): PromiseResult<string> {
     const url = `${getQueueUrl(this.config)}/message`
     const response = await sendDeleteRequest(url, this.httpsAgent)
     const body = response && response.data && response.data.body
@@ -41,16 +43,19 @@ export class IbmMqService {
     return body
   }
 
-  async clearQueue(): Promise<void> {
+  async clearQueue(): PromiseResult<void> {
     const url = `${getQueueUrl(this.config)}/message`
     let response
 
     do {
       try {
+        // eslint-disable-next-line no-await-in-loop
         response = await sendDeleteRequest(url, this.httpsAgent)
       } catch (error) {
         return error
       }
     } while (!response || response.status !== 204)
+
+    return undefined
   }
 }

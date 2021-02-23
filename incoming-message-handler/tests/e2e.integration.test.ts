@@ -1,5 +1,5 @@
-import { IncomingMessageSimulator } from "./IncomingMessageSimulator"
-import { IbmMqService } from "./IbmMqService"
+import IncomingMessageSimulator from "./IncomingMessageSimulator"
+import IbmMqService from "./IbmMqService"
 
 jest.setTimeout(30000)
 

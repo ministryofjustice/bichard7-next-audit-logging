@@ -16,8 +16,6 @@ const env: MqConfig = {
 export const sendMessage = async (event: SQSEvent): Promise<void> => {
   const gateway = new MqGateway(env)
 
-  console.log("Starting...")
-
   await Promise.allSettled(
     event.Records.map(async (record) => {
       const result = await gateway.execute(JSON.stringify(record))
@@ -30,6 +28,4 @@ export const sendMessage = async (event: SQSEvent): Promise<void> => {
       }
     })
   )
-
-  console.log("Finished!")
 }

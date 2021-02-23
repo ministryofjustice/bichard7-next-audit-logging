@@ -1,6 +1,6 @@
 import { SQS } from "aws-sdk"
 
-export class IncomingMessageSimulator {
+export default class IncomingMessageSimulator {
   private queue: SQS
 
   constructor(private awsUrl: string) {
