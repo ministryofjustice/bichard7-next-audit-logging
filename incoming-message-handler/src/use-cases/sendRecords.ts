@@ -11,9 +11,6 @@ class SendRecordsUseCase {
         const result = await this.gateway.execute(JSON.stringify(record))
 
         if (isError(result)) {
-          // eslint-disable-next-line no-console
-          console.log(result)
-
           throw result
         }
       })
