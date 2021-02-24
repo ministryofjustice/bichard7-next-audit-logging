@@ -1,7 +1,6 @@
 import { MqConfig } from "../types"
 
-// eslint-disable-next-line import/prefer-default-export
-export const createMqConfig = (): MqConfig => {
+const createMqConfig = (): MqConfig => {
   const { MQ_USER, MQ_PASSWORD, MQ_HOST, MQ_PORT, MQ_QUEUE_MANAGER, MQ_QUEUE } = process.env
   return {
     MQ_USER,
@@ -12,3 +11,5 @@ export const createMqConfig = (): MqConfig => {
     MQ_QUEUE
   }
 }
+
+export default createMqConfig

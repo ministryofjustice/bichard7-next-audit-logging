@@ -1,6 +1,5 @@
 jest.mock("axios")
 
-import { isError } from "@handlers/common"
 import axios from "axios"
 import { post } from "./api"
 
@@ -19,9 +18,10 @@ describe("api", () => {
     })
 
     it("make a call and error", async () => {
-      jest.spyOn(axios, "post").mockRejectedValue(new Error("Call failed"))
+      const error = new Error("Call failed")
+      jest.spyOn(axios, "post").mockRejectedValue(error)
       const response = await post("url", "message")
-      expect(isError(response)).toBe(true)
+      expect(response).toBe(error)
     })
   })
 })

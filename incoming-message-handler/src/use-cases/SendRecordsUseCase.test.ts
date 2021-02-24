@@ -1,5 +1,4 @@
 import { SQSRecord } from "aws-lambda"
-import { isError } from "@handlers/common"
 import SendRecordsUseCase from "./SendRecordsUseCase"
 import MqGateway from "../gateways/MqGateway"
 
@@ -34,8 +33,8 @@ describe("sendRecords", () => {
 
   it("should handle successful calls", async () => {
     jest.spyOn(gateway, "execute").mockResolvedValue()
-    const response = useCase.sendRecords(records)
-    await expect(response).resolves.toEqual(undefined)
+    const response = await useCase.sendRecords(records)
+    expect(response).toEqual(undefined)
   })
 
   it("should handle failed calls", async () => {
@@ -44,7 +43,7 @@ describe("sendRecords", () => {
     try {
       await useCase.sendRecords(records)
     } catch (e) {
-      expect(isError(e)).toEqual(true)
+      expect(e).toEqual(error)
     }
   })
 })
