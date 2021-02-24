@@ -1,4 +1,5 @@
 import { SQSRecord } from "aws-lambda"
+import { isError } from "@handlers/common"
 import SendRecordsUseCase from "./SendRecordsUseCase"
 import MqGateway from "../gateways/MqGateway"
 
@@ -43,7 +44,7 @@ describe("sendRecords", () => {
     try {
       await useCase.sendRecords(records)
     } catch (e) {
-      expect(e).toEqual(error)
+      expect(isError(e)).toEqual(true)
     }
   })
 })

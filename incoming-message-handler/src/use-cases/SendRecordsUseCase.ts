@@ -1,20 +1,17 @@
 import { SQSRecord } from "aws-lambda"
-import { isError } from "@handlers/common"
 import MqGateway from "../gateways/MqGateway"
 
 class SendRecordsUseCase {
   constructor(private gateway: MqGateway) {}
 
   async sendRecords(records: SQSRecord[]): Promise<void> {
-    await Promise.allSettled(
-      records.map(async (record) => {
-        const result = await this.gateway.execute(JSON.stringify(record))
-
-        if (isError(result)) {
-          throw result
-        }
-      })
+    const results = await Promise.allSettled(
+      records.map(async (record) => this.gateway.execute(JSON.stringify(record)))
     )
+    const rejected = results.find((result) => result.status === "rejected") as PromiseRejectedResult
+    if (rejected) {
+      throw rejected.reason
+    }
   }
 }
 
