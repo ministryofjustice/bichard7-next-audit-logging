@@ -1,20 +1,20 @@
 jest.mock("axios")
 
 import axios from "axios"
-import { post } from "./Api"
+import { post } from "./api2"
 
 describe("api", () => {
   describe("post", () => {
-    it("make a successsful post call", async () => {
+    it("make a successful post call", async () => {
       const expectedResponse = {
         status: 200,
         statusMessage: "Success!"
       }
-      const axiosSpy = jest.spyOn(axios, "post").mockResolvedValue(expectedResponse)
+      jest.spyOn(axios, "post").mockResolvedValue(expectedResponse)
 
-      await post("url", "message")
+      const response = await post("url", "message")
 
-      expect(axiosSpy).toHaveBeenCalled()
+      expect(response).toBeUndefined()
     })
 
     it("make a call and error", async () => {
@@ -23,9 +23,11 @@ describe("api", () => {
         statusMessage: "Failed!"
       }
       jest.spyOn(axios, "post").mockRejectedValue(expectedResponse)
-
-      const actual = await post("url", "message")
-      expect(actual).toEqual(expectedResponse)
+      try {
+        await post("url", "message")
+      } catch (e) {
+        expect(e).toEqual(expectedResponse)
+      }
     })
   })
 })

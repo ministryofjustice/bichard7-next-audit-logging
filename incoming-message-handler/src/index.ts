@@ -1,5 +1,5 @@
 import { SQSEvent } from "aws-lambda"
-import { createMqConfig } from "./utils/Config"
+import { createMqConfig } from "./utils/config2"
 import MqGateway from "./gateways/MqGateway"
 import SendRecordsUseCase from "./use-cases/SendRecordsUseCase"
 

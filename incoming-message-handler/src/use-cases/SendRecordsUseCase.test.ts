@@ -33,7 +33,8 @@ describe("sendRecords", () => {
 
   it("should handle successful calls", async () => {
     jest.spyOn(gateway, "execute").mockResolvedValue()
-    await expect(useCase.sendRecords(records)).resolves.toEqual(undefined)
+    const response = useCase.sendRecords(records)
+    await expect(response).resolves.toEqual(undefined)
   })
 
   it("should handle failed calls", async () => {

@@ -6,7 +6,7 @@
     "typeRoots": ["node_modules/@types", "src/@types"]
   },
   "compileOnSave": true,
-  "include": ["src/**/*.ts"],
+  "include": ["src/**/*.ts", "src/utils/api2.ts"],
   "exclude": ["node_modules", "build"],
   "paths": {
     "*": ["node_modules/*"]

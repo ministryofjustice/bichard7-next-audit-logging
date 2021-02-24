@@ -1,6 +1,6 @@
 import { PromiseResult } from "@handlers/common"
 import { MqConfig } from "../types"
-import { post } from "../utils/Api"
+import { post } from "../utils/api2"
 
 class MqGateway {
   private URL: string

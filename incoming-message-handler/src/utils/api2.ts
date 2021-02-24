@@ -7,18 +7,16 @@ const defaultHeaders = {
   "Content-Type": "text/plain;charset=utf-8"
 }
 
-const createHttpsAgent = () => {
-  return new https.Agent({
-    rejectUnauthorized: false
-  })
-}
+const httpsAgent = new https.Agent({
+  rejectUnauthorized: false
+})
 
 // eslint-disable-next-line import/prefer-default-export
 export const post = (url: string, body: unknown, headers: { [key: string]: string } = {}): PromiseResult<void> => {
   return axios
     .post(url, body, {
       headers: { ...defaultHeaders, ...headers },
-      httpsAgent: createHttpsAgent()
+      httpsAgent
     })
     .then(() => undefined)
     .catch((error: AxiosError) => error)

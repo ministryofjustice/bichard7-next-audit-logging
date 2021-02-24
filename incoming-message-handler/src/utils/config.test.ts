@@ -1,5 +1,5 @@
 import { MqConfig } from "../types"
-import { createMqConfig } from "./Config"
+import { createMqConfig } from "./config2"
 
 const envMock: MqConfig = {
   MQ_HOST: "a-host",
@@ -13,7 +13,7 @@ const envMock: MqConfig = {
 describe("config", () => {
   describe("MQConfig", () => {
     it("returns the mqconfig", () => {
-      process.env = envMock
+      process.env = { ...process.env, ...envMock }
       expect(createMqConfig()).toEqual(envMock)
     })
   })
