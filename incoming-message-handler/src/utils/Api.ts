@@ -13,6 +13,7 @@ const createHttpsAgent = () => {
   })
 }
 
+// eslint-disable-next-line import/prefer-default-export
 export const post = (url: string, body: unknown, headers: { [key: string]: string } = {}): PromiseResult<void> => {
   return axios
     .post(url, body, {
@@ -22,5 +23,3 @@ export const post = (url: string, body: unknown, headers: { [key: string]: strin
     .then(() => undefined)
     .catch((error: AxiosError) => error)
 }
-
-export default { post }

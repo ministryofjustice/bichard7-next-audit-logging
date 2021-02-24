@@ -1,7 +1,7 @@
 import { SQSEvent } from "aws-lambda"
-import SendRecordsUseCase from "./use-cases/sendRecords"
 import { createMqConfig } from "./utils/Config"
 import MqGateway from "./gateways/MqGateway"
+import SendRecordsUseCase from "./use-cases/SendRecordsUseCase"
 
 const gateway = new MqGateway(createMqConfig())
 const sendRecordsUseCase = new SendRecordsUseCase(gateway)
