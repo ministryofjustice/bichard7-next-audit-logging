@@ -1,5 +1,5 @@
 import { MqConfig } from "../types"
-import { createMqConfig } from "./config2"
+import { createMqConfig } from "./createMqConfig"
 
 const envMock: MqConfig = {
   MQ_HOST: "a-host",

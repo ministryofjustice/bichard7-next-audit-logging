@@ -1,7 +1,7 @@
 jest.mock("axios")
 
 import axios from "axios"
-import { post } from "./api2"
+import { post } from "./api"
 
 describe("api", () => {
   describe("post", () => {
