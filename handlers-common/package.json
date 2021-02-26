@@ -15,6 +15,7 @@
   },
   "scripts": {
     "build": "tsc",
+    "postbuild": "cp package.json dist/package.json && cd dist && npm i --production",
     "test": "jest",
     "lint": "npx eslint src/**/*.ts"
   }

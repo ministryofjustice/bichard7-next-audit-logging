@@ -1,0 +1,18 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: A lambda that handles incoming messages from the ExISS system
+
+Transform:
+  - AWS::Serverless-2016-10-31
+
+Globals:
+  Function:
+    Timeout: 60
+
+Resources:
+  IncomingMessageHandler:
+    Type: AWS::Serverless::Function
+    Properties:
+      Description: A Lambda function that logs the payload of messages sent to an associated SQS queue.
+      CodeUri: build
+      Runtime: nodejs14.x
+      Handler: index.sendMessage

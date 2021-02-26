@@ -3,6 +3,7 @@
   "description": "Listens and responds to audit events",
   "version": "0.0.1",
   "private": true,
+  "main": "index.js",
   "devDependencies": {
     "@types/aws-lambda": "^8.10.64",
     "@types/axios": "^0.14.0",
@@ -16,8 +17,11 @@
     "typescript": "^4.1.2"
   },
   "scripts": {
+    "postinstall": "unlink node_modules/@handlers/common && cp -RL ../../../node_modules/@handlers/common node_modules/@handlers/common",
+    "prestart": "mkdir -p build && npm run postbuild",
+    "start": "tsc -p tsconfig.json --watch",
     "build": "tsc -p tsconfig.json",
-    "postbuild": "cp package.json build/ && cp -RL node_modules build",
+    "postbuild": "cp package.json build/",
     "test": "npm run test:unit",
     "test:unit": "jest --watch --testPathPattern=src",
     "test:integration": "./tests/environment/setup.sh && jest --watch --testPathPattern=tests",

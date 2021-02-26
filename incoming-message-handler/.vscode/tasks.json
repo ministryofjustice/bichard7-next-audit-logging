@@ -9,8 +9,13 @@
         "kind": "build",
         "isDefault": true
       },
-      "label": "npm: build",
+      "label": "build",
       "detail": "tsc"
+    },
+    {
+      "label": "host",
+      "dependsOn": "build",
+      "command": "./launch-sam-cli.sh"
     }
   ]
 }
