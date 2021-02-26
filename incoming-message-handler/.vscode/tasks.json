@@ -13,9 +13,13 @@
       "detail": "tsc"
     },
     {
-      "label": "host",
+      "label": "startDebugging",
       "dependsOn": "build",
-      "command": "./launch-sam-cli.sh"
+      "command": "scripts/start-debugging.sh"
+    },
+    {
+      "label": "stopDebugging",
+      "command": "scripts/stop-debugging.sh"
     }
   ]
 }

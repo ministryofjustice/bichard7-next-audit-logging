@@ -10,7 +10,9 @@
       "remoteRoot": "/var/task",
       "protocol": "inspector",
       "stopOnEntry": false,
-      "outFiles": ["${workspaceFolder}/build/**/*.js"]
+      "outFiles": ["${workspaceFolder}/build/**/*.js"],
+      "preLaunchTask": "startDebugging",
+      "postDebugTask": "stopDebugging"
     }
   ]
 }
