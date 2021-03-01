@@ -6,7 +6,17 @@ if [[ -z $LOCALSTACK_URL ]]; then
   exit 1
 fi
 
-INFRA_PATH=$PWD/tests/environment/infrastructure
+# Get the right path for Windows
+case $( (uname) | tr '[:upper:]' '[:lower:]') in
+  msys*|cygwin*|mingw*|nt|win*)
+    CWD=$(pwd -W)
+    ;;
+  *)
+    CWD=$PWD
+    ;;
+esac
+
+INFRA_PATH=$CWD/tests/environment/infrastructure
 QUEUE_NAME=incoming_message_queue
 DLQ_NAME=incoming_message_dead_letter_queue
 LAMBDA_NAME=IncomingMessageHandler

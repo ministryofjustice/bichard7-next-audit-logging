@@ -34,7 +34,7 @@ describe("sendRecords", () => {
   it("should handle successful calls", async () => {
     jest.spyOn(gateway, "execute").mockResolvedValue()
     const response = await useCase.sendRecords(records)
-    expect(response).toEqual(undefined)
+    expect(response).toBeUndefined()
   })
 
   it("should handle failed calls", async () => {
@@ -42,8 +42,8 @@ describe("sendRecords", () => {
     jest.spyOn(gateway, "execute").mockRejectedValue(error)
     try {
       await useCase.sendRecords(records)
-    } catch (e) {
-      expect(e).toEqual(error)
+    } catch (err) {
+      expect(err).toEqual(error)
     }
   })
 })
