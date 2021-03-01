@@ -7,7 +7,7 @@
   },
   "compileOnSave": true,
   "include": ["src/**/*.ts"],
-  "exclude": ["node_modules", "build"],
+  "exclude": ["node_modules", "build", "**/*d.ts"],
   "paths": {
     "*": ["node_modules/*"]
   }
