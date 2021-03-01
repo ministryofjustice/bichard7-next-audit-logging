@@ -3,6 +3,7 @@
   "description": "Listens and responds to audit events",
   "version": "0.0.1",
   "private": true,
+  "main": "index.js",
   "devDependencies": {
     "@types/aws-lambda": "^8.10.64",
     "@types/jest": "^26.0.20",
@@ -15,11 +16,12 @@
     "typescript": "^4.1.2"
   },
   "scripts": {
+    "postinstall": "./scripts/copy-local-module.sh",
     "build": "tsc -p tsconfig.json",
-    "postbuild": "cp package.json build/ && cp -RL node_modules build",
+    "postbuild": "./scripts/postbuild.sh",
     "test": "npm run test:unit",
     "test:unit": "jest --watch --testPathPattern=src",
-    "test:integration": "./tests/environment/setup.sh && jest --watch --testPathPattern=tests",
+    "test:integration": "./tests/environment/setup.sh; jest --watch --testPathPattern=tests",
     "test:ci": "JEST_JUNIT_OUTPUT_DIR=./test-results/jest jest --testPathPattern=src --coverage --ci --runInBand --reporters=default --reporters=jest-junit",
     "lint": "eslint --ext ts ."
   },

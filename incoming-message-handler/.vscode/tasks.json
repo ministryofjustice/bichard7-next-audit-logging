@@ -9,8 +9,17 @@
         "kind": "build",
         "isDefault": true
       },
-      "label": "npm: build",
+      "label": "build",
       "detail": "tsc"
+    },
+    {
+      "label": "startDebugging",
+      "dependsOn": "build",
+      "command": "scripts/start-debugging.sh"
+    },
+    {
+      "label": "stopDebugging",
+      "command": "scripts/stop-debugging.sh"
     }
   ]
 }
