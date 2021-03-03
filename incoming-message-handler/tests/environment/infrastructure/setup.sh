@@ -61,10 +61,13 @@ awslocal dynamodb create-table \
   --table-name IncomingMessage \
   --attribute-definitions \
     AttributeName=MessageId,AttributeType=S \
+    AttributeName=CaseNumber,AttributeType=N \
   --key-schema \
     AttributeName=MessageId,KeyType=HASH \
   --provisioned-throughput \
-    ReadCapacityUnits=10,WriteCapacityUnits=5
+    ReadCapacityUnits=10,WriteCapacityUnits=5 \
+  --global-secondary-indexes \
+    IndexName=CaseNumberIndex,KeySchema=["{AttributeName=CaseNumber,KeyType=HASH}"],Projection="{ProjectionType=ALL}",ProvisionedThroughput="{ReadCapacityUnits=10,WriteCapacityUnits=5}"
 
 awslocal dynamodb create-table \
   --table-name IncomingMessageCompKey \
