@@ -13,6 +13,16 @@
       "outFiles": ["${workspaceFolder}/build/**/*.js"],
       "preLaunchTask": "startDebugging",
       "postDebugTask": "stopDebugging"
+    },
+    {
+      "name": "Debug Tests",
+      "request": "launch",
+      "type": "node",
+      "program": "${workspaceRoot}/node_modules/jest/bin/jest.js",
+      "args": ["-i"],
+      "preLaunchTask": "build",
+      "internalConsoleOptions": "openOnSessionStart",
+      "outFiles": ["${workspadceRoot}/dist/**/*"]
     }
   ]
 }

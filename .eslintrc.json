@@ -4,7 +4,7 @@
     "airbnb-typescript",
     "plugin:@typescript-eslint/recommended",
     "prettier/@typescript-eslint",
-    "plugin:prettier/recommended" 
+    "plugin:prettier/recommended"
   ],
   "parserOptions": {
     "ecmaVersion": 2020,
@@ -15,16 +15,13 @@
     "es6": true
   },
   "rules": {
-    "prettier/prettier": [
-      "error"
-    ],
-    "@typescript-eslint/ban-ts-comment": "off"
+    "prettier/prettier": ["error"],
+    "@typescript-eslint/ban-ts-comment": "off",
+    "no-plusplus": "off"
   },
   "overrides": [
     {
-      "files": [
-        "*.test.ts"
-      ],
+      "files": ["*.test.ts"],
       "rules": {
         "@typescript-eslint/no-var-requires": "off",
         "import/first": "off"

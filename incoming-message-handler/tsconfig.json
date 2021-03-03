@@ -1,7 +1,7 @@
 {
   "extends": "../tsconfig.json",
   "compilerOptions": {
-    "rootDir": "src",
+    "strictNullChecks": false,
     "outDir": "build",
     "types": ["node", "jest"],
     "sourceMap": true,
@@ -9,5 +9,5 @@
     "preserveSymlinks": false
   },
   "compileOnSave": true,
-  "include": ["src/**/*.ts"]
+  "include": ["src/**/*.ts", "tests/**/*.ts"]
 }
