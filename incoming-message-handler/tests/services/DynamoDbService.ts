@@ -1,15 +1,14 @@
 import { DynamoDB } from "aws-sdk"
-import { DbConfig, DbResults } from "./types"
+import { CreateTableOutput, DeleteTableOutput } from "aws-sdk/clients/dynamodb"
 
 const { DocumentClient } = DynamoDB
 
-// eslint-disable-next-line import/prefer-default-export
-export class DynamoDbService {
+export default class DynamoDbService {
   private dynamoDb: DynamoDB
 
   private documentClient: DynamoDB.DocumentClient
 
-  constructor(private config: DbConfig, private tableName: string) {
+  constructor(private config: DynamoDB.Types.ClientConfiguration, private tableName: string) {
     this.dynamoDb = new DynamoDB({ ...this.config })
     this.documentClient = new DocumentClient({ service: this.dynamoDb })
   }
@@ -26,7 +25,7 @@ export class DynamoDbService {
     return tables.TableNames && tables.TableNames.indexOf(this.tableName) >= 0
   }
 
-  async createTable(params: AWS.DynamoDB.Types.CreateTableInput): Promise<DbResults> {
+  async createTable(params: AWS.DynamoDB.Types.CreateTableInput): Promise<CreateTableOutput | void> {
     const { TableName, KeySchema, AttributeDefinitions, ProvisionedThroughput, LocalSecondaryIndexes } = params
     const tableParams = {
       TableName: TableName || this.tableName,
@@ -37,13 +36,15 @@ export class DynamoDbService {
     }
     const result = await this.dynamoDb.createTable(tableParams).promise()
     const { data, error } = result.$response
-    return { data, error }
+    if (error) throw error
+    return data
   }
 
-  async deleteTable(): Promise<DbResults> {
+  async deleteTable(): Promise<DeleteTableOutput | void> {
     const result = await this.dynamoDb.deleteTable({ TableName: this.tableName }).promise()
     const { data, error } = result.$response
-    return { data, error }
+    if (error) throw error
+    return data
   }
 
   async seedTable<T>(data: T[]): Promise<void> {

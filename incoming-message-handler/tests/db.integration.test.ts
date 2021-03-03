@@ -1,17 +1,15 @@
-import { DynamoDbService } from "./DynamoDbService"
-import testData from "./test-data.json"
-import { DbConfig } from "./types"
+import { DynamoDB } from "aws-sdk"
+import DynamoDbService from "./services/DynamoDbService"
+import testData from "./test-data/test-data.json"
 
 const LOCALSTACK_URL = "http://localhost:4566"
 
 describe("db integration tests", () => {
   let dbService: DynamoDbService
   beforeAll(async () => {
-    const config: DbConfig = {
+    const config: DynamoDB.Types.ClientConfiguration = {
       region: "eu-west2",
-      endpoint: LOCALSTACK_URL,
-      accessKeyId: "key",
-      secretAccessKey: "secret"
+      endpoint: LOCALSTACK_URL
     }
     dbService = new DynamoDbService(config, "test-incoming-message-table")
 

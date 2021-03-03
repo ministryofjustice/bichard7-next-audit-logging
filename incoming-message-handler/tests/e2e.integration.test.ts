@@ -1,5 +1,5 @@
 import IncomingMessageSimulator from "./IncomingMessageSimulator"
-import IbmMqService from "./IbmMqService"
+import IbmMqService from "./services/IbmMqService"
 
 jest.setTimeout(30000)
 
