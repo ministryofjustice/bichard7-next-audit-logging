@@ -57,25 +57,31 @@ awslocal lambda create-event-source-mapping \
 # Create the DynamoDb tables
 #  - IncomingMessage (PK = MessageId)
 #  - IncomingMessageCompKey (PK = ReceivedDate.Day, SK = MessageId)
-awslocal dynamodb create-table \
-  --table-name IncomingMessage \
-  --attribute-definitions \
-    AttributeName=MessageId,AttributeType=S \
-    AttributeName=CaseNumber,AttributeType=N \
-  --key-schema \
-    AttributeName=MessageId,KeyType=HASH \
-  --provisioned-throughput \
-    ReadCapacityUnits=10,WriteCapacityUnits=5 \
-  --global-secondary-indexes \
-    IndexName=CaseNumberIndex,KeySchema=["{AttributeName=CaseNumber,KeyType=HASH}"],Projection="{ProjectionType=ALL}",ProvisionedThroughput="{ReadCapacityUnits=10,WriteCapacityUnits=5}"
+if [[ -z $(awslocal dynamodb list-tables | grep IncomingMessage | grep -v CompKey) ]]; then
+  awslocal dynamodb create-table \
+    --table-name IncomingMessage \
+    --attribute-definitions \
+      AttributeName=MessageId,AttributeType=S \
+      AttributeName=CaseNumber,AttributeType=N \
+    --key-schema \
+      AttributeName=MessageId,KeyType=HASH \
+    --provisioned-throughput \
+      ReadCapacityUnits=10,WriteCapacityUnits=5 \
+    --global-secondary-indexes \
+      IndexName=CaseNumberIndex,KeySchema=["{AttributeName=CaseNumber,KeyType=HASH}"],Projection="{ProjectionType=ALL}",ProvisionedThroughput="{ReadCapacityUnits=10,WriteCapacityUnits=5}"
+fi
 
-awslocal dynamodb create-table \
-  --table-name IncomingMessageCompKey \
-  --attribute-definitions \
-    AttributeName=ReceivedDate,AttributeType=S \
-    AttributeName=MessageId,AttributeType=S \
-  --key-schema \
-    AttributeName=ReceivedDate,KeyType=HASH \
-    AttributeName=MessageId,KeyType=RANGE \
-  --provisioned-throughput \
-    ReadCapacityUnits=10,WriteCapacityUnits=5
+if [[ -z $(awslocal dynamodb list-tables | grep IncomingMessageCompKey) ]]; then
+  awslocal dynamodb create-table \
+    --table-name IncomingMessageCompKey \
+    --attribute-definitions \
+      AttributeName=ReceivedDate,AttributeType=S \
+      AttributeName=MessageId,AttributeType=S \
+    --key-schema \
+      AttributeName=ReceivedDate,KeyType=HASH \
+      AttributeName=MessageId,KeyType=RANGE \
+    --provisioned-throughput \
+      ReadCapacityUnits=10,WriteCapacityUnits=5 \
+    --global-secondary-indexes \
+      IndexName=MessageIdIndex,KeySchema=["{AttributeName=MessageId,KeyType=HASH}"],Projection="{ProjectionType=ALL}",ProvisionedThroughput="{ReadCapacityUnits=10,WriteCapacityUnits=5}"
+fi
