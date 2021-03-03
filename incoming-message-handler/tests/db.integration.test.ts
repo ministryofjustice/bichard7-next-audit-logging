@@ -1,25 +1,41 @@
 import { AWSError, DynamoDB } from "aws-sdk"
 import { PromiseResult } from "aws-sdk/lib/request"
 
+jest.setTimeout(60000)
+
 const LOCALSTACK_URL = "http://localhost:4566"
 
-declare type SeedResult = PromiseResult<DynamoDB.DocumentClient.BatchWriteItemOutput, AWSError>
 declare type GetMessageResult = PromiseResult<DynamoDB.DocumentClient.GetItemOutput, AWSError>
 
-async function seedTable(client: DynamoDB.DocumentClient, tableName: string, records: any[]): Promise<SeedResult> {
-  const requests = records.map((d) => ({
-    PutRequest: {
-      Item: { ...d }
-    }
-  }))
+async function seedTable(client: DynamoDB.DocumentClient, tableName: string, records: any[]): Promise<void> {
+  let currentArray = records
+  const promises: Promise<void>[] = []
 
-  const params = {
-    RequestItems: {
-      [tableName]: requests
+  while (currentArray.length > 0) {
+    const batch = currentArray.slice(0, 20)
+    currentArray = currentArray.slice(20)
+
+    const requests = batch.map((d) => ({
+      PutRequest: {
+        Item: { ...d }
+      }
+    }))
+
+    const params = {
+      RequestItems: {
+        [tableName]: requests
+      }
     }
+
+    promises.push(
+      client
+        .batchWrite(params)
+        .promise()
+        .then(() => undefined)
+    )
   }
 
-  return await client.batchWrite(params).promise()
+  await Promise.all(promises)
 }
 
 async function getByMessageId(client: DynamoDB.DocumentClient, messageId: string): Promise<GetMessageResult> {
@@ -44,7 +60,7 @@ function getDateFromIndex(index: number): string {
 }
 
 describe("db integration tests", () => {
-  const numberOfRecords = 20
+  const numberOfRecords = 1000
 
   let db: DynamoDB
   let client: DynamoDB.DocumentClient
