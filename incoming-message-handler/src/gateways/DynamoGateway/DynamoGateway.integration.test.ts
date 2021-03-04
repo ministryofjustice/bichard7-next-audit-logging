@@ -17,6 +17,10 @@ describe("DynamoGateway", () => {
   })
 
   describe("insertOne()", () => {
+    beforeEach(async () => {
+      await gateway.deleteAll(tableName, "id")
+    })
+
     it("should return undefined when successful and have inserted one record", async () => {
       const expectedRecord = {
         id: "InsertOneRecord",
