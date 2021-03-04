@@ -1,19 +1,23 @@
 import { PromiseResult } from "@handlers/common"
-import { DynamoDB } from "aws-sdk"
+import { DocumentClient } from "aws-sdk/clients/dynamodb"
 import { DynamoDbConfig } from "src/types"
 
 export default class DynamoGateway {
-  private client: DynamoDB.DocumentClient
+  private readonly documentClient: DocumentClient
 
   constructor(config: DynamoDbConfig) {
-    this.client = new DynamoDB.DocumentClient({
+    this.documentClient = new DocumentClient({
       endpoint: config.DYNAMO_URL,
       region: config.DYNAMO_REGION
     })
   }
 
+  protected get client(): DocumentClient {
+    return this.documentClient
+  }
+
   async insertOne<T>(tableName: string, record: T): PromiseResult<void> {
-    const params: DynamoDB.DocumentClient.PutItemInput = {
+    const params: DocumentClient.PutItemInput = {
       TableName: tableName,
       Item: record
     }

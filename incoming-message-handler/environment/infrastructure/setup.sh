@@ -16,7 +16,7 @@ case $( (uname) | tr '[:upper:]' '[:lower:]') in
     ;;
 esac
 
-INFRA_PATH=$CWD/tests/environment/infrastructure
+INFRA_PATH=$CWD/environment/infrastructure
 QUEUE_NAME=incoming_message_queue
 DLQ_NAME=incoming_message_dead_letter_queue
 LAMBDA_NAME=IncomingMessageHandler
@@ -91,9 +91,9 @@ if [[ -z $(awslocal dynamodb list-tables | grep DynamoTesting) ]]; then
   awslocal dynamodb create-table \
     --table-name DynamoTesting \
     --attribute-definitions \
-      AttributeName=Id,AttributeType=S \
+      AttributeName=id,AttributeType=S \
     --key-schema \
-      AttributeName=Id,KeyType=HASH \
+      AttributeName=id,KeyType=HASH \
     --provisioned-throughput \
       ReadCapacityUnits=10,WriteCapacityUnits=5
 fi
