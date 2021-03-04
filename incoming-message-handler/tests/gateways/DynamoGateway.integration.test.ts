@@ -1,6 +1,6 @@
 import { isError } from "@handlers/common"
 import { DynamoDbConfig } from "src/types"
-import DynamoGateway from "../src/gateways/DynamoGateway"
+import DynamoGateway from "../../src/gateways/DynamoGateway"
 
 const config: DynamoDbConfig = {
   DYNAMO_URL: "http://localhost:4566",
