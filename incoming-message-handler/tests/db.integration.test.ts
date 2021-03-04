@@ -1,6 +1,8 @@
 import { AWSError, DynamoDB } from "aws-sdk"
 import { PromiseResult } from "aws-sdk/lib/request"
 
+/* eslint-disable no-console */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 jest.setTimeout(60000)
 
 const LOCALSTACK_URL = "http://localhost:4566"
