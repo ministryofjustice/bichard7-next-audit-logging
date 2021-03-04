@@ -85,3 +85,15 @@ if [[ -z $(awslocal dynamodb list-tables | grep IncomingMessageCompKey) ]]; then
     --global-secondary-indexes \
       IndexName=MessageIdIndex,KeySchema=["{AttributeName=MessageId,KeyType=HASH}"],Projection="{ProjectionType=ALL}",ProvisionedThroughput="{ReadCapacityUnits=10,WriteCapacityUnits=5}"
 fi
+
+# Dynamo tables used specifically for integration testing
+if [[ -z $(awslocal dynamodb list-tables | grep DynamoTesting) ]]; then
+  awslocal dynamodb create-table \
+    --table-name DynamoTesting \
+    --attribute-definitions \
+      AttributeName=Id,AttributeType=S \
+    --key-schema \
+      AttributeName=Id,KeyType=HASH \
+    --provisioned-throughput \
+      ReadCapacityUnits=10,WriteCapacityUnits=5
+fi
