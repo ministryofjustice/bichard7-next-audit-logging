@@ -54,36 +54,16 @@ awslocal lambda create-event-source-mapping \
   --function-name $LAMBDA_NAME \
   --event-source-arn arn:aws:sqs:us-east-1:000000000000:$QUEUE_NAME
 
-# Create the DynamoDb tables
-#  - IncomingMessage (PK = MessageId)
-#  - IncomingMessageCompKey (PK = ReceivedDate.Day, SK = MessageId)
-if [[ -z $(awslocal dynamodb list-tables | grep IncomingMessage | grep -v CompKey) ]]; then
+# Create the DynamoDb table for persisting the IncomingMessage entity
+if [[ -z $(awslocal dynamodb list-tables | grep IncomingMessage) ]]; then
   awslocal dynamodb create-table \
     --table-name IncomingMessage \
     --attribute-definitions \
       AttributeName=MessageId,AttributeType=S \
-      AttributeName=CaseNumber,AttributeType=N \
     --key-schema \
       AttributeName=MessageId,KeyType=HASH \
     --provisioned-throughput \
       ReadCapacityUnits=10,WriteCapacityUnits=5 \
-    --global-secondary-indexes \
-      IndexName=CaseNumberIndex,KeySchema=["{AttributeName=CaseNumber,KeyType=HASH}"],Projection="{ProjectionType=ALL}",ProvisionedThroughput="{ReadCapacityUnits=10,WriteCapacityUnits=5}"
-fi
-
-if [[ -z $(awslocal dynamodb list-tables | grep IncomingMessageCompKey) ]]; then
-  awslocal dynamodb create-table \
-    --table-name IncomingMessageCompKey \
-    --attribute-definitions \
-      AttributeName=ReceivedDate,AttributeType=S \
-      AttributeName=MessageId,AttributeType=S \
-    --key-schema \
-      AttributeName=ReceivedDate,KeyType=HASH \
-      AttributeName=MessageId,KeyType=RANGE \
-    --provisioned-throughput \
-      ReadCapacityUnits=10,WriteCapacityUnits=5 \
-    --global-secondary-indexes \
-      IndexName=MessageIdIndex,KeySchema=["{AttributeName=MessageId,KeyType=HASH}"],Projection="{ProjectionType=ALL}",ProvisionedThroughput="{ReadCapacityUnits=10,WriteCapacityUnits=5}"
 fi
 
 # Dynamo tables used specifically for integration testing
