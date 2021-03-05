@@ -59,11 +59,11 @@ if [[ -z $(awslocal dynamodb list-tables | grep IncomingMessage) ]]; then
   awslocal dynamodb create-table \
     --table-name IncomingMessage \
     --attribute-definitions \
-      AttributeName=MessageId,AttributeType=S \
+      AttributeName=messageId,AttributeType=S \
     --key-schema \
-      AttributeName=MessageId,KeyType=HASH \
+      AttributeName=messageId,KeyType=HASH \
     --provisioned-throughput \
-      ReadCapacityUnits=10,WriteCapacityUnits=5 \
+      ReadCapacityUnits=10,WriteCapacityUnits=5
 fi
 
 # Dynamo tables used specifically for integration testing

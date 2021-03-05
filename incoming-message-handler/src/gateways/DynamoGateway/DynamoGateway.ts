@@ -16,10 +16,11 @@ export default class DynamoGateway {
     return this.documentClient
   }
 
-  async insertOne<T>(tableName: string, record: T): PromiseResult<void> {
+  async insertOne<T>(tableName: string, record: T, keyName: string): PromiseResult<void> {
     const params: DocumentClient.PutItemInput = {
       TableName: tableName,
-      Item: record
+      Item: record,
+      ConditionExpression: `attribute_not_exists(${keyName})`
     }
 
     return this.client

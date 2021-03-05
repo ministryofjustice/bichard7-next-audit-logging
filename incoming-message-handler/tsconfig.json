@@ -6,7 +6,10 @@
     "types": ["node", "jest"],
     "sourceMap": true,
     "baseUrl": ".",
-    "preserveSymlinks": false
+    "preserveSymlinks": false,
+    "paths": {
+      "src/*": ["src/*"]
+    }
   },
   "compileOnSave": true,
   "include": ["src/**/*.ts"]

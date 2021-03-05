@@ -21,7 +21,7 @@
     "postbuild": "./scripts/postbuild.sh",
     "test": "npm run test:unit",
     "test:unit": "./scripts/test.sh unit",
-    "test:integration": "./environment/setup.sh; ./scripts/test.sh integration",
+    "test:integration": "./environment/setup.sh && ./scripts/test.sh integration",
     "test:ci": "./scripts/test.sh ci",
     "lint": "eslint --ext ts ."
   },
