@@ -27,7 +27,7 @@ describe("DynamoGateway", () => {
         someOtherValue: "SomeOtherValue"
       }
 
-      const result = await gateway.insertOne(tableName, expectedRecord)
+      const result = await gateway.insertOne(tableName, expectedRecord, "id")
 
       expect(result).toBeUndefined()
 
@@ -45,7 +45,7 @@ describe("DynamoGateway", () => {
         someOtherValue: "Id should be a number"
       }
 
-      const result = await gateway.insertOne(tableName, record)
+      const result = await gateway.insertOne(tableName, record, "id")
 
       expect(result).toBeTruthy()
       expect(isError(result)).toBe(true)
