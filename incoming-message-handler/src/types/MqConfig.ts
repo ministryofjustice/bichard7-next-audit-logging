@@ -1,4 +1,4 @@
-export type MqConfig = {
+type MqConfig = {
   MQ_USER?: string
   MQ_PASSWORD?: string
   MQ_HOST?: string
@@ -6,3 +6,5 @@ export type MqConfig = {
   MQ_QUEUE_MANAGER?: string
   MQ_QUEUE?: string
 }
+
+export default MqConfig

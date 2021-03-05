@@ -1,3 +1,2 @@
-export * from "./MqConfig"
-export * from "./AwsConfig"
-export * from "./DeliveryMessage"
+export { default as MqConfig } from "./MqConfig"
+export { default as MessageData } from "./MessageData"
