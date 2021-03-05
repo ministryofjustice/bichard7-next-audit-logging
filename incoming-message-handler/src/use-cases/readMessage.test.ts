@@ -32,9 +32,10 @@ describe("handleMessage", () => {
   it("should handle invalid xml", async () => {
     const result = await readMessage("Invalid xml")
 
+    const applicationError = <ApplicationError>result
     expect(isError(result)).toBe(true)
-    expect((<Error>result).message).toEqual("Failed to parse XML")
-    expect((<ApplicationError>result).originalError).toBeDefined()
+    expect(applicationError.message).toEqual("Failed to parse XML")
+    expect(applicationError.originalError).toBeDefined()
   })
 
   it("should handle missing message id error", async () => {

@@ -37,5 +37,12 @@ describe("xml", () => {
 
       expect(hasElement).toEqual(false)
     })
+
+    it("should return false if the xml contains the element but is not the root element", async () => {
+      const personXml = "<person><name>Bob</name></person>"
+      const hasElement = await hasRootElement(personXml, "name")
+
+      expect(hasElement).toEqual(false)
+    })
   })
 })
