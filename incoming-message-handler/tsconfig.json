@@ -5,10 +5,11 @@
     "outDir": "build",
     "types": ["node", "jest"],
     "sourceMap": true,
-    "baseUrl": ".",
+    "baseUrl": "./",
     "preserveSymlinks": false,
     "paths": {
-      "src/*": ["src/*"]
+      "src/*": ["src/*"],
+      "gateways/*": ["src/gateways/*"]
     }
   },
   "compileOnSave": true,
