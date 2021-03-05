@@ -1,4 +1,5 @@
 import { isError } from "@handlers/common"
+import ApplicationError from "src/errors/ApplicationError"
 import { MessageData } from "src/types"
 import readMessage from "./readMessage"
 
@@ -26,6 +27,14 @@ describe("handleMessage", () => {
     expect(messageId).toBeDefined()
     expect(rawXml).toBeDefined()
     expect(caseId).toEqual("41BP0510007")
+  })
+
+  it("should handle invalid xml", async () => {
+    const result = await readMessage("Invalid xml")
+
+    expect(isError(result)).toBe(true)
+    expect((<Error>result).message).toEqual("Failed to parse XML")
+    expect((<ApplicationError>result).originalError).toBeDefined()
   })
 
   it("should handle missing message id error", async () => {
