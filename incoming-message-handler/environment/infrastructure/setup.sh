@@ -16,7 +16,7 @@ case $( (uname) | tr '[:upper:]' '[:lower:]') in
     ;;
 esac
 
-INFRA_PATH=$CWD/tests/environment/infrastructure
+INFRA_PATH=$CWD/environment/infrastructure
 QUEUE_NAME=incoming_message_queue
 DLQ_NAME=incoming_message_dead_letter_queue
 LAMBDA_NAME=IncomingMessageHandler
@@ -54,34 +54,26 @@ awslocal lambda create-event-source-mapping \
   --function-name $LAMBDA_NAME \
   --event-source-arn arn:aws:sqs:us-east-1:000000000000:$QUEUE_NAME
 
-# Create the DynamoDb tables
-#  - IncomingMessage (PK = MessageId)
-#  - IncomingMessageCompKey (PK = ReceivedDate.Day, SK = MessageId)
-if [[ -z $(awslocal dynamodb list-tables | grep IncomingMessage | grep -v CompKey) ]]; then
+# Create the DynamoDb table for persisting the IncomingMessage entity
+if [[ -z $(awslocal dynamodb list-tables | grep IncomingMessage) ]]; then
   awslocal dynamodb create-table \
     --table-name IncomingMessage \
     --attribute-definitions \
-      AttributeName=MessageId,AttributeType=S \
-      AttributeName=CaseNumber,AttributeType=N \
+      AttributeName=messageId,AttributeType=S \
     --key-schema \
-      AttributeName=MessageId,KeyType=HASH \
+      AttributeName=messageId,KeyType=HASH \
     --provisioned-throughput \
-      ReadCapacityUnits=10,WriteCapacityUnits=5 \
-    --global-secondary-indexes \
-      IndexName=CaseNumberIndex,KeySchema=["{AttributeName=CaseNumber,KeyType=HASH}"],Projection="{ProjectionType=ALL}",ProvisionedThroughput="{ReadCapacityUnits=10,WriteCapacityUnits=5}"
+      ReadCapacityUnits=10,WriteCapacityUnits=5
 fi
 
-if [[ -z $(awslocal dynamodb list-tables | grep IncomingMessageCompKey) ]]; then
+# Dynamo tables used specifically for integration testing
+if [[ -z $(awslocal dynamodb list-tables | grep DynamoTesting) ]]; then
   awslocal dynamodb create-table \
-    --table-name IncomingMessageCompKey \
+    --table-name DynamoTesting \
     --attribute-definitions \
-      AttributeName=ReceivedDate,AttributeType=S \
-      AttributeName=MessageId,AttributeType=S \
+      AttributeName=id,AttributeType=S \
     --key-schema \
-      AttributeName=ReceivedDate,KeyType=HASH \
-      AttributeName=MessageId,KeyType=RANGE \
+      AttributeName=id,KeyType=HASH \
     --provisioned-throughput \
-      ReadCapacityUnits=10,WriteCapacityUnits=5 \
-    --global-secondary-indexes \
-      IndexName=MessageIdIndex,KeySchema=["{AttributeName=MessageId,KeyType=HASH}"],Projection="{ProjectionType=ALL}",ProvisionedThroughput="{ReadCapacityUnits=10,WriteCapacityUnits=5}"
+      ReadCapacityUnits=10,WriteCapacityUnits=5
 fi

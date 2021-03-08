@@ -22,9 +22,9 @@
     "build": "tsc -p tsconfig.json",
     "postbuild": "./scripts/postbuild.sh",
     "test": "npm run test:unit",
-    "test:unit": "jest --watch --testPathPattern=src",
-    "test:integration": "./tests/environment/setup.sh; jest --watch --testPathPattern=tests --verbose",
-    "test:ci": "JEST_JUNIT_OUTPUT_DIR=./test-results/jest jest --testPathPattern=src --coverage --ci --runInBand --reporters=default --reporters=jest-junit",
+    "test:unit": "./scripts/test.sh unit",
+    "test:integration": "./environment/setup.sh && ./scripts/test.sh integration",
+    "test:ci": "./scripts/test.sh ci",
     "lint": "eslint --ext ts ."
   },
   "dependencies": {

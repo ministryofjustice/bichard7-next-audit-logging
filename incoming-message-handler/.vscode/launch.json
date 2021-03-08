@@ -15,14 +15,20 @@
       "postDebugTask": "stopDebugging"
     },
     {
-      "name": "Debug Tests",
-      "request": "launch",
       "type": "node",
-      "program": "${workspaceRoot}/node_modules/jest/bin/jest.js",
-      "args": ["-i"],
-      "preLaunchTask": "build",
-      "internalConsoleOptions": "openOnSessionStart",
-      "outFiles": ["${workspadceRoot}/dist/**/*"]
+      "name": "vscode-jest-tests",
+      "request": "launch",
+      "program": "${workspaceFolder}/node_modules/jest/bin/jest",
+      "args": ["--runInBand"],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "disableOptimisticBPs": true,
+      "skipFiles": [
+        "<node_internals>/**/*.js",
+        "${workspaceFolder/node_modules/**/*.js",
+        "${workspaceRoot/node_modules/**/*.js"
+      ]
     }
   ]
 }

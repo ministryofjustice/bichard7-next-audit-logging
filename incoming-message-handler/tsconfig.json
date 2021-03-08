@@ -5,9 +5,14 @@
     "outDir": "build",
     "types": ["node", "jest"],
     "sourceMap": true,
-    "baseUrl": ".",
-    "preserveSymlinks": false
+    "baseUrl": "./",
+    "preserveSymlinks": false,
+    "paths": {
+      "src/*": ["src/*"],
+      "gateways/*": ["src/gateways/*"]
+    }
   },
   "compileOnSave": true,
-  "include": ["src/**/*.ts", "tests/**/*.ts"]
+  "include": ["src/**/*.ts"],
+  "exclude": ["src/**/*.test.ts", "src/e2e/*"]
 }

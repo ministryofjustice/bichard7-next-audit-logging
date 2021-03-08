@@ -16,3 +16,17 @@ Resources:
       CodeUri: build
       Runtime: nodejs14.x
       Handler: index.sendMessage
+
+  IncomingMessageTable:
+    Type: AWS::DynamoDb::Table
+    Properties:
+      TableName: IncomingMessage
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+      ProvisionedThroughput:
+        ReadCapacityUnits: 10
+        WriteCapacityUnits: 5
