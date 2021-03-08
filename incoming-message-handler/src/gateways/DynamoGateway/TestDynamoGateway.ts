@@ -28,7 +28,7 @@ export default class TestDynamoGateway extends DynamoGateway {
 
     const remainingItems = await this.getAll(tableName)
     if (remainingItems.Count > 0) {
-      throw new Error("Failed to delete all items!")
+      throw new Error(`Failed to delete all items! Remaining Items: ${remainingItems.Count}`)
     }
   }
 }

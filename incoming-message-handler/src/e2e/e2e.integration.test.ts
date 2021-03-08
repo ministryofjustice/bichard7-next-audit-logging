@@ -1,4 +1,5 @@
 import TestDynamoGateway from "src/gateways/DynamoGateway/TestDynamoGateway"
+import IncomingMessage from "src/entities/IncomingMessage"
 import IncomingMessageSimulator from "./IncomingMessageSimulator"
 import IbmMqService from "./IbmMqService"
 
@@ -39,7 +40,8 @@ describe("integration tests", () => {
     const persistedMessages = await gateway.getAll("IncomingMessage")
     expect(persistedMessages.Count).toBe(1)
 
-    console.log(persistedMessages.Items[0])
+    const persistedMessage = <IncomingMessage>persistedMessages.Items[0]
+    expect(persistedMessage.messageId).toBe(expectedMessage)
 
     const actualMessage = await mq.getMessage()
     expect(actualMessage).toBe(expectedMessage)
