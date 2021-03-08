@@ -23,12 +23,6 @@ export const sendMessage = async (event: SQSEvent): Promise<void> => {
     "IncomingMessage"
   )
 
-  // FOR SOME REASON, DEBUGGING STOPS WORKING AS SOON AS I REFERENCE ANY OF THE OTHER TYPES
-  // I WONDER IF IT IS TO DO WITH THE ABSOLUTE PATHS MECHANISM IN TSCONFIG.PATHS NOT WORKING
-  // WHEN DEPLOYED INTO THE .AWS-SAM OR BUILD FOLDERS. SEE THIS POST ON STACKOVERFLOW FOR A
-  // SUGGESTION: https://stackoverflow.com/a/58666074/308012
-  // TRY AGAIN ON MONDAY...
-
   // TODO: Merge with message parsing/formatting.
   const incomingMessage = new IncomingMessage(record, new Date())
 
