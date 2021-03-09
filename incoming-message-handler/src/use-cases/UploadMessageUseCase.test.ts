@@ -9,6 +9,8 @@ const config: S3Config = {
   S3_REGION: "us-east-1"
 }
 
+const messageId = "message123"
+const receivedDate = new Date(2021, 3, 9, 12, 15, 18)
 const gateway = new S3Gateway(config)
 const useCase = new UploadMessageUseCase(gateway)
 
@@ -16,8 +18,6 @@ describe("UploadMessageUseCase", () => {
   it("should save the message", async () => {
     jest.spyOn(gateway, "upload").mockResolvedValue(undefined)
 
-    const messageId = "message123"
-    const receivedDate = new Date()
     const expectedResult = getFileName(receivedDate, messageId)
     const result = await useCase.save({ messageId, caseId: "case123", receivedDate, rawXml: "message" })
 
@@ -26,8 +26,6 @@ describe("UploadMessageUseCase", () => {
   })
 
   it("should fail when the error is unknown", async () => {
-    const messageId = "message123"
-    const receivedDate = new Date()
     const expectedFileName = getFileName(receivedDate, messageId)
     jest.spyOn(gateway, "upload").mockResolvedValue(new Error("An unknown error"))
 

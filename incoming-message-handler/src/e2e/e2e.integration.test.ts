@@ -6,21 +6,22 @@ import TestS3Gateway from "../gateways/S3Gateway/TestS3Gateway"
 
 jest.setTimeout(30000)
 
-const LOCALSTACK_URL = "http://localhost:4566"
+const AWS_URL = "http://localhost:4566"
 const REGION = "us-east-1"
 
-const gateway = new TestDynamoGateway({
-  DYNAMO_URL: LOCALSTACK_URL,
+const dynamoGateway = new TestDynamoGateway({
+  DYNAMO_URL: AWS_URL,
   DYNAMO_REGION: REGION
 })
 
 const s3Gateway = new TestS3Gateway({
-  S3_URL: LOCALSTACK_URL,
+  S3_URL: AWS_URL,
   S3_REGION: REGION,
-  S3_BUCKET_NAME: "incoming-messages"
+  S3_FORCE_PATH_STYLE: "true",
+  INCOMING_MESSAGE_BUCKET_NAME: "incoming-messages"
 })
 
-const simulator = new IncomingMessageSimulator(LOCALSTACK_URL)
+const simulator = new IncomingMessageSimulator(AWS_URL)
 
 const mq = new IbmMqService({
   MQ_HOST: "localhost",
@@ -36,7 +37,7 @@ const waitFor = (milliseconds: number): Promise<void> =>
 
 describe("integration tests", () => {
   beforeEach(async () => {
-    await gateway.deleteAll("IncomingMessage", "messageId")
+    await dynamoGateway.deleteAll("IncomingMessage", "messageId")
     await s3Gateway.deleteAll()
   })
 
@@ -50,8 +51,12 @@ describe("integration tests", () => {
     const savedMessages = await s3Gateway.getAll()
     expect(savedMessages.length).toBe(1)
 
+    const savedMessage = savedMessages[0]
+    const messageContent = await s3Gateway.getContent(savedMessage.Key)
+    expect(messageContent).toBe(expectedMessage)
+
     // Check the message is in the database
-    const persistedMessages = await gateway.getAll("IncomingMessage")
+    const persistedMessages = await dynamoGateway.getAll("IncomingMessage")
     expect(persistedMessages.Count).toBe(1)
 
     const persistedMessage = <IncomingMessage>persistedMessages.Items[0]

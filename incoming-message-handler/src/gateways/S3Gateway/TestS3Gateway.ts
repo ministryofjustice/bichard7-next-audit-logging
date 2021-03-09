@@ -27,4 +27,10 @@ export default class TestS3Gateway extends S3Gateway {
       throw new Error(`Failed to delete all items! Remaining Items: ${remainingItems.length}`)
     }
   }
+
+  async getContent(key: string): Promise<string> {
+    const params: S3.Types.GetObjectRequest = { Bucket: this.bucketName, Key: key }
+    const content = await this.client.getObject(params).promise()
+    return String(content.Body)
+  }
 }

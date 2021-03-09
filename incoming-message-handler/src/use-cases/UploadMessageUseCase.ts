@@ -1,4 +1,5 @@
 import { isError, PromiseResult } from "@handlers/common"
+import ApplicationError from "../errors/ApplicationError"
 import S3Gateway from "../gateways/S3Gateway"
 import { MessageData } from "../types"
 import { getFileName } from "../utils/file"
@@ -12,7 +13,7 @@ export default class UploadMessageUseCase {
     const result = await this.gateway.upload(fileName, rawXml)
 
     if (isError(result)) {
-      return new Error(`The file ${fileName} could not be saved`)
+      return new ApplicationError(`The file ${fileName} could not be saved`, result)
     }
 
     return fileName

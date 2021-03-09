@@ -7,9 +7,9 @@ export default class S3Gateway {
 
   protected readonly bucketName: string
 
-  constructor(protected readonly config: S3Config) {
-    const { S3_URL, S3_REGION, S3_FORCE_PATH_STYLE, S3_BUCKET_NAME } = config
-    this.bucketName = S3_BUCKET_NAME
+  constructor(private readonly config: S3Config) {
+    const { S3_URL, S3_REGION, S3_FORCE_PATH_STYLE, INCOMING_MESSAGE_BUCKET_NAME } = this.config
+    this.bucketName = INCOMING_MESSAGE_BUCKET_NAME
     this.s3 = new S3({
       endpoint: S3_URL,
       region: S3_REGION,

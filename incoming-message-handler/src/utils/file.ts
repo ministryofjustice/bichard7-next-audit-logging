@@ -1,8 +1,5 @@
 const pad = (value: number) => {
-  if (value < 10) {
-    return `0${value}`
-  }
-  return value
+  return String(value).padStart(2, "0")
 }
 
 // eslint-disable-next-line import/prefer-default-export
