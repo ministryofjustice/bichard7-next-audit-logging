@@ -1,7 +1,7 @@
 {
   "configurations": [
     {
-      "name": "Attach to SAM CLI",
+      "name": "Launch Lambda in Debug Mode",
       "type": "node",
       "request": "attach",
       "address": "localhost",

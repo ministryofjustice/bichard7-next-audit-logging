@@ -20,12 +20,12 @@ services:
       - DEBUG=1
       - LAMBDA_REMOTE_DOCKER=false
       - NODE_TLS_REJECT_UNAUTHORIZED=0
-      - LAMBDA_DOCKER_NETWORK=mq_network
+      - LAMBDA_DOCKER_NETWORK=bichard_audit_logging
       - LAMNDA_REMOVE_CONTAINERS=false
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
 
 networks:
   default:
-    name: mq_network
+    name: bichard_audit_logging
     driver: bridge
