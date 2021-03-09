@@ -1,16 +1,26 @@
-import TestDynamoGateway from "src/gateways/DynamoGateway/TestDynamoGateway"
-import IncomingMessage from "src/entities/IncomingMessage"
+import TestDynamoGateway from "../gateways/DynamoGateway/TestDynamoGateway"
+import IncomingMessage from "../entities/IncomingMessage"
 import IncomingMessageSimulator from "./IncomingMessageSimulator"
 import IbmMqService from "./IbmMqService"
+import TestS3Gateway from "../gateways/S3Gateway/TestS3Gateway"
 
 jest.setTimeout(30000)
 
+const LOCALSTACK_URL = "http://localhost:4566"
+const REGION = "us-east-1"
+
 const gateway = new TestDynamoGateway({
-  DYNAMO_URL: "http://localhost:4566",
-  DYNAMO_REGION: "us-east-1"
+  DYNAMO_URL: LOCALSTACK_URL,
+  DYNAMO_REGION: REGION
 })
 
-const simulator = new IncomingMessageSimulator("http://localhost:4566")
+const s3Gateway = new TestS3Gateway({
+  S3_URL: LOCALSTACK_URL,
+  S3_REGION: REGION,
+  S3_BUCKET_NAME: "incoming-messages"
+})
+
+const simulator = new IncomingMessageSimulator(LOCALSTACK_URL)
 
 const mq = new IbmMqService({
   MQ_HOST: "localhost",
@@ -27,6 +37,7 @@ const waitFor = (milliseconds: number): Promise<void> =>
 describe("integration tests", () => {
   beforeEach(async () => {
     await gateway.deleteAll("IncomingMessage", "messageId")
+    await s3Gateway.deleteAll()
   })
 
   it("should receive a message on the target queue when the message is sent to the AWS SQS queue", async () => {
@@ -35,6 +46,9 @@ describe("integration tests", () => {
     await mq.clearQueue()
     await simulator.sendMessage(expectedMessage)
     await waitFor(3000)
+
+    const savedMessages = await s3Gateway.getAll()
+    expect(savedMessages.length).toBe(1)
 
     // Check the message is in the database
     const persistedMessages = await gateway.getAll("IncomingMessage")
