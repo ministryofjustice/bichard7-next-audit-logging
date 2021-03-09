@@ -16,6 +16,16 @@ Resources:
       CodeUri: build
       Runtime: nodejs14.x
       Handler: index.sendMessage
+      Environment:
+        Variables:
+          MQ_HOST:
+          MQ_PORT:
+          MQ_QUEUE:
+          MQ_USER:
+          MQ_PASSWORD:
+          MQ_QUEUE_MANAGER:
+          AWS_URL:
+          AWS_REGION:
 
   IncomingMessageTable:
     Type: AWS::DynamoDb::Table
