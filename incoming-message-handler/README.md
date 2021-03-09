@@ -1,3 +1,7 @@
 # AWS Lambda: Incoming Message Handler
 
 This is an AWS Lambda function that has the responsibility to accept incoming messages from the ExISS API that sits between the Libra court system and Bichard7. The intention is that this allows us to log the message along with some contextual information, for later analysis and review by users in a separate part of the system. This lambda will then also reformat the message before sending it back into the rest of the Bichard7.
+
+## Debugging
+
+This project uses the [AWS SAM CLI](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-install.html) to support debugging the lambda locally. This is a prerequisite to allow you to debug this application. Once installed, you will need to make sure the local infrastructure is fully setup. The easiest way to do this is to run `npm run test:integration`. This will spin up the local infrastructure and make sure all parts are available on the Docker network `bichard_audit_logging`. Once up, you can then debug this application from within Visual Studio Code by hitting F5 (or selecting `Launch Lambda in Debug Mode` from the Debug menu). This will break in a random `index.js` file, which will give you time to set the breakpoint in the TypeScript lambda code where you require. Once you have done that, you can hit F5 to jump to your breakpoint, and debug from there.

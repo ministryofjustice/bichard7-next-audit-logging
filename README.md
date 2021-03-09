@@ -30,6 +30,8 @@ You will also need to run `npm i` in the root directory to install any local con
 
 Where applicable, each project has tests that are run by Jest. To run these, simply run `npm test` from within the relevant project folder. Projects may also have integration tests, which you can run with `npm run test:integration`. Both of these approaches will execute tests in a watch mode, which will allow you to make changes to the underlying tests or codebase and then save the files to automatically trigger another test run.
 
+> Note: Before running integration tests, you need to make sure you have rebuilt any changes using `npm run build` in the respective project folder.
+
 ### Before Committing / Pushing
 
 Before you commit and push your code, and especially before raising a pull request, make sure you run through the following steps first.
