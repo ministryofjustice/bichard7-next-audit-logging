@@ -1,11 +1,10 @@
 import { SQSEvent } from "aws-lambda"
-import { isError } from "@handlers/common"
 import { createDynamoDbConfig, createMqConfig } from "./types"
 import MqGateway from "./gateways/MqGateway"
-import IncomingMessage from "./entities/IncomingMessage"
 import IncomingMessageDynamoGateway from "./gateways/IncomingMessageDynamoGateway"
 import PersistMessageUseCase from "./use-cases/PersistMessageUseCase"
 import SendMessageUseCase from "./use-cases/SendMessageUseCase"
+import HandleMessageUseCase from "./use-cases/HandleMessageUseCase"
 
 const gateway = new MqGateway(createMqConfig())
 const sendMessageUseCase = new SendMessageUseCase(gateway)
@@ -14,6 +13,8 @@ const sendMessageUseCase = new SendMessageUseCase(gateway)
 const incomingMessageGateway = new IncomingMessageDynamoGateway(createDynamoDbConfig(), "IncomingMessage")
 const persistMessage = new PersistMessageUseCase(incomingMessageGateway)
 
+const handleMessage = new HandleMessageUseCase(persistMessage, sendMessageUseCase)
+
 // eslint-disable-next-line import/prefer-default-export
 export const sendMessage = async (event: SQSEvent): Promise<void> => {
   if (event.Records.length === 0) {
@@ -21,18 +22,12 @@ export const sendMessage = async (event: SQSEvent): Promise<void> => {
     return
   }
 
-  const record = event.Records[0].body
+  const promises = event.Records.map((record) => handleMessage.handle(record.body))
+  const results = await Promise.allSettled(promises)
 
-  // TODO: Merge with message parsing/formatting.
-  const incomingMessage = new IncomingMessage(record, new Date())
-  const persistMessageResult = await persistMessage.persist(incomingMessage)
-
-  if (isError(persistMessageResult)) {
-    throw persistMessageResult
-  }
-
-  const sendMessageResult = await sendMessageUseCase.send(undefined)
-  if (isError(sendMessageResult)) {
-    throw sendMessageResult
+  const failureResult = results.find((result) => result.status === "rejected")
+  if (failureResult) {
+    const { reason } = <PromiseRejectedResult>failureResult
+    throw new Error(reason)
   }
 }
