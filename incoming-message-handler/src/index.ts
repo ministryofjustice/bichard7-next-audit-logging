@@ -1,10 +1,13 @@
 import { SQSEvent } from "aws-lambda"
-import { createDynamoDbConfig, createMqConfig } from "./types"
+import { isError } from "@handlers/common"
+import { createDynamoDbConfig, createMqConfig, createS3Config, MessageData } from "./types"
 import MqGateway from "./gateways/MqGateway"
 import IncomingMessageDynamoGateway from "./gateways/IncomingMessageDynamoGateway"
 import PersistMessageUseCase from "./use-cases/PersistMessageUseCase"
 import SendMessageUseCase from "./use-cases/SendMessageUseCase"
 import HandleMessageUseCase from "./use-cases/HandleMessageUseCase"
+import UploadMessageUseCase from "./use-cases/UploadMessageUseCase"
+import S3Gateway from "./gateways/S3Gateway"
 
 const gateway = new MqGateway(createMqConfig())
 const sendMessageUseCase = new SendMessageUseCase(gateway)
@@ -13,7 +16,10 @@ const sendMessageUseCase = new SendMessageUseCase(gateway)
 const incomingMessageGateway = new IncomingMessageDynamoGateway(createDynamoDbConfig(), "IncomingMessage")
 const persistMessage = new PersistMessageUseCase(incomingMessageGateway)
 
-const handleMessage = new HandleMessageUseCase(persistMessage, sendMessageUseCase)
+const s3Gateway = new S3Gateway(createS3Config())
+const uploadMessage = new UploadMessageUseCase(s3Gateway)
+
+const handleMessage = new HandleMessageUseCase(persistMessage, uploadMessage, sendMessageUseCase)
 
 // eslint-disable-next-line import/prefer-default-export
 export const sendMessage = async (event: SQSEvent): Promise<void> => {

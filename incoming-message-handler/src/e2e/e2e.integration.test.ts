@@ -5,6 +5,7 @@ import TestDynamoGateway from "../gateways/DynamoGateway/TestDynamoGateway"
 import IncomingMessage from "../entities/IncomingMessage"
 import IncomingMessageSimulator from "./IncomingMessageSimulator"
 import IbmMqService from "./IbmMqService"
+import TestS3Gateway from "../gateways/S3Gateway/TestS3Gateway"
 
 jest.setTimeout(30000)
 
@@ -32,12 +33,22 @@ const expectedMessage = format(
   }
 )
 
-const gateway = new TestDynamoGateway({
-  DYNAMO_URL: "http://localhost:4566",
-  DYNAMO_REGION: "us-east-1"
+const AWS_URL = "http://localhost:4566"
+const REGION = "us-east-1"
+
+const dynamoGateway = new TestDynamoGateway({
+  DYNAMO_URL: AWS_URL,
+  DYNAMO_REGION: REGION
 })
 
-const simulator = new IncomingMessageSimulator("http://localhost:4566")
+const s3Gateway = new TestS3Gateway({
+  S3_URL: AWS_URL,
+  S3_REGION: REGION,
+  S3_FORCE_PATH_STYLE: "true",
+  INCOMING_MESSAGE_BUCKET_NAME: "incoming-messages"
+})
+
+const simulator = new IncomingMessageSimulator(AWS_URL)
 
 const mq = new IbmMqService({
   MQ_HOST: "localhost",
@@ -65,7 +76,8 @@ const getPrettyMessageXml = async (): PromiseResult<string> => {
 
 describe("integration tests", () => {
   beforeEach(async () => {
-    await gateway.deleteAll("IncomingMessage", "messageId")
+    await dynamoGateway.deleteAll("IncomingMessage", "messageId")
+    await s3Gateway.deleteAll()
   })
 
   it("should receive a message on the target queue when the message is sent to the AWS SQS queue", async () => {
@@ -73,8 +85,15 @@ describe("integration tests", () => {
     await simulator.sendMessage(expectedMessage)
     await waitFor(3000)
 
+    const savedMessages = await s3Gateway.getAll()
+    expect(savedMessages.length).toBe(1)
+
+    const savedMessage = savedMessages[0]
+    const messageContent = await s3Gateway.getContent(savedMessage.Key)
+    expect(messageContent).toBe(expectedMessage)
+
     // Check the message is in the database
-    const persistedMessages = await gateway.getAll("IncomingMessage")
+    const persistedMessages = await dynamoGateway.getAll("IncomingMessage")
     expect(persistedMessages.Count).toBe(1)
 
     const persistedMessage = <IncomingMessage>persistedMessages.Items[0]

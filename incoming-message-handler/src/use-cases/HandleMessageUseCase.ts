@@ -4,11 +4,13 @@ import IncomingMessage from "../entities/IncomingMessage"
 import formatMessage from "./formatMessage"
 import readMessage from "./readMessage"
 import PersistMessageUseCase from "./PersistMessageUseCase"
+import UploadMessageUseCase from "./UploadMessageUseCase"
 import SendMessageUseCase from "./SendMessageUseCase"
 
 export default class HandleMessageUseCase {
   constructor(
     private readonly persistMessage: PersistMessageUseCase,
+    private readonly uploadMessage: UploadMessageUseCase,
     private readonly sendMessage: SendMessageUseCase
   ) {}
 
@@ -23,6 +25,11 @@ export default class HandleMessageUseCase {
     const messageData = await readMessage(formattedMessage)
     if (isError(messageData)) {
       return messageData
+    }
+
+    const uploadResult = await this.uploadMessage.save(messageData)
+    if (isError(uploadResult)) {
+      throw uploadResult
     }
 
     const incomingMessage = new IncomingMessage(messageData.messageId, new Date())
