@@ -1,6 +1,6 @@
 import { isError } from "@handlers/common"
 import S3Gateway from "../gateways/S3Gateway"
-import { S3Config } from "../types"
+import { S3Config } from "../configs"
 import UploadMessageUseCase from "./UploadMessageUseCase"
 
 const config: S3Config = {

@@ -1,5 +1,5 @@
 import { PromiseResult } from "@handlers/common"
-import { MqConfig } from "../types"
+import { MqConfig } from "../configs"
 import { post } from "../utils/api"
 
 class MqGateway {

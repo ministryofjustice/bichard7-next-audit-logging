@@ -1,7 +1,7 @@
 import { isError, PromiseResult } from "@handlers/common"
+import { MessageData } from "../entities"
 import ApplicationError from "../errors/ApplicationError"
 import S3Gateway from "../gateways/S3Gateway"
-import { MessageData } from "../types"
 import getFileName from "../utils/getFileName"
 
 export default class UploadMessageUseCase {

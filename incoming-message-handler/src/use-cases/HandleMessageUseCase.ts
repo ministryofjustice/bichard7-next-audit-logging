@@ -1,6 +1,6 @@
 import { isError, PromiseResult } from "@handlers/common"
 import { clean, hasRootElement } from "../utils/xml"
-import IncomingMessage from "../entities/IncomingMessage"
+import { IncomingMessage } from "../entities"
 import formatMessage from "./formatMessage"
 import readMessage from "./readMessage"
 import PersistMessageUseCase from "./PersistMessageUseCase"

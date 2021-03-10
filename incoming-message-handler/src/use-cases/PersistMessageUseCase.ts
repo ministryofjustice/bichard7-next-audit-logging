@@ -1,6 +1,6 @@
 import { isError, PromiseResult } from "@handlers/common"
 import IncomingMessageDynamoGateway from "../gateways/IncomingMessageDynamoGateway"
-import IncomingMessage from "../entities/IncomingMessage"
+import { IncomingMessage } from "../entities"
 
 const isConditionalExpressionViolationError = (error: Error): boolean =>
   error.message === "The conditional request failed"
