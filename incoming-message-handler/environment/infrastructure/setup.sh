@@ -77,3 +77,5 @@ if [[ -z $(awslocal dynamodb list-tables | grep DynamoTesting) ]]; then
     --provisioned-throughput \
       ReadCapacityUnits=10,WriteCapacityUnits=5
 fi
+
+awslocal s3 mb s3://incoming-messages
