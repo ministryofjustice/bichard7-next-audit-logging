@@ -23,9 +23,10 @@
     "postinstall": "./scripts/copy-local-module.sh",
     "build": "tsc -p tsconfig.json",
     "postbuild": "./scripts/postbuild.sh",
-    "test": "npm run test:unit",
+    "test": "./environment/setup.sh && ./scripts/test.sh",
     "test:unit": "./scripts/test.sh unit",
     "test:integration": "./environment/setup.sh && ./scripts/test.sh integration",
+    "test:e2e": "./environment/setup.sh && ./scripts/test.sh e2e",
     "test:ci": "./scripts/test.sh ci",
     "lint": "eslint --ext ts ."
   },
