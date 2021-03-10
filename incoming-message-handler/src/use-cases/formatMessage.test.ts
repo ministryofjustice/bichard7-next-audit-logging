@@ -1,4 +1,4 @@
-import DeliveryMessage from "../entities/DeliveryMessage"
+import { DeliveryMessage } from "../entities"
 import { parseXml } from "../utils/xml"
 import formatMessage from "./formatMessage"
 

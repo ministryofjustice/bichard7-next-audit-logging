@@ -1,6 +1,5 @@
 import { isError, PromiseResult, Result } from "@handlers/common"
-import { MessageData } from "../types"
-import DeliveryMessage from "../entities/DeliveryMessage"
+import { DeliveryMessage, MessageData } from "../entities"
 import { parseXml } from "../utils/xml"
 import ApplicationError from "../errors/ApplicationError"
 

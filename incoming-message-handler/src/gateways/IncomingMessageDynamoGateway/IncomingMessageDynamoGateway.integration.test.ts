@@ -1,6 +1,6 @@
 import { isError } from "@handlers/common"
-import { DynamoDbConfig } from "../../types"
-import IncomingMessage from "../../entities/IncomingMessage"
+import { DynamoDbConfig } from "../../configs"
+import { IncomingMessage } from "../../entities"
 import TestDynamoGateway from "../DynamoGateway/TestDynamoGateway"
 import IncomingMessageDynamoGateway from "./IncomingMessageDynamoGateway"
 

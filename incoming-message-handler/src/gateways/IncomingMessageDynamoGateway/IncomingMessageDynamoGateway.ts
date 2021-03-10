@@ -1,6 +1,6 @@
 import { isError, PromiseResult } from "@handlers/common"
-import { DynamoDbConfig } from "../../types"
-import IncomingMessage from "../../entities/IncomingMessage"
+import { DynamoDbConfig } from "../../configs"
+import { IncomingMessage } from "../../entities"
 import DynamoGateway from "../DynamoGateway"
 
 export default class IncomingMessageDynamoGateway extends DynamoGateway {

@@ -1,5 +1,5 @@
 import { SQSEvent } from "aws-lambda"
-import { createDynamoDbConfig, createMqConfig, createS3Config } from "./types"
+import { createDynamoDbConfig, createMqConfig, createS3Config } from "./configs"
 import MqGateway from "./gateways/MqGateway"
 import IncomingMessageDynamoGateway from "./gateways/IncomingMessageDynamoGateway"
 import PersistMessageUseCase from "./use-cases/PersistMessageUseCase"
