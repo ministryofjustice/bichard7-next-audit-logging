@@ -1,7 +1,7 @@
 import * as https from "https"
 import axios, { AxiosError, AxiosResponse } from "axios"
 import { PromiseResult } from "@handlers/common"
-import { MqConfig } from "src/types"
+import { MqConfig } from "../types"
 
 const getQueueUrl = (config: MqConfig): string =>
   `https://${config.MQ_USER}:${config.MQ_PASSWORD}@${config.MQ_HOST}:${config.MQ_PORT}/ibmmq/rest/v1/messaging/qmgr/${config.MQ_QUEUE_MANAGER}/queue/${config.MQ_QUEUE}`
@@ -34,13 +34,13 @@ export default class IbmMqService {
   async getMessage(): PromiseResult<string> {
     const url = `${getQueueUrl(this.config)}/message`
     const response = await sendDeleteRequest(url, this.httpsAgent)
-    const body = response && response.data && response.data.body
+    const content = response && response.data
 
-    if (!body) {
-      return new Error("Response received but no content")
+    if (!content || typeof content !== "string") {
+      return new Error("Response received but no discernible content")
     }
 
-    return body
+    return content
   }
 
   async clearQueue(): PromiseResult<void> {

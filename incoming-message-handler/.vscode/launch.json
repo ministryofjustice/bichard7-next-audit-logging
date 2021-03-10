@@ -12,7 +12,13 @@
       "stopOnEntry": false,
       "outFiles": ["${workspaceFolder}/build/**/*.js"],
       "preLaunchTask": "startDebugging",
-      "postDebugTask": "stopDebugging"
+      "postDebugTask": "stopDebugging",
+      "smartStep": true,
+      "skipFiles": [
+        "<node_internals>/**/*.js",
+        "${workspaceFolder}/node_modules/**/*.js",
+        "${workspaceRoot}/node_modules/**/*.js"
+      ]
     },
     {
       "type": "node",
@@ -24,10 +30,11 @@
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen",
       "disableOptimisticBPs": true,
+      "smartStep": true,
       "skipFiles": [
         "<node_internals>/**/*.js",
-        "${workspaceFolder/node_modules/**/*.js",
-        "${workspaceRoot/node_modules/**/*.js"
+        "${workspaceFolder}/node_modules/**/*.js",
+        "${workspaceRoot}/node_modules/**/*.js"
       ]
     }
   ]

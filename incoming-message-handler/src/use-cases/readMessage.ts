@@ -1,6 +1,6 @@
-import { MessageData } from "src/types"
 import { isError, PromiseResult, Result } from "@handlers/common"
-import DeliveryMessage from "src/entities/DeliveryMessage"
+import { MessageData } from "../types"
+import DeliveryMessage from "../entities/DeliveryMessage"
 import { parseXml } from "../utils/xml"
 import ApplicationError from "../errors/ApplicationError"
 
@@ -27,7 +27,7 @@ const getMessageId = (xml: DeliveryMessage): Result<string> => {
     return new Error("Message Id cannot be found")
   }
 
-  return messageId
+  return messageId.trim()
 }
 
 const readMessage = async (message: string): PromiseResult<MessageData> => {
