@@ -1,21 +1,15 @@
 import { isError } from "@handlers/common"
-import { MessageData } from "../types"
 import MqGateway from "../gateways/MqGateway"
 import SendMessageUseCase from "./SendMessageUseCase"
 
 const gateway = new MqGateway({})
 const useCase = new SendMessageUseCase(gateway)
-const message: MessageData = {
-  messageId: "messageId",
-  caseId: "caseId",
-  rawXml: "<?xml?><root/>"
-}
 
 describe("SendMessageUseCase", () => {
   describe("send()", () => {
     it("should return undefined when the message was sent successfully", async () => {
       jest.spyOn(gateway, "execute").mockResolvedValue(undefined)
-      const result = await useCase.send(message)
+      const result = await useCase.send("<?xml?><root/>")
 
       expect(isError(result)).toBe(false)
       expect(result).toBeUndefined()
@@ -25,7 +19,7 @@ describe("SendMessageUseCase", () => {
       const expectedError = new Error("Test error")
       jest.spyOn(gateway, "execute").mockResolvedValue(expectedError)
 
-      const result = await useCase.send(message)
+      const result = await useCase.send("<?xml?><root/>")
 
       expect(isError(result)).toBe(true)
       expect(<Error>result).toBe(expectedError)

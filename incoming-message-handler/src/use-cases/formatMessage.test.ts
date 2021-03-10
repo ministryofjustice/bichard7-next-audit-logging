@@ -1,4 +1,4 @@
-import DeliveryMessage from "src/entities/DeliveryMessage"
+import DeliveryMessage from "../entities/DeliveryMessage"
 import { parseXml } from "../utils/xml"
 import formatMessage from "./formatMessage"
 
@@ -6,7 +6,9 @@ const message = `
 <DC:ResultedCaseMessage xmlns:DC="http://www.dca.gov.uk/xmlschemas/libra" Flow='ResultedCasesForThePolice' Interface='LibraStandardProsecutorPolice' SchemaVersion='0.6g'>
 	<DC:Session>
 		<DC:Case>
-			<DC:PTIURN>123456789</DC:PTIURN>
+			<DC:PTIURN>
+        123456789
+      </DC:PTIURN>
 		</DC:Case>
 	</DC:Session>
 </DC:ResultedCaseMessage>

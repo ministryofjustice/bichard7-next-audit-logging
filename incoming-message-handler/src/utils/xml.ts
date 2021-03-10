@@ -6,7 +6,11 @@ export const clean = (message: string): string => {
 
 export const parseXml = async <T>(xml: string): Promise<T> => {
   const stripNamespaces = processors.stripPrefix
-  return parseStringPromise(xml, { tagNameProcessors: [stripNamespaces], explicitArray: false }) as Promise<T>
+  return parseStringPromise(xml, {
+    tagNameProcessors: [stripNamespaces],
+    explicitArray: false,
+    trim: true
+  }) as Promise<T>
 }
 
 export const hasRootElement = async <T extends { [key: string]: string }>(
