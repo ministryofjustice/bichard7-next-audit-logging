@@ -1,6 +1,5 @@
 import { SQSEvent } from "aws-lambda"
-import { isError } from "@handlers/common"
-import { createDynamoDbConfig, createMqConfig, createS3Config, MessageData } from "./types"
+import { createDynamoDbConfig, createMqConfig, createS3Config } from "./types"
 import MqGateway from "./gateways/MqGateway"
 import IncomingMessageDynamoGateway from "./gateways/IncomingMessageDynamoGateway"
 import PersistMessageUseCase from "./use-cases/PersistMessageUseCase"

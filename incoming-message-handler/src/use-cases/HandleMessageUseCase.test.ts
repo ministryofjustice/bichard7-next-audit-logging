@@ -4,6 +4,8 @@ import MqGateway from "../gateways/MqGateway"
 import PersistMessageUseCase from "./PersistMessageUseCase"
 import SendMessageUseCase from "./SendMessageUseCase"
 import HandleMessageUseCase from "./HandleMessageUseCase"
+import UploadMessageUseCase from "./UploadMessageUseCase"
+import S3Gateway from "../gateways/S3Gateway"
 
 const partialMessage = `
 <DC:ResultedCaseMessage xmlns:DC="http://www.dca.gov.uk/xmlschemas/libra" Flow='ResultedCasesForThePolice' Interface='LibraStandardProsecutorPolice' SchemaVersion='0.6g'>
@@ -36,7 +38,15 @@ const mqGateway = new MqGateway({})
 const persistMessage = new PersistMessageUseCase(incomingMessageGateway)
 const sendMessage = new SendMessageUseCase(mqGateway)
 
-const useCase = new HandleMessageUseCase(persistMessage, sendMessage)
+const s3Gateway = new S3Gateway({
+  INCOMING_MESSAGE_BUCKET_NAME: "test-bucket",
+  S3_FORCE_PATH_STYLE: "true",
+  S3_REGION: "region",
+  S3_URL: "url"
+})
+
+const uploadMessage = new UploadMessageUseCase(s3Gateway)
+const useCase = new HandleMessageUseCase(persistMessage, uploadMessage, sendMessage)
 
 describe("HandleMessageUseCase", () => {
   describe("handle()", () => {
@@ -46,6 +56,7 @@ describe("HandleMessageUseCase", () => {
 
     it("should return undefined when the message was handled successfully", async () => {
       jest.spyOn(persistMessage, "persist").mockResolvedValue(undefined)
+      jest.spyOn(uploadMessage, "save").mockResolvedValue(undefined)
       jest.spyOn(sendMessage, "send").mockResolvedValue(undefined)
 
       const result = await useCase.handle(message)

@@ -1,6 +1,6 @@
 import { v4 as uuid } from "uuid"
 import format from "xml-formatter"
-import { isError, PromiseResult } from "@handlers/common"
+import { isError } from "@handlers/common"
 import TestDynamoGateway from "../gateways/DynamoGateway/TestDynamoGateway"
 import IncomingMessage from "../entities/IncomingMessage"
 import IncomingMessageSimulator from "./IncomingMessageSimulator"
@@ -9,8 +9,10 @@ import TestS3Gateway from "../gateways/S3Gateway/TestS3Gateway"
 
 jest.setTimeout(30000)
 
+const formatXml = (xml: string): string => format(xml, { indentation: "  " })
+
 const expectedMessageId = uuid()
-const expectedMessage = format(
+const expectedMessage = formatXml(
   `
 <?xml version="1.0" encoding="UTF-8"?>
 <DeliverRequest xmlns="http://schemas.cjse.gov.uk/messages/deliver/2006-05" xmlns:ex="http://schemas.cjse.gov.uk/messages/exception/2006-06" xmlns:mf="http://schemas.cjse.gov.uk/messages/format/2006-05" xmlns:mm="http://schemas.cjse.gov.uk/messages/metadata/2006-05" xmlns:msg="http://schemas.cjse.gov.uk/messages/messaging/2006-05" xmlns:xmime="http://www.w3.org/2005/05/xmlmime" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
@@ -27,10 +29,7 @@ const expectedMessage = format(
     </DC:ResultedCaseMessage>
 	</Message>
 </DeliverRequest>
-`,
-  {
-    indentation: "  "
-  }
+`
 )
 
 const AWS_URL = "http://localhost:4566"
@@ -62,18 +61,6 @@ const mq = new IbmMqService({
 const waitFor = (milliseconds: number): Promise<void> =>
   new Promise<void>((resolve) => setTimeout(() => resolve(), milliseconds))
 
-const getPrettyMessageXml = async (): PromiseResult<string> => {
-  const message = await mq.getMessage()
-
-  if (isError(message)) {
-    return message
-  }
-
-  return format(message, {
-    indentation: "  "
-  })
-}
-
 describe("integration tests", () => {
   beforeEach(async () => {
     await dynamoGateway.deleteAll("IncomingMessage", "messageId")
@@ -90,7 +77,7 @@ describe("integration tests", () => {
 
     const savedMessage = savedMessages[0]
     const messageContent = await s3Gateway.getContent(savedMessage.Key)
-    expect(messageContent).toBe(expectedMessage)
+    expect(formatXml(messageContent)).toBe(expectedMessage)
 
     // Check the message is in the database
     const persistedMessages = await dynamoGateway.getAll("IncomingMessage")
@@ -99,8 +86,8 @@ describe("integration tests", () => {
     const persistedMessage = <IncomingMessage>persistedMessages.Items[0]
     expect(persistedMessage.messageId).toBe(expectedMessageId)
 
-    const actualMessage = await getPrettyMessageXml()
+    const actualMessage = await mq.getMessage()
     expect(isError(actualMessage)).toBe(false)
-    expect(actualMessage).toBe(expectedMessage)
+    expect(formatXml(<string>actualMessage)).toBe(expectedMessage)
   })
 })
