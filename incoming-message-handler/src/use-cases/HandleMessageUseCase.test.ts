@@ -50,15 +50,17 @@ const useCase = new HandleMessageUseCase(persistMessage, uploadMessage, sendMess
 
 describe("HandleMessageUseCase", () => {
   describe("handle()", () => {
-    afterAll(() => {
+    beforeEach(() => {
+      jest.spyOn(persistMessage, "persist").mockResolvedValue(undefined)
+      jest.spyOn(uploadMessage, "save").mockResolvedValue(undefined)
+      jest.spyOn(sendMessage, "send").mockResolvedValue(undefined)
+    })
+
+    afterEach(() => {
       jest.clearAllMocks()
     })
 
     it("should return undefined when the message was handled successfully", async () => {
-      jest.spyOn(persistMessage, "persist").mockResolvedValue(undefined)
-      jest.spyOn(uploadMessage, "save").mockResolvedValue(undefined)
-      jest.spyOn(sendMessage, "send").mockResolvedValue(undefined)
-
       const result = await useCase.handle(message)
 
       expect(result).toBeUndefined()
@@ -80,9 +82,17 @@ describe("HandleMessageUseCase", () => {
       expect(result).toBe(expectedError)
     })
 
-    it("should return an error when sending the message fails", async () => {
-      jest.spyOn(persistMessage, "persist").mockResolvedValue(undefined)
+    it("should return an error when saving the message fails", async () => {
+      const expectedError = new Error("Failed to save the message")
+      jest.spyOn(uploadMessage, "save").mockResolvedValue(expectedError)
 
+      const result = await useCase.handle(message)
+
+      expect(isError(result)).toBe(true)
+      expect(result).toBe(expectedError)
+    })
+
+    it("should return an error when sending the message fails", async () => {
       const expectedError = new Error("Failed to send the message")
       jest.spyOn(sendMessage, "send").mockResolvedValue(expectedError)
 

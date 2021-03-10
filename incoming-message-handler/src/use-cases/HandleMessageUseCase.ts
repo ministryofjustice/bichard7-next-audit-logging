@@ -29,7 +29,7 @@ export default class HandleMessageUseCase {
 
     const uploadResult = await this.uploadMessage.save(messageData)
     if (isError(uploadResult)) {
-      throw uploadResult
+      return uploadResult
     }
 
     const incomingMessage = new IncomingMessage(messageData.messageId, new Date())
