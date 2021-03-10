@@ -1,6 +1,5 @@
 import { isError } from "@handlers/common"
 import { S3Config } from "../../types"
-import { getFileName } from "../../utils/file"
 import TestS3Gateway from "./TestS3Gateway"
 
 const config: S3Config = {
@@ -11,7 +10,7 @@ const config: S3Config = {
 }
 
 const gateway = new TestS3Gateway(config)
-const fileName = getFileName(new Date(2021, 3, 9, 12, 15, 18), "123456")
+const fileName = "2021/04/09/12/06/123456.xml"
 
 describe("S3Gateway", () => {
   describe("upload", () => {

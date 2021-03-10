@@ -2,7 +2,7 @@ import { isError, PromiseResult } from "@handlers/common"
 import ApplicationError from "../errors/ApplicationError"
 import S3Gateway from "../gateways/S3Gateway"
 import { MessageData } from "../types"
-import { getFileName } from "../utils/file"
+import getFileName from "../utils/getFileName"
 
 export default class UploadMessageUseCase {
   constructor(private readonly gateway: S3Gateway) {}
