@@ -22,15 +22,15 @@ case $STYLE in
     PARAMS+=(--watchAll --testPathPattern=e2e)
     ;;
 
-  "all")
-    echo "Running all tests..."
-    PARAMS+=(--watchAll)
-    ;;
-
   "ci")
     echo "Running CI tests..."
     JEST_JUNIT_OUTPUT_DIR=./test-results/jest
     PARAMS+=(--coverage --ci --watchAll false --runInBand --reporters=default --reporters=jest-junit --testPathIgnorePatterns="integration" "e2e")
+    ;;
+
+    *)
+    echo "Running all tests..."
+    PARAMS+=(--watchAll)
     ;;
 esac
 
