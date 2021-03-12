@@ -42,7 +42,7 @@ fi
 
 awslocal sqs set-queue-attributes \
   --queue-url="$LOCALSTACK_URL/000000000000/$QUEUE_NAME" \
-  --attributes file://$INFRA_PATH/attributes.json
+  --attributes file://$INFRA_PATH/sqs-attributes.json
 
 # Configure the lambda with environment variables
 awslocal lambda update-function-configuration \
@@ -79,3 +79,19 @@ if [[ -z $(awslocal dynamodb list-tables | grep DynamoTesting) ]]; then
 fi
 
 awslocal s3 mb s3://incoming-messages
+
+# Setup the Step Function state machine to trigger our Lambda
+ORIGINAL_LAMBDA_ARN=$( \
+  awslocal lambda list-functions | \
+  jq ".[] | map(select(.FunctionName == \""$LAMBDA_NAME"\"))" | \
+  jq ".[0].FunctionArn" | sed -e "s/\"//g")
+
+TEMP_STATE_MACHINE_CONFIG_FILE=/tmp/state-machine.json
+cat $INFRA_PATH/state-machine.json | sed -e "s/{LAMBDA_ARN}/$ORIGINAL_LAMBDA_ARN/g" > $TEMP_STATE_MACHINE_CONFIG_FILE
+
+awslocal stepfunctions create-state-machine \
+  --definition file://$TEMP_STATE_MACHINE_CONFIG_FILE \
+  --name "RunOriginalLambdaStateMachine" \
+  --role-arn "arn:aws:iam::012345678901:role/DummyRole"
+
+rm $TEMP_STATE_MACHINE_CONFIG_FILE

@@ -14,7 +14,7 @@ cat environment/infrastructure/environment.json | sed -e "s/Variables/IncomingMe
 sam local invoke IncomingMessageHandler \
   -d 9999 \
   --env-vars $TMPVARS \
-  -e scripts/event.json \
+  -e scripts/sqs-event.json \
   --docker-network bichard_audit_logging \
   -l incoming-message-handler.log \
   &

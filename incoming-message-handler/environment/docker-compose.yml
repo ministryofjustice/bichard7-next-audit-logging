@@ -16,7 +16,7 @@ services:
     ports:
       - 4566:4566
     environment:
-      - SERVICES=sqs,lambda,s3,dynamodb
+      - SERVICES=sqs,lambda,s3,dynamodb,stepfunctions
       - DEBUG=1
       - LAMBDA_REMOTE_DOCKER=false
       - NODE_TLS_REJECT_UNAUTHORIZED=0
