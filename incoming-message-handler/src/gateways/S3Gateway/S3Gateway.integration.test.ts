@@ -13,11 +13,21 @@ const gateway = new TestS3Gateway(config)
 const fileName = "2021/04/09/12/06/123456.xml"
 
 describe("S3Gateway", () => {
-  describe("upload", () => {
-    beforeAll(async () => {
-      await gateway.deleteAll()
-    })
+  beforeAll(async () => {
+    await gateway.deleteAll()
+  })
 
+  describe("getItem()", () => {
+    it("should return the contents of a file when it exists in the bucket", async () => {
+      await gateway.upload(fileName, "Message to be saved")
+
+      const content = await gateway.getItem(config.INCOMING_MESSAGE_BUCKET_NAME, fileName)
+
+      expect(content).toBe("Message to be saved")
+    })
+  })
+
+  describe("upload()", () => {
     it("should save the message in the bucket", async () => {
       const result = await gateway.upload(fileName, "Message to be saved")
 
