@@ -4,7 +4,12 @@
   "States": {
     "OriginalLambda": {
       "Type": "Task",
-      "Resource": "{LAMBDA_ARN}",
+      "Resource": "{ORIGINAL_LAMBDA_ARN}",
+      "Next": "Send to Bichard"
+    },
+    "Send to Bichard": {
+      "Type": "Task",
+      "Resource": "{SEND_TO_BICHARD_ARN}",
       "End": true
     }
   }

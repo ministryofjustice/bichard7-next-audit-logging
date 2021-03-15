@@ -1,6 +1,6 @@
 import { isError } from "@handlers/common"
 import { createDynamoDbConfig, createMqConfig, createS3Config } from "./configs"
-import { S3PutObjectEvent } from "./entities"
+import { IncomingMessage, S3PutObjectEvent } from "./entities"
 import MqGateway from "./gateways/MqGateway"
 import IncomingMessageDynamoGateway from "./gateways/IncomingMessageDynamoGateway"
 import S3Gateway from "./gateways/S3Gateway"
@@ -20,7 +20,7 @@ const s3Gateway = new S3Gateway(s3Config)
 const handleMessage = new HandleMessageUseCase(persistMessage, sendMessageUseCase)
 
 // eslint-disable-next-line import/prefer-default-export
-export const sendMessage = async (event: S3PutObjectEvent): Promise<void> => {
+export const sendMessage = async (event: S3PutObjectEvent): Promise<IncomingMessage> => {
   const { bucketName, key } = event.detail.requestParameters
   const message = await s3Gateway.getItem(bucketName, key)
 
@@ -33,4 +33,6 @@ export const sendMessage = async (event: S3PutObjectEvent): Promise<void> => {
   if (isError(result)) {
     throw result
   }
+
+  return result
 }

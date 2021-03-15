@@ -35,7 +35,7 @@ export default class IncomingMessageSimulator {
     const executionName = fileName.replace(/\//g, "_")
     await this.stateMachine
       .startExecution({
-        stateMachineArn: "arn:aws:states:us-east-1:000000000000:stateMachine:RunOriginalLambdaStateMachine",
+        stateMachineArn: "arn:aws:states:us-east-1:000000000000:stateMachine:IncomingMessageHandler",
         input: `{
           "detail": {
             "requestParameters": {

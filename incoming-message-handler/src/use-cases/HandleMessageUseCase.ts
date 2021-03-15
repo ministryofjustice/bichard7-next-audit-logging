@@ -12,7 +12,7 @@ export default class HandleMessageUseCase {
     private readonly sendMessage: SendMessageUseCase
   ) {}
 
-  async handle(messageBody: string): PromiseResult<void> {
+  async handle(messageBody: string): PromiseResult<IncomingMessage> {
     let formattedMessage = messageBody
 
     const hasDeliveryElement = await hasRootElement(messageBody, "DeliverRequest")
@@ -25,7 +25,7 @@ export default class HandleMessageUseCase {
       return messageData
     }
 
-    const incomingMessage = new IncomingMessage(messageData.messageId, new Date())
+    const incomingMessage = new IncomingMessage(messageData.messageId, new Date(), messageData.rawXml)
     const persistMessageResult = await this.persistMessage.persist(incomingMessage)
 
     if (isError(persistMessageResult)) {
@@ -37,6 +37,6 @@ export default class HandleMessageUseCase {
       return sendMessageResult
     }
 
-    return undefined
+    return incomingMessage
   }
 }
