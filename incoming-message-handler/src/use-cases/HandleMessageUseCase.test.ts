@@ -54,7 +54,7 @@ describe("HandleMessageUseCase", () => {
 
       const incomingMessage = <IncomingMessage>result
       expect(incomingMessage.messageId).toBe(expectedMessageId)
-      expect(incomingMessage.originalMessageXml).toBe(message)
+      expect(incomingMessage.messageXml).toBe(message)
     })
 
     it("should return an error when reading the message fails", async () => {
