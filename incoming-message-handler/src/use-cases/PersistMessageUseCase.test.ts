@@ -12,7 +12,7 @@ const config: DynamoDbConfig = {
 const gateway = new IncomingMessageDynamoGateway(config, "IncomingMessage")
 const useCase = new PersistMessageUseCase(gateway)
 
-const message = new IncomingMessage("id", new Date())
+const message = new IncomingMessage("id", new Date(), "XML")
 
 describe("PersistMessageUseCase", () => {
   it("should create the message when valid", async () => {
@@ -25,6 +25,7 @@ describe("PersistMessageUseCase", () => {
     const actualMessage = <IncomingMessage>result
     expect(actualMessage.messageId).toBe(message.messageId)
     expect(actualMessage.receivedDate).toBe(message.receivedDate)
+    expect(actualMessage.messageXml).toBe("XML")
   })
 
   it("should fail when the message already exists", async () => {

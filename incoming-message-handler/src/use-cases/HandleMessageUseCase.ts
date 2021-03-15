@@ -4,15 +4,11 @@ import { IncomingMessage } from "../entities"
 import formatMessage from "./formatMessage"
 import readMessage from "./readMessage"
 import PersistMessageUseCase from "./PersistMessageUseCase"
-import SendMessageUseCase from "./SendMessageUseCase"
 
 export default class HandleMessageUseCase {
-  constructor(
-    private readonly persistMessage: PersistMessageUseCase,
-    private readonly sendMessage: SendMessageUseCase
-  ) {}
+  constructor(private readonly persistMessage: PersistMessageUseCase) {}
 
-  async handle(messageBody: string): PromiseResult<void> {
+  async handle(messageBody: string): PromiseResult<IncomingMessage> {
     let formattedMessage = messageBody
 
     const hasDeliveryElement = await hasRootElement(messageBody, "DeliverRequest")
@@ -25,18 +21,13 @@ export default class HandleMessageUseCase {
       return messageData
     }
 
-    const incomingMessage = new IncomingMessage(messageData.messageId, new Date())
+    const incomingMessage = new IncomingMessage(messageData.messageId, new Date(), messageData.rawXml)
     const persistMessageResult = await this.persistMessage.persist(incomingMessage)
 
     if (isError(persistMessageResult)) {
       return persistMessageResult
     }
 
-    const sendMessageResult = await this.sendMessage.send(messageData.rawXml)
-    if (isError(sendMessageResult)) {
-      return sendMessageResult
-    }
-
-    return undefined
+    return incomingMessage
   }
 }
