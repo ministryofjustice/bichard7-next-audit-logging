@@ -1,7 +1,5 @@
 import { v4 as uuid } from "uuid"
 import { isError } from "@handlers/common"
-import IncomingMessageDynamoGateway from "../gateways/IncomingMessageDynamoGateway"
-import PersistMessageUseCase from "./PersistMessageUseCase"
 import HandleMessageUseCase from "./HandleMessageUseCase"
 import { IncomingMessage } from "../entities"
 
@@ -25,28 +23,11 @@ const message = `
 	</Message>
 </DeliverRequest>
 `
-const incomingMessageGateway = new IncomingMessageDynamoGateway(
-  {
-    DYNAMO_REGION: "region",
-    DYNAMO_URL: "url"
-  },
-  "test"
-)
 
-const persistMessage = new PersistMessageUseCase(incomingMessageGateway)
-
-const useCase = new HandleMessageUseCase(persistMessage)
+const useCase = new HandleMessageUseCase()
 
 describe("HandleMessageUseCase", () => {
   describe("handle()", () => {
-    beforeEach(() => {
-      jest.spyOn(persistMessage, "persist").mockResolvedValue(undefined)
-    })
-
-    afterEach(() => {
-      jest.clearAllMocks()
-    })
-
     it("should return undefined when the message was handled successfully", async () => {
       const result = await useCase.handle(message)
 
@@ -61,16 +42,6 @@ describe("HandleMessageUseCase", () => {
       const result = await useCase.handle("<InvalidMessage />")
 
       expect(isError(result)).toBe(true)
-    })
-
-    it("should return an error when persisting the message fails", async () => {
-      const expectedError = new Error("Failed to persist the message")
-      jest.spyOn(persistMessage, "persist").mockResolvedValue(expectedError)
-
-      const result = await useCase.handle(message)
-
-      expect(isError(result)).toBe(true)
-      expect(result).toBe(expectedError)
     })
   })
 })
