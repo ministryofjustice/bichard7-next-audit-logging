@@ -21,6 +21,19 @@ export default class S3Gateway {
     return this.s3
   }
 
+  async getItem(bucketName: string, key: string): PromiseResult<string> {
+    const params = {
+      Bucket: bucketName,
+      Key: key
+    }
+
+    return this.s3
+      .getObject(params)
+      .promise()
+      .then((response) => response.Body.toString("utf-8"))
+      .catch((error) => <Error>error)
+  }
+
   async upload<T>(fileName: string, content: T): PromiseResult<void> {
     const params: S3.Types.PutObjectRequest = {
       Bucket: this.bucketName,

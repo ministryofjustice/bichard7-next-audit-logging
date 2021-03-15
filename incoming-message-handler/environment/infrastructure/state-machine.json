@@ -1,0 +1,11 @@
+{
+  "Comment": "Simulates a state machine to manage the workflow of receiving Libra/ExISS messages into the system",
+  "StartAt": "OriginalLambda",
+  "States": {
+    "OriginalLambda": {
+      "Type": "Task",
+      "Resource": "{LAMBDA_ARN}",
+      "End": true
+    }
+  }
+}

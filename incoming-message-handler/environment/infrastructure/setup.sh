@@ -31,28 +31,10 @@ if [[ -z $(awslocal lambda list-functions | grep $LAMBDA_NAME) ]]; then
     --role whatever
 fi
 
-# Create the queue and a dead letter queue
-if [[ -z $(awslocal sqs list-queues | grep $QUEUE_NAME) ]]; then
-  awslocal sqs create-queue --queue-name $QUEUE_NAME
-fi
-
-if [[ -z $(awslocal sqs list-queues | grep $DLQ_NAME) ]]; then
-  awslocal sqs create-queue --queue-name $DLQ_NAME
-fi
-
-awslocal sqs set-queue-attributes \
-  --queue-url="$LOCALSTACK_URL/000000000000/$QUEUE_NAME" \
-  --attributes file://$INFRA_PATH/attributes.json
-
 # Configure the lambda with environment variables
 awslocal lambda update-function-configuration \
   --function-name $LAMBDA_NAME \
   --environment file://$INFRA_PATH/environment.json
-
-# Trigger the lambda when a message is received on the queue
-awslocal lambda create-event-source-mapping \
-  --function-name $LAMBDA_NAME \
-  --event-source-arn arn:aws:sqs:us-east-1:000000000000:$QUEUE_NAME
 
 # Create the DynamoDb table for persisting the IncomingMessage entity
 if [[ -z $(awslocal dynamodb list-tables | grep IncomingMessage) ]]; then
@@ -79,3 +61,19 @@ if [[ -z $(awslocal dynamodb list-tables | grep DynamoTesting) ]]; then
 fi
 
 awslocal s3 mb s3://incoming-messages
+
+# Setup the Step Function state machine to trigger our Lambda
+ORIGINAL_LAMBDA_ARN=$( \
+  awslocal lambda list-functions | \
+  jq ".[] | map(select(.FunctionName == \""$LAMBDA_NAME"\"))" | \
+  jq ".[0].FunctionArn" | sed -e "s/\"//g")
+
+TEMP_STATE_MACHINE_CONFIG_FILE=/tmp/state-machine.json
+cat $INFRA_PATH/state-machine.json | sed -e "s/{LAMBDA_ARN}/$ORIGINAL_LAMBDA_ARN/g" > $TEMP_STATE_MACHINE_CONFIG_FILE
+
+awslocal stepfunctions create-state-machine \
+  --definition file://$TEMP_STATE_MACHINE_CONFIG_FILE \
+  --name "RunOriginalLambdaStateMachine" \
+  --role-arn "arn:aws:iam::012345678901:role/DummyRole"
+
+rm $TEMP_STATE_MACHINE_CONFIG_FILE
