@@ -5,6 +5,11 @@
     "OriginalLambda": {
       "Type": "Task",
       "Resource": "{ORIGINAL_LAMBDA_ARN}",
+      "Next": "Log Message Receipt"
+    },
+    "Log Message Receipt": {
+      "Type": "Task",
+      "Resource": "{LOG_MESSAGE_RECEIPT_LAMBDA_ARN}",
       "Next": "Send to Bichard"
     },
     "Send to Bichard": {
