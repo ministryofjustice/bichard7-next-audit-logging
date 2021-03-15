@@ -87,14 +87,11 @@ cat $INFRA_PATH/state-machine.json | \
   sed -e "s/{SEND_TO_BICHARD_ARN}/$SEND_TO_BICHARD_ARN/g" \
   > $TEMP_STATE_MACHINE_CONFIG_FILE
 
-if [[ -n $(awslocal stepfunctions list-state-machines | grep IncomingMessageHandler) ]]; then
-  awslocal stepfunctions delete-state-machine \
-    --state-machine-arn arn:aws:states:us-east-1:000000000000:stateMachine:IncomingMessageHandler
+if [[ -z $(awslocal stepfunctions list-state-machines | grep IncomingMessageHandler) ]]; then
+  awslocal stepfunctions create-state-machine \
+    --definition file://$TEMP_STATE_MACHINE_CONFIG_FILE \
+    --name "IncomingMessageHandler" \
+    --role-arn "arn:aws:iam::012345678901:role/DummyRole"
 fi
-
-awslocal stepfunctions create-state-machine \
-  --definition file://$TEMP_STATE_MACHINE_CONFIG_FILE \
-  --name "IncomingMessageHandler" \
-  --role-arn "arn:aws:iam::012345678901:role/DummyRole"
 
 rm $TEMP_STATE_MACHINE_CONFIG_FILE

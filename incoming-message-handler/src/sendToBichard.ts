@@ -1,7 +1,11 @@
+import { createMqConfig } from "./configs"
 import { IncomingMessage } from "./entities"
+import MqGateway from "./gateways/MqGateway"
+import SendMessageUseCase from "./use-cases/SendMessageUseCase"
 
-export default function sendToBichard(event: IncomingMessage): Promise<void> {
-  console.log(event)
+const gateway = new MqGateway(createMqConfig())
+const sendMessageUseCase = new SendMessageUseCase(gateway)
 
-  return Promise.resolve()
+export default async function sendToBichard(event: IncomingMessage): Promise<void> {
+  await sendMessageUseCase.send(event.originalMessageXml)
 }
