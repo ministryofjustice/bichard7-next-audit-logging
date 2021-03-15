@@ -68,16 +68,11 @@ describe("integration tests", () => {
   })
 
   it("should receive a message on the target queue when the message is sent to the AWS SQS queue", async () => {
+    const fileName = `2021/03/15/12/28/${expectedMessageId}.xml`
+
     await mq.clearQueue()
-    await simulator.sendMessage(expectedMessage)
+    await simulator.start(fileName, expectedMessage)
     await waitFor(3000)
-
-    const savedMessages = await s3Gateway.getAll()
-    expect(savedMessages.length).toBe(1)
-
-    const savedMessage = savedMessages[0]
-    const messageContent = await s3Gateway.getContent(savedMessage.Key)
-    expect(formatXml(messageContent)).toBe(expectedMessage)
 
     // Check the message is in the database
     const persistedMessages = await dynamoGateway.getAll("IncomingMessage")

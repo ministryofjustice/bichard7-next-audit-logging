@@ -31,28 +31,10 @@ if [[ -z $(awslocal lambda list-functions | grep $LAMBDA_NAME) ]]; then
     --role whatever
 fi
 
-# Create the queue and a dead letter queue
-if [[ -z $(awslocal sqs list-queues | grep $QUEUE_NAME) ]]; then
-  awslocal sqs create-queue --queue-name $QUEUE_NAME
-fi
-
-if [[ -z $(awslocal sqs list-queues | grep $DLQ_NAME) ]]; then
-  awslocal sqs create-queue --queue-name $DLQ_NAME
-fi
-
-awslocal sqs set-queue-attributes \
-  --queue-url="$LOCALSTACK_URL/000000000000/$QUEUE_NAME" \
-  --attributes file://$INFRA_PATH/sqs-attributes.json
-
 # Configure the lambda with environment variables
 awslocal lambda update-function-configuration \
   --function-name $LAMBDA_NAME \
   --environment file://$INFRA_PATH/environment.json
-
-# Trigger the lambda when a message is received on the queue
-awslocal lambda create-event-source-mapping \
-  --function-name $LAMBDA_NAME \
-  --event-source-arn arn:aws:sqs:us-east-1:000000000000:$QUEUE_NAME
 
 # Create the DynamoDb table for persisting the IncomingMessage entity
 if [[ -z $(awslocal dynamodb list-tables | grep IncomingMessage) ]]; then

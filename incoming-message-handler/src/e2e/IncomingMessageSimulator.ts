@@ -1,10 +1,21 @@
-import { SQS } from "aws-sdk"
+import { isError } from "@handlers/common"
+import { StepFunctions } from "aws-sdk"
+import S3Gateway from "../gateways/S3Gateway"
 
 export default class IncomingMessageSimulator {
-  private queue: SQS
+  private readonly s3Gateway: S3Gateway
 
-  constructor(private awsUrl: string) {
-    this.queue = new SQS({
+  private readonly stateMachine: StepFunctions
+
+  constructor(awsUrl: string) {
+    this.s3Gateway = new S3Gateway({
+      S3_URL: awsUrl,
+      S3_REGION: "us-east-1",
+      INCOMING_MESSAGE_BUCKET_NAME: "incoming-messages",
+      S3_FORCE_PATH_STYLE: "true"
+    })
+
+    this.stateMachine = new StepFunctions({
       endpoint: awsUrl,
       region: "us-east-1",
       credentials: {
@@ -14,21 +25,27 @@ export default class IncomingMessageSimulator {
     })
   }
 
-  async sendMessage(message: string): Promise<void> {
-    return new Promise<void>((resolve, reject) => {
-      this.queue.sendMessage(
-        {
-          QueueUrl: `${this.awsUrl}/000000000000/incoming_message_queue`,
-          MessageBody: message
-        },
-        (error) => {
-          if (error) {
-            reject(error)
-          }
+  async start(fileName: string, message: string): Promise<void> {
+    const result = await this.s3Gateway.upload(fileName, message)
 
-          resolve()
-        }
-      )
-    })
+    if (isError(result)) {
+      throw result
+    }
+
+    const executionName = fileName.replace(/\//g, "_")
+    await this.stateMachine
+      .startExecution({
+        stateMachineArn: "arn:aws:states:us-east-1:000000000000:stateMachine:RunOriginalLambdaStateMachine",
+        input: `{
+          "detail": {
+            "requestParameters": {
+              "bucketName": "incoming-messages",
+              "key": "${fileName}"
+            }
+          }
+        }`,
+        name: executionName
+      })
+      .promise()
   }
 }
