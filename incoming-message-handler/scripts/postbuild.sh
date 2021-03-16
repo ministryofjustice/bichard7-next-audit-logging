@@ -1,14 +1,10 @@
 #!/bin/bash
+echo "Removing old build files..."
+rm -rf $PWD/.aws-sam/build/IncomingMessageHandler/build
 
-cp package.json package-lock.json build/
+echo "Creating build folder..."
+mkdir -p $PWD/.aws-sam/build/IncomingMessageHandler/build
 
-mkdir -p build/scripts
-cp scripts/copy-local-module.sh build/scripts/
-
-# Only install production dependencies (ignore development libraries)
-cp package.json build/
-cd build; npm i --production; cd ..
-
-# Replace the @handlers/common broken sym link with the actual folder
-unlink build/node_modules/@handlers/common
-cp -RL node_modules/@handlers/common/ build/node_modules/@handlers/common/
+echo "Copy the debug image..."
+cp -RL $PWD/build  $PWD/.aws-sam/build/IncomingMessageHandler
+echo "Debug image copied..."
