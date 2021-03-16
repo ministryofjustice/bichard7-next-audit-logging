@@ -1,5 +1,5 @@
 import { PromiseResult } from "@handlers/common"
-import MqGateway from "../gateways/MqGateway"
+import MqGateway from "src/gateways/MqGateway"
 
 export default class SendMessageUseCase {
   constructor(private gateway: MqGateway) {}

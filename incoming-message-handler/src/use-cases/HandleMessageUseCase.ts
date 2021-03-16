@@ -1,5 +1,5 @@
 import { PromiseResult } from "@handlers/common"
-import { clean, hasRootElement } from "../utils/xml"
+import { clean, hasRootElement } from "src/utils/xml"
 import formatMessage from "./formatMessageXml"
 
 export default class HandleMessageUseCase {

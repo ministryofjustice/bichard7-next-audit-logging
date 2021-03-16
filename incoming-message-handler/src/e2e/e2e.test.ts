@@ -72,7 +72,7 @@ describe("integration tests", () => {
 
     await mq.clearQueue()
     await simulator.start(fileName, expectedMessage)
-    await waitFor(3000)
+    await waitFor(5000)
 
     // Check the message is in the database
     const persistedMessages = await dynamoGateway.getAll("IncomingMessage")

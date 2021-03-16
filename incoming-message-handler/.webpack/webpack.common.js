@@ -10,6 +10,7 @@ module.exports = {
     sendToBichard: "./src/handlers/sendToBichard.ts"
   },
   resolve: {
+    modules: [path.resolve("./node_modules"), path.resolve(".")],
     extensions: [".js", ".json", ".ts"]
   },
   output: {
