@@ -1,6 +1,6 @@
 import { DeliveryMessage } from "../entities"
 import { parseXml } from "../utils/xml"
-import formatMessage from "./formatMessage"
+import formatMessageXml from "./formatMessageXml"
 
 const message = `
 <DC:ResultedCaseMessage xmlns:DC="http://www.dca.gov.uk/xmlschemas/libra" Flow='ResultedCasesForThePolice' Interface='LibraStandardProsecutorPolice' SchemaVersion='0.6g'>
@@ -14,10 +14,10 @@ const message = `
 </DC:ResultedCaseMessage>
 `
 
-describe("formatMessage", () => {
+describe("formatMessageXml()", () => {
   let xml: DeliveryMessage
   beforeAll(async () => {
-    const formattedMessage = formatMessage(message)
+    const formattedMessage = formatMessageXml(message)
     xml = await parseXml<DeliveryMessage>(formattedMessage)
   })
 
