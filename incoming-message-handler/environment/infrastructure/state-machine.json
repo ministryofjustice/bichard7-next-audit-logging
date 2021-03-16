@@ -5,11 +5,11 @@
     "OriginalLambda": {
       "Type": "Task",
       "Resource": "{ORIGINAL_LAMBDA_ARN}",
-      "Next": "Read Message"
+      "Next": "Parse Message"
     },
-    "Read Message": {
+    "Parse Message": {
       "Type": "Task",
-      "Resource": "{READ_MESSAGE_LAMBDA_ARN}",
+      "Resource": "{PARSE_MESSAGE_LAMBDA_ARN}",
       "Next": "Log Message Receipt"
     },
     "Log Message Receipt": {

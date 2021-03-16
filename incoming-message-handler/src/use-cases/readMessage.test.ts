@@ -3,7 +3,7 @@ import format from "xml-formatter"
 import { isError } from "@handlers/common"
 import ApplicationError from "../errors/ApplicationError"
 import readMessage from "./readMessage"
-import { MessageData } from "../entities"
+import { IncomingMessage } from "../entities"
 
 const formatXml = (xml: string): string =>
   format(xml, {
@@ -34,11 +34,11 @@ const expectedMessage = formatXml(`
 
 describe("handleMessage", () => {
   it("should read the message and return the message data", async () => {
-    const result = (await readMessage(expectedMessage)) as MessageData
-    const { messageId, caseId, rawXml } = result
+    const result = (await readMessage(expectedMessage)) as IncomingMessage
+    const { messageId, caseId, messageXml } = result
 
     expect(messageId).toBe(expectedMessageId)
-    expect(rawXml).toBe(expectedMessage)
+    expect(messageXml).toBe(expectedMessage)
     expect(caseId).toEqual(expectedCaseId)
   })
 

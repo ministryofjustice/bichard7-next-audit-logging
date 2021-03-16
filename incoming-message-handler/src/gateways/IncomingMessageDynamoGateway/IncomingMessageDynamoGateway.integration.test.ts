@@ -21,7 +21,7 @@ describe("IncomingMessageDynamoGateway", () => {
 
   describe("create()", () => {
     it("should insert the given message", async () => {
-      const expectedMessage = new IncomingMessage("ExpectedMessage", new Date())
+      const expectedMessage = new IncomingMessage("ExpectedMessage", new Date(), "XML")
 
       const result = await gateway.create(expectedMessage)
 
@@ -30,10 +30,11 @@ describe("IncomingMessageDynamoGateway", () => {
       const actualMessage = <IncomingMessage>result
       expect(actualMessage.messageId).toBe(expectedMessage.messageId)
       expect(actualMessage.receivedDate).toBe(expectedMessage.receivedDate)
+      expect(actualMessage.messageXml).toBe(expectedMessage.messageXml)
     })
 
     it("should return an error when the given message already exists", async () => {
-      const message = new IncomingMessage("one", new Date())
+      const message = new IncomingMessage("one", new Date(), "XML")
       await gateway.create(message)
 
       const result = await gateway.create(message)

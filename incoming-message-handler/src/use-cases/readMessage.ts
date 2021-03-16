@@ -1,5 +1,5 @@
 import { isError, PromiseResult, Result } from "@handlers/common"
-import { DeliveryMessage, MessageData } from "../entities"
+import { DeliveryMessage, IncomingMessage } from "../entities"
 import { parseXml } from "../utils/xml"
 import ApplicationError from "../errors/ApplicationError"
 
@@ -29,8 +29,8 @@ const getMessageId = (xml: DeliveryMessage): Result<string> => {
   return messageId.trim()
 }
 
-const readMessage = async (message: string): PromiseResult<MessageData> => {
-  const xml = await parseXml<DeliveryMessage>(message).catch((err) => <Error>err)
+const readMessage = async (message: string): PromiseResult<IncomingMessage> => {
+  const xml = await parseXml<DeliveryMessage>(message).catch((error) => <Error>error)
 
   if (isError(xml)) {
     return new ApplicationError("Failed to parse XML", xml)
@@ -48,13 +48,11 @@ const readMessage = async (message: string): PromiseResult<MessageData> => {
     return caseId
   }
 
-  const messageData: MessageData = {
-    messageId,
-    caseId,
-    rawXml: message
-  }
+  // TODO: Read received date from S3 path.
+  const incomingMessage = new IncomingMessage(messageId, new Date(), message)
+  incomingMessage.caseId = caseId
 
-  return messageData
+  return incomingMessage
 }
 
 export default readMessage

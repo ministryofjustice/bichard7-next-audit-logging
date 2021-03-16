@@ -1,11 +1,9 @@
-import { isError, PromiseResult } from "@handlers/common"
+import { PromiseResult } from "@handlers/common"
 import { clean, hasRootElement } from "../utils/xml"
-import { IncomingMessage } from "../entities"
 import formatMessage from "./formatMessage"
-import readMessage from "./readMessage"
 
 export default class HandleMessageUseCase {
-  async handle(messageBody: string): PromiseResult<IncomingMessage> {
+  async handle(messageBody: string): PromiseResult<string> {
     console.log(this)
 
     let formattedMessage = messageBody
@@ -15,12 +13,6 @@ export default class HandleMessageUseCase {
       formattedMessage = formatMessage(clean(messageBody))
     }
 
-    const messageData = await readMessage(formattedMessage)
-    if (isError(messageData)) {
-      return messageData
-    }
-
-    const incomingMessage = new IncomingMessage(messageData.messageId, new Date(), messageData.rawXml)
-    return incomingMessage
+    return formattedMessage
   }
 }
