@@ -87,7 +87,7 @@ SEND_TO_BICHARD_ARN=$( \
   jq ".[] | map(select(.FunctionName == \"SendToBichard\"))" | \
   jq ".[0].FunctionArn" -r)
 
-TEMP_STATE_MACHINE_CONFIG_FILE=/tmp/state-machine.json
+TEMP_STATE_MACHINE_CONFIG_FILE=./state-machine.tmp.json
 cat $INFRA_PATH/state-machine.json | \
   sed -e "s/{ORIGINAL_LAMBDA_ARN}/$ORIGINAL_LAMBDA_ARN/g" | \
   sed -e "s/{LOG_MESSAGE_RECEIPT_LAMBDA_ARN}/$LOG_MESSAGE_RECEIPT_LAMBDA_ARN/g" | \

@@ -22,7 +22,7 @@ S3_MESSAGE_PATH=$RECEIVED_DATE/$MESSAGE_ID.xml
 ESCAPED_MESSAGE_PATH=$(echo $S3_MESSAGE_PATH | sed -e "s/\///g")
 
 function store_file_in_s3 {
-  TMP_MSG=/tmp/message.xml
+  TMP_MSG=./message.tmp.xml
   
   cat $MESSAGE_PATH | sed "s/{MESSAGE_ID}/$MESSAGE_ID/g" > $TMP_MSG
   awslocal s3 cp $TMP_MSG s3://$BUCKET_NAME/$S3_MESSAGE_PATH
@@ -37,7 +37,7 @@ function trigger_state_machine {
     jq ".[] | map(select(.FunctionName == \""$LAMBDA_NAME"\"))" | \
     jq ".[0].FunctionArn" | sed -e "s/\"//g")
 
-  TMP_PATH=/tmp/event.json
+  TMP_PATH=./event.tmp.json
   cat $CWD/scripts/s3-putobject-event.json | \
     sed 's,{BUCKET_NAME},'"$BUCKET_NAME"',g' | \
     sed 's,{OBJECT_KEY},'"$S3_MESSAGE_PATH"',g' > $TMP_PATH
