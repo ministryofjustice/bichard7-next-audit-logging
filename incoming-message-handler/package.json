@@ -29,9 +29,9 @@
   },
   "scripts": {
     "build": "rimraf build && webpack --config ./.webpack/webpack.prod.js",
-    "build-dev": "rimraf build && webpack --config ./.webpack/webpack.dev.js",
+    "build:dev": "rimraf build && webpack --config ./.webpack/webpack.dev.js",
     "postbuild": "./scripts/postbuild.sh",
-    "postbuild-dev": "./scripts/postbuild.sh",
+    "postbuild:dev": "./scripts/postbuild.sh",
     "test": "./environment/setup.sh && ./scripts/test.sh",
     "test:unit": "./scripts/test.sh unit",
     "test:integration": "./environment/setup.sh && ./scripts/test.sh integration",
