@@ -1,18 +1,13 @@
 import { isError } from "@handlers/common"
-import { createDynamoDbConfig, createS3Config } from "./configs"
+import { createS3Config } from "./configs"
 import { IncomingMessage, S3PutObjectEvent } from "./entities"
-import IncomingMessageDynamoGateway from "./gateways/IncomingMessageDynamoGateway"
 import S3Gateway from "./gateways/S3Gateway"
-import PersistMessageUseCase from "./use-cases/PersistMessageUseCase"
 import HandleMessageUseCase from "./use-cases/HandleMessageUseCase"
-
-const incomingMessageGateway = new IncomingMessageDynamoGateway(createDynamoDbConfig(), "IncomingMessage")
-const persistMessage = new PersistMessageUseCase(incomingMessageGateway)
 
 const s3Config = createS3Config()
 const s3Gateway = new S3Gateway(s3Config)
 
-const handleMessage = new HandleMessageUseCase(persistMessage)
+const handleMessage = new HandleMessageUseCase()
 
 // eslint-disable-next-line import/prefer-default-export
 export const sendMessage = async (event: S3PutObjectEvent): Promise<IncomingMessage> => {
