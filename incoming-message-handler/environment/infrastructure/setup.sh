@@ -42,6 +42,7 @@ function create_lambda {
 
 # Create the lambda function
 create_lambda "IncomingMessageHandler" "index.sendMessage"
+create_lambda "ReadMessage" "readMessage.default"
 create_lambda "LogMessageReceipt" "logMessageReceipt.default"
 create_lambda "SendToBichard" "sendToBichard.default"
 
@@ -77,6 +78,11 @@ ORIGINAL_LAMBDA_ARN=$( \
   jq ".[] | map(select(.FunctionName == \"IncomingMessageHandler\"))" | \
   jq ".[0].FunctionArn" -r)
 
+READ_MESSAGE_LAMBDA_ARN=$( \
+  awslocal lambda list-functions | \
+  jq ".[] | map(select(.FunctionName == \"ReadMessage\"))" | \
+  jq ".[0].FunctionArn" -r)
+
 LOG_MESSAGE_RECEIPT_LAMBDA_ARN=$( \
   awslocal lambda list-functions | \
   jq ".[] | map(select(.FunctionName == \"LogMessageReceipt\"))" | \
@@ -90,6 +96,7 @@ SEND_TO_BICHARD_ARN=$( \
 TEMP_STATE_MACHINE_CONFIG_FILE=/tmp/state-machine.json
 cat $INFRA_PATH/state-machine.json | \
   sed -e "s/{ORIGINAL_LAMBDA_ARN}/$ORIGINAL_LAMBDA_ARN/g" | \
+  sed -e "s/{READ_MESSAGE_LAMBDA_ARN}/$READ_MESSAGE_LAMBDA_ARN/g" | \
   sed -e "s/{LOG_MESSAGE_RECEIPT_LAMBDA_ARN}/$LOG_MESSAGE_RECEIPT_LAMBDA_ARN/g" | \
   sed -e "s/{SEND_TO_BICHARD_ARN}/$SEND_TO_BICHARD_ARN/g" \
   > $TEMP_STATE_MACHINE_CONFIG_FILE
