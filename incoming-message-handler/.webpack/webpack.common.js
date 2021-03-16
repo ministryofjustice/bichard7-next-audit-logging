@@ -2,14 +2,20 @@ const path = require("path")
 const ForkTsCheckerWebpackPlugin = require("fork-ts-checker-webpack-plugin")
 
 module.exports = {
-  entry: "./src/index.ts",
+  entry: {
+    index: "./src/index.ts",
+    formatMessage: "./src/formatMessage.ts",
+    parseMessage: "./src/parseMessage.ts",
+    logMessageReceipt: "./src/logMessageReceipt.ts",
+    sendToBichard: "./src/sendToBichard.ts"
+  },
   resolve: {
     extensions: [".js", ".json", ".ts"]
   },
   output: {
     libraryTarget: "commonjs",
     path: path.join(__dirname, "..", "build"),
-    filename: "index.js"
+    filename: "[name].js"
   },
   target: "node",
   module: {
@@ -20,12 +26,12 @@ module.exports = {
         use: {
           loader: "babel-loader",
           options: {
-            "presets": [
+            presets: [
               [
                 "@babel/preset-env",
                 {
-                  "targets": {
-                    "node": "14"
+                  targets: {
+                    node: "14"
                   }
                 }
               ],
@@ -33,7 +39,6 @@ module.exports = {
             ]
           }
         }
-        
       }
     ]
   },
