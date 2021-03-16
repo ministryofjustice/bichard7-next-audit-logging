@@ -1,7 +1,7 @@
 import { isError } from "@handlers/common"
-import { createS3Config } from "./configs"
-import { S3PutObjectEvent, ReceivedMessage } from "./entities"
-import S3Gateway from "./gateways/S3Gateway"
+import { createS3Config } from "../configs"
+import { S3PutObjectEvent, ReceivedMessage } from "../entities"
+import S3Gateway from "../gateways/S3Gateway"
 
 const s3Gateway = new S3Gateway(createS3Config())
 

@@ -1,8 +1,8 @@
 import { isError } from "@handlers/common"
-import { createMqConfig } from "./configs"
-import { IncomingMessage } from "./entities"
-import MqGateway from "./gateways/MqGateway"
-import SendMessageUseCase from "./use-cases/SendMessageUseCase"
+import { createMqConfig } from "../configs"
+import { IncomingMessage } from "../entities"
+import MqGateway from "../gateways/MqGateway"
+import SendMessageUseCase from "../use-cases/SendMessageUseCase"
 
 const gateway = new MqGateway(createMqConfig())
 const sendMessageUseCase = new SendMessageUseCase(gateway)

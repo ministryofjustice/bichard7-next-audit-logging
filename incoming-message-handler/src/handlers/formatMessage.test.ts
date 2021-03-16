@@ -1,6 +1,6 @@
-import { ReceivedMessage } from "./entities"
+import { ReceivedMessage } from "../entities"
 import formatMessage from "./formatMessage"
-import { hasRootElement } from "./utils/xml"
+import { hasRootElement } from "../utils/xml"
 
 const unformattedMessage = `
 <DC:ResultedCaseMessage xmlns:DC="http://www.dca.gov.uk/xmlschemas/libra" Flow='ResultedCasesForThePolice' Interface='LibraStandardProsecutorPolice' SchemaVersion='0.6g'>
