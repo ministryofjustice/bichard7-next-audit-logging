@@ -1,8 +1,5 @@
 #!/bin/bash
 
-echo "Building the debug image..."
-sam build
-
 echo "Starting AWS SAM CLI..."
 TMPVARS=/tmp/incoming-message-handler.vars
 

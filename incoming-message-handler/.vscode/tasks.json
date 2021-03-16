@@ -3,7 +3,7 @@
   "tasks": [
     {
       "type": "npm",
-      "script": "build",
+      "script": "build-dev",
       "problemMatcher": ["$eslint-compact"],
       "group": {
         "kind": "build",
@@ -15,11 +15,13 @@
     {
       "label": "startDebugging",
       "dependsOn": "build",
-      "command": "scripts/start-debugging.sh"
+      "command": "./environment/setup.sh && scripts/start-debugging.sh",
+      "type": "shell"
     },
     {
       "label": "stopDebugging",
-      "command": "scripts/stop-debugging.sh"
+      "command": "scripts/stop-debugging.sh",
+      "type": "shell"
     }
   ]
 }
