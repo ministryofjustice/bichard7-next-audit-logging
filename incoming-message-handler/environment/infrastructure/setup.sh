@@ -41,7 +41,7 @@ function create_lambda {
 }
 
 # Create the lambda function
-create_lambda "IncomingMessageHandler" "index.sendMessage"
+create_lambda "RetrieveFromS3" "retrieveFromS3.default"
 create_lambda "FormatMessage" "formatMessage.default"
 create_lambda "ParseMessage" "parseMessage.default"
 create_lambda "LogMessageReceipt" "logMessageReceipt.default"
@@ -74,9 +74,9 @@ fi
 awslocal s3 mb s3://incoming-messages
 
 # Setup the Step Function state machine to trigger our Lambda
-ORIGINAL_LAMBDA_ARN=$( \
+RETRIEVE_FROM_S3_LAMBDA_ARN=$( \
   awslocal lambda list-functions | \
-  jq ".[] | map(select(.FunctionName == \"IncomingMessageHandler\"))" | \
+  jq ".[] | map(select(.FunctionName == \"RetrieveFromS3\"))" | \
   jq ".[0].FunctionArn" -r)
 
 FORMAT_MESSAGE_LAMBDA_ARN=$( \
@@ -101,7 +101,7 @@ SEND_TO_BICHARD_ARN=$( \
 
 TEMP_STATE_MACHINE_CONFIG_FILE=./state-machine.tmp.json
 cat $INFRA_PATH/state-machine.json | \
-  sed -e "s/{ORIGINAL_LAMBDA_ARN}/$ORIGINAL_LAMBDA_ARN/g" | \
+  sed -e "s/{RETRIEVE_FROM_S3_LAMBDA_ARN}/$RETRIEVE_FROM_S3_LAMBDA_ARN/g" | \
   sed -e "s/{FORMAT_MESSAGE_LAMBDA_ARN}/$FORMAT_MESSAGE_LAMBDA_ARN/g" | \
   sed -e "s/{PARSE_MESSAGE_LAMBDA_ARN}/$PARSE_MESSAGE_LAMBDA_ARN/g" | \
   sed -e "s/{LOG_MESSAGE_RECEIPT_LAMBDA_ARN}/$LOG_MESSAGE_RECEIPT_LAMBDA_ARN/g" | \

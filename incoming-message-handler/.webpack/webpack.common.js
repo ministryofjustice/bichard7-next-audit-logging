@@ -3,7 +3,7 @@ const ForkTsCheckerWebpackPlugin = require("fork-ts-checker-webpack-plugin")
 
 module.exports = {
   entry: {
-    index: "./src/index.ts",
+    retrieveFromS3: "./src/retrieveFromS3.ts",
     formatMessage: "./src/formatMessage.ts",
     parseMessage: "./src/parseMessage.ts",
     logMessageReceipt: "./src/logMessageReceipt.ts",
