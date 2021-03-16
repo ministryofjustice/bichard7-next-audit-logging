@@ -1,6 +1,6 @@
 import { PromiseResult } from "@handlers/common"
 import { clean, hasRootElement } from "../utils/xml"
-import formatMessage from "./formatMessage"
+import formatMessage from "./formatMessageXml"
 
 export default class HandleMessageUseCase {
   async handle(messageBody: string): PromiseResult<string> {
