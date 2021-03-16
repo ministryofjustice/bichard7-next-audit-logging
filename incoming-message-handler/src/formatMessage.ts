@@ -1,5 +1,13 @@
-export default async function formatMessage(event: string): Promise<string> {
-  await Promise.resolve()
+import formatMessageXml from "./use-cases/formatMessageXml"
+import { clean, hasRootElement } from "./utils/xml"
 
-  return event
+export default async function formatMessage(event: string): Promise<string> {
+  let formattedMessage = event
+
+  const hasDeliveryElement = await hasRootElement(formattedMessage, "DeliverRequest")
+  if (!hasDeliveryElement) {
+    formattedMessage = formatMessageXml(clean(formattedMessage))
+  }
+
+  return formattedMessage
 }
