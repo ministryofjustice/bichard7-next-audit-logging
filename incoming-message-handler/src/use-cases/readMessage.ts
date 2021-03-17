@@ -30,7 +30,7 @@ const getMessageId = (xml: DeliveryMessage): Result<string> => {
 }
 
 const readMessage = async (message: ReceivedMessage): PromiseResult<IncomingMessage> => {
-  const xml = await parseXml<DeliveryMessage>(message.messageXml).catch((error: any) => <Error>error)
+  const xml = await parseXml<DeliveryMessage>(message.messageXml).catch((error: Error) => error)
 
   if (isError(xml)) {
     return new ApplicationError("Failed to parse XML", xml)
