@@ -1,26 +1,6 @@
 {
   "configurations": [
     {
-      "name": "Launch Lambda in Debug Mode",
-      "type": "node",
-      "request": "attach",
-      "address": "localhost",
-      "port": 9999,
-      "localRoot": "${workspaceRoot}/build",
-      "remoteRoot": "/var/task",
-      "protocol": "inspector",
-      "stopOnEntry": false,
-      "outFiles": ["${workspaceFolder}/build/**/*.js"],
-      "preLaunchTask": "startDebugging",
-      "postDebugTask": "stopDebugging",
-      "smartStep": true,
-      "skipFiles": [
-        "<node_internals>/**/*.js",
-        "${workspaceFolder}/node_modules/**/*.js",
-        "${workspaceRoot}/node_modules/**/*.js"
-      ]
-    },
-    {
       "type": "node",
       "name": "vscode-jest-tests",
       "request": "launch",
