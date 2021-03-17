@@ -1,6 +1,6 @@
 import { PromiseResult } from "@handlers/common"
 import { DocumentClient } from "aws-sdk/clients/dynamodb"
-import { DynamoDbConfig } from "../../configs"
+import { DynamoDbConfig } from "src/configs"
 
 export default class DynamoGateway {
   private readonly documentClient: DocumentClient

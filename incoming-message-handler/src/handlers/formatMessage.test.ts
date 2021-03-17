@@ -1,5 +1,6 @@
+import { ReceivedMessage } from "../entities"
 import formatMessage from "./formatMessage"
-import { hasRootElement } from "./utils/xml"
+import { hasRootElement } from "../utils/xml"
 
 const unformattedMessage = `
 <DC:ResultedCaseMessage xmlns:DC="http://www.dca.gov.uk/xmlschemas/libra" Flow='ResultedCasesForThePolice' Interface='LibraStandardProsecutorPolice' SchemaVersion='0.6g'>
@@ -25,16 +26,29 @@ const formattedMessage = `
 
 describe("formatMessage()", () => {
   it("should not format the message when it is already formatted", async () => {
-    const actualMessage = await formatMessage(formattedMessage)
+    const expectedMessage: ReceivedMessage = {
+      receivedDate: new Date(),
+      messageXml: formattedMessage
+    }
 
-    expect(actualMessage).toBe(formattedMessage)
+    const actualMessage = await formatMessage(expectedMessage)
+
+    expect(actualMessage.receivedDate).toBe(expectedMessage.receivedDate)
+    expect(actualMessage.messageXml).toBe(expectedMessage.messageXml)
   })
 
   it("should format the message when it is not already formatted", async () => {
-    const actualMessage = await formatMessage(unformattedMessage)
-    const isFormatted = await hasRootElement(actualMessage, "DeliverRequest")
+    const expectedMessage: ReceivedMessage = {
+      receivedDate: new Date(),
+      messageXml: unformattedMessage
+    }
 
-    expect(actualMessage).toContain(unformattedMessage)
+    const actualMessage = await formatMessage(expectedMessage)
+
+    expect(actualMessage.receivedDate).toBe(expectedMessage.receivedDate)
+    expect(actualMessage.messageXml).toContain(unformattedMessage)
+
+    const isFormatted = await hasRootElement(actualMessage.messageXml, "DeliverRequest")
     expect(isFormatted).toBe(true)
   })
 })

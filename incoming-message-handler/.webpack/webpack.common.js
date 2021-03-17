@@ -3,13 +3,14 @@ const ForkTsCheckerWebpackPlugin = require("fork-ts-checker-webpack-plugin")
 
 module.exports = {
   entry: {
-    index: "./src/index.ts",
-    formatMessage: "./src/formatMessage.ts",
-    parseMessage: "./src/parseMessage.ts",
-    logMessageReceipt: "./src/logMessageReceipt.ts",
-    sendToBichard: "./src/sendToBichard.ts"
+    retrieveFromS3: "./src/handlers/retrieveFromS3.ts",
+    formatMessage: "./src/handlers/formatMessage.ts",
+    parseMessage: "./src/handlers/parseMessage.ts",
+    logMessageReceipt: "./src/handlers/logMessageReceipt.ts",
+    sendToBichard: "./src/handlers/sendToBichard.ts"
   },
   resolve: {
+    modules: [path.resolve("./node_modules"), path.resolve(".")],
     extensions: [".js", ".json", ".ts"]
   },
   output: {

@@ -3,7 +3,7 @@ import format from "xml-formatter"
 import { isError } from "@handlers/common"
 import ApplicationError from "../errors/ApplicationError"
 import readMessage from "./readMessage"
-import { IncomingMessage } from "../entities"
+import { IncomingMessage, ReceivedMessage } from "../entities"
 
 const formatXml = (xml: string): string =>
   format(xml, {
@@ -32,9 +32,16 @@ const expectedMessage = formatXml(`
 </DeliverRequest>
 `)
 
+const message: ReceivedMessage = {
+  receivedDate: new Date(),
+  messageXml: ""
+}
+
 describe("handleMessage", () => {
   it("should read the message and return the message data", async () => {
-    const result = (await readMessage(expectedMessage)) as IncomingMessage
+    message.messageXml = expectedMessage
+
+    const result = (await readMessage(message)) as IncomingMessage
     const { messageId, caseId, messageXml } = result
 
     expect(messageId).toBe(expectedMessageId)
@@ -43,7 +50,9 @@ describe("handleMessage", () => {
   })
 
   it("should handle invalid xml", async () => {
-    const result = await readMessage("Invalid xml")
+    message.messageXml = "Invalid xml"
+
+    const result = await readMessage(message)
 
     const applicationError = <ApplicationError>result
     expect(isError(result)).toBe(true)
@@ -52,16 +61,18 @@ describe("handleMessage", () => {
   })
 
   it("should handle missing message id error", async () => {
-    const messageWithNoId = expectedMessage.replace(/<msg:MessageIdentifier>.+?<\/msg:MessageIdentifier>/s, "")
-    const result = await readMessage(messageWithNoId)
+    message.messageXml = expectedMessage.replace(/<msg:MessageIdentifier>.+?<\/msg:MessageIdentifier>/s, "")
+
+    const result = await readMessage(message)
 
     expect(isError(result)).toBe(true)
     expect((<Error>result).message).toEqual("Message Id cannot be found")
   })
 
   it("should handle missing case id error", async () => {
-    const messageWithNoCaseId = expectedMessage.replace(/<DC:PTIURN>.+?<\/DC:PTIURN>/s, "")
-    const result = await readMessage(messageWithNoCaseId)
+    message.messageXml = expectedMessage.replace(/<DC:PTIURN>.+?<\/DC:PTIURN>/s, "")
+
+    const result = await readMessage(message)
 
     expect(isError(result)).toBe(true)
     expect((<Error>result).message).toEqual("Case Id cannot be found")

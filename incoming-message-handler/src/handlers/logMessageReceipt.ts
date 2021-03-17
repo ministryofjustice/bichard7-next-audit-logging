@@ -1,8 +1,8 @@
 import { isError } from "@handlers/common"
-import { createDynamoDbConfig } from "./configs"
-import { IncomingMessage } from "./entities"
-import IncomingMessageDynamoGateway from "./gateways/IncomingMessageDynamoGateway"
-import PersistMessageUseCase from "./use-cases/PersistMessageUseCase"
+import { createDynamoDbConfig } from "src/configs"
+import { IncomingMessage } from "src/entities"
+import IncomingMessageDynamoGateway from "src/gateways/IncomingMessageDynamoGateway"
+import PersistMessageUseCase from "src/use-cases/PersistMessageUseCase"
 
 const incomingMessageGateway = new IncomingMessageDynamoGateway(createDynamoDbConfig(), "IncomingMessage")
 const persistMessage = new PersistMessageUseCase(incomingMessageGateway)

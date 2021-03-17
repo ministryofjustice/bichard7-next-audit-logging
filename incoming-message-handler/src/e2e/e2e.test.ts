@@ -12,6 +12,7 @@ jest.setTimeout(30000)
 const formatXml = (xml: string): string => format(xml, { indentation: "  " })
 
 const expectedMessageId = uuid()
+const expectedCaseId = "41BP0510007"
 const expectedMessage = formatXml(
   `
 <?xml version="1.0" encoding="UTF-8"?>
@@ -22,7 +23,7 @@ const expectedMessage = formatXml(
       <DC:Session>
         <DC:Case>
           <DC:PTIURN>
-            41BP0510007
+            ${expectedCaseId}
           </DC:PTIURN>
         </DC:Case>
       </DC:Session>
@@ -63,16 +64,17 @@ const waitFor = (milliseconds: number): Promise<void> =>
 
 describe("integration tests", () => {
   beforeEach(async () => {
+    await mq.clearQueue()
     await dynamoGateway.deleteAll("IncomingMessage", "messageId")
     await s3Gateway.deleteAll()
   })
 
   it("should receive a message on the target queue when the message is sent to the AWS SQS queue", async () => {
     const fileName = `2021/03/15/12/28/${expectedMessageId}.xml`
+    const expectedReceivedDate = new Date(2021, 2 /* March */, 15, 12, 28)
 
-    await mq.clearQueue()
     await simulator.start(fileName, expectedMessage)
-    await waitFor(3000)
+    await waitFor(5000)
 
     // Check the message is in the database
     const persistedMessages = await dynamoGateway.getAll("IncomingMessage")
@@ -80,6 +82,10 @@ describe("integration tests", () => {
 
     const persistedMessage = <IncomingMessage>persistedMessages.Items[0]
     expect(persistedMessage.messageId).toBe(expectedMessageId)
+    expect(persistedMessage.caseId).toBe(expectedCaseId)
+
+    // Received date will be a string as we currently pull it straight from the database without parsing
+    expect(persistedMessage.receivedDate).toBe(expectedReceivedDate.toISOString())
 
     const actualMessage = await mq.getMessage()
     expect(isError(actualMessage)).toBe(false)
