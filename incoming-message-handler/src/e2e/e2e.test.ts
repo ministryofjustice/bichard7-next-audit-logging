@@ -2,7 +2,7 @@ import { v4 as uuid } from "uuid"
 import format from "xml-formatter"
 import { isError } from "@handlers/common"
 import TestDynamoGateway from "../gateways/DynamoGateway/TestDynamoGateway"
-import { IncomingMessage } from "../entities"
+import { AuditLog } from "../entities"
 import IncomingMessageSimulator from "./IncomingMessageSimulator"
 import IbmMqService from "./IbmMqService"
 import TestS3Gateway from "../gateways/S3Gateway/TestS3Gateway"
@@ -65,7 +65,7 @@ const waitFor = (milliseconds: number): Promise<void> =>
 describe("integration tests", () => {
   beforeEach(async () => {
     await mq.clearQueue()
-    await dynamoGateway.deleteAll("IncomingMessage", "messageId")
+    await dynamoGateway.deleteAll("AuditLog", "messageId")
     await s3Gateway.deleteAll()
   })
 
@@ -77,10 +77,10 @@ describe("integration tests", () => {
     await waitFor(5000)
 
     // Check the message is in the database
-    const persistedMessages = await dynamoGateway.getAll("IncomingMessage")
+    const persistedMessages = await dynamoGateway.getAll("AuditLog")
     expect(persistedMessages.Count).toBe(1)
 
-    const persistedMessage = <IncomingMessage>persistedMessages.Items[0]
+    const persistedMessage = <AuditLog>persistedMessages.Items[0]
     expect(persistedMessage.messageId).toBe(expectedMessageId)
     expect(persistedMessage.caseId).toBe(expectedCaseId)
 

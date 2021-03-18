@@ -47,10 +47,10 @@ create_lambda "ParseMessage" "parseMessage.default"
 create_lambda "LogMessageReceipt" "logMessageReceipt.default"
 create_lambda "SendToBichard" "sendToBichard.default"
 
-# Create the DynamoDb table for persisting the IncomingMessage entity
-if [[ -z $(awslocal dynamodb list-tables | grep IncomingMessage) ]]; then
+# Create the DynamoDb table for persisting the AuditLog entity
+if [[ -z $(awslocal dynamodb list-tables | grep AuditLog) ]]; then
   awslocal dynamodb create-table \
-    --table-name IncomingMessage \
+    --table-name AuditLog \
     --attribute-definitions \
       AttributeName=messageId,AttributeType=S \
     --key-schema \

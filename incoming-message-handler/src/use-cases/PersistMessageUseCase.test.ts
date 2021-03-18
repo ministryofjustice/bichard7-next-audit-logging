@@ -1,6 +1,6 @@
 import { isError } from "@handlers/common"
-import { IncomingMessage } from "../entities"
-import IncomingMessageDynamoGateway from "../gateways/IncomingMessageDynamoGateway"
+import { AuditLog } from "../entities"
+import AuditLogDynamoGateway from "../gateways/AuditLogDynamoGateway"
 import { DynamoDbConfig } from "../configs"
 import PersistMessageUseCase from "./PersistMessageUseCase"
 
@@ -9,10 +9,10 @@ const config: DynamoDbConfig = {
   DYNAMO_REGION: "us-east-1"
 }
 
-const gateway = new IncomingMessageDynamoGateway(config, "IncomingMessage")
+const gateway = new AuditLogDynamoGateway(config, "AuditLog")
 const useCase = new PersistMessageUseCase(gateway)
 
-const message = new IncomingMessage("id", new Date(), "XML")
+const message = new AuditLog("id", new Date(), "XML")
 
 describe("PersistMessageUseCase", () => {
   it("should create the message when valid", async () => {
@@ -22,7 +22,7 @@ describe("PersistMessageUseCase", () => {
 
     expect(isError(result)).toBe(false)
 
-    const actualMessage = <IncomingMessage>result
+    const actualMessage = <AuditLog>result
     expect(actualMessage.messageId).toBe(message.messageId)
     expect(actualMessage.receivedDate).toBe(message.receivedDate)
     expect(actualMessage.messageXml).toBe("XML")

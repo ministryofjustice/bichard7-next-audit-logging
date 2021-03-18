@@ -1,4 +1,4 @@
-export default class IncomingMessage {
+export default class AuditLog {
   public caseId: string
 
   constructor(
