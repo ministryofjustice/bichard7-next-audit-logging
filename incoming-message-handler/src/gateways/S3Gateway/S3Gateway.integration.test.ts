@@ -1,5 +1,5 @@
 import { isError } from "@handlers/common"
-import { S3Config } from "../../configs"
+import { S3Config } from "src/configs"
 import TestS3Gateway from "./TestS3Gateway"
 
 const config: S3Config = {

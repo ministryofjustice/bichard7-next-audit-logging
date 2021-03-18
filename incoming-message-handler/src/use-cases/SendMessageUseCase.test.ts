@@ -1,5 +1,5 @@
 import { isError } from "@handlers/common"
-import MqGateway from "../gateways/MqGateway"
+import MqGateway from "src/gateways/MqGateway"
 import SendMessageUseCase from "./SendMessageUseCase"
 
 const gateway = new MqGateway({})
