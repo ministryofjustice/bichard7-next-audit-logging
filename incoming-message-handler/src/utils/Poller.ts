@@ -20,7 +20,7 @@ export default class Poller<T> {
           clearTimeouts([timeoutHandle, ...processHandles])
           resolve(result)
         } else {
-          processHandles.push(setTimeout(process, 1000))
+          processHandles.push(setTimeout(process, 100))
         }
       }
 

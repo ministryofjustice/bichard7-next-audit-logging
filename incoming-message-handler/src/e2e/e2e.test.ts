@@ -6,7 +6,6 @@ import { IncomingMessage } from "src/entities"
 import TestS3Gateway from "src/gateways/S3Gateway/TestS3Gateway"
 import IncomingMessageSimulator from "./IncomingMessageSimulator"
 import IbmMqService from "./IbmMqService"
-import delay from "./delay"
 
 jest.setTimeout(30000)
 
@@ -72,10 +71,9 @@ describe("e2e tests", () => {
     const expectedReceivedDate = new Date(2021, 2 /* March */, 15, 12, 28)
 
     await simulator.start(fileName, expectedMessage)
-    await delay(5000)
 
     // Check the message is in the database
-    const persistedMessages = await dynamoGateway.getAll("IncomingMessage")
+    const persistedMessages = await dynamoGateway.pollForMessages("IncomingMessage", 3000)
     expect(persistedMessages.Count).toBe(1)
 
     const persistedMessage = <IncomingMessage>persistedMessages.Items[0]
@@ -85,8 +83,7 @@ describe("e2e tests", () => {
     // Received date will be a string as we currently pull it straight from the database without parsing
     expect(persistedMessage.receivedDate).toBe(expectedReceivedDate.toISOString())
 
-    // const actualMessage = await mq.getMessage()
-    const actualMessage = await mq.pollForMessage(5000)
+    const actualMessage = await mq.pollForMessage(3000)
     expect(isError(actualMessage)).toBe(false)
     expect(formatXml(<string>actualMessage)).toBe(expectedMessage)
   })
