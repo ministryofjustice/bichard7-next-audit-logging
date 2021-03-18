@@ -1,11 +1,11 @@
 import { v4 as uuid } from "uuid"
 import format from "xml-formatter"
 import { isError } from "@handlers/common"
-import TestDynamoGateway from "../gateways/DynamoGateway/TestDynamoGateway"
-import { IncomingMessage } from "../entities"
+import TestDynamoGateway from "src/gateways/DynamoGateway/TestDynamoGateway"
+import { IncomingMessage } from "src/entities"
+import TestS3Gateway from "src/gateways/S3Gateway/TestS3Gateway"
 import IncomingMessageSimulator from "./IncomingMessageSimulator"
 import IbmMqService from "./IbmMqService"
-import TestS3Gateway from "../gateways/S3Gateway/TestS3Gateway"
 
 jest.setTimeout(30000)
 
@@ -59,25 +59,21 @@ const mq = new IbmMqService({
   MQ_PASSWORD: "passw0rd"
 })
 
-const waitFor = (milliseconds: number): Promise<void> =>
-  new Promise<void>((resolve) => setTimeout(() => resolve(), milliseconds))
-
-describe("integration tests", () => {
+describe("e2e tests", () => {
   beforeEach(async () => {
     await mq.clearQueue()
     await dynamoGateway.deleteAll("IncomingMessage", "messageId")
     await s3Gateway.deleteAll()
   })
 
-  it("should receive a message on the target queue when the message is sent to the AWS SQS queue", async () => {
+  it("should receive a message on the target queue when the message is sent to the S3 bucket", async () => {
     const fileName = `2021/03/15/12/28/${expectedMessageId}.xml`
     const expectedReceivedDate = new Date(2021, 2 /* March */, 15, 12, 28)
 
     await simulator.start(fileName, expectedMessage)
-    await waitFor(5000)
 
     // Check the message is in the database
-    const persistedMessages = await dynamoGateway.getAll("IncomingMessage")
+    const persistedMessages = await dynamoGateway.pollForMessages("IncomingMessage", 3000)
     expect(persistedMessages.Count).toBe(1)
 
     const persistedMessage = <IncomingMessage>persistedMessages.Items[0]
@@ -87,7 +83,7 @@ describe("integration tests", () => {
     // Received date will be a string as we currently pull it straight from the database without parsing
     expect(persistedMessage.receivedDate).toBe(expectedReceivedDate.toISOString())
 
-    const actualMessage = await mq.getMessage()
+    const actualMessage = await mq.pollForMessage(3000)
     expect(isError(actualMessage)).toBe(false)
     expect(formatXml(<string>actualMessage)).toBe(expectedMessage)
   })

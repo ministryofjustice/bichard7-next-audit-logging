@@ -1,9 +1,9 @@
 import { v4 as uuid } from "uuid"
 import format from "xml-formatter"
 import { isError } from "@handlers/common"
-import ApplicationError from "../errors/ApplicationError"
+import ApplicationError from "src/errors/ApplicationError"
+import { IncomingMessage, ReceivedMessage } from "src/entities"
 import readMessage from "./readMessage"
-import { IncomingMessage, ReceivedMessage } from "../entities"
 
 const formatXml = (xml: string): string =>
   format(xml, {

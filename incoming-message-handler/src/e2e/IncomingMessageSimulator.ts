@@ -1,6 +1,6 @@
 import { isError } from "@handlers/common"
 import { StepFunctions } from "aws-sdk"
-import S3Gateway from "../gateways/S3Gateway"
+import S3Gateway from "src/gateways/S3Gateway"
 
 export default class IncomingMessageSimulator {
   private readonly s3Gateway: S3Gateway

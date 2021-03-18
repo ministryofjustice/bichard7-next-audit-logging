@@ -1,7 +1,7 @@
 jest.mock("axios")
 
 import axios from "axios"
-import { MqConfig } from "../configs"
+import { MqConfig } from "src/configs"
 import MqGateway from "./MqGateway"
 
 const env: MqConfig = {

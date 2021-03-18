@@ -1,5 +1,5 @@
 import { isError } from "@handlers/common"
-import { DynamoDbConfig } from "../../configs"
+import { DynamoDbConfig } from "src/configs"
 import TestDynamoGateway from "./TestDynamoGateway"
 
 const config: DynamoDbConfig = {
