@@ -1,13 +1,13 @@
 import { isError } from "@handlers/common"
-import { IncomingMessage, ReceivedMessage } from "src/entities"
+import { AuditLog, ReceivedMessage } from "src/entities"
 import readMessage from "src/use-cases/readMessage"
 
-export default async function parseMessage(event: ReceivedMessage): Promise<IncomingMessage> {
-  const incomingMessage = await readMessage(event)
+export default async function parseMessage(event: ReceivedMessage): Promise<AuditLog> {
+  const auditLog = await readMessage(event)
 
-  if (isError(incomingMessage)) {
-    throw incomingMessage
+  if (isError(auditLog)) {
+    throw auditLog
   }
 
-  return incomingMessage
+  return auditLog
 }

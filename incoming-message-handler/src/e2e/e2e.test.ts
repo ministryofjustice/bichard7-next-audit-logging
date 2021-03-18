@@ -1,8 +1,8 @@
 import { v4 as uuid } from "uuid"
 import format from "xml-formatter"
 import { isError } from "@handlers/common"
+import { AuditLog } from "src/entities"
 import TestDynamoGateway from "src/gateways/DynamoGateway/TestDynamoGateway"
-import { IncomingMessage } from "src/entities"
 import TestS3Gateway from "src/gateways/S3Gateway/TestS3Gateway"
 import IncomingMessageSimulator from "./IncomingMessageSimulator"
 import IbmMqService from "./IbmMqService"
@@ -62,7 +62,7 @@ const mq = new IbmMqService({
 describe("e2e tests", () => {
   beforeEach(async () => {
     await mq.clearQueue()
-    await dynamoGateway.deleteAll("IncomingMessage", "messageId")
+    await dynamoGateway.deleteAll("AuditLog", "messageId")
     await s3Gateway.deleteAll()
   })
 
@@ -73,10 +73,10 @@ describe("e2e tests", () => {
     await simulator.start(fileName, expectedMessage)
 
     // Check the message is in the database
-    const persistedMessages = await dynamoGateway.pollForMessages("IncomingMessage", 3000)
+    const persistedMessages = await dynamoGateway.pollForMessages("AuditLog", 3000)
     expect(persistedMessages.Count).toBe(1)
 
-    const persistedMessage = <IncomingMessage>persistedMessages.Items[0]
+    const persistedMessage = <AuditLog>persistedMessages.Items[0]
     expect(persistedMessage.messageId).toBe(expectedMessageId)
     expect(persistedMessage.caseId).toBe(expectedCaseId)
 

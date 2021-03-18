@@ -1,5 +1,5 @@
 import { isError, PromiseResult, Result } from "@handlers/common"
-import { DeliveryMessage, IncomingMessage, ReceivedMessage } from "src/entities"
+import { DeliveryMessage, AuditLog, ReceivedMessage } from "src/entities"
 import { parseXml } from "src/utils/xml"
 import ApplicationError from "src/errors/ApplicationError"
 
@@ -29,7 +29,7 @@ const getMessageId = (xml: DeliveryMessage): Result<string> => {
   return messageId.trim()
 }
 
-const readMessage = async (message: ReceivedMessage): PromiseResult<IncomingMessage> => {
+const readMessage = async (message: ReceivedMessage): PromiseResult<AuditLog> => {
   const xml = await parseXml<DeliveryMessage>(message.messageXml).catch((error: Error) => error)
 
   if (isError(xml)) {
@@ -48,10 +48,10 @@ const readMessage = async (message: ReceivedMessage): PromiseResult<IncomingMess
     return caseId
   }
 
-  const incomingMessage = new IncomingMessage(messageId, message.receivedDate, message.messageXml)
-  incomingMessage.caseId = caseId
+  const auditLog = new AuditLog(messageId, message.receivedDate, message.messageXml)
+  auditLog.caseId = caseId
 
-  return incomingMessage
+  return auditLog
 }
 
 export default readMessage

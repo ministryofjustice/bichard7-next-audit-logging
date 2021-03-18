@@ -1,13 +1,13 @@
 import { isError } from "@handlers/common"
 import { createDynamoDbConfig } from "src/configs"
-import { IncomingMessage } from "src/entities"
-import IncomingMessageDynamoGateway from "src/gateways/IncomingMessageDynamoGateway"
+import { AuditLog } from "src/entities"
+import AuditLogDynamoGateway from "src/gateways/AuditLogDynamoGateway"
 import PersistMessageUseCase from "src/use-cases/PersistMessageUseCase"
 
-const incomingMessageGateway = new IncomingMessageDynamoGateway(createDynamoDbConfig(), "IncomingMessage")
-const persistMessage = new PersistMessageUseCase(incomingMessageGateway)
+const auditLogGateway = new AuditLogDynamoGateway(createDynamoDbConfig(), "AuditLog")
+const persistMessage = new PersistMessageUseCase(auditLogGateway)
 
-export default async function logMessageReceipt(event: IncomingMessage): Promise<IncomingMessage> {
+export default async function logMessageReceipt(event: AuditLog): Promise<AuditLog> {
   const persistMessageResult = await persistMessage.persist(event)
 
   if (isError(persistMessageResult)) {

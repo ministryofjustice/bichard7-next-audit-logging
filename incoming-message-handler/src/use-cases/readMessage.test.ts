@@ -2,7 +2,7 @@ import { v4 as uuid } from "uuid"
 import format from "xml-formatter"
 import { isError } from "@handlers/common"
 import ApplicationError from "src/errors/ApplicationError"
-import { IncomingMessage, ReceivedMessage } from "src/entities"
+import { AuditLog, ReceivedMessage } from "src/entities"
 import readMessage from "./readMessage"
 
 const formatXml = (xml: string): string =>
@@ -41,7 +41,7 @@ describe("handleMessage", () => {
   it("should read the message and return the message data", async () => {
     message.messageXml = expectedMessage
 
-    const result = (await readMessage(message)) as IncomingMessage
+    const result = (await readMessage(message)) as AuditLog
     const { messageId, caseId, messageXml } = result
 
     expect(messageId).toBe(expectedMessageId)

@@ -1,14 +1,14 @@
 import { isError, PromiseResult } from "@handlers/common"
-import IncomingMessageDynamoGateway from "src/gateways/IncomingMessageDynamoGateway"
-import { IncomingMessage } from "src/entities"
+import AuditLogDynamoGateway from "src/gateways/AuditLogDynamoGateway"
+import { AuditLog } from "src/entities"
 
 const isConditionalExpressionViolationError = (error: Error): boolean =>
   error.message === "The conditional request failed"
 
 export default class PersistMessageUseCase {
-  constructor(private readonly gateway: IncomingMessageDynamoGateway) {}
+  constructor(private readonly gateway: AuditLogDynamoGateway) {}
 
-  async persist(message: IncomingMessage): PromiseResult<IncomingMessage> {
+  async persist(message: AuditLog): PromiseResult<AuditLog> {
     const result = await this.gateway.create(message)
 
     if (isError(result) && isConditionalExpressionViolationError(result)) {
