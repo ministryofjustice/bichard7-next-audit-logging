@@ -1,5 +1,5 @@
-import { DeliveryMessage } from "../entities"
-import { parseXml } from "../utils/xml"
+import { DeliveryMessage } from "src/entities"
+import { parseXml } from "src/utils/xml"
 import formatMessageXml from "./formatMessageXml"
 
 const message = `

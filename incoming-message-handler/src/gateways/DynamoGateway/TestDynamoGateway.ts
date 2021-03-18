@@ -1,7 +1,22 @@
 import { DocumentClient } from "aws-sdk/clients/dynamodb"
+import Poller from "src/utils/Poller"
 import DynamoGateway from "./DynamoGateway"
 
 export default class TestDynamoGateway extends DynamoGateway {
+  pollForMessages(tableName: string, timeout: number): Promise<DocumentClient.ScanOutput> {
+    const poller = new Poller(async () => {
+      const response = await this.getAll(tableName)
+
+      if (!response || response.Count === 0) {
+        return undefined
+      }
+
+      return response
+    })
+
+    return poller.poll(timeout)
+  }
+
   getAll(tableName: string): Promise<DocumentClient.ScanOutput> {
     return this.client
       .scan({

@@ -1,7 +1,7 @@
 import * as https from "https"
 import axios, { AxiosError, AxiosResponse } from "axios"
-import { PromiseResult } from "@handlers/common"
-import { MqConfig } from "../configs"
+import { MqConfig } from "src/configs"
+import Poller from "src/utils/Poller"
 
 const getQueueUrl = (config: MqConfig): string =>
   `https://${config.MQ_USER}:${config.MQ_PASSWORD}@${config.MQ_HOST}:${config.MQ_PORT}/ibmmq/rest/v1/messaging/qmgr/${config.MQ_QUEUE_MANAGER}/queue/${config.MQ_QUEUE}`
@@ -23,39 +23,39 @@ const sendDeleteRequest = (url: string, httpsAgent: any): Promise<AxiosResponse>
 
 export default class IbmMqService {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private httpsAgent: any
+  private readonly httpsAgent: any
 
-  constructor(private config: MqConfig) {
+  constructor(private readonly config: MqConfig) {
     this.httpsAgent = new https.Agent({
       rejectUnauthorized: false
     })
   }
 
-  async getMessage(): PromiseResult<string> {
+  pollForMessage(timeout: number): Promise<string> {
+    const poller = new Poller(() => this.getMessage())
+
+    return poller.poll(timeout)
+  }
+
+  async getMessage(): Promise<string | undefined> {
     const url = `${getQueueUrl(this.config)}/message`
     const response = await sendDeleteRequest(url, this.httpsAgent)
     const content = response && response.data
 
-    if (!content || typeof content !== "string") {
-      return new Error("Response received but no discernible content")
+    if (content && typeof content !== "string") {
+      throw new Error("Response received but no discernible content")
     }
 
     return content
   }
 
-  async clearQueue(): PromiseResult<void> {
+  async clearQueue(): Promise<void> {
     const url = `${getQueueUrl(this.config)}/message`
     let response
 
     do {
-      try {
-        // eslint-disable-next-line no-await-in-loop
-        response = await sendDeleteRequest(url, this.httpsAgent)
-      } catch (error) {
-        return error
-      }
+      // eslint-disable-next-line no-await-in-loop
+      response = await sendDeleteRequest(url, this.httpsAgent)
     } while (!response || response.status !== 204)
-
-    return undefined
   }
 }

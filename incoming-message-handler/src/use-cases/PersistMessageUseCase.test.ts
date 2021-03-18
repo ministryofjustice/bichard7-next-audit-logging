@@ -1,7 +1,7 @@
 import { isError } from "@handlers/common"
-import { AuditLog } from "../entities"
-import AuditLogDynamoGateway from "../gateways/AuditLogDynamoGateway"
-import { DynamoDbConfig } from "../configs"
+import { AuditLog } from "src/entities"
+import AuditLogDynamoGateway from "src/gateways/AuditLogDynamoGateway"
+import { DynamoDbConfig } from "src/configs"
 import PersistMessageUseCase from "./PersistMessageUseCase"
 
 const config: DynamoDbConfig = {
