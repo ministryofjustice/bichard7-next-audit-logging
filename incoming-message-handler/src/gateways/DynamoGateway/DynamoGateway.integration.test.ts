@@ -66,7 +66,7 @@ describe("DynamoGateway", () => {
             id: `Record ${i}`,
             someOtherValue: `Value ${i}`
           }
-          await gateway.insertOne(tableName, record, "id")
+          await gateway.insertOne(tableName, record, "messageId")
         })
       )
     })

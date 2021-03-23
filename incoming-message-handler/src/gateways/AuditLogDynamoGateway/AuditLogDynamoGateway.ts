@@ -1,6 +1,6 @@
 import { isError, PromiseResult } from "@handlers/common"
 import { DynamoDbConfig } from "src/configs"
-import { AuditLog } from "src/entities"
+import { AuditLog, Message } from "src/entities"
 import DynamoGateway from "src/gateways/DynamoGateway"
 
 export default class AuditLogDynamoGateway extends DynamoGateway {
@@ -18,13 +18,13 @@ export default class AuditLogDynamoGateway extends DynamoGateway {
     return message
   }
 
-  async fetchMany(limit = 10): PromiseResult<AuditLog[]> {
+  async fetchMany(limit = 10): PromiseResult<Message[]> {
     const result = await this.getMany(this.tableName, limit)
 
     if (isError(result)) {
       return result
     }
 
-    return <AuditLog[]>result.Items
+    return <Message[]>result.Items
   }
 }

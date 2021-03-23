@@ -1,11 +1,11 @@
 jest.mock("src/use-cases/FetchMessagesUserCase")
 
 import FetchMessagesUseCase from "src/use-cases/FetchMessagesUserCase"
-import { AuditLog } from "src/entities"
+import { Message } from "src/entities"
 import { APIGatewayProxyResult } from "aws-lambda"
 import getMessages from "./getMessages"
 
-const expectedSuccessfulResponse: AuditLog[] = [
+const expectedSuccessfulResponse: Message[] = [
   {
     messageId: "1",
     caseId: "123",

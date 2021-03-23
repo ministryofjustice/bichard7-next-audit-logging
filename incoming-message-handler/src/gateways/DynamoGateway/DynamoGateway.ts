@@ -30,7 +30,7 @@ export default class DynamoGateway {
       .catch((error) => <Error>error)
   }
 
-  async getMany(tableName: string, limit: number): PromiseResult<DocumentClient.ScanOutput> {
+  getMany(tableName: string, limit: number): PromiseResult<DocumentClient.ScanOutput> {
     return this.client
       .scan({
         TableName: tableName,

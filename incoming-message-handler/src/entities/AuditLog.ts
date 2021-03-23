@@ -4,6 +4,6 @@ export default class AuditLog {
   constructor(
     public readonly messageId: string,
     public readonly receivedDate: Date,
-    public readonly messageXml?: string
+    public readonly messageXml: string
   ) {}
 }
