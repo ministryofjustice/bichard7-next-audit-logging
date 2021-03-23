@@ -45,4 +45,22 @@ describe("AuditLogDynamoGateway", () => {
       expect(actualError.message).toBe("The conditional request failed")
     })
   })
+
+  describe("get()", () => {
+    beforeAll(async () => {
+      Promise.allSettled(
+        [...Array(12).keys()].map(async (i: number) => {
+          const message = new AuditLog(`Message ${i}`, new Date(), "XML")
+          await gateway.create(message)
+        })
+      )
+    })
+
+    it("should return a list of saved messages", async () => {
+      const result = await gateway.fetchMany()
+      const actualMessages = <AuditLog[]>result
+
+      expect(actualMessages.length).toBe(10)
+    })
+  })
 })

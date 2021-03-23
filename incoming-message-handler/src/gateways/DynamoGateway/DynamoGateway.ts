@@ -29,4 +29,14 @@ export default class DynamoGateway {
       .then(() => undefined)
       .catch((error) => <Error>error)
   }
+
+  async getMany(tableName: string, limit: number): PromiseResult<DocumentClient.ScanOutput> {
+    return this.client
+      .scan({
+        TableName: tableName,
+        Limit: limit
+      })
+      .promise()
+      .catch((error) => <Error>error)
+  }
 }

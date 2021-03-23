@@ -17,4 +17,14 @@ export default class AuditLogDynamoGateway extends DynamoGateway {
 
     return message
   }
+
+  async fetchMany(limit = 10): PromiseResult<AuditLog[]> {
+    const result = await this.getMany(this.tableName, limit)
+
+    if (isError(result)) {
+      return result
+    }
+
+    return <AuditLog[]>result.Items
+  }
 }

@@ -46,6 +46,7 @@ create_lambda "FormatMessage" "formatMessage.default"
 create_lambda "ParseMessage" "parseMessage.default"
 create_lambda "LogMessageReceipt" "logMessageReceipt.default"
 create_lambda "SendToBichard" "sendToBichard.default"
+create_lambda "GetMessages" "getMessages.default"
 
 # Create the DynamoDb table for persisting the AuditLog entity
 if [[ -z $(awslocal dynamodb list-tables | grep AuditLog) ]]; then
@@ -99,6 +100,13 @@ SEND_TO_BICHARD_ARN=$( \
   jq ".[] | map(select(.FunctionName == \"SendToBichard\"))" | \
   jq ".[0].FunctionArn" -r)
 
+GET_MESSAGE_API_ARN=$( \
+  awslocal lambda list-functions | \
+  jq ".[] | map(select(.FunctionName == \"GetMessages\"))" | \
+  jq ".[0].FunctionArn" -r)
+
+
+
 TEMP_STATE_MACHINE_CONFIG_FILE=./state-machine.tmp.json
 cat $INFRA_PATH/state-machine.json | \
   sed -e "s/{RETRIEVE_FROM_S3_LAMBDA_ARN}/$RETRIEVE_FROM_S3_LAMBDA_ARN/g" | \
@@ -116,3 +124,60 @@ if [[ -z $(awslocal stepfunctions list-state-machines | grep IncomingMessageHand
 fi
 
 rm $TEMP_STATE_MACHINE_CONFIG_FILE
+
+function create_rest_api {
+  API_NAME=$1
+
+  REGION=us-east-1
+  STAGE=dev
+
+  if [[ -z $(awslocal apigateway get-rest-apis | grep $API_NAME) ]]; then
+    awslocal apigateway create-rest-api \
+        --name ${API_NAME} \
+        --region ${REGION} \
+
+    API_ID=$(awslocal apigateway get-rest-apis --query "items[?name==\`${API_NAME}\`].id" --output text --region ${REGION})
+
+    PARENT_RESOURCE_ID=$(awslocal apigateway get-resources --rest-api-id ${API_ID} --query 'items[?path==`/`].id' --output text --region ${REGION})
+
+    awslocal apigateway create-resource \
+        --region ${REGION} \
+        --rest-api-id ${API_ID} \
+        --parent-id ${PARENT_RESOURCE_ID} \
+        --path-part "{events}"
+
+    RESOURCE_ID=$(awslocal apigateway get-resources --rest-api-id ${API_ID} --query 'items[?path==`/{events}`].id' --output text --region ${REGION})
+
+    awslocal apigateway put-method \
+        --region ${REGION} \
+        --rest-api-id ${API_ID} \
+        --resource-id ${RESOURCE_ID} \
+        --http-method GET \
+        --request-parameters "method.request.path.events=true" \
+        --authorization-type "NONE" \
+
+    awslocal apigateway put-integration \
+        --region ${REGION} \
+        --rest-api-id ${API_ID} \
+        --resource-id ${RESOURCE_ID} \
+        --http-method GET \
+        --type AWS_PROXY \
+        --integration-http-method POST \
+        --uri arn:aws:apigateway:${REGION}:lambda:path/2015-03-31/functions/${GET_MESSAGE_API_ARN}/invocations \
+        --passthrough-behavior WHEN_NO_MATCH \
+
+    awslocal apigateway create-deployment \
+        --region ${REGION} \
+        --rest-api-id ${API_ID} \
+        --stage-name ${STAGE} \
+
+  fi
+
+  API_ID=$(awslocal apigateway get-rest-apis --query "items[?name==\`${API_NAME}\`].id" --output text --region ${REGION})
+  
+  ENDPOINT=http://localhost:4566/restapis/${API_ID}/${STAGE}/_user_request_/messages
+
+  echo "API available at: ${ENDPOINT}"
+
+}
+create_rest_api "GetMessages"

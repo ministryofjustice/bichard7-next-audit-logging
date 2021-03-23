@@ -1,4 +1,5 @@
 import { isError } from "@handlers/common"
+import { DocumentClient } from "aws-sdk/clients/dynamodb"
 import { DynamoDbConfig } from "src/configs"
 import TestDynamoGateway from "./TestDynamoGateway"
 
@@ -53,6 +54,27 @@ describe("DynamoGateway", () => {
 
       const actualRecords = await gateway.getAll(tableName)
       expect(actualRecords.Count).toBe(0)
+    })
+  })
+
+  describe("getAll()", () => {
+    beforeEach(async () => {
+      await gateway.deleteAll(tableName, "id")
+      Promise.allSettled(
+        [...Array(3).keys()].map(async (i: number) => {
+          const record = {
+            id: `Record ${i}`,
+            someOtherValue: `Value ${i}`
+          }
+          await gateway.insertOne(tableName, record, "id")
+        })
+      )
+    })
+
+    it("should return limited amount of records", async () => {
+      const actualRecords = await gateway.getMany(tableName, 1)
+      const results = <DocumentClient.ScanOutput>actualRecords
+      expect(results.Count).toBe(1)
     })
   })
 })
