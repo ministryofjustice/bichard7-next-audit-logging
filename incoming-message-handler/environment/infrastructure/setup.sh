@@ -17,9 +17,6 @@ case $( (uname) | tr '[:upper:]' '[:lower:]') in
 esac
 
 INFRA_PATH=$CWD/environment/infrastructure
-QUEUE_NAME=incoming_message_queue
-DLQ_NAME=incoming_message_dead_letter_queue
-LAMBDA_NAME=IncomingMessageHandler
 
 function create_lambda {
   LAMBDA_NAME=$1
