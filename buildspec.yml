@@ -16,6 +16,8 @@ phases:
 
 artifacts:
   files:
+    - $CODEBUILD_SRC_DIR/test.txt
+    - ./test.txt
     - test.txt
     - incoming-message-handler/build/formatMessage.js
     - incoming-message-handler/build/logMessageReceipt.js
