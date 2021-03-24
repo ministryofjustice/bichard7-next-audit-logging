@@ -11,4 +11,4 @@ phases:
 
 artifacts:
   files:
-    - incoming-message-handler/build/*.js
+    - incoming-message-handler/build/*
