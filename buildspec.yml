@@ -8,19 +8,8 @@ phases:
   build:
     commands:
       - /bin/sh ./scripts/codebuild-build.sh
-      - touch test.txt
-      - ls
-      - ls incoming-message-handler
-      - ls incoming-message-handler/build
-      - echo $CODEBUILD_SRC_DIR
+      - aws s3 sync incoming-message-handler/build/ s3://{S3_BUCKET}/audit-logging --acl bucket-owner-full-control
 
 artifacts:
   files:
-    - $CODEBUILD_SRC_DIR/test.txt
-    - ./test.txt
-    - test.txt
-    - incoming-message-handler/build/formatMessage.js
-    - incoming-message-handler/build/logMessageReceipt.js
-    - incoming-message-handler/build/parseMessage.js
-    - incoming-message-handler/build/retrieveFromS3.js
-    - incoming-message-handler/build/sendToBichard.js
+    - incoming-message-handler/build/*.js
