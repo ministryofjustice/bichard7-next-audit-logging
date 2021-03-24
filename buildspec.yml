@@ -9,6 +9,10 @@ phases:
     commands:
       - /bin/sh ./scripts/codebuild-build.sh
       - touch test.txt
+      - ls
+      - ls incoming-message-handler
+      - ls incoming-message-handler/build
+      - echo $CODEBUILD_SRC_DIR
 
 artifacts:
   files:
