@@ -8,3 +8,7 @@ phases:
   build:
     commands:
       - /bin/sh ./scripts/codebuild-build.sh
+
+artifacts:
+  files:
+    - incoming-message-handler/build/*.js

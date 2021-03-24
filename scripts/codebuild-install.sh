@@ -6,5 +6,5 @@ set -e
 curl -fsSL https://deb.nodesource.com/setup_15.x | bash -
 apt install -y nodejs
 
-echo "Checking NodeJS version... $(node -v)"
-echo "Checking NPM version... $(npm -v)"
+echo "NodeJS version: $(node -v)"
+echo "NPM version: $(npm -v)"
