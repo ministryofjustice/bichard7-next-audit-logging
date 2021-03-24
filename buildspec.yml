@@ -16,3 +16,4 @@ artifacts:
     - incoming-message-handler/build/parseMessage.js
     - incoming-message-handler/build/retrieveFromS3.js
     - incoming-message-handler/build/sendToBichard.js
+  name: audit-logging-artifacts
