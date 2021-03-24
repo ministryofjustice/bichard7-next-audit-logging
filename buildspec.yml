@@ -8,7 +8,7 @@ phases:
   build:
     commands:
       - /bin/sh ./scripts/codebuild-build.sh
-      - aws s3 sync incoming-message-handler/build/ s3://{S3_BUCKET}/audit-logging --acl bucket-owner-full-control
+      - aws s3 sync incoming-message-handler/build/ s3://$S3_BUCKET/audit-logging --acl bucket-owner-full-control
 
 artifacts:
   files:
