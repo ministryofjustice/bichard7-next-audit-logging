@@ -11,8 +11,9 @@ phases:
 
 artifacts:
   files:
-    - "incoming-message-handler/build/formatMessage.js"
-    - "incoming-message-handler/build/logMessageReceipt.js"
-    - "incoming-message-handler/build/parseMessage.js"
-    - "incoming-message-handler/build/retrieveFromS3.js"
-    - "incoming-message-handler/build/sendToBichard.js"
+    - "**/*"
+    - incoming-message-handler/build/formatMessage.js
+    - incoming-message-handler/build/logMessageReceipt.js
+    - incoming-message-handler/build/parseMessage.js
+    - incoming-message-handler/build/retrieveFromS3.js
+    - incoming-message-handler/build/sendToBichard.js
