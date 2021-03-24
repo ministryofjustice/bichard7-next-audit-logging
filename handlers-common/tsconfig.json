@@ -1,12 +1,16 @@
 {
   "extends": "../tsconfig.json",
   "compilerOptions": {
-    "outDir": "dist"
+    "strictNullChecks": false,
+    "outDir": "dist",
+    "types": ["node", "jest"],
+    "sourceMap": true,
+    "baseUrl": ".",
+    "preserveSymlinks": false,
+    "paths": {
+      "src/*": ["src/*"]
+    }
   },
   "compileOnSave": true,
-  "include": ["**/*.ts"],
-  "exclude": ["node_modules", "build"],
-  "paths": {
-    "*": ["node_modules/*"]
-  }
+  "include": ["src/**/*.ts"]
 }
