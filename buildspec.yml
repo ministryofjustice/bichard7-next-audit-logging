@@ -8,10 +8,11 @@ phases:
   build:
     commands:
       - /bin/sh ./scripts/codebuild-build.sh
+      - touch test.txt
 
 artifacts:
   files:
-    - "**/*"
+    - test.txt
     - incoming-message-handler/build/formatMessage.js
     - incoming-message-handler/build/logMessageReceipt.js
     - incoming-message-handler/build/parseMessage.js
