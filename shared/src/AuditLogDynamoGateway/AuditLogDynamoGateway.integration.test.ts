@@ -9,13 +9,14 @@ const config: DynamoDbConfig = {
   DYNAMO_REGION: "us-east-1"
 }
 
-const tableName = "AuditLog"
+const tableName = "TestAuditLog"
 
 const gateway = new AuditLogDynamoGateway(config, tableName)
 const testGateway = new TestDynamoGateway(config)
 
 describe("AuditLogDynamoGateway", () => {
   beforeAll(async () => {
+    await testGateway.createTable(tableName, "messageId")
     await testGateway.deleteAll(tableName, "messageId")
   })
 
@@ -46,25 +47,5 @@ describe("AuditLogDynamoGateway", () => {
     })
   })
 
-  describe("get()", () => {
-    beforeAll(async () => {
-      Promise.allSettled(
-        [...Array(12).keys()].map(async (i: number) => {
-          const message = new AuditLog(`Message ${i}`, new Date(), "XML")
-          await gateway.create(message)
-        })
-      )
-    })
-
-    afterAll(async () => {
-      await testGateway.deleteAll("AuditLog", "messageId")
-    })
-
-    it("should return a list of saved messages", async () => {
-      const result = await gateway.fetchMany()
-      const actualMessages = <AuditLog[]>result
-
-      expect(actualMessages.length).toBe(10)
-    })
-  })
+  // TODO: Proper testing for getting messages. Include date ordering.
 })
