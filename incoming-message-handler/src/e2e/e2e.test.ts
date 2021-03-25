@@ -61,7 +61,7 @@ const mq = new IbmMqService({
 describe("e2e tests", () => {
   beforeEach(async () => {
     await mq.clearQueue()
-    await dynamoGateway.deleteAll("AuditLog", "messageId")
+    await dynamoGateway.deleteAll("audit-log", "messageId")
     await s3Gateway.deleteAll()
   })
 
@@ -72,7 +72,7 @@ describe("e2e tests", () => {
     await simulator.start(fileName, expectedMessage)
 
     // Check the message is in the database
-    const persistedMessages = await dynamoGateway.pollForMessages("AuditLog", 3000)
+    const persistedMessages = await dynamoGateway.pollForMessages("audit-log", 3000)
     expect(persistedMessages.Count).toBe(1)
 
     const persistedMessage = <AuditLog>persistedMessages.Items[0]

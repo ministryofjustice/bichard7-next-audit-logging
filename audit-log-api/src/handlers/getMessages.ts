@@ -3,7 +3,7 @@ import { APIGatewayProxyResult } from "aws-lambda"
 import createDynamoDbConfig from "src/createDynamoDbConfig"
 import FetchMessagesUseCase from "src/use-cases"
 
-const auditLogGateway = new AuditLogDynamoGateway(createDynamoDbConfig(), "AuditLog")
+const auditLogGateway = new AuditLogDynamoGateway(createDynamoDbConfig(), "audit-log")
 const fetchMessages = new FetchMessagesUseCase(auditLogGateway)
 
 export default async function getMessages(): PromiseResult<APIGatewayProxyResult> {

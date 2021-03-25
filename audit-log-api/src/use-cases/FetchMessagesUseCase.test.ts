@@ -6,7 +6,7 @@ const config: DynamoDbConfig = {
   DYNAMO_REGION: "us-east-1"
 }
 
-const gateway = new AuditLogDynamoGateway(config, "AuditLog")
+const gateway = new AuditLogDynamoGateway(config, "audit-log")
 const useCase = new FetchMessagesUseCase(gateway)
 
 describe("FetchMessagesUseCase", () => {
