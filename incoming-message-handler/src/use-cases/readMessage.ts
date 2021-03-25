@@ -1,4 +1,4 @@
-import { isError, PromiseResult, Result } from "@handlers/common"
+import { isError, PromiseResult, Result } from "shared"
 import { DeliveryMessage, AuditLog, ReceivedMessage } from "src/entities"
 import { parseXml } from "src/utils/xml"
 import ApplicationError from "src/errors/ApplicationError"

@@ -1,4 +1,4 @@
-import { PromiseResult } from "@handlers/common"
+import { PromiseResult } from "shared"
 import MqGateway from "src/gateways/MqGateway"
 
 export default class SendMessageUseCase {

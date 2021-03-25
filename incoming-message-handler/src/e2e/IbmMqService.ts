@@ -1,6 +1,6 @@
 import * as https from "https"
 import axios, { AxiosError, AxiosResponse } from "axios"
-import { Poller } from "@handlers/common"
+import { Poller } from "shared"
 import { MqConfig } from "src/configs"
 
 const getQueueUrl = (config: MqConfig): string =>

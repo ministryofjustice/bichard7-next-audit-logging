@@ -1,4 +1,4 @@
-import { isError } from "@handlers/common"
+import { isError } from "shared"
 import { createMqConfig } from "src/configs"
 import { AuditLog } from "src/entities"
 import MqGateway from "src/gateways/MqGateway"

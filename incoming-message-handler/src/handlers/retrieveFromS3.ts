@@ -1,4 +1,4 @@
-import { isError } from "@handlers/common"
+import { isError } from "shared"
 import { createS3Config } from "src/configs"
 import { S3PutObjectEvent, ReceivedMessage } from "src/entities"
 import S3Gateway from "src/gateways/S3Gateway"

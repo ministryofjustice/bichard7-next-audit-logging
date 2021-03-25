@@ -1,4 +1,4 @@
-import { isError } from "@handlers/common"
+import { isError } from "shared"
 import { AuditLog, ReceivedMessage } from "src/entities"
 import readMessage from "src/use-cases/readMessage"
 

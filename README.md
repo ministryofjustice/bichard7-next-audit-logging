@@ -17,7 +17,7 @@ The following requirements must be installed to develop on and run the projects 
 
 This repository currently contains multiple projects to support easy local referencing and development. The future vision is to move some/all of the individual projects out into their own repositories/packages. For more information on what the purpose of each project is, take a look at the README file for each.
 
-1. [Handlers Common](handlers-common/) - local npm library
+1. [Handlers Common](shared/) - local npm library
 2. [Incoming Message Handler](incoming-message-handler/) - AWS Step Functions and Lambdas
 
 ## Development
@@ -26,10 +26,10 @@ This repository currently contains multiple projects to support easy local refer
 
 Since we use shared local modules in these projects, there are some dependencies that denote a build order for dependent projects.
 
-1. `@handlers/common` - Run `npm run build` from within the `handlers-common/` folder. This is a shared module.
+1. `shared` - Run `npm run build` from within the `shared/` folder. This is a shared module.
 2. `incoming-message-handler` - Run `npm run build:dev` from within the `incoming-message-handler/` folder. This is an AWS Lambda project.
 
-> Note: Be sure to run `npm i` before building any project. Also, make sure you build the `@handlers/common` module and then build (or rebuild) the `incoming-message-handler` project, as this will copy across the shared module into the output `build/` directory.
+> Note: Be sure to run `npm i` before building any project. Also, make sure you build the `shared` module and then build (or rebuild) the `incoming-message-handler` project, as this will copy across the shared module into the output `build/` directory.
 
 You will also need to run `npm i` in the root directory to install any local configuration dependencies that manage the repository as a whole, such as Husky for pre-commit handling.
 

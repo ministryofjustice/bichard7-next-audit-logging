@@ -1,4 +1,4 @@
-import { isError, PromiseResult } from "@handlers/common"
+import { isError, PromiseResult } from "shared"
 import AuditLogDynamoGateway from "src/gateways/AuditLogDynamoGateway"
 import { AuditLog } from "src/entities"
 

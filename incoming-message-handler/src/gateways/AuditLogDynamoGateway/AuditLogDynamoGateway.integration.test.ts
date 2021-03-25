@@ -1,5 +1,5 @@
-import { isError } from "@handlers/common"
-import TestDynamoGateway from "@handlers/common/dist/DynamoGateway/TestDynamoGateway"
+import { isError } from "shared"
+import TestDynamoGateway from "shared/dist/DynamoGateway/TestDynamoGateway"
 import { DynamoDbConfig } from "src/configs"
 import { AuditLog } from "src/entities"
 import AuditLogDynamoGateway from "./AuditLogDynamoGateway"

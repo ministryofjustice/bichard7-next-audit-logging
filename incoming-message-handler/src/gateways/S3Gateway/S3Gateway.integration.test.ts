@@ -1,4 +1,4 @@
-import { isError } from "@handlers/common"
+import { isError } from "shared"
 import { S3Config } from "src/configs"
 import TestS3Gateway from "./TestS3Gateway"
 

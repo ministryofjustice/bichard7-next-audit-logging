@@ -1,4 +1,4 @@
-import { isError } from "@handlers/common"
+import { isError } from "shared"
 import { createDynamoDbConfig } from "src/configs"
 import { AuditLog } from "src/entities"
 import AuditLogDynamoGateway from "src/gateways/AuditLogDynamoGateway"

@@ -39,11 +39,11 @@
     "lint": "eslint --ext ts ."
   },
   "dependencies": {
-    "@handlers/common": "file:../handlers-common",
     "aws-sdk": "^2.804.0",
     "axios": "^0.21.1",
     "dateformat": "^4.5.1",
     "https": "^1.0.0",
+    "shared": "file:../shared",
     "uuid": "^8.3.2",
     "xml2js": "^0.4.23"
   }

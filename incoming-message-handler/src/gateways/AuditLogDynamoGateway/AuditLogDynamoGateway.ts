@@ -1,4 +1,4 @@
-import { isError, PromiseResult, DynamoGateway } from "@handlers/common"
+import { isError, PromiseResult, DynamoGateway } from "shared"
 import { DynamoDbConfig } from "src/configs"
 import { AuditLog } from "src/entities"
 

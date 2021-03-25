@@ -4,10 +4,10 @@
     {
       "type": "npm",
       "script": "build",
-      "path": "handlers-common/",
+      "path": "shared/",
       "problemMatcher": ["$tsc"],
       "group": "build",
-      "label": "npm: build - handlers-common",
+      "label": "npm: build - shared",
       "detail": "tsc -p tsconfig.json"
     },
     {
@@ -17,6 +17,15 @@
       "problemMatcher": ["$tsc"],
       "group": "build",
       "label": "npm: build - incoming-message-handler",
+      "detail": "tsc -p tsconfig.json"
+    },
+    {
+      "type": "npm",
+      "script": "build:dev",
+      "path": "audit-log-api/",
+      "problemMatcher": ["$tsc"],
+      "group": "build",
+      "label": "npm: build - audit-log-api",
       "detail": "tsc -p tsconfig.json"
     }
   ]
