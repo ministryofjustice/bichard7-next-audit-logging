@@ -1,4 +1,5 @@
 #! /bin/bash
+
 set -e
 
 if [[ -z $LOCALSTACK_URL ]]; then
@@ -6,20 +7,7 @@ if [[ -z $LOCALSTACK_URL ]]; then
   exit 1
 fi
 
-# Get the right path for Windows
-case $( (uname) | tr '[:upper:]' '[:lower:]') in
-  msys*|cygwin*|mingw*|nt|win*)
-    CWD=$(pwd -W)
-    ;;
-  *)
-    CWD=$PWD
-    ;;
-esac
-
-INFRA_PATH=$CWD/environment/infrastructure
-QUEUE_NAME=incoming_message_queue
-DLQ_NAME=incoming_message_dead_letter_queue
-LAMBDA_NAME=IncomingMessageHandler
+INFRA_PATH=$PWD/environment/infrastructure
 
 function create_lambda {
   LAMBDA_NAME=$1
@@ -46,7 +34,6 @@ create_lambda "FormatMessage" "formatMessage.default"
 create_lambda "ParseMessage" "parseMessage.default"
 create_lambda "LogMessageReceipt" "logMessageReceipt.default"
 create_lambda "SendToBichard" "sendToBichard.default"
-create_lambda "GetMessages" "getMessages.default"
 
 # Create the DynamoDb table for persisting the AuditLog entity
 if [[ -z $(awslocal dynamodb list-tables | grep AuditLog) ]]; then
@@ -99,13 +86,6 @@ SEND_TO_BICHARD_ARN=$( \
   awslocal lambda list-functions | \
   jq ".[] | map(select(.FunctionName == \"SendToBichard\"))" | \
   jq ".[0].FunctionArn" -r)
-
-GET_MESSAGE_API_ARN=$( \
-  awslocal lambda list-functions | \
-  jq ".[] | map(select(.FunctionName == \"GetMessages\"))" | \
-  jq ".[0].FunctionArn" -r)
-
-
 
 TEMP_STATE_MACHINE_CONFIG_FILE=./state-machine.tmp.json
 cat $INFRA_PATH/state-machine.json | \
