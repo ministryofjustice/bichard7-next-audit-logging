@@ -47,18 +47,6 @@ if [[ -z $(awslocal dynamodb list-tables | grep AuditLog) ]]; then
       ReadCapacityUnits=10,WriteCapacityUnits=5
 fi
 
-# Dynamo tables used specifically for integration testing
-if [[ -z $(awslocal dynamodb list-tables | grep DynamoTesting) ]]; then
-  awslocal dynamodb create-table \
-    --table-name DynamoTesting \
-    --attribute-definitions \
-      AttributeName=id,AttributeType=S \
-    --key-schema \
-      AttributeName=id,KeyType=HASH \
-    --provisioned-throughput \
-      ReadCapacityUnits=10,WriteCapacityUnits=5
-fi
-
 awslocal s3 mb s3://incoming-messages
 
 # Setup the Step Function state machine to trigger our Lambda

@@ -1,19 +1,22 @@
+import { DynamoDB } from "aws-sdk"
 import { DocumentClient } from "aws-sdk/clients/dynamodb"
 import { PromiseResult } from "../types"
 import DynamoDbConfig from "./DynamoDbConfig"
 
 export default class DynamoGateway {
-  private readonly documentClient: DocumentClient
+  protected readonly service: DynamoDB
+
+  protected readonly client: DocumentClient
 
   constructor(config: DynamoDbConfig) {
-    this.documentClient = new DocumentClient({
+    this.service = new DynamoDB({
       endpoint: config.DYNAMO_URL,
       region: config.DYNAMO_REGION
     })
-  }
 
-  protected get client(): DocumentClient {
-    return this.documentClient
+    this.client = new DocumentClient({
+      service: this.service
+    })
   }
 
   async insertOne<T>(tableName: string, record: T, keyName: string): PromiseResult<void> {

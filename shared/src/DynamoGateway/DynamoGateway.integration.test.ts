@@ -10,11 +10,11 @@ const config: DynamoDbConfig = {
 
 const tableName = "DynamoTesting"
 
-describe("DynamoGateway", () => {
-  let gateway: TestDynamoGateway
+const gateway = new TestDynamoGateway(config)
 
-  beforeAll(() => {
-    gateway = new TestDynamoGateway(config)
+describe("DynamoGateway", () => {
+  beforeAll(async () => {
+    await gateway.createTable(tableName, "id")
   })
 
   describe("insertOne()", () => {
@@ -60,7 +60,7 @@ describe("DynamoGateway", () => {
   describe("getAll()", () => {
     beforeEach(async () => {
       await gateway.deleteAll(tableName, "id")
-      Promise.allSettled(
+      await Promise.allSettled(
         [...Array(3).keys()].map(async (i: number) => {
           const record = {
             id: `Record ${i}`,
