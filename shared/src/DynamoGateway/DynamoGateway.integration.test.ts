@@ -1,5 +1,5 @@
-import { isError } from "src/types"
 import { DocumentClient } from "aws-sdk/clients/dynamodb"
+import { isError } from "../types"
 import DynamoDbConfig from "./DynamoDbConfig"
 import TestDynamoGateway from "./TestDynamoGateway"
 

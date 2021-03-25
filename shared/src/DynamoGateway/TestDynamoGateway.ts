@@ -1,5 +1,5 @@
 import { DocumentClient } from "aws-sdk/clients/dynamodb"
-import Poller from "src/utils/Poller"
+import Poller from "../utils/Poller"
 import DynamoGateway from "./DynamoGateway"
 
 export default class TestDynamoGateway extends DynamoGateway {

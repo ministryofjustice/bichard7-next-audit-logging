@@ -1,7 +1,7 @@
-import { isError } from "shared"
-import TestDynamoGateway from "shared/dist/DynamoGateway/TestDynamoGateway"
-import { DynamoDbConfig } from "src/configs"
-import { AuditLog } from "src/entities"
+import { isError } from "../types"
+import AuditLog from "../AuditLog"
+import { DynamoDbConfig } from "../DynamoGateway"
+import TestDynamoGateway from "../DynamoGateway/TestDynamoGateway"
 import AuditLogDynamoGateway from "./AuditLogDynamoGateway"
 
 const config: DynamoDbConfig = {

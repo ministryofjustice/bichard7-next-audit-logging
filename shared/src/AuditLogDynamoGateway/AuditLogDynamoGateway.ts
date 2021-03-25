@@ -1,6 +1,6 @@
-import { isError, PromiseResult, DynamoGateway } from "shared"
-import { DynamoDbConfig } from "src/configs"
-import { AuditLog } from "src/entities"
+import { isError, PromiseResult } from "../types"
+import { DynamoGateway, DynamoDbConfig } from "../DynamoGateway"
+import AuditLog from "../AuditLog"
 
 export default class AuditLogDynamoGateway extends DynamoGateway {
   constructor(config: DynamoDbConfig, private readonly tableName: string) {

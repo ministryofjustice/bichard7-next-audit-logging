@@ -1,7 +1,4 @@
-import { isError } from "shared"
-import { AuditLog } from "src/entities"
-import AuditLogDynamoGateway from "src/gateways/AuditLogDynamoGateway"
-import { DynamoDbConfig } from "src/configs"
+import { isError, AuditLog, AuditLogDynamoGateway, DynamoDbConfig } from "shared"
 import PersistMessageUseCase from "./PersistMessageUseCase"
 
 const config: DynamoDbConfig = {

@@ -1,8 +1,8 @@
 import { v4 as uuid } from "uuid"
 import format from "xml-formatter"
-import { isError } from "shared"
+import { isError, AuditLog } from "shared"
 import ApplicationError from "src/errors/ApplicationError"
-import { AuditLog, ReceivedMessage } from "src/entities"
+import { ReceivedMessage } from "src/entities"
 import readMessage from "./readMessage"
 
 const formatXml = (xml: string): string =>

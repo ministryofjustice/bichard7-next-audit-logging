@@ -1,7 +1,5 @@
-import { isError } from "shared"
+import { isError, AuditLog, AuditLogDynamoGateway } from "shared"
 import { createDynamoDbConfig } from "src/configs"
-import { AuditLog } from "src/entities"
-import AuditLogDynamoGateway from "src/gateways/AuditLogDynamoGateway"
 import PersistMessageUseCase from "src/use-cases/PersistMessageUseCase"
 
 const auditLogGateway = new AuditLogDynamoGateway(createDynamoDbConfig(), "AuditLog")

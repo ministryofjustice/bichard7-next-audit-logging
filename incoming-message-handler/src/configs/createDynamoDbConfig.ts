@@ -1,4 +1,4 @@
-import DynamoDbConfig from "./DynamoDbConfig"
+import { DynamoDbConfig } from "shared"
 
 export default function createDynamoDbConfig(): DynamoDbConfig {
   return {

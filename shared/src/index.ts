@@ -1,3 +1,5 @@
+export { default as AuditLog } from "./AuditLog"
+export { default as AuditLogDynamoGateway } from "./AuditLogDynamoGateway"
 export * from "./DynamoGateway"
 export * from "./types"
 export * from "./utils"
