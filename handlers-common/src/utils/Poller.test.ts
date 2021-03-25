@@ -1,4 +1,5 @@
-import Poller, { PollAction } from "./Poller"
+import PollAction from "./PollAction"
+import Poller from "./Poller"
 
 const poll = async (timeout: number, numberOfIterations: number, shouldSucceed: boolean): Promise<string> => {
   let iterations = 0

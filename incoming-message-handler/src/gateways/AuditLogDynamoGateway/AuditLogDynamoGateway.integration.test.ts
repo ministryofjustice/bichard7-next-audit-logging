@@ -1,7 +1,7 @@
 import { isError } from "@handlers/common"
+import TestDynamoGateway from "@handlers/common/dist/DynamoGateway/TestDynamoGateway"
 import { DynamoDbConfig } from "src/configs"
-import { AuditLog, Message } from "src/entities"
-import TestDynamoGateway from "src/gateways/DynamoGateway/TestDynamoGateway"
+import { AuditLog } from "src/entities"
 import AuditLogDynamoGateway from "./AuditLogDynamoGateway"
 
 const config: DynamoDbConfig = {
@@ -62,7 +62,7 @@ describe("AuditLogDynamoGateway", () => {
 
     it("should return a list of saved messages", async () => {
       const result = await gateway.fetchMany()
-      const actualMessages = <Message[]>result
+      const actualMessages = <AuditLog[]>result
 
       expect(actualMessages.length).toBe(10)
     })

@@ -1,6 +1,6 @@
-const clearTimeouts = (handles: NodeJS.Timeout[]): void => handles.forEach(clearTimeout)
+import PollAction from "./PollAction"
 
-export type PollAction<T> = () => Promise<T | undefined>
+const clearTimeouts = (handles: NodeJS.Timeout[]): void => handles.forEach(clearTimeout)
 
 export default class Poller<T> {
   constructor(private readonly action: PollAction<T>) {}

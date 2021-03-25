@@ -7,8 +7,7 @@ module.exports = {
     formatMessage: "./src/handlers/formatMessage.ts",
     parseMessage: "./src/handlers/parseMessage.ts",
     logMessageReceipt: "./src/handlers/logMessageReceipt.ts",
-    sendToBichard: "./src/handlers/sendToBichard.ts",
-    getMessages: "./src/handlers/getMessages.ts"
+    sendToBichard: "./src/handlers/sendToBichard.ts"
   },
   resolve: {
     modules: [path.resolve("./node_modules"), path.resolve(".")],
