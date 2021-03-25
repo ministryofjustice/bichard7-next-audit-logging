@@ -5,7 +5,13 @@
   "main": "index.js",
   "scripts": {
     "build": "rimraf build && webpack --config ./.webpack/webpack.prod.js",
-    "build:dev": "rimraf build && webpack --config ./.webpack/webpack.dev.js"
+    "build:dev": "rimraf build && webpack --config ./.webpack/webpack.dev.js",
+    "setup:env": "cd .. && ./environment/setup.sh && cd -",
+    "test": "npm run setup:env && ../scripts/test.sh",
+    "test:unit": "../scripts/test.sh unit",
+    "test:integration": "npm run setup:env && ../scripts/test.sh integration",
+    "test:e2e": "npm run setup:env && ../scripts/test.sh e2e",
+    "test:ci": "../scripts/test.sh ci"
   },
   "repository": {
     "type": "git",

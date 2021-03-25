@@ -14,7 +14,7 @@ log2.caseId = "456"
 const expectedSuccessfulResponse = [log1, log2]
 
 const expectedSuccessfulBodyResponse =
-  '{"messages":[{"messageId":"1","caseId":"123","receivedDate":"2021-11-12T00:00:00.000Z"},{"messageId":"2","caseId":"456","receivedDate":"2021-11-13T00:00:00.000Z"}]}'
+  '{"messages":[{"messageId":"1","receivedDate":"2021-11-12T00:00:00.000Z","messageXml":"XML","caseId":"123"},{"messageId":"2","receivedDate":"2021-11-13T00:00:00.000Z","messageXml":"XML","caseId":"456"}]}'
 
 const expectedErrorBodyResponse = "Error: Call failed"
 
