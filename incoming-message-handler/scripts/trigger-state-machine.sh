@@ -2,20 +2,9 @@
 
 set -e
 
-# Get the right path for Windows
-case $( (uname) | tr '[:upper:]' '[:lower:]') in
-  msys*|cygwin*|mingw*|nt|win*)
-    CWD=$(pwd -W)
-    ;;
-  *)
-    CWD=$PWD
-    ;;
-esac
-
-
 LAMBDA_NAME=IncomingMessageHandler
 BUCKET_NAME=incoming-messages
-MESSAGE_PATH=$CWD/scripts/message.xml
+MESSAGE_PATH=$PWD/scripts/message.xml
 RECEIVED_DATE=$(date +'%Y/%m/%d/%H/%M')
 MESSAGE_ID=$(uuidgen)
 S3_MESSAGE_PATH=$RECEIVED_DATE/$MESSAGE_ID.xml
@@ -38,7 +27,7 @@ function trigger_state_machine {
     jq ".[0].FunctionArn" | sed -e "s/\"//g")
 
   TMP_PATH=./event.tmp.json
-  cat $CWD/scripts/s3-putobject-event.json | \
+  cat $PWD/scripts/s3-putobject-event.json | \
     sed 's,{BUCKET_NAME},'"$BUCKET_NAME"',g' | \
     sed 's,{OBJECT_KEY},'"$S3_MESSAGE_PATH"',g' > $TMP_PATH
 

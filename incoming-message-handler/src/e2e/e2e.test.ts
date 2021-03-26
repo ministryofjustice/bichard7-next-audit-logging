@@ -1,8 +1,7 @@
 import { v4 as uuid } from "uuid"
 import format from "xml-formatter"
-import { isError } from "@handlers/common"
-import { AuditLog } from "src/entities"
-import TestDynamoGateway from "src/gateways/DynamoGateway/TestDynamoGateway"
+import { isError, AuditLog } from "shared"
+import TestDynamoGateway from "shared/dist/DynamoGateway/TestDynamoGateway"
 import TestS3Gateway from "src/gateways/S3Gateway/TestS3Gateway"
 import IncomingMessageSimulator from "./IncomingMessageSimulator"
 import IbmMqService from "./IbmMqService"
@@ -62,7 +61,7 @@ const mq = new IbmMqService({
 describe("e2e tests", () => {
   beforeEach(async () => {
     await mq.clearQueue()
-    await dynamoGateway.deleteAll("AuditLog", "messageId")
+    await dynamoGateway.deleteAll("audit-log", "messageId")
     await s3Gateway.deleteAll()
   })
 
@@ -73,7 +72,7 @@ describe("e2e tests", () => {
     await simulator.start(fileName, expectedMessage)
 
     // Check the message is in the database
-    const persistedMessages = await dynamoGateway.pollForMessages("AuditLog", 3000)
+    const persistedMessages = await dynamoGateway.pollForMessages("audit-log", 10000)
     expect(persistedMessages.Count).toBe(1)
 
     const persistedMessage = <AuditLog>persistedMessages.Items[0]
@@ -83,7 +82,7 @@ describe("e2e tests", () => {
     // Received date will be a string as we currently pull it straight from the database without parsing
     expect(persistedMessage.receivedDate).toBe(expectedReceivedDate.toISOString())
 
-    const actualMessage = await mq.pollForMessage(3000)
+    const actualMessage = await mq.pollForMessage(10000)
     expect(isError(actualMessage)).toBe(false)
     expect(formatXml(<string>actualMessage)).toBe(expectedMessage)
   })

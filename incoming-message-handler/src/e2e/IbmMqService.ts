@@ -1,7 +1,7 @@
 import * as https from "https"
 import axios, { AxiosError, AxiosResponse } from "axios"
+import { Poller } from "shared"
 import { MqConfig } from "src/configs"
-import Poller from "src/utils/Poller"
 
 const getQueueUrl = (config: MqConfig): string =>
   `https://${config.MQ_USER}:${config.MQ_PASSWORD}@${config.MQ_HOST}:${config.MQ_PORT}/ibmmq/rest/v1/messaging/qmgr/${config.MQ_QUEUE_MANAGER}/queue/${config.MQ_QUEUE}`

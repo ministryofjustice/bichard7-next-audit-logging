@@ -1,7 +1,4 @@
-import { isError } from "@handlers/common"
-import { AuditLog } from "src/entities"
-import AuditLogDynamoGateway from "src/gateways/AuditLogDynamoGateway"
-import { DynamoDbConfig } from "src/configs"
+import { isError, AuditLog, AuditLogDynamoGateway, DynamoDbConfig } from "shared"
 import PersistMessageUseCase from "./PersistMessageUseCase"
 
 const config: DynamoDbConfig = {
@@ -9,7 +6,7 @@ const config: DynamoDbConfig = {
   DYNAMO_REGION: "us-east-1"
 }
 
-const gateway = new AuditLogDynamoGateway(config, "AuditLog")
+const gateway = new AuditLogDynamoGateway(config, "audit-log")
 const useCase = new PersistMessageUseCase(gateway)
 
 const message = new AuditLog("id", new Date(), "XML")

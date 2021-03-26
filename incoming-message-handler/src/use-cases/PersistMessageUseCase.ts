@@ -1,6 +1,4 @@
-import { isError, PromiseResult } from "@handlers/common"
-import AuditLogDynamoGateway from "src/gateways/AuditLogDynamoGateway"
-import { AuditLog } from "src/entities"
+import { isError, PromiseResult, AuditLogDynamoGateway, AuditLog } from "shared"
 
 const isConditionalExpressionViolationError = (error: Error): boolean =>
   error.message === "The conditional request failed"

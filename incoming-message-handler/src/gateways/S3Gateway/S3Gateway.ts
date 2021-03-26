@@ -1,5 +1,5 @@
 import { S3 } from "aws-sdk"
-import { PromiseResult } from "@handlers/common"
+import { PromiseResult } from "shared"
 import { S3Config } from "src/configs"
 
 export default class S3Gateway {

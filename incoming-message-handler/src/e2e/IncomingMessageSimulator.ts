@@ -1,4 +1,4 @@
-import { isError } from "@handlers/common"
+import { isError } from "shared"
 import { StepFunctions } from "aws-sdk"
 import S3Gateway from "src/gateways/S3Gateway"
 

@@ -12,10 +12,10 @@ jobs:
           command: npm i
       - run:
           name: Install the dependencies for the Handlers Common module
-          command: cd ./handlers-common && npm i
+          command: cd ./shared && npm i
       - run:
           name: Build the Handlers Common module
-          command: cd ./handlers-common && npm run build
+          command: cd ./shared && npm run build
       - run:
           name: Install the dependencies for the Incoming Message Handler project
           command: cd ./incoming-message-handler && npm i -f
@@ -34,10 +34,10 @@ jobs:
       - checkout
       - run:
           name: Install the dependencies for the Handlers Common module
-          command: cd ./handlers-common && npm i
+          command: cd ./shared && npm i
       - run:
           name: Build the Handlers Common module
-          command: cd ./handlers-common && npm run build
+          command: cd ./shared && npm run build
       - run:
           name: Install the dependencies for the Incoming Message Handler project
           command: cd ./incoming-message-handler && npm i -f

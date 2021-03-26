@@ -1,4 +1,4 @@
-import { isError } from "@handlers/common"
+import { isError } from "shared"
 import MqGateway from "src/gateways/MqGateway"
 import SendMessageUseCase from "./SendMessageUseCase"
 

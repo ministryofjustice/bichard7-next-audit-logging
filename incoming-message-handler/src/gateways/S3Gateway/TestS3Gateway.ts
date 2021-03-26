@@ -1,7 +1,24 @@
-import S3, { ObjectIdentifierList } from "aws-sdk/clients/s3"
+import S3, { CreateBucketOutput, ObjectIdentifierList } from "aws-sdk/clients/s3"
 import S3Gateway from "./S3Gateway"
 
 export default class TestS3Gateway extends S3Gateway {
+  async bucketExists(bucketName: string): Promise<boolean> {
+    const buckets = await this.client.listBuckets().promise()
+    return !!buckets.Buckets.find((bucket) => bucket.Name === bucketName)
+  }
+
+  async createBucket(bucketName: string, skipIfExists = true): Promise<CreateBucketOutput> {
+    if (skipIfExists && (await this.bucketExists(bucketName))) {
+      return undefined
+    }
+
+    return this.client
+      .createBucket({
+        Bucket: bucketName
+      })
+      .promise()
+  }
+
   async getAll(): Promise<S3.ObjectList> {
     const { Contents } = await this.client.listObjects({ Bucket: this.bucketName }).promise()
     return Contents
