@@ -72,7 +72,7 @@ describe("e2e tests", () => {
     await simulator.start(fileName, expectedMessage)
 
     // Check the message is in the database
-    const persistedMessages = await dynamoGateway.pollForMessages("audit-log", 3000)
+    const persistedMessages = await dynamoGateway.pollForMessages("audit-log", 10000)
     expect(persistedMessages.Count).toBe(1)
 
     const persistedMessage = <AuditLog>persistedMessages.Items[0]
@@ -82,7 +82,7 @@ describe("e2e tests", () => {
     // Received date will be a string as we currently pull it straight from the database without parsing
     expect(persistedMessage.receivedDate).toBe(expectedReceivedDate.toISOString())
 
-    const actualMessage = await mq.pollForMessage(3000)
+    const actualMessage = await mq.pollForMessage(10000)
     expect(isError(actualMessage)).toBe(false)
     expect(formatXml(<string>actualMessage)).toBe(expectedMessage)
   })
