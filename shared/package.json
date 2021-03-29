@@ -1,0 +1,31 @@
+{
+  "name": "shared",
+  "description": "Hosts common types and services",
+  "version": "0.0.1",
+  "private": true,
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist/**/*"
+  ],
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^4.9.0",
+    "@typescript-eslint/parser": "^4.9.0",
+    "eslint": "^7.15.0",
+    "jest": "^26.6.3",
+    "ts-jest": "^26.4.4",
+    "typescript": "^4.1.2"
+  },
+  "dependencies": {
+    "aws-sdk": "^2.870.0"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "setup:env": "cd .. && ./environment/setup.sh && cd -",
+    "test": "npm run setup:env && ../scripts/test.sh",
+    "test:unit": "../scripts/test.sh unit",
+    "test:integration": "npm run setup:env && ../scripts/test.sh integration",
+    "test:e2e": "npm run setup:env && ../scripts/test.sh e2e",
+    "test:ci": "../scripts/test.sh ci"
+  }
+}

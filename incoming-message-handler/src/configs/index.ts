@@ -1,4 +1,3 @@
-export { default as DynamoDbConfig } from "./DynamoDbConfig"
 export { default as createDynamoDbConfig } from "./createDynamoDbConfig"
 export { default as MqConfig } from "./MqConfig"
 export { default as createMqConfig } from "./createMqConfig"

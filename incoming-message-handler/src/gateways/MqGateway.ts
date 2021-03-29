@@ -1,4 +1,4 @@
-import { PromiseResult } from "@handlers/common"
+import { PromiseResult } from "shared"
 import { MqConfig } from "src/configs"
 import { post } from "src/utils/api"
 
