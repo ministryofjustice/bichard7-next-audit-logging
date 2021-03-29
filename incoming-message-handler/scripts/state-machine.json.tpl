@@ -4,27 +4,27 @@
   "States": {
     "Retrieve from S3": {
       "Type": "Task",
-      "Resource": "{RETRIEVE_FROM_S3_LAMBDA_ARN}",
+      "Resource": "${RETRIEVE_FROM_S3_LAMBDA_ARN}",
       "Next": "Format Message"
     },
     "Format Message": {
       "Type": "Task",
-      "Resource": "{FORMAT_MESSAGE_LAMBDA_ARN}",
+      "Resource": "${FORMAT_MESSAGE_LAMBDA_ARN}",
       "Next": "Parse Message"
     },
     "Parse Message": {
       "Type": "Task",
-      "Resource": "{PARSE_MESSAGE_LAMBDA_ARN}",
+      "Resource": "${PARSE_MESSAGE_LAMBDA_ARN}",
       "Next": "Log Message Receipt"
     },
     "Log Message Receipt": {
       "Type": "Task",
-      "Resource": "{LOG_MESSAGE_RECEIPT_LAMBDA_ARN}",
+      "Resource": "${LOG_MESSAGE_RECEIPT_LAMBDA_ARN}",
       "Next": "Send to Bichard"
     },
     "Send to Bichard": {
       "Type": "Task",
-      "Resource": "{SEND_TO_BICHARD_ARN}",
+      "Resource": "${SEND_TO_BICHARD_ARN}",
       "End": true
     }
   }
