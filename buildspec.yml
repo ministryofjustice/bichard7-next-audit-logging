@@ -8,10 +8,4 @@ phases:
   build:
     commands:
       - /bin/sh ./scripts/codebuild-build.sh
-      - aws s3 cp ./incoming-message-handler/build/ s3://$S3_BUCKET/audit-logging/ --exclude "*.txt" --recursive
-      - aws s3 cp ./incoming-message-handler/scripts/state-machine.json.tpl s3://$S3_BUCKET/audit-logging/state-machine.json.tpl
-
-artifacts:
-  files:
-    - incoming-message-handler/build/*.js
-    - incoming-message-handler/scripts/state-machine.json.tpl
+      - /bin/sh ./scripts/codebuild-artifacts.sh
