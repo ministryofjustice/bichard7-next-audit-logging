@@ -14,5 +14,14 @@ zip sendToBichard.zip sendToBichard.js
 cd -
 
 # Upload all artifacts to the S3 bucket
-aws s3 cp ./incoming-message-handler/build/ s3://$S3_BUCKET/audit-logging/ --recursive --exclude "*" --include "*.zip"
-aws s3 cp ./incoming-message-handler/scripts/state-machine.json.tpl s3://$S3_BUCKET/audit-logging/state-machine.json.tpl
+aws s3 cp \
+  ./incoming-message-handler/build/ \
+  s3://$S3_BUCKET/audit-logging/ \
+  --recursive \
+  --exclude "*" \
+  --include "*.zip" \
+  --acl bucket-owner-full-control
+
+aws s3 cp \
+  ./incoming-message-handler/scripts/state-machine.json.tpl \
+  s3://$S3_BUCKET/audit-logging/state-machine.json.tpl
