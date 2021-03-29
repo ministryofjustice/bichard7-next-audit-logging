@@ -24,4 +24,5 @@ aws s3 cp \
 
 aws s3 cp \
   ./incoming-message-handler/scripts/state-machine.json.tpl \
-  s3://$S3_BUCKET/audit-logging/state-machine.json.tpl
+  s3://$S3_BUCKET/audit-logging/state-machine.json.tpl \
+  --acl bucket-owner-full-control
