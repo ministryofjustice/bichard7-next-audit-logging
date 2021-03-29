@@ -1,0 +1,11 @@
+version: 0.2
+
+phases:
+  install:
+    commands:
+      - /bin/sh ./scripts/codebuild-install.sh
+
+  build:
+    commands:
+      - /bin/sh ./scripts/codebuild-build.sh
+      - /bin/sh ./scripts/codebuild-artifacts.sh

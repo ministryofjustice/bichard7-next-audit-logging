@@ -2,7 +2,6 @@
 
 set -e
 
-LOCALSTACK_URL=http://localhost:4566
 SCRIPTS_PATH=$PWD/scripts
 
 function create_lambda {
@@ -72,7 +71,7 @@ SEND_TO_BICHARD_ARN=$( \
   jq ".[0].FunctionArn" -r)
 
 TEMP_STATE_MACHINE_CONFIG_FILE=./state-machine.tmp.json
-cat $SCRIPTS_PATH/state-machine.json | \
+cat $SCRIPTS_PATH/state-machine.json.tpl | \
   sed -e "s/{RETRIEVE_FROM_S3_LAMBDA_ARN}/$RETRIEVE_FROM_S3_LAMBDA_ARN/g" | \
   sed -e "s/{FORMAT_MESSAGE_LAMBDA_ARN}/$FORMAT_MESSAGE_LAMBDA_ARN/g" | \
   sed -e "s/{PARSE_MESSAGE_LAMBDA_ARN}/$PARSE_MESSAGE_LAMBDA_ARN/g" | \
