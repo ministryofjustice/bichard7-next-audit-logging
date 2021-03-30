@@ -3,8 +3,9 @@ import format from "xml-formatter"
 import { isError, AuditLog } from "shared"
 import TestDynamoGateway from "shared/dist/DynamoGateway/TestDynamoGateway"
 import TestS3Gateway from "src/gateways/S3Gateway/TestS3Gateway"
+import { MqConfig } from "src/configs"
+import TestMqGateway from "src/gateways/MqGateway/TestMqGateway"
 import IncomingMessageSimulator from "./IncomingMessageSimulator"
-import IbmMqService from "./IbmMqService"
 
 jest.setTimeout(30000)
 
@@ -49,20 +50,17 @@ const s3Gateway = new TestS3Gateway({
 
 const simulator = new IncomingMessageSimulator(AWS_URL)
 
-const mq = new IbmMqService({
-  MQ_HOST: "localhost",
-  MQ_PORT: "10443",
-  MQ_QUEUE_MANAGER: "BR7_QM",
-  MQ_QUEUE: "DEV.QUEUE.1",
-  MQ_USER: "app",
-  MQ_PASSWORD: "passw0rd"
-})
+const mqConfig = new MqConfig("localhost", 51613, "admin", "admin", "incoming-message-handler-e2e-testing")
+const testMqGateway = new TestMqGateway(mqConfig)
 
 describe("e2e tests", () => {
   beforeEach(async () => {
-    await mq.clearQueue()
     await dynamoGateway.deleteAll("audit-log", "messageId")
     await s3Gateway.deleteAll()
+  })
+
+  afterAll(async () => {
+    await testMqGateway.dispose()
   })
 
   it("should receive a message on the target queue when the message is sent to the S3 bucket", async () => {
@@ -82,7 +80,7 @@ describe("e2e tests", () => {
     // Received date will be a string as we currently pull it straight from the database without parsing
     expect(persistedMessage.receivedDate).toBe(expectedReceivedDate.toISOString())
 
-    const actualMessage = await mq.pollForMessage(10000)
+    const actualMessage = await testMqGateway.getMessage(mqConfig.queueName)
     expect(isError(actualMessage)).toBe(false)
     expect(formatXml(<string>actualMessage)).toBe(expectedMessage)
   })

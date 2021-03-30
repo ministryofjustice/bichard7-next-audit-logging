@@ -1,11 +1,10 @@
 {
   "Variables": {
-    "MQ_HOST": "ibmmq",
-    "MQ_PORT": "9443",
-    "MQ_QUEUE": "DEV.QUEUE.1",
-    "MQ_USER": "app",
-    "MQ_PASSWORD": "passw0rd",
-    "MQ_QUEUE_MANAGER": "BR7_QM",
+    "MQ_HOST": "mq",
+    "MQ_PORT": "61613",
+    "MQ_QUEUE": "incoming-message-handler-e2e-testing",
+    "MQ_USER": "admin",
+    "MQ_PASSWORD": "admin",
     "AWS_URL": "http://localstack_main:4566",
     "AWS_REGION": "us-east-1",
     "INCOMING_MESSAGE_BUCKET_NAME": "incoming-messages",
