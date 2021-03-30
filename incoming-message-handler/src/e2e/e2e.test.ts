@@ -3,7 +3,6 @@ import format from "xml-formatter"
 import { isError, AuditLog } from "shared"
 import TestDynamoGateway from "shared/dist/DynamoGateway/TestDynamoGateway"
 import TestS3Gateway from "src/gateways/S3Gateway/TestS3Gateway"
-import { MqConfig } from "src/configs"
 import TestMqGateway from "src/gateways/MqGateway/TestMqGateway"
 import IncomingMessageSimulator from "./IncomingMessageSimulator"
 
@@ -50,8 +49,14 @@ const s3Gateway = new TestS3Gateway({
 
 const simulator = new IncomingMessageSimulator(AWS_URL)
 
-const mqConfig = new MqConfig("localhost", 51613, "admin", "admin", "incoming-message-handler-e2e-testing")
-const testMqGateway = new TestMqGateway(mqConfig)
+const queueName = "incoming-message-handler-e2e-testing"
+const testMqGateway = new TestMqGateway({
+  host: "localhost",
+  port: 51613,
+  username: "admin",
+  password: "admin",
+  queueName
+})
 
 describe("e2e tests", () => {
   beforeEach(async () => {
@@ -80,7 +85,7 @@ describe("e2e tests", () => {
     // Received date will be a string as we currently pull it straight from the database without parsing
     expect(persistedMessage.receivedDate).toBe(expectedReceivedDate.toISOString())
 
-    const actualMessage = await testMqGateway.getMessage(mqConfig.queueName)
+    const actualMessage = await testMqGateway.getMessage(queueName)
     expect(isError(actualMessage)).toBe(false)
     expect(formatXml(<string>actualMessage)).toBe(expectedMessage)
   })

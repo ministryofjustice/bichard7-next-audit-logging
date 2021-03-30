@@ -3,7 +3,14 @@ import { MqConfig } from "src/configs"
 import MqGateway from "src/gateways/MqGateway"
 import SendMessageUseCase from "./SendMessageUseCase"
 
-const config = new MqConfig("host", 1234, "username", "password", "queueName")
+const config: MqConfig = {
+  host: "host",
+  port: 1234,
+  username: "username",
+  password: "password",
+  queueName: "queueName"
+}
+
 const gateway = new MqGateway(config)
 const useCase = new SendMessageUseCase(gateway)
 

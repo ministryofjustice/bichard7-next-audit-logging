@@ -4,7 +4,13 @@ import MqGateway from "./MqGateway"
 import TestMqGateway from "./TestMqGateway"
 
 const queueName = "mq-gateway-integration-testing"
-const config = new MqConfig("localhost", 51613, "admin", "admin", queueName)
+const config: MqConfig = {
+  host: "localhost",
+  port: 51613,
+  username: "admin",
+  password: "admin",
+  queueName
+}
 
 const gateway = new MqGateway(config)
 const testGateway = new TestMqGateway(config)
