@@ -1,8 +1,17 @@
 import { isError } from "shared"
+import { MqConfig } from "src/configs"
 import MqGateway from "src/gateways/MqGateway"
 import SendMessageUseCase from "./SendMessageUseCase"
 
-const gateway = new MqGateway({})
+const config: MqConfig = {
+  host: "host",
+  port: 1234,
+  username: "username",
+  password: "password",
+  queueName: "queueName"
+}
+
+const gateway = new MqGateway(config)
 const useCase = new SendMessageUseCase(gateway)
 
 describe("SendMessageUseCase", () => {

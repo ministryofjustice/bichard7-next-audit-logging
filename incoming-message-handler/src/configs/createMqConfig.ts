@@ -1,15 +1,13 @@
 import MqConfig from "./MqConfig"
 
-const createMqConfig = (): MqConfig => {
-  const { MQ_USER, MQ_PASSWORD, MQ_HOST, MQ_PORT, MQ_QUEUE_MANAGER, MQ_QUEUE } = process.env
+export default (): MqConfig => {
+  const { MQ_USER, MQ_PASSWORD, MQ_HOST, MQ_PORT, MQ_QUEUE } = process.env
+
   return {
-    MQ_USER,
-    MQ_PASSWORD,
-    MQ_HOST,
-    MQ_PORT,
-    MQ_QUEUE_MANAGER,
-    MQ_QUEUE
+    host: MQ_HOST,
+    port: +MQ_PORT,
+    username: MQ_USER,
+    password: MQ_PASSWORD,
+    queueName: MQ_QUEUE
   }
 }
-
-export default createMqConfig
