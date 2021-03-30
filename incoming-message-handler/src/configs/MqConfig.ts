@@ -1,10 +1,9 @@
-type MqConfig = {
-  MQ_USER?: string
-  MQ_PASSWORD?: string
-  MQ_HOST?: string
-  MQ_PORT?: string
-  MQ_QUEUE_MANAGER?: string
-  MQ_QUEUE?: string
+export default class MqConfig {
+  constructor(
+    public readonly host: string,
+    public readonly port: number,
+    public readonly username: string,
+    public readonly password: string,
+    public readonly queueName: string
+  ) {}
 }
-
-export default MqConfig

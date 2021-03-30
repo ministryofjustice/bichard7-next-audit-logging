@@ -4,7 +4,7 @@ services:
     image: rmohr/activemq
     ports:
       - 58161:8161
-      - 51616:61616
+      - 51613:61613
     volumes:
       - ./activemq.xml:/opt/activemq/conf/activemq.xml
 
