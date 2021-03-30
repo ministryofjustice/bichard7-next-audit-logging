@@ -1,14 +1,12 @@
 version: "3.2"
 services:
-  ibmmq:
-    image: ibmcom/mq
-    container_name: ibmmq
+  mq:
+    image: rmohr/activemq
     ports:
-      - 1414:1414
-      - 10443:9443
-    environment:
-      - LICENSE=accept
-      - MQ_QMGR_NAME=BR7_QM
+      - 58161:8161
+      - 51616:61616
+    volumes:
+      - ./activemq.xml:/opt/activemq/conf/activemq.xml
 
   localstack:
     image: localstack/localstack
