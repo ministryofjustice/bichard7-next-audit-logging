@@ -1,13 +1,9 @@
-import Head from "next/head"
-import Home from "./Home"
+import Home from "pages/Home"
+import Head from "components/Head"
 
 const Index = () => (
   <>
-    <Head>
-      <title>Create Next App</title>
-      <link rel="icon" href="/favicon.ico" />
-    </Head>
-
+    <Head />
     <Home />
   </>
 )
