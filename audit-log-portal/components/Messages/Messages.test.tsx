@@ -1,4 +1,3 @@
-import React from "react"
 import { shallow } from "enzyme"
 import Message from "components/Message"
 import Messages from "./Messages"
