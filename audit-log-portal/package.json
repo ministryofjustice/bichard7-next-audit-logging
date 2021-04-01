@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "test": "jest"
+    "test": "jest",
+    "cypress:open": "cypress open",
+    "cypress:run": "cypress run"
   },
   "dependencies": {
     "next": "^10.1.2",
@@ -21,6 +23,7 @@
     "@types/react": "^17.0.3",
     "@wojtekmaj/enzyme-adapter-react-17": "^0.6.0",
     "babel-jest": "^26.6.3",
+    "cypress": "^6.8.0",
     "enzyme": "^3.11.0",
     "identity-obj-proxy": "^3.0.0",
     "jest": "^26.6.3",
