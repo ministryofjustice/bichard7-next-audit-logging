@@ -18,10 +18,22 @@ jobs:
           command: cd ./shared && npm run build
       - run:
           name: Install the dependencies for the Incoming Message Handler project
-          command: cd ./incoming-message-handler && npm i -f
+          command: cd ./incoming-message-handler && npm i
       - run:
           name: Build the Incoming Message Handler project
           command: cd ./incoming-message-handler && npm run build
+      - run:
+          name: Install the dependencies for the Audit Log API project
+          command: cd ./audit-log-api && npm i
+      - run:
+          name: Build the Audit Log API project
+          command: cd ./audit-log-api && npm run build
+      - run:
+          name: Install the dependencies for the Audit Log Portal project
+          command: cd ./audit-log-portal && npm i
+      - run:
+          name: Build the Audit Log Portal project
+          command: cd ./audit-log-portal && npm run build
       - run:
           name: Run lint
           command: npm run lint
@@ -33,14 +45,19 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Install the dependencies for the Handlers Common module
+          name: Install the dependencies for the Shared library
           command: cd ./shared && npm i
       - run:
-          name: Build the Handlers Common module
+          name: Build the Shared library
           command: cd ./shared && npm run build
       - run:
+          name: Run all unit tests for the Shared library
+          command: cd ./shared && npm run test:ci
+      - store_test_results:
+          path: ./shared/test-results/jest/
+      - run:
           name: Install the dependencies for the Incoming Message Handler project
-          command: cd ./incoming-message-handler && npm i -f
+          command: cd ./incoming-message-handler && npm i
       - run:
           name: Build the Incoming Message Handler project
           command: cd ./incoming-message-handler && npm run build
@@ -49,6 +66,28 @@ jobs:
           command: cd ./incoming-message-handler && npm run test:ci
       - store_test_results:
           path: ./incoming-message-handler/test-results/jest/
+      - run:
+          name: Install the dependencies for the Audit Log API project
+          command: cd ./audit-log-api && npm i
+      - run:
+          name: Build the Audit Log API project
+          command: cd ./audit-log-api && npm run build
+      - run:
+          name: Run all unit tests for the Audit Log API project
+          command: cd ./audit-log-api && npm run test:ci
+      - store_test_results:
+          path: ./audit-log-api/test-results/jest/
+      - run:
+          name: Install the dependencies for the Audit Log Portal project
+          command: cd ./audit-log-portal && npm i
+      - run:
+          name: Build the Audit Log Portal project
+          command: cd ./audit-log-portal && npm run build
+      - run:
+          name: Run all unit tests for the Audit Log Portal project
+          command: cd ./audit-log-portal && npm run test:ci
+      - store_test_results:
+          path: ./audit-log-portal/test-results/jest/
 
 workflows:
   version: 2
