@@ -2,17 +2,9 @@ import { shallow } from "enzyme"
 import Message from "components/Message"
 import Messages from "./Messages"
 
-interface SomeInterface {
-  expectedMessageLength: number
-}
-
-const expectedMessages: SomeInterface = {
-  expectedMessageLength: 10
-}
-
 describe("<Messages />", () => {
-  it("should render 3 <Message /> components", () => {
+  it("should render 10 <Message /> components", () => {
     const component = shallow(<Messages />)
-    expect(component.find(Message)).toHaveLength(expectedMessages.expectedMessageLength)
+    expect(component.find(Message)).toHaveLength(10)
   })
 })
