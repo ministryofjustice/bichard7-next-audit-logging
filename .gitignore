@@ -111,3 +111,7 @@ dist
 
 # Jest output
 junit.xml
+
+# Cypress output
+**/cypress/screenshots
+**/cypress/videos

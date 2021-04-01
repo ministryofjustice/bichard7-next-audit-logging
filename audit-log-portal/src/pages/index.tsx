@@ -1,4 +1,5 @@
 import Image from "next/image"
+import Link from "next/link"
 import Head from "components/Head"
 import Messages from "components/Messages"
 import NavBar from "components/NavBar"
@@ -21,6 +22,10 @@ const Index = () => (
 
     <Page>
       <Messages />
+
+      <Link href="/test">
+        Show Test Page
+      </Link>
     </Page>
   </>
 )
