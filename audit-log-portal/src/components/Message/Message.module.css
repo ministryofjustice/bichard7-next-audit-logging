@@ -1,0 +1,17 @@
+.container {
+  display: block;
+  margin-bottom: 1rem;
+}
+
+.innerContainer {
+  display: flex;
+  flex-direction: row;
+}
+
+.informationBlock {
+  margin-right: 2rem;
+}
+
+.label {
+  font-weight: bold;
+}

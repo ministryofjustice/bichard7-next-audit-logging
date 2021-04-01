@@ -27,6 +27,15 @@
       "group": "build",
       "label": "npm: build - audit-log-api",
       "detail": "tsc -p tsconfig.json"
+    },
+    {
+      "type": "npm",
+      "script": "build",
+      "path": "audit-log-portal/",
+      "problemMatcher": ["$tsc"],
+      "group": "build",
+      "label": "npm: build - audit-log-portal",
+      "detail": "tsc -p tsconfig.json"
     }
   ]
 }
