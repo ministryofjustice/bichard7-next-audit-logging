@@ -1,6 +1,31 @@
 version: 2.1
 
 jobs:
+  install_dependencies:
+    docker:
+      - image: cimg/node:15.9.0
+    working_directory: ~
+    steps:
+      - checkout
+      - run:
+          name: Install root dependencies
+          command: npm i
+      - persist_to_workspace:
+          root: .
+          paths:
+            - ./*
+
+  check_deps:
+    docker:
+      - image: cimg/node:15.9.0
+    working_directory: ~
+    steps:
+      - attach_workspace:
+          at: .
+      - run:
+          name: Check workspace dependencies
+          command: ls
+
   build:
     docker:
       - image: cimg/node:15.9.0
@@ -91,6 +116,13 @@ jobs:
 
 workflows:
   version: 2
+  prototyping:
+    jobs:
+      - install_dependencies
+      - check_deps:
+          requires:
+            - install_dependencies
+
   build-and-test:
     jobs:
       - build
