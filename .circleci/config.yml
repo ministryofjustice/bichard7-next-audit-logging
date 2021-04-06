@@ -7,24 +7,49 @@ jobs:
     working_directory: ~
     steps:
       - checkout
-      - run:
-          name: Install root dependencies
-          command: npm i
-      - run:
-          name: Install the dependencies for the Handlers Common module
-          command: cd ./shared && npm i
-      - run:
-          name: Build the Handlers Common module
-          command: cd ./shared && npm run build
-      - run:
-          name: Install the dependencies for the Incoming Message Handler project
-          command: cd ./incoming-message-handler && npm i -f
-      - run:
-          name: Build the Incoming Message Handler project
-          command: cd ./incoming-message-handler && npm run build
-      - run:
-          name: Run lint
-          command: npm run lint
+
+      # Load dependencies from the cache if they exist and haven't changed
+      - restore_cache:
+          keys:
+            - v1-npm-deps-{{ checksum "package-lock.json" }}
+            - v1-npm-deps-{{ checksum "shared/package-lock.json" }}
+            - v1-npm-deps-{{ checksum "incoming-message-handler/package-lock.json" }}
+            - v1-npm-deps-{{ checksum "audit-log-api/package-lock.json" }}
+            - v1-npm-deps-{{ checksum "audit-log-portal/package-lock.json" }}
+
+      - run: ./scripts/install-all.sh
+      - run: ./scripts/build-all.sh
+      - run: npm run lint
+
+      # Update the cache with the latest installed dependencies to speed up future installs
+      - save_cache:
+          key: v1-npm-deps-{{ checksum "package-lock.json" }}
+          paths: node_modules
+
+      - save_cache:
+          key: v1-npm-deps-{{ checksum "shared/package-lock.json" }}
+          paths: shared/node_modules
+
+      - save_cache:
+          key: v1-npm-deps-{{ checksum "incoming-message-handler/package-lock.json" }}
+          paths: incoming-message-handler/node_modules
+
+      - save_cache:
+          key: v1-npm-deps-{{ checksum "audit-log-api/package-lock.json" }}
+          paths: audit-log-api/node_modules
+
+      - save_cache:
+          key: v1-npm-deps-{{ checksum "audit-log-portal/package-lock.json" }}
+          paths: audit-log-portal/node_modules
+
+      # Persist all dist/build folders to the workspace to reduce build time later
+      - persist_to_workspace:
+          root: .
+          paths:
+            - shared/dist
+            - incoming-message-handler/build
+            - audit-log-api/build
+            - audit-log-portal/.next
 
   test:
     docker:
@@ -32,23 +57,39 @@ jobs:
     working_directory: ~
     steps:
       - checkout
-      - run:
-          name: Install the dependencies for the Handlers Common module
-          command: cd ./shared && npm i
-      - run:
-          name: Build the Handlers Common module
-          command: cd ./shared && npm run build
-      - run:
-          name: Install the dependencies for the Incoming Message Handler project
-          command: cd ./incoming-message-handler && npm i -f
-      - run:
-          name: Build the Incoming Message Handler project
-          command: cd ./incoming-message-handler && npm run build
-      - run:
-          name: Run all unit tests for the Incoming Message Handler project
-          command: cd ./incoming-message-handler && npm run test:ci
+
+      # Restore any cached dependencies for the projects to reduce install time
+      - restore_cache:
+          key: v1-npm-deps-{{ checksum "package-lock.json" }}
+
+      - restore_cache:
+          key: v1-npm-deps-{{ checksum "shared/package-lock.json" }}
+
+      - restore_cache:
+          key: v1-npm-deps-{{ checksum "incoming-message-handler/package-lock.json" }}
+
+      - restore_cache:
+          key: v1-npm-deps-{{ checksum "audit-log-api/package-lock.json" }}
+
+      - restore_cache:
+          key: v1-npm-deps-{{ checksum "audit-log-portal/package-lock.json" }}
+
+      - run: ./scripts/install-all.sh
+
+      # Attach the workspace to retrieve the dist/build folders so we don't have to rebuild
+      - attach_workspace:
+          at: .
+
+      - run: ./scripts/test-all.sh
+
+      - store_test_results:
+          path: ./shared/test-results/jest/
       - store_test_results:
           path: ./incoming-message-handler/test-results/jest/
+      - store_test_results:
+          path: ./audit-log-api/test-results/jest/
+      - store_test_results:
+          path: ./audit-log-portal/test-results/jest/
 
 workflows:
   version: 2

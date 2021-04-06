@@ -2,20 +2,13 @@
 
 set -e
 
-echo "Building the shared library..."
-cd shared
-npm i
-npm run build
-cd ..
+projects=$(cat scripts/projects)
 
-echo "Building the Incoming Message Handler..."
-cd incoming-message-handler
-npm i
-npm run build:dev
-cd ..
+# Move into a sub directory so the for loop can jump up and down through project folders
+cd scripts
 
-echo "Building the Audit Log API..."
-cd audit-log-api
-npm i
-npm run build:dev
-cd ..
+for p in ${projects[@]}; do
+  echo "Building $p..."
+  cd ../$p
+  npm run build
+done

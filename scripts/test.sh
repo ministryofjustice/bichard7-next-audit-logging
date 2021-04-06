@@ -24,7 +24,7 @@ case $STYLE in
 
   "ci")
     echo "Running CI tests..."
-    JEST_JUNIT_OUTPUT_DIR=./test-results/jest
+    export JEST_JUNIT_OUTPUT_DIR=./test-results/jest
     PARAMS+=(--coverage --ci --watchAll false --runInBand --reporters=default --reporters=jest-junit --testPathIgnorePatterns="integration" "e2e")
     ;;
 
@@ -34,4 +34,4 @@ case $STYLE in
     ;;
 esac
 
-jest "${PARAMS[@]}" --testPathPattern=$TEST_PATH_PATTERN
+jest "${PARAMS[@]}" --testPathPattern=$TEST_PATH_PATTERN --testPathIgnorePatterns="dist" "build"
