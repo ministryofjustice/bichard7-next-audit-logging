@@ -48,12 +48,20 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-          keys:
-            - v1-npm-deps-{{ checksum "package-lock.json" }}
-            - v1-npm-deps-{{ checksum "shared/package-lock.json" }}
-            - v1-npm-deps-{{ checksum "incoming-message-handler/package-lock.json" }}
-            - v1-npm-deps-{{ checksum "audit-log-api/package-lock.json" }}
-            - v1-npm-deps-{{ checksum "audit-log-portal/package-lock.json" }}
+          key: v1-npm-deps-{{ checksum "package-lock.json" }}
+
+      - restore_cache:
+          key: v1-npm-deps-{{ checksum "shared/package-lock.json" }}
+
+      - restore_cache:
+          key: v1-npm-deps-{{ checksum "incoming-message-handler/package-lock.json" }}
+
+      - restore_cache:
+          key: v1-npm-deps-{{ checksum "audit-log-api/package-lock.json" }}
+
+      - restore_cache:
+          key: v1-npm-deps-{{ checksum "audit-log-portal/package-lock.json" }}
+
       - run: ./scripts/install-all.sh
       - run: ./scripts/test-all.sh
       - store_test_results:
