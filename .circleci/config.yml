@@ -23,6 +23,8 @@ jobs:
       - attach_workspace:
           at: .
       - run:
+          command: ls && ls incoming-message-handler
+      - run:
           name: Build all projects
           command: ./scripts/build-all.sh
       - run:
