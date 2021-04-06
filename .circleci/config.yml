@@ -22,12 +22,24 @@ jobs:
 
       # Update the cache with the latest installed dependencies to speed up future installs
       - save_cache:
-          keys:
-            - v1-npm-deps-{{ checksum "package-lock.json" }}
-            - v1-npm-deps-{{ checksum "shared/package-lock.json" }}
-            - v1-npm-deps-{{ checksum "incoming-message-handler/package-lock.json" }}
-            - v1-npm-deps-{{ checksum "audit-log-api/package-lock.json" }}
-            - v1-npm-deps-{{ checksum "audit-log-portal/package-lock.json" }}
+          key: v1-npm-deps-{{ checksum "package-lock.json" }}
+          paths: node_modules
+
+      - save_cache:
+          key: v1-npm-deps-{{ checksum "shared/package-lock.json" }}
+          paths: shared/node_modules
+
+      - save_cache:
+          key: v1-npm-deps-{{ checksum "incoming-message-handler/package-lock.json" }}
+          paths: incoming-message-handler/node_modules
+
+      - save_cache:
+          key: v1-npm-deps-{{ checksum "audit-log-api/package-lock.json" }}
+          paths: audit-log-api/node_modules
+
+      - save_cache:
+          key: v1-npm-deps-{{ checksum "audit-log-portal/package-lock.json" }}
+          paths: audit-log-portal/node_modules
 
   test:
     docker:
@@ -56,8 +68,9 @@ jobs:
 
 workflows:
   version: 2
-  jobs:
-    - build
-    - test:
-        requires:
-          - build
+  build-and-test:
+    jobs:
+      - build
+      - test:
+          requires:
+            - build
