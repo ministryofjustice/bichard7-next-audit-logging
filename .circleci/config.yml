@@ -8,8 +8,8 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Install dependencies
-          command: ./scripts/install-dependencies.sh
+          name: Install project dependencies
+          command: ./scripts/install-all.sh
       - persist_to_workspace:
           root: .
           paths:
