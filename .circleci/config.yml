@@ -55,7 +55,6 @@ jobs:
             - v1-npm-deps-{{ checksum "audit-log-api/package-lock.json" }}
             - v1-npm-deps-{{ checksum "audit-log-portal/package-lock.json" }}
       - run: ./scripts/install-all.sh
-      - run: ./scripts/build-all.sh dev
       - run: ./scripts/test-all.sh
       - store_test_results:
           path: ./shared/test-results/jest/
