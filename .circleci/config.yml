@@ -16,6 +16,7 @@ jobs:
             - v1-npm-deps-{{ checksum "incoming-message-handler/package-lock.json" }}
             - v1-npm-deps-{{ checksum "audit-log-api/package-lock.json" }}
             - v1-npm-deps-{{ checksum "audit-log-portal/package-lock.json" }}
+
       - run: ./scripts/install-all.sh
       - run: ./scripts/build-all.sh
       - run: npm run lint
@@ -41,12 +42,23 @@ jobs:
           key: v1-npm-deps-{{ checksum "audit-log-portal/package-lock.json" }}
           paths: audit-log-portal/node_modules
 
+      # Persist all dist/build folders to the workspace to reduce build time later
+      - persist_to_workspace:
+          root: .
+          paths:
+            - shared/dist
+            - incoming-message-handler/build
+            - audit-log-api/build
+            - audit-log-portal/.next
+
   test:
     docker:
       - image: cimg/node:15.9.0
     working_directory: ~
     steps:
       - checkout
+
+      # Restore any cached dependencies for the projects to reduce install time
       - restore_cache:
           key: v1-npm-deps-{{ checksum "package-lock.json" }}
 
@@ -63,8 +75,13 @@ jobs:
           key: v1-npm-deps-{{ checksum "audit-log-portal/package-lock.json" }}
 
       - run: ./scripts/install-all.sh
-      - run: ./scripts/build-all.sh
+
+      # Attach the workspace to retrieve the dist/build folders so we don't have to rebuild
+      - attach_workspace:
+          at: .
+
       - run: ./scripts/test-all.sh
+
       - store_test_results:
           path: ./shared/test-results/jest/
       - store_test_results:
