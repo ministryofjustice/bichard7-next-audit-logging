@@ -48,3 +48,5 @@ curl http://localhost:4566/restapis/ivoo55uouz/dev/_user_request_/messages
 # Response
 {messages:[]}
 ```
+
+> Note: The `_user_request_` part of the URL is hardcoded in [LocalStack](https://github.com/atlassian/localstack/blob/master/localstack/constants.py#L81).
