@@ -30,18 +30,6 @@ create_lambda "ParseMessage" "parseMessage.default"
 create_lambda "LogMessageReceipt" "logMessageReceipt.default"
 create_lambda "SendToBichard" "sendToBichard.default"
 
-# Create the DynamoDb table for persisting the AuditLog entity
-if [[ -z $(awslocal dynamodb list-tables | grep audit-log) ]]; then
-  awslocal dynamodb create-table \
-    --table-name audit-log \
-    --attribute-definitions \
-      AttributeName=messageId,AttributeType=S \
-    --key-schema \
-      AttributeName=messageId,KeyType=HASH \
-    --provisioned-throughput \
-      ReadCapacityUnits=10,WriteCapacityUnits=5
-fi
-
 awslocal s3 mb s3://incoming-messages
 
 # Setup the Step Function state machine to trigger our Lambda
