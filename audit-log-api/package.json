@@ -12,7 +12,7 @@
     "test:integration": "npm run setup:env && ../scripts/test.sh integration",
     "test:e2e": "npm run setup:env && ../scripts/test.sh e2e",
     "test:ci": "../scripts/test.sh ci",
-    "start": "npm run build:dev && npm run setup:env && ./environment/setup.sh"
+    "start": "npm run build:dev && npm run setup:env && ./scripts/deploy-infrastructure.sh"
   },
   "repository": {
     "type": "git",
