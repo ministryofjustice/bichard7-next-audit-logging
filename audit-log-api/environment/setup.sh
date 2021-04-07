@@ -2,8 +2,6 @@
 
 set -e
 
-INFRA_PATH=$PWD/environment/infrastructure
-
 function create_lambda {
   LAMBDA_NAME=$1
   HANDLER_NAME=$2
@@ -20,7 +18,7 @@ function create_lambda {
   # Configure the lambda with environment variables
   awslocal lambda update-function-configuration \
     --function-name $LAMBDA_NAME \
-    --environment file://$INFRA_PATH/env-vars.json
+    --environment file://$PWD/environment/env-vars.json
 }
 
 function create_rest_api {
@@ -33,7 +31,7 @@ function create_rest_api {
   if [[ -z $(awslocal apigateway get-rest-apis | grep $API_NAME) ]]; then
     awslocal apigateway create-rest-api \
         --name $API_NAME \
-        --region $REGION \
+        --region $REGION
 
     API_ID=$(awslocal apigateway get-rest-apis --query "items[?name==\`$API_NAME\`].id" --output text --region $REGION)
 
@@ -53,7 +51,7 @@ function create_rest_api {
         --resource-id $RESOURCE_ID \
         --http-method GET \
         --request-parameters "method.request.path.events=true" \
-        --authorization-type "NONE" \
+        --authorization-type "NONE"
 
     awslocal apigateway put-integration \
         --region $REGION \
@@ -63,12 +61,12 @@ function create_rest_api {
         --type AWS_PROXY \
         --integration-http-method POST \
         --uri arn:aws:apigateway:$REGION:lambda:path/2015-03-31/functions/$LAMBDA_ARN/invocations \
-        --passthrough-behavior WHEN_NO_MATCH \
+        --passthrough-behavior WHEN_NO_MATCH
 
     awslocal apigateway create-deployment \
         --region $REGION \
         --rest-api-id $API_ID \
-        --stage-name $STAGE \
+        --stage-name $STAGE
   fi
 
   API_ID=$(awslocal apigateway get-rest-apis --query "items[?name==\`$API_NAME\`].id" --output text --region $REGION)

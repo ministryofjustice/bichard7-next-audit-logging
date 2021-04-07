@@ -5,7 +5,7 @@ import Messages from "components/Messages"
 import NavBar from "components/NavBar"
 import Page from "components/Page"
 
-const Index = () => (
+const Index = ({ data }) => (
   <>
     <Head />
     <NavBar
@@ -21,7 +21,7 @@ const Index = () => (
     />
 
     <Page>
-      <Messages />
+      <Messages messages={data.messages || []} />
 
       <Link href="/test">
         Show Test Page
@@ -29,5 +29,20 @@ const Index = () => (
     </Page>
   </>
 )
+
+export async function getServerSideProps() {
+  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/messages`)
+  const data = await response.json()
+
+  if (!data) {
+    return {
+      notFound: true
+    }
+  }
+
+  return {
+    props: { data }
+  }
+}
 
 export default Index
