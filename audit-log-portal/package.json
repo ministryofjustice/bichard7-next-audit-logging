@@ -3,9 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "./scripts/setup-environment-variables.sh && next dev",
     "build": "next build",
-    "start": "next start",
+    "start": "./scripts/setup-environment-variables.sh && next start",
     "test": "../scripts/test.sh unit",
     "cypress:open": "cypress open",
     "cypress:run": "cypress run",

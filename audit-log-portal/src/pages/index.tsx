@@ -26,6 +26,10 @@ const Index = () => (
       <Link href="/test">
         Show Test Page
       </Link>
+
+      <p>
+        {`The API endpoint is at ${process.env.NEXT_PUBLIC_API_URL}`}
+      </p>
     </Page>
   </>
 )
