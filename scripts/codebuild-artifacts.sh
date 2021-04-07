@@ -2,6 +2,10 @@
 
 set -e
 
+############################################
+# Incoming Message Handler
+############################################
+
 # Zip each lambda file individually
 cd incoming-message-handler/build
 
@@ -25,4 +29,24 @@ aws s3 cp \
 aws s3 cp \
   ./incoming-message-handler/scripts/state-machine.json.tpl \
   s3://$S3_BUCKET/audit-logging/state-machine.json.tpl \
+  --acl bucket-owner-full-control
+
+############################################
+# Audit Log API
+############################################
+
+# Zip each lambda file individually
+cd audit-log-api/build
+
+zip getMessages.zip getMessages.js
+
+cd -
+
+# Upload all artifacts to the S3 bucket
+aws s3 cp \
+  ./audit-log-api/build/ \
+  s3://$S3_BUCKET/audit-logging/ \
+  --recursive \
+  --exclude "*" \
+  --include "*.zip" \
   --acl bucket-owner-full-control
