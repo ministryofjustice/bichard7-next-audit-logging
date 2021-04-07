@@ -7,5 +7,6 @@ phases:
 
   build:
     commands:
-      - /bin/sh ./scripts/codebuild-build.sh
+      - /bin/sh ./scripts/install-all.sh
+      - /bin/sh ./scripts/build-all.sh
       - /bin/sh ./scripts/codebuild-artifacts.sh
