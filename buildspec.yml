@@ -3,10 +3,10 @@ version: 0.2
 phases:
   install:
     commands:
-      - /bin/sh ./scripts/codebuild-install.sh
+      - /bin/bash ./scripts/codebuild-install.sh
 
   build:
     commands:
-      - /bin/sh ./scripts/install-all.sh
-      - /bin/sh ./scripts/build-all.sh
-      - /bin/sh ./scripts/codebuild-artifacts.sh
+      - /bin/bash ./scripts/install-all.sh
+      - /bin/bash ./scripts/build-all.sh
+      - /bin/bash ./scripts/codebuild-artifacts.sh
