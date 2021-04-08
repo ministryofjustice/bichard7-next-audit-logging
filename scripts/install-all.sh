@@ -1,6 +1,8 @@
-#!/bin/bash
+#!/bin/sh
 
 set -e
+
+projects=$(cat scripts/projects)
 
 echo Installing root dependencies...
 npm i
@@ -8,8 +10,8 @@ npm i
 # Move into a sub directory so the for loop can jump up and down through project folders
 cd scripts
 
-while IFS= read -r project; do
-  echo "Installing $project dependencies..."
-  cd ../$project
+for p in ${projects}; do
+  echo "Installing $p dependencies..."
+  cd ../$p
   npm i
-done < "projects"
+done
