@@ -2,7 +2,13 @@
 
 set -e
 
-projects=$(cat scripts/projects)
+# projects=$(cat scripts/projects)
+projects=(
+  shared
+  incoming-message-handler
+  audit-log-api
+  audit-log-portal
+)
 
 # Move into a sub directory so the for loop can jump up and down through project folders
 cd scripts
