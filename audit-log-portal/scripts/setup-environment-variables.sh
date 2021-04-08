@@ -5,7 +5,7 @@ set -e
 REGION=us-east-1
 STAGE=dev
 HOST=http://localhost:4566
-API_NAME=GetMessages
+API_NAME=AuditLogApi
 
 # Note: We ignore this from source control so we need to generate it fresh.
 # This also allows us to update the API parameter in case it has changed.
