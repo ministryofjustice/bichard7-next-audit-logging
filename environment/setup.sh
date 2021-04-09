@@ -9,4 +9,4 @@ cd environment
 docker-compose -f docker-compose.yml up -d
 
 ./wait.sh
-./setup-common-infrastructure.sh
+./deploy-common-infrastructure.sh
