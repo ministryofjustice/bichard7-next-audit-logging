@@ -1,5 +1,6 @@
 import React from "react"
 import styles from "./Message.module.css"
+import DateTime from "components/DateTime"
 
 interface Props {
   message: {
@@ -35,7 +36,7 @@ const Message = ({ message }: Props) => (
           Received Date
         </label>
         <p>
-          {message.receivedDate.toString()}
+          <DateTime date={message.receivedDate} />
         </p>
       </div>
     </div>

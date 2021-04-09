@@ -12,9 +12,11 @@
     "test:ci": "../scripts/test.sh ci"
   },
   "dependencies": {
+    "moment": "^2.29.1",
     "next": "^10.1.2",
     "react": "^17.0.2",
-    "react-dom": "^17.0.2"
+    "react-dom": "^17.0.2",
+    "react-moment": "^1.1.1"
   },
   "devDependencies": {
     "@babel/cli": "^7.13.14",
