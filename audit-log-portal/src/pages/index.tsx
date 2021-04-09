@@ -1,5 +1,4 @@
 import Image from "next/image"
-import Link from "next/link"
 import Head from "components/Head"
 import Messages from "components/Messages"
 import NavBar from "components/NavBar"
@@ -22,10 +21,6 @@ const Index = ({ data }) => (
 
     <Page>
       <Messages messages={data.messages || []} />
-
-      <Link href="/test">
-        Show Test Page
-      </Link>
     </Page>
   </>
 )

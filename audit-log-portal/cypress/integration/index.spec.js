@@ -8,14 +8,6 @@ describe("Index Page", () => {
       it("should visit the home page", () => {
         cy.visit("/")
       })
-
-      describe("When you click the test button", () => {
-        it("should navigate to the test page", () => {
-          cy.get("a").contains("Show Test Page").click()
-
-          cy.url().should("include", "/test")
-        })
-      })
     })
   })
 })
