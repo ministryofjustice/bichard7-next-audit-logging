@@ -16,6 +16,12 @@ const messages = [
 ]
 
 describe("<Messages />", () => {
+  it("should not render any <Message /> component", () => {
+    const component = shallow(<Messages messages={[]} />)
+    expect(component.find(Message)).toHaveLength(0)
+    expect(component.contains("No messages")).toBe(true)
+  })
+
   it("should render 2 <Message /> components", () => {
     const component = shallow(<Messages messages={messages} />)
     expect(component.find(Message)).toHaveLength(2)
