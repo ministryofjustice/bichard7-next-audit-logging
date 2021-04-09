@@ -33,11 +33,11 @@
   "scripts": {
     "build": "rimraf build && webpack --config ./.webpack/webpack.prod.js",
     "build:dev": "rimraf build && webpack --config ./.webpack/webpack.dev.js",
-    "setup:env": "cd .. && ./environment/setup.sh && cd -",
-    "test": "npm run setup:env && ./scripts/setup-environment.sh && ../scripts/test.sh",
+    "setup:env": "cd .. && ./environment/setup.sh && cd - && ./scripts/deploy-infrastructure.sh",
+    "test": "npm run setup:env && ../scripts/test.sh",
     "test:unit": "../scripts/test.sh unit",
     "test:integration": "npm run setup:env && ../scripts/test.sh integration",
-    "test:e2e": "npm run setup:env && ./scripts/setup-environment.sh && ../scripts/test.sh e2e",
+    "test:e2e": "npm run setup:env && ../scripts/test.sh e2e",
     "test:ci": "../scripts/test.sh ci"
   },
   "dependencies": {
