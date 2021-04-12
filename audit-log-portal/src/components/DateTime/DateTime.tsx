@@ -1,5 +1,5 @@
 import React from "react"
-import Moment from 'react-moment'
+import { format } from "date-fns"
 
 interface Props {
   date?: Date | string
@@ -9,12 +9,10 @@ const DateTime = ({ date }: Props) => {
   if (!date) {
     return (<></>)
   }
-  
+
   const dateObject = new Date(date)
 
-  return (
-    <Moment date={dateObject} format="DD/MM/YYYY HH:mm:ss" />
-  )
+  return (<time>{format(dateObject, "dd/MM/yyyy HH:mm:ss")}</time>)
 }
 
 export default DateTime
