@@ -9,7 +9,7 @@ describe("<DateTime />", () => {
     expect(component.html()).toContain(expectedDateString)
   })
 
-  it("should not render when date has not value", () => {
+  it("should not render when date has no value", () => {
     const component = shallow(<DateTime date={null} />)
     expect(component.html()).toBe("")
   })
