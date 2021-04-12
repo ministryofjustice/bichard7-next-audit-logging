@@ -1,8 +1,11 @@
-import { rest } from "msw"
-import messages from "./data/messages"
+const { rest } = require("msw")
+const { messages } = require("./data/messages")
+const baseApiUrl = 'http*://*/restapis/*'
 
-export const handlers = [
-  rest.get("https://audit-log-api.dev/messages", (req, res, ctx) => {
-    return res(ctx.json({ messages: messages }));
-  })
-];
+module.exports = {
+  handlers: [
+    rest.get(`${baseApiUrl}/messages`, (req, res, ctx) => {
+      return res(ctx.json({ messages: messages }));
+    })
+  ]
+}
