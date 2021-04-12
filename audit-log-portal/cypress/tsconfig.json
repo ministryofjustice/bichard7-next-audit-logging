@@ -1,11 +1,7 @@
 {
   "extends": "../tsconfig",
   "compilerOptions": {
-    "types": [
-      "cypress"
-    ]
+    "types": ["cypress"]
   },
-  "include": [
-    "**/*.*"
-  ]
+  "include": ["**/*.*"]
 }

@@ -5,10 +5,6 @@ interface Props {
   children: ReactNode
 }
 
-const Page = ({ children }: Props) => (
-  <main className={styles.page}>
-    {children}
-  </main>
-)
+const Page = ({ children }: Props) => <main className={styles.page}>{children}</main>
 
 export default memo(Page)
