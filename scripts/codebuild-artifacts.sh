@@ -58,7 +58,7 @@ aws s3 cp \
 # Add the public and .next folders to a single zip
 cd audit-log-portal
 
-zip -r audit-log-portal.zip .next/ public/
+zip -r audit-log-portal.zip .next/ public/ host.js package.json node_modules/
 
 # Upload the package to the the artifact bucket
 aws s3 cp \
