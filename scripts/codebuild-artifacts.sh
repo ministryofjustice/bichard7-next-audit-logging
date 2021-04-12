@@ -50,3 +50,18 @@ aws s3 cp \
   --exclude "*" \
   --include "*.zip" \
   --acl bucket-owner-full-control
+
+############################################
+# Audit Log Portal
+############################################
+
+# Add the public and .next folders to a single zip
+cd audit-log-portal
+
+zip -r audit-log-portal.zip .next/ public/
+
+# Upload the package to the the artifact bucket
+aws s3 cp \
+  ./audit-log-portal.zip \
+  s3://$S3_BUCKET/audit-logging/ \
+  --acl bucket-owner-full-control
