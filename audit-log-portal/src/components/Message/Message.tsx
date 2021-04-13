@@ -1,5 +1,7 @@
 import React from "react"
 import styles from "./Message.module.css"
+import DateTime from "components/DateTime"
+import classNames from "classnames"
 
 interface Props {
   message: {
@@ -10,7 +12,7 @@ interface Props {
 }
 
 const Message = ({ message }: Props) => (
-  <div className={styles.container}>
+  <div className={classNames(styles.container, "row")}>
     <div className={styles.innerContainer}>
       <div className={styles.informationBlock}>
         <label className={styles.label}>
@@ -35,7 +37,7 @@ const Message = ({ message }: Props) => (
           Received Date
         </label>
         <p>
-          {message.receivedDate.toString()}
+          <DateTime date={message.receivedDate} />
         </p>
       </div>
     </div>

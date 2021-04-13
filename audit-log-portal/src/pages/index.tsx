@@ -1,5 +1,4 @@
 import Image from "next/image"
-import Link from "next/link"
 import Head from "components/Head"
 import Messages from "components/Messages"
 import NavBar from "components/NavBar"
@@ -9,23 +8,12 @@ const Index = ({ data }) => (
   <>
     <Head />
     <NavBar
-      logo={(
-        <Image
-          src="/logo.png"
-          alt="Bichard7 Audit Log Portal"
-          width="64"
-          height="64"
-        />
-      )}
+      logo={<Image src="/logo.png" alt="Bichard7 Audit Log Portal" width="64" height="64" />}
       title="Bichard7 Audit Log Portal"
     />
 
     <Page>
       <Messages messages={data.messages || []} />
-
-      <Link href="/test">
-        Show Test Page
-      </Link>
     </Page>
   </>
 )
