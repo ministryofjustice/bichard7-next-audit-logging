@@ -10,8 +10,8 @@ const message = {
 describe("<Message />", () => {
   it("should render <Message /> when message has value", () => {
     const component = shallow(<Message message={message} />)
-    expect(component.contains("Message1")).toBe(true)
-    expect(component.contains("Case1000")).toBe(true)
+    expect(component.text()).toContain("Message1")
+    expect(component.text()).toContain("Case1000")
     expect(component.html()).toContain("01/05/2021 10:25:53")
   })
 })
