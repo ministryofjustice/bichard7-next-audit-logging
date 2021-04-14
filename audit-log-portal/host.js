@@ -18,7 +18,7 @@ const envVars = JSON.stringify({
   NEXT_PUBLIC_API_URL: process.env.AUDIT_LOG_API_URL
 })
 
-// fs.writeFileSync(".env.local", envVars)
+fs.writeFileSync(".env.local", envVars)
 
 // Setup the server and which files to host
 const nextRequesthost = app.getRequestHandler()
