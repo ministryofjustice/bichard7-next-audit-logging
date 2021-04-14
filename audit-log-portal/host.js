@@ -9,8 +9,13 @@ const app = require("next")({
 })
 
 // Create the environment variables file
+if (!process.env.AUDIT_LOG_API_URL) {
+  console.error("Missing environment variable AUDIT_LOG_API_URL")
+  process.exit(1)
+}
+
 const envVars = JSON.stringify({
-  NEXT_PUBLIC_API_URL=process.env.AUDIT_LOG_API_URL
+  NEXT_PUBLIC_API_URL: process.env.AUDIT_LOG_API_URL
 })
 
 fs.writeFileSync(".env.local", envVars)
