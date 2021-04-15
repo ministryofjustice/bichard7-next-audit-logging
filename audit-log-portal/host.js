@@ -2,23 +2,16 @@ const host = require("serverless-http")
 const server = require("restana")()
 const files = require("serve-static")
 const path = require("path")
-const fs = require("fs")
 
 const app = require("next")({
   dev: false
 })
 
-// Create the environment variables file
-if (!process.env.AUDIT_LOG_API_URL) {
-  console.error("Missing environment variable AUDIT_LOG_API_URL")
+// Verify the required env vars exist
+if (!process.env.NEXT_PUBLIC_API_URL) {
+  console.error("Missing environment variable NEXT_PUBLIC_API_URL")
   process.exit(1)
 }
-
-const envVars = JSON.stringify({
-  NEXT_PUBLIC_API_URL: process.env.AUDIT_LOG_API_URL
-})
-
-fs.writeFileSync(".env.local", envVars)
 
 // Setup the server and which files to host
 const nextRequesthost = app.getRequestHandler()
