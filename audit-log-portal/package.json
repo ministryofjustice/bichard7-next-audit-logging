@@ -10,7 +10,7 @@
     "cypress:open": "cypress open",
     "cypress:run": "cypress run",
     "test:ci": "../scripts/test.sh ci",
-    "host": "npm run build && node scripts/startHost.mjs"
+    "host": "npm run build && nodemon scripts/startHost.mjs"
   },
   "dependencies": {
     "next": "^10.1.2",
@@ -21,6 +21,7 @@
     "serverless-http": "^2.7.0"
   },
   "devDependencies": {
+    "@aws-sdk/client-api-gateway": "^3.13.0",
     "@babel/cli": "^7.13.14",
     "@babel/core": "^7.13.14",
     "@types/jest": "^26.0.22",
@@ -30,9 +31,11 @@
     "babel-jest": "^26.6.3",
     "cypress": "^6.8.0",
     "enzyme": "^3.11.0",
+    "express": "^4.17.1",
     "identity-obj-proxy": "^3.0.0",
     "jest": "^26.6.3",
     "jest-junit": "^12.0.0",
+    "nodemon": "^2.0.7",
     "ts-jest": "^26.5.4",
     "typescript": "^4.2.3"
   }

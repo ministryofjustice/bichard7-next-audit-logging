@@ -1,11 +1,14 @@
 import path, { dirname } from "path"
 import { fileURLToPath } from "url"
 import shell from "shelljs"
+import express from "express"
 
-import { LambdaClient, GetFunctionCommand, CreateFunctionCommand } from "@aws-sdk/client-lambda"
+import { LambdaClient, GetFunctionCommand, CreateFunctionCommand, InvokeCommand } from "@aws-sdk/client-lambda"
+import { APIGatewayClient, GetRestApisCommand, GetStagesCommand } from "@aws-sdk/client-api-gateway"
 
 const modulePath = dirname(fileURLToPath(import.meta.url))
 const localStackUrl = process.env.LOCALSTACK_URL || "http://localhost:4566"
+const localStackInternalUrl = process.env.LOCALSTACK_INTERNAL_URL || "http://localstack_main:4566"
 
 // Make sure the local infrastructure is running
 // Note: We need to move into the environment directory to allow the shell script to run properly.
@@ -16,8 +19,37 @@ const envSetupFilePath = path.resolve(modulePath, "../../environment/setup.sh")
 const { stdout } = shell.exec(envSetupFilePath)
 console.log(stdout)
 
+// Get the ID and Stage Name for the Audit Log API
+const apiGatewayClient = new APIGatewayClient({
+  endpoint: localStackUrl,
+  region: "us-east-1"
+})
+
+const getRestApisCommand = new GetRestApisCommand({})
+const restApisResult = await apiGatewayClient.send(getRestApisCommand)
+const restApis = (restApisResult && restApisResult.items) || []
+
+const auditLogApi = restApis.find((api) => api.name === "AuditLogApi")
+if (!auditLogApi) {
+  console.error("The Audit Log API is not running")
+  process.exit(1)
+}
+
+const getStagesCommand = new GetStagesCommand({
+  restApiId: auditLogApi.id
+})
+
+const stagesResult = await apiGatewayClient.send(getStagesCommand)
+const stages = (stagesResult && stagesResult.item) || []
+const stageName = stages.length === 0 ? undefined : stages[0].stageName
+
+if (!stageName) {
+  console.error("Failed to find a Stage for the Audit Log API")
+  process.exit(1)
+}
+
 // Create a local lambda in the infrastructure
-const client = new LambdaClient({
+const lambdaClient = new LambdaClient({
   endpoint: localStackUrl,
   region: "us-east-1"
 })
@@ -27,11 +59,18 @@ const getFunctionArn = async (functionName) => {
     FunctionName: functionName
   })
 
-  const result = await client.send(command)
-  return result && result.Configuration && result.Configuration.FunctionArn
+  try {
+    const result = await lambdaClient.send(command)
+    console.log(`Function ARN = ${result.Configuration.FunctionArn}`)
+    return result && result.Configuration && result.Configuration.FunctionArn
+  } catch (error) {
+    // The error is likely because the function does not exist
+    // We could check for the returned httpStatusCode 404 here
+    return undefined
+  }
 }
 
-const createFunction = async (functionName) => {
+const createFunction = async (functionName, apiId, stageName) => {
   const command = new CreateFunctionCommand({
     FunctionName: functionName,
     Code: {
@@ -40,10 +79,16 @@ const createFunction = async (functionName) => {
     },
     Handler: "host.handler",
     Runtime: "nodejs12.x",
-    Role: "whatever"
+    Role: "whatever",
+    Timeout: 10,
+    Environment: {
+      Variables: {
+        NEXT_PUBLIC_API_URL: `${localStackInternalUrl}/restapis/${apiId}/${stageName}/_user_request_`
+      }
+    }
   })
 
-  const result = await client.send(command)
+  const result = await lambdaClient.send(command)
   const lambdaArn = result && result.FunctionArn
 
   if (!lambdaArn) {
@@ -54,7 +99,31 @@ const createFunction = async (functionName) => {
   return lambdaArn
 }
 
-const lambdaArn = (await getFunctionArn("portal")) || (await createFunction("portal"))
+const invokeFunction = async (functionName) => {
+  const command = new InvokeCommand({
+    FunctionName: functionName
+  })
+
+  const result = await lambdaClient.send(command)
+  if (result.FunctionError) {
+    console.error(result.FunctionError)
+  } else if (result.StatusCode < 200 || result.StatusCode >= 400) {
+    console.error(result.LogResult)
+  } else {
+    const decoder = new TextDecoder()
+    return decoder.decode(result.Payload)
+  }
+}
+
+const lambdaArn = (await getFunctionArn("portal")) || (await createFunction("portal", auditLogApi.id, stageName))
 console.log(`Lambda ARN: ${lambdaArn}`)
 
 // Configure express.js as a proxy server
+const app = express()
+
+app.get("/", async (_, response) => {
+  const result = await invokeFunction("portal")
+  response.send(result)
+})
+
+app.listen(8080, () => console.log("Portal host proxy listening on port 8080"))
