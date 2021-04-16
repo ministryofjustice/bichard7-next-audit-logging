@@ -1,7 +1,8 @@
 import path, { dirname } from "path"
 import { fileURLToPath } from "url"
 import shell from "shelljs"
-import express from "express"
+import lambdaProxy from "http-lambda-proxy"
+import serverFactory from "restana"
 
 import { LambdaClient, GetFunctionCommand, CreateFunctionCommand, InvokeCommand } from "@aws-sdk/client-lambda"
 import { APIGatewayClient, GetRestApisCommand, GetStagesCommand } from "@aws-sdk/client-api-gateway"
@@ -99,31 +100,29 @@ const createFunction = async (functionName, apiId, stageName) => {
   return lambdaArn
 }
 
-const invokeFunction = async (functionName) => {
-  const command = new InvokeCommand({
-    FunctionName: functionName
-  })
-
-  const result = await lambdaClient.send(command)
-  if (result.FunctionError) {
-    console.error(result.FunctionError)
-  } else if (result.StatusCode < 200 || result.StatusCode >= 400) {
-    console.error(result.LogResult)
-  } else {
-    const decoder = new TextDecoder()
-    return decoder.decode(result.Payload)
-  }
-}
-
 const lambdaArn = (await getFunctionArn("portal")) || (await createFunction("portal", auditLogApi.id, stageName))
 console.log(`Lambda ARN: ${lambdaArn}`)
 
-// Configure express.js as a proxy server
-const app = express()
-
-app.get("/", async (_, response) => {
-  const result = await invokeFunction("portal")
-  response.send(result)
+const proxy = lambdaProxy({
+  target: "portal",
+  region: "us-east-1",
+  endpoint: localStackUrl
 })
 
-app.listen(8080, () => console.log("Portal host proxy listening on port 8080"))
+const server = serverFactory()
+server.all("/*", (request, response) => {
+  // Add in a custom header to the request to prevent the AWS infrastructure from
+  // modifying the content type on the response to gzip
+  // See: https://stackoverflow.com/a/48217379/308012
+  const newRequest = {
+    ...request,
+    headers: {
+      ...request.headers,
+      "Accept-Encoding": "identity"
+    }
+  }
+
+  proxy(newRequest, response, request.url, {})
+})
+
+server.start(8080).then(() => console.log("Portal host proxy listening on port 8080"))
