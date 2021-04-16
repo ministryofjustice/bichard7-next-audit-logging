@@ -9,7 +9,8 @@
     "test": "../scripts/test.sh unit",
     "cypress:open": "cypress open",
     "cypress:run": "cypress run",
-    "test:ci": "../scripts/test.sh ci"
+    "test:ci": "../scripts/test.sh ci",
+    "host": "./scripts/launch-host.sh"
   },
   "dependencies": {
     "next": "^10.1.2",
