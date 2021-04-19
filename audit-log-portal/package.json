@@ -10,7 +10,7 @@
     "cypress:open": "cypress open",
     "cypress:run": "cypress run",
     "test:ci": "../scripts/test.sh ci",
-    "host": "npm run build && nodemon scripts/startHost.mjs"
+    "host": "npm run build && nodemon scripts/host/start.mjs"
   },
   "dependencies": {
     "next": "^10.1.2",
