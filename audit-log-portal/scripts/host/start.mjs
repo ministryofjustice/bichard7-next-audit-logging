@@ -2,7 +2,7 @@ import lambdaProxy from "http-lambda-proxy"
 import serverFactory from "restana"
 import { localStackUrl, region } from "./config.mjs"
 import { setupEnvironment } from "./environment.mjs"
-import { getApi } from "./api.mjs"
+import { getApiDetails, isApiRunning, launchApi } from "./api.mjs"
 import { getFunctionArn, createFunction } from "./hostLambda.mjs"
 
 // Make sure the local infrastructure is running
@@ -10,9 +10,11 @@ import { getFunctionArn, createFunction } from "./hostLambda.mjs"
 // This will be done relative to the portal root directory.
 setupEnvironment()
 
-const { apiId, stageName } = getApi()
+if (!(await isApiRunning())) {
+  await launchApi()
+}
 
-// TODO: Launch the API if it is not already running.
+const { apiId, stageName } = await getApiDetails()
 
 const hostLambdaFunctionName = "portal"
 if (!(await getFunctionArn(hostLambdaFunctionName))) {

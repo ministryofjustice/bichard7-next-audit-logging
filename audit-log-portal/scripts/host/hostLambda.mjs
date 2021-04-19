@@ -30,7 +30,7 @@ const createFunction = async (functionName, apiId, stageName) => {
     FunctionName: functionName,
     Code: {
       S3Bucket: "__local__",
-      S3Key: path.resolve(modulePath, "..")
+      S3Key: path.resolve(modulePath, "../..")
     },
     Handler: "host.handler",
     Runtime: "nodejs12.x",

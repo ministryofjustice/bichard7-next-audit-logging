@@ -1,5 +1,8 @@
+import path from "path"
+import shell from "shelljs"
 import { APIGatewayClient, GetRestApisCommand, GetStagesCommand } from "@aws-sdk/client-api-gateway"
 import { localStackUrl, region } from "./config.mjs"
+import modulePath from "./modulePath.mjs"
 
 const apiName = "AuditLogApi"
 
@@ -14,7 +17,11 @@ const getApi = async () => {
   const restApisResult = await apiGatewayClient.send(getRestApisCommand)
   const restApis = (restApisResult && restApisResult.items) || []
 
-  const auditLogApi = restApis.find((api) => api.name === apiName)
+  return restApis.find((api) => api.name === apiName)
+}
+
+const getApiDetails = async () => {
+  const auditLogApi = await getApi()
   if (!auditLogApi) {
     throw new Error("The Audit Log API is not running")
   }
@@ -37,4 +44,19 @@ const getApi = async () => {
   }
 }
 
-export { getApi }
+const isApiRunning = async () => {
+  const auditLogApi = await getApi()
+  return !!auditLogApi
+}
+
+const launchApi = async () => {
+  // Move the path to the Audit Log API root directory
+  process.chdir(modulePath)
+  process.chdir("../../../audit-log-api")
+
+  const launchApiScriptPath = path.resolve(modulePath, "../../../audit-log-api/scripts/deploy-infrastructure.sh")
+  const { stdout } = shell.exec(launchApiScriptPath)
+  console.log(stdout)
+}
+
+export { getApiDetails, isApiRunning, launchApi }
