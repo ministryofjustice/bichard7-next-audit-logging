@@ -1,4 +1,3 @@
-import React from "react"
 import Message from "components/Message"
 
 interface Props {
@@ -9,17 +8,17 @@ interface Props {
   }[]
 }
 
-const Messages = ({ messages }: Props) => (
+const Messages = ({ messages }: Props): JSX.Element => (
   <>
     <h3>Messages</h3>
 
     {messages.length === 0 && (
       <p>
-        <i>{`No messages`}</i>
+        <i>No messages</i>
       </p>
     )}
 
-    {messages.length > 0 && messages.map((message, index) => <Message key={index} message={message} />)}
+    {messages.length > 0 && messages.map((message) => <Message key={message.messageId} message={message} />)}
   </>
 )
 

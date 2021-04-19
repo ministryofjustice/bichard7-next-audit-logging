@@ -2,12 +2,12 @@ import { memo, ReactNode } from "react"
 import styles from "./NavBar.module.css"
 
 interface Props {
-  logo: ReactNode
+  logo: JSX.Element
   title: string
   children?: ReactNode
 }
 
-const NavBar = ({ logo, title, children }: Props) => (
+const NavBar = ({ logo, title, children }: Props): JSX.Element => (
   <nav className={styles.navBar}>
     {logo}
 
@@ -16,5 +16,9 @@ const NavBar = ({ logo, title, children }: Props) => (
     {children}
   </nav>
 )
+
+NavBar.defaultProps = {
+  children: null
+}
 
 export default memo(NavBar)

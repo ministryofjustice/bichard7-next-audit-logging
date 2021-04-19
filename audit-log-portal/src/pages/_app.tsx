@@ -1,6 +1,7 @@
 import { AppProps } from "next/app"
 import "styles/globals.css"
 
-const App = ({ Component, pageProps }: AppProps) => <Component {...pageProps} />
+/* eslint-disable react/jsx-props-no-spreading */
+const App = ({ Component, pageProps }: AppProps): JSX.Element => <Component {...pageProps} />
 
 export default App
