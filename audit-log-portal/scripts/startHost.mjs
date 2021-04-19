@@ -4,7 +4,7 @@ import shell from "shelljs"
 import lambdaProxy from "http-lambda-proxy"
 import serverFactory from "restana"
 
-import { LambdaClient, GetFunctionCommand, CreateFunctionCommand, InvokeCommand } from "@aws-sdk/client-lambda"
+import { LambdaClient, GetFunctionCommand, CreateFunctionCommand } from "@aws-sdk/client-lambda"
 import { APIGatewayClient, GetRestApisCommand, GetStagesCommand } from "@aws-sdk/client-api-gateway"
 
 const modulePath = dirname(fileURLToPath(import.meta.url))
