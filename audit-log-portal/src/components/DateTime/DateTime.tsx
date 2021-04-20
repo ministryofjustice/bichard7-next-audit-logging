@@ -4,7 +4,7 @@ interface Props {
   date?: Date | string
 }
 
-const DateTime = ({ date }: Props): JSX.Element => {
+const DateTime = ({ date }: Props) => {
   if (!date) {
     return <></>
   }
@@ -12,10 +12,6 @@ const DateTime = ({ date }: Props): JSX.Element => {
   const dateObject = new Date(date)
 
   return <time>{format(dateObject, "dd/MM/yyyy HH:mm:ss")}</time>
-}
-
-DateTime.defaultProps = {
-  date: null
 }
 
 export default DateTime

@@ -10,7 +10,7 @@ interface Props {
   }
 }
 
-const Index = ({ data }: Props): JSX.Element => (
+const Index = ({ data }: Props) => (
   <>
     <Head />
     <NavBar

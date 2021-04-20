@@ -10,7 +10,7 @@ interface Props {
   }
 }
 
-const Message = ({ message }: Props): JSX.Element => (
+const Message = ({ message }: Props) => (
   <div className={classNames(styles.container, "row")}>
     <h1>123</h1>
     <h1>321</h1>

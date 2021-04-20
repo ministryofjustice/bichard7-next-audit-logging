@@ -8,13 +8,13 @@ interface Props {
   }[]
 }
 
-const Messages = ({ messages }: Props): JSX.Element => (
+const Messages = ({ messages }: Props) => (
   <>
     <h3>Messages</h3>
 
     {messages.length === 0 && (
       <p>
-        <i>No messages</i>
+        <i>{`No messages`}</i>
       </p>
     )}
 

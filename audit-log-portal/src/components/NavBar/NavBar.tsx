@@ -7,7 +7,7 @@ interface Props {
   children?: ReactNode
 }
 
-const NavBar = ({ logo, title, children }: Props): JSX.Element => (
+const NavBar = ({ logo, title, children }: Props) => (
   <nav className={styles.navBar}>
     {logo}
 
@@ -16,9 +16,5 @@ const NavBar = ({ logo, title, children }: Props): JSX.Element => (
     {children}
   </nav>
 )
-
-NavBar.defaultProps = {
-  children: null
-}
 
 export default memo(NavBar)
