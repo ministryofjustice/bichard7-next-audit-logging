@@ -1,5 +1,5 @@
 import { memo } from "react"
-import { default as HtmlHead } from "next/head"
+import HtmlHead from "next/head"
 
 const Head = () => (
   <HtmlHead>

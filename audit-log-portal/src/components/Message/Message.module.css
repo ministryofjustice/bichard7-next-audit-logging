@@ -3,12 +3,12 @@
   margin-bottom: 1rem;
 }
 
-.innerContainer {
+.inner-container {
   display: flex;
   flex-direction: row;
 }
 
-.informationBlock {
+.information-block {
   margin-right: 2rem;
 }
 

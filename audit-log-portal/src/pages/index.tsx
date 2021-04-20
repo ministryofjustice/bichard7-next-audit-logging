@@ -4,7 +4,13 @@ import Messages from "components/Messages"
 import NavBar from "components/NavBar"
 import Page from "components/Page"
 
-const Index = ({ data }) => (
+interface Props {
+  data: {
+    messages: []
+  }
+}
+
+const Index = ({ data }: Props) => (
   <>
     <Head />
     <NavBar
@@ -18,7 +24,12 @@ const Index = ({ data }) => (
   </>
 )
 
-export async function getServerSideProps() {
+interface ApiResponse {
+  notFound: boolean
+  props?: Props
+}
+
+export async function getServerSideProps(): Promise<ApiResponse> {
   const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/messages`)
   const data = await response.json()
 
@@ -29,6 +40,7 @@ export async function getServerSideProps() {
   }
 
   return {
+    notFound: false,
     props: { data }
   }
 }
