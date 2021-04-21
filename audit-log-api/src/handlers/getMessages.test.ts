@@ -25,7 +25,7 @@ describe("getMessages()", () => {
     const messages = await getMessages()
     const actualResponse = <APIGatewayProxyResult>messages
 
-    expect(actualResponse.statusCode).toBe(HttpStatusCode.Ok)
+    expect(actualResponse.statusCode).toBe(HttpStatusCode.ok)
     expect(actualResponse.body).toEqual(expectedSuccessfulBodyResponse)
   })
 
@@ -36,7 +36,7 @@ describe("getMessages()", () => {
     const messages = await getMessages()
     const actualResponse = <APIGatewayProxyResult>messages
 
-    expect(actualResponse.statusCode).toBe(HttpStatusCode.InternalServerError)
+    expect(actualResponse.statusCode).toBe(HttpStatusCode.internalServerError)
     expect(actualResponse.body).toEqual(expectedErrorBodyResponse)
   })
 })

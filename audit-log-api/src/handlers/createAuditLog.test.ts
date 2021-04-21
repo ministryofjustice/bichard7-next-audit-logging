@@ -18,7 +18,7 @@ describe("createAuditlog()", () => {
 
     const createAuditLogResponse = await createAuditLog(<APIGatewayProxyEvent>{ body: JSON.stringify(log) })
     const actualResponse = <APIGatewayProxyResult>createAuditLogResponse
-    expect(actualResponse.statusCode).toBe(HttpStatusCode.Created)
+    expect(actualResponse.statusCode).toBe(HttpStatusCode.created)
     expect(actualResponse.body).toBe(expectedSuccessfulBodyResponse)
   })
 
@@ -33,7 +33,7 @@ describe("createAuditlog()", () => {
     const createAuditLogResponse = await createAuditLog(<APIGatewayProxyEvent>{ body: JSON.stringify(log) })
     const actualResponse = <APIGatewayProxyResult>createAuditLogResponse
 
-    expect(actualResponse.statusCode).toBe(HttpStatusCode.Conflict)
+    expect(actualResponse.statusCode).toBe(HttpStatusCode.conflict)
     expect(actualResponse.body).toBe(expectedErrorBodyResponse)
   })
 })

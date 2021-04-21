@@ -14,13 +14,13 @@ export default async function createAuditLog(event: APIGatewayProxyEvent): Promi
 
   if (isError(result) && isConditionalExpressionViolationError(result)) {
     return createJSONApiResult({
-      statusCode: HttpStatusCode.Conflict,
+      statusCode: HttpStatusCode.conflict,
       body: `A message with Id ${log.messageId} already exists in the database`
     })
   }
 
   return createJSONApiResult({
-    statusCode: HttpStatusCode.Created,
+    statusCode: HttpStatusCode.created,
     body: "Created"
   })
 }

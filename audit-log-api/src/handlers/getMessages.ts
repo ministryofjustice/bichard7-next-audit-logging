@@ -13,13 +13,13 @@ export default async function getMessages(): PromiseResult<APIGatewayProxyResult
 
   if (isError(messages)) {
     return createJSONApiResult({
-      statusCode: HttpStatusCode.InternalServerError,
+      statusCode: HttpStatusCode.internalServerError,
       body: String(messages)
     })
   }
 
   return createJSONApiResult({
-    statusCode: HttpStatusCode.Ok,
+    statusCode: HttpStatusCode.ok,
     body: { messages }
   })
 }
