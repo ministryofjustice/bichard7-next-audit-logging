@@ -1,4 +1,4 @@
-import { isError, PromiseResult, AuditLogDynamoGateway } from "shared"
+import { isError, PromiseResult, AuditLogDynamoGateway, HttpStatusCode } from "shared"
 import { APIGatewayProxyResult } from "aws-lambda"
 import createDynamoDbConfig from "src/createDynamoDbConfig"
 import FetchMessagesUseCase from "src/use-cases"
@@ -11,13 +11,13 @@ export default async function getMessages(): PromiseResult<APIGatewayProxyResult
 
   if (isError(messages)) {
     return {
-      statusCode: 500,
+      statusCode: HttpStatusCode.InternalServerError,
       body: String(messages)
     }
   }
 
   return {
-    statusCode: 200,
+    statusCode: HttpStatusCode.Ok,
     body: JSON.stringify({ messages })
   }
 }

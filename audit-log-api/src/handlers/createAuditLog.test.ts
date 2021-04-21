@@ -1,5 +1,5 @@
 import { APIGatewayProxyResult } from "aws-lambda"
-import { AuditLog, AuditLogDynamoGateway } from "shared"
+import { AuditLog, AuditLogDynamoGateway, HttpStatusCode } from "shared"
 import createAuditLog from "./createAuditLog"
 
 const log = new AuditLog("1", new Date(2021, 10, 12), "XML")
@@ -18,7 +18,7 @@ describe("createAuditlog()", () => {
 
     const createAuditLogResponse = await createAuditLog(log)
     const actualResponse = <APIGatewayProxyResult>createAuditLogResponse
-    expect(actualResponse.statusCode).toBe(201)
+    expect(actualResponse.statusCode).toBe(HttpStatusCode.Created)
     expect(actualResponse.body).toBe(expectedSuccessfulBodyResponse)
   })
 
@@ -33,7 +33,7 @@ describe("createAuditlog()", () => {
     const createAuditLogResponse = await createAuditLog(log)
     const actualResponse = <APIGatewayProxyResult>createAuditLogResponse
 
-    expect(actualResponse.statusCode).toBe(500)
+    expect(actualResponse.statusCode).toBe(HttpStatusCode.Conflict)
     expect(actualResponse.body).toBe(expectedErrorBodyResponse)
   })
 })

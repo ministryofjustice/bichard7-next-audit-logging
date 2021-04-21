@@ -1,4 +1,4 @@
-import { isError, PromiseResult, AuditLogDynamoGateway, AuditLog } from "shared"
+import { isError, PromiseResult, AuditLogDynamoGateway, AuditLog, HttpStatusCode } from "shared"
 import { APIGatewayProxyResult } from "aws-lambda"
 import createDynamoDbConfig from "src/createDynamoDbConfig"
 
@@ -12,13 +12,13 @@ export default async function createAuditLog(log: AuditLog): PromiseResult<APIGa
 
   if (isError(result) && isConditionalExpressionViolationError(result)) {
     return {
-      statusCode: 500,
+      statusCode: HttpStatusCode.Conflict,
       body: `A message with Id ${log.messageId} already exists in the database`
     }
   }
 
   return {
-    statusCode: 201,
+    statusCode: HttpStatusCode.Created,
     body: "Created"
   }
 }
