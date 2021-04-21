@@ -6,18 +6,17 @@ import AuditLogDynamoGateway from "./AuditLogDynamoGateway"
 
 const config: DynamoDbConfig = {
   DYNAMO_URL: "http://localhost:4566",
-  DYNAMO_REGION: "us-east-1"
+  DYNAMO_REGION: "us-east-1",
+  AUDIT_LOG_TABLE_NAME: "TestAuditLog"
 }
 
-const tableName = "TestAuditLog"
-
-const gateway = new AuditLogDynamoGateway(config, tableName)
+const gateway = new AuditLogDynamoGateway(config, config.AUDIT_LOG_TABLE_NAME)
 const testGateway = new TestDynamoGateway(config)
 
 describe("AuditLogDynamoGateway", () => {
   beforeAll(async () => {
-    await testGateway.createTable(tableName, "messageId")
-    await testGateway.deleteAll(tableName, "messageId")
+    await testGateway.createTable(config.AUDIT_LOG_TABLE_NAME, "messageId")
+    await testGateway.deleteAll(config.AUDIT_LOG_TABLE_NAME, "messageId")
   })
 
   describe("create()", () => {

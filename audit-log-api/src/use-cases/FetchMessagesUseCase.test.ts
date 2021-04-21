@@ -3,10 +3,11 @@ import FetchMessagesUseCase from "./FetchMessagesUseCase"
 
 const config: DynamoDbConfig = {
   DYNAMO_URL: "localhost",
-  DYNAMO_REGION: "us-east-1"
+  DYNAMO_REGION: "us-east-1",
+  AUDIT_LOG_TABLE_NAME: "audit-log"
 }
 
-const gateway = new AuditLogDynamoGateway(config, "audit-log")
+const gateway = new AuditLogDynamoGateway(config, config.AUDIT_LOG_TABLE_NAME)
 const useCase = new FetchMessagesUseCase(gateway)
 
 describe("FetchMessagesUseCase", () => {
