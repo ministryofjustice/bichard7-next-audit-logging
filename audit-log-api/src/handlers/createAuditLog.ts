@@ -1,5 +1,5 @@
 import { isError, PromiseResult, AuditLogDynamoGateway, AuditLog, HttpStatusCode } from "shared"
-import { APIGatewayProxyResult } from "aws-lambda"
+import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda"
 import createDynamoDbConfig from "src/createDynamoDbConfig"
 import createJSONApiResult from "src/utils"
 
@@ -8,7 +8,8 @@ const auditLogGateway = new AuditLogDynamoGateway(createDynamoDbConfig(), "audit
 const isConditionalExpressionViolationError = (error: Error): boolean =>
   error.message === "The conditional request failed"
 
-export default async function createAuditLog(log: AuditLog): PromiseResult<APIGatewayProxyResult> {
+export default async function createAuditLog(event: APIGatewayProxyEvent): PromiseResult<APIGatewayProxyResult> {
+  const log = <AuditLog>JSON.parse(event.body)
   const result = await auditLogGateway.create(log)
 
   if (isError(result) && isConditionalExpressionViolationError(result)) {
