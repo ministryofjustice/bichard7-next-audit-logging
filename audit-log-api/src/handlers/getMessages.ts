@@ -3,6 +3,7 @@ import { APIGatewayProxyResult } from "aws-lambda"
 import createDynamoDbConfig from "src/createDynamoDbConfig"
 import FetchMessagesUseCase from "src/use-cases"
 
+// TODO: Replace the table name with an env var
 const auditLogGateway = new AuditLogDynamoGateway(createDynamoDbConfig(), "audit-log")
 const fetchMessages = new FetchMessagesUseCase(auditLogGateway)
 
