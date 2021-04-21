@@ -2,6 +2,7 @@ import { isError, PromiseResult, AuditLogDynamoGateway, AuditLog } from "shared"
 import { APIGatewayProxyResult } from "aws-lambda"
 import createDynamoDbConfig from "src/createDynamoDbConfig"
 
+// TODO: Replace the table name with an env var
 const auditLogGateway = new AuditLogDynamoGateway(createDynamoDbConfig(), "audit-log")
 const isConditionalExpressionViolationError = (error: Error): boolean =>
   error.message === "The conditional request failed"
