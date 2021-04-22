@@ -5,7 +5,7 @@ interface Props {
   body: string | unknown
 }
 
-export default function createJSONApiResult(props: Props): APIGatewayProxyResult {
+export default function createJsonApiResult(props: Props): APIGatewayProxyResult {
   const body = typeof props.body === "string" ? <string>props.body : JSON.stringify(props.body)
 
   return {

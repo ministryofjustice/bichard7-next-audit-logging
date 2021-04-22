@@ -2,7 +2,7 @@ import { isError, PromiseResult, AuditLogDynamoGateway, HttpStatusCode } from "s
 import { APIGatewayProxyResult } from "aws-lambda"
 import createDynamoDbConfig from "src/createDynamoDbConfig"
 import FetchMessagesUseCase from "src/use-cases"
-import createJSONApiResult from "src/utils"
+import { createJsonApiResult } from "src/utils"
 
 // TODO: Replace the table name with an env var
 const auditLogGateway = new AuditLogDynamoGateway(createDynamoDbConfig(), "audit-log")
@@ -12,13 +12,13 @@ export default async function getMessages(): PromiseResult<APIGatewayProxyResult
   const messages = await fetchMessages.get()
 
   if (isError(messages)) {
-    return createJSONApiResult({
+    return createJsonApiResult({
       statusCode: HttpStatusCode.internalServerError,
       body: String(messages)
     })
   }
 
-  return createJSONApiResult({
+  return createJsonApiResult({
     statusCode: HttpStatusCode.ok,
     body: { messages }
   })

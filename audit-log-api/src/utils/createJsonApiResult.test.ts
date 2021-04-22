@@ -1,9 +1,9 @@
 import { HttpStatusCode } from "shared"
-import createJSONApiResult from "./JSONApiResult"
+import createJsonApiResult from "./createJsonApiResult"
 
 describe("createJsonApiResult", () => {
   it("should return 'body' when 'body' is string", () => {
-    const result = createJSONApiResult({ statusCode: HttpStatusCode.ok, body: "Content" })
+    const result = createJsonApiResult({ statusCode: HttpStatusCode.ok, body: "Content" })
 
     expect(result.body).toBe("Content")
     expect(result.statusCode).toBe(HttpStatusCode.ok)
@@ -12,7 +12,7 @@ describe("createJsonApiResult", () => {
   })
 
   it("should return stringified 'body' when 'body' is JSON", () => {
-    const result = createJSONApiResult({ statusCode: HttpStatusCode.ok, body: { Message: "Content" } })
+    const result = createJsonApiResult({ statusCode: HttpStatusCode.ok, body: { Message: "Content" } })
 
     expect(result.body).toBe('{"Message":"Content"}')
     expect(result.statusCode).toBe(HttpStatusCode.ok)
