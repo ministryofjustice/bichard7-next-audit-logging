@@ -24,7 +24,7 @@ describe("FetchMessagesUseCase", () => {
     const actualMessages = <AuditLog[]>result
     const actualMessage = actualMessages[0]
 
-    expect(actualMessages.length).toBe(1)
+    expect(actualMessages).toHaveLength(1)
     expect(actualMessage.messageId).toEqual(expectedMessage.messageId)
     expect(actualMessage.caseId).toEqual(expectedMessage.caseId)
     expect(actualMessage.receivedDate.toISOString()).toContain("2021-03-24")

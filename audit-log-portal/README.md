@@ -15,6 +15,30 @@ npm run dev
 
 > Note: Running the dev command will create a local `.env.local` file dynamically with the API endpoint.
 
+## Testing
+
+### Unit Tests
+
+In order to run unit tests, you need to run the following command:
+
+```bash
+npm run test
+```
+
+### UI Tests
+
+Before running UI tests, you need to run the application using the following command. This will run the application and mock the API:
+
+```bash
+npm run start:mocked
+```
+
+Once the application is running, you can run UI tests by running the command below:
+
+```bash
+npm run test:ui
+```
+
 ## Testing the host
 
 The portal is hosted on AWS via a host lambda. This can be somewhat tested locally by running the following command:

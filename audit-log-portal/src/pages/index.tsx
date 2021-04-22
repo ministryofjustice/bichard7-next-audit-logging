@@ -1,36 +1,35 @@
 import Image from "next/image"
-import Link from "next/link"
 import Head from "components/Head"
 import Messages from "components/Messages"
 import NavBar from "components/NavBar"
 import Page from "components/Page"
 
-const Index = ({ data }) => (
+interface Props {
+  data: {
+    messages: []
+  }
+}
+
+const Index = ({ data }: Props) => (
   <>
     <Head />
     <NavBar
-      logo={(
-        <Image
-          src="/logo.png"
-          alt="Bichard7 Audit Log Portal"
-          width="64"
-          height="64"
-        />
-      )}
+      logo={<Image src="/logo.png" alt="Bichard7 Audit Log Portal" width="64" height="64" />}
       title="Bichard7 Audit Log Portal"
     />
 
     <Page>
       <Messages messages={data.messages || []} />
-
-      <Link href="/test">
-        Show Test Page
-      </Link>
     </Page>
   </>
 )
 
-export async function getServerSideProps() {
+interface ApiResponse {
+  notFound: boolean
+  props?: Props
+}
+
+export async function getServerSideProps(): Promise<ApiResponse> {
   const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/messages`)
   const data = await response.json()
 
@@ -41,6 +40,7 @@ export async function getServerSideProps() {
   }
 
   return {
+    notFound: false,
     props: { data }
   }
 }

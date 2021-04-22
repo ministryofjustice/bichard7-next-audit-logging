@@ -17,15 +17,15 @@ API_ID=$(awslocal apigateway get-rest-apis \
   --output text \
   --region $REGION \
 )
-
 if [[ -z $API_ID ]]; then
   echo "Failed to retrieve the API Id"
   exit 1
 fi
+API_URL="$HOST/restapis/$API_ID/$STAGE/_user_request_"
 
 # Note: Environment variables that are to be exposed to the browser must be
 # prefixed with NEXT_PUBLIC_.
 # See: https://nextjs.org/docs/basic-features/environment-variables
 cat > $ENV_PATH <<- EOM
-NEXT_PUBLIC_API_URL=$HOST/restapis/$API_ID/$STAGE/_user_request_
+NEXT_PUBLIC_API_URL=$API_URL
 EOM

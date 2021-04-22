@@ -39,6 +39,7 @@ aws s3 cp \
 cd audit-log-api/build
 
 zip getMessages.zip getMessages.js
+zip createAuditLog.zip createAuditLog.js
 
 cd -
 

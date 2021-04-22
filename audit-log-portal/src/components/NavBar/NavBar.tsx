@@ -2,7 +2,7 @@ import { memo, ReactNode } from "react"
 import styles from "./NavBar.module.css"
 
 interface Props {
-  logo: ReactNode
+  logo: JSX.Element
   title: string
   children?: ReactNode
 }

@@ -111,8 +111,14 @@ function deploy_api {
   echo "API available at: http://localhost:4566/restapis/$API_ID/$STAGE/_user_request_/"
 }
 
-create_lambda "GetMessages" "getMessages.default"
-
 create_rest_api "AuditLogApi"
+
+# GET /messages
+create_lambda "GetMessages" "getMessages.default"
 create_rest_endpoint "AuditLogApi" "messages" "GET" "GetMessages"
+
+# POST /messages
+create_lambda "CreateAuditLog" "createAuditLog.default"
+create_rest_endpoint "AuditLogApi" "messages" "POST" "CreateAuditLog"
+
 deploy_api "AuditLogApi"

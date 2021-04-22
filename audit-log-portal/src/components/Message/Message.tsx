@@ -1,4 +1,5 @@
-import React from "react"
+import DateTime from "components/DateTime"
+import classNames from "classnames"
 import styles from "./Message.module.css"
 
 interface Props {
@@ -10,32 +11,24 @@ interface Props {
 }
 
 const Message = ({ message }: Props) => (
-  <div className={styles.container}>
-    <div className={styles.innerContainer}>
-      <div className={styles.informationBlock}>
-        <label className={styles.label}>
-          Message Id
-        </label>
-        <p>
-          {message.messageId}
-        </p>
+  <div className={classNames(styles.container, "row")}>
+    <h1>123</h1>
+    <h1>321</h1>
+    <div className={styles["inner-container"]}>
+      <div className={styles["information-block"]}>
+        <p className={styles.label}>{`Message Id`}</p>
+        <p>{message.messageId}</p>
       </div>
 
-      <div className={styles.informationBlock}>
-        <label className={styles.label}>
-          Case Number
-        </label>
-        <p>
-          {message.caseId}
-        </p>
+      <div className={styles["information-block"]}>
+        <p className={styles.label}>{`Case Number`}</p>
+        <p>{message.caseId}</p>
       </div>
 
-      <div className={styles.informationBlock}>
-        <label className={styles.label}>
-          Received Date
-        </label>
+      <div className={styles["information-block"]}>
+        <p className={styles.label}>{`Received Date`}</p>
         <p>
-          {message.receivedDate.toString()}
+          <DateTime date={message.receivedDate} />
         </p>
       </div>
     </div>
