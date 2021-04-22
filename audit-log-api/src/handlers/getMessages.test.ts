@@ -1,7 +1,7 @@
 jest.mock("src/use-cases/FetchMessagesUseCase")
 
 import { APIGatewayProxyResult } from "aws-lambda"
-import { AuditLog } from "shared"
+import { AuditLog, HttpStatusCode } from "shared"
 import FetchMessagesUseCase from "src/use-cases/FetchMessagesUseCase"
 import getMessages from "./getMessages"
 
@@ -25,7 +25,7 @@ describe("getMessages()", () => {
     const messages = await getMessages()
     const actualResponse = <APIGatewayProxyResult>messages
 
-    expect(actualResponse.statusCode).toBe(200)
+    expect(actualResponse.statusCode).toBe(HttpStatusCode.ok)
     expect(actualResponse.body).toEqual(expectedSuccessfulBodyResponse)
   })
 
@@ -36,7 +36,7 @@ describe("getMessages()", () => {
     const messages = await getMessages()
     const actualResponse = <APIGatewayProxyResult>messages
 
-    expect(actualResponse.statusCode).toBe(500)
+    expect(actualResponse.statusCode).toBe(HttpStatusCode.internalServerError)
     expect(actualResponse.body).toEqual(expectedErrorBodyResponse)
   })
 })
