@@ -22,7 +22,7 @@
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "setup:env": "cd .. && ./environment/setup.sh && cd -",
+    "setup:env": "cd ../environment && ./setup.sh && cd -",
     "test": "npm run setup:env && ../scripts/test.sh",
     "test:unit": "../scripts/test.sh unit",
     "test:integration": "npm run setup:env && ../scripts/test.sh integration",

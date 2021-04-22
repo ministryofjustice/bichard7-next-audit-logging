@@ -4,6 +4,7 @@
   "version": "0.0.1",
   "private": true,
   "devDependencies": {
+    "@aws-sdk/client-lambda": "^3.13.0",
     "@babel/preset-react": "^7.13.13",
     "@typescript-eslint/eslint-plugin": "^4.4.1",
     "@typescript-eslint/parser": "^4.15.1",
@@ -21,6 +22,7 @@
     "lint-staged": "^10.5.4",
     "prettier": "^2.2.1",
     "react-test-renderer": "^17.0.2",
+    "shelljs": "^0.8.4",
     "ts-jest": "^26.4.4",
     "typescript": "^4.1.2"
   },

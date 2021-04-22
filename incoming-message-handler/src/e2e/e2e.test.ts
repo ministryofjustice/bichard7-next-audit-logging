@@ -1,6 +1,6 @@
 import { v4 as uuid } from "uuid"
 import format from "xml-formatter"
-import { isError, AuditLog } from "shared"
+import { isError, AuditLog, DynamoDbConfig } from "shared"
 import TestDynamoGateway from "shared/dist/DynamoGateway/TestDynamoGateway"
 import TestS3Gateway from "src/gateways/S3Gateway/TestS3Gateway"
 import TestMqGateway from "src/gateways/MqGateway/TestMqGateway"
@@ -35,10 +35,12 @@ const expectedMessage = formatXml(
 const AWS_URL = "http://localhost:4566"
 const REGION = "us-east-1"
 
-const dynamoGateway = new TestDynamoGateway({
+const dynamoConfig: DynamoDbConfig = {
   DYNAMO_URL: AWS_URL,
-  DYNAMO_REGION: REGION
-})
+  DYNAMO_REGION: REGION,
+  AUDIT_LOG_TABLE_NAME: "audit-log"
+}
+const dynamoGateway = new TestDynamoGateway(dynamoConfig)
 
 const s3Gateway = new TestS3Gateway({
   S3_URL: AWS_URL,
@@ -60,7 +62,7 @@ const testMqGateway = new TestMqGateway({
 
 describe("e2e tests", () => {
   beforeEach(async () => {
-    await dynamoGateway.deleteAll("audit-log", "messageId")
+    await dynamoGateway.deleteAll(dynamoConfig.AUDIT_LOG_TABLE_NAME, "messageId")
     await s3Gateway.deleteAll()
   })
 
@@ -75,7 +77,7 @@ describe("e2e tests", () => {
     await simulator.start(fileName, expectedMessage)
 
     // Check the message is in the database
-    const persistedMessages = await dynamoGateway.pollForMessages("audit-log", 10000)
+    const persistedMessages = await dynamoGateway.pollForMessages(dynamoConfig.AUDIT_LOG_TABLE_NAME, 10000)
     expect(persistedMessages.Count).toBe(1)
 
     const persistedMessage = <AuditLog>persistedMessages.Items[0]
