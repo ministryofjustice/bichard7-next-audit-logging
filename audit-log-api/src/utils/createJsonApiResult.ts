@@ -1,15 +1,15 @@
 import { APIGatewayProxyResult } from "aws-lambda"
 
-interface Props {
+interface ResultOptions {
   statusCode: number
   body: string | unknown
 }
 
-export default function createJsonApiResult(props: Props): APIGatewayProxyResult {
-  const body = typeof props.body === "string" ? <string>props.body : JSON.stringify(props.body)
+export default function createJsonApiResult(options: ResultOptions): APIGatewayProxyResult {
+  const body = typeof options.body === "string" ? <string>options.body : JSON.stringify(options.body)
 
   return {
-    statusCode: props.statusCode,
+    statusCode: options.statusCode,
     body,
     headers: {
       "content-type": "application/json"
