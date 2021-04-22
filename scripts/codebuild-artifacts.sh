@@ -58,6 +58,11 @@ aws s3 cp \
 # Add the public and .next folders to a single zip
 cd audit-log-portal
 
+# Before we build the artifact, remove node_modules as it will contain dev dependencies
+# and reinstall only production dependencies, so we can reduce the size of the artifact
+rm -rf node_modules/
+npm i --production
+
 zip -r audit-log-portal.zip .next/ public/ host.js package.json node_modules/
 
 # Upload the package to the the artifact bucket
