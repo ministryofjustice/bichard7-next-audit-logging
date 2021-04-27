@@ -36,6 +36,7 @@ export default class MqGateway {
         }
       }
 
+      console.log(`*** MQGATEWAY: Connecting to ${this.url}...`)
       const connectionManager = new ConnectFailover(this.url, this.options)
       connectionManager.connect(listener)
     })
