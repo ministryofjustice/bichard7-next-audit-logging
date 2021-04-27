@@ -53,7 +53,7 @@ const simulator = new IncomingMessageSimulator(AWS_URL)
 
 const queueName = "incoming-message-handler-e2e-testing"
 const testMqGateway = new TestMqGateway({
-  url: "http://localhost:51613",
+  url: "failover:(stomp://localhost:51613)",
   username: "admin",
   password: "admin",
   queueName
