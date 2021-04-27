@@ -24,6 +24,7 @@ const getMessage = (client: Client, queueName: string): Promise<Client.Message> 
   return new Promise<Client.Message>((resolve, reject) => {
     const callback: Client.MessageCallback = (error: Error, message: Client.Message) => {
       if (error) {
+        console.error(error)
         reject(error)
       } else {
         resolve(message)

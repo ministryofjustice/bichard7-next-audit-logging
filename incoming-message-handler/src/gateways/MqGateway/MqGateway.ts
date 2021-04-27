@@ -1,24 +1,33 @@
-import { Client, connect } from "stompit"
+import { Client, connect, ConnectFailover } from "stompit"
 import { isError, PromiseResult } from "shared"
 import { MqConfig } from "src/configs"
 
 export default class MqGateway {
+  private readonly url: string
+
+  private readonly options: any
+
   private client: Client
 
-  constructor(private readonly config: MqConfig) {}
-
-  private connectAsync(): PromiseResult<Client> {
-    return new Promise<Client>((resolve, reject) => {
-      const options: connect.ConnectOptions = {
-        host: this.config.host,
-        port: this.config.port,
+  constructor(private readonly config: MqConfig) {
+    this.url = config.url
+    this.options = {
+      connect: {
         connectHeaders: {
-          login: this.config.username,
-          passcode: this.config.password,
+          login: config.username,
+          passcode: config.password,
           "heart-beat": "5000,5000"
         }
       }
+    }
 
+    if (/stomp\+ssl/.test(this.url)) {
+      this.url = this.url.replace(/stomp\+ssl/g, "ssl")
+    }
+  }
+
+  private connectAsync(): PromiseResult<Client> {
+    return new Promise((resolve, reject) => {
       const listener: connect.ConnectionListener = (error: Error, client: Client) => {
         if (error) {
           reject(error)
@@ -27,7 +36,8 @@ export default class MqGateway {
         }
       }
 
-      connect(options, listener)
+      const connectionManager = new ConnectFailover(this.url, this.options)
+      connectionManager.connect(listener)
     })
   }
 
