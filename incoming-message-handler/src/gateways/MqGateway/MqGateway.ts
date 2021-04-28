@@ -29,33 +29,26 @@ export default class MqGateway {
   private connectAsync(): PromiseResult<Client> {
     return new Promise((resolve, reject) => {
       const listener: connect.ConnectionListener = (error: Error, client: Client) => {
-        console.log("Connection listener received response")
         if (error) {
-          console.log("Connection listener received error")
           reject(error)
         } else {
-          console.log("Connection listener success!")
           resolve(client)
         }
       }
 
       const connectionManager = new ConnectFailover(this.url, this.options)
-      console.log(`Attempting to connect to ${this.url}`)
       connectionManager.connect(listener)
     })
   }
 
   protected async connectIfRequired(): PromiseResult<Client> {
     if (!this.client) {
-      console.log("No client, so connecting")
       const connectionResult = await this.connectAsync()
 
       if (isError(connectionResult)) {
-        console.log("Connection failed")
         return connectionResult
       }
 
-      console.log("Connected!")
       this.client = connectionResult
     }
 
@@ -69,7 +62,6 @@ export default class MqGateway {
       return client
     }
 
-    console.log("Sending message to Bichard...")
     const result = this.sendMessage(client, message)
       .then(() => undefined)
       .catch((error: Error) => error)
