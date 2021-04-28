@@ -1,5 +1,6 @@
 #! /bin/bash
 
+source $(dirname "$0")/../../environment/audit-log-api-url.sh
 set -e
 
 SCRIPTS_PATH=$PWD/scripts
@@ -22,6 +23,36 @@ function create_lambda {
     --function-name $LAMBDA_NAME \
     --environment file://$SCRIPTS_PATH/env-vars.json
 }
+
+function update_env_vars_file {
+  local _env_path=$(dirname "$0")/env-vars.json
+  local _api_url=$(get_audit_log_api_url localstack_main)
+
+  if [[ -z $_api_url ]]; then
+    echo "Failed to retrieve the API URL"
+    exit 1
+  fi
+
+  cat > $_env_path <<- EOM
+{
+  "Variables": {
+    "MQ_HOST": "mq",
+    "MQ_PORT": "61613",
+    "MQ_QUEUE": "incoming-message-handler-e2e-testing",
+    "MQ_USER": "admin",
+    "MQ_PASSWORD": "admin",
+    "AWS_URL": "http://localstack_main:4566",
+    "AWS_REGION": "us-east-1",
+    "INCOMING_MESSAGE_BUCKET_NAME": "incoming-messages",
+    "S3_FORCE_PATH_STYLE": "true",
+    "API_URL": "$_api_url"
+  }
+}
+EOM
+}
+
+# Update environment variables file
+update_env_vars_file
 
 # Create the lambda function
 create_lambda "RetrieveFromS3" "retrieveFromS3.default"
