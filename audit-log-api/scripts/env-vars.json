@@ -1,6 +1,7 @@
 {
   "Variables": {
     "AWS_URL": "http://localstack_main:4566",
-    "AWS_REGION": "us-east-1"
+    "AWS_REGION": "us-east-1",
+    "AUDIT_LOG_TABLE_NAME": "audit-log"
   }
 }
