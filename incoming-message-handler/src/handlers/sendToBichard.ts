@@ -11,6 +11,11 @@ const sendMessageUseCase = new SendMessageUseCase(gateway)
 export default async function sendToBichard(event: AuditLog): Promise<AuditLog> {
   console.log(`Sending message ${event.messageId} to Bichard`)
 
+  return {
+    ...event,
+    messageXml: `MQ URL: ${config.url}`
+  }
+
   let result: Result<void>
 
   try {
