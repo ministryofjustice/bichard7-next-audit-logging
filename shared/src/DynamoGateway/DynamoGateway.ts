@@ -19,7 +19,7 @@ export default class DynamoGateway {
     })
   }
 
-  async insertOne<T>(tableName: string, record: T, keyName: string): PromiseResult<void> {
+  insertOne<T>(tableName: string, record: T, keyName: string): PromiseResult<void> {
     const params: DocumentClient.PutItemInput = {
       TableName: tableName,
       Item: record,

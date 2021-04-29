@@ -17,14 +17,14 @@ export default class TestApi {
     return this.apiUrl
   }
 
-  async getMessages(): Promise<AuditLog[]> {
+  getMessages(): Promise<AuditLog[]> {
     return axios
       .get(`${this.getApiUrl()}/messages`)
       .then((response) => response.data.messages)
       .catch((error) => <AxiosError>error)
   }
 
-  async pollForGetMessages(
+  pollForGetMessages(
     condition: PollCondition<AuditLog[]> = (messages) => messages.length > 0,
     timeout = 10000,
     delay = 300
