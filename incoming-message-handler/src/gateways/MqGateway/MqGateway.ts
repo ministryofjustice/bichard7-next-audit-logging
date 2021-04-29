@@ -2,27 +2,71 @@ import { Client, connect, ConnectFailover } from "stompit"
 import { isError, PromiseResult } from "shared"
 import { MqConfig } from "src/configs"
 
-export default class MqGateway {
-  private readonly url: string
+interface ConnectionOptions {
+  host: string
+  port: number
+  ssl: boolean
+}
 
-  private readonly options: any
+export function parseConnectionOptions(url: string): ConnectionOptions {
+  const protocolPosition = url.indexOf("://")
+  const protocol = url.substring(0, protocolPosition)
+
+  const portPosition = url.lastIndexOf(":")
+  const port = +url.substring(portPosition + 1)
+
+  const host = url.substring(protocolPosition + 3, portPosition)
+
+  return {
+    host,
+    port,
+    ssl: /ssl/.test(protocol)
+  }
+}
+
+export function deconstructServers(config: MqConfig): connect.ConnectOptions[] {
+  const connectHeaders: connect.ConnectHeaders = {
+    login: config.username,
+    passcode: config.password,
+    "heart-beat": "5000,5000"
+  }
+
+  let { url } = config
+  if (/^failover:\(.*\)$/.test(url)) {
+    // Remove the failover:() wrapper
+    url = url.substring("failover:(".length)
+    url = url.substring(0, url.length - 1)
+  }
+
+  const servers = url.split(",")
+  return servers.map((serverUrl) => {
+    const options = parseConnectionOptions(serverUrl)
+
+    return {
+      host: options.host,
+      port: options.port,
+      connectHeaders,
+      ssl: true, // options.ssl,
+      timeout: 10000
+    }
+  })
+}
+
+export default class MqGateway {
+  private readonly connectionOptions: connect.ConnectOptions[]
+
+  private readonly reconnectOptions: ConnectFailover.ConnectFailoverOptions
 
   private client: Client
 
   constructor(private readonly config: MqConfig) {
-    this.url = config.url
-    this.options = {
-      connect: {
-        connectHeaders: {
-          login: config.username,
-          passcode: config.password,
-          "heart-beat": "5000,5000"
-        }
-      }
-    }
+    this.connectionOptions = deconstructServers(config)
 
-    if (/stomp\+ssl/.test(this.url)) {
-      this.url = this.url.replace(/stomp\+ssl/g, "ssl")
+    this.reconnectOptions = {
+      initialReconnectDelay: 1000,
+      maxReconnectDelay: 3000,
+      maxReconnects: 2,
+      useExponentialBackOff: false
     }
   }
 
@@ -36,7 +80,12 @@ export default class MqGateway {
         }
       }
 
-      const connectionManager = new ConnectFailover(this.url, this.options)
+      const connectionManager = new ConnectFailover(this.connectionOptions, this.reconnectOptions)
+      connectionManager.on("error", (error) => {
+        console.log("*** AN ERROR OCCURRED WHILE TRYING TO CONNECT ***")
+        console.log(`Url = ${this.config.url}`)
+        console.error(error)
+      })
       connectionManager.connect(listener)
     })
   }
