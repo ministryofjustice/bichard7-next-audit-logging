@@ -1,9 +1,9 @@
 #! /bin/bash
 
-source $(dirname "$0")/../../environment/audit-log-api-url.sh
-set -e
-
 SCRIPTS_PATH=$PWD/scripts
+
+source $SCRIPTS_PATH/../../environment/audit-log-api-url.sh
+set -e
 
 function create_lambda {
   LAMBDA_NAME=$1
@@ -25,7 +25,7 @@ function create_lambda {
 }
 
 function update_env_vars_file {
-  local env_path=$(dirname "$0")/env-vars.json
+  local env_path=$SCRIPTS_PATH/env-vars.json
   local api_url=$(get_audit_log_api_url localstack_main)
 
   if [[ -z $api_url ]]; then
