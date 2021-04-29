@@ -11,11 +11,8 @@ const persistMessage = async (message: AuditLog): PromiseResult<void> => {
     .post(`${process.env.API_URL}/messages`, message, {
       httpsAgent
     })
-    .then((response) => JSON.parse(response.toString()))
     .then((result) =>
-      result.statusCode === HttpStatusCode.created
-        ? null
-        : Error(`Could not create audit log. (Code ${result.statusCode})`)
+      result.status === HttpStatusCode.created ? null : Error(`Error ${result.status}: Could not create audit log.`)
     )
     .catch((error: AxiosError) => error)
 }
