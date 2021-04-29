@@ -82,7 +82,7 @@ export default class MqGateway {
 
       const connectionManager = new ConnectFailover(this.connectionOptions, this.reconnectOptions)
       connectionManager.on("error", (error) => {
-        console.log("!!! AN ERROR OCCURRED WHILE TRYING TO CONNECT !!!")
+        console.log(`Failed to connect to URL ${this.config.url}`)
         console.error(error)
       })
       connectionManager.connect(listener)
