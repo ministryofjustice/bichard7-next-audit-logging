@@ -51,6 +51,11 @@ function update_env_vars_file {
 EOM
 }
 
+# Run API
+cd $SCRIPTS_PATH/../../audit-log-api
+npm run start
+cd $SCRIPTS_PATH/..
+
 # Update environment variables file
 update_env_vars_file
 
