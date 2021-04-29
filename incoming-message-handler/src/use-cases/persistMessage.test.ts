@@ -32,6 +32,6 @@ describe("persistMessage", () => {
 
     const result = await persistMessage(message)
 
-    expect(isError(result)).toBe(true)
+    expect(<Error>result).toBe(expectedError)
   })
 })
