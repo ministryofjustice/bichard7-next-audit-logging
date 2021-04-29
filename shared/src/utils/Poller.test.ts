@@ -1,5 +1,7 @@
 import PollAction from "./PollAction"
-import Poller, { PollCondition, PollOptions } from "./Poller"
+import PollCondition from "./PollCondition"
+import Poller from "./Poller"
+import PollOptions from "./PollOptions"
 
 const expectedResult = "Hello, World!"
 
