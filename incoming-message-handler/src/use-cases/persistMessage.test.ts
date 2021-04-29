@@ -17,7 +17,7 @@ describe("persistMessage", () => {
   })
 
   it("should fail when server does not responds with 201 status code", async () => {
-    const expectedFailedServerResponse = { data: "Created", status: 400 }
+    const expectedFailedServerResponse = { status: 400 }
     jest.spyOn(axios, "post").mockResolvedValue(Promise.resolve(expectedFailedServerResponse))
 
     const result = await persistMessage(message)
