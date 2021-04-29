@@ -25,15 +25,15 @@ function create_lambda {
 }
 
 function update_env_vars_file {
-  local _env_path=$(dirname "$0")/env-vars.json
-  local _api_url=$(get_audit_log_api_url localstack_main)
+  local env_path=$(dirname "$0")/env-vars.json
+  local api_url=$(get_audit_log_api_url localstack_main)
 
-  if [[ -z $_api_url ]]; then
+  if [[ -z $api_url ]]; then
     echo "Failed to retrieve the API URL"
     exit 1
   fi
 
-  cat > $_env_path <<- EOM
+  cat > $env_path <<- EOM
 {
   "Variables": {
     "MQ_HOST": "mq",
@@ -45,7 +45,7 @@ function update_env_vars_file {
     "AWS_REGION": "us-east-1",
     "INCOMING_MESSAGE_BUCKET_NAME": "incoming-messages",
     "S3_FORCE_PATH_STYLE": "true",
-    "API_URL": "$_api_url"
+    "API_URL": "$api_url"
   }
 }
 EOM
