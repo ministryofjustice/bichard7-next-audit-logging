@@ -29,6 +29,6 @@ export default class TestApi {
     timeout = 10000,
     delay = 300
   ): Promise<AuditLog[]> {
-    return new Poller(() => this.getMessages()).poll(timeout, delay, condition)
+    return new Poller(() => this.getMessages()).poll({ timeout, delay, condition })
   }
 }

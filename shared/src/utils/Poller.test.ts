@@ -1,18 +1,20 @@
 import PollAction from "./PollAction"
-import Poller from "./Poller"
+import Poller, { PollCondition, PollOptions } from "./Poller"
+
+const expectedResult = "Hello, World!"
 
 const poll = async (
   timeout: number,
   numberOfIterations: number,
   shouldSucceed: boolean,
-  condition?: (result: string) => boolean
+  condition?: PollCondition<string>
 ): Promise<string> => {
   let iterations = 0
 
   const action: PollAction<string> = () =>
     new Promise((resolve) => {
-      if (shouldSucceed && iterations === numberOfIterations && (!condition || condition("VALID"))) {
-        resolve("Hello, World!")
+      if (shouldSucceed && iterations === numberOfIterations) {
+        resolve(expectedResult)
       } else {
         iterations++
         resolve(undefined)
@@ -20,7 +22,9 @@ const poll = async (
     })
 
   const poller = new Poller<string>(action)
-  return await poller.poll(timeout)
+  const options: PollOptions<string> = { timeout, condition }
+
+  return await poller.poll(options)
 }
 
 describe("Poller", () => {
@@ -50,7 +54,7 @@ describe("Poller", () => {
   })
 
   it("should succeed when condition is valid", async () => {
-    const message = await poll(5000, 1, true, (result) => result === "VALID")
+    const message = await poll(6000, 1, true, (result) => result === expectedResult)
 
     expect(message).toBe("Hello, World!")
   })
@@ -59,7 +63,7 @@ describe("Poller", () => {
     let actualError: Error
 
     try {
-      await poll(1000, 1, false, (result) => result !== "VALID")
+      await poll(1000, 1, false, (result) => result === expectedResult)
     } catch (error) {
       actualError = error
     }

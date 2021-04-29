@@ -47,7 +47,7 @@ export default class TestDynamoGateway extends DynamoGateway {
       return response
     })
 
-    return poller.poll(timeout)
+    return poller.poll({ timeout })
   }
 
   getAll(tableName: string): Promise<DocumentClient.ScanOutput> {

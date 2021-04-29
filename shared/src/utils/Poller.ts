@@ -1,13 +1,18 @@
 import PollAction from "./PollAction"
 
 export type PollCondition<T> = (result: T) => boolean
+export type PollOptions<T> = {
+  timeout?: number
+  delay?: number
+  condition?: PollCondition<T>
+}
 
 const clearTimeouts = (handles: NodeJS.Timeout[]): void => handles.forEach(clearTimeout)
 
 export default class Poller<T> {
   constructor(private readonly action: PollAction<T>) {}
 
-  poll(timeout: number, dealy = 100, condition?: PollCondition<T>): Promise<T> {
+  poll({ timeout = 10000, delay = 100, condition = (result) => !!result }: PollOptions<T>): Promise<T> {
     return new Promise<T>((resolve, reject) => {
       const processHandles: NodeJS.Timeout[] = []
 
@@ -18,11 +23,11 @@ export default class Poller<T> {
 
       const process = async () => {
         const result = await this.action()
-        if ((!condition && result) || (condition && condition(result))) {
+        if (condition(result)) {
           clearTimeouts([timeoutHandle, ...processHandles])
           resolve(result)
         } else {
-          processHandles.push(setTimeout(process, dealy))
+          processHandles.push(setTimeout(process, delay))
         }
       }
 
