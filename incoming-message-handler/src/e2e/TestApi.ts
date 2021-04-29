@@ -6,7 +6,9 @@ export default class TestApi {
   private apiUrl: string
 
   private getApiUrl(): string {
-    if (this.apiUrl) return this.apiUrl
+    if (this.apiUrl) {
+      return this.apiUrl
+    }
 
     const environmentVariablesFilePath = `${process.cwd()}/scripts/env-vars.json`
     const environmentVariables = JSON.parse(readFileSync(environmentVariablesFilePath, "utf-8")).Variables
