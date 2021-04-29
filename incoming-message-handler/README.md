@@ -6,7 +6,11 @@ This is a series of AWS Lambda functions controlled by an AWS Step Function that
 
 ## Debugging
 
-Debugging is not currently supported for these Lambdas / Step Functions. However, you can output variables using `console.log()` and check them in the docker logs. For docker logs, refer to the LocalStack section.
+Debugging is not currently supported for these Lambdas / Step Functions. However, you can output variables using `console.log()` and check them in the docker logs for the LocalStack container. To view logs, you need to run the following command:
+
+```bash
+$ docker logs -ft localstack_main
+```
 
 ## Interacting with the infrastructure
 
