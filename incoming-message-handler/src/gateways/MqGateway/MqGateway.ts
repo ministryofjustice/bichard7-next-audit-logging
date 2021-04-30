@@ -1,56 +1,7 @@
 import { Client, connect, ConnectFailover } from "stompit"
 import { isError, PromiseResult } from "shared"
 import { MqConfig } from "src/configs"
-
-interface ConnectionOptions {
-  host: string
-  port: number
-  ssl: boolean
-}
-
-export function parseConnectionOptions(url: string): ConnectionOptions {
-  const protocolPosition = url.indexOf("://")
-  const protocol = url.substring(0, protocolPosition)
-
-  const portPosition = url.lastIndexOf(":")
-  const port = +url.substring(portPosition + 1)
-
-  const host = url.substring(protocolPosition + 3, portPosition)
-
-  return {
-    host,
-    port,
-    ssl: /ssl/.test(protocol)
-  }
-}
-
-export function deconstructServers(config: MqConfig): connect.ConnectOptions[] {
-  const connectHeaders: connect.ConnectHeaders = {
-    login: config.username,
-    passcode: config.password,
-    "heart-beat": "5000,5000"
-  }
-
-  let { url } = config
-  if (/^failover:\(.*\)$/.test(url)) {
-    // Remove the failover:() wrapper
-    url = url.substring("failover:(".length)
-    url = url.substring(0, url.length - 1)
-  }
-
-  const servers = url.split(",")
-  return servers.map((serverUrl) => {
-    const options = parseConnectionOptions(serverUrl)
-
-    return {
-      host: options.host,
-      port: options.port,
-      connectHeaders,
-      ssl: true, // options.ssl,
-      timeout: 10000
-    }
-  })
-}
+import deconstructServers from "./deconstructServers"
 
 export default class MqGateway {
   private readonly connectionOptions: connect.ConnectOptions[]
@@ -72,20 +23,14 @@ export default class MqGateway {
 
   private connectAsync(): PromiseResult<Client> {
     return new Promise((resolve, reject) => {
-      const listener: connect.ConnectionListener = (error: Error, client: Client) => {
+      const connectionManager = new ConnectFailover(this.connectionOptions, this.reconnectOptions)
+      connectionManager.connect((error: Error, client: Client) => {
         if (error) {
           reject(error)
         } else {
           resolve(client)
         }
-      }
-
-      const connectionManager = new ConnectFailover(this.connectionOptions, this.reconnectOptions)
-      connectionManager.on("error", (error) => {
-        console.log(`Failed to connect to URL ${this.config.url}`)
-        console.error(error)
       })
-      connectionManager.connect(listener)
     })
   }
 
