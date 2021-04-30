@@ -24,7 +24,10 @@ const poll = async (
     })
 
   const poller = new Poller<string>(action)
-  const options: PollOptions<string> = { timeout, condition }
+  const options: PollOptions<string> = { timeout }
+  if (condition) {
+    options.condition = condition
+  }
 
   return await poller.poll(options)
 }
