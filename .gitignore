@@ -115,3 +115,6 @@ junit.xml
 # Cypress output
 **/cypress/screenshots
 **/cypress/videos
+
+# Auto-generated env-vars.json
+incoming-message-handler/scripts/env-vars.json

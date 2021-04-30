@@ -21,15 +21,15 @@ describe("formatMessageXml()", () => {
     xml = await parseXml<DeliveryMessage>(formattedMessage)
   })
 
-  it("should format the message", async () => {
+  it("should format the message", () => {
     expect(xml.DeliverRequest).toBeDefined()
   })
 
-  it("should provide a message id", async () => {
+  it("should provide a message id", () => {
     expect(xml.DeliverRequest.MessageIdentifier).toBeDefined()
   })
 
-  it("should provide a case id", async () => {
+  it("should provide a case id", () => {
     expect(xml.DeliverRequest.Message.ResultedCaseMessage.Session.Case.PTIURN).toBe("123456789")
   })
 })

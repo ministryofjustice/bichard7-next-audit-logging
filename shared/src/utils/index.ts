@@ -1,3 +1,5 @@
 export { default as PollAction } from "./PollAction"
 export { default as Poller } from "./Poller"
+export { default as PollOptions } from "./PollOptions"
+export { default as PollCondition } from "./PollCondition"
 export { default as HttpStatusCode } from "./HttpStatusCode"

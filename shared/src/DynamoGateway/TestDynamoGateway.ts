@@ -1,4 +1,5 @@
 import { CreateTableOutput, DocumentClient } from "aws-sdk/clients/dynamodb"
+import PollOptions from "../utils/PollOptions"
 import Poller from "../utils/Poller"
 import DynamoGateway from "./DynamoGateway"
 
@@ -47,7 +48,7 @@ export default class TestDynamoGateway extends DynamoGateway {
       return response
     })
 
-    return poller.poll(timeout)
+    return poller.poll(new PollOptions(timeout))
   }
 
   getAll(tableName: string): Promise<DocumentClient.ScanOutput> {
