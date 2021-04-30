@@ -2,16 +2,12 @@ import PollAction from "./PollAction"
 import PollOptions from "./PollOptions"
 
 const clearTimeouts = (handles: NodeJS.Timeout[]): void => handles.forEach(clearTimeout)
-const defaultOptions: PollOptions<unknown> = {
-  timeout: 10000,
-  delay: 100,
-  condition: (result) => !!result
-}
+
 export default class Poller<T> {
   constructor(private readonly action: PollAction<T>) {}
 
   poll(options: PollOptions<T>): Promise<T> {
-    const { timeout, delay, condition } = { ...defaultOptions, ...options }
+    const { timeout, delay, condition } = options
 
     return new Promise<T>((resolve, reject) => {
       const processHandles: NodeJS.Timeout[] = []

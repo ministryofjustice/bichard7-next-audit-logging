@@ -1,15 +1,13 @@
 import PollAction from "./PollAction"
-import PollCondition from "./PollCondition"
 import Poller from "./Poller"
 import PollOptions from "./PollOptions"
 
 const expectedResult = "Hello, World!"
 
 const poll = async (
-  timeout: number,
+  options: PollOptions<string>,
   numberOfIterations: number,
-  shouldSucceed: boolean,
-  condition?: PollCondition<string>
+  shouldSucceed: boolean
 ): Promise<string> => {
   let iterations = 0
 
@@ -24,23 +22,20 @@ const poll = async (
     })
 
   const poller = new Poller<string>(action)
-  const options: PollOptions<string> = { timeout }
-  if (condition) {
-    options.condition = condition
-  }
-
   return await poller.poll(options)
 }
 
 describe("Poller", () => {
   it("should succeed when the item is found", async () => {
-    const message = await poll(5000, 1, true)
+    const options = new PollOptions(5000)
+    const message = await poll(options, 1, true)
 
     expect(message).toBe("Hello, World!")
   })
 
   it("should take 3 seconds to find the item", async () => {
-    const message = await poll(5000, 3, true)
+    const options = new PollOptions(5000)
+    const message = await poll(options, 3, true)
 
     expect(message).toBe("Hello, World!")
   })
@@ -49,7 +44,8 @@ describe("Poller", () => {
     let actualError: Error
 
     try {
-      await poll(1000, 1, false)
+      const options = new PollOptions(1000)
+      await poll(options, 1, false)
     } catch (error) {
       actualError = error
     }
@@ -59,7 +55,9 @@ describe("Poller", () => {
   })
 
   it("should succeed when condition is valid", async () => {
-    const message = await poll(6000, 1, true, (result) => result === expectedResult)
+    const options = new PollOptions(5000)
+    options.condition = (result) => result === expectedResult
+    const message = await poll(options, 1, true)
 
     expect(message).toBe("Hello, World!")
   })
@@ -68,7 +66,9 @@ describe("Poller", () => {
     let actualError: Error
 
     try {
-      await poll(1000, 1, false, (result) => result === expectedResult)
+      const options = new PollOptions(1000)
+      options.condition = (result) => result === expectedResult
+      await poll(options, 1, false)
     } catch (error) {
       actualError = error
     }

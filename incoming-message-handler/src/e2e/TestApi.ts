@@ -1,6 +1,6 @@
 import axios, { AxiosError } from "axios"
 import { readFileSync } from "fs"
-import { AuditLog, Poller, PollCondition } from "shared"
+import { AuditLog, Poller, PollOptions } from "shared"
 
 export default class TestApi {
   private apiUrl: string
@@ -24,11 +24,11 @@ export default class TestApi {
       .catch((error) => <AxiosError>error)
   }
 
-  pollForGetMessages(
-    condition: PollCondition<AuditLog[]> = (messages) => messages.length > 0,
-    timeout = 10000,
-    delay = 300
-  ): Promise<AuditLog[]> {
-    return new Poller(() => this.getMessages()).poll({ timeout, delay, condition })
+  pollForGetMessages(): Promise<AuditLog[]> {
+    const options = new PollOptions<AuditLog[]>(10000)
+    options.delay = 300
+    options.condition = (messages) => messages.length > 0
+
+    return new Poller(() => this.getMessages()).poll(options)
   }
 }
