@@ -1,4 +1,5 @@
 import { connect } from "stompit"
+import { ConnectionOptions as TlsConnectionOptions } from "tls"
 import { MqConfig } from "src/configs"
 import parseConnectionOptions from "./parseConnectionOptions"
 
@@ -20,16 +21,29 @@ export default (config: MqConfig): connect.ConnectOptions[] => {
   return servers.map((serverUrl) => {
     const options = parseConnectionOptions(serverUrl)
 
-    return {
+    const tlsOptions: TlsConnectionOptions = {
       host: options.host,
       port: options.port,
-      connectHeaders,
-
-      // The type definitions seem to be locking this as `true`, regardless of
-      // what we want to pass in. We should be passing in `options.ssl`, but have
-      // to stick to `true` for now (it is working as-is)
-      ssl: true,
       timeout: 10000
+    }
+
+    // We cannot use `ssl: options.ssl` as the stompit library changes the `ssl`
+    // property from a `boolean` type to only `true` values for the
+    // `SslConnectionOptions` type and only `false` values for the other two types.
+    if (options.ssl) {
+      return {
+        ...tlsOptions,
+        connectHeaders,
+        ssl: true
+      }
+    }
+
+    // We need to explicitly cast this otherwise TypeScript tries to take this
+    // as the SslConnectionOptions type, which is wrong
+    return <connect.ConnectOptions>{
+      ...tlsOptions,
+      connectHeaders,
+      ssl: false
     }
   })
 }
