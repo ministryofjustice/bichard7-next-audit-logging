@@ -4,7 +4,7 @@ export const clean = (message: string): string => {
   return message.replace(/&lt;/g, "<").replace(/&gt;/g, ">")
 }
 
-export const parseXml = async <T>(xml: string): Promise<T> => {
+export const parseXml = <T>(xml: string): Promise<T> => {
   const stripNamespaces = processors.stripPrefix
   return parseStringPromise(xml, {
     tagNameProcessors: [stripNamespaces],

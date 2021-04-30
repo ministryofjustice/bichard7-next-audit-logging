@@ -3,8 +3,8 @@ import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda"
 import createDynamoDbConfig from "src/createDynamoDbConfig"
 import { createJsonApiResult } from "src/utils"
 
-// TODO: Replace the table name with an env var
-const auditLogGateway = new AuditLogDynamoGateway(createDynamoDbConfig(), "audit-log")
+const config = createDynamoDbConfig()
+const auditLogGateway = new AuditLogDynamoGateway(config, config.AUDIT_LOG_TABLE_NAME)
 const isConditionalExpressionViolationError = (error: Error): boolean =>
   error.message === "The conditional request failed"
 

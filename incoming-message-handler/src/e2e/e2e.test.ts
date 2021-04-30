@@ -1,10 +1,11 @@
 import { v4 as uuid } from "uuid"
 import format from "xml-formatter"
-import { isError, AuditLog, DynamoDbConfig } from "shared"
+import { isError, DynamoDbConfig } from "shared"
 import TestDynamoGateway from "shared/dist/DynamoGateway/TestDynamoGateway"
 import TestS3Gateway from "src/gateways/S3Gateway/TestS3Gateway"
 import TestMqGateway from "src/gateways/MqGateway/TestMqGateway"
 import IncomingMessageSimulator from "./IncomingMessageSimulator"
+import TestApi from "./TestApi"
 
 jest.setTimeout(30000)
 
@@ -76,11 +77,12 @@ describe("e2e tests", () => {
 
     await simulator.start(fileName, expectedMessage)
 
-    // Check the message is in the database
-    const persistedMessages = await dynamoGateway.pollForMessages(dynamoConfig.AUDIT_LOG_TABLE_NAME, 10000)
-    expect(persistedMessages.Count).toBe(1)
+    // Get messages from the API
+    const api = new TestApi()
+    const persistedMessages = await api.pollForGetMessages()
+    expect(persistedMessages).toHaveLength(1)
 
-    const persistedMessage = <AuditLog>persistedMessages.Items[0]
+    const persistedMessage = persistedMessages[0]
     expect(persistedMessage.messageId).toBe(expectedMessageId)
     expect(persistedMessage.caseId).toBe(expectedCaseId)
 
