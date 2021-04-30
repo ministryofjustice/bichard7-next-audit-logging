@@ -4,8 +4,7 @@ import MqGateway from "src/gateways/MqGateway"
 import SendMessageUseCase from "./SendMessageUseCase"
 
 const config: MqConfig = {
-  host: "host",
-  port: 1234,
+  url: "host",
   username: "username",
   password: "password",
   queueName: "queueName"

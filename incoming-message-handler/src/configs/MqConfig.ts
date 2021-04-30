@@ -1,6 +1,5 @@
 export default interface MqConfig {
-  host: string
-  port: number
+  url: string
   username: string
   password: string
   queueName: string

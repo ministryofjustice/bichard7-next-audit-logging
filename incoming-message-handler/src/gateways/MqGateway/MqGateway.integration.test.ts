@@ -3,10 +3,11 @@ import { MqConfig } from "src/configs"
 import MqGateway from "./MqGateway"
 import TestMqGateway from "./TestMqGateway"
 
+jest.setTimeout(30000)
+
 const queueName = "mq-gateway-integration-testing"
 const config: MqConfig = {
-  host: "localhost",
-  port: 51613,
+  url: "failover:(stomp://localhost:51613)",
   username: "admin",
   password: "admin",
   queueName

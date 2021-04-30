@@ -1,33 +1,36 @@
-import { Client, connect } from "stompit"
+import { Client, connect, ConnectFailover } from "stompit"
 import { isError, PromiseResult } from "shared"
 import { MqConfig } from "src/configs"
+import deconstructServers from "./deconstructServers"
 
 export default class MqGateway {
+  private readonly connectionOptions: connect.ConnectOptions[]
+
+  private readonly reconnectOptions: ConnectFailover.ConnectFailoverOptions
+
   private client: Client
 
-  constructor(private readonly config: MqConfig) {}
+  constructor(private readonly config: MqConfig) {
+    this.connectionOptions = deconstructServers(config)
+
+    this.reconnectOptions = {
+      initialReconnectDelay: 1000,
+      maxReconnectDelay: 3000,
+      maxReconnects: 2,
+      useExponentialBackOff: false
+    }
+  }
 
   private connectAsync(): PromiseResult<Client> {
-    return new Promise<Client>((resolve, reject) => {
-      const options: connect.ConnectOptions = {
-        host: this.config.host,
-        port: this.config.port,
-        connectHeaders: {
-          login: this.config.username,
-          passcode: this.config.password,
-          "heart-beat": "5000,5000"
-        }
-      }
-
-      const listener: connect.ConnectionListener = (error: Error, client: Client) => {
+    return new Promise((resolve, reject) => {
+      const connectionManager = new ConnectFailover(this.connectionOptions, this.reconnectOptions)
+      connectionManager.connect((error: Error, client: Client) => {
         if (error) {
           reject(error)
         } else {
           resolve(client)
         }
-      }
-
-      connect(options, listener)
+      })
     })
   }
 

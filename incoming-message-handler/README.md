@@ -14,17 +14,17 @@ $ docker logs -ft localstack_main
 
 ## Interacting with the infrastructure
 
-### IBM MQ
+### Active MQ
 
-Messages that come through the lambda are sent off to an IBM MQ queue once processing has complete. You can view these messages through IBM's browser-based management console. Go to a web browser once the local infrastructure has been setup (see `environment/docker-compose.yml`) and enter the following:
+Messages that come through the lambda are sent off to an Active MQ queue once processing has complete. You can view these messages through IBM's browser-based management console. Go to a web browser once the local infrastructure has been setup (see `environment/docker-compose.yml`) and enter the following:
 
-> URL: **https://localhost:10443**
+> URL: **http://localhost:58161**
 
 > Username: **admin**
 
-> Password: **passw0rd**
+> Password: **admin**
 
-Currently, all messages are sent to the queue `DEV.QUEUE.1` on the queue manager `BR7_QM`.
+A queue will be created when a message is sent to the instance or a listener subscries to it.
 
 ### LocalStack (Local AWS Infrastructure)
 

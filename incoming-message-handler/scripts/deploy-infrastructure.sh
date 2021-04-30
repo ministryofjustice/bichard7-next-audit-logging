@@ -36,8 +36,7 @@ function update_env_vars_file {
   cat > $env_path <<- EOM
 {
   "Variables": {
-    "MQ_HOST": "mq",
-    "MQ_PORT": "61613",
+    "MQ_URL": "failover:(stomp://mq:61613)",
     "MQ_QUEUE": "incoming-message-handler-e2e-testing",
     "MQ_USER": "admin",
     "MQ_PASSWORD": "admin",
