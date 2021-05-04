@@ -10,11 +10,7 @@ test("renders all 3 values when given a message", () => {
 
   render(<Message message={message} />)
 
-  const messageId = screen.getByLabelText("Message Id")
-  const caseId = screen.getByLabelText("Case Id")
-  const receivedDate = screen.getByLabelText("Received Date")
-
-  expect(messageId.innerHTML).toBe(message.messageId)
-  expect(caseId.innerHTML).toBe(message.caseId)
-  expect(receivedDate.innerHTML).toContain("01/05/2021 10:25:53")
+  expect(screen.getByLabelText("Message Id")).toHaveTextContent(message.messageId)
+  expect(screen.getByLabelText("Case Id")).toHaveTextContent(message.caseId)
+  expect(screen.getByLabelText("Received Date")).toHaveTextContent("01/05/2021 10:25:53")
 })

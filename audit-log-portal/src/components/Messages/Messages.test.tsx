@@ -27,9 +27,8 @@ test("should render 2 messages when 2 messages are given", () => {
 
   render(<Messages messages={messages} />)
 
-  const noMessages = screen.queryByLabelText("No Messages")
-  const actualMessages = screen.getByLabelText("Messages")
+  expect(screen.queryByLabelText("No Messages")).not.toBeInTheDocument()
 
-  expect(noMessages).toBeNull()
+  const actualMessages = screen.getByLabelText("Messages")
   expect(actualMessages.children).toHaveLength(2)
 })
