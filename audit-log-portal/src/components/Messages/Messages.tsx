@@ -10,15 +10,17 @@ interface Props {
 
 const Messages = ({ messages }: Props) => (
   <>
-    <h3>Messages</h3>
+    <h3>{`Messages`}</h3>
 
     {messages.length === 0 && (
-      <p>
+      <p aria-label="No Messages">
         <i>{`No messages`}</i>
       </p>
     )}
 
-    {messages.length > 0 && messages.map((message) => <Message key={message.messageId} message={message} />)}
+    <div aria-label="Messages">
+      {messages.length > 0 && messages.map((message) => <Message key={message.messageId} message={message} />)}
+    </div>
   </>
 )
 

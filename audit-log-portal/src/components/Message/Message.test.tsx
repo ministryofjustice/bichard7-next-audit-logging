@@ -1,17 +1,16 @@
-import { shallow } from "enzyme"
+import { render, screen } from "@testing-library/react"
 import Message from "./Message"
 
-const message = {
-  messageId: "Message1",
-  caseId: "Case1000",
-  receivedDate: new Date("2021-05-01T10:25:53")
-}
+test("renders all 3 values when given a message", () => {
+  const message = {
+    messageId: "Message1",
+    caseId: "Case1000",
+    receivedDate: new Date("2021-05-01T10:25:53")
+  }
 
-describe("<Message />", () => {
-  it("should render <Message /> when message has value", () => {
-    const component = shallow(<Message message={message} />)
-    expect(component.text()).toContain("Message1")
-    expect(component.text()).toContain("Case1000")
-    expect(component.html()).toContain("01/05/2021 10:25:53")
-  })
+  render(<Message message={message} />)
+
+  expect(screen.getByLabelText("Message Id")).toHaveTextContent(message.messageId)
+  expect(screen.getByLabelText("Case Id")).toHaveTextContent(message.caseId)
+  expect(screen.getByLabelText("Received Date")).toHaveTextContent("01/05/2021 10:25:53")
 })

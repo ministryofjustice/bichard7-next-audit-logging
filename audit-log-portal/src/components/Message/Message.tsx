@@ -12,22 +12,20 @@ interface Props {
 
 const Message = ({ message }: Props) => (
   <div className={classNames(styles.container, "row")}>
-    <h1>123</h1>
-    <h1>321</h1>
     <div className={styles["inner-container"]}>
       <div className={styles["information-block"]}>
         <p className={styles.label}>{`Message Id`}</p>
-        <p>{message.messageId}</p>
+        <p aria-label="Message Id">{message.messageId}</p>
       </div>
 
       <div className={styles["information-block"]}>
         <p className={styles.label}>{`Case Number`}</p>
-        <p>{message.caseId}</p>
+        <p aria-label="Case Id">{message.caseId}</p>
       </div>
 
       <div className={styles["information-block"]}>
         <p className={styles.label}>{`Received Date`}</p>
-        <p>
+        <p aria-label="Received Date">
           <DateTime date={message.receivedDate} />
         </p>
       </div>
