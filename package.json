@@ -31,7 +31,7 @@
     "lint:fix": "eslint . --fix"
   },
   "lint-staged": {
-    "*.(j|t)s(x?)$": [
+    "*.{js,ts,tsx}": [
       "eslint --fix"
     ]
   },
