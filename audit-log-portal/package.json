@@ -10,7 +10,7 @@
     "test": "../scripts/test.sh unit",
     "host": "npm run build && nodemon scripts/host/start.mjs",
     "cypress:open": "cypress open",
-    "test:ui": "cypress run",
+    "test:ui": "concurrently --kill-others \"npm run start:mocked\" \"./scripts/run-ui-tests.sh\"",
     "test:ci": "../scripts/test.sh ci"
   },
   "dependencies": {
