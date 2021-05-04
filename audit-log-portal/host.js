@@ -9,8 +9,7 @@ const app = require("next")({
 
 // Verify the required env vars exist
 if (!process.env.NEXT_PUBLIC_API_URL) {
-  console.error("Missing environment variable NEXT_PUBLIC_API_URL")
-  process.exit(1)
+  throw new Error("Missing environment variable NEXT_PUBLIC_API_URL")
 }
 
 // Setup the server and which files to host

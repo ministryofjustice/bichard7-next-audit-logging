@@ -10,9 +10,7 @@ interface Props {
 
 const Messages = ({ messages }: Props) => (
   <>
-    <h3 role="heading">
-      Messages
-    </h3>
+    <h3>{`Messages`}</h3>
 
     {messages.length === 0 && (
       <p aria-label="No Messages">

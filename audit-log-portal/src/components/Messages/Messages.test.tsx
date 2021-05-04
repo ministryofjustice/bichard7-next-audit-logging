@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react"
 import Messages from "./Messages"
 
-test("should render \"No Messages\" when no messages are given", () => {
+test("should render 'No Messages' when no messages are given", () => {
   render(<Messages messages={[]} />)
 
   const noMessages = screen.getByLabelText("No Messages")
