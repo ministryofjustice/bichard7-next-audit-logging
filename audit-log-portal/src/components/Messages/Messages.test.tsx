@@ -1,29 +1,35 @@
-import { shallow } from "enzyme"
-import Message from "components/Message"
+import { render, screen } from "@testing-library/react"
 import Messages from "./Messages"
 
-const messages = [
-  {
-    messageId: "Message1",
-    caseId: "123",
-    receivedDate: new Date()
-  },
-  {
-    messageId: "Message2",
-    caseId: "456",
-    receivedDate: new Date()
-  }
-]
+test("should render \"No Messages\" when no messages are given", () => {
+  render(<Messages messages={[]} />)
 
-describe("<Messages />", () => {
-  it("should not render any <Message /> component when there are no messages", () => {
-    const component = shallow(<Messages messages={[]} />)
-    expect(component.find(Message)).toHaveLength(0)
-    expect(component.contains("No messages")).toBe(true)
-  })
+  const noMessages = screen.getByLabelText("No Messages")
+  const actualMessages = screen.getByLabelText("Messages")
 
-  it("should render 2 <Message /> components when there are 2 messages", () => {
-    const component = shallow(<Messages messages={messages} />)
-    expect(component.find(Message)).toHaveLength(2)
-  })
+  expect(noMessages.innerHTML).toContain("No messages")
+  expect(actualMessages.children).toHaveLength(0)
+})
+
+test("should render 2 messages when 2 messages are given", () => {
+  const messages = [
+    {
+      messageId: "Message1",
+      caseId: "123",
+      receivedDate: new Date()
+    },
+    {
+      messageId: "Message2",
+      caseId: "456",
+      receivedDate: new Date()
+    }
+  ]
+
+  render(<Messages messages={messages} />)
+
+  const noMessages = screen.queryByLabelText("No Messages")
+  const actualMessages = screen.getByLabelText("Messages")
+
+  expect(noMessages).toBeNull()
+  expect(actualMessages.children).toHaveLength(2)
 })
