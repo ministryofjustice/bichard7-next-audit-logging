@@ -1,7 +1,7 @@
 module.exports = {
   preset: "ts-jest",
   clearMocks: true,
-  testEnvironment: "node",
+  testEnvironment: "jsdom",
   transform: {
     "\\.[jt]sx?$": "babel-jest"
   },

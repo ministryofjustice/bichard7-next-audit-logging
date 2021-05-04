@@ -1,23 +1,29 @@
-import { shallow } from "enzyme"
+import { render, screen } from "@testing-library/react"
 import DateTime from "./DateTime"
 
-describe("<DateTime />", () => {
-  it("should render correct date time format when date is type of Date", () => {
-    const date = new Date("2021-04-01T13:20:30")
-    const expectedDateString = "01/04/2021 13:20:30"
-    const component = shallow(<DateTime date={date} />)
-    expect(component.find("time").text()).toContain(expectedDateString)
-  })
+test("has correct date time format when date is type of Date", () => {
+  const date = new Date("2021-04-01T13:20:30")
+  const expectedDateString = "01/04/2021 13:20:30"
 
-  it("should render correct date time format when date is type of String", () => {
-    const dateString = "2021-04-01T13:20:30"
-    const expectedDateString = "01/04/2021 13:20:30"
-    const component = shallow(<DateTime date={dateString} />)
-    expect(component.find("time").text()).toContain(expectedDateString)
-  })
+  render(<DateTime date={date} />)
 
-  it("should not render when date has no value", () => {
-    const component = shallow(<DateTime date={null} />)
-    expect(component.html()).toBe("")
-  })
+  const time = screen.getByLabelText("time")
+  expect(time.innerHTML).toBe(expectedDateString)
+})
+
+test("has correct date time format when date is type of String", () => {
+  const dateString = "2021-04-01T13:20:30"
+  const expectedDateString = "01/04/2021 13:20:30"
+
+  render(<DateTime date={dateString} />)
+
+  const time = screen.getByLabelText("time")
+  expect(time.innerHTML).toBe(expectedDateString)
+})
+
+test("not rendered when date has no value", () => {
+  render(<DateTime date={null} />)
+
+  const time = screen.queryByLabelText("time")
+  expect(time).toBeNull()
 })

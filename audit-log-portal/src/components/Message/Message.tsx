@@ -12,8 +12,6 @@ interface Props {
 
 const Message = ({ message }: Props) => (
   <div className={classNames(styles.container, "row")}>
-    <h1>123</h1>
-    <h1>321</h1>
     <div className={styles["inner-container"]}>
       <div className={styles["information-block"]}>
         <p className={styles.label}>{`Message Id`}</p>

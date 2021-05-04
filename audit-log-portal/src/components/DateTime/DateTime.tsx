@@ -11,7 +11,11 @@ const DateTime = ({ date }: Props) => {
 
   const dateObject = new Date(date)
 
-  return <time>{format(dateObject, "dd/MM/yyyy HH:mm:ss")}</time>
+  return (
+    <time aria-label="time">
+      {format(dateObject, "dd/MM/yyyy HH:mm:ss")}
+    </time>
+  )
 }
 
 export default DateTime
