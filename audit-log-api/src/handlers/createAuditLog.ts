@@ -1,21 +1,28 @@
-import { isError, PromiseResult, AuditLogDynamoGateway, AuditLog, HttpStatusCode } from "shared"
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda"
-import createDynamoDbConfig from "src/createDynamoDbConfig"
+import { AuditLogDynamoGateway, AuditLog, HttpStatusCode } from "shared"
 import { createJsonApiResult } from "src/utils"
+import createDynamoDbConfig from "src/createDynamoDbConfig"
+import CreateAuditLogUseCase from "src/use-cases/CreateAuditLogUseCase"
 
 const config = createDynamoDbConfig()
 const auditLogGateway = new AuditLogDynamoGateway(config, config.AUDIT_LOG_TABLE_NAME)
-const isConditionalExpressionViolationError = (error: Error): boolean =>
-  error.message === "The conditional request failed"
+const createAuditLogUseCase = new CreateAuditLogUseCase(auditLogGateway)
 
-export default async function createAuditLog(event: APIGatewayProxyEvent): PromiseResult<APIGatewayProxyResult> {
-  const log = <AuditLog>JSON.parse(event.body)
-  const result = await auditLogGateway.create(log)
+export default async function createAuditLog(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
+  const auditLog = <AuditLog>JSON.parse(event.body)
+  const result = await createAuditLogUseCase.create(auditLog)
 
-  if (isError(result) && isConditionalExpressionViolationError(result)) {
+  if (result.resultType === "conflict") {
     return createJsonApiResult({
       statusCode: HttpStatusCode.conflict,
-      body: `A message with Id ${log.messageId} already exists in the database`
+      body: result.resultDescription
+    })
+  }
+
+  if (result.resultType === "error") {
+    return createJsonApiResult({
+      statusCode: HttpStatusCode.internalServerError,
+      body: result.resultDescription
     })
   }
 
