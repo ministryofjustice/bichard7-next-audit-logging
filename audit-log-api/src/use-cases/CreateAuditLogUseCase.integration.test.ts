@@ -1,4 +1,5 @@
 import { AuditLog, AuditLogDynamoGateway, DynamoDbConfig } from "shared"
+import TestDynamoGateway from "shared/dist/DynamoGateway/TestDynamoGateway"
 import CreateAuditLogUseCase from "./CreateAuditLogUseCase"
 
 const config: DynamoDbConfig = {
@@ -7,12 +8,20 @@ const config: DynamoDbConfig = {
   AUDIT_LOG_TABLE_NAME: "audit-log"
 }
 
+const testDynamoGateway = new TestDynamoGateway(config)
 const auditLogDynamoGateway = new AuditLogDynamoGateway(config, config.AUDIT_LOG_TABLE_NAME)
 const createAuditLogUseCase = new CreateAuditLogUseCase(auditLogDynamoGateway)
 
 const createAuditLog = (): AuditLog => new AuditLog("CorrelationId", new Date(), "XML")
 
+const getAuditLog = (messageId: string): Promise<AuditLog> =>
+  testDynamoGateway.getOne(config.AUDIT_LOG_TABLE_NAME, "messageId", messageId)
+
 describe("CreateAuditLogUseCase", () => {
+  beforeEach(async () => {
+    await testDynamoGateway.deleteAll(config.AUDIT_LOG_TABLE_NAME, "messageId")
+  })
+
   it("should return a conflict result when an Audit Log record exists with the same messageId", async () => {
     const auditLog = createAuditLog()
     await auditLogDynamoGateway.create(auditLog)
@@ -24,23 +33,33 @@ describe("CreateAuditLogUseCase", () => {
   })
 
   it("should return an error result when an unknown error occurs within the database", async () => {
-    const expectedError = new Error("Expected Error")
-    jest.spyOn(AuditLogDynamoGateway.prototype, "create").mockResolvedValue(Promise.resolve(expectedError))
+    const gateway = new AuditLogDynamoGateway(config, "Invalid Table Name")
+    const useCase = new CreateAuditLogUseCase(gateway)
 
     const auditLog = createAuditLog()
 
-    const result = await createAuditLogUseCase.create(auditLog)
+    const result = await useCase.create(auditLog)
 
     expect(result.resultType).toBe("error")
-    expect(result.resultDescription).toBe(expectedError.message)
+    expect(result.resultDescription).toBeDefined()
+
+    const actualAuditLog = await getAuditLog(auditLog.messageId)
+    expect(actualAuditLog).toBeNull()
   })
 
   it("should return a success result when the record is stored in the database", async () => {
-    const auditLog = createAuditLog()
+    const expectedAuditLog = createAuditLog()
 
-    const result = await createAuditLogUseCase.create(auditLog)
+    const result = await createAuditLogUseCase.create(expectedAuditLog)
 
     expect(result.resultType).toBe("success")
     expect(result.resultDescription).toBeUndefined()
+
+    const actualAuditLog = await getAuditLog(expectedAuditLog.messageId)
+    expect(actualAuditLog.messageId).toBe(expectedAuditLog.messageId)
+    expect(actualAuditLog.externalCorrelationId).toBe(expectedAuditLog.externalCorrelationId)
+    expect(actualAuditLog.caseId).toBe(expectedAuditLog.caseId)
+    expect(actualAuditLog.receivedDate).toBe(expectedAuditLog.receivedDate)
+    expect(actualAuditLog.messageXml).toBe(expectedAuditLog.messageXml)
   })
 })

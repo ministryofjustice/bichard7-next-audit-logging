@@ -27,7 +27,7 @@ describe("FetchMessagesUseCase", () => {
     expect(actualMessages).toHaveLength(1)
     expect(actualMessage.messageId).toEqual(expectedMessage.messageId)
     expect(actualMessage.caseId).toEqual(expectedMessage.caseId)
-    expect(actualMessage.receivedDate.toISOString()).toContain("2021-03-24")
+    expect(actualMessage.receivedDate).toContain("2021-03-24")
   })
 
   it("should fail when the error is unknown", async () => {

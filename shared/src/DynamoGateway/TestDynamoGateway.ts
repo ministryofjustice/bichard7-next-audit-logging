@@ -1,4 +1,4 @@
-import { CreateTableOutput, DocumentClient } from "aws-sdk/clients/dynamodb"
+import { AttributeValue, CreateTableOutput, DocumentClient } from "aws-sdk/clients/dynamodb"
 import PollOptions from "../utils/PollOptions"
 import Poller from "../utils/Poller"
 import DynamoGateway from "./DynamoGateway"
@@ -57,6 +57,23 @@ export default class TestDynamoGateway extends DynamoGateway {
         TableName: tableName
       })
       .promise()
+  }
+
+  async getOne<T>(tableName: string, keyName: string, keyValue: AttributeValue): Promise<T | null> {
+    const result = await this.client
+      .get({
+        TableName: tableName,
+        Key: {
+          [keyName]: keyValue
+        }
+      })
+      .promise()
+
+    if (!result.Item) {
+      return null
+    }
+
+    return <T>result.Item
   }
 
   async deleteAll(tableName: string, keyName: string): Promise<void> {
