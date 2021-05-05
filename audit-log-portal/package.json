@@ -6,11 +6,11 @@
     "dev": "./scripts/setup-environment-variables.sh && next dev",
     "build": "next build",
     "start": "./scripts/setup-environment-variables.sh && next start",
-    "start:mocked": "./scripts/setup-environment-variables.sh && NODE_OPTIONS='--require \"./mocks/index\"' next start",
+    "start:mocked": "./scripts/setup-environment-variables.sh mocked && NODE_OPTIONS='--require \"./mocks/index\"' next start",
     "test": "../scripts/test.sh unit",
     "host": "npm run build && nodemon scripts/host/start.mjs",
     "cypress:open": "cypress open",
-    "test:ui": "cypress run",
+    "test:ui": "concurrently --kill-others --success first \"npm run start:mocked\" \"./scripts/run-ui-tests.sh\"",
     "test:ci": "../scripts/test.sh ci"
   },
   "dependencies": {
@@ -33,6 +33,7 @@
     "@types/node": "^14.14.37",
     "@types/react": "^17.0.3",
     "babel-jest": "^26.6.3",
+    "concurrently": "^6.0.2",
     "cypress": "^6.8.0",
     "http-lambda-proxy": "^1.1.4",
     "identity-obj-proxy": "^3.0.0",
