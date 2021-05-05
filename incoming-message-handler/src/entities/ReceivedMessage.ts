@@ -1,4 +1,4 @@
 export default interface ReceivedMessage {
-  receivedDate: Date
+  receivedDate: string
   messageXml: string
 }

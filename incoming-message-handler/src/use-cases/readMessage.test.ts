@@ -33,7 +33,7 @@ const expectedMessage = formatXml(`
 `)
 
 const message: ReceivedMessage = {
-  receivedDate: new Date(),
+  receivedDate: new Date().toISOString(),
   messageXml: ""
 }
 

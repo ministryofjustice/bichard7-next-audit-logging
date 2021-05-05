@@ -90,7 +90,7 @@ describe("e2e tests", () => {
     const actualMessage = await testMqGateway.getMessage(queueName)
     expect(isError(actualMessage)).toBe(false)
 
-    const expectedXml = replaceMessageIdInXml(persistedMessage)
+    const expectedXml = formatXml(replaceMessageIdInXml(persistedMessage))
     expect(formatXml(<string>actualMessage)).toBe(expectedXml)
   })
 })

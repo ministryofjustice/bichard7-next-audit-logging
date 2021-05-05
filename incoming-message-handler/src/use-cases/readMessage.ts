@@ -46,7 +46,7 @@ const readMessage = async (message: ReceivedMessage): PromiseResult<AuditLog> =>
     return caseId
   }
 
-  const auditLog = new AuditLog(externalCorrelationId, message.receivedDate, message.messageXml)
+  const auditLog = new AuditLog(externalCorrelationId, new Date(message.receivedDate), message.messageXml)
   auditLog.caseId = caseId
 
   return auditLog
