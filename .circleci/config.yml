@@ -92,11 +92,9 @@ jobs:
           path: ./audit-log-portal/test-results/jest/
 
       - run:
-          name: Installing prerequisites for Cypress 
-          command: sudo apt-get update && sudo apt-get install libgtk2.0-0 libgtk-3-0 libgbm-dev libnotify-dev libgconf-2-4 libnss3 libxss1 libasound2 libxtst6 xauth xvfb
-      - run:
           name: Installing Cypress 
-          command: cd ./audit-log-portal && npx cypress install && cd -
+          command: ./scripts/install-cypress.sh
+          
       - run:
           name: Running UI tests
           command: cd ./audit-log-portal && npm run test:ui && cd -
