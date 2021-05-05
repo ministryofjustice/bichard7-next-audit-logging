@@ -91,6 +91,19 @@ jobs:
       - store_test_results:
           path: ./audit-log-portal/test-results/jest/
 
+      - run:
+          name: Installing Cypress 
+          command: ./scripts/install-cypress.sh
+          
+      - run:
+          name: Running UI tests
+          command: cd ./audit-log-portal && npm run test:ui && cd -
+
+      - store_artifacts:
+          path: ./audit-log-portal/cypress/videos
+      - store_artifacts:
+          path: ./audit-log-portal/cypress/screenshots
+
 workflows:
   version: 2
   build-and-test:
