@@ -4,6 +4,26 @@
   "version": "0.0.1",
   "private": true,
   "main": "index.js",
+  "scripts": {
+    "build": "rimraf build && webpack --config ./.webpack/webpack.prod.js",
+    "build:dev": "rimraf build && webpack --config ./.webpack/webpack.dev.js",
+    "setup:env": "cd ../environment && ./setup.sh && cd - && ./scripts/deploy-infrastructure.sh",
+    "test": "npm run setup:env && ../scripts/test.sh",
+    "test:unit": "../scripts/test.sh unit",
+    "test:integration": "npm run setup:env && ../scripts/test.sh integration",
+    "test:e2e": "npm run setup:env && ../scripts/test.sh e2e",
+    "test:ci": "../scripts/test.sh ci"
+  },
+  "dependencies": {
+    "aws-sdk": "^2.804.0",
+    "axios": "^0.21.1",
+    "dateformat": "^4.5.1",
+    "https": "^1.0.0",
+    "shared": "file:../shared",
+    "stompit": "^1.0.0",
+    "uuid": "^8.3.2",
+    "xml2js": "^0.4.23"
+  },
   "devDependencies": {
     "@babel/core": "^7.13.10",
     "@babel/plugin-bugfix-v8-spread-parameters-in-optional-chaining": "^7.13.12",
@@ -29,25 +49,5 @@
     "webpack-cli": "^4.5.0",
     "webpack-merge": "^5.7.3",
     "xml-formatter": "^2.4.0"
-  },
-  "scripts": {
-    "build": "rimraf build && webpack --config ./.webpack/webpack.prod.js",
-    "build:dev": "rimraf build && webpack --config ./.webpack/webpack.dev.js",
-    "setup:env": "cd ../environment && ./setup.sh && cd - && ./scripts/deploy-infrastructure.sh",
-    "test": "npm run setup:env && ../scripts/test.sh",
-    "test:unit": "../scripts/test.sh unit",
-    "test:integration": "npm run setup:env && ../scripts/test.sh integration",
-    "test:e2e": "npm run setup:env && ../scripts/test.sh e2e",
-    "test:ci": "../scripts/test.sh ci"
-  },
-  "dependencies": {
-    "aws-sdk": "^2.804.0",
-    "axios": "^0.21.1",
-    "dateformat": "^4.5.1",
-    "https": "^1.0.0",
-    "shared": "file:../shared",
-    "stompit": "^1.0.0",
-    "uuid": "^8.3.2",
-    "xml2js": "^0.4.23"
   }
 }

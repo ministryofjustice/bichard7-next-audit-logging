@@ -19,14 +19,14 @@ const getCaseId = (xml: DeliveryMessage): Result<string> => {
   return caseId
 }
 
-const getMessageId = (xml: DeliveryMessage): Result<string> => {
-  const messageId = xml.DeliverRequest && xml.DeliverRequest.MessageIdentifier
+const getExternalCorrelationId = (xml: DeliveryMessage): Result<string> => {
+  const externalCorrelationId = xml.DeliverRequest && xml.DeliverRequest.MessageIdentifier
 
-  if (!messageId) {
-    return new Error("Message Id cannot be found")
+  if (!externalCorrelationId) {
+    return new Error("The External Correlation Id cannot be found")
   }
 
-  return messageId.trim()
+  return externalCorrelationId.trim()
 }
 
 const readMessage = async (message: ReceivedMessage): PromiseResult<AuditLog> => {
@@ -36,19 +36,17 @@ const readMessage = async (message: ReceivedMessage): PromiseResult<AuditLog> =>
     return new ApplicationError("Failed to parse XML", xml)
   }
 
-  const messageId = getMessageId(xml)
-
-  if (isError(messageId)) {
-    return messageId
+  const externalCorrelationId = getExternalCorrelationId(xml)
+  if (isError(externalCorrelationId)) {
+    return externalCorrelationId
   }
 
   const caseId = getCaseId(xml)
-
   if (isError(caseId)) {
     return caseId
   }
 
-  const auditLog = new AuditLog(messageId, message.receivedDate, message.messageXml)
+  const auditLog = new AuditLog(externalCorrelationId, message.receivedDate, message.messageXml)
   auditLog.caseId = caseId
 
   return auditLog
