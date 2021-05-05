@@ -1,6 +1,6 @@
 #!/bin/bash
 
-## Wait until application is running
+# Wait until application is running
 APP_URL=http://localhost:3000
 RESPONSE_CODE=404
 RETRY=7
@@ -13,12 +13,12 @@ while [ $RESPONSE_CODE != "200" ] && [ $RETRY -gt 0 ]; do
   sleep 2
 done
 
-## Exit if it couldn't get 200 response code
+# Exit if it couldn't get 200 response code
 if [ $RETRY -eq 0 ]; then
   echo "'audit-log-portal' is not running on $APP_URL"
   exit 1
 fi
 
-## Run Cypress UI tests
+# Run Cypress UI tests
 echo "Running UI tests"
 npx cypress run
