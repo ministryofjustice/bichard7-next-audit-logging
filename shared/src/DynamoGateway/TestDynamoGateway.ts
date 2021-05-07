@@ -1,7 +1,9 @@
-import { AttributeValue, CreateTableOutput, DocumentClient } from "aws-sdk/clients/dynamodb"
+import { CreateTableOutput, DocumentClient } from "aws-sdk/clients/dynamodb"
 import PollOptions from "../utils/PollOptions"
 import Poller from "../utils/Poller"
 import DynamoGateway from "./DynamoGateway"
+
+type KeyValue = string | number | boolean
 
 export default class TestDynamoGateway extends DynamoGateway {
   async tableExists(tableName: string): Promise<boolean> {
@@ -59,7 +61,7 @@ export default class TestDynamoGateway extends DynamoGateway {
       .promise()
   }
 
-  async getOne<T>(tableName: string, keyName: string, keyValue: AttributeValue): Promise<T | null> {
+  async getOne<T>(tableName: string, keyName: string, keyValue: KeyValue): Promise<T | null> {
     const result = await this.client
       .get({
         TableName: tableName,
