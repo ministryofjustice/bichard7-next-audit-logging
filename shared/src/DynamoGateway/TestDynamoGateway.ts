@@ -3,6 +3,8 @@ import PollOptions from "../utils/PollOptions"
 import Poller from "../utils/Poller"
 import DynamoGateway from "./DynamoGateway"
 
+type KeyValue = string | number | boolean
+
 export default class TestDynamoGateway extends DynamoGateway {
   async tableExists(tableName: string): Promise<boolean> {
     const tableResult = await this.service.listTables().promise()
@@ -57,6 +59,23 @@ export default class TestDynamoGateway extends DynamoGateway {
         TableName: tableName
       })
       .promise()
+  }
+
+  async getOne<T>(tableName: string, keyName: string, keyValue: KeyValue): Promise<T | null> {
+    const result = await this.client
+      .get({
+        TableName: tableName,
+        Key: {
+          [keyName]: keyValue
+        }
+      })
+      .promise()
+
+    if (!result.Item) {
+      return null
+    }
+
+    return <T>result.Item
   }
 
   async deleteAll(tableName: string, keyName: string): Promise<void> {

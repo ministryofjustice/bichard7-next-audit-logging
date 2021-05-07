@@ -10,13 +10,13 @@ const formatXml = (xml: string): string =>
     indentation: "  "
   })
 
-const expectedMessageId = uuid()
+const expectedExternalCorrelationId = uuid()
 const expectedCaseId = "41BP0510007"
 const expectedMessage = formatXml(`
 <?xml version="1.0" encoding="UTF-8"?>
 <DeliverRequest xmlns="http://schemas.cjse.gov.uk/messages/deliver/2006-05" xmlns:ex="http://schemas.cjse.gov.uk/messages/exception/2006-06" xmlns:mf="http://schemas.cjse.gov.uk/messages/format/2006-05" xmlns:mm="http://schemas.cjse.gov.uk/messages/metadata/2006-05" xmlns:msg="http://schemas.cjse.gov.uk/messages/messaging/2006-05" xmlns:xmime="http://www.w3.org/2005/05/xmlmime" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<msg:MessageIdentifier>
-    ${expectedMessageId}
+    ${expectedExternalCorrelationId}
   </msg:MessageIdentifier>
 	<Message>
     <DC:ResultedCaseMessage xmlns:DC="http://www.dca.gov.uk/xmlschemas/libra" Flow='ResultedCasesForThePolice' Interface='LibraStandardProsecutorPolice' SchemaVersion='0.6g'>
@@ -33,7 +33,7 @@ const expectedMessage = formatXml(`
 `)
 
 const message: ReceivedMessage = {
-  receivedDate: new Date(),
+  receivedDate: new Date().toISOString(),
   messageXml: ""
 }
 
@@ -42,9 +42,10 @@ describe("handleMessage", () => {
     message.messageXml = expectedMessage
 
     const result = (await readMessage(message)) as AuditLog
-    const { messageId, caseId, messageXml } = result
+    const { messageId, externalCorrelationId, caseId, messageXml } = result
 
-    expect(messageId).toBe(expectedMessageId)
+    expect(messageId).toBeDefined()
+    expect(externalCorrelationId).toBe(expectedExternalCorrelationId)
     expect(messageXml).toBe(expectedMessage)
     expect(caseId).toEqual(expectedCaseId)
   })
@@ -66,7 +67,7 @@ describe("handleMessage", () => {
     const result = await readMessage(message)
 
     expect(isError(result)).toBe(true)
-    expect((<Error>result).message).toEqual("Message Id cannot be found")
+    expect((<Error>result).message).toEqual("The External Correlation Id cannot be found")
   })
 
   it("should handle missing case id error", async () => {

@@ -27,7 +27,7 @@ const formattedMessage = `
 describe("formatMessage()", () => {
   it("should not format the message when it is already formatted", async () => {
     const expectedMessage: ReceivedMessage = {
-      receivedDate: new Date(),
+      receivedDate: new Date().toISOString(),
       messageXml: formattedMessage
     }
 
@@ -39,7 +39,7 @@ describe("formatMessage()", () => {
 
   it("should format the message when it is not already formatted", async () => {
     const expectedMessage: ReceivedMessage = {
-      receivedDate: new Date(),
+      receivedDate: new Date().toISOString(),
       messageXml: unformattedMessage
     }
 

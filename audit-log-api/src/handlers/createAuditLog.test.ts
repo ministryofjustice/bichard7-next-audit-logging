@@ -1,39 +1,60 @@
-import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda"
-import { AuditLog, AuditLogDynamoGateway, HttpStatusCode } from "shared"
+import { APIGatewayProxyEvent } from "aws-lambda"
+import { AuditLog, HttpStatusCode } from "shared"
+import CreateAuditLogUseCase from "src/use-cases/CreateAuditLogUseCase"
 import createAuditLog from "./createAuditLog"
 
-const log = new AuditLog("1", new Date(2021, 10, 12), "XML")
-log.caseId = "123"
+const createHandlerEvent = (): APIGatewayProxyEvent => {
+  const auditLog = new AuditLog("1", new Date(), "XML")
 
-const expectedSuccessfulBodyResponse = "Created"
-const expectedErrorBodyResponse = `A message with Id ${log.messageId} already exists in the database`
+  return <APIGatewayProxyEvent>{
+    body: JSON.stringify(auditLog)
+  }
+}
 
 describe("createAuditlog()", () => {
-  it("should return 'Created' status code (201) when log ID does not exist in the database", async () => {
-    jest.spyOn(AuditLogDynamoGateway.prototype, "create").mockReturnValue(
-      new Promise<AuditLog>((resolve) => {
-        resolve(log)
+  it("should return 201 Created status code when Audit Log Id does not exist in the database", async () => {
+    jest.spyOn(CreateAuditLogUseCase.prototype, "create").mockReturnValue(
+      Promise.resolve({
+        resultType: "success"
       })
     )
 
-    const createAuditLogResponse = await createAuditLog(<APIGatewayProxyEvent>{ body: JSON.stringify(log) })
-    const actualResponse = <APIGatewayProxyResult>createAuditLogResponse
+    const event = createHandlerEvent()
+    const actualResponse = await createAuditLog(event)
+
     expect(actualResponse.statusCode).toBe(HttpStatusCode.created)
-    expect(actualResponse.body).toBe(expectedSuccessfulBodyResponse)
+    expect(actualResponse.body).toBe("Created")
   })
 
-  it("should respond with error when there is a log with the same ID in the database", async () => {
-    const error = new Error("The conditional request failed")
-    jest.spyOn(AuditLogDynamoGateway.prototype, "create").mockReturnValue(
-      new Promise<Error>((resolve) => {
-        resolve(error)
+  it("should respond with 400 Conflict status code when there is a log with the same Audit Log Id in the database", async () => {
+    const expectedMessage = "Expected Message"
+    jest.spyOn(CreateAuditLogUseCase.prototype, "create").mockReturnValue(
+      Promise.resolve({
+        resultType: "conflict",
+        resultDescription: expectedMessage
       })
     )
 
-    const createAuditLogResponse = await createAuditLog(<APIGatewayProxyEvent>{ body: JSON.stringify(log) })
-    const actualResponse = <APIGatewayProxyResult>createAuditLogResponse
+    const event = createHandlerEvent()
+    const actualResponse = await createAuditLog(event)
 
     expect(actualResponse.statusCode).toBe(HttpStatusCode.conflict)
-    expect(actualResponse.body).toBe(expectedErrorBodyResponse)
+    expect(actualResponse.body).toBe(expectedMessage)
+  })
+
+  it("should respond with a 500 Internal Server Error status code when an unhandled error occurs", async () => {
+    const expectedMessage = "Expected Message"
+    jest.spyOn(CreateAuditLogUseCase.prototype, "create").mockReturnValue(
+      Promise.resolve({
+        resultType: "error",
+        resultDescription: expectedMessage
+      })
+    )
+
+    const event = createHandlerEvent()
+    const actualResponse = await createAuditLog(event)
+
+    expect(actualResponse.statusCode).toBe(HttpStatusCode.internalServerError)
+    expect(actualResponse.body).toBe(expectedMessage)
   })
 })

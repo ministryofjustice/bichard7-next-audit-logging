@@ -25,9 +25,10 @@ describe("FetchMessagesUseCase", () => {
     const actualMessage = actualMessages[0]
 
     expect(actualMessages).toHaveLength(1)
-    expect(actualMessage.messageId).toEqual(expectedMessage.messageId)
-    expect(actualMessage.caseId).toEqual(expectedMessage.caseId)
-    expect(actualMessage.receivedDate.toISOString()).toContain("2021-03-24")
+    expect(actualMessage.messageId).toBe(expectedMessage.messageId)
+    expect(actualMessage.externalCorrelationId).toBe(expectedMessage.externalCorrelationId)
+    expect(actualMessage.caseId).toBe(expectedMessage.caseId)
+    expect(actualMessage.receivedDate).toContain("2021-03-24")
   })
 
   it("should fail when the error is unknown", async () => {
@@ -37,6 +38,6 @@ describe("FetchMessagesUseCase", () => {
     const result = await useCase.get()
 
     expect(isError(result)).toBe(true)
-    expect(result).toEqual(expectedError)
+    expect(result).toBe(expectedError)
   })
 })

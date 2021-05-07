@@ -13,11 +13,6 @@ log2.caseId = "456"
 
 const expectedSuccessfulResponse = [log1, log2]
 
-const expectedSuccessfulBodyResponse =
-  '{"messages":[{"messageId":"1","receivedDate":"2021-11-12T00:00:00.000Z","messageXml":"XML","caseId":"123"},{"messageId":"2","receivedDate":"2021-11-13T00:00:00.000Z","messageXml":"XML","caseId":"456"}]}'
-
-const expectedErrorBodyResponse = "Error: Call failed"
-
 describe("getMessages()", () => {
   it("should respond with a list of messages", async () => {
     jest.spyOn(FetchMessagesUseCase.prototype, "get").mockResolvedValue(expectedSuccessfulResponse)
@@ -26,7 +21,23 @@ describe("getMessages()", () => {
     const actualResponse = <APIGatewayProxyResult>messages
 
     expect(actualResponse.statusCode).toBe(HttpStatusCode.ok)
-    expect(actualResponse.body).toEqual(expectedSuccessfulBodyResponse)
+
+    const actualMessages: AuditLog[] = JSON.parse(actualResponse.body).messages
+    expect(actualMessages).toHaveLength(2)
+
+    const actualMessage1 = actualMessages[0]
+    expect(actualMessage1.messageId).toBe(log1.messageId)
+    expect(actualMessage1.externalCorrelationId).toBe(log1.externalCorrelationId)
+    expect(actualMessage1.caseId).toBe(log1.caseId)
+    expect(actualMessage1.receivedDate).toBe(log1.receivedDate)
+    expect(actualMessage1.messageXml).toBe(log1.messageXml)
+
+    const actualMessage2 = actualMessages[1]
+    expect(actualMessage2.messageId).toBe(log2.messageId)
+    expect(actualMessage2.externalCorrelationId).toBe(log2.externalCorrelationId)
+    expect(actualMessage2.caseId).toBe(log2.caseId)
+    expect(actualMessage2.receivedDate).toBe(log2.receivedDate)
+    expect(actualMessage2.messageXml).toBe(log2.messageXml)
   })
 
   it("should respond with error", async () => {
@@ -37,6 +48,6 @@ describe("getMessages()", () => {
     const actualResponse = <APIGatewayProxyResult>messages
 
     expect(actualResponse.statusCode).toBe(HttpStatusCode.internalServerError)
-    expect(actualResponse.body).toEqual(expectedErrorBodyResponse)
+    expect(actualResponse.body).toEqual("Error: Call failed")
   })
 })

@@ -17,7 +17,7 @@ export default async function retrieveFromS3(event: S3PutObjectEvent): Promise<R
   const receivedDate = readReceivedDateFromS3ObjectKey(key)
 
   return {
-    receivedDate,
+    receivedDate: receivedDate.toISOString(),
     messageXml
   }
 }
