@@ -17,19 +17,24 @@ The following requirements must be installed to develop on and run the projects 
 
 This repository currently contains multiple projects to support easy local referencing and development. The future vision is to move some/all of the individual projects out into their own repositories/packages. For more information on what the purpose of each project is, take a look at the README file for each.
 
-1. [Handlers Common](shared/) - local npm library
-2. [Incoming Message Handler](incoming-message-handler/) - AWS Step Functions and Lambdas
+1. [Handlers Common](shared/) - Library of components common to multiple projects in this repository
+2. [API](audit-log-api/) - API exposing Audit Log records and attached events
+3. [Incoming Message Handler](incoming-message-handler/) - AWS Step Functions and Lambdas for intercepting and processing messages coming into the Bichard system
+4. [General Event Handler](general-event-handler/) - Lambda for transforming events coming from the Bichard system and attaching to Audit Log records
+5. [Portal](audit-log-portal/) - Web-based portal allowing access to view and explore all Audit Log records and their events
 
 ## Development
 
 ### Build Order
 
-Since we use shared local modules in these projects, there are some dependencies that denote a build order for dependent projects.
+Since we use shared local modules in these projects, there are some dependencies that denote a build order for dependent projects. The easiest way is to using the preset scripts to build:
 
-1. `shared` - Run `npm run build` from within the `shared/` folder. This is a shared module.
-2. `incoming-message-handler` - Run `npm run build:dev` from within the `incoming-message-handler/` folder. This is an AWS Lambda project.
+```shell
+$ scripts/install-all.sh
+$ scripts/build-all.sh
+```
 
-> Note: Be sure to run `npm i` before building any project. Also, make sure you build the `shared` module and then build (or rebuild) the `incoming-message-handler` project, as this will copy across the shared module into the output `build/` directory.
+> Check the `scripts/projects` file to see the build order.
 
 You will also need to run `npm i` in the root directory to install any local configuration dependencies that manage the repository as a whole, such as Husky for pre-commit handling.
 
@@ -37,6 +42,7 @@ You will also need to run `npm i` in the root directory to install any local con
 
 Where applicable, each project has tests that are run by Jest. To run these, simply run `npm test` from within the relevant project folder. Projects may also have different test scripts that you can run with the following commands:
 
+- Run all tests - `npm test`
 - Unit tests - `npm run test:unit`
 - Integration tests - `npm run test:integration`
 - End-to-end tests - `npm run test:e2e`
