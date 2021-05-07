@@ -3,7 +3,12 @@
 source $(dirname "$0")/../../environment/audit-log-api-url.sh
 set -e
 
-API_URL=$(get_audit_log_api_url)
+API_MODE=$1
+API_URL=http://localhost/restapis/dummy_api_id/dummy_stage/_user_request_
+
+if [[ -z $API_MODE ]] || [[ $API_MODE != "mocked" ]]; then
+  API_URL=$(get_audit_log_api_url)
+fi
 
 if [[ -z $API_URL ]]; then
   echo "Failed to retrieve the API URL"
