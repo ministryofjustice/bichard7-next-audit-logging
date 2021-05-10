@@ -74,7 +74,8 @@ describe("AuditLogDynamoGateway", () => {
 
     const actualOtherMessage = <AuditLog>actualRecords.Items?.find((r) => r.messageId === otherMessage.messageId)
     expect(actualOtherMessage).toBeDefined()
-    expect(actualOtherMessage.events).toBeUndefined()
+    expect(actualOtherMessage.events).toBeDefined()
+    expect(actualOtherMessage.events).toHaveLength(0)
 
     const actualMessage = <AuditLog>actualRecords.Items?.find((r) => r.messageId === message.messageId)
     expect(actualMessage).toBeDefined()

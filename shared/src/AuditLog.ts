@@ -8,7 +8,7 @@ export default class AuditLog {
 
   public caseId: string
 
-  public events: AuditLogEvent[]
+  public events: AuditLogEvent[] = []
 
   constructor(public readonly externalCorrelationId: string, receivedDate: Date, public readonly messageXml: string) {
     this.messageId = uuid()
