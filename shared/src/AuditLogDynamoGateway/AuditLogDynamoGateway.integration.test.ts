@@ -4,6 +4,7 @@ import AuditLog from "../AuditLog"
 import { DynamoDbConfig } from "../DynamoGateway"
 import TestDynamoGateway from "../DynamoGateway/TestDynamoGateway"
 import AuditLogDynamoGateway from "./AuditLogDynamoGateway"
+import { AuditLogEvent } from ".."
 
 const config: DynamoDbConfig = {
   DYNAMO_URL: "http://localhost:4566",
@@ -50,28 +51,30 @@ describe("AuditLogDynamoGateway", () => {
     })
   })
 
-  it("should update one entry when key exists", async () => {
-    const expectedMessageXml = "Updated XML"
-    const message = new AuditLog("one", new Date(), "XML")
+  it("should add an event to the audit log", async () => {
+    const expectedEvent = new AuditLogEvent("information", new Date(), "Test event")
+    const message = new AuditLog("one", new Date(), "XML1")
+    const otherMessage = new AuditLog("two", new Date(), "XML2")
     await gateway.create(message)
+    await gateway.create(otherMessage)
 
-    const params = {
-      keyName: "messageId",
-      keyValue: message.messageId,
-      updateExpression: "set messageXml = :messageXml",
-      updateExpressionValues: {
-        ":messageXml": expectedMessageXml
-      }
-    }
-    const result = await gateway.updateEntry(config.AUDIT_LOG_TABLE_NAME, params)
+    const result = await gateway.addEvent(message.messageId, expectedEvent)
 
     expect(isError(result)).toBe(false)
 
-    const actualRecords = <DocumentClient.ScanOutput>await gateway.getMany(config.AUDIT_LOG_TABLE_NAME, 3)
-    const filteredRecords = actualRecords.Items?.filter((r) => r.messageId === message.messageId)
+    const actualRecords = <DocumentClient.ScanOutput>await gateway.getMany(config.AUDIT_LOG_TABLE_NAME, 2)
 
-    expect(filteredRecords).toHaveLength(1)
-    expect(filteredRecords[0].messageXml).toBe(expectedMessageXml)
+    const actualOtherMessage = <AuditLog>actualRecords.Items?.find((r) => r.messageId === otherMessage.messageId)
+    expect(actualOtherMessage).toBeDefined()
+    expect(actualOtherMessage.events).toBeUndefined()
+
+    const actualMessage = <AuditLog>actualRecords.Items?.find((r) => r.messageId === message.messageId)
+    expect(actualMessage).toBeDefined()
+    expect(actualMessage.events).toBeDefined()
+    expect(actualMessage.events).toHaveLength(1)
+
+    const actualEvent = actualMessage.events[0]
+    expect(actualEvent.eventType).toBe(expectedEvent.eventType)
   })
 
   // TODO: Proper testing for getting messages. Include date ordering.
