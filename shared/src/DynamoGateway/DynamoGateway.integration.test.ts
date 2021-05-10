@@ -94,7 +94,7 @@ describe("DynamoGateway", () => {
     it("should update one entry when key exists", async () => {
       const recordId = "Record 1"
       const expectedValue = "Updated value"
-      const params = {
+      const options = {
         keyName: "id",
         keyValue: recordId,
         updateExpression: "set someOtherValue = :newValue",
@@ -102,7 +102,7 @@ describe("DynamoGateway", () => {
           ":newValue": expectedValue
         }
       }
-      const result = await gateway.updateEntry(config.AUDIT_LOG_TABLE_NAME, params)
+      const result = await gateway.updateEntry(config.AUDIT_LOG_TABLE_NAME, options)
 
       expect(isError(result)).toBe(false)
 
@@ -111,6 +111,21 @@ describe("DynamoGateway", () => {
 
       expect(filteredRecords).toHaveLength(1)
       expect(filteredRecords[0].someOtherValue).toBe(expectedValue)
+    })
+
+    it("should return error when key does not exist", async () => {
+      const recordId = "Invalid record Id"
+      const options = {
+        keyName: "id",
+        keyValue: recordId,
+        updateExpression: "set someOtherValue = :newValue",
+        updateExpressionValues: {
+          ":newValue": "Some value"
+        }
+      }
+      const result = await gateway.updateEntry(config.AUDIT_LOG_TABLE_NAME, options)
+
+      expect(isError(result)).toBe(true)
     })
   })
 })

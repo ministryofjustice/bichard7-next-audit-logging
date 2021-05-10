@@ -43,4 +43,12 @@ describe("CreateAuditLogUseCase", () => {
     expect(actualEvent.timestamp).toBe(event.timestamp)
     expect(actualEvent.eventType).toBe(event.eventType)
   })
+
+  it("should return not found result when audit log does not exist", async () => {
+    const nonExistentMessageId = "11290b62-e8b8-47a8-ab24-6702a8fc6bba"
+    const event = createAuditLogEvent()
+    const result = await createAuditLogEventUseCase.create(nonExistentMessageId, event)
+
+    expect(result.resultType).toBe("notFound")
+  })
 })

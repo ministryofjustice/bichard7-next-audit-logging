@@ -14,6 +14,13 @@ export default async function createAuditLogEvent(event: APIGatewayProxyEvent): 
   const auditLogEvent = <AuditLogEvent>JSON.parse(event.body)
   const result = await createAuditLogEventUseCase.create(messageId, auditLogEvent)
 
+  if (result.resultType === "notFound") {
+    return createJsonApiResult({
+      statusCode: HttpStatusCode.notFound,
+      body: result.resultDescription
+    })
+  }
+
   if (result.resultType === "error") {
     return createJsonApiResult({
       statusCode: HttpStatusCode.internalServerError,

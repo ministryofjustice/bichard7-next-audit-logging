@@ -29,6 +29,22 @@ describe("createAuditLogEvent()", () => {
     expect(actualResponse.body).toBe("Created")
   })
 
+  it("should respond with an Not Found status when message id does not exist", async () => {
+    const expectedMessage = "Expected Message"
+    jest.spyOn(CreateAuditLogEventUseCase.prototype, "create").mockReturnValue(
+      Promise.resolve({
+        resultType: "notFound",
+        resultDescription: expectedMessage
+      })
+    )
+
+    const event = createHandlerEvent()
+    const actualResponse = await createAuditLogEvent(event)
+
+    expect(actualResponse.statusCode).toBe(HttpStatusCode.notFound)
+    expect(actualResponse.body).toBe(expectedMessage)
+  })
+
   it("should respond with an Internal Server Error status when an unhandled error occurs", async () => {
     const expectedMessage = "Expected Message"
     jest.spyOn(CreateAuditLogEventUseCase.prototype, "create").mockReturnValue(

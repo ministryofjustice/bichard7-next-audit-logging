@@ -1,4 +1,5 @@
 import { DocumentClient } from "aws-sdk/clients/dynamodb"
+import { v4 as uuid } from "uuid"
 import { isError } from "../types"
 import AuditLog from "../AuditLog"
 import { DynamoDbConfig } from "../DynamoGateway"
@@ -135,6 +136,15 @@ describe("AuditLogDynamoGateway", () => {
     const actualEventTwoAttributes = actualEventTwo.attributes
     expect(actualEventTwoAttributes).toBeDefined()
     expect(actualEventTwoAttributes.EventTwoAttribute).toBe(expectedEventTwo.attributes.EventTwoAttribute)
+  })
+
+  it("should return error when audit log does not exist", async () => {
+    const event = new AuditLogEvent("information", new Date(), "Test event one")
+    const randomMessageId = uuid()
+
+    const resultOne = await gateway.addEvent(randomMessageId, event)
+
+    expect(isError(resultOne)).toBe(true)
   })
 
   // TODO: Proper testing for getting messages. Include date ordering.
