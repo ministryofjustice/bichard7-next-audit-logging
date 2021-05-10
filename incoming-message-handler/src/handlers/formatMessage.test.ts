@@ -1,5 +1,5 @@
+import { hasRootElement } from "shared"
 import { ReceivedMessage } from "src/entities"
-import { hasRootElement } from "src/utils/xml"
 import formatMessage from "./formatMessage"
 
 const unformattedMessage = `
