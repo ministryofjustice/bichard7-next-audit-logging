@@ -51,7 +51,7 @@ describe("AuditLogDynamoGateway", () => {
     })
   })
 
-  it("should add an event to the audit log", async () => {
+  it("should only add an event to the specified audit log", async () => {
     const expectedEvent = new AuditLogEvent("information", new Date(), "Test event")
     const message = new AuditLog("one", new Date(), "XML1")
     const otherMessage = new AuditLog("two", new Date(), "XML2")
@@ -75,6 +75,34 @@ describe("AuditLogDynamoGateway", () => {
 
     const actualEvent = actualMessage.events[0]
     expect(actualEvent.eventType).toBe(expectedEvent.eventType)
+  })
+
+  it("should add two events to the audit log", async () => {
+    const expectedEventOne = new AuditLogEvent("information", new Date(), "Test event one")
+    const expectedEventTwo = new AuditLogEvent("error", new Date(), "Test event two")
+    const message = new AuditLog("one", new Date(), "XML")
+    await gateway.create(message)
+
+    const resultOne = await gateway.addEvent(message.messageId, expectedEventOne)
+    expect(isError(resultOne)).toBe(false)
+
+    const resultTwo = await gateway.addEvent(message.messageId, expectedEventTwo)
+    expect(isError(resultTwo)).toBe(false)
+
+    const actualRecords = <DocumentClient.ScanOutput>await gateway.getMany(config.AUDIT_LOG_TABLE_NAME, 1)
+
+    const actualMessage = <AuditLog>actualRecords.Items?.find((r) => r.messageId === message.messageId)
+    expect(actualMessage).toBeDefined()
+    expect(actualMessage.events).toBeDefined()
+    expect(actualMessage.events).toHaveLength(2)
+
+    const actualEventOne = actualMessage.events[0]
+    expect(actualEventOne.eventType).toBe(expectedEventOne.eventType)
+    expect(actualEventOne.category).toBe(expectedEventOne.category)
+
+    const actualEventTwo = actualMessage.events[1]
+    expect(actualEventTwo.eventType).toBe(expectedEventTwo.eventType)
+    expect(actualEventTwo.category).toBe(expectedEventTwo.category)
   })
 
   // TODO: Proper testing for getting messages. Include date ordering.
