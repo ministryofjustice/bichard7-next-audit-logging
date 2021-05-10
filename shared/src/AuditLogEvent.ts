@@ -1,3 +1,5 @@
+import { EventCategory } from "./types"
+
 export default class AuditLogEvent {
   public eventSource: string
 
@@ -5,11 +7,7 @@ export default class AuditLogEvent {
 
   public attributes: { [name: string]: unknown }
 
-  constructor(
-    public readonly category: "information" | "error" | "warning",
-    timestamp: Date,
-    public readonly eventType: string
-  ) {
+  constructor(public readonly category: EventCategory, timestamp: Date, public readonly eventType: string) {
     this.timestamp = timestamp.toISOString()
   }
 }
