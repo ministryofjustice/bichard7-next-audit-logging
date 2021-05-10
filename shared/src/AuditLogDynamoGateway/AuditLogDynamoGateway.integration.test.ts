@@ -53,6 +53,13 @@ describe("AuditLogDynamoGateway", () => {
 
   it("should only add an event to the specified audit log", async () => {
     const expectedEvent = new AuditLogEvent("information", new Date(), "Test event")
+    expectedEvent.eventSource = "Test event source"
+    const expectedEventAttributes = {
+      "Attribute one": "Some value",
+      "Attribute two": 2
+    }
+    expectedEvent.attributes = expectedEventAttributes
+
     const message = new AuditLog("one", new Date(), "XML1")
     const otherMessage = new AuditLog("two", new Date(), "XML2")
     await gateway.create(message)
@@ -74,12 +81,25 @@ describe("AuditLogDynamoGateway", () => {
     expect(actualMessage.events).toHaveLength(1)
 
     const actualEvent = actualMessage.events[0]
+    expect(actualEvent.eventSource).toBe(expectedEvent.eventSource)
+    expect(actualEvent.category).toBe(expectedEvent.category)
+    expect(actualEvent.timestamp).toBe(expectedEvent.timestamp)
     expect(actualEvent.eventType).toBe(expectedEvent.eventType)
+
+    const actualEventAttributes = actualEvent.attributes
+    expect(actualEventAttributes).toBeDefined()
+    expect(actualEventAttributes["Attribute one"]).toBe("Some value")
+    expect(actualEventAttributes["Attribute two"]).toBe(2)
   })
 
   it("should add two events to the audit log", async () => {
     const expectedEventOne = new AuditLogEvent("information", new Date(), "Test event one")
+    expectedEventOne.eventSource = "Event source one"
+    expectedEventOne.attributes = { EventOneAttribute: "Event one attribute" }
     const expectedEventTwo = new AuditLogEvent("error", new Date(), "Test event two")
+    expectedEventTwo.eventSource = "Event source two"
+    expectedEventTwo.attributes = { EventTwoAttribute: "Event two attribute" }
+
     const message = new AuditLog("one", new Date(), "XML")
     await gateway.create(message)
 
@@ -96,13 +116,25 @@ describe("AuditLogDynamoGateway", () => {
     expect(actualMessage.events).toBeDefined()
     expect(actualMessage.events).toHaveLength(2)
 
-    const actualEventOne = actualMessage.events[0]
-    expect(actualEventOne.eventType).toBe(expectedEventOne.eventType)
+    const actualEventOne = actualMessage.events.find((e) => e.eventSource === expectedEventOne.eventSource)
+    expect(actualEventOne.eventSource).toBe(expectedEventOne.eventSource)
     expect(actualEventOne.category).toBe(expectedEventOne.category)
+    expect(actualEventOne.timestamp).toBe(expectedEventOne.timestamp)
+    expect(actualEventOne.eventType).toBe(expectedEventOne.eventType)
 
-    const actualEventTwo = actualMessage.events[1]
-    expect(actualEventTwo.eventType).toBe(expectedEventTwo.eventType)
+    const actualEventOneAttributes = actualEventOne.attributes
+    expect(actualEventOneAttributes).toBeDefined()
+    expect(actualEventOneAttributes.EventOneAttribute).toBe(expectedEventOne.attributes.EventOneAttribute)
+
+    const actualEventTwo = actualMessage.events.find((e) => e.eventSource === expectedEventTwo.eventSource)
+    expect(actualEventTwo.eventSource).toBe(expectedEventTwo.eventSource)
     expect(actualEventTwo.category).toBe(expectedEventTwo.category)
+    expect(actualEventTwo.timestamp).toBe(expectedEventTwo.timestamp)
+    expect(actualEventTwo.eventType).toBe(expectedEventTwo.eventType)
+
+    const actualEventTwoAttributes = actualEventTwo.attributes
+    expect(actualEventTwoAttributes).toBeDefined()
+    expect(actualEventTwoAttributes.EventTwoAttribute).toBe(expectedEventTwo.attributes.EventTwoAttribute)
   })
 
   // TODO: Proper testing for getting messages. Include date ordering.

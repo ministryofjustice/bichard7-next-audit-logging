@@ -1,5 +1,5 @@
 export default class AuditLogEvent {
-  public readonly eventSource: string
+  public eventSource: string
 
   public readonly timestamp: string
 
