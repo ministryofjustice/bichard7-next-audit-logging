@@ -1,7 +1,7 @@
 import { isError, PromiseResult, AuditLogDynamoGateway, HttpStatusCode } from "shared"
 import { APIGatewayProxyResult } from "aws-lambda"
 import createDynamoDbConfig from "src/createDynamoDbConfig"
-import FetchMessagesUseCase from "src/use-cases"
+import { FetchMessagesUseCase } from "src/use-cases"
 import { createJsonApiResult } from "src/utils"
 
 const config = createDynamoDbConfig()
