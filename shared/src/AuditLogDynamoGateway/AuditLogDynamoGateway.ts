@@ -30,7 +30,7 @@ export default class AuditLogDynamoGateway extends DynamoGateway {
     return <AuditLog[]>result.Items
   }
 
-  async addEvent(messageId: string, event: AuditLogEvent): PromiseResult<boolean> {
+  async addEvent(messageId: string, event: AuditLogEvent): PromiseResult<void> {
     const params = {
       keyName: this.tableKey,
       keyValue: messageId,
@@ -46,6 +46,6 @@ export default class AuditLogDynamoGateway extends DynamoGateway {
       return result
     }
 
-    return true
+    return undefined
   }
 }
