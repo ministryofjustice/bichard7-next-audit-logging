@@ -1,3 +1,4 @@
+import { DocumentClient } from "aws-sdk/clients/dynamodb"
 import { isError } from "../types"
 import AuditLog from "../AuditLog"
 import { DynamoDbConfig } from "../DynamoGateway"
@@ -16,6 +17,9 @@ const testGateway = new TestDynamoGateway(config)
 describe("AuditLogDynamoGateway", () => {
   beforeAll(async () => {
     await testGateway.createTable(config.AUDIT_LOG_TABLE_NAME, "messageId")
+  })
+
+  beforeEach(async () => {
     await testGateway.deleteAll(config.AUDIT_LOG_TABLE_NAME, "messageId")
   })
 
@@ -44,6 +48,30 @@ describe("AuditLogDynamoGateway", () => {
       const actualError = <Error>result
       expect(actualError.message).toBe("The conditional request failed")
     })
+  })
+
+  it("should update one entry when key exists", async () => {
+    const expectedMessageXml = "Updated XML"
+    const message = new AuditLog("one", new Date(), "XML")
+    await gateway.create(message)
+
+    const params = {
+      keyName: "messageId",
+      keyValue: message.messageId,
+      updateExpression: "set messageXml = :messageXml",
+      updateExpressionValues: {
+        ":messageXml": expectedMessageXml
+      }
+    }
+    const result = await gateway.updateEntry(config.AUDIT_LOG_TABLE_NAME, params)
+
+    expect(isError(result)).toBe(false)
+
+    const actualRecords = <DocumentClient.ScanOutput>await gateway.getMany(config.AUDIT_LOG_TABLE_NAME, 3)
+    const filteredRecords = actualRecords.Items?.filter((r) => r.messageId === message.messageId)
+
+    expect(filteredRecords).toHaveLength(1)
+    expect(filteredRecords[0].messageXml).toBe(expectedMessageXml)
   })
 
   // TODO: Proper testing for getting messages. Include date ordering.
