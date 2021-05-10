@@ -57,8 +57,10 @@ export default class DynamoGateway {
         [options.keyName]: options.keyValue
       },
       UpdateExpression: options.updateExpression,
-      ExpressionAttributeValues: options.updateExpressionValues
+      ExpressionAttributeValues: options.updateExpressionValues,
+      ConditionExpression: `attribute_exists(${options.keyName})`
     }
+
     return this.client
       .update(updateParams)
       .promise()
