@@ -1,7 +1,19 @@
-export default (): string => {
-  const message = "Hello, World!"
+import GeneralEventLogItem from "./types/GeneralEventLogItem"
 
-  console.log(message)
+interface AmazonMqEventSourceRecordEvent {
+  eventSource: string
+  eventSourceArn: string
+  messages: string[]
+}
 
-  return message
+export default (event: AmazonMqEventSourceRecordEvent): void => {
+  const { messages } = event
+
+  if (!messages || messages.length === 0) {
+    throw new Error("No messages were found in the event")
+  }
+
+  const message = messages[0]
+  const eventLogItem = new GeneralEventLogItem(message)
+  console.log(eventLogItem.xml)
 }

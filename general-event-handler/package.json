@@ -6,7 +6,7 @@
   "scripts": {
     "clean": "rimraf build",
     "build": "npm run clean && webpack --config ./.webpack/webpack.prod.js",
-    "build:dev": "npm run clean && webpack --config ./.webpack.dev.js",
+    "build:dev": "npm run clean && webpack --config ./.webpack/webpack.dev.js",
     "setup:env": "cd ../environment && ./setup.sh && cd -",
     "test": "npm run setup:env && ../scripts/test.sh",
     "test:unit": "../scripts/test.sh unit",
