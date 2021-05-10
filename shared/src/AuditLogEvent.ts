@@ -5,7 +5,11 @@ export default class AuditLogEvent {
 
   public attributes: Record<string, unknown>
 
-  constructor(public readonly category: string, timestamp: Date, public readonly eventType: string) {
+  constructor(
+    public readonly category: "information" | "error" | "warning",
+    timestamp: Date,
+    public readonly eventType: string
+  ) {
     this.timestamp = timestamp.toISOString()
   }
 }
