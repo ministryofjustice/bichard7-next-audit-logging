@@ -3,7 +3,7 @@ import { DocumentClient, ExpressionAttributeValueMap, UpdateExpression } from "a
 import { PromiseResult } from "../types"
 import DynamoDbConfig from "./DynamoDbConfig"
 
-interface UpdateParams {
+interface UpdateOptions {
   keyName: string
   keyValue: unknown
   updateExpression: UpdateExpression
@@ -50,14 +50,14 @@ export default class DynamoGateway {
       .catch((error) => <Error>error)
   }
 
-  updateEntry(tableName: string, params: UpdateParams): PromiseResult<DocumentClient.UpdateItemOutput> {
+  updateEntry(tableName: string, options: UpdateOptions): PromiseResult<DocumentClient.UpdateItemOutput> {
     const updateParams = <DocumentClient.UpdateItemInput>{
       TableName: tableName,
       Key: {
-        [params.keyName]: params.keyValue
+        [options.keyName]: options.keyValue
       },
-      UpdateExpression: params.updateExpression,
-      ExpressionAttributeValues: params.updateExpressionValues
+      UpdateExpression: options.updateExpression,
+      ExpressionAttributeValues: options.updateExpressionValues
     }
     return this.client
       .update(updateParams)
