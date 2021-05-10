@@ -16,11 +16,7 @@ const createHandlerEvent = (): APIGatewayProxyEvent => {
 
 describe("createAuditLogEvent()", () => {
   it("should return Created status when event is added to the audit log in the database", async () => {
-    jest.spyOn(CreateAuditLogEventUseCase.prototype, "create").mockReturnValue(
-      Promise.resolve({
-        resultType: "success"
-      })
-    )
+    jest.spyOn(CreateAuditLogEventUseCase.prototype, "create").mockReturnValue(Promise.resolve())
 
     const event = createHandlerEvent()
     const actualResponse = await createAuditLogEvent(event)
@@ -30,34 +26,27 @@ describe("createAuditLogEvent()", () => {
   })
 
   it("should respond with an Not Found status when message id does not exist", async () => {
-    const expectedMessage = "Expected Message"
-    jest.spyOn(CreateAuditLogEventUseCase.prototype, "create").mockReturnValue(
-      Promise.resolve({
-        resultType: "notFound",
-        resultDescription: expectedMessage
-      })
-    )
+    const expectedError = new Error("Expected Message")
+    expectedError.name = "notFound"
+    jest.spyOn(CreateAuditLogEventUseCase.prototype, "create").mockReturnValue(Promise.resolve(expectedError))
 
     const event = createHandlerEvent()
     const actualResponse = await createAuditLogEvent(event)
 
     expect(actualResponse.statusCode).toBe(HttpStatusCode.notFound)
-    expect(actualResponse.body).toBe(expectedMessage)
+    expect(actualResponse.body).toBe(expectedError.message)
   })
 
   it("should respond with an Internal Server Error status when an unhandled error occurs", async () => {
-    const expectedMessage = "Expected Message"
-    jest.spyOn(CreateAuditLogEventUseCase.prototype, "create").mockReturnValue(
-      Promise.resolve({
-        resultType: "error",
-        resultDescription: expectedMessage
-      })
-    )
+    const expectedError = new Error("Expected Message")
+    expectedError.name = "error"
+
+    jest.spyOn(CreateAuditLogEventUseCase.prototype, "create").mockReturnValue(Promise.resolve(expectedError))
 
     const event = createHandlerEvent()
     const actualResponse = await createAuditLogEvent(event)
 
     expect(actualResponse.statusCode).toBe(HttpStatusCode.internalServerError)
-    expect(actualResponse.body).toBe(expectedMessage)
+    expect(actualResponse.body).toBe(expectedError.message)
   })
 })
