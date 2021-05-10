@@ -7,7 +7,7 @@ interface UpdateOptions {
   keyName: string
   keyValue: unknown
   updateExpression: UpdateExpression
-  updateExpressionValues: ExpressionAttributeValueMap | Record<string, unknown>
+  updateExpressionValues: ExpressionAttributeValueMap | { [name: string]: unknown }
 }
 
 export default class DynamoGateway {

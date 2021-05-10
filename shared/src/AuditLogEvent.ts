@@ -3,7 +3,7 @@ export default class AuditLogEvent {
 
   public readonly timestamp: string
 
-  public attributes: Record<string, unknown>
+  public attributes: { [name: string]: unknown }
 
   constructor(
     public readonly category: "information" | "error" | "warning",
