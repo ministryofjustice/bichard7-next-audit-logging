@@ -22,7 +22,7 @@
   "dependencies": {
     "aws-sdk": "^2.870.0",
     "uuid": "^3.3.2",
-    "xml2js": "^0.4.19"
+    "xml2js": "^0.4.23"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",

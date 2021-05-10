@@ -1,5 +1,3 @@
-import GeneralEventLogItem from "./types/GeneralEventLogItem"
-
 interface AmazonMqEventSourceRecordEvent {
   eventSource: string
   eventSourceArn: string
@@ -14,6 +12,5 @@ export default (event: AmazonMqEventSourceRecordEvent): void => {
   }
 
   const message = messages[0]
-  const eventLogItem = new GeneralEventLogItem(message)
-  console.log(eventLogItem.xml)
+  console.log(message)
 }

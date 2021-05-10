@@ -1,5 +1,16 @@
-export default class GeneralEventLogItem {
-  constructor(public readonly xml: string) {
-    console.log(xml)
+export default interface GeneralEventLogItem {
+  logEvent: {
+    systemID: string
+    componentID: string
+    eventCategory: string
+    eventType: string
+    correlationID: string
+    eventDateTime: string
+    nameValuePairs: {
+      nameValuePair: {
+        name: string
+        value: string
+      }[]
+    }
   }
 }
