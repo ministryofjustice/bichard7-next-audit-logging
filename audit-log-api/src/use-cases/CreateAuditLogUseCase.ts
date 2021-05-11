@@ -1,7 +1,5 @@
 import { AuditLog, AuditLogDynamoGateway, isError } from "shared"
-
-const isConditionalExpressionViolationError = (error: Error): boolean =>
-  error.name === "ConditionalCheckFailedException"
+import { isConditionalExpressionViolationError } from "src/utils"
 
 interface CreateAuditLogResult {
   resultType: "success" | "conflict" | "error"
