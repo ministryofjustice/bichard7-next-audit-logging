@@ -50,6 +50,18 @@ export default class DynamoGateway {
       .catch((error) => <Error>error)
   }
 
+  getOne(tableName: string, keyName: string, keyValue: unknown): PromiseResult<DocumentClient.GetItemOutput> {
+    return this.client
+      .get({
+        TableName: tableName,
+        Key: {
+          [keyName]: keyValue
+        }
+      })
+      .promise()
+      .catch((error) => <Error>error)
+  }
+
   updateEntry(tableName: string, options: UpdateOptions): PromiseResult<DocumentClient.UpdateItemOutput> {
     const updateParams = <DocumentClient.UpdateItemInput>{
       TableName: tableName,

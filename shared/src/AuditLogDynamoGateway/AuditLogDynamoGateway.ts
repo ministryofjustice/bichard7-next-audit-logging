@@ -30,6 +30,16 @@ export default class AuditLogDynamoGateway extends DynamoGateway {
     return <AuditLog[]>result.Items
   }
 
+  async fetchOne(messageId: string): PromiseResult<AuditLog> {
+    const result = await this.getOne(this.tableName, this.tableKey, messageId)
+
+    if (isError(result)) {
+      return result
+    }
+
+    return result.Item as AuditLog
+  }
+
   async addEvent(messageId: string, event: AuditLogEvent): PromiseResult<void> {
     const params = {
       keyName: this.tableKey,
