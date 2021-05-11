@@ -76,4 +76,56 @@ describe("DynamoGateway", () => {
       expect(results.Count).toBe(1)
     })
   })
+
+  describe("updateEntry()", () => {
+    beforeEach(async () => {
+      await gateway.deleteAll(config.AUDIT_LOG_TABLE_NAME, "id")
+      await Promise.allSettled(
+        [...Array(3).keys()].map(async (i: number) => {
+          const record = {
+            id: `Record ${i}`,
+            someOtherValue: `Value ${i}`
+          }
+          await gateway.insertOne(config.AUDIT_LOG_TABLE_NAME, record, "messageId")
+        })
+      )
+    })
+
+    it("should update one entry when key exists", async () => {
+      const recordId = "Record 1"
+      const expectedValue = "Updated value"
+      const options = {
+        keyName: "id",
+        keyValue: recordId,
+        updateExpression: "set someOtherValue = :newValue",
+        updateExpressionValues: {
+          ":newValue": expectedValue
+        }
+      }
+      const result = await gateway.updateEntry(config.AUDIT_LOG_TABLE_NAME, options)
+
+      expect(isError(result)).toBe(false)
+
+      const actualRecords = <DocumentClient.ScanOutput>await gateway.getMany(config.AUDIT_LOG_TABLE_NAME, 3)
+      const filteredRecords = actualRecords.Items?.filter((r) => r.id === recordId)
+
+      expect(filteredRecords).toHaveLength(1)
+      expect(filteredRecords[0].someOtherValue).toBe(expectedValue)
+    })
+
+    it("should return error when key does not exist", async () => {
+      const recordId = "Invalid record Id"
+      const options = {
+        keyName: "id",
+        keyValue: recordId,
+        updateExpression: "set someOtherValue = :newValue",
+        updateExpressionValues: {
+          ":newValue": "Some value"
+        }
+      }
+      const result = await gateway.updateEntry(config.AUDIT_LOG_TABLE_NAME, options)
+
+      expect(isError(result)).toBe(true)
+    })
+  })
 })

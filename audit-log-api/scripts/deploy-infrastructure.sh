@@ -51,21 +51,37 @@ function get_rest_api_id {
     --region $REGION
 }
 
+function get_resource_id {
+    API_NAME=$1
+    ENDPOINT=$2
+
+    API_ID=$(get_rest_api_id $API_NAME)
+
+    awslocal apigateway get-resources \
+    --rest-api-id "$API_ID" \
+    --query "items[?path=='/$ENDPOINT'].id" \
+    --output text \
+    --region "$REGION"
+}
+
 function create_rest_endpoint {
   API_NAME=$1
   ENDPOINT=$2
   HTTP_METHOD=$3
   LAMBDA_NAME=$4
+  PARENT_RESOURCE_ID=$5
 
   LAMBDA_ARN=$(get_lambda_arn $LAMBDA_NAME)
   API_ID=$(get_rest_api_id $API_NAME)
 
-  PARENT_RESOURCE_ID=$(awslocal apigateway get-resources \
-    --rest-api-id "$API_ID" \
-    --query "items[?path=='/'].id" \
-    --output text \
-    --region "$REGION" \
-  )
+  if [[ -z "$PARENT_RESOURCE_ID" ]]; then
+    PARENT_RESOURCE_ID=$(awslocal apigateway get-resources \
+      --rest-api-id "$API_ID" \
+      --query "items[?path=='/'].id" \
+      --output text \
+      --region "$REGION" \
+    )
+  fi
 
   RESOURCE_ID=$(awslocal apigateway get-resources \
     --rest-api-id "$API_ID" \
@@ -116,9 +132,19 @@ create_rest_api "AuditLogApi"
 # GET /messages
 create_lambda "GetMessages" "getMessages.default"
 create_rest_endpoint "AuditLogApi" "messages" "GET" "GetMessages"
+MESSAGES_RESOURCE_ID=$(get_resource_id "AuditLogApi" "messages")
 
 # POST /messages
 create_lambda "CreateAuditLog" "createAuditLog.default"
 create_rest_endpoint "AuditLogApi" "messages" "POST" "CreateAuditLog"
+
+# GET /messages/{messageId}
+create_rest_endpoint "AuditLogApi" "{messageId}" "GET" "GetMessages" $MESSAGES_RESOURCE_ID
+MESSAGES_PROXY_RESOURCE_ID=$(get_resource_id "AuditLogApi" "messages/{messageId}")
+
+# POST /messages/{messageId}/events
+create_lambda "CreateAuditLogEvent" "createAuditLogEvent.default"
+create_rest_endpoint "AuditLogApi" "events" "POST" "CreateAuditLogEvent" $MESSAGES_PROXY_RESOURCE_ID
+
 
 deploy_api "AuditLogApi"

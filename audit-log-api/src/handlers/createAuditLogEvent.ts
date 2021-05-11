@@ -1,20 +1,22 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda"
-import { AuditLogDynamoGateway, AuditLog, HttpStatusCode } from "shared"
+import { AuditLogDynamoGateway, AuditLogEvent, HttpStatusCode } from "shared"
 import { createJsonApiResult } from "src/utils"
 import createDynamoDbConfig from "src/createDynamoDbConfig"
-import { CreateAuditLogUseCase } from "src/use-cases"
+import { CreateAuditLogEventUseCase } from "src/use-cases"
 
 const config = createDynamoDbConfig()
 const auditLogGateway = new AuditLogDynamoGateway(config, config.AUDIT_LOG_TABLE_NAME)
-const createAuditLogUseCase = new CreateAuditLogUseCase(auditLogGateway)
+const createAuditLogEventUseCase = new CreateAuditLogEventUseCase(auditLogGateway)
 
-export default async function createAuditLog(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
-  const auditLog = <AuditLog>JSON.parse(event.body)
-  const result = await createAuditLogUseCase.create(auditLog)
+export default async function createAuditLogEvent(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
+  const { messageId } = event.pathParameters
 
-  if (result.resultType === "conflict") {
+  const auditLogEvent = <AuditLogEvent>JSON.parse(event.body)
+  const result = await createAuditLogEventUseCase.create(messageId, auditLogEvent)
+
+  if (result.resultType === "notFound") {
     return createJsonApiResult({
-      statusCode: HttpStatusCode.conflict,
+      statusCode: HttpStatusCode.notFound,
       body: result.resultDescription
     })
   }

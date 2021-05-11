@@ -1,8 +1,11 @@
+import AuditLogEvent from "src/AuditLogEvent"
 import { isError, PromiseResult } from "../types"
 import { DynamoGateway, DynamoDbConfig } from "../DynamoGateway"
 import AuditLog from "../AuditLog"
 
 export default class AuditLogDynamoGateway extends DynamoGateway {
+  private readonly tableKey: string = "messageId"
+
   constructor(config: DynamoDbConfig, private readonly tableName: string) {
     super(config)
   }
@@ -25,5 +28,24 @@ export default class AuditLogDynamoGateway extends DynamoGateway {
     }
 
     return <AuditLog[]>result.Items
+  }
+
+  async addEvent(messageId: string, event: AuditLogEvent): PromiseResult<void> {
+    const params = {
+      keyName: this.tableKey,
+      keyValue: messageId,
+      updateExpression: "set events = list_append(if_not_exists(events, :empty_list), :event)",
+      updateExpressionValues: {
+        ":event": [event],
+        ":empty_list": <AuditLogEvent[]>[]
+      }
+    }
+    const result = await this.updateEntry(this.tableName, params)
+
+    if (isError(result)) {
+      return result
+    }
+
+    return undefined
   }
 }
