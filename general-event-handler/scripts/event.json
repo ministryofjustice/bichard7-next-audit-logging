@@ -1,0 +1,7 @@
+{
+  "eventSource": "aws:amq",
+  "eventSourceArn": "none",
+  "messages": [
+    "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?><logEvent xmlns=\"http://www.example.org/GeneralEventLogMessage\" xmlns:ds=\"http://schemas.cjse.gov.uk/datastandards/2006-10\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"><systemID>BR7</systemID><componentID>PNC Access Manager</componentID><eventCategory>warning</eventCategory><eventType>PNC Response not received</eventType><correlationID>10-05-202110:09http://www.altova.com</correlationID><eventDateTime>2021-05-10T10:09:54.477+00:00</eventDateTime><nameValuePairs><nameValuePair><name>PNC Request Type</name><value>ENQASI</value></nameValuePair><nameValuePair><name>Error Message</name><value>2021-05-10 10:09:54.471+0000: BCS10023X: JUpicException caught in createProxyConnection(): de.sieme</value></nameValuePair><nameValuePair><name>Error Code</name><value>11</value></nameValuePair></nameValuePairs></logEvent>"
+  ]
+}
