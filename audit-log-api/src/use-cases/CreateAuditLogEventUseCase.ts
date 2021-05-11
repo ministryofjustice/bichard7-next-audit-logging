@@ -1,12 +1,12 @@
 import { AuditLogEvent, AuditLogDynamoGateway, isError } from "shared"
 
+const isConditionalExpressionViolationError = (error: Error): boolean =>
+  error.name === "ConditionalCheckFailedException"
+
 interface CreateAuditLogEventResult {
   resultType: "success" | "notFound" | "error"
   resultDescription?: string
 }
-
-const isConditionalExpressionViolationError = (error: Error): boolean =>
-  error.message === "The conditional request failed"
 
 export default class CreateAuditLogEventUseCase {
   constructor(private readonly auditLogGateway: AuditLogDynamoGateway) {}
