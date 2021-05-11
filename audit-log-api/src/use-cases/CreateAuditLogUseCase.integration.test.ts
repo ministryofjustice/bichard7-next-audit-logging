@@ -1,4 +1,4 @@
-import { AuditLog, AuditLogDynamoGateway, DynamoDbConfig, isError } from "shared"
+import { AuditLog, AuditLogDynamoGateway, DynamoDbConfig } from "shared"
 import TestDynamoGateway from "shared/dist/DynamoGateway/TestDynamoGateway"
 import CreateAuditLogUseCase from "./CreateAuditLogUseCase"
 
@@ -28,11 +28,8 @@ describe("CreateAuditLogUseCase", () => {
 
     const result = await createAuditLogUseCase.create(auditLog)
 
-    expect(isError(result)).toBe(true)
-
-    const error = <Error>result
-    expect(error.name).toBe("conflict")
-    expect(error.message).toBe(`A message with Id ${auditLog.messageId} already exists in the database`)
+    expect(result.resultType).toBe("conflict")
+    expect(result.resultDescription).toBe(`A message with Id ${auditLog.messageId} already exists in the database`)
   })
 
   it("should return an error result when an unknown error occurs within the database", async () => {
@@ -43,11 +40,8 @@ describe("CreateAuditLogUseCase", () => {
 
     const result = await useCase.create(auditLog)
 
-    expect(isError(result)).toBe(true)
-
-    const error = <Error>result
-    expect(error.name).toBe("error")
-    expect(error.message).toBeDefined()
+    expect(result.resultType).toBe("error")
+    expect(result.resultDescription).toBeDefined()
 
     const actualAuditLog = await getAuditLog(auditLog.messageId)
     expect(actualAuditLog).toBeNull()
@@ -58,7 +52,8 @@ describe("CreateAuditLogUseCase", () => {
 
     const result = await createAuditLogUseCase.create(expectedAuditLog)
 
-    expect(isError(result)).toBe(false)
+    expect(result.resultType).toBe("success")
+    expect(result.resultDescription).toBeUndefined()
 
     const actualAuditLog = await getAuditLog(expectedAuditLog.messageId)
     expect(actualAuditLog.messageId).toBe(expectedAuditLog.messageId)

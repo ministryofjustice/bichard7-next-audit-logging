@@ -1,5 +1,5 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda"
-import { AuditLogDynamoGateway, AuditLogEvent, HttpStatusCode, isError } from "shared"
+import { AuditLogDynamoGateway, AuditLogEvent, HttpStatusCode } from "shared"
 import { createJsonApiResult } from "src/utils"
 import createDynamoDbConfig from "src/createDynamoDbConfig"
 import { CreateAuditLogEventUseCase } from "src/use-cases"
@@ -14,19 +14,17 @@ export default async function createAuditLogEvent(event: APIGatewayProxyEvent): 
   const auditLogEvent = <AuditLogEvent>JSON.parse(event.body)
   const result = await createAuditLogEventUseCase.create(messageId, auditLogEvent)
 
-  if (isError(result)) {
-    const error = <Error>result
+  if (result.resultType === "notFound") {
+    return createJsonApiResult({
+      statusCode: HttpStatusCode.notFound,
+      body: result.resultDescription
+    })
+  }
 
-    if (error.name === "notFound") {
-      return createJsonApiResult({
-        statusCode: HttpStatusCode.notFound,
-        body: result.message
-      })
-    }
-
+  if (result.resultType === "error") {
     return createJsonApiResult({
       statusCode: HttpStatusCode.internalServerError,
-      body: result.message
+      body: result.resultDescription
     })
   }
 

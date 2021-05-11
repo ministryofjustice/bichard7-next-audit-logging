@@ -1,25 +1,35 @@
-import { AuditLogEvent, AuditLogDynamoGateway, isError, PromiseResult } from "shared"
+import { AuditLogEvent, AuditLogDynamoGateway, isError } from "shared"
+
+interface CreateAuditLogEventResult {
+  resultType: "success" | "notFound" | "error"
+  resultDescription?: string
+}
 
 const isConditionalExpressionViolationError = (error: Error): boolean =>
-  error.name === "ConditionalCheckFailedException"
+  error.message === "The conditional request failed"
 
-export default class CreateAuditLogEventUseCase {
+export default class CreateAuditLogUseCase {
   constructor(private readonly auditLogGateway: AuditLogDynamoGateway) {}
 
-  async create(messageId: string, event: AuditLogEvent): PromiseResult<void> {
+  async create(messageId: string, event: AuditLogEvent): Promise<CreateAuditLogEventResult> {
     const result = await this.auditLogGateway.addEvent(messageId, event)
 
     if (isError(result)) {
       if (isConditionalExpressionViolationError(result)) {
-        result.name = "notFound"
-        result.message = `A message with Id ${messageId} already exists in the database`
-      } else {
-        result.name = "error"
+        return {
+          resultType: "notFound",
+          resultDescription: `A message with Id ${messageId} does not exist in the database`
+        }
       }
 
-      return result
+      return {
+        resultType: "error",
+        resultDescription: result.message
+      }
     }
 
-    return undefined
+    return {
+      resultType: "success"
+    }
   }
 }

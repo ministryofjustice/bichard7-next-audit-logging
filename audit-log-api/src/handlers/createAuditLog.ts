@@ -1,5 +1,5 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda"
-import { AuditLogDynamoGateway, AuditLog, HttpStatusCode, isError } from "shared"
+import { AuditLogDynamoGateway, AuditLog, HttpStatusCode } from "shared"
 import { createJsonApiResult } from "src/utils"
 import createDynamoDbConfig from "src/createDynamoDbConfig"
 import { CreateAuditLogUseCase } from "src/use-cases"
@@ -12,18 +12,17 @@ export default async function createAuditLog(event: APIGatewayProxyEvent): Promi
   const auditLog = <AuditLog>JSON.parse(event.body)
   const result = await createAuditLogUseCase.create(auditLog)
 
-  if (isError(result)) {
-    const error = <Error>result
-    if (error.name === "conflict") {
-      return createJsonApiResult({
-        statusCode: HttpStatusCode.conflict,
-        body: error.message
-      })
-    }
+  if (result.resultType === "conflict") {
+    return createJsonApiResult({
+      statusCode: HttpStatusCode.conflict,
+      body: result.resultDescription
+    })
+  }
 
+  if (result.resultType === "error") {
     return createJsonApiResult({
       statusCode: HttpStatusCode.internalServerError,
-      body: error.message
+      body: result.resultDescription
     })
   }
 

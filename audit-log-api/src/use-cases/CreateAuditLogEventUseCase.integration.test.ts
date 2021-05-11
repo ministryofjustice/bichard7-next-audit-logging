@@ -1,4 +1,4 @@
-import { AuditLog, AuditLogEvent, AuditLogDynamoGateway, DynamoDbConfig, isError } from "shared"
+import { AuditLog, AuditLogEvent, AuditLogDynamoGateway, DynamoDbConfig } from "shared"
 import TestDynamoGateway from "shared/dist/DynamoGateway/TestDynamoGateway"
 import CreateAuditLogEventUseCase from "./CreateAuditLogEventUseCase"
 
@@ -31,7 +31,7 @@ describe("CreateAuditLogUseCase", () => {
     const event = createAuditLogEvent()
     const result = await createAuditLogEventUseCase.create(auditLog.messageId, event)
 
-    expect(isError(result)).toBe(false)
+    expect(result.resultType).toBe("success")
 
     const actualAuditLog = await getAuditLog(auditLog.messageId)
     expect(actualAuditLog).toBeDefined()
@@ -49,29 +49,6 @@ describe("CreateAuditLogUseCase", () => {
     const event = createAuditLogEvent()
     const result = await createAuditLogEventUseCase.create(nonExistentMessageId, event)
 
-    expect(isError(result)).toBe(true)
-
-    const error = <Error>result
-    expect(error.name).toBe("notFound")
-    expect(error.message).toBe(`A message with Id ${nonExistentMessageId} already exists in the database`)
-  })
-
-  it("should return an error result when an unknown error occurs within the database", async () => {
-    const gateway = new AuditLogDynamoGateway(config, "Invalid Table Name")
-    const useCase = new CreateAuditLogEventUseCase(gateway)
-
-    const auditLog = createAuditLog()
-    const event = createAuditLogEvent()
-
-    const result = await useCase.create(auditLog.messageId, event)
-
-    expect(isError(result)).toBe(true)
-
-    const error = <Error>result
-    expect(error.name).toBe("error")
-    expect(error.message).toBeDefined()
-
-    const actualAuditLog = await getAuditLog(auditLog.messageId)
-    expect(actualAuditLog).toBeNull()
+    expect(result.resultType).toBe("notFound")
   })
 })
