@@ -1,5 +1,5 @@
+import { parseXml } from "shared"
 import { DeliveryMessage } from "src/entities"
-import { parseXml } from "src/utils/xml"
 import formatMessageXml from "./formatMessageXml"
 
 const message = `

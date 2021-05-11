@@ -71,3 +71,22 @@ aws s3 cp \
   ./audit-log-portal.zip \
   s3://$S3_BUCKET/audit-logging/ \
   --acl bucket-owner-full-control
+
+cd -
+
+############################################
+# General Event Handler
+############################################
+
+# Zip any lambdas from the General Event Handler
+cd general-event-handler/build
+
+zip general-event-handler.zip generalEventHandler.js
+
+# Upload the package to the artifact bucket
+aws s3 cp \
+  ./general-event-handler.zip \
+  s3://$S3_BUCKET/audit-logging/ \
+  --acl bucket-owner-full-control
+
+cd -
