@@ -7,16 +7,18 @@
     "clean": "rimraf build",
     "build": "npm run clean && webpack --config ./.webpack/webpack.prod.js",
     "build:dev": "npm run clean && webpack --config ./.webpack/webpack.dev.js",
-    "setup:env": "cd ../environment && ./setup.sh && cd -",
+    "setup:env": "cd ../environment && ./setup.sh && cd - && scripts/launch-api.sh",
     "test": "npm run setup:env && ../scripts/test.sh",
     "test:unit": "../scripts/test.sh unit",
     "test:integration": "npm run setup:env && ../scripts/test.sh integration",
-    "test:e2e": "npm run setup:env && ../scripts/test.sh e2e",
+    "test:e2e": "npm run setup:env && cd - && ../scripts/test.sh e2e",
     "test:ci": "../scripts/test.sh ci",
     "start": "npm run build:dev && npm run setup:env && ./scripts/deploy-infrastructure.sh"
   },
   "dependencies": {
     "aws-lambda": "^1.0.6",
+    "aws-sdk": "^2.904.0",
+    "axios": "^0.21.1",
     "shared": "file:../shared",
     "uuid": "^3.3.2"
   },
