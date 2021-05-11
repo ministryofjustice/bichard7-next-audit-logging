@@ -8,7 +8,7 @@ interface CreateAuditLogEventResult {
 const isConditionalExpressionViolationError = (error: Error): boolean =>
   error.message === "The conditional request failed"
 
-export default class CreateAuditLogUseCase {
+export default class CreateAuditLogEventUseCase {
   constructor(private readonly auditLogGateway: AuditLogDynamoGateway) {}
 
   async create(messageId: string, event: AuditLogEvent): Promise<CreateAuditLogEventResult> {
