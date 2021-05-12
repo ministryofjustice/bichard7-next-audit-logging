@@ -27,8 +27,18 @@ export default class TestApi {
   pollForGetMessages(): Promise<AuditLog[]> {
     const options = new PollOptions<AuditLog[]>(20000)
     options.delay = 300
-    options.condition = (messages) =>
-      !!messages && messages.length > 0 && !!messages[0].events && messages[0].events.length > 0
+    options.condition = (messages) => {
+      if (!messages || messages.length === 0) {
+        return false
+      }
+
+      const message = messages[0]
+      if (!message.events || message.events.length === 0) {
+        return false
+      }
+
+      return true
+    }
 
     return new Poller(() => this.getMessages()).poll(options)
   }
