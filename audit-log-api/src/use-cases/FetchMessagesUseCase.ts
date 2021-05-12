@@ -10,6 +10,6 @@ export default class FetchMessagesUseCase {
   getById(messageId: string): PromiseResult<AuditLog> {
     console.log(messageId)
 
-    return null
+    return null // TODO
   }
 }
