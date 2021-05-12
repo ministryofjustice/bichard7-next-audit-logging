@@ -16,11 +16,11 @@ describe("DynamoGateway", () => {
     await gateway.createTable(config.AUDIT_LOG_TABLE_NAME, "id")
   })
 
-  describe("insertOne()", () => {
-    beforeEach(async () => {
-      await gateway.deleteAll(config.AUDIT_LOG_TABLE_NAME, "id")
-    })
+  beforeEach(async () => {
+    await gateway.deleteAll(config.AUDIT_LOG_TABLE_NAME, "id")
+  })
 
+  describe("insertOne()", () => {
     it("should return undefined when successful and have inserted one record", async () => {
       const expectedRecord = {
         id: "InsertOneRecord",
@@ -58,14 +58,14 @@ describe("DynamoGateway", () => {
 
   describe("getAll()", () => {
     beforeEach(async () => {
-      await gateway.deleteAll(config.AUDIT_LOG_TABLE_NAME, "id")
       await Promise.allSettled(
         [...Array(3).keys()].map(async (i: number) => {
           const record = {
             id: `Record ${i}`,
             someOtherValue: `Value ${i}`
           }
-          await gateway.insertOne(config.AUDIT_LOG_TABLE_NAME, record, "messageId")
+
+          await gateway.insertOne(config.AUDIT_LOG_TABLE_NAME, record, "id")
         })
       )
     })
@@ -77,9 +77,36 @@ describe("DynamoGateway", () => {
     })
   })
 
+  describe("getOne()", () => {
+    it("should return the item with matching key", async () => {
+      const expectedRecord = {
+        id: "Record1",
+        someOtherValue: "Value 1"
+      }
+
+      await gateway.insertOne(config.AUDIT_LOG_TABLE_NAME, expectedRecord, "id")
+
+      const actualRecord = await gateway.getOne<{ id: string; someOtherValue: string }>(
+        config.AUDIT_LOG_TABLE_NAME,
+        "id",
+        "Record1"
+      )
+
+      expect(actualRecord).toBeDefined()
+      expect(actualRecord.id).toBe(expectedRecord.id)
+      expect(actualRecord.someOtherValue).toBe(expectedRecord.someOtherValue)
+    })
+
+    it("should return null when no item has a matching key", async () => {
+      const result = await gateway.getOne(config.AUDIT_LOG_TABLE_NAME, "id", "InvalidKey")
+
+      expect(isError(result)).toBe(false)
+      expect(result).toBeNull()
+    })
+  })
+
   describe("updateEntry()", () => {
     beforeEach(async () => {
-      await gateway.deleteAll(config.AUDIT_LOG_TABLE_NAME, "id")
       await Promise.allSettled(
         [...Array(3).keys()].map(async (i: number) => {
           const record = {

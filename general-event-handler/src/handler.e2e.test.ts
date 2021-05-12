@@ -1,6 +1,6 @@
 import { AuditLog, isError } from "shared"
 import AmazonMqEventSourceRecordEvent from "./AmazonMqEventSourceRecordEvent"
-import ApiGateway from "./gateways/ApiGateway"
+import AuditLogApiGateway from "./gateways/AuditLogApiGateway"
 import getLocalAuditLogApiUrl from "./getLocalAuditLogApiUrl"
 import handler from "./handler"
 
@@ -42,11 +42,11 @@ const createMqEvent = (messages: string[]): AmazonMqEventSourceRecordEvent => {
   }
 }
 
-const getApiGateway = async (): Promise<ApiGateway> => {
+const getApiGateway = async (): Promise<AuditLogApiGateway> => {
   const apiUrl = await getLocalAuditLogApiUrl("http://localhost:4566", "us-east-1")
   process.env.API_URL = apiUrl
 
-  return new ApiGateway(apiUrl)
+  return new AuditLogApiGateway(apiUrl)
 }
 
 test("should transform the message and attach as an event to an existing AuditLog record", async () => {

@@ -6,4 +6,8 @@ export default class FetchMessagesUseCase {
   get(): PromiseResult<AuditLog[]> {
     return this.gateway.fetchMany()
   }
+
+  getById(messageId: string): PromiseResult<AuditLog> {
+    return this.gateway.fetchOne(messageId)
+  }
 }

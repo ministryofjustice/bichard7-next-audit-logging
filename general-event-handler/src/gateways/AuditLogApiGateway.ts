@@ -2,7 +2,7 @@ import axios from "axios"
 import { AuditLog, PromiseResult } from "shared"
 import { AuditLogEvent } from "src/types"
 
-export default class ApiGateway {
+export default class AuditLogApiGateway {
   constructor(private readonly apiUrl: string) {}
 
   getMessages(): PromiseResult<AuditLog[]> {
@@ -15,13 +15,7 @@ export default class ApiGateway {
   getMessage(messageId: string): PromiseResult<AuditLog> {
     return axios
       .get(`${this.apiUrl}/messages/${messageId}`)
-      .then((response) => {
-        // Currently, this endpoint returns all messages, so we need to
-        // filter by the given message Id
-        // TODO: When we fix the endpoint, replace this code.
-        const messages = response.data.messages || response.data || []
-        return messages.find((message: AuditLog) => message.messageId === messageId)
-      })
+      .then((response) => response.data)
       .catch((error) => <Error>error)
   }
 
