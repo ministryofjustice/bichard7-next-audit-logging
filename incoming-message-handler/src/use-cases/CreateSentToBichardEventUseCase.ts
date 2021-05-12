@@ -21,9 +21,7 @@ export default class CreateSentToBichardEventUseCase {
           case HttpStatusCode.created:
             return undefined
           case HttpStatusCode.notFound:
-            return Error(
-              `Error ${result.status}: A message with Id ${message.messageId} does not exist in the database.`
-            )
+            return Error(`The message with Id ${message.messageId} does not exist.`)
           default:
             return Error(`Error ${result.status}: Could not create audit log event.`)
         }

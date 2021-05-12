@@ -20,7 +20,7 @@ describe("createSentToBichardEvent()", () => {
     const result = await useCase.create(message)
 
     expect(isError(result)).toBe(true)
-    expect((<Error>result).message).toContain("404")
+    expect((<Error>result).message).toBe(`The message with Id ${message.messageId} does not exist.`)
   })
 
   it("should fail when the error is unknown", async () => {
