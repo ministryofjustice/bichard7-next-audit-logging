@@ -6,8 +6,7 @@ const message = new AuditLog("b5edf595-16a9-450f-a52b-40628cd58c29", new Date(),
 
 describe("createSentToBichardEvent()", () => {
   it("should return Created http status code when message exists", async () => {
-    const expectedSuccessfulServerResponse = { status: 201 }
-    jest.spyOn(axios, "post").mockResolvedValue(expectedSuccessfulServerResponse)
+    jest.spyOn(axios, "post").mockResolvedValue({ status: 201 })
 
     const result = await createSentToBichardEvent(message)
 
@@ -15,8 +14,7 @@ describe("createSentToBichardEvent()", () => {
   })
 
   it("should fail when message does not exist", async () => {
-    const expectedFailedServerResponse = { status: 404 }
-    jest.spyOn(axios, "post").mockResolvedValue(Promise.resolve(expectedFailedServerResponse))
+    jest.spyOn(axios, "post").mockResolvedValue({ status: 404 })
 
     const result = await createSentToBichardEvent(message)
 

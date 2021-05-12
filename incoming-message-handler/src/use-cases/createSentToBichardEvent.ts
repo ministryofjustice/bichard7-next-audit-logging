@@ -5,10 +5,9 @@ import * as https from "https"
 const httpsAgent = new https.Agent({
   rejectUnauthorized: false
 })
-const sentToBichardEventType = "Message Sent to Bichard"
 
 export default function createSentToBichardEvent(message: AuditLog): PromiseResult<void> {
-  const event = new AuditLogEvent("information", new Date(), sentToBichardEventType)
+  const event = new AuditLogEvent("information", new Date(), "Message Sent to Bichard")
 
   return axios
     .post(`${process.env.API_URL}/messages/${message.messageId}/events`, event, {

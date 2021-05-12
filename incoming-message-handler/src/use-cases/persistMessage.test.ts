@@ -7,8 +7,7 @@ message.caseId = "123"
 
 describe("persistMessage", () => {
   it("should return true when server responds with 201 status code", async () => {
-    const expectedSuccessfulServerResponse = { data: "Created", status: 201 }
-    jest.spyOn(axios, "post").mockResolvedValue(expectedSuccessfulServerResponse)
+    jest.spyOn(axios, "post").mockResolvedValue({ status: 201 })
 
     const result = await persistMessage(message)
 
@@ -17,8 +16,7 @@ describe("persistMessage", () => {
   })
 
   it("should fail when server does not responds with 201 status code", async () => {
-    const expectedFailedServerResponse = { status: 400 }
-    jest.spyOn(axios, "post").mockResolvedValue(Promise.resolve(expectedFailedServerResponse))
+    jest.spyOn(axios, "post").mockResolvedValue({ status: 400 })
 
     const result = await persistMessage(message)
 

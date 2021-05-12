@@ -14,8 +14,6 @@ const formatXml = (xml: string): string => format(xml, { indentation: "  " })
 
 const expectedExternalCorrelationId = uuid()
 const expectedCaseId = "41BP0510007"
-const expectedEventCategory = "information"
-const expectedEventType = "Message Sent to Bichard"
 const originalXml = formatXml(`
   <?xml version="1.0" encoding="UTF-8"?>
   <DeliverRequest xmlns="http://schemas.cjse.gov.uk/messages/deliver/2006-05" xmlns:ex="http://schemas.cjse.gov.uk/messages/exception/2006-06" xmlns:mf="http://schemas.cjse.gov.uk/messages/format/2006-05" xmlns:mm="http://schemas.cjse.gov.uk/messages/metadata/2006-05" xmlns:msg="http://schemas.cjse.gov.uk/messages/messaging/2006-05" xmlns:xmime="http://www.w3.org/2005/05/xmlmime" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
@@ -93,8 +91,8 @@ describe("e2e tests", () => {
     expect(persistedMessage.events).toHaveLength(1)
 
     const persistedEvent = persistedMessage.events[0]
-    expect(persistedEvent.category).toBe(expectedEventCategory)
-    expect(persistedEvent.eventType).toBe(expectedEventType)
+    expect(persistedEvent.category).toBe("information")
+    expect(persistedEvent.eventType).toBe("Message Sent to Bichard")
 
     const actualMessage = await testMqGateway.getMessage(queueName)
     expect(isError(actualMessage)).toBe(false)
