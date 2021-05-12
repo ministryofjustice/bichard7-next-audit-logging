@@ -11,7 +11,7 @@ const fetchMessages = new FetchMessagesUseCase(auditLogGateway)
 export default async function getMessages(event: APIGatewayProxyEvent): PromiseResult<APIGatewayProxyResult> {
   const { messageId } = event.pathParameters
 
-  const fetchMessagesResult = !!messageId ? await fetchMessages.getById(messageId) : await fetchMessages.get()
+  const fetchMessagesResult = messageId ? await fetchMessages.getById(messageId) : await fetchMessages.get()
 
   if (isError(fetchMessagesResult)) {
     return createJsonApiResult({
@@ -24,12 +24,12 @@ export default async function getMessages(event: APIGatewayProxyEvent): PromiseR
   if (!!messages && Array.isArray(messages)) {
     return createJsonApiResult({
       statusCode: HttpStatusCode.ok,
-      body: { messages }
+      body: messages
     })
   }
 
   return createJsonApiResult({
     statusCode: HttpStatusCode.ok,
-    body: { message: fetchMessagesResult as AuditLog }
+    body: fetchMessagesResult as AuditLog
   })
 }

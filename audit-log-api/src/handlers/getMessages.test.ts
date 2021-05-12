@@ -30,7 +30,7 @@ test("should respond with a list of messages", async () => {
 
   expect(actualResponse.statusCode).toBe(HttpStatusCode.ok)
 
-  const actualMessages: AuditLog[] = JSON.parse(actualResponse.body).messages
+  const actualMessages: AuditLog[] = JSON.parse(actualResponse.body)
   expect(actualMessages).toHaveLength(2)
 
   const actualMessage1 = actualMessages[0]
@@ -69,7 +69,7 @@ test("should return a single message when the message Id is given", async () => 
   const actualResponse = <APIGatewayProxyResult>messages
   expect(actualResponse.statusCode).toBe(HttpStatusCode.ok)
 
-  const actualMessage: AuditLog = JSON.parse(actualResponse.body).message
+  const actualMessage: AuditLog = JSON.parse(actualResponse.body)
   expect(actualMessage).toBeDefined()
   expect(actualMessage.messageId).toBe(log1.messageId)
   expect(actualMessage.externalCorrelationId).toBe(log1.externalCorrelationId)

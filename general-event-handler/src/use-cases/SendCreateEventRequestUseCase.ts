@@ -1,12 +1,12 @@
 import { PromiseResult } from "shared"
-import ApiGateway from "src/gateways/ApiGateway"
+import AuditLogApiGateway from "src/gateways/AuditLogApiGateway"
 import { AuditLogEvent } from "src/types"
 
 export default class SendCreateEventRequestUseCase {
-  private readonly gateway: ApiGateway
+  private readonly gateway: AuditLogApiGateway
 
   constructor(apiUrl: string) {
-    this.gateway = new ApiGateway(apiUrl)
+    this.gateway = new AuditLogApiGateway(apiUrl)
   }
 
   execute(messageId: string, event: AuditLogEvent): PromiseResult<void> {
