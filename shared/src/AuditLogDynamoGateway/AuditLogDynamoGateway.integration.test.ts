@@ -172,7 +172,7 @@ describe("AuditLogDynamoGateway", () => {
       const result = await gateway.fetchOne("InvalidMessageId")
 
       expect(isError(result)).toBe(false)
-      expect(result as AuditLog).toBeNull()
+      expect(result as AuditLog).toBeUndefined()
     })
   })
 

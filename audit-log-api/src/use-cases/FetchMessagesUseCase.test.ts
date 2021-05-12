@@ -31,11 +31,38 @@ describe("FetchMessagesUseCase", () => {
     expect(actualMessage.receivedDate).toContain("2021-03-24")
   })
 
-  it("should fail when the error is unknown", async () => {
+  it("should return an error when fetchMany fails", async () => {
     const expectedError = new Error("Results not found")
     jest.spyOn(gateway, "fetchMany").mockResolvedValue(expectedError)
 
     const result = await useCase.get()
+
+    expect(isError(result)).toBe(true)
+    expect(result).toBe(expectedError)
+  })
+
+  it("should get one message", async () => {
+    const expectedMessage = new AuditLog("id", new Date(Date.parse("2021-03-24")), "XML")
+    expectedMessage.caseId = "123"
+
+    jest.spyOn(gateway, "fetchOne").mockResolvedValue(expectedMessage)
+
+    const result = await useCase.getById("id")
+
+    expect(isError(result)).toBe(false)
+
+    const actualMessage = <AuditLog>result
+    expect(actualMessage.messageId).toBe(expectedMessage.messageId)
+    expect(actualMessage.externalCorrelationId).toBe(expectedMessage.externalCorrelationId)
+    expect(actualMessage.caseId).toBe(expectedMessage.caseId)
+    expect(actualMessage.receivedDate).toContain("2021-03-24")
+  })
+
+  it("should return an error when fetchOne fails", async () => {
+    const expectedError = new Error("Results not found")
+    jest.spyOn(gateway, "fetchOne").mockResolvedValue(expectedError)
+
+    const result = await useCase.getById("Invalid")
 
     expect(isError(result)).toBe(true)
     expect(result).toBe(expectedError)

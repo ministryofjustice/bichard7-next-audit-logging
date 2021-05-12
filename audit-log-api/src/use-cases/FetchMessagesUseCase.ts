@@ -8,8 +8,6 @@ export default class FetchMessagesUseCase {
   }
 
   getById(messageId: string): PromiseResult<AuditLog> {
-    console.log(messageId)
-
-    return null // TODO
+    return this.gateway.fetchOne(messageId)
   }
 }
