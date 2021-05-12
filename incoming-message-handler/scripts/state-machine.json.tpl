@@ -25,6 +25,11 @@
     "Send to Bichard": {
       "Type": "Task",
       "Resource": "${SEND_TO_BICHARD_ARN}",
+      "Next": "Record Sent to Bichard Event"
+    },
+    "Record Sent to Bichard Event": {
+      "Type": "Task",
+      "Resource": "${RECORD_SENT_TO_BICHARD_EVENT_ARN}",
       "End": true
     }
   }
