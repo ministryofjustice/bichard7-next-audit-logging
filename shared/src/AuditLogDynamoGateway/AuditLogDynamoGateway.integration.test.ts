@@ -120,24 +120,24 @@ describe("AuditLogDynamoGateway", () => {
       expect(actualMessage.events).toHaveLength(2)
 
       const actualEventOne = actualMessage.events.find((e) => e.eventSource === expectedEventOne.eventSource)
-      expect(actualEventOne.eventSource).toBe(expectedEventOne.eventSource)
-      expect(actualEventOne.category).toBe(expectedEventOne.category)
-      expect(actualEventOne.timestamp).toBe(expectedEventOne.timestamp)
-      expect(actualEventOne.eventType).toBe(expectedEventOne.eventType)
+      expect(actualEventOne?.eventSource).toBe(expectedEventOne.eventSource)
+      expect(actualEventOne?.category).toBe(expectedEventOne.category)
+      expect(actualEventOne?.timestamp).toBe(expectedEventOne.timestamp)
+      expect(actualEventOne?.eventType).toBe(expectedEventOne.eventType)
 
-      const actualEventOneAttributes = actualEventOne.attributes
+      const actualEventOneAttributes = actualEventOne?.attributes
       expect(actualEventOneAttributes).toBeDefined()
-      expect(actualEventOneAttributes.EventOneAttribute).toBe(expectedEventOne.attributes.EventOneAttribute)
+      expect(actualEventOneAttributes?.EventOneAttribute).toBe(expectedEventOne.attributes.EventOneAttribute)
 
       const actualEventTwo = actualMessage.events.find((e) => e.eventSource === expectedEventTwo.eventSource)
-      expect(actualEventTwo.eventSource).toBe(expectedEventTwo.eventSource)
-      expect(actualEventTwo.category).toBe(expectedEventTwo.category)
-      expect(actualEventTwo.timestamp).toBe(expectedEventTwo.timestamp)
-      expect(actualEventTwo.eventType).toBe(expectedEventTwo.eventType)
+      expect(actualEventTwo?.eventSource).toBe(expectedEventTwo.eventSource)
+      expect(actualEventTwo?.category).toBe(expectedEventTwo.category)
+      expect(actualEventTwo?.timestamp).toBe(expectedEventTwo.timestamp)
+      expect(actualEventTwo?.eventType).toBe(expectedEventTwo.eventType)
 
-      const actualEventTwoAttributes = actualEventTwo.attributes
+      const actualEventTwoAttributes = actualEventTwo?.attributes
       expect(actualEventTwoAttributes).toBeDefined()
-      expect(actualEventTwoAttributes.EventTwoAttribute).toBe(expectedEventTwo.attributes.EventTwoAttribute)
+      expect(actualEventTwoAttributes?.EventTwoAttribute).toBe(expectedEventTwo.attributes.EventTwoAttribute)
     })
 
     it("should return error when audit log does not exist", async () => {

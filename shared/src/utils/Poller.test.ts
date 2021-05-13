@@ -5,13 +5,13 @@ import PollOptions from "./PollOptions"
 const expectedResult = "Hello, World!"
 
 const poll = async (
-  options: PollOptions<string>,
+  options: PollOptions<string | undefined>,
   numberOfIterations: number,
   shouldSucceed: boolean
-): Promise<string> => {
+): Promise<string | undefined> => {
   let iterations = 0
 
-  const action: PollAction<string> = () =>
+  const action: PollAction<string | undefined> = () =>
     new Promise((resolve) => {
       if (shouldSucceed && iterations === numberOfIterations) {
         resolve(expectedResult)
@@ -21,7 +21,7 @@ const poll = async (
       }
     })
 
-  const poller = new Poller<string>(action)
+  const poller = new Poller<string | undefined>(action)
   return await poller.poll(options)
 }
 
@@ -41,7 +41,7 @@ describe("Poller", () => {
   })
 
   it("should fail when the timeout is exceeded", async () => {
-    let actualError: Error
+    let actualError: Error | undefined
 
     try {
       const options = new PollOptions(1000)
@@ -51,7 +51,7 @@ describe("Poller", () => {
     }
 
     expect(actualError).toBeDefined()
-    expect(actualError.message).toBe("Failed polling due to exceeding the timeout")
+    expect(actualError?.message).toBe("Failed polling due to exceeding the timeout")
   })
 
   it("should succeed when condition is valid", async () => {
@@ -63,7 +63,7 @@ describe("Poller", () => {
   })
 
   it("should fail when condition is invalid", async () => {
-    let actualError: Error
+    let actualError: Error | undefined
 
     try {
       const options = new PollOptions(1000)
@@ -74,6 +74,6 @@ describe("Poller", () => {
     }
 
     expect(actualError).toBeDefined()
-    expect(actualError.message).toBe("Failed polling due to exceeding the timeout")
+    expect(actualError?.message).toBe("Failed polling due to exceeding the timeout")
   })
 })

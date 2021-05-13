@@ -37,7 +37,7 @@ export default class AuditLogDynamoGateway extends DynamoGateway {
       return result
     }
 
-    return result.Item as AuditLog
+    return result?.Item as AuditLog
   }
 
   async addEvent(messageId: string, event: AuditLogEvent): PromiseResult<void> {

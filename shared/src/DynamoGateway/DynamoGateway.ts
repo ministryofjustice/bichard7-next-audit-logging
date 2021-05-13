@@ -50,7 +50,11 @@ export default class DynamoGateway {
       .catch((error) => <Error>error)
   }
 
-  getOne(tableName: string, keyName: string, keyValue: unknown): PromiseResult<DocumentClient.GetItemOutput> {
+  getOne(
+    tableName: string,
+    keyName: string,
+    keyValue: unknown
+  ): PromiseResult<DocumentClient.GetItemOutput | Error | null> {
     return this.client
       .get({
         TableName: tableName,
