@@ -9,7 +9,7 @@ const auditLogGateway = new AuditLogDynamoGateway(config, config.AUDIT_LOG_TABLE
 const fetchMessages = new FetchMessagesUseCase(auditLogGateway)
 
 export default async function getMessages(event: APIGatewayProxyEvent): PromiseResult<APIGatewayProxyResult> {
-  const { messageId } = event.pathParameters || {}
+  const messageId = event.pathParameters?.messageId
 
   const fetchMessagesResult = messageId ? await fetchMessages.getById(messageId) : await fetchMessages.get()
 
