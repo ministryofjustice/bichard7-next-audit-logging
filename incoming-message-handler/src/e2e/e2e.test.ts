@@ -87,6 +87,13 @@ describe("e2e tests", () => {
     // Received date will be a string as we currently pull it straight from the database without parsing
     expect(persistedMessage.receivedDate).toBe(expectedReceivedDate.toISOString())
 
+    expect(persistedMessage.events).toBeDefined()
+    expect(persistedMessage.events).toHaveLength(1)
+
+    const persistedEvent = persistedMessage.events[0]
+    expect(persistedEvent.category).toBe("information")
+    expect(persistedEvent.eventType).toBe("Message Sent to Bichard")
+
     const actualMessage = await testMqGateway.getMessage(queueName)
     expect(isError(actualMessage)).toBe(false)
 

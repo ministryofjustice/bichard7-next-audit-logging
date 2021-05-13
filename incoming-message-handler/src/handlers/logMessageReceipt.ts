@@ -1,8 +1,10 @@
 import { isError, AuditLog } from "shared"
-import persistMessage from "src/use-cases/persistMessage"
+import PersistMessageUseCase from "src/use-cases/PersistMessageUseCase"
+
+const persistMessageUseCase = new PersistMessageUseCase(process.env.API_URL)
 
 export default async function logMessageReceipt(event: AuditLog): Promise<AuditLog> {
-  const persistMessageResult = await persistMessage(event)
+  const persistMessageResult = await persistMessageUseCase.persist(event)
 
   if (isError(persistMessageResult)) {
     throw persistMessageResult

@@ -64,6 +64,7 @@ create_lambda "FormatMessage" "formatMessage.default"
 create_lambda "ParseMessage" "parseMessage.default"
 create_lambda "LogMessageReceipt" "logMessageReceipt.default"
 create_lambda "SendToBichard" "sendToBichard.default"
+create_lambda "RecordSentToBichardEvent" "recordSentToBichardEvent.default"
 
 awslocal s3 mb s3://incoming-messages
 
@@ -93,13 +94,19 @@ SEND_TO_BICHARD_ARN=$( \
   jq ".[] | map(select(.FunctionName == \"SendToBichard\"))" | \
   jq ".[0].FunctionArn" -r)
 
+RECORD_SENT_TO_BICHARD_EVENT_ARN=$( \
+  awslocal lambda list-functions | \
+  jq ".[] | map(select(.FunctionName == \"RecordSentToBichardEvent\"))" | \
+  jq ".[0].FunctionArn" -r)
+
 TEMP_STATE_MACHINE_CONFIG_FILE=./state-machine.tmp.json
 cat $SCRIPTS_PATH/state-machine.json.tpl | \
   sed -e "s/\${RETRIEVE_FROM_S3_LAMBDA_ARN}/$RETRIEVE_FROM_S3_LAMBDA_ARN/g" | \
   sed -e "s/\${FORMAT_MESSAGE_LAMBDA_ARN}/$FORMAT_MESSAGE_LAMBDA_ARN/g" | \
   sed -e "s/\${PARSE_MESSAGE_LAMBDA_ARN}/$PARSE_MESSAGE_LAMBDA_ARN/g" | \
   sed -e "s/\${LOG_MESSAGE_RECEIPT_LAMBDA_ARN}/$LOG_MESSAGE_RECEIPT_LAMBDA_ARN/g" | \
-  sed -e "s/\${SEND_TO_BICHARD_ARN}/$SEND_TO_BICHARD_ARN/g" \
+  sed -e "s/\${SEND_TO_BICHARD_ARN}/$SEND_TO_BICHARD_ARN/g" | \
+  sed -e "s/\${RECORD_SENT_TO_BICHARD_EVENT_ARN}/$RECORD_SENT_TO_BICHARD_EVENT_ARN/g" \
   > $TEMP_STATE_MACHINE_CONFIG_FILE
 
 if [[ -z $(awslocal stepfunctions list-state-machines | grep IncomingMessageHandler) ]]; then

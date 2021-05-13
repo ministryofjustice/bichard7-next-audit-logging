@@ -14,6 +14,7 @@ zip logMessageReceipt.zip logMessageReceipt.js
 zip parseMessage.zip parseMessage.js
 zip retrieveFromS3.zip retrieveFromS3.js
 zip sendToBichard.zip sendToBichard.js
+zip recordSentToBichardEvent.zip recordSentToBichardEvent.js
 
 cd -
 

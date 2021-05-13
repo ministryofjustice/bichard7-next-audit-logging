@@ -20,14 +20,25 @@ export default class TestApi {
   getMessages(): Promise<AuditLog[]> {
     return axios
       .get(`${this.getApiUrl()}/messages`)
-      .then((response) => response.data.messages)
+      .then((response) => response.data)
       .catch((error) => <AxiosError>error)
   }
 
   pollForGetMessages(): Promise<AuditLog[]> {
-    const options = new PollOptions<AuditLog[]>(10000)
+    const options = new PollOptions<AuditLog[]>(20000)
     options.delay = 300
-    options.condition = (messages) => messages.length > 0
+    options.condition = (messages) => {
+      if (!messages || messages.length === 0) {
+        return false
+      }
+
+      const message = messages[0]
+      if (!message.events || message.events.length === 0) {
+        return false
+      }
+
+      return true
+    }
 
     return new Poller(() => this.getMessages()).poll(options)
   }
