@@ -9,7 +9,22 @@ const auditLogGateway = new AuditLogDynamoGateway(config, config.AUDIT_LOG_TABLE
 const createAuditLogUseCase = new CreateAuditLogUseCase(auditLogGateway)
 
 export default async function createAuditLog(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
-  const auditLog = <AuditLog>JSON.parse(event.body)
+  const { body } = event
+  let auditLog: AuditLog
+
+  try {
+    if (!body) {
+      throw Error("Body cannot be empty.")
+    }
+
+    auditLog = <AuditLog>JSON.parse(body)
+  } catch (error) {
+    return createJsonApiResult({
+      statusCode: HttpStatusCode.badRequest,
+      body: error.message
+    })
+  }
+
   const result = await createAuditLogUseCase.create(auditLog)
 
   if (result.resultType === "conflict") {

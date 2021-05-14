@@ -9,9 +9,26 @@ const auditLogGateway = new AuditLogDynamoGateway(config, config.AUDIT_LOG_TABLE
 const createAuditLogEventUseCase = new CreateAuditLogEventUseCase(auditLogGateway)
 
 export default async function createAuditLogEvent(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
-  const { messageId } = event.pathParameters
+  const messageId = event.pathParameters?.messageId
+  const { body } = event
+  let auditLogEvent: AuditLogEvent
 
-  const auditLogEvent = <AuditLogEvent>JSON.parse(event.body)
+  try {
+    if (!messageId) {
+      throw new Error("Message Id must be provided in the URL.")
+    }
+
+    if (!body) {
+      throw Error("Body cannot be empty.")
+    }
+
+    auditLogEvent = <AuditLogEvent>JSON.parse(body)
+  } catch (error) {
+    return createJsonApiResult({
+      statusCode: HttpStatusCode.badRequest,
+      body: error.message
+    })
+  }
   const result = await createAuditLogEventUseCase.create(messageId, auditLogEvent)
 
   if (result.resultType === "notFound") {
