@@ -11,7 +11,7 @@ function create_lambda {
       --function-name "$lambda_name" \
       --code S3Bucket="__local__",S3Key="$PWD/build" \
       --handler "$handler_name" \
-      --runtime nodejs12.x \
+      --runtime nodejs14.x \
       --role whatever
   fi
 
