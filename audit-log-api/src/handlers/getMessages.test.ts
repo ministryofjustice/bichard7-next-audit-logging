@@ -1,7 +1,20 @@
 jest.mock("src/use-cases/FetchMessagesUseCase")
+jest.mock("src/createDynamoDbConfig")
+
+import createDynamoDbConfig from "src/createDynamoDbConfig"
+
+const mockedCreateDynamoDbConfig = <jest.Mock<typeof createDynamoDbConfig>>(<unknown>createDynamoDbConfig)
+mockedCreateDynamoDbConfig.mockReturnValue(
+  () =>
+    <DynamoDbConfig>{
+      DYNAMO_URL: "dummy",
+      DYNAMO_REGION: "dummy",
+      AUDIT_LOG_TABLE_NAME: "dummy"
+    }
+)
 
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda"
-import { AuditLog, HttpStatusCode } from "shared"
+import { AuditLog, DynamoDbConfig, HttpStatusCode } from "shared"
 import FetchMessagesUseCase from "src/use-cases/FetchMessagesUseCase"
 import getMessages from "./getMessages"
 
