@@ -1,35 +1,24 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda"
-import { AuditLogDynamoGateway, AuditLogEvent, HttpStatusCode } from "shared"
+import { AuditLogDynamoGateway, HttpStatusCode, isError } from "shared"
 import { createJsonApiResult } from "src/utils"
 import createDynamoDbConfig from "src/createDynamoDbConfig"
-import { CreateAuditLogEventUseCase } from "src/use-cases"
+import { CreateAuditLogEventUseCase, parseCreateAuditLogEventRequest } from "src/use-cases"
 
 const config = createDynamoDbConfig()
 const auditLogGateway = new AuditLogDynamoGateway(config, config.AUDIT_LOG_TABLE_NAME)
 const createAuditLogEventUseCase = new CreateAuditLogEventUseCase(auditLogGateway)
 
 export default async function createAuditLogEvent(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
-  const messageId = event.pathParameters?.messageId
-  const { body } = event
-  let auditLogEvent: AuditLogEvent
+  const request = parseCreateAuditLogEventRequest(event)
 
-  try {
-    if (!messageId) {
-      throw new Error("Message Id must be provided in the URL.")
-    }
-
-    if (!body) {
-      throw Error("Body cannot be empty.")
-    }
-
-    auditLogEvent = <AuditLogEvent>JSON.parse(body)
-  } catch (error) {
+  if (isError(request)) {
     return createJsonApiResult({
       statusCode: HttpStatusCode.badRequest,
-      body: error.message
+      body: request.message
     })
   }
-  const result = await createAuditLogEventUseCase.create(messageId, auditLogEvent)
+
+  const result = await createAuditLogEventUseCase.create(request.messageId, request.auditLogEvent)
 
   if (result.resultType === "notFound") {
     return createJsonApiResult({
