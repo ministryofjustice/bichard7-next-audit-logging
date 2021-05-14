@@ -8,7 +8,7 @@ export default class MqGateway {
 
   private readonly reconnectOptions: ConnectFailover.ConnectFailoverOptions
 
-  private client: Client
+  private client: Client | null
 
   constructor(private readonly config: MqConfig) {
     this.connectionOptions = deconstructServers(config)
@@ -24,7 +24,7 @@ export default class MqGateway {
   private connectAsync(): PromiseResult<Client> {
     return new Promise((resolve, reject) => {
       const connectionManager = new ConnectFailover(this.connectionOptions, this.reconnectOptions)
-      connectionManager.connect((error: Error, client: Client) => {
+      connectionManager.connect((error: Error | null, client: Client) => {
         if (error) {
           reject(error)
         } else {
@@ -96,7 +96,7 @@ export default class MqGateway {
 
   private disconnectAsync(): Promise<void> {
     return new Promise<void>((resolve, reject) => {
-      this.client.disconnect((error: Error) => {
+      this.client?.disconnect((error: Error | null) => {
         if (error) {
           reject(error)
         } else {

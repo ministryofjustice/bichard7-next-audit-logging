@@ -9,7 +9,7 @@ const httpsAgent = new https.Agent({
 export default class PersistMessageUseCase {
   constructor(private readonly apiUrl: string) {}
 
-  persist(message: AuditLog): PromiseResult<void> {
+  persist(message: AuditLog): PromiseResult<Error | null> {
     return axios
       .post(`${this.apiUrl}/messages`, message, {
         httpsAgent

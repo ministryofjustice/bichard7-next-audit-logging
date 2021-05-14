@@ -4,7 +4,7 @@ import MqGateway from "./MqGateway"
 
 const readMessage = (message: Client.Message): PromiseResult<string> => {
   return new Promise<string>((resolve, reject) => {
-    message.readString("utf-8", (error: Error, buffer?: string) => {
+    message.readString("utf-8", (error: Error | null, buffer?: string) => {
       if (error) {
         reject(error)
       } else if (!buffer) {
@@ -22,7 +22,7 @@ const getMessage = (client: Client, queueName: string): Promise<Client.Message> 
   }
 
   return new Promise<Client.Message>((resolve, reject) => {
-    const callback: Client.MessageCallback = (error: Error, message: Client.Message) => {
+    const callback: Client.MessageCallback = (error: Error | null, message: Client.Message) => {
       if (error) {
         reject(error)
       } else {

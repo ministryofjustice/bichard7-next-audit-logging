@@ -24,7 +24,7 @@ describe("replaceMessageIdInXml()", () => {
 
     const transformedXml = replaceMessageIdInXml(auditLog)
 
-    const actualMessageId = /<msg:MessageIdentifier>(.*)<\/msg:MessageIdentifier>/s.exec(transformedXml)[1].trim()
+    const actualMessageId = /<msg:MessageIdentifier>(.*)<\/msg:MessageIdentifier>/s.exec(transformedXml)?.[1].trim()
     expect(actualMessageId).toBe(auditLog.messageId)
   })
 })

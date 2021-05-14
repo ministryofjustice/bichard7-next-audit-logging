@@ -96,7 +96,7 @@ export default class TestDynamoGateway extends DynamoGateway {
     await Promise.all(promises)
 
     const remainingItems = await this.getAll(tableName)
-    if ((remainingItems?.Count ?? 0) > 0) {
+    if (remainingItems.Count && remainingItems.Count > 0) {
       throw new Error(`Failed to delete all items! Remaining Items: ${remainingItems.Count}`)
     }
   }

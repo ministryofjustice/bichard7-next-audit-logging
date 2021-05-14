@@ -4,10 +4,10 @@ import S3Gateway from "./S3Gateway"
 export default class TestS3Gateway extends S3Gateway {
   async bucketExists(bucketName: string): Promise<boolean> {
     const buckets = await this.client.listBuckets().promise()
-    return !!buckets.Buckets.find((bucket) => bucket.Name === bucketName)
+    return !!buckets.Buckets?.find((bucket) => bucket.Name === bucketName)
   }
 
-  async createBucket(bucketName: string, skipIfExists = true): Promise<CreateBucketOutput> {
+  async createBucket(bucketName: string, skipIfExists = true): Promise<CreateBucketOutput | undefined> {
     if (skipIfExists && (await this.bucketExists(bucketName))) {
       return undefined
     }
@@ -19,7 +19,7 @@ export default class TestS3Gateway extends S3Gateway {
       .promise()
   }
 
-  async getAll(): Promise<S3.ObjectList> {
+  async getAll(): Promise<S3.ObjectList | undefined> {
     const { Contents } = await this.client.listObjects({ Bucket: this.bucketName }).promise()
     return Contents
   }
@@ -28,7 +28,7 @@ export default class TestS3Gateway extends S3Gateway {
     const contents = await this.getAll()
 
     if (contents && contents.length > 0) {
-      const obj: ObjectIdentifierList = contents.map(({ Key }) => ({ Key }))
+      const obj = <ObjectIdentifierList>contents.map(({ Key }) => ({ Key }))
       const params: S3.Types.DeleteObjectsRequest = {
         Bucket: this.bucketName,
         Delete: {
@@ -40,8 +40,8 @@ export default class TestS3Gateway extends S3Gateway {
     }
 
     const remainingItems = await this.getAll()
-    if (remainingItems.length > 0) {
-      throw new Error(`Failed to delete all items! Remaining Items: ${remainingItems.length}`)
+    if (remainingItems && remainingItems.length > 0) {
+      throw new Error(`Failed to delete all items! Remaining Items: ${remainingItems?.length}`)
     }
   }
 
