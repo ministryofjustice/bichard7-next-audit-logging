@@ -11,7 +11,7 @@ export default class S3Gateway {
     const { S3_URL, S3_REGION, S3_FORCE_PATH_STYLE, INCOMING_MESSAGE_BUCKET_NAME } = config
 
     if (!INCOMING_MESSAGE_BUCKET_NAME) {
-      throw Error("S3 bucket name must have value.")
+      throw Error("INCOMING_MESSAGE_BUCKET_NAME must have value.")
     }
     this.bucketName = INCOMING_MESSAGE_BUCKET_NAME
 
