@@ -1,19 +1,9 @@
-jest.mock("src/createDynamoDbConfig")
-
-import createDynamoDbConfig from "src/createDynamoDbConfig"
-
-const mockedCreateDynamoDbConfig = <jest.Mock<typeof createDynamoDbConfig>>(<unknown>createDynamoDbConfig)
-mockedCreateDynamoDbConfig.mockReturnValue(
-  () =>
-    <DynamoDbConfig>{
-      DYNAMO_URL: "dummy",
-      DYNAMO_REGION: "dummy",
-      AUDIT_LOG_TABLE_NAME: "dummy"
-    }
-)
+process.env.AWS_URL = "dummy"
+process.env.AWS_REGION = "dummy"
+process.env.AUDIT_LOG_TABLE_NAME = "dummy"
 
 import { APIGatewayProxyEvent } from "aws-lambda"
-import { AuditLogEvent, DynamoDbConfig, HttpStatusCode } from "shared"
+import { AuditLogEvent, HttpStatusCode } from "shared"
 import { CreateAuditLogEventUseCase } from "src/use-cases"
 import createAuditLogEvent from "./createAuditLogEvent"
 
