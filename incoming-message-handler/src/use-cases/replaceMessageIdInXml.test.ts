@@ -24,7 +24,19 @@ describe("replaceMessageIdInXml()", () => {
 
     const transformedXml = replaceMessageIdInXml(auditLog)
 
-    const actualMessageId = /<msg:MessageIdentifier>(.*)<\/msg:MessageIdentifier>/s.exec(transformedXml)?.[1].trim()
+    const matchResult = /<msg:MessageIdentifier>(.*)<\/msg:MessageIdentifier>/s.exec(transformedXml)
+    expect(matchResult).toBeDefined()
+
+    const actualMessageId = matchResult?.[1].trim()
     expect(actualMessageId).toBe(auditLog.messageId)
+  })
+
+  it("should not add audit log messageId to the XML when MessageIdentifier element does not exist", () => {
+    const auditLog = new AuditLog(externalCorrelationId, new Date(), "<Xml></Xml>")
+
+    const transformedXml = replaceMessageIdInXml(auditLog)
+
+    const matchResult = /<msg:MessageIdentifier>(.*)<\/msg:MessageIdentifier>/s.exec(transformedXml)
+    expect(matchResult).toBeNull()
   })
 })
