@@ -1,4 +1,3 @@
-jest.mock("src/use-cases/CreateAuditLogEventUseCase")
 jest.mock("src/createDynamoDbConfig")
 
 import createDynamoDbConfig from "src/createDynamoDbConfig"

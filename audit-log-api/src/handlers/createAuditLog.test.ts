@@ -1,5 +1,4 @@
 jest.mock("src/createDynamoDbConfig")
-jest.mock("src/createDynamoDbConfig")
 
 import createDynamoDbConfig from "src/createDynamoDbConfig"
 
