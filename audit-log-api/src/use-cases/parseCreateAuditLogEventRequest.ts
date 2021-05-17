@@ -14,11 +14,11 @@ export default function parseCreateAuditLogEventRequest(
 
   try {
     if (!messageId) {
-      throw new Error("Message Id must be provided in the URL.")
+      return Error("Message Id must be provided in the URL.")
     }
 
     if (!body) {
-      throw Error("Body cannot be empty.")
+      return Error("Body cannot be empty.")
     }
 
     return {
