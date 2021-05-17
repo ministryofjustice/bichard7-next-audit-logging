@@ -8,10 +8,10 @@ type KeyValue = string | number | boolean
 export default class TestDynamoGateway extends DynamoGateway {
   async tableExists(tableName: string): Promise<boolean> {
     const tableResult = await this.service.listTables().promise()
-    return !!tableResult.TableNames.find((name) => name === tableName)
+    return !!tableResult.TableNames?.find((name) => name === tableName)
   }
 
-  async createTable(tableName: string, keyName: string, skipIfExists = true): Promise<CreateTableOutput> {
+  async createTable(tableName: string, keyName: string, skipIfExists = true): Promise<CreateTableOutput | undefined> {
     if (skipIfExists && (await this.tableExists(tableName))) {
       return undefined
     }
@@ -39,7 +39,7 @@ export default class TestDynamoGateway extends DynamoGateway {
       .promise()
   }
 
-  pollForMessages(tableName: string, timeout: number): Promise<DocumentClient.ScanOutput> {
+  pollForMessages(tableName: string, timeout: number): Promise<DocumentClient.ScanOutput | undefined> {
     const poller = new Poller(async () => {
       const response = await this.getAll(tableName)
 
@@ -81,21 +81,22 @@ export default class TestDynamoGateway extends DynamoGateway {
   async deleteAll(tableName: string, keyName: string): Promise<void> {
     const items = await this.getAll(tableName)
 
-    const promises = items.Items.map((item) =>
-      this.client
-        .delete({
-          TableName: tableName,
-          Key: {
-            [keyName]: item[keyName]
-          }
-        })
-        .promise()
-    )
+    const promises =
+      items.Items?.map((item) =>
+        this.client
+          .delete({
+            TableName: tableName,
+            Key: {
+              [keyName]: item[keyName]
+            }
+          })
+          .promise()
+      ) ?? []
 
     await Promise.all(promises)
 
     const remainingItems = await this.getAll(tableName)
-    if (remainingItems.Count > 0) {
+    if (remainingItems.Count && remainingItems.Count > 0) {
       throw new Error(`Failed to delete all items! Remaining Items: ${remainingItems.Count}`)
     }
   }

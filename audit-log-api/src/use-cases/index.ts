@@ -1,3 +1,5 @@
 export { default as FetchMessagesUseCase } from "./FetchMessagesUseCase"
 export { default as CreateAuditLogUseCase } from "./CreateAuditLogUseCase"
 export { default as CreateAuditLogEventUseCase } from "./CreateAuditLogEventUseCase"
+export { default as parseCreateAuditLogRequest } from "./parseCreateAuditLogRequest"
+export { default as parseCreateAuditLogEventRequest } from "./parseCreateAuditLogEventRequest"

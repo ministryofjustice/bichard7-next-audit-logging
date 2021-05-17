@@ -14,7 +14,7 @@ const createAuditLogUseCase = new CreateAuditLogUseCase(auditLogDynamoGateway)
 
 const createAuditLog = (): AuditLog => new AuditLog("CorrelationId", new Date(), "XML")
 
-const getAuditLog = (messageId: string): Promise<AuditLog> =>
+const getAuditLog = (messageId: string): Promise<AuditLog | null> =>
   testDynamoGateway.getOne(config.AUDIT_LOG_TABLE_NAME, "messageId", messageId)
 
 describe("CreateAuditLogUseCase", () => {
@@ -56,10 +56,10 @@ describe("CreateAuditLogUseCase", () => {
     expect(result.resultDescription).toBeUndefined()
 
     const actualAuditLog = await getAuditLog(expectedAuditLog.messageId)
-    expect(actualAuditLog.messageId).toBe(expectedAuditLog.messageId)
-    expect(actualAuditLog.externalCorrelationId).toBe(expectedAuditLog.externalCorrelationId)
-    expect(actualAuditLog.caseId).toBe(expectedAuditLog.caseId)
-    expect(actualAuditLog.receivedDate).toBe(expectedAuditLog.receivedDate)
-    expect(actualAuditLog.messageXml).toBe(expectedAuditLog.messageXml)
+    expect(actualAuditLog?.messageId).toBe(expectedAuditLog.messageId)
+    expect(actualAuditLog?.externalCorrelationId).toBe(expectedAuditLog.externalCorrelationId)
+    expect(actualAuditLog?.caseId).toBe(expectedAuditLog.caseId)
+    expect(actualAuditLog?.receivedDate).toBe(expectedAuditLog.receivedDate)
+    expect(actualAuditLog?.messageXml).toBe(expectedAuditLog.messageXml)
   })
 })

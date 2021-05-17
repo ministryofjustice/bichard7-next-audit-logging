@@ -9,7 +9,12 @@ export default class S3Gateway {
 
   constructor(config: S3Config) {
     const { S3_URL, S3_REGION, S3_FORCE_PATH_STYLE, INCOMING_MESSAGE_BUCKET_NAME } = config
+
+    if (!INCOMING_MESSAGE_BUCKET_NAME) {
+      throw Error("INCOMING_MESSAGE_BUCKET_NAME must have value.")
+    }
     this.bucketName = INCOMING_MESSAGE_BUCKET_NAME
+
     this.s3 = new S3({
       endpoint: S3_URL,
       region: S3_REGION,
@@ -30,7 +35,7 @@ export default class S3Gateway {
     return this.s3
       .getObject(params)
       .promise()
-      .then((response) => response.Body.toString("utf-8"))
+      .then((response) => response.Body?.toString("utf-8") ?? Error(`Content is empty for key ${key}.`))
       .catch((error) => <Error>error)
   }
 

@@ -1,7 +1,6 @@
 {
   "extends": "../.config/tsconfig.json",
   "compilerOptions": {
-    "strictNullChecks": false,
     "outDir": "dist",
     "types": ["node", "jest"],
     "sourceMap": false,

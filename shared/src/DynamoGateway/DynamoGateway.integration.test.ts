@@ -34,9 +34,9 @@ describe("DynamoGateway", () => {
       const actualRecords = await gateway.getAll(config.AUDIT_LOG_TABLE_NAME)
       expect(actualRecords.Count).toBe(1)
 
-      const actualRecord = actualRecords.Items[0]
-      expect(actualRecord.id).toBe(expectedRecord.id)
-      expect(actualRecord.someOtherValue).toBe(expectedRecord.someOtherValue)
+      const actualRecord = actualRecords.Items?.[0]
+      expect(actualRecord?.id).toBe(expectedRecord.id)
+      expect(actualRecord?.someOtherValue).toBe(expectedRecord.someOtherValue)
     })
 
     it("should return an error when there is a failure and have inserted zero records", async () => {
@@ -93,8 +93,8 @@ describe("DynamoGateway", () => {
       )
 
       expect(actualRecord).toBeDefined()
-      expect(actualRecord.id).toBe(expectedRecord.id)
-      expect(actualRecord.someOtherValue).toBe(expectedRecord.someOtherValue)
+      expect(actualRecord?.id).toBe(expectedRecord.id)
+      expect(actualRecord?.someOtherValue).toBe(expectedRecord.someOtherValue)
     })
 
     it("should return null when no item has a matching key", async () => {
@@ -137,7 +137,7 @@ describe("DynamoGateway", () => {
       const filteredRecords = actualRecords.Items?.filter((r) => r.id === recordId)
 
       expect(filteredRecords).toHaveLength(1)
-      expect(filteredRecords[0].someOtherValue).toBe(expectedValue)
+      expect(filteredRecords?.[0].someOtherValue).toBe(expectedValue)
     })
 
     it("should return error when key does not exist", async () => {

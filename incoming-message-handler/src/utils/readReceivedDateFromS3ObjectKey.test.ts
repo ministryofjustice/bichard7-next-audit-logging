@@ -15,7 +15,7 @@ describe("readReceivedDateFromS3ObjectKey()", () => {
   it("should throw an error when the object key is not in the correct format", () => {
     const invalidObjectKey = "InvalidObjectKey"
 
-    let actualError: Error
+    let actualError: Error | undefined
 
     try {
       readReceivedDateFromS3ObjectKey(invalidObjectKey)
@@ -24,6 +24,6 @@ describe("readReceivedDateFromS3ObjectKey()", () => {
     }
 
     expect(actualError).toBeDefined()
-    expect(actualError.message).toBe(`The object key "${invalidObjectKey}" is in an invalid format`)
+    expect(actualError?.message).toBe(`The object key "${invalidObjectKey}" is in an invalid format`)
   })
 })

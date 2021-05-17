@@ -1,7 +1,8 @@
 import { isError, AuditLog } from "shared"
+import { getApiUrl } from "src/configs"
 import CreateSentToBichardEventUseCase from "src/use-cases/CreateSentToBichardEventUseCase"
 
-const createSentToBichardEventUseCase = new CreateSentToBichardEventUseCase(process.env.API_URL)
+const createSentToBichardEventUseCase = new CreateSentToBichardEventUseCase(getApiUrl())
 
 export default async function recordSentToBichardEvent(message: AuditLog): Promise<AuditLog> {
   const result = await createSentToBichardEventUseCase.create(message)

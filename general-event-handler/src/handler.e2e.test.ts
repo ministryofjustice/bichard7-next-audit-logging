@@ -85,7 +85,7 @@ test("should throw an error when the referenced AuditLog record does not exist",
   const message = createMessage("Message1")
   const event = createMqEvent([message])
 
-  let actualError: Error = null
+  let actualError: Error | undefined
 
   try {
     await handler(event)
@@ -94,5 +94,5 @@ test("should throw an error when the referenced AuditLog record does not exist",
   }
 
   expect(actualError).toBeDefined()
-  expect(actualError.message).toBe("Request failed with status code 404")
+  expect(actualError?.message).toBe("Request failed with status code 404")
 })

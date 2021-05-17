@@ -20,8 +20,8 @@ describe("deconstructServers()", () => {
     expect(servers).toHaveLength(1)
 
     const server = servers[0]
-    expect(server.connectHeaders.login).toBe(config.username)
-    expect(server.connectHeaders.passcode).toBe(config.password)
+    expect(server.connectHeaders?.login).toBe(config.username)
+    expect(server.connectHeaders?.passcode).toBe(config.password)
 
     const tlsOptions = <TlsConnectionOptions>server
     expect(tlsOptions.host).toBe("host1")
@@ -39,8 +39,8 @@ describe("deconstructServers()", () => {
 
     const server1 = servers[0]
     expect(server1.ssl).toBe(true)
-    expect(server1.connectHeaders.login).toBe(config.username)
-    expect(server1.connectHeaders.passcode).toBe(config.password)
+    expect(server1.connectHeaders?.login).toBe(config.username)
+    expect(server1.connectHeaders?.passcode).toBe(config.password)
 
     const tlsOptions1 = <TlsConnectionOptions>server1
     expect(tlsOptions1.host).toBe("host1")
@@ -48,8 +48,8 @@ describe("deconstructServers()", () => {
 
     const server2 = servers[1]
     expect(server2.ssl).toBe(false)
-    expect(server2.connectHeaders.login).toBe(config.username)
-    expect(server2.connectHeaders.passcode).toBe(config.password)
+    expect(server2.connectHeaders?.login).toBe(config.username)
+    expect(server2.connectHeaders?.passcode).toBe(config.password)
 
     const tlsOptions2 = <TlsConnectionOptions>server2
     expect(tlsOptions2.host).toBe("host2")

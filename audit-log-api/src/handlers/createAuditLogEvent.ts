@@ -1,18 +1,24 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda"
-import { AuditLogDynamoGateway, AuditLogEvent, HttpStatusCode } from "shared"
+import { AuditLogDynamoGateway, HttpStatusCode, isError } from "shared"
 import { createJsonApiResult } from "src/utils"
 import createDynamoDbConfig from "src/createDynamoDbConfig"
-import { CreateAuditLogEventUseCase } from "src/use-cases"
+import { CreateAuditLogEventUseCase, parseCreateAuditLogEventRequest } from "src/use-cases"
 
 const config = createDynamoDbConfig()
 const auditLogGateway = new AuditLogDynamoGateway(config, config.AUDIT_LOG_TABLE_NAME)
 const createAuditLogEventUseCase = new CreateAuditLogEventUseCase(auditLogGateway)
 
 export default async function createAuditLogEvent(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
-  const { messageId } = event.pathParameters
+  const request = parseCreateAuditLogEventRequest(event)
 
-  const auditLogEvent = <AuditLogEvent>JSON.parse(event.body)
-  const result = await createAuditLogEventUseCase.create(messageId, auditLogEvent)
+  if (isError(request)) {
+    return createJsonApiResult({
+      statusCode: HttpStatusCode.badRequest,
+      body: request.message
+    })
+  }
+
+  const result = await createAuditLogEventUseCase.create(request.messageId, request.auditLogEvent)
 
   if (result.resultType === "notFound") {
     return createJsonApiResult({

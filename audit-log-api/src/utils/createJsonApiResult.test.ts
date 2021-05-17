@@ -8,7 +8,7 @@ describe("createJsonApiResult", () => {
     expect(result.body).toBe("Content")
     expect(result.statusCode).toBe(HttpStatusCode.ok)
     expect(result.headers).toHaveProperty("content-type")
-    expect(result.headers["content-type"]).toBe("application/json")
+    expect(result.headers?.["content-type"]).toBe("application/json")
   })
 
   it("should return stringified 'body' when 'body' is JSON", () => {
@@ -17,6 +17,6 @@ describe("createJsonApiResult", () => {
     expect(result.body).toBe('{"Message":"Content"}')
     expect(result.statusCode).toBe(HttpStatusCode.ok)
     expect(result.headers).toHaveProperty("content-type")
-    expect(result.headers["content-type"]).toBe("application/json")
+    expect(result.headers?.["content-type"]).toBe("application/json")
   })
 })
