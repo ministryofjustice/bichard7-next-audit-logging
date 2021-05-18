@@ -8,7 +8,7 @@ import replaceMessageIdInXml from "src/use-cases/replaceMessageIdInXml"
 import IncomingMessageSimulator from "./IncomingMessageSimulator"
 import TestApi from "./TestApi"
 
-jest.setTimeout(30000)
+jest.setTimeout(60000)
 
 const formatXml = (xml: string): string => format(xml, { indentation: "  " })
 
