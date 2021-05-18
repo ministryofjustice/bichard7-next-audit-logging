@@ -46,7 +46,7 @@ Where applicable, each project has tests that are run by Jest. To run these, sim
 - Unit tests - `npm run test:unit`
 - Integration tests - `npm run test:integration`
 - End-to-end tests - `npm run test:e2e`
-- Continuous Integration test run (run by the CI pipeline) - `npm run test:ci`
+- UI tests - `npm run test:ui`
 
 All of these approaches will execute tests in a watch mode, which will allow you to make changes to the underlying tests or codebase and then save the files to automatically trigger another test run.
 
