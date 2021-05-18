@@ -25,7 +25,7 @@ export default class TestApi {
   }
 
   pollForGetMessages(): Promise<AuditLog[]> {
-    const options = new PollOptions<AuditLog[]>(20000)
+    const options = new PollOptions<AuditLog[]>(40000)
     options.delay = 300
     options.condition = (messages) => {
       if (!messages || messages.length === 0) {
