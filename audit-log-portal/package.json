@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "./scripts/setup-environment-variables.sh && next start",
     "start:mocked": "./scripts/setup-environment-variables.sh mocked && NODE_OPTIONS='--require \"./mocks/index\"' next start",
-    "test": "../scripts/test.sh unit",
+    "test": "../scripts/test.sh",
     "host": "npm run build && nodemon scripts/host/start.mjs",
     "cypress:open": "cypress open",
     "test:ui": "concurrently --kill-others --success first \"npm run start:mocked\" \"./scripts/run-ui-tests.sh\"",
