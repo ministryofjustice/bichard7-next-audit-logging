@@ -90,7 +90,7 @@ jobs:
 
       - run:
           name: Installing and configuring awslocal
-          command: ./scripts/ci/install-awslocal.sh
+          command: ./.circleci/scripts/install-awslocal.sh
 
       - run:
           name: Installing all
@@ -117,7 +117,7 @@ jobs:
 
       - run:
           name: Installing Cypress 
-          command: ./scripts/ci/install-cypress.sh
+          command: ./.circleci/scripts/install-cypress.sh
           
       - run:
           name: Running UI tests
