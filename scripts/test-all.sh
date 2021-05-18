@@ -10,5 +10,5 @@ cd scripts
 for p in ${projects[@]}; do
   echo "Running tests for $p..."
   cd ../$p
-  npm run test
+  npm run test:ci
 done

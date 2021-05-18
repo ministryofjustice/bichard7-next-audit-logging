@@ -62,8 +62,6 @@ jobs:
       image: ubuntu-2004:202104-01
       docker_layer_caching: true
     working_directory: ~
-    environment:
-      - TEST_ENVIRONMENT=ci
     steps:
       - checkout
 
