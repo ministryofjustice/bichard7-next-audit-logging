@@ -8,7 +8,7 @@ PARAMS=()
 if [[ -z "$TEST_ENVIRONMENT" ]] || [ "$TEST_ENVIRONMENT" != "ci" ]; then
   PARAMS+=(--watchAll)
 else
-  PARAMS+=(--ci --detectOpenHandles)
+  PARAMS+=(--coverage --ci false --runInBand --reporters=default --reporters=jest-junit)
 fi
 
 case $STYLE in
@@ -26,12 +26,6 @@ case $STYLE in
   "e2e")
     echo "Running e2e tests..."
     PARAMS+=(--testPathPattern=e2e)
-    ;;
-
-  "ci")
-    echo "Running CI tests..."
-    export JEST_JUNIT_OUTPUT_DIR=./test-results/jest
-    PARAMS+=(--coverage --ci false --runInBand --reporters=default --reporters=jest-junit --testPathIgnorePatterns="integration" "e2e")
     ;;
 
     *)
