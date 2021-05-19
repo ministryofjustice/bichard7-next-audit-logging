@@ -58,8 +58,9 @@ jobs:
             - general-event-handler/build
 
   test:
-    docker:
-      - image: cimg/node:15.9.0
+    machine:
+      image: ubuntu-2004:202104-01
+      docker_layer_caching: true
     working_directory: ~
     steps:
       - checkout
@@ -83,13 +84,25 @@ jobs:
       - restore_cache:
           key: v1-npm-deps-{{ checksum "general-event-handler/package-lock.json" }}
 
-      - run: ./scripts/install-all.sh
+      - run:
+          name: Installing Nodejs version in .nvmrc
+          command: nvm install
+
+      - run:
+          name: Installing and configuring awslocal
+          command: ./.circleci/scripts/install-awslocal.sh
+
+      - run:
+          name: Installing all
+          command: ./scripts/install-all.sh
 
       # Attach the workspace to retrieve the dist/build folders so we don't have to rebuild
       - attach_workspace:
           at: .
-
-      - run: ./scripts/test-all.sh
+      
+      - run:
+          name: Running unit, integration, and end-to-end tests 
+          command: ./scripts/test-all.sh
 
       - store_test_results:
           path: ./shared/test-results/jest/
@@ -104,7 +117,7 @@ jobs:
 
       - run:
           name: Installing Cypress 
-          command: ./scripts/install-cypress.sh
+          command: ./.circleci/scripts/install-cypress.sh
           
       - run:
           name: Running UI tests
