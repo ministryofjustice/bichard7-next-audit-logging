@@ -66,6 +66,12 @@
         "@typescript-eslint/no-var-requires": "off",
         "import/first": "off"
       }
+    },
+    {
+      "files": ["*.stories.tsx"],
+      "rules": {
+        "import/no-extraneous-dependencies": "off"
+      }
     }
   ]
 }
