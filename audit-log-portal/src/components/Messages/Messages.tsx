@@ -1,4 +1,6 @@
+import Header from "components/Header"
 import Message from "components/Message"
+import { ReactNode } from "react"
 
 interface Props {
   messages: {
@@ -8,19 +10,23 @@ interface Props {
   }[]
 }
 
+const NoMessages = () => (
+  <p aria-label="No Messages">
+    <i>{`No messages`}</i>
+  </p>
+)
+
+const MessagesContainer = ({ children }: { children: ReactNode }) => <div aria-label="Messages">{children}</div>
+
 const Messages = ({ messages }: Props) => (
   <>
-    <h3>{`Messages`}</h3>
+    <Header text="Messages" />
 
-    {messages.length === 0 && (
-      <p aria-label="No Messages">
-        <i>{`No messages`}</i>
-      </p>
-    )}
+    {messages.length === 0 && <NoMessages />}
 
-    <div aria-label="Messages">
+    <MessagesContainer>
       {messages.length > 0 && messages.map((message) => <Message key={message.messageId} message={message} />)}
-    </div>
+    </MessagesContainer>
   </>
 )
 
