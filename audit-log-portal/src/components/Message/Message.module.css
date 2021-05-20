@@ -1,17 +1,28 @@
 .container {
   display: block;
   margin-bottom: 1rem;
+
+  /* TODO: Use proper theming. */
+  border: 1px solid blue;
+  padding: 0.75rem;
 }
 
-.inner-container {
+.innerContainer {
   display: flex;
   flex-direction: row;
+  justify-content: space-between;
 }
 
-.information-block {
-  margin-right: 2rem;
-}
-
-.label {
+.correlationId {
   font-weight: bold;
+  display: block;
+  margin-bottom: 0.25rem;
+}
+
+.receivedDate {
+  font-style: italic;
+
+  /* TODO: Use proper theming. */
+  color: #bbb;
+  display: block;
 }

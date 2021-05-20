@@ -1,34 +1,26 @@
-import DateTime from "components/DateTime"
 import classNames from "classnames"
+import DateTime from "components/DateTime"
+import { AuditLog } from "shared"
 import styles from "./Message.module.css"
 
 interface Props {
-  message: {
-    messageId: string
-    caseId: string
-    receivedDate: Date
-  }
+  message: AuditLog
 }
 
 const Message = ({ message }: Props) => (
   <div className={classNames(styles.container, "row")}>
-    <div className={styles["inner-container"]}>
-      <div className={styles["information-block"]}>
-        <p className={styles.label}>{`Message Id`}</p>
-        <p aria-label="Message Id">{message.messageId}</p>
+    <div className={styles.innerContainer}>
+      <div>
+        <div className={styles.correlationId}>{message.externalCorrelationId}</div>
+
+        <div className={styles.receivedDate}>
+          <DateTime date={message.receivedDate} prefix="Received: " />
+        </div>
       </div>
 
-      <div className={styles["information-block"]}>
-        <p className={styles.label}>{`Case Number`}</p>
-        <p aria-label="Case Id">{message.caseId}</p>
-      </div>
-
-      <div className={styles["information-block"]}>
-        <p className={styles.label}>{`Received Date`}</p>
-        <p aria-label="Received Date">
-          <DateTime date={message.receivedDate} />
-        </p>
-      </div>
+      {/* TODO: X Days Old */}
+      {/* TODO: Button: View XML */}
+      {/* TODO: Button: View Events */}
     </div>
   </div>
 )

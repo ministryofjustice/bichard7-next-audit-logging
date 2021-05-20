@@ -1,4 +1,5 @@
 import { Meta } from "@storybook/react"
+import { AuditLog } from "shared"
 import Message from "./Message"
 
 export default {
@@ -6,12 +7,5 @@ export default {
   component: Message
 } as Meta
 
-export const Default = () => (
-  <Message
-    message={{
-      messageId: "LIBRA-EXISS-001",
-      caseId: "Case Id",
-      receivedDate: new Date()
-    }}
-  />
-)
+const message = new AuditLog("LIBRA-EXISS-0001", new Date(), "XML")
+export const Default = () => <Message message={message} />
