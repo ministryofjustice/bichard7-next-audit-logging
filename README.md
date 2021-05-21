@@ -28,9 +28,9 @@ This repository currently contains multiple projects to support easy local refer
 
 Once all prerequisites are installed, you can do the followings:
 
-1. Run `make run-all` to deploy and run all components. After running this command, you should be able to access to the portal at [http://localhost:3000](http://localhost:3000)
-2. Run `make run-all-e2e` to deploy and run all components required for solution-level end-to-end testing.
-5. Run `make destroy` to destroy the local infrastructure.
+- Run `make run-all` to deploy and run all components. After running this command, you should be able to access to the portal at [http://localhost:3000](http://localhost:3000)
+- Run `make run-all-e2e` to deploy and run all components required for solution-level end-to-end testing.
+- Run `make destroy` to destroy the local infrastructure.
 
 ## Development
 
