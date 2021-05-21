@@ -1,5 +1,7 @@
 import styled from "styled-components"
+import Button from "components/Button"
 import DateTime from "components/DateTime"
+import EventIcon from "icons/EventIcon"
 import { AuditLog } from "shared"
 import getDaysOld from "./getDaysOld"
 
@@ -40,21 +42,25 @@ const DaysOld = styled(Block)`
   font-size: large;
 `
 
+const Actions = styled.div``
+
 const Message = ({ message }: Props) => (
   <Container>
     <InnerContainer>
       <Block>
         <CorrelationId>{message.externalCorrelationId}</CorrelationId>
 
-        <ReceivedDate>
+        <ReceivedDate className="text-sm">
           <DateTime date={message.receivedDate} prefix="Received: " />
         </ReceivedDate>
       </Block>
 
       <DaysOld>{getDaysOld(message.receivedDate)}</DaysOld>
 
-      {/* TODO: Button: View XML */}
-      {/* TODO: Button: View Events */}
+      <Actions>
+        {/* TODO: Button: View XML */}
+        <Button icon={<EventIcon />}>{`View Events (${message.events.length})`}</Button>
+      </Actions>
     </InnerContainer>
   </Container>
 )
