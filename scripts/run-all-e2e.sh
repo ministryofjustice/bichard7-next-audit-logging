@@ -13,5 +13,5 @@ export MQ_HOST
 export MQ_AUDIT_EVENT_QUEUE
 
 make run-api
-make deploy-incoming-message-handler
-make deploy-general-event-handler
+make run-incoming-message-handler
+make run-general-event-handler
