@@ -13,6 +13,7 @@ The following requirements must be installed to develop on and run the projects 
 - [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2.html)
 - [AWS CLI Local](https://github.com/localstack/awscli-local)
 - [jq JSON processor](https://stedolan.github.io/jq/)
+- GNU Make ([Linux](https://www.gnu.org/software/make/), [Mac](https://formulae.brew.sh/formula/make))
 
 ## Projects
 
