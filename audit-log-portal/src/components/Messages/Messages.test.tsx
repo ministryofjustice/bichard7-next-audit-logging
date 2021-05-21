@@ -1,4 +1,5 @@
-import { render, screen } from "@testing-library/react"
+import { screen } from "@testing-library/react"
+import { render } from "testing/render"
 import Messages from "./Messages"
 
 test("should render 'No Messages' when no messages are given", () => {

@@ -1,0 +1,33 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`matches snapshot 1`] = `
+<div>
+  <div
+    class="Message__Container-sc-12ihk2z-0 eqhdQT"
+  >
+    <div
+      class="Message__InnerContainer-sc-12ihk2z-1 fDJQDi"
+    >
+      <div
+        class="Message__Block-sc-12ihk2z-2"
+      >
+        <div
+          class="Message__CorrelationId-sc-12ihk2z-3 cencrW"
+        >
+          ExternalCorrelationId
+        </div>
+        <div
+          class="Message__ReceivedDate-sc-12ihk2z-4 cRaotj"
+        >
+          Received: 
+          <time
+            aria-label="time"
+          >
+            01/05/2021 10:25:53
+          </time>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
