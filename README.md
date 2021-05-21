@@ -12,6 +12,7 @@ The following requirements must be installed to develop on and run the projects 
 - [Docker Compose](https://docs.docker.com/compose/install/)
 - [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2.html)
 - [AWS CLI Local](https://github.com/localstack/awscli-local)
+- [jq JSON processor](https://stedolan.github.io/jq/)
 
 ## Projects
 
@@ -53,7 +54,7 @@ Where applicable, each project has tests that are run by Jest. To run these, sim
 - Run all tests - `npm test`
 - Unit tests - `npm run test:unit`
 - Integration tests - `npm run test:integration`
-- End-to-end tests - `npm run test:e2e`
+- Component-level end-to-end tests - `npm run test:e2e`
 - UI tests - `npm run test:ui`
 - Continuous Integration test run (run by the CI pipeline) - `npm run test:ci`
 
