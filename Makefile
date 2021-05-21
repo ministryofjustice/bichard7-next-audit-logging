@@ -1,11 +1,10 @@
+.PHONY: deploy-incoming-message-handler
 deploy-incoming-message-handler:
 	cd ./incoming-message-handler && npm run setup:env && cd -
 
+.PHONY: deploy-general-event-handler
 deploy-general-event-handler:
 	cd ./general-event-handler && npm run setup:env && cd -
-
-prepare-e2e:
-	./environment/prepare-e2e.sh
 
 .PHONY: run-api
 run-api:
@@ -19,7 +18,8 @@ run-portal:
 run-all: run-api deploy-incoming-message-handler deploy-general-event-handler run-portal
 
 .PHONY: run-all-e2e
-run-all-e2e: prepare-e2e run-api deploy-incoming-message-handler deploy-general-event-handler
+run-all-e2e: 
+	./scripts/run-all-e2e.sh
 
 .PHONY: destroy
 destroy:

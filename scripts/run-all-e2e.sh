@@ -1,5 +1,4 @@
-# This script is for preparing the environment for solution-level end-to-end testing.
-# You do not need to run this script if you are running a component-level end-to-end test.
+# This script is for preparing the environment and running all components required for solution-level end-to-end testing.
 
 # Set MQ_HOST environment variable based on the current OS
 if [ "$(uname)" == "Darwin" ]; then
@@ -12,3 +11,7 @@ MQ_AUDIT_EVENT_QUEUE=AUDIT_EVENT_QUEUE
 
 export MQ_HOST
 export MQ_AUDIT_EVENT_QUEUE
+
+make run-api
+make deploy-incoming-message-handler
+make deploy-general-event-handler
