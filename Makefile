@@ -4,7 +4,7 @@ run-incoming-message-handler:
 
 .PHONY: run-general-event-handler
 run-general-event-handler:
-	cd ./general-event-handler && npm run setup:env && cd -
+	cd ./general-event-handler && npm run start && cd -
 
 .PHONY: run-api
 run-api:
