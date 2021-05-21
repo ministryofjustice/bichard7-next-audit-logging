@@ -6,10 +6,10 @@ exports[`matches snapshot 1`] = `
     class="Message__Container-sc-12ihk2z-0 eqhdQT"
   >
     <div
-      class="Message__InnerContainer-sc-12ihk2z-1 fDJQDi"
+      class="Message__InnerContainer-sc-12ihk2z-1 bJyMqO"
     >
       <div
-        class="Message__Block-sc-12ihk2z-2"
+        class="Message__Block-sc-12ihk2z-2 hEUOFb"
       >
         <div
           class="Message__CorrelationId-sc-12ihk2z-3 cencrW"
@@ -26,6 +26,11 @@ exports[`matches snapshot 1`] = `
             01/05/2021 10:25:53
           </time>
         </div>
+      </div>
+      <div
+        class="Message__Block-sc-12ihk2z-2 Message__DaysOld-sc-12ihk2z-5 hEUOFb gmpRMg"
+      >
+        20 days old
       </div>
     </div>
   </div>

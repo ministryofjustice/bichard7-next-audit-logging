@@ -1,6 +1,7 @@
 import styled from "styled-components"
 import DateTime from "components/DateTime"
 import { AuditLog } from "shared"
+import getDaysOld from "./getDaysOld"
 
 interface Props {
   message: AuditLog
@@ -16,10 +17,12 @@ const Container = styled.div`
 const InnerContainer = styled.div`
   display: flex;
   flex-direction: row;
-  justify-content: space-between;
+  align-items: center;
 `
 
-const Block = styled.div``
+const Block = styled.div`
+  margin-right: 1.5rem;
+`
 
 const CorrelationId = styled.div`
   display: block;
@@ -33,6 +36,10 @@ const ReceivedDate = styled.div`
   color: ${(props) => props.theme.colors.muted};
 `
 
+const DaysOld = styled(Block)`
+  font-size: large;
+`
+
 const Message = ({ message }: Props) => (
   <Container>
     <InnerContainer>
@@ -44,7 +51,8 @@ const Message = ({ message }: Props) => (
         </ReceivedDate>
       </Block>
 
-      {/* TODO: X Days Old */}
+      <DaysOld>{getDaysOld(message.receivedDate)}</DaysOld>
+
       {/* TODO: Button: View XML */}
       {/* TODO: Button: View Events */}
     </InnerContainer>

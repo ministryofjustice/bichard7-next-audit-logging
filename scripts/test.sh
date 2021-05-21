@@ -30,6 +30,7 @@ case $STYLE in
 
     *)
     echo "Running all tests..."
+    PARAMS+=(--watchAll)
     ;;
 esac
 
