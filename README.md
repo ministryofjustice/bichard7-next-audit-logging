@@ -23,6 +23,14 @@ This repository currently contains multiple projects to support easy local refer
 4. [General Event Handler](general-event-handler/) - Lambda for transforming events coming from the Bichard system and attaching to Audit Log records
 5. [Portal](audit-log-portal/) - Web-based portal allowing access to view and explore all Audit Log records and their events
 
+## Quickstart
+
+Once all prerequisites are installed, you can do the followings:
+
+1. Run `make run-all` to deploy and run all components. After running this command, you should be able to access to the portal at [http://localhost:3000](http://localhost:3000)
+2. Run `make run-all-e2e` to deploy and run all components required for solution-level end-to-end testing.
+5. Run `make destroy` to destroy the local infrastructure.
+
 ## Development
 
 ### Build Order
