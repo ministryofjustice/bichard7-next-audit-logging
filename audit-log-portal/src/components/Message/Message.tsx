@@ -59,7 +59,7 @@ const Message = ({ message }: Props) => (
 
       <Actions>
         {/* TODO: Button: View XML */}
-        <Button icon={<EventIcon />}>{`View Events (${message.events.length})`}</Button>
+        <Button icon={<EventIcon />}>{`View Events (${(message.events || []).length})`}</Button>
       </Actions>
     </InnerContainer>
   </Container>
