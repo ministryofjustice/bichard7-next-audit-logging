@@ -1,28 +1,54 @@
-import classNames from "classnames"
+import styled from "styled-components"
 import DateTime from "components/DateTime"
 import { AuditLog } from "shared"
-import styles from "./Message.module.css"
 
 interface Props {
   message: AuditLog
 }
 
-const Message = ({ message }: Props) => (
-  <div className={classNames(styles.container, "row")}>
-    <div className={styles.innerContainer}>
-      <div>
-        <div className={styles.correlationId}>{message.externalCorrelationId}</div>
+const Container = styled.div`
+  display: block;
+  margin-bottom: 1rem;
+  border: 1px solid ${(props) => props.theme.colors.primary};
+  padding: 0.75rem;
+`
 
-        <div className={styles.receivedDate}>
+const InnerContainer = styled.div`
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+`
+
+const Block = styled.div``
+
+const CorrelationId = styled.div`
+  display: block;
+  font-weight: bold;
+  margin-bottom: 0.25rem;
+`
+
+const ReceivedDate = styled.div`
+  display: block;
+  font-style: italic;
+  color: ${(props) => props.theme.colors.muted};
+`
+
+const Message = ({ message }: Props) => (
+  <Container>
+    <InnerContainer>
+      <Block>
+        <CorrelationId>{message.externalCorrelationId}</CorrelationId>
+
+        <ReceivedDate>
           <DateTime date={message.receivedDate} prefix="Received: " />
-        </div>
-      </div>
+        </ReceivedDate>
+      </Block>
 
       {/* TODO: X Days Old */}
       {/* TODO: Button: View XML */}
       {/* TODO: Button: View Events */}
-    </div>
-  </div>
+    </InnerContainer>
+  </Container>
 )
 
 export default Message
