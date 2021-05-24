@@ -19,7 +19,7 @@ const Index = ({ data }: Props) => (
     />
 
     <Page>
-      <Messages messages={data.messages || []} />
+      <Messages messages={data || []} />
     </Page>
   </>
 )
