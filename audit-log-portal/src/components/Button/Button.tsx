@@ -1,27 +1,11 @@
 import { ReactNode } from "react"
 import styled from "styled-components"
+import { Button as MuiButton } from "@material-ui/core"
 
 interface Props {
   icon?: ReactNode
   children: ReactNode
 }
-
-const StyledButton = styled.button`
-  background-color: white;
-  padding: 0.5rem;
-  border-radius: 5px;
-  border-width: 1px;
-  border-color: ${(props) => props.theme.colors.muted};
-  cursor: pointer;
-
-  &:hover {
-    background-color: rgb(235, 235, 255, 0.25);
-  }
-
-  &:active {
-    background-color: rgb(235, 235, 255, 0.8);
-  }
-`
 
 const ChildrenContainer = styled.div`
   display: flex;
@@ -36,12 +20,12 @@ const ChildrenContainer = styled.div`
 `
 
 const Button = ({ icon, children }: Props) => (
-  <StyledButton>
+  <MuiButton variant="outlined">
     <ChildrenContainer>
       {icon}
       {children}
     </ChildrenContainer>
-  </StyledButton>
+  </MuiButton>
 )
 
 export default Button
