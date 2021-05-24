@@ -1,5 +1,5 @@
 import styled from "styled-components"
-import { Card, CardContent, Button, Typography } from "@material-ui/core"
+import { Badge, Button, Card, CardContent, Typography } from "@material-ui/core"
 import { AuditLog } from "shared"
 import DateTime from "components/DateTime"
 import EventIcon from "icons/EventIcon"
@@ -48,9 +48,11 @@ const Message = ({ message }: Props) => (
 
         <Actions>
           {/* TODO: Button: View XML */}
-          <Button variant="outlined" color="default" startIcon={<EventIcon />}>
-            {`View Events`}
-          </Button>
+          <Badge badgeContent={(message.events || []).length} color="secondary">
+            <Button variant="outlined" color="default" startIcon={<EventIcon />}>
+              {`View Events`}
+            </Button>
+          </Badge>
         </Actions>
       </InnerContainer>
     </CardContent>
