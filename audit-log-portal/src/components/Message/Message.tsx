@@ -13,11 +13,15 @@ const Container = styled(Card)`
   margin-bottom: 1rem;
 `
 
-const InnerContainer = styled.div`
+const InnerContainer = styled(CardContent)`
   display: flex;
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
+
+  &:last-child: {
+    padding-bottom: 0;
+  }
 `
 
 const Block = styled.div`
@@ -30,32 +34,32 @@ const ReceivedDate = styled(Typography)`
   `}
 `
 
-const Actions = styled.div``
+const Actions = styled.div`
+  margin-left: 1rem;
+`
 
 const Message = ({ message }: Props) => (
   <Container>
-    <CardContent>
-      <InnerContainer>
-        <Block>
-          <Typography variant="h6">{message.externalCorrelationId}</Typography>
+    <InnerContainer>
+      <Block>
+        <Typography variant="h6">{message.externalCorrelationId}</Typography>
 
-          <ReceivedDate variant="caption">
-            <DateTime date={message.receivedDate} prefix="Received: " />
-          </ReceivedDate>
-        </Block>
+        <ReceivedDate variant="caption">
+          <DateTime date={message.receivedDate} prefix="Received: " />
+        </ReceivedDate>
+      </Block>
 
-        <Typography variant="h6">{getDaysOld(message.receivedDate)}</Typography>
+      <Typography variant="h6">{getDaysOld(message.receivedDate)}</Typography>
 
-        <Actions>
-          {/* TODO: Button: View XML */}
-          <Badge badgeContent={(message.events || []).length} color="secondary">
-            <Button variant="outlined" color="default" startIcon={<EventIcon />}>
-              {`View Events`}
-            </Button>
-          </Badge>
-        </Actions>
-      </InnerContainer>
-    </CardContent>
+      <Actions>
+        {/* TODO: Button: View XML */}
+        <Badge badgeContent={(message.events || []).length} color="secondary">
+          <Button variant="outlined" color="default" startIcon={<EventIcon />}>
+            {`View Events`}
+          </Button>
+        </Badge>
+      </Actions>
+    </InnerContainer>
   </Container>
 )
 
