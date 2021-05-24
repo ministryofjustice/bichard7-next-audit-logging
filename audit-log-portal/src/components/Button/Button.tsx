@@ -6,7 +6,9 @@ interface Props {
   children: ReactNode
 }
 
-const StyledButton = styled.button`
+const StyledButton = styled.button.attrs({
+  className: "bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded inline-flex items-center"
+})`
   padding: 0.5rem;
 `
 
@@ -23,7 +25,7 @@ const ChildrenContainer = styled.div`
 `
 
 const Button = ({ icon, children }: Props) => (
-  <StyledButton className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded inline-flex items-center">
+  <StyledButton>
     <ChildrenContainer>
       {icon}
       {children}

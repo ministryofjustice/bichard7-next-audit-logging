@@ -45,6 +45,10 @@ const DaysOld = styled(Block)`
 
 const Actions = styled.div``
 
+const ButtonText = styled.span`
+  white-space: nowrap;
+`
+
 const Message = ({ message }: Props) => (
   <Container>
     <InnerContainer>
@@ -60,7 +64,11 @@ const Message = ({ message }: Props) => (
 
       <Actions>
         {/* TODO: Button: View XML */}
-        <Button icon={<EventIcon />}>{`View Events (${(message.events || []).length})`}</Button>
+        <Button icon={<EventIcon />}>
+          {/* <ButtonText> */}
+          {`View Events (${(message.events || []).length})`}
+          {/* </ButtonText> */}
+        </Button>
       </Actions>
     </InnerContainer>
   </Container>

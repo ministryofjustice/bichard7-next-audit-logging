@@ -5,9 +5,7 @@ import NavBar from "components/NavBar"
 import Page from "components/Page"
 
 interface Props {
-  data: {
-    messages: []
-  }
+  data: []
 }
 
 const Index = ({ data }: Props) => (

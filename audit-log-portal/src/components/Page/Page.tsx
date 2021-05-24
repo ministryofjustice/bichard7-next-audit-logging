@@ -1,10 +1,14 @@
-import { memo, ReactNode } from "react"
-import styles from "./Page.module.css"
+import { ReactNode } from "react"
+import styled from "styled-components"
 
 interface Props {
   children: ReactNode
 }
 
-const Page = ({ children }: Props) => <main className={styles.page}>{children}</main>
+const Main = styled.main`
+  margin: 1rem;
+`
 
-export default memo(Page)
+const Page = ({ children }: Props) => <Main>{children}</Main>
+
+export default Page
