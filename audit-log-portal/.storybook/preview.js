@@ -1,3 +1,4 @@
+import { MuiThemeProvider, CssBaseline } from "@material-ui/core"
 import { ThemeProvider } from "styled-components"
 import theme from "styles/theme"
 import "styles/globals.css"
@@ -14,8 +15,11 @@ export const parameters = {
 
 export const decorators = [
   Story => (
-    <ThemeProvider theme={theme}>
-      <Story />
-    </ThemeProvider>
+    <MuiThemeProvider theme={theme}>
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <Story />
+      </ThemeProvider>
+    </MuiThemeProvider>
   )
 ]
