@@ -1,0 +1,85 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`matches snapshot 1`] = `
+<div>
+  <div
+    class="MuiPaper-root MuiCard-root Message__Container-sc-12ihk2z-0 jpkXTb MuiPaper-elevation1 MuiPaper-rounded"
+  >
+    <div
+      class="MuiCardContent-root Message__InnerContainer-sc-12ihk2z-1 jgWPQx"
+    >
+      <div
+        class="Message__Block-sc-12ihk2z-2 hEUOFb"
+      >
+        <h6
+          class="MuiTypography-root MuiTypography-h6"
+        >
+          ExternalCorrelationId
+        </h6>
+        <span
+          class="MuiTypography-root Message__ReceivedDate-sc-12ihk2z-3 biKlAM MuiTypography-caption"
+        >
+          Received: 
+          <time
+            aria-label="time"
+          >
+            01/05/2021 10:25:53
+          </time>
+        </span>
+      </div>
+      <h6
+        class="MuiTypography-root MuiTypography-h6"
+      >
+        23 days old
+      </h6>
+      <div
+        class="Message__Actions-sc-12ihk2z-4 cFTIpd"
+      >
+        <span
+          class="MuiBadge-root"
+        >
+          <button
+            class="MuiButtonBase-root MuiButton-root MuiButton-outlined"
+            tabindex="0"
+            type="button"
+          >
+            <span
+              class="MuiButton-label"
+            >
+              <span
+                class="MuiButton-startIcon MuiButton-iconSizeMedium"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="svg-inline--fa fa-calendar-day fa-w-14 "
+                  data-icon="calendar-day"
+                  data-prefix="fas"
+                  focusable="false"
+                  role="img"
+                  style="width: 18px; height: 18px;"
+                  viewBox="0 0 448 512"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M0 464c0 26.5 21.5 48 48 48h352c26.5 0 48-21.5 48-48V192H0v272zm64-192c0-8.8 7.2-16 16-16h96c8.8 0 16 7.2 16 16v96c0 8.8-7.2 16-16 16H80c-8.8 0-16-7.2-16-16v-96zM400 64h-48V16c0-8.8-7.2-16-16-16h-32c-8.8 0-16 7.2-16 16v48H160V16c0-8.8-7.2-16-16-16h-32c-8.8 0-16 7.2-16 16v48H48C21.5 64 0 85.5 0 112v48h448v-48c0-26.5-21.5-48-48-48z"
+                    fill="currentColor"
+                  />
+                </svg>
+              </span>
+              View Events
+            </span>
+            <span
+              class="MuiTouchRipple-root"
+            />
+          </button>
+          <span
+            class="MuiBadge-badge MuiBadge-anchorOriginTopRightRectangle MuiBadge-colorSecondary MuiBadge-invisible"
+          >
+            0
+          </span>
+        </span>
+      </div>
+    </div>
+  </div>
+</div>
+`;

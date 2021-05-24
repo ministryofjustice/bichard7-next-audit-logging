@@ -61,10 +61,17 @@
       }
     },
     {
-      "files": ["*.test.ts", "*.test.tsx"],
+      "files": ["*.test.ts", "*.test.tsx", "**/testing/*.tsx"],
       "rules": {
         "@typescript-eslint/no-var-requires": "off",
-        "import/first": "off"
+        "import/first": "off",
+        "import/no-extraneous-dependencies": "off"
+      }
+    },
+    {
+      "files": ["*.stories.tsx"],
+      "rules": {
+        "import/no-extraneous-dependencies": "off"
       }
     }
   ]

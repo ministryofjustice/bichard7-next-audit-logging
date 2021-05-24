@@ -1,4 +1,6 @@
-import { render, screen } from "@testing-library/react"
+import { screen } from "@testing-library/react"
+import { AuditLog } from "shared"
+import { render } from "testing/render"
 import Messages from "./Messages"
 
 test("should render 'No Messages' when no messages are given", () => {
@@ -12,17 +14,9 @@ test("should render 'No Messages' when no messages are given", () => {
 })
 
 test("should render 2 messages when 2 messages are given", () => {
-  const messages = [
-    {
-      messageId: "Message1",
-      caseId: "123",
-      receivedDate: new Date()
-    },
-    {
-      messageId: "Message2",
-      caseId: "456",
-      receivedDate: new Date()
-    }
+  const messages: AuditLog[] = [
+    new AuditLog("Message1", new Date(), "XML"),
+    new AuditLog("Message2", new Date(), "XML")
   ]
 
   render(<Messages messages={messages} />)

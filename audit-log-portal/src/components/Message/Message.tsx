@@ -1,36 +1,66 @@
+import styled from "styled-components"
+import { Badge, Button, Card, CardContent, Typography } from "@material-ui/core"
+import { AuditLog } from "shared"
 import DateTime from "components/DateTime"
-import classNames from "classnames"
-import styles from "./Message.module.css"
+import EventIcon from "icons/EventIcon"
+import getDaysOld from "./getDaysOld"
 
 interface Props {
-  message: {
-    messageId: string
-    caseId: string
-    receivedDate: Date
-  }
+  message: AuditLog
 }
 
+const Container = styled(Card)`
+  margin-bottom: 1rem;
+`
+
+const InnerContainer = styled(CardContent)`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+
+  &:last-child: {
+    padding-bottom: 0;
+  }
+`
+
+const Block = styled.div`
+  margin-right: 1.5rem;
+`
+
+const ReceivedDate = styled(Typography)`
+  ${({ theme }) => `
+    color: ${theme.palette.text.disabled};
+  `}
+`
+
+const Actions = styled.div`
+  margin-left: 1rem;
+`
+
 const Message = ({ message }: Props) => (
-  <div className={classNames(styles.container, "row")}>
-    <div className={styles["inner-container"]}>
-      <div className={styles["information-block"]}>
-        <p className={styles.label}>{`Message Id`}</p>
-        <p aria-label="Message Id">{message.messageId}</p>
-      </div>
+  <Container>
+    <InnerContainer>
+      <Block>
+        <Typography variant="h6">{message.externalCorrelationId}</Typography>
 
-      <div className={styles["information-block"]}>
-        <p className={styles.label}>{`Case Number`}</p>
-        <p aria-label="Case Id">{message.caseId}</p>
-      </div>
+        <ReceivedDate variant="caption">
+          <DateTime date={message.receivedDate} prefix="Received: " />
+        </ReceivedDate>
+      </Block>
 
-      <div className={styles["information-block"]}>
-        <p className={styles.label}>{`Received Date`}</p>
-        <p aria-label="Received Date">
-          <DateTime date={message.receivedDate} />
-        </p>
-      </div>
-    </div>
-  </div>
+      <Typography variant="h6">{getDaysOld(message.receivedDate)}</Typography>
+
+      <Actions>
+        {/* TODO: Button: View XML */}
+        <Badge badgeContent={(message.events || []).length} color="secondary">
+          <Button variant="outlined" color="default" startIcon={<EventIcon />}>
+            {`View Events`}
+          </Button>
+        </Badge>
+      </Actions>
+    </InnerContainer>
+  </Container>
 )
 
 export default Message
