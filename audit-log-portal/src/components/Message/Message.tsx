@@ -11,9 +11,13 @@ interface Props {
 
 const Container = styled.div`
   display: block;
+  background-color: white;
+  border-bottom-color: rgb(229, 231, 235);
+  border-radius: 12px;
+  box-shadow: rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.1) 0px 4px 6px -1px,
+    rgba(0, 0, 0, 0.06) 0px 2px 4px -1px;
   margin-bottom: 1rem;
-  border: 1px solid ${(props) => props.theme.colors.primary};
-  padding: 0.75rem;
+  padding: 1.25rem;
 `
 
 const InnerContainer = styled.div`
@@ -50,28 +54,28 @@ const ButtonText = styled.span`
 `
 
 const Message = ({ message }: Props) => (
-  <Container>
-    <InnerContainer>
-      <Block>
-        <CorrelationId>{message.externalCorrelationId}</CorrelationId>
+  <>
+    <Container>
+      <InnerContainer>
+        <Block>
+          <CorrelationId>{message.externalCorrelationId}</CorrelationId>
 
-        <ReceivedDate className="text-sm">
-          <DateTime date={message.receivedDate} prefix="Received: " />
-        </ReceivedDate>
-      </Block>
+          <ReceivedDate className="text-sm">
+            <DateTime date={message.receivedDate} prefix="Received: " />
+          </ReceivedDate>
+        </Block>
 
-      <DaysOld>{getDaysOld(message.receivedDate)}</DaysOld>
+        <DaysOld>{getDaysOld(message.receivedDate)}</DaysOld>
 
-      <Actions>
-        {/* TODO: Button: View XML */}
-        <Button icon={<EventIcon />}>
-          {/* <ButtonText> */}
-          {`View Events (${(message.events || []).length})`}
-          {/* </ButtonText> */}
-        </Button>
-      </Actions>
-    </InnerContainer>
-  </Container>
+        <Actions>
+          {/* TODO: Button: View XML */}
+          <Button icon={<EventIcon />}>
+            <ButtonText>{`View Events (${(message.events || []).length})`}</ButtonText>
+          </Button>
+        </Actions>
+      </InnerContainer>
+    </Container>
+  </>
 )
 
 export default Message
