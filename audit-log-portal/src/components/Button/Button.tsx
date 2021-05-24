@@ -6,10 +6,21 @@ interface Props {
   children: ReactNode
 }
 
-const StyledButton = styled.button.attrs({
-  className: "bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded inline-flex items-center"
-})`
+const StyledButton = styled.button`
+  background-color: white;
   padding: 0.5rem;
+  border-radius: 5px;
+  border-width: 1px;
+  border-color: ${(props) => props.theme.colors.muted};
+  cursor: pointer;
+
+  &:hover {
+    background-color: rgb(235, 235, 255, 0.25);
+  }
+
+  &:active {
+    background-color: rgb(235, 235, 255, 0.8);
+  }
 `
 
 const ChildrenContainer = styled.div`
