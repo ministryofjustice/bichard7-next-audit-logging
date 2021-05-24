@@ -1,13 +1,10 @@
+import { ReactNode } from "react"
+import { AuditLog } from "shared"
 import Header from "components/Header"
 import Message from "components/Message"
-import { ReactNode } from "react"
 
 interface Props {
-  messages: {
-    messageId: string
-    caseId: string
-    receivedDate: Date
-  }[]
+  messages: AuditLog[]
 }
 
 const NoMessages = () => (
