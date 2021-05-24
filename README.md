@@ -12,6 +12,8 @@ The following requirements must be installed to develop on and run the projects 
 - [Docker Compose](https://docs.docker.com/compose/install/)
 - [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2.html)
 - [AWS CLI Local](https://github.com/localstack/awscli-local)
+- [jq JSON processor](https://stedolan.github.io/jq/)
+- GNU Make ([Linux](https://www.gnu.org/software/make/), [Mac](https://formulae.brew.sh/formula/make))
 
 ## Projects
 
@@ -22,6 +24,14 @@ This repository currently contains multiple projects to support easy local refer
 3. [Incoming Message Handler](incoming-message-handler/) - AWS Step Functions and Lambdas for intercepting and processing messages coming into the Bichard system
 4. [General Event Handler](general-event-handler/) - Lambda for transforming events coming from the Bichard system and attaching to Audit Log records
 5. [Portal](audit-log-portal/) - Web-based portal allowing access to view and explore all Audit Log records and their events
+
+## Quickstart
+
+Once all prerequisites are installed, you can do the followings:
+
+- Run `make run-all` to deploy and run all components. After running this command, you should be able to access to the portal at [http://localhost:3000](http://localhost:3000)
+- Run `make run-all-e2e` to deploy and run all components required for solution-level end-to-end testing.
+- Run `make destroy-all` to destroy the local infrastructure.
 
 ## Development
 
@@ -45,7 +55,7 @@ Where applicable, each project has tests that are run by Jest. To run these, sim
 - Run all tests - `npm test`
 - Unit tests - `npm run test:unit`
 - Integration tests - `npm run test:integration`
-- End-to-end tests - `npm run test:e2e`
+- Component-level end-to-end tests - `npm run test:e2e`
 - UI tests - `npm run test:ui`
 - Continuous Integration test run (run by the CI pipeline) - `npm run test:ci`
 
