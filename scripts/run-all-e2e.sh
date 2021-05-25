@@ -7,9 +7,9 @@ elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
   MQ_HOST=172.17.0.1:61613
 fi
 
-MQ_AUDIT_EVENT_QUEUE=COURT_RESULT_INPUT_QUEUE
+MQ_INCOMING_MESSAGE_HANDLER_QUEUE=COURT_RESULT_INPUT_QUEUE
 
 export MQ_HOST
-export MQ_AUDIT_EVENT_QUEUE
+export MQ_INCOMING_MESSAGE_HANDLER_QUEUE
 
 make run-all-without-portal

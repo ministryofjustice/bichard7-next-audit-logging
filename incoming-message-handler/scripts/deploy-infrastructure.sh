@@ -37,15 +37,15 @@ function update_env_vars_file {
     MQ_HOST=mq:61613
   fi
 
-  if [[ -z "$MQ_AUDIT_EVENT_QUEUE" ]]; then
-    MQ_AUDIT_EVENT_QUEUE=incoming-message-handler-e2e-testing
+  if [[ -z "$MQ_INCOMING_MESSAGE_HANDLER_QUEUE" ]]; then
+    MQ_INCOMING_MESSAGE_HANDLER_QUEUE=incoming-message-handler-e2e-testing
   fi
 
   cat > $env_path <<- EOM
 {
   "Variables": {
     "MQ_URL": "failover:(stomp://$MQ_HOST)",
-    "MQ_QUEUE": "$MQ_AUDIT_EVENT_QUEUE",
+    "MQ_QUEUE": "$MQ_INCOMING_MESSAGE_HANDLER_QUEUE",
     "MQ_USER": "admin",
     "MQ_PASSWORD": "admin",
     "AWS_URL": "http://localstack_main:4566",
