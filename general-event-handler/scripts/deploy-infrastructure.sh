@@ -1,8 +1,8 @@
 #!/bin/bash
 
-SCRIPTS_PATH=$PWD/scripts
+SCRIPTS_PATH="$PWD/scripts"
 
-source $SCRIPTS_PATH/../../environment/audit-log-api-url.sh
+source "$SCRIPTS_PATH/../../environment/audit-log-api-url.sh"
 set -e
 
 function create_lambda {
@@ -25,7 +25,7 @@ function create_lambda {
 }
 
 function update_env_vars_file {
-  local env_path=$SCRIPTS_PATH/env-vars.json
+  local env_path="$SCRIPTS_PATH/env-vars.json"
   local api_url=$(get_audit_log_api_url localstack_main)
 
   if [[ -z $api_url ]]; then
@@ -33,7 +33,7 @@ function update_env_vars_file {
     exit 1
   fi
 
-  cat > $env_path <<- EOM
+  cat > "$env_path" <<- EOM
 {
   "Variables": {
     "AWS_URL": "http://localstack_main:4566",
@@ -45,9 +45,9 @@ EOM
 }
 
 # Run API
-cd $SCRIPTS_PATH/../../audit-log-api
+cd "$SCRIPTS_PATH/../../audit-log-api"
 npm run start
-cd $SCRIPTS_PATH/..
+cd "$SCRIPTS_PATH/.."
 
 # Update environment variables file
 update_env_vars_file
