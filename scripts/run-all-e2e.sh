@@ -12,6 +12,4 @@ MQ_AUDIT_EVENT_QUEUE=AUDIT_EVENT_QUEUE
 export MQ_HOST
 export MQ_AUDIT_EVENT_QUEUE
 
-make run-api
-make run-incoming-message-handler
-make run-general-event-handler
+make run-all-without-portal
