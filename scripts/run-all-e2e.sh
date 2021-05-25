@@ -13,3 +13,4 @@ export MQ_HOST
 export MQ_INCOMING_MESSAGE_HANDLER_QUEUE
 
 make run-all-without-portal
+make run-mq-listener

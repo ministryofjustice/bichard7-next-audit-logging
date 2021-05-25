@@ -3,7 +3,7 @@
 ########################################
 
 .PHONY: run-mq-listener
-run-mq-listener:
+run-mq-listener: destroy-mq-listener
 	npm run start:mq-listener
 
 .PHONY: run-incoming-message-handler
@@ -31,7 +31,7 @@ run-portal:
 		cd -
 
 .PHONY: run-all-without-portal
-run-all-without-portal: run-api run-incoming-message-handler run-general-event-handler run-mq-listener
+run-all-without-portal: run-api run-incoming-message-handler run-general-event-handler
 
 .PHONY: run-all
 run-all: run-all-without-portal run-portal
