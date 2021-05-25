@@ -1,5 +1,6 @@
 import { AuditLog } from "shared"
 import Layout from "components/Layout"
+import Events from "components/Events"
 import PageProps from "utils/PageProps"
 import config from "config"
 
@@ -9,11 +10,7 @@ interface Props {
 
 const MessageView = ({ message }: Props) => (
   <Layout pageTitle="Events">
-    {message.events.map((event) => (
-      <div key={event.timestamp}>
-        {`Event: ${event.category} - ${event.eventType} - ${event.eventSource} (${event.timestamp})`}
-      </div>
-    ))}
+    <Events events={message.events || []} />
   </Layout>
 )
 
