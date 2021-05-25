@@ -21,7 +21,7 @@ class MqHelper {
     if (this.channel) {
       return
     }
-    
+
     const { connectHeaders } = this.options.connect
     const connectionManager = new ConnectFailover()
     connectionManager.addServer({
