@@ -18,9 +18,13 @@ const action = (error, message, ack) => {
   } else {
     message.setEncoding("utf8")
     const payload = JSON.stringify({ eventSource: "aws:amq", eventSourceArn: "ARN", messages: [message.read()] })
+    console.log("Payload: ", payload)
     lambda
       .invokeGeneralEventHandler(payload)
-      .then(() => ack())
+      .then((response) => {
+        console.log("Lambda function response: ", response)
+        ack()
+      })
       .catch((err) => console.log(err))
   }
 }

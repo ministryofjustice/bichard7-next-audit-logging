@@ -63,6 +63,10 @@ destroy-all: destroy-mq-listener destroy-infra
 follow-logs:
 	docker logs -tf localstack_main
 
+.PHONY: follow-mq-listener-logs
+follow-mq-listener-logs:
+	npm run logs:mq-listener
+
 .PHONY: scan-db
 scan-db:
 	awslocal dynamodb scan --table-name audit-log

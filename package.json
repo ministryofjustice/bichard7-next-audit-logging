@@ -34,6 +34,7 @@
   "scripts": {
     "start:mq-listener": "pm2 start ./scripts/mq-listener/start.js --name \"MqListener\"",
     "stop:mq-listener": "pm2 delete \"MqListener\"",
+    "logs:mq-listener": "pm2 logs \"MqListener\" --lines 500",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix"
   },
