@@ -1,0 +1,20 @@
+{
+  "name": "mq-listener",
+  "version": "1.0.0",
+  "description": "This package subscribes to GENERAL_EVENT_QUEUE and invokes GeneralEventHandler lambda function",
+  "main": "src/start.js",
+  "scripts": {
+    "start": "pm2 start ./app/start.js --name \"MqListener\" --time",
+    "stop": "pm2 delete \"MqListener\" 2> /dev/null || :",
+    "logs": "pm2 logs \"MqListener\" --lines 500"
+  },
+  "dependencies": {
+    "aws-sdk": "^2.804.0",
+    "stompit": "^1.0.0"
+  },
+  "devDependencies": {
+    "pm2": "^4.5.6"
+  },
+  "author": "",
+  "license": "ISC"
+}

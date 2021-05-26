@@ -3,10 +3,6 @@
   "description": "Listens and responds to audit events",
   "version": "0.0.1",
   "private": true,
-  "dependencies": {
-    "aws-sdk": "^2.804.0",
-    "stompit": "^1.0.0"
-  },
   "devDependencies": {
     "@aws-sdk/client-lambda": "^3.13.0",
     "@babel/preset-react": "^7.13.13",
@@ -24,7 +20,6 @@
     "eslint-plugin-react-hooks": "^4.0.8",
     "husky": "^4.3.8",
     "lint-staged": "^10.5.4",
-    "pm2": "^4.5.6",
     "prettier": "^2.2.1",
     "react-test-renderer": "^17.0.2",
     "shelljs": "^0.8.4",
@@ -32,9 +27,6 @@
     "typescript": "^4.1.2"
   },
   "scripts": {
-    "start:mq-listener": "pm2 start ./scripts/mq-listener/start.js --name \"MqListener\" --time",
-    "stop:mq-listener": "pm2 delete \"MqListener\"",
-    "logs:mq-listener": "pm2 logs \"MqListener\" --lines 500",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix"
   },

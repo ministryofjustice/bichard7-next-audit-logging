@@ -4,7 +4,7 @@
 
 .PHONY: run-mq-listener
 run-mq-listener: destroy-mq-listener
-	npm run start:mq-listener
+	cd ./mq-listener && npm run start && cd -
 
 .PHONY: run-incoming-message-handler
 run-incoming-message-handler:
@@ -46,7 +46,7 @@ run-all-e2e:
 
 .PHONY: destroy-mq-listener
 destroy-mq-listener:
-	npm run stop:mq-listener 2> /dev/null || :
+	cd ./mq-listener && npm run stop && cd -
 
 .PHONY: destroy-infra
 destroy-infra:
@@ -65,7 +65,7 @@ follow-logs:
 
 .PHONY: follow-mq-listener-logs
 follow-mq-listener-logs:
-	npm run logs:mq-listener
+	cd ./mq-listener && npm run logs && cd -
 
 .PHONY: scan-db
 scan-db:

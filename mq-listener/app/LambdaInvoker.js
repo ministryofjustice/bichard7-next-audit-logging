@@ -1,6 +1,6 @@
 const { Lambda } = require("aws-sdk")
 
-class LambdaHelper {
+class LambdaInvoker {
   constructor(config) {
     this.lambda = new Lambda({
       endpoint: config.url,
@@ -22,4 +22,4 @@ class LambdaHelper {
   }
 }
 
-module.exports = LambdaHelper
+module.exports = LambdaInvoker
