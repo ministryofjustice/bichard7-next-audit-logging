@@ -21,9 +21,11 @@ const Events = ({ events }: Props) => (
 
     {events.length === 0 && <NoEvents />}
 
-    <EventsContainer>
-      {events.length > 0 && events.map((event) => <Event key={event.timestamp} event={event} />)}
-    </EventsContainer>
+    {events.length > 0 && (
+      <EventsContainer>
+        {events.length > 0 && events.map((event) => <Event key={event.timestamp} event={event} />)}
+      </EventsContainer>
+    )}
   </>
 )
 
