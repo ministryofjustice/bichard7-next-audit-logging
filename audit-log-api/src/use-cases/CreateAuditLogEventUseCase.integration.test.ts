@@ -13,8 +13,12 @@ const auditLogDynamoGateway = new AuditLogDynamoGateway(config, config.AUDIT_LOG
 const createAuditLogEventUseCase = new CreateAuditLogEventUseCase(auditLogDynamoGateway)
 
 const createAuditLog = (): AuditLog => new AuditLog("CorrelationId", new Date(), "XML")
-const createAuditLogEvent = (): AuditLogEvent =>
-  new AuditLogEvent("information", new Date(), "Create audit log event test")
+const createAuditLogEvent = (): AuditLogEvent => {
+  const event = new AuditLogEvent("information", new Date(), "Create audit log event test")
+  event.eventSource = "Integration Test"
+
+  return event
+}
 
 const getAuditLog = (messageId: string): Promise<AuditLog | null> =>
   testDynamoGateway.getOne(config.AUDIT_LOG_TABLE_NAME, "messageId", messageId)
@@ -42,6 +46,7 @@ describe("CreateAuditLogUseCase", () => {
     expect(actualEvent?.category).toBe(event.category)
     expect(actualEvent?.timestamp).toBe(event.timestamp)
     expect(actualEvent?.eventType).toBe(event.eventType)
+    expect(actualEvent?.eventSource).toBe(event.eventSource)
   })
 
   it("should return not found result when audit log does not exist", async () => {

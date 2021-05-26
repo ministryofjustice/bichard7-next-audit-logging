@@ -5,7 +5,8 @@ import styled from "styled-components"
 const ColoredIcon = styled(FontAwesomeIcon)`
   ${({ theme }) => `
     color: ${theme.palette.info.main};
-    font-size: xx-large;
+    width: 36px;
+    height: 36px;
   `}
 `
 
