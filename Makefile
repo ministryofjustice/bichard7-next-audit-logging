@@ -33,8 +33,11 @@ run-portal:
 .PHONY: run-all-without-portal
 run-all-without-portal: run-api run-incoming-message-handler run-general-event-handler
 
-.PHONY: run-all
+.PHONY: run-infra
 run-all: run-all-without-portal run-portal
+
+.PHONY: run-all
+run-all: run-all-without-portal run-portal run-mq-listener
 
 .PHONY: run-all-e2e
 run-all-e2e: 
