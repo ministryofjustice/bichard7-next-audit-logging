@@ -32,7 +32,7 @@
     "typescript": "^4.1.2"
   },
   "scripts": {
-    "start:mq-listener": "pm2 start ./scripts/mq-listener/start.js --name \"MqListener\"",
+    "start:mq-listener": "pm2 start ./scripts/mq-listener/start.js --name \"MqListener\" --time",
     "stop:mq-listener": "pm2 delete \"MqListener\"",
     "logs:mq-listener": "pm2 logs \"MqListener\" --lines 500",
     "lint": "eslint .",
