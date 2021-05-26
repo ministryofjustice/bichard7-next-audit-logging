@@ -5,7 +5,7 @@
   "scripts": {
     "setup:env": "cd ../audit-log-api && npm run start && cd - && ./scripts/setup-environment-variables.sh",
     "dev": "npm run setup:env && next dev",
-    "dev:skip-env": "next dev",
+    "dev:skip-env": "./scripts/setup-environment-variables.sh && next dev",
     "build": "next build",
     "start": "npm run setup:env && next start",
     "start:mocked": "./scripts/setup-environment-variables.sh mocked && NODE_OPTIONS='--require \"./mocks/index\"' next start",
