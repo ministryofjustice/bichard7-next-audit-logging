@@ -15,7 +15,8 @@ function create_lambda {
       --code S3Bucket="__local__",S3Key=$PWD/build \
       --handler $HANDLER_NAME \
       --runtime nodejs14.x \
-      --role whatever
+      --role whatever \
+      --timeout 15
   fi
 
   # Configure the lambda with environment variables
