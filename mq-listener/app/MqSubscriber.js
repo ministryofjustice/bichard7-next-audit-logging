@@ -1,6 +1,5 @@
 /* eslint-disable no-console */
 const { ConnectFailover, Channel } = require("stompit")
-const LambdaInvoker = require("./LambdaInvoker")
 const processMessage = require("./processMessage")
 
 class MqSubscriber {
@@ -61,12 +60,7 @@ class MqSubscriber {
     )
   }
 
-  subscribeToGeneralEventQueue() {
-    const lambda = new LambdaInvoker({
-      url: process.env.AWS_URL || "http://localhost:4566",
-      region: process.env.STEP_FUNCTIONS_REGION || "us-east-1"
-    })
-
+  subscribeToGeneralEventQueue(lambda) {
     this.subscribe("GENERAL_EVENT_QUEUE", (error, message, operations) =>
       processMessage(error, message, operations, lambda)
     )
