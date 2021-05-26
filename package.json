@@ -1,5 +1,5 @@
 {
-  "name": "incoming-message-handler",
+  "name": "audit-logging",
   "description": "Listens and responds to audit events",
   "version": "0.0.1",
   "private": true,

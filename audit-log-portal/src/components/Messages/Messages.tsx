@@ -21,9 +21,11 @@ const Messages = ({ messages }: Props) => (
 
     {messages.length === 0 && <NoMessages />}
 
-    <MessagesContainer>
-      {messages.length > 0 && messages.map((message) => <Message key={message.messageId} message={message} />)}
-    </MessagesContainer>
+    {messages.length > 0 && (
+      <MessagesContainer>
+        {messages.length > 0 && messages.map((message) => <Message key={message.messageId} message={message} />)}
+      </MessagesContainer>
+    )}
   </>
 )
 

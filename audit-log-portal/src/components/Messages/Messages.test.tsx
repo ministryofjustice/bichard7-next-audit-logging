@@ -7,10 +7,10 @@ test("should render 'No Messages' when no messages are given", () => {
   render(<Messages messages={[]} />)
 
   const noMessages = screen.getByLabelText("No Messages")
-  const actualMessages = screen.getByLabelText("Messages")
+  const messagesContainer = screen.queryByLabelText("Messages")
 
   expect(noMessages.innerHTML).toContain("No messages")
-  expect(actualMessages.children).toHaveLength(0)
+  expect(messagesContainer).toBeNull()
 })
 
 test("should render 2 messages when 2 messages are given", () => {

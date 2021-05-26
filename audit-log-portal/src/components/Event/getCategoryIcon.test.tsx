@@ -1,0 +1,19 @@
+import { EventCategory } from "shared"
+import ErrorIcon from "icons/ErrorIcon"
+import WarningIcon from "icons/WarningIcon"
+import InformationIcon from "icons/InformationIcon"
+import getCategoryIcon from "./getCategoryIcon"
+
+interface TestInput {
+  category: EventCategory
+  expectedIcon: () => JSX.Element
+}
+
+test.each<TestInput>([
+  { category: "error", expectedIcon: ErrorIcon },
+  { category: "warning", expectedIcon: WarningIcon },
+  { category: "information", expectedIcon: InformationIcon }
+])("returns <$expected/> when category is $category", ({ category, expectedIcon }) => {
+  const Component = getCategoryIcon(category)
+  expect(Component).toBe(expectedIcon)
+})

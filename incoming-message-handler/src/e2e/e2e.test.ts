@@ -93,6 +93,7 @@ describe("e2e tests", () => {
     const persistedEvent = persistedMessage.events[0]
     expect(persistedEvent.category).toBe("information")
     expect(persistedEvent.eventType).toBe("Message Sent to Bichard")
+    expect(persistedEvent.eventSource).toBe("Incoming Message Handler")
 
     const actualMessage = await testMqGateway.getMessage(queueName)
     expect(isError(actualMessage)).toBe(false)
