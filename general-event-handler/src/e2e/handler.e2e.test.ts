@@ -1,8 +1,9 @@
 import { AuditLog, isError } from "shared"
-import AmazonMqEventSourceRecordEvent from "./AmazonMqEventSourceRecordEvent"
-import AuditLogApiGateway from "./gateways/AuditLogApiGateway"
-import getLocalAuditLogApiUrl from "./getLocalAuditLogApiUrl"
-import handler from "./handler"
+import AmazonMqEventSourceRecordEvent from "../AmazonMqEventSourceRecordEvent"
+import AuditLogApiGateway from "../gateways/AuditLogApiGateway"
+import getLocalAuditLogApiUrl from "../getLocalAuditLogApiUrl"
+import handler from "../handler"
+import invokeGeneralEventHandlerFunction from "./invokeGeneralEventHandlerFunction"
 
 const createMessage = (correlationId: string): string => {
   const eventDateTime = new Date().toISOString()
@@ -50,6 +51,7 @@ const getApiGateway = async (): Promise<AuditLogApiGateway> => {
 }
 
 test("should transform the message and attach as an event to an existing AuditLog record", async () => {
+  jest.setTimeout(10000)
   const apiGateway = await getApiGateway()
 
   const auditLog = new AuditLog("ExternalCorrelationId", new Date(), "XML")
@@ -58,7 +60,7 @@ test("should transform the message and attach as an event to an existing AuditLo
   const message = createMessage(auditLog.messageId)
   const event = createMqEvent([message])
 
-  await handler(event)
+  await invokeGeneralEventHandlerFunction(JSON.stringify(event))
 
   const result = await apiGateway.getMessage(auditLog.messageId)
   expect(isError(result)).toBe(false)
