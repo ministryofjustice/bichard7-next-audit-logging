@@ -39,7 +39,12 @@ class MqHelper {
       ack: "auto"
     }
 
-    return this.channel.subscribe(headers, (error, message) => action(error, message, () => this.channel.ack(message)))
+    return this.channel.subscribe(headers, (error, message) =>
+      action(error, message, {
+        ack: () => this.channel.ack(message),
+        nack: () => this.channel.nack(message)
+      })
+    )
   }
 }
 

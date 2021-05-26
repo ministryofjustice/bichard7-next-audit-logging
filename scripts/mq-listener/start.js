@@ -12,9 +12,10 @@ const lambda = new LambdaHelper({
   region: process.env.STEP_FUNCTIONS_REGION || "us-east-1"
 })
 
-const action = (error, message, ack) => {
+const action = (error, message, operations) => {
   if (error) {
     console.log(error)
+    operations.nack()
   } else {
     message.setEncoding("utf8")
     const payload = JSON.stringify({ eventSource: "aws:amq", eventSourceArn: "ARN", messages: [message.read()] })
@@ -23,9 +24,12 @@ const action = (error, message, ack) => {
       .invokeGeneralEventHandler(payload)
       .then((response) => {
         console.log("Lambda function response: ", response)
-        ack()
+        operations.ack()
       })
-      .catch((err) => console.log(err))
+      .catch((err) => {
+        console.log(err)
+        operations.nack()
+      })
   }
 }
 
