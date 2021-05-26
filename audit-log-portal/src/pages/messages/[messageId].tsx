@@ -1,7 +1,7 @@
+import type { GetServerSideProps } from "next"
 import { AuditLog } from "shared"
 import Layout from "components/Layout"
 import Events from "components/Events"
-import PageProps from "utils/PageProps"
 import config from "config"
 
 interface Props {
@@ -16,7 +16,7 @@ const MessageView = ({ message }: Props) => (
 
 export default MessageView
 
-export async function getServerSideProps({ params }): Promise<PageProps<Props>> {
+export const getServerSideProps: GetServerSideProps<Props> = async ({ params }) => {
   const response = await fetch(`${config.apiUrl}/messages/${params.messageId}`)
   const message = (await response.json()) as AuditLog
 

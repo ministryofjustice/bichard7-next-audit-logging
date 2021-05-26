@@ -1,7 +1,7 @@
+import type { GetServerSideProps } from "next"
 import { AuditLog } from "shared"
 import Messages from "components/Messages"
 import Layout from "components/Layout"
-import PageProps from "utils/PageProps"
 import config from "config"
 
 interface Props {
@@ -14,11 +14,9 @@ const Index = ({ data }: Props) => (
   </Layout>
 )
 
-interface ApiResponse extends PageProps<Props> {
-  notFound: boolean
-}
+export default Index
 
-export async function getServerSideProps(): Promise<ApiResponse> {
+export const getServerSideProps: GetServerSideProps<Props> = async () => {
   const response = await fetch(`${config.apiUrl}/messages`)
   const data = await response.json()
 
@@ -29,9 +27,6 @@ export async function getServerSideProps(): Promise<ApiResponse> {
   }
 
   return {
-    notFound: false,
     props: { data }
   }
 }
-
-export default Index
