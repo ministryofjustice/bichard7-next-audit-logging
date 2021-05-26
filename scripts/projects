@@ -3,3 +3,4 @@ incoming-message-handler
 audit-log-api
 audit-log-portal
 general-event-handler
+mq-listener
