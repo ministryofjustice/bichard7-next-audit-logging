@@ -1,10 +1,9 @@
-ARG aws_account_id
-ARG image_id
+ARG NODE_IMAGE=node:15.4.0
 
 #########################################
 # Shared Module: Build
 #########################################
-FROM ${aws_account_id}.dkr.ecr.eu-west-2.amazonaws.com/nodejs:${image_id} as base
+FROM ${NODE_IMAGE} as base
 
 RUN apt update
 RUN apt install -y jq
@@ -26,13 +25,6 @@ WORKDIR /src/audit-log-portal
 
 COPY audit-log-portal/ ./
 
-# Remove the cypress package from the devDependencies as it slows down the package install
-# and causes issues when building, but we don't need it for a production portal image
-# RUN cat package.json | \
-#   jq 'del(.devDependencies.cypress)' > tmp.json && \
-#   rm package.json && \
-#   mv tmp.json package.json
-
 RUN npm i
 RUN npm run build
 
@@ -50,7 +42,7 @@ RUN npm i --production
 #########################################
 # Portal: Package
 #########################################
-FROM ${aws_account_id}.dkr.ecr.eu-west-2.amazonaws.com/nodejs:${image_id} as runner
+FROM ${NODE_IMAGE} as runner
 
 WORKDIR /app
 

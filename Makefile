@@ -52,9 +52,7 @@ destroy-all:
 
 .PHONY: build-portal-image
 build-portal-image:
-	docker build -t audit-log-portal . \
-		--build-arg aws_account_id=258361008057 \
-		--build-arg image_id=025d33d7797aaad52c0e3c96699814946093d4b50f792ec35cbd2f57278b94f2
+	AWS_ACCOUNT_ID=258361008057 scripts/build-portal-docker-image.sh
 
 .PHONY: get-api-url
 get-api-url:
