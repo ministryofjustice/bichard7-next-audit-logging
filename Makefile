@@ -2,6 +2,10 @@
 # Run Commands
 ########################################
 
+.PHONY: run-mq-listener
+run-mq-listener: destroy-mq-listener
+	cd ./mq-listener && npm run start && cd -
+
 .PHONY: run-incoming-message-handler
 run-incoming-message-handler:
 	cd ./incoming-message-handler && \
@@ -29,8 +33,11 @@ run-portal:
 .PHONY: run-all-without-portal
 run-all-without-portal: run-api run-incoming-message-handler run-general-event-handler
 
-.PHONY: run-all
+.PHONY: run-infra
 run-all: run-all-without-portal run-portal
+
+.PHONY: run-all
+run-all: run-all-without-portal run-portal run-mq-listener
 
 .PHONY: run-all-e2e
 run-all-e2e: 
@@ -40,9 +47,16 @@ run-all-e2e:
 # Destroy Commands
 ########################################
 
-.PHONY: destroy-all
-destroy-all:
+.PHONY: destroy-mq-listener
+destroy-mq-listener:
+	cd ./mq-listener && npm run stop && cd -
+
+.PHONY: destroy-infra
+destroy-infra:
 	docker-compose -f ./environment/docker-compose.yml down
+
+.PHONY: destroy-all
+destroy-all: destroy-mq-listener destroy-infra
 
 ########################################
 # Action Commands
@@ -51,6 +65,10 @@ destroy-all:
 .PHONY: follow-logs
 follow-logs:
 	docker logs -tf localstack_main
+
+.PHONY: follow-mq-listener-logs
+follow-mq-listener-logs:
+	cd ./mq-listener && npm run logs && cd -
 
 .PHONY: scan-db
 scan-db:

@@ -10,5 +10,5 @@ cd scripts
 for p in ${projects[@]}; do
   echo "Building $p..."
   cd ../$p
-  npm run build
+  npm run build --if-present
 done
