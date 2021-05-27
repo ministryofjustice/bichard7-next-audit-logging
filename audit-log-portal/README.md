@@ -41,18 +41,27 @@ npm run test:ui
 
 ## Testing the host
 
-The portal is hosted on AWS via a host lambda. This can be somewhat tested locally by running the following command:
+The portal is hosted on AWS via ECS using a custom Docker Image. Follow these steps to build and run the image locally.
+
+1. You will first need to make sure you have logged into the container registry in the AWS parent account. You will need
+to make use of the AWS Vault for this, using the following command:
 
 ```shell
-npm run host
+aws-vault exec <account_name> -- \
+  aws ecr get-login-password --region <region> | \
+  docker login -u AWS --password-stdin <aws_account_id>.dkr.ecr.<region>.amazonaws.com
 ```
 
-This will run through the following steps:
+> Refer to [this](https://docs.aws.amazon.com/AmazonECR/latest/userguide/getting-started-cli.html#cli-authenticate-registry)
+document for further guidance.
 
-1. Build a production output of the portal
-2. Ensure the LocalStack environment is available
-3. Ensure the Audit Log API is running locally
-4. Create the host lambda
-5. Setup a local HTTP proxy to handle HTTP requests and pipe them into the lambda
+* <account_name> is the name of the name of the account to use as registered in AWS Vault. It is the account containing the
+ECR images you want to access.
+* <region> is the region the account is in - this is most likely `eu-west-2`.
+* <aws_account_id> is the Id of the AWS Account containing the ECR images you want to access.
 
-You should then be able to browse to the portal via the URL `http://localhost:8080`
+You can now build the image. Run the following command from the repository root:
+
+```shell
+make build-portal-image
+```

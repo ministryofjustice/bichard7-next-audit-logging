@@ -48,6 +48,12 @@ destroy-all:
 # Action Commands
 ########################################
 
+.PHONY: build-portal-image
+build-portal-image:
+	docker build -t audit-log-portal . \
+		--build-arg aws_account_id=258361008057 \
+		--build-arg image_id=025d33d7797aaad52c0e3c96699814946093d4b50f792ec35cbd2f57278b94f2
+
 .PHONY: follow-logs
 follow-logs:
 	docker logs -tf localstack_main
