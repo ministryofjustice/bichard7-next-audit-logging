@@ -4,9 +4,9 @@
   "description": "This package subscribes to GENERAL_EVENT_QUEUE and invokes GeneralEventHandler lambda function",
   "main": "src/start.js",
   "scripts": {
-    "start": "pm2 start ./app/start.js --name \"MqListener\" --time",
-    "stop": "pm2 delete \"MqListener\" 2> /dev/null || :",
-    "logs": "pm2 logs \"MqListener\" --lines 500"
+    "start": "pm2 start ./config/ecosystem.config.js --env e2e",
+    "stop": "pm2 delete ./config/ecosystem.config.js",
+    "logs": "pm2 logs mq-listener --lines 500"
   },
   "dependencies": {
     "aws-sdk": "^2.804.0",
