@@ -23,5 +23,5 @@ ENV_PATH=.env.local
 # prefixed with NEXT_PUBLIC_.
 # See: https://nextjs.org/docs/basic-features/environment-variables
 cat > $ENV_PATH <<- EOM
-NEXT_PUBLIC_API_URL=$API_URL
+API_URL=$API_URL
 EOM
