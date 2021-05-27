@@ -21,6 +21,11 @@ jobs:
 
       - run: ./scripts/install-all.sh
       - run: ./scripts/build-all.sh
+      
+      - run:
+          name: Build Portal Stories
+          command: cd audit-log-portal && npm run build-storybook && cd -
+
       - run: npm run lint
 
       # Update the cache with the latest installed dependencies to speed up future installs

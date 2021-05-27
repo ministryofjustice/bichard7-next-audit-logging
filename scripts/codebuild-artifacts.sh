@@ -66,7 +66,10 @@ cd audit-log-portal
 rm -rf node_modules/
 npm i --production
 
-zip -r audit-log-portal.zip .next/ public/ host.js package.json node_modules/
+# Removed node_modules from zip as it was causing a package that was too large for the
+# lambdas. This is a temporary solution to fix the deployment of the infrastructure and
+# will be addressed properly as part of this ticket: https://dsdmoj.atlassian.net/browse/BICAWS-834
+zip -r audit-log-portal.zip .next/ public/ host.js package.json
 
 # Upload the package to the the artifact bucket
 aws s3 cp \
