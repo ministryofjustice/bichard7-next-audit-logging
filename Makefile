@@ -1,3 +1,5 @@
+SHELL := /bin/bash
+
 ########################################
 # Run Commands
 ########################################
@@ -61,6 +63,14 @@ destroy-all: destroy-mq-listener destroy-infra
 ########################################
 # Action Commands
 ########################################
+
+.PHONY: build-portal-image
+build-portal-image:
+	AWS_ACCOUNT_ID=258361008057 scripts/build-portal-docker-image.sh
+
+.PHONY: get-api-url
+get-api-url:
+	\. environment/audit-log-api-url.sh && get_audit_log_api_url
 
 .PHONY: follow-logs
 follow-logs:

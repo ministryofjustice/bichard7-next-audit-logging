@@ -1,9 +1,13 @@
+import getConfig from "next/config"
+
+const { serverRuntimeConfig } = getConfig()
+
 interface PortalConfig {
   apiUrl: string
 }
 
 const config: PortalConfig = {
-  apiUrl: process.env.NEXT_PUBLIC_API_URL
+  apiUrl: serverRuntimeConfig.apiUrl
 }
 
 export default config

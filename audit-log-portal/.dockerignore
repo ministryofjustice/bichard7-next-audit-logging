@@ -1,0 +1,16 @@
+.next
+.storybook
+coverage
+cypress
+mocks
+node_modules
+scripts
+storybook-static
+test-results
+.dockerignore
+.env.local
+.gitignore
+cypress.json
+host.js
+jest.config.js
+README.md
