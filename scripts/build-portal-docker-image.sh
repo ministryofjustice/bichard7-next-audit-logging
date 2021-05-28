@@ -3,9 +3,18 @@
 set -e
 
 if [[ -z "$AWS_ACCOUNT_ID" ]]; then
-    echo "AWS_ACCOUNT_ID is not set!" >&2
-    exit 1
+  echo "AWS_ACCOUNT_ID is not set!" >&2
+  exit 1
 fi
+
+if [[ -z "$AWS_REGION" ]]; then
+  echo "AWS_REGION is not set!" >&2
+  exit 1
+fi
+
+aws ecr get-login-password --region "$AWS_REGION" | docker login \
+  --username AWS \
+  --password-stdin "$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com"
 
 echo "Building Audit Log Portal Docker Image on $(date)"
 
@@ -16,6 +25,6 @@ IMAGE_HASH=$(aws ecr describe-images \
 )
 
 IMAGE_HASH=$(echo $IMAGE_HASH | tr -d '"')
-DOCKER_IMAGE_HASH="$AWS_ACCOUNT_ID.dkr.ecr.eu-west-2.amazonaws.com/nodejs@$IMAGE_HASH"
+DOCKER_IMAGE_HASH="$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/nodejs@$IMAGE_HASH"
 
 docker build --build-arg "NODE_IMAGE=$DOCKER_IMAGE_HASH" -t audit-log-portal:latest .

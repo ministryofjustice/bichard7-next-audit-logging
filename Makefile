@@ -66,7 +66,7 @@ destroy-all: destroy-mq-listener destroy-infra
 
 .PHONY: build-portal-image
 build-portal-image:
-	AWS_ACCOUNT_ID=258361008057 scripts/build-portal-docker-image.sh
+	AWS_ACCOUNT_ID=258361008057 AWS_REGION=eu-west-2 scripts/build-portal-docker-image.sh
 
 .PHONY: get-api-url
 get-api-url:
