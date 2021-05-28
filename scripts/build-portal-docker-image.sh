@@ -18,4 +18,4 @@ IMAGE_HASH=$(aws ecr describe-images \
 IMAGE_HASH=$(echo $IMAGE_HASH | tr -d '"')
 DOCKER_IMAGE_HASH="$AWS_ACCOUNT_ID.dkr.ecr.eu-west-2.amazonaws.com/nodejs@$IMAGE_HASH"
 
-docker build --build-arg "NODE_IMAGE=$DOCKER_IMAGE_HASH" -t audit-log-portal .
+docker build --build-arg "NODE_IMAGE=$DOCKER_IMAGE_HASH" -t audit-log-portal:latest .

@@ -55,31 +55,6 @@ aws s3 cp \
   --acl bucket-owner-full-control
 
 ############################################
-# Audit Log Portal
-############################################
-
-# Add the public and .next folders to a single zip
-cd audit-log-portal
-
-# Before we build the artifact, remove node_modules as it will contain dev dependencies
-# and reinstall only production dependencies, so we can reduce the size of the artifact
-rm -rf node_modules/
-npm i --production
-
-# Removed node_modules from zip as it was causing a package that was too large for the
-# lambdas. This is a temporary solution to fix the deployment of the infrastructure and
-# will be addressed properly as part of this ticket: https://dsdmoj.atlassian.net/browse/BICAWS-834
-zip -r audit-log-portal.zip .next/ public/ host.js package.json
-
-# Upload the package to the the artifact bucket
-aws s3 cp \
-  ./audit-log-portal.zip \
-  s3://$S3_BUCKET/audit-logging/ \
-  --acl bucket-owner-full-control
-
-cd -
-
-############################################
 # General Event Handler
 ############################################
 
@@ -95,3 +70,16 @@ aws s3 cp \
   --acl bucket-owner-full-control
 
 cd -
+
+############################################
+# Audit Log Portal
+############################################
+
+# Build the Portal Docker Image
+make build-portal-image
+
+portal_image_name="$AWS_ACCOUNT_ID.dkr.ecr.eu-west-2.amazonaws.com/audit-log-portal:$CODEBUILD_RESOLVED_SOURCE_VERSION-$CODEBUILD_START_TIME"
+docker tag audit-log-portal:latest "$portal_image_name"
+
+echo "Push Docker Image on $(date)"
+docker push "$portal_image_name"
