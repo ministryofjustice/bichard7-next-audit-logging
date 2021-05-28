@@ -47,21 +47,8 @@ The portal is hosted on AWS via ECS using a custom Docker Image. Follow these st
 to make use of the AWS Vault for this, using the following command:
 
 ```shell
-aws-vault exec <account_name> -- \
-  aws ecr get-login-password --region <region> | \
-  docker login -u AWS --password-stdin <aws_account_id>.dkr.ecr.<region>.amazonaws.com
+aws-vault exec <account_name> -- make build-portal-image
 ```
 
 > Refer to [this](https://docs.aws.amazon.com/AmazonECR/latest/userguide/getting-started-cli.html#cli-authenticate-registry)
 document for further guidance.
-
-* <account_name> is the name of the name of the account to use as registered in AWS Vault. It is the account containing the
-ECR images you want to access.
-* <region> is the region the account is in - this is most likely `eu-west-2`.
-* <aws_account_id> is the Id of the AWS Account containing the ECR images you want to access.
-
-You can now build the image. Run the following command from the repository root:
-
-```shell
-make build-portal-image
-```
