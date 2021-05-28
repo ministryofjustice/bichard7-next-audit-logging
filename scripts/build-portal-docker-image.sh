@@ -3,14 +3,22 @@
 set -e
 
 if [[ -z "$AWS_ACCOUNT_ID" ]]; then
-  echo "AWS_ACCOUNT_ID is not set!" >&2
-  exit 1
+  AWS_ACCOUNT_ID=$(aws sts get-caller-identity \
+    --query 'Account' \
+    --output text
+  )
 fi
 
 if [[ -z "$AWS_REGION" ]]; then
-  echo "AWS_REGION is not set!" >&2
+  AWS_REGION=$(env | grep "AWS_REGION" | sed -e "s/AWS_REGION=//g")
+fi
+
+if [[ -z "$AWS_REGION" ]]; then
+  echo "AWS_REGION is not set and cannot be determined"
   exit 1
 fi
+
+echo "Using account $AWS_ACCOUNT_ID and region $AWS_REGION"
 
 aws ecr get-login-password --region "$AWS_REGION" | docker login \
   --username AWS \
