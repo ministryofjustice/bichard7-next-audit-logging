@@ -68,6 +68,10 @@ destroy-all: destroy-mq-listener destroy-infra
 build-portal-image:
 	AWS_ACCOUNT_ID=258361008057 AWS_REGION=eu-west-2 scripts/build-portal-docker-image.sh
 
+.PHONY: codebuild-portal-image
+codebuild-portal-image:
+	scripts/build-portal-codebuild-image.sh
+
 .PHONY: get-api-url
 get-api-url:
 	\. environment/audit-log-api-url.sh && get_audit_log_api_url
