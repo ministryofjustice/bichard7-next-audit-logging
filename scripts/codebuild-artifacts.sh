@@ -76,10 +76,5 @@ cd -
 ############################################
 
 # Build the Portal Docker Image
-make build-portal-image
+make codebuild-portal-image
 
-portal_image_name="$AWS_ACCOUNT_ID.dkr.ecr.eu-west-2.amazonaws.com/audit-log-portal:$CODEBUILD_RESOLVED_SOURCE_VERSION-$CODEBUILD_START_TIME"
-docker tag audit-log-portal:latest "$portal_image_name"
-
-echo "Push Docker Image on $(date)"
-docker push "$portal_image_name"
