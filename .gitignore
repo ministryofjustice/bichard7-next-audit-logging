@@ -122,3 +122,4 @@ general-event-handler/scripts/env-vars.json
 
 # Storybook output
 **/storybook-static
+.idea/
