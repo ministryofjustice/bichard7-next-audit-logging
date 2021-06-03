@@ -2,7 +2,7 @@
 
 set -e
 
-readonly REPOSITORY_NAME="audit-logging-portal"
+readonly REPOSITORY_NAME="audit-log-portal"
 readonly SOURCE_REPOSITORY_NAME="nodejs"
 readonly REPOSITORY="${AWS_ACCOUNT_ID}.dkr.ecr.eu-west-2.amazonaws.com"
 readonly DOCKER_IMAGE_PREFIX="${REPOSITORY}/${REPOSITORY_NAME}"
