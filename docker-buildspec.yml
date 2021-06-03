@@ -1,0 +1,9 @@
+---
+
+version: 0.2
+phases:
+  build:
+    commands:
+      - set -ev
+      - /bin/bash ./scripts/build-portal-codebuild-image.sh
+...
