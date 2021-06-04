@@ -10,10 +10,11 @@ const config: DynamoDbConfig = {
 }
 
 const gateway = new TestDynamoGateway(config)
+const sortKey = "someOtherValue"
 
 describe("DynamoGateway", () => {
   beforeAll(async () => {
-    await gateway.createTable(config.AUDIT_LOG_TABLE_NAME, "id")
+    await gateway.createTable(config.AUDIT_LOG_TABLE_NAME, "id", "someOtherValue")
   })
 
   beforeEach(async () => {
@@ -71,9 +72,20 @@ describe("DynamoGateway", () => {
     })
 
     it("should return limited amount of records", async () => {
-      const actualRecords = await gateway.getMany(config.AUDIT_LOG_TABLE_NAME, 1)
+      const actualRecords = await gateway.getMany(config.AUDIT_LOG_TABLE_NAME, sortKey, 1)
       const results = <DocumentClient.ScanOutput>actualRecords
       expect(results.Count).toBe(1)
+    })
+
+    it("should return records ordered by sort key", async () => {
+      const actualRecords = await gateway.getMany(config.AUDIT_LOG_TABLE_NAME, sortKey, 3)
+      const results = <DocumentClient.ScanOutput>actualRecords
+      expect(results.Count).toBe(3)
+
+      const items = results.Items
+      expect(items?.[0].someOtherValue).toBe("Value 2")
+      expect(items?.[1].someOtherValue).toBe("Value 1")
+      expect(items?.[2].someOtherValue).toBe("Value 0")
     })
   })
 
@@ -133,7 +145,8 @@ describe("DynamoGateway", () => {
 
       expect(isError(result)).toBe(false)
 
-      const actualRecords = <DocumentClient.ScanOutput>await gateway.getMany(config.AUDIT_LOG_TABLE_NAME, 3)
+      const actualRecords = <DocumentClient.ScanOutput>await gateway.getMany(config.AUDIT_LOG_TABLE_NAME, sortKey, 3)
+      expect(isError(actualRecords)).toBeFalsy()
       const filteredRecords = actualRecords.Items?.filter((r) => r.id === recordId)
 
       expect(filteredRecords).toHaveLength(1)
