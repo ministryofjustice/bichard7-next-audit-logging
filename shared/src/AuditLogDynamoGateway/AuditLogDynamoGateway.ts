@@ -6,6 +6,8 @@ import AuditLog from "../AuditLog"
 export default class AuditLogDynamoGateway extends DynamoGateway {
   private readonly tableKey: string = "messageId"
 
+  private readonly sortKey: string = "receivedDate"
+
   constructor(config: DynamoDbConfig, private readonly tableName: string) {
     super(config)
   }
@@ -21,7 +23,7 @@ export default class AuditLogDynamoGateway extends DynamoGateway {
   }
 
   async fetchMany(limit = 10): PromiseResult<AuditLog[]> {
-    const result = await this.getMany(this.tableName, limit)
+    const result = await this.getMany(this.tableName, this.sortKey, limit)
 
     if (isError(result)) {
       return result

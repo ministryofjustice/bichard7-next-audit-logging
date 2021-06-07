@@ -15,14 +15,16 @@ const config: DynamoDbConfig = {
 
 const gateway = new AuditLogDynamoGateway(config, config.AUDIT_LOG_TABLE_NAME)
 const testGateway = new TestDynamoGateway(config)
+const primaryKey = "messageId"
+const sortKey = "receivedDate"
 
 describe("AuditLogDynamoGateway", () => {
   beforeAll(async () => {
-    await testGateway.createTable(config.AUDIT_LOG_TABLE_NAME, "messageId")
+    await testGateway.createTable(config.AUDIT_LOG_TABLE_NAME, primaryKey, sortKey)
   })
 
   beforeEach(async () => {
-    await testGateway.deleteAll(config.AUDIT_LOG_TABLE_NAME, "messageId")
+    await testGateway.deleteAll(config.AUDIT_LOG_TABLE_NAME, primaryKey)
   })
 
   describe("create()", () => {
@@ -71,7 +73,7 @@ describe("AuditLogDynamoGateway", () => {
 
       expect(isError(result)).toBe(false)
 
-      const actualRecords = <DocumentClient.ScanOutput>await gateway.getMany(config.AUDIT_LOG_TABLE_NAME, 2)
+      const actualRecords = <DocumentClient.ScanOutput>await gateway.getMany(config.AUDIT_LOG_TABLE_NAME, sortKey, 2)
 
       const actualOtherMessage = <AuditLog>actualRecords.Items?.find((r) => r.messageId === otherMessage.messageId)
       expect(actualOtherMessage).toBeDefined()
@@ -112,7 +114,7 @@ describe("AuditLogDynamoGateway", () => {
       const resultTwo = await gateway.addEvent(message.messageId, expectedEventTwo)
       expect(isError(resultTwo)).toBe(false)
 
-      const actualRecords = <DocumentClient.ScanOutput>await gateway.getMany(config.AUDIT_LOG_TABLE_NAME, 1)
+      const actualRecords = <DocumentClient.ScanOutput>await gateway.getMany(config.AUDIT_LOG_TABLE_NAME, sortKey, 1)
 
       const actualMessage = <AuditLog>actualRecords.Items?.find((r) => r.messageId === message.messageId)
       expect(actualMessage).toBeDefined()
@@ -152,7 +154,7 @@ describe("AuditLogDynamoGateway", () => {
 
   describe("fetchOne", () => {
     it("should return the matching AuditLog", async () => {
-      const expectedAuditLog = new AuditLog("ExternalCorrelationId", new Date(), "XMl")
+      const expectedAuditLog = new AuditLog("ExternalCorrelationId", new Date(), "XML")
       await gateway.create(expectedAuditLog)
 
       const result = await gateway.fetchOne(expectedAuditLog.messageId)
@@ -176,5 +178,46 @@ describe("AuditLogDynamoGateway", () => {
     })
   })
 
-  // TODO: Proper testing for getting messages. Include date ordering.
+  describe("fetchMany", () => {
+    it("should return limited amount of AuditLogs", async () => {
+      await Promise.allSettled(
+        [...Array(3).keys()].map(async (i: number) => {
+          const auditLog = new AuditLog(`External correlation id ${i}`, new Date(), "XML")
+          await gateway.create(auditLog)
+        })
+      )
+
+      const result = await gateway.fetchMany(1)
+
+      expect(isError(result)).toBe(false)
+      expect(result).toHaveLength(1)
+    })
+
+    it("should return AuditLogs ordered by receivedDate", async () => {
+      const receivedDates = ["2021-06-01T10:11:12", "2021-06-05T10:11:12", "2021-06-03T10:11:12"]
+      const expectedReceivedDates = receivedDates
+        .map((dateString: string) => new Date(dateString).toISOString())
+        .sort()
+        .reverse()
+
+      await Promise.allSettled(
+        receivedDates.map(async (dateString: string, i: number) => {
+          const auditLog = new AuditLog(`External correlation id ${i}`, new Date(dateString), "XML")
+          await gateway.create(auditLog)
+        })
+      )
+
+      const result = await gateway.fetchMany(3)
+
+      expect(isError(result)).toBe(false)
+      expect(result).toHaveLength(3)
+
+      const actualAuditLogs = <AuditLog[]>result
+
+      expect(actualAuditLogs).toBeDefined()
+      expect(actualAuditLogs[0].receivedDate).toBe(expectedReceivedDates[0])
+      expect(actualAuditLogs[1].receivedDate).toBe(expectedReceivedDates[1])
+      expect(actualAuditLogs[2].receivedDate).toBe(expectedReceivedDates[2])
+    })
+  })
 })

@@ -29,7 +29,7 @@ export default class DynamoGateway {
   insertOne<T>(tableName: string, record: T, keyName: string): PromiseResult<void> {
     const params: DocumentClient.PutItemInput = {
       TableName: tableName,
-      Item: record,
+      Item: { _: "_", ...record },
       ConditionExpression: `attribute_not_exists(${keyName})`
     }
 
@@ -40,11 +40,20 @@ export default class DynamoGateway {
       .catch((error) => <Error>error)
   }
 
-  getMany(tableName: string, limit: number): PromiseResult<DocumentClient.ScanOutput> {
+  getMany(tableName: string, sortKey: string, limit: number): PromiseResult<DocumentClient.QueryOutput> {
     return this.client
-      .scan({
+      .query({
         TableName: tableName,
-        Limit: limit
+        IndexName: `${sortKey}Index`,
+        KeyConditionExpression: "#dummyKey = :dummyValue",
+        ExpressionAttributeValues: {
+          ":dummyValue": "_"
+        },
+        ExpressionAttributeNames: {
+          "#dummyKey": "_"
+        },
+        Limit: limit,
+        ScanIndexForward: false // Descending order
       })
       .promise()
       .catch((error) => <Error>error)

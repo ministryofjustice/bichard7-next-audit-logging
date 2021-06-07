@@ -11,7 +11,12 @@ export default class TestDynamoGateway extends DynamoGateway {
     return !!tableResult.TableNames?.find((name) => name === tableName)
   }
 
-  async createTable(tableName: string, keyName: string, skipIfExists = true): Promise<CreateTableOutput | undefined> {
+  async createTable(
+    tableName: string,
+    keyName: string,
+    sortKey: string,
+    skipIfExists = true
+  ): Promise<CreateTableOutput | undefined> {
     if (skipIfExists && (await this.tableExists(tableName))) {
       return undefined
     }
@@ -22,12 +27,42 @@ export default class TestDynamoGateway extends DynamoGateway {
           {
             AttributeName: keyName,
             AttributeType: "S"
+          },
+          {
+            AttributeName: sortKey,
+            AttributeType: "S"
+          },
+          {
+            AttributeName: "_",
+            AttributeType: "S"
           }
         ],
         KeySchema: [
           {
             AttributeName: keyName,
             KeyType: "HASH"
+          }
+        ],
+        GlobalSecondaryIndexes: [
+          {
+            IndexName: `${sortKey}Index`,
+            KeySchema: [
+              {
+                AttributeName: "_",
+                KeyType: "HASH"
+              },
+              {
+                AttributeName: sortKey,
+                KeyType: "RANGE"
+              }
+            ],
+            Projection: {
+              ProjectionType: "ALL"
+            },
+            ProvisionedThroughput: {
+              ReadCapacityUnits: 1,
+              WriteCapacityUnits: 1
+            }
           }
         ],
         ProvisionedThroughput: {
