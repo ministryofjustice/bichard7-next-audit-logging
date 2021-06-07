@@ -1,4 +1,4 @@
-# Bichard7 vNext: Services
+# Bichard7 Next: Services
 
 A collection of service components to be hosted within AWS that will run as new parts of the Bichard7 architecture.
 
