@@ -6,8 +6,8 @@ export default interface GeneralEventLogItem {
     eventType: string
     correlationID: string
     eventDateTime: string
-    nameValuePairs: {
-      nameValuePair: {
+    nameValuePairs?: {
+      nameValuePair?: {
         name: string
         value: string
       }[]

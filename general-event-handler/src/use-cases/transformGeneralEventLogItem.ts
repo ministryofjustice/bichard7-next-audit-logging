@@ -24,9 +24,10 @@ export default (generalEventLogItem: GeneralEventLogItem): AuditLogEvent => {
     timestamp
   })
 
-  generalEventLogItem.logEvent.nameValuePairs.nameValuePair.forEach((attribute) =>
-    event.addAttribute(attribute.name, attribute.value)
-  )
+  const attributes = generalEventLogItem.logEvent.nameValuePairs?.nameValuePair
+  if (attributes && Array.isArray(attributes)) {
+    attributes.forEach((attribute) => event.addAttribute(attribute.name, attribute.value))
+  }
 
   return event
 }
