@@ -1,12 +1,12 @@
-ARG NODE_IMAGE=node:15.4.0
+ARG NODE_IMAGE=258361008057.dkr.ecr.eu-west-2.amazonaws.com/nodejs:b8be3caa8e19a3cb9bd814ffa622823456263a34-1623239152176
 
 #########################################
 # Shared Module: Build
 #########################################
 FROM ${NODE_IMAGE} as base
 
-RUN apt update
-RUN apt install -y jq
+RUN yum update -y && \
+    yum install -y jq
 
 COPY ./.config /src/.config
 COPY ./shared /src/shared
@@ -48,9 +48,13 @@ WORKDIR /app
 
 ENV NODE_ENV production
 
-RUN useradd nextjs
-RUN groupadd nodejs
-RUN usermod -a -G nodejs nextjs
+RUN yum install -y shadow-utils && \
+    useradd nextjs && \
+    groupadd nodejs && \
+    usermod -a -G nodejs nextjs && \
+    yum remove -y shadow-utils && \
+    yum clean all && \
+    rm -rf /var/cache/yum
 
 COPY --from=builder /src/audit-log-portal/next.config.js ./
 COPY --from=builder /src/audit-log-portal/public ./public
