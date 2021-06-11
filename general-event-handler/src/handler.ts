@@ -1,8 +1,9 @@
 import { isError } from "shared"
-import { parseGeneralEventLogItem } from "./types"
 import transformGeneralEventLogItem from "./use-cases/transformGeneralEventLogItem"
 import AmazonMqEventSourceRecordEvent from "./AmazonMqEventSourceRecordEvent"
 import SendCreateEventRequestUseCase from "./use-cases/SendCreateEventRequestUseCase"
+import parseGeneralEventLogItem from "./use-cases/parseGeneralEventLogItem"
+import { GeneralEventLogItem } from "./types"
 
 export default async (event: AmazonMqEventSourceRecordEvent): Promise<void> => {
   const { messages } = event
@@ -18,7 +19,7 @@ export default async (event: AmazonMqEventSourceRecordEvent): Promise<void> => {
 
   // TODO: Handle multiple messages with batching?
   const message = messages[0]
-  const logItem = await parseGeneralEventLogItem(message)
+  const logItem = <GeneralEventLogItem>await parseGeneralEventLogItem(message)
   const auditLogEvent = transformGeneralEventLogItem(logItem)
 
   const sendCreateEventRequest = new SendCreateEventRequestUseCase(apiUrl)
