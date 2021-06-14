@@ -5,7 +5,34 @@
     "Retrieve from S3": {
       "Type": "Task",
       "Resource": "${RETRIEVE_FROM_S3_LAMBDA_ARN}",
-      "Next": "Format Message"
+      "Next": "Validate retrieve from S3 result"
+    },
+    "Validate retrieve from S3 result": {
+      "Type": "Choice",
+      "Choices": [
+        {
+          "And": [
+            {
+              "Variable": "$.validationResult",
+              "IsPresent": true
+            },
+            {
+              "Variable": "$.validationResult.isValid",
+              "BooleanEquals": false
+            }
+          ],
+          "Next": "Invalid S3 Key"
+        },
+        {
+          "Variable": "$.validationResult",
+          "IsPresent": false,
+          "Next": "Format Message"
+        }
+      ]
+    },
+    "Invalid S3 Key": {
+      "Type": "Pass",
+      "End": true
     },
     "Format Message": {
       "Type": "Task",
