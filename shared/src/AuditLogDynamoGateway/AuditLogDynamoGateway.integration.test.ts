@@ -20,7 +20,7 @@ const sortKey = "receivedDate"
 
 describe("AuditLogDynamoGateway", () => {
   beforeAll(async () => {
-    await testGateway.createTable(config.AUDIT_LOG_TABLE_NAME, primaryKey, sortKey)
+    await testGateway.createTable(config.AUDIT_LOG_TABLE_NAME, primaryKey, sortKey, [])
   })
 
   beforeEach(async () => {

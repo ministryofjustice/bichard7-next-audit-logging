@@ -14,7 +14,12 @@ const sortKey = "someOtherValue"
 
 describe("DynamoGateway", () => {
   beforeAll(async () => {
-    await gateway.createTable(config.AUDIT_LOG_TABLE_NAME, "id", "someOtherValue")
+    await gateway.createTable(config.AUDIT_LOG_TABLE_NAME, "id", "someOtherValue", [
+      {
+        name: "someOtherValueSecondaryIndex",
+        key: "someOtherValue"
+      }
+    ])
   })
 
   beforeEach(async () => {
@@ -86,6 +91,53 @@ describe("DynamoGateway", () => {
       expect(items?.[0].someOtherValue).toBe("Value 2")
       expect(items?.[1].someOtherValue).toBe("Value 1")
       expect(items?.[2].someOtherValue).toBe("Value 0")
+    })
+  })
+
+  describe("queryIndex()", () => {
+    beforeEach(async () => {
+      await Promise.allSettled(
+        [...Array(3).keys()].map(async (i: number) => {
+          const record = {
+            id: `Record ${i}`,
+            someOtherValue: `Value ${i}`
+          }
+
+          await gateway.insertOne(config.AUDIT_LOG_TABLE_NAME, record, "id")
+        })
+      )
+    })
+
+    it("should return one record when key value exists", async () => {
+      const actualRecords = await gateway.queryIndex(
+        config.AUDIT_LOG_TABLE_NAME,
+        "someOtherValueSecondaryIndex",
+        "someOtherValue",
+        "Value 1"
+      )
+
+      expect(isError(actualRecords)).toBe(false)
+
+      const results = <DocumentClient.QueryOutput>actualRecords
+      expect(results.Count).toBe(1)
+
+      const item = results.Items![0]
+      expect(item.id).toBe("Record 1")
+      expect(item.someOtherValue).toBe("Value 1")
+    })
+
+    it("should return null when key value does not exist", async () => {
+      const actualRecords = await gateway.queryIndex(
+        config.AUDIT_LOG_TABLE_NAME,
+        "someOtherValueSecondaryIndex",
+        "someOtherValue",
+        "Value doesn't exist"
+      )
+
+      expect(isError(actualRecords)).toBe(false)
+
+      const results = <DocumentClient.QueryOutput>actualRecords
+      expect(results.Count).toBe(0)
     })
   })
 

@@ -5,6 +5,11 @@ import DynamoGateway from "./DynamoGateway"
 
 type KeyValue = string | number | boolean
 
+interface SecondaryIndex {
+  name: string
+  key: string
+}
+
 export default class TestDynamoGateway extends DynamoGateway {
   async tableExists(tableName: string): Promise<boolean> {
     const tableResult = await this.service.listTables().promise()
@@ -15,56 +20,87 @@ export default class TestDynamoGateway extends DynamoGateway {
     tableName: string,
     keyName: string,
     sortKey: string,
+    secondaryIndexes: SecondaryIndex[],
     skipIfExists = true
   ): Promise<CreateTableOutput | undefined> {
     if (skipIfExists && (await this.tableExists(tableName))) {
       return undefined
     }
 
-    return this.service
-      .createTable({
-        AttributeDefinitions: [
+    const attributes = [
+      {
+        AttributeName: keyName,
+        AttributeType: "S"
+      },
+      {
+        AttributeName: sortKey,
+        AttributeType: "S"
+      },
+      {
+        AttributeName: "_",
+        AttributeType: "S"
+      }
+    ]
+
+    const indexes = [
+      {
+        IndexName: `${sortKey}Index`,
+        KeySchema: [
           {
-            AttributeName: keyName,
-            AttributeType: "S"
+            AttributeName: "_",
+            KeyType: "HASH"
           },
           {
             AttributeName: sortKey,
-            AttributeType: "S"
-          },
-          {
-            AttributeName: "_",
-            AttributeType: "S"
+            KeyType: "RANGE"
           }
         ],
+        Projection: {
+          ProjectionType: "ALL"
+        },
+        ProvisionedThroughput: {
+          ReadCapacityUnits: 1,
+          WriteCapacityUnits: 1
+        }
+      }
+    ]
+
+    secondaryIndexes.forEach((index) => {
+      if (attributes.filter((a) => a.AttributeName === index.key).length === 0) {
+        attributes.push({
+          AttributeName: index.key,
+          AttributeType: "S"
+        })
+      }
+
+      indexes.push({
+        IndexName: index.name,
+        KeySchema: [
+          {
+            AttributeName: index.key,
+            KeyType: "HASH"
+          }
+        ],
+        Projection: {
+          ProjectionType: "ALL"
+        },
+        ProvisionedThroughput: {
+          ReadCapacityUnits: 1,
+          WriteCapacityUnits: 1
+        }
+      })
+    })
+
+    return this.service
+      .createTable({
+        AttributeDefinitions: attributes,
         KeySchema: [
           {
             AttributeName: keyName,
             KeyType: "HASH"
           }
         ],
-        GlobalSecondaryIndexes: [
-          {
-            IndexName: `${sortKey}Index`,
-            KeySchema: [
-              {
-                AttributeName: "_",
-                KeyType: "HASH"
-              },
-              {
-                AttributeName: sortKey,
-                KeyType: "RANGE"
-              }
-            ],
-            Projection: {
-              ProjectionType: "ALL"
-            },
-            ProvisionedThroughput: {
-              ReadCapacityUnits: 1,
-              WriteCapacityUnits: 1
-            }
-          }
-        ],
+        GlobalSecondaryIndexes: indexes,
         ProvisionedThroughput: {
           ReadCapacityUnits: 1,
           WriteCapacityUnits: 1

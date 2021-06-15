@@ -59,6 +59,28 @@ export default class DynamoGateway {
       .catch((error) => <Error>error)
   }
 
+  queryIndex(
+    tableName: string,
+    indexName: string,
+    keyName: string,
+    keyValue: string
+  ): PromiseResult<DocumentClient.QueryOutput> {
+    return this.client
+      .query({
+        TableName: tableName,
+        IndexName: indexName,
+        KeyConditionExpression: "#keyName = :keyValue",
+        ExpressionAttributeValues: {
+          ":keyValue": keyValue
+        },
+        ExpressionAttributeNames: {
+          "#keyName": keyName
+        }
+      })
+      .promise()
+      .catch((error) => <Error>error)
+  }
+
   getOne(
     tableName: string,
     keyName: string,
