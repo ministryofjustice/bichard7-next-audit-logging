@@ -20,7 +20,12 @@ const sortKey = "receivedDate"
 
 describe("AuditLogDynamoGateway", () => {
   beforeAll(async () => {
-    await testGateway.createTable(config.AUDIT_LOG_TABLE_NAME, primaryKey, sortKey, [])
+    await testGateway.createTable(config.AUDIT_LOG_TABLE_NAME, primaryKey, sortKey, [
+      {
+        name: "externalCorrelationIdIndex",
+        key: "externalCorrelationId"
+      }
+    ])
   })
 
   beforeEach(async () => {
@@ -218,6 +223,41 @@ describe("AuditLogDynamoGateway", () => {
       expect(actualAuditLogs[0].receivedDate).toBe(expectedReceivedDates[0])
       expect(actualAuditLogs[1].receivedDate).toBe(expectedReceivedDates[1])
       expect(actualAuditLogs[2].receivedDate).toBe(expectedReceivedDates[2])
+    })
+  })
+
+  describe("fetchByExternalCorrelationId", () => {
+    it("should return one AuditLog when external correlation id exists in the table", async () => {
+      await Promise.allSettled(
+        [...Array(3).keys()].map(async (i: number) => {
+          const auditLog = new AuditLog(`External correlation id ${i}`, new Date(), "XML")
+          await gateway.create(auditLog)
+        })
+      )
+
+      const correlationId = "External correlation id 2"
+      const result = await gateway.fetchByExternalCorrelationId(correlationId)
+
+      expect(isError(result)).toBe(false)
+      expect(result).toBeDefined()
+
+      const item = <AuditLog>result
+      expect(item.externalCorrelationId).toBe(correlationId)
+    })
+
+    it("should not return any AuditLog when external correlation id does not exist in the table", async () => {
+      await Promise.allSettled(
+        [...Array(3).keys()].map(async (i: number) => {
+          const auditLog = new AuditLog(`External correlation id ${i}`, new Date(), "XML")
+          await gateway.create(auditLog)
+        })
+      )
+
+      const correlationId = "External correlation id does not exist"
+      const result = await gateway.fetchByExternalCorrelationId(correlationId)
+
+      expect(isError(result)).toBe(false)
+      expect(result).toBeUndefined()
     })
   })
 })

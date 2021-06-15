@@ -32,6 +32,23 @@ export default class AuditLogDynamoGateway extends DynamoGateway {
     return <AuditLog[]>result.Items
   }
 
+  async fetchByExternalCorrelationId(externalCorrelationId: string): PromiseResult<AuditLog | undefined> {
+    const result = await this.queryIndex(
+      this.tableName,
+      "externalCorrelationIdIndex",
+      "externalCorrelationId",
+      externalCorrelationId
+    )
+
+    if (isError(result)) {
+      return result
+    }
+
+    const items = <AuditLog[]>result?.Items
+
+    return items.length === 1 ? items[0] : undefined
+  }
+
   async fetchOne(messageId: string): PromiseResult<AuditLog> {
     const result = await this.getOne(this.tableName, this.tableKey, messageId)
 
