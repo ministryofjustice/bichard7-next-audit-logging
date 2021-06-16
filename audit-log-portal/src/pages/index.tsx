@@ -1,18 +1,31 @@
+import { useEffect } from "react"
 import type { GetServerSideProps } from "next"
 import { AuditLog } from "shared"
-import Messages from "components/Messages"
+import Header from "components/Header"
 import Layout from "components/Layout"
+import Messages from "components/Messages"
+import MessageSearch from "components/MessageSearch"
 import config from "config"
 
 interface Props {
   data: AuditLog[]
 }
 
-const Index = ({ data }: Props) => (
-  <Layout pageTitle="Messages">
-    <Messages messages={data || []} />
-  </Layout>
-)
+const Index = ({ data }: Props) => {
+  const search = () => console.log("Search!")
+
+  useEffect(() => {
+    search()
+  }, [])
+
+  return (
+    <Layout pageTitle="Messages">
+      <Header text="Messages" />
+      <MessageSearch onSearch={(_) => search()} />
+      <Messages messages={data || []} />
+    </Layout>
+  )
+}
 
 export default Index
 
