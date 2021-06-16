@@ -7,22 +7,14 @@ import Loading from "components/Loading"
 import Messages from "components/Messages"
 import MessageSearch from "components/MessageSearch"
 import MessageSearchModel from "types/MessageSearchModel"
+import convertObjectToURLSearchParams from "utils/convertObjectToURLSearchParams"
+import combineUrlAndQueryString from "utils/combineUrlAndQueryString"
 
 const fetcher = (url) => fetch(url).then((response) => response.json())
 
 const resolveApiUrl = (searchModel: MessageSearchModel): string => {
-  const params = new URLSearchParams()
-
-  Object.keys(searchModel).map((key) => params.append(key, searchModel[key]))
-
-  const baseUrl = `/api/messages`
-  const queryString = params.toString()
-
-  if (queryString.length > 0) {
-    return `${baseUrl}?${queryString}`
-  }
-
-  return baseUrl
+  const params = convertObjectToURLSearchParams(searchModel)
+  return combineUrlAndQueryString(`/api/messages`, params.toString())
 }
 
 const Index = () => {
