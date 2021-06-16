@@ -245,7 +245,7 @@ describe("AuditLogDynamoGateway", () => {
       expect(item.externalCorrelationId).toBe(correlationId)
     })
 
-    it("should not return any AuditLog when external correlation id does not exist in the table", async () => {
+    it("should throw error when external correlation id does not exist in the table", async () => {
       await Promise.allSettled(
         [...Array(3).keys()].map(async (i: number) => {
           const auditLog = new AuditLog(`External correlation id ${i}`, new Date(), "XML")
@@ -253,11 +253,13 @@ describe("AuditLogDynamoGateway", () => {
         })
       )
 
-      const correlationId = "External correlation id does not exist"
-      const result = await gateway.fetchByExternalCorrelationId(correlationId)
+      const externalCorrelationId = "External correlation id does not exist"
+      const result = await gateway.fetchByExternalCorrelationId(externalCorrelationId)
 
-      expect(isError(result)).toBe(false)
-      expect(result).toBeUndefined()
+      expect(isError(result)).toBe(true)
+
+      const error = <Error>result
+      expect(error.message).toBe(`Message with external correlation id '${externalCorrelationId}' does not exist.`)
     })
   })
 })

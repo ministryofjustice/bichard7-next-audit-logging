@@ -32,7 +32,7 @@ export default class AuditLogDynamoGateway extends DynamoGateway {
     return <AuditLog[]>result.Items
   }
 
-  async fetchByExternalCorrelationId(externalCorrelationId: string): PromiseResult<AuditLog | undefined> {
+  async fetchByExternalCorrelationId(externalCorrelationId: string): PromiseResult<AuditLog> {
     const result = await this.queryIndex(
       this.tableName,
       "externalCorrelationIdIndex",
@@ -44,9 +44,12 @@ export default class AuditLogDynamoGateway extends DynamoGateway {
       return result
     }
 
+    if (result.Count === 0) {
+      return new Error(`Message with external correlation id '${externalCorrelationId}' does not exist.`)
+    }
     const items = <AuditLog[]>result?.Items
 
-    return items.length === 1 ? items[0] : undefined
+    return items[0]
   }
 
   async fetchOne(messageId: string): PromiseResult<AuditLog> {
