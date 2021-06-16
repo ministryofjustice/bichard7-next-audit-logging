@@ -1,45 +1,52 @@
-import { useEffect } from "react"
-import type { GetServerSideProps } from "next"
-import { AuditLog } from "shared"
+import { useState } from "react"
+import useSwr from "swr"
 import Header from "components/Header"
 import Layout from "components/Layout"
 import Messages from "components/Messages"
 import MessageSearch from "components/MessageSearch"
-import config from "config"
+import MessageSearchModel from "types/MessageSearchModel"
 
-interface Props {
-  data: AuditLog[]
+const fetcher = (url) => fetch(url).then((response) => response.json())
+
+const resolveApiUrl = (searchModel: MessageSearchModel): string => {
+  const params = new URLSearchParams()
+
+  Object.keys(searchModel).map((key) => params.append(key, searchModel[key]))
+
+  const baseUrl = `/api/messages`
+  const queryString = params.toString()
+
+  if (queryString.length > 0) {
+    return `${baseUrl}?${queryString}`
+  }
+
+  return baseUrl
 }
 
-const Index = ({ data }: Props) => {
-  const search = () => console.log("Search!")
+const Index = () => {
+  const [searchModel, setSearchModel] = useState<MessageSearchModel>({})
 
-  useEffect(() => {
-    search()
-  }, [])
+  const { data, error } = useSwr(() => resolveApiUrl(searchModel), fetcher)
+
+  if (error) {
+    return <Layout pageTitle="Messages">{error.message}</Layout>
+  }
+
+  if (!data) {
+    return (
+      <Layout pageTitle="Messages">
+        <i>{`Loading...`}</i>
+      </Layout>
+    )
+  }
 
   return (
     <Layout pageTitle="Messages">
       <Header text="Messages" />
-      <MessageSearch onSearch={(_) => search()} />
-      <Messages messages={data || []} />
+      <MessageSearch onSearch={(model) => setSearchModel(model)} />
+      <Messages messages={data.messages || []} />
     </Layout>
   )
 }
 
 export default Index
-
-export const getServerSideProps: GetServerSideProps<Props> = async () => {
-  const response = await fetch(`${config.apiUrl}/messages`)
-  const data = await response.json()
-
-  if (!data) {
-    return {
-      notFound: true
-    }
-  }
-
-  return {
-    props: { data }
-  }
-}
