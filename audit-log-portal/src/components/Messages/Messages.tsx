@@ -1,6 +1,5 @@
 import { ReactNode } from "react"
 import { AuditLog } from "shared"
-import Header from "components/Header"
 import Message from "components/Message"
 
 interface Props {
@@ -17,8 +16,6 @@ const MessagesContainer = ({ children }: { children: ReactNode }) => <div aria-l
 
 const Messages = ({ messages }: Props) => (
   <>
-    <Header text="Messages" />
-
     {messages.length === 0 && <NoMessages />}
 
     {messages.length > 0 && (
