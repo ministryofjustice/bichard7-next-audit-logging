@@ -15,9 +15,10 @@ const ExternalCorrelationIdField = styled(TextField)`
 
 interface Props {
   onSearch: (model: MessageSearchModel) => void
+  disabled?: boolean
 }
 
-const MessageSearch = ({ onSearch }: Props) => {
+const MessageSearch = ({ onSearch, disabled = false }: Props) => {
   const [externalCorrelationId, setExternalCorrelationId] = useState("")
 
   const triggerSearch = () => onSearch({ externalCorrelationId })
@@ -33,6 +34,7 @@ const MessageSearch = ({ onSearch }: Props) => {
         label="Search by External Correlation Id"
         value={externalCorrelationId}
         onChange={(e) => setExternalCorrelationId(e.target.value || "")}
+        disabled={disabled}
         fullWidth
         autoFocus
       />
@@ -41,6 +43,7 @@ const MessageSearch = ({ onSearch }: Props) => {
         aria-label="search for messages"
         type="submit"
         color="primary"
+        disabled={disabled}
         onClick={(e) => {
           e.preventDefault()
           triggerSearch()

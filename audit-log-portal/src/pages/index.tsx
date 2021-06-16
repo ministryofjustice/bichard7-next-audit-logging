@@ -1,7 +1,9 @@
 import { useState } from "react"
 import useSwr from "swr"
+import Error from "components/Error"
 import Header from "components/Header"
 import Layout from "components/Layout"
+import Loading from "components/Loading"
 import Messages from "components/Messages"
 import MessageSearch from "components/MessageSearch"
 import MessageSearchModel from "types/MessageSearchModel"
@@ -28,23 +30,16 @@ const Index = () => {
 
   const { data, error } = useSwr(() => resolveApiUrl(searchModel), fetcher)
 
-  if (error) {
-    return <Layout pageTitle="Messages">{error.message}</Layout>
-  }
-
-  if (!data) {
-    return (
-      <Layout pageTitle="Messages">
-        <i>{`Loading...`}</i>
-      </Layout>
-    )
-  }
-
   return (
     <Layout pageTitle="Messages">
       <Header text="Messages" />
-      <MessageSearch onSearch={(model) => setSearchModel(model)} />
-      <Messages messages={data.messages || []} />
+      <MessageSearch onSearch={(model) => setSearchModel(model)} disabled={!data} />
+
+      {!!error && <Error message={error.message} />}
+
+      {!!data && <Messages messages={data.messages || []} />}
+
+      <Loading isLoading={!data} />
     </Layout>
   )
 }
