@@ -14,12 +14,19 @@ const sortKey = "someOtherValue"
 
 describe("DynamoGateway", () => {
   beforeAll(async () => {
-    await gateway.createTable(config.AUDIT_LOG_TABLE_NAME, "id", "someOtherValue", [
-      {
-        name: "someOtherValueSecondaryIndex",
-        key: "someOtherValue"
-      }
-    ])
+    const options = {
+      keyName: "id",
+      sortKey: "someOtherValue",
+      secondaryIndexes: [
+        {
+          name: "someOtherValueSecondaryIndex",
+          key: "someOtherValue"
+        }
+      ],
+      skipIfExists: true
+    }
+
+    await gateway.createTable(config.AUDIT_LOG_TABLE_NAME, options)
   })
 
   beforeEach(async () => {

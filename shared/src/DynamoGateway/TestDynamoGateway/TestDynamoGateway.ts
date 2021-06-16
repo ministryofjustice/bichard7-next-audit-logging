@@ -1,13 +1,18 @@
 import { CreateTableOutput, DocumentClient } from "aws-sdk/clients/dynamodb"
-import PollOptions from "../utils/PollOptions"
-import Poller from "../utils/Poller"
-import DynamoGateway from "./DynamoGateway"
+import PollOptions from "../../utils/PollOptions"
+import Poller from "../../utils/Poller"
+import DynamoGateway from "../DynamoGateway"
+import getTableAttributes from "./getTableAttributes"
+import getTableIndexes from "./getTableIndexes"
+import { SecondaryIndex } from "./SecondaryIndex"
 
 type KeyValue = string | number | boolean
 
-interface SecondaryIndex {
-  name: string
-  key: string
+interface CreateTableOptions {
+  keyName: string
+  sortKey: string
+  secondaryIndexes: SecondaryIndex[]
+  skipIfExists: boolean
 }
 
 export default class TestDynamoGateway extends DynamoGateway {
@@ -16,80 +21,15 @@ export default class TestDynamoGateway extends DynamoGateway {
     return !!tableResult.TableNames?.find((name) => name === tableName)
   }
 
-  async createTable(
-    tableName: string,
-    keyName: string,
-    sortKey: string,
-    secondaryIndexes: SecondaryIndex[],
-    skipIfExists = true
-  ): Promise<CreateTableOutput | undefined> {
+  async createTable(tableName: string, options: CreateTableOptions): Promise<CreateTableOutput | undefined> {
+    const { keyName, sortKey, secondaryIndexes, skipIfExists } = options
+
     if (skipIfExists && (await this.tableExists(tableName))) {
       return undefined
     }
 
-    const attributes = [
-      {
-        AttributeName: keyName,
-        AttributeType: "S"
-      },
-      {
-        AttributeName: sortKey,
-        AttributeType: "S"
-      },
-      {
-        AttributeName: "_",
-        AttributeType: "S"
-      }
-    ]
-
-    const indexes = [
-      {
-        IndexName: `${sortKey}Index`,
-        KeySchema: [
-          {
-            AttributeName: "_",
-            KeyType: "HASH"
-          },
-          {
-            AttributeName: sortKey,
-            KeyType: "RANGE"
-          }
-        ],
-        Projection: {
-          ProjectionType: "ALL"
-        },
-        ProvisionedThroughput: {
-          ReadCapacityUnits: 1,
-          WriteCapacityUnits: 1
-        }
-      }
-    ]
-
-    secondaryIndexes.forEach((index) => {
-      if (attributes.filter((a) => a.AttributeName === index.key).length === 0) {
-        attributes.push({
-          AttributeName: index.key,
-          AttributeType: "S"
-        })
-      }
-
-      indexes.push({
-        IndexName: index.name,
-        KeySchema: [
-          {
-            AttributeName: index.key,
-            KeyType: "HASH"
-          }
-        ],
-        Projection: {
-          ProjectionType: "ALL"
-        },
-        ProvisionedThroughput: {
-          ReadCapacityUnits: 1,
-          WriteCapacityUnits: 1
-        }
-      })
-    })
+    const attributes = getTableAttributes(keyName, sortKey, secondaryIndexes)
+    const indexes = getTableIndexes(sortKey, secondaryIndexes)
 
     return this.service
       .createTable({

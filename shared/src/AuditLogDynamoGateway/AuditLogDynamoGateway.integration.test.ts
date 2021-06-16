@@ -20,12 +20,19 @@ const sortKey = "receivedDate"
 
 describe("AuditLogDynamoGateway", () => {
   beforeAll(async () => {
-    await testGateway.createTable(config.AUDIT_LOG_TABLE_NAME, primaryKey, sortKey, [
-      {
-        name: "externalCorrelationIdIndex",
-        key: "externalCorrelationId"
-      }
-    ])
+    const options = {
+      keyName: primaryKey,
+      sortKey,
+      secondaryIndexes: [
+        {
+          name: "externalCorrelationIdIndex",
+          key: "externalCorrelationId"
+        }
+      ],
+      skipIfExists: true
+    }
+
+    await testGateway.createTable(config.AUDIT_LOG_TABLE_NAME, options)
   })
 
   beforeEach(async () => {
