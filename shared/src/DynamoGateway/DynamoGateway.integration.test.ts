@@ -109,12 +109,13 @@ describe("DynamoGateway", () => {
     })
 
     it("should return one record when key value exists", async () => {
-      const actualRecords = await gateway.queryIndex(
-        config.AUDIT_LOG_TABLE_NAME,
-        "someOtherValueSecondaryIndex",
-        "someOtherValue",
-        "Value 1"
-      )
+      const options = {
+        indexName: "someOtherValueSecondaryIndex",
+        attributeName: "someOtherValue",
+        attributeValue: "Value 1"
+      }
+
+      const actualRecords = await gateway.fetchByIndex(config.AUDIT_LOG_TABLE_NAME, options)
 
       expect(isError(actualRecords)).toBe(false)
 
@@ -127,12 +128,13 @@ describe("DynamoGateway", () => {
     })
 
     it("should return null when key value does not exist", async () => {
-      const actualRecords = await gateway.queryIndex(
-        config.AUDIT_LOG_TABLE_NAME,
-        "someOtherValueSecondaryIndex",
-        "someOtherValue",
-        "Value doesn't exist"
-      )
+      const options = {
+        indexName: "someOtherValueSecondaryIndex",
+        attributeName: "someOtherValue",
+        attributeValue: "Value doesn't exist"
+      }
+
+      const actualRecords = await gateway.fetchByIndex(config.AUDIT_LOG_TABLE_NAME, options)
 
       expect(isError(actualRecords)).toBe(false)
 
