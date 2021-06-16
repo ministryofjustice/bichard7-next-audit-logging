@@ -72,6 +72,14 @@ Before you commit and push your code, and especially before raising a pull reque
 3. You have built all projects using `npm run build` or `npm run build:dev` where applicable.
 4. You have run `npm test` in all projects where appropriate and all tests pass.
 
+# A note on running the docker container locally
+
+Nginx is doing ssl termination and requires a certificate and key pair to be in the `/certs` path.
+In order to run this locally you can generate a self-signed certificate and key using [this method](https://linuxize.com/post/creating-a-self-signed-ssl-certificate/) and then mount 
+this as a volume in your container
+
+ie `docker run --rm -v /path/to/your/certificates:/certs -p 80:80 -p 443:443 -e API_URL=xxx audit-logging-portal:latest`
+
 ## Authors
 
 This repository is developed and managed by the Made Tech team working on the Bichard7 project.

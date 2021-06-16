@@ -1,32 +1,39 @@
-import type { GetServerSideProps } from "next"
-import { AuditLog } from "shared"
-import Messages from "components/Messages"
+import { useState } from "react"
+import useSwr from "swr"
+import Error from "components/Error"
+import Header from "components/Header"
 import Layout from "components/Layout"
-import config from "config"
+import Loading from "components/Loading"
+import Messages from "components/Messages"
+import MessageSearch from "components/MessageSearch"
+import MessageSearchModel from "types/MessageSearchModel"
+import convertObjectToURLSearchParams from "utils/convertObjectToURLSearchParams"
+import combineUrlAndQueryString from "utils/combineUrlAndQueryString"
 
-interface Props {
-  data: AuditLog[]
+const fetcher = (url) => fetch(url).then((response) => response.json())
+
+const resolveApiUrl = (searchModel: MessageSearchModel): string => {
+  const params = convertObjectToURLSearchParams(searchModel)
+  return combineUrlAndQueryString(`/api/messages`, params.toString())
 }
 
-const Index = ({ data }: Props) => (
-  <Layout pageTitle="Messages">
-    <Messages messages={data || []} />
-  </Layout>
-)
+const Index = () => {
+  const [searchModel, setSearchModel] = useState<MessageSearchModel>({})
+
+  const { data, error } = useSwr(() => resolveApiUrl(searchModel), fetcher)
+
+  return (
+    <Layout pageTitle="Messages">
+      <Header text="Messages" />
+      <MessageSearch onSearch={(model) => setSearchModel(model)} disabled={!data} />
+
+      {!!error && <Error message={error.message} />}
+
+      {!!data && <Messages messages={data.messages || []} />}
+
+      <Loading isLoading={!data} />
+    </Layout>
+  )
+}
 
 export default Index
-
-export const getServerSideProps: GetServerSideProps<Props> = async () => {
-  const response = await fetch(`${config.apiUrl}/messages`)
-  const data = await response.json()
-
-  if (!data) {
-    return {
-      notFound: true
-    }
-  }
-
-  return {
-    props: { data }
-  }
-}

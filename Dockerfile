@@ -48,11 +48,15 @@ WORKDIR /app
 
 ENV NODE_ENV production
 
-RUN yum install -y shadow-utils && \
+RUN yum update -y && \
+    amazon-linux-extras install -y epel && \
+    yum install -y \
+      supervisor \
+      nginx \
+      shadow-utils && \
     useradd nextjs && \
     groupadd nodejs && \
     usermod -a -G nodejs nextjs && \
-    yum remove -y shadow-utils && \
     yum clean all && \
     rm -rf /var/cache/yum
 
@@ -62,11 +66,12 @@ COPY --from=builder --chown=nextjs:nodejs /src/audit-log-portal/.next ./.next
 COPY --from=prod_deps /src/audit-log-portal/node_modules ./node_modules
 COPY --from=builder /src/audit-log-portal/package.json ./package.json
 
-USER nextjs
+EXPOSE 80
+EXPOSE 443
 
-EXPOSE 3000
-
-# Disable anonymous telemetry
 ENV NEXT_TELEMETRY_DISABLED 1
 
-CMD ["npm", "start"]
+COPY docker/conf/nginx.conf /etc/nginx/nginx.conf
+COPY docker/conf/supervisord.conf /etc/supervisord.conf
+
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf"]
