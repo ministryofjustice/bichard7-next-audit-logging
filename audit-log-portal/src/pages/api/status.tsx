@@ -1,5 +1,1 @@
-function handler(req, res) {
-  res.status(200).json({ status: "ok" })
-}
-
-export default handler
+export default (_, response) => response.status(200).json({ status: "ok" })
