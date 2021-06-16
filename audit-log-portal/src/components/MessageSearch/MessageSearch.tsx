@@ -2,6 +2,7 @@ import { memo, useState } from "react"
 import { IconButton, TextField } from "@material-ui/core"
 import styled from "styled-components"
 import SearchIcon from "icons/SearchIcon"
+import MessageSearchModel from "types/MessageSearchModel"
 
 const Container = styled.form`
   display: flex;
@@ -13,13 +14,13 @@ const ExternalCorrelationIdField = styled(TextField)`
 `
 
 interface Props {
-  onSearch: (externalCorrelationId?: string) => void
+  onSearch: (model: MessageSearchModel) => void
 }
 
 const MessageSearch = ({ onSearch }: Props) => {
   const [externalCorrelationId, setExternalCorrelationId] = useState("")
 
-  const triggerSearch = () => onSearch(externalCorrelationId)
+  const triggerSearch = () => onSearch({ externalCorrelationId })
 
   return (
     <Container
