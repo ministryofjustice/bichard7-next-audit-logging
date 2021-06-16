@@ -3,7 +3,7 @@ import { APIGatewayProxyEvent } from "aws-lambda"
 import parseGetMessagesRequest from "./parseGetMessagesRequest"
 import FetchMessagesUseCase from "./FetchMessagesUseCase"
 
-describe("parseGetMessageRequest()", () => {
+describe("parseGetMessagesRequest()", () => {
   it("should return all messages when there are no path or query string parameters", async () => {
     const expectedMessages = [
       new AuditLog("1", new Date(), "Xml"),
