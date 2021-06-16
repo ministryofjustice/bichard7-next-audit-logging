@@ -2,6 +2,7 @@ import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda"
 import { isError, PromiseResult, AuditLogDynamoGateway, HttpStatusCode, AuditLog } from "shared"
 import createDynamoDbConfig from "src/createDynamoDbConfig"
 import { FetchMessagesUseCase } from "src/use-cases"
+import parseGetMessagesRequest from "src/use-cases/parseGetMessagesRequest"
 import { createJsonApiResult } from "src/utils"
 
 const config = createDynamoDbConfig()
@@ -9,9 +10,8 @@ const auditLogGateway = new AuditLogDynamoGateway(config, config.AUDIT_LOG_TABLE
 const fetchMessages = new FetchMessagesUseCase(auditLogGateway)
 
 export default async function getMessages(event: APIGatewayProxyEvent): PromiseResult<APIGatewayProxyResult> {
-  const messageId = event.pathParameters?.messageId
-
-  const fetchMessagesResult = messageId ? await fetchMessages.getById(messageId) : await fetchMessages.get()
+  const parseRequestResult = parseGetMessagesRequest(event, fetchMessages)
+  const fetchMessagesResult = await parseRequestResult.fetchMessages()
 
   if (isError(fetchMessagesResult)) {
     return createJsonApiResult({

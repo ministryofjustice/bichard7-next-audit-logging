@@ -10,6 +10,12 @@ interface UpdateOptions {
   updateExpressionValues: ExpressionAttributeValueMap | { [name: string]: unknown }
 }
 
+interface FetchByIndexOptions {
+  indexName: string
+  attributeName: string
+  attributeValue: unknown
+}
+
 export default class DynamoGateway {
   protected readonly service: DynamoDB
 
@@ -54,6 +60,25 @@ export default class DynamoGateway {
         },
         Limit: limit,
         ScanIndexForward: false // Descending order
+      })
+      .promise()
+      .catch((error) => <Error>error)
+  }
+
+  fetchByIndex(tableName: string, options: FetchByIndexOptions): PromiseResult<DocumentClient.QueryOutput> {
+    const { indexName, attributeName, attributeValue } = options
+
+    return this.client
+      .query({
+        TableName: tableName,
+        IndexName: indexName,
+        KeyConditionExpression: "#keyName = :keyValue",
+        ExpressionAttributeValues: {
+          ":keyValue": attributeValue
+        },
+        ExpressionAttributeNames: {
+          "#keyName": attributeName
+        }
       })
       .promise()
       .catch((error) => <Error>error)

@@ -1,9 +1,19 @@
 import { CreateTableOutput, DocumentClient } from "aws-sdk/clients/dynamodb"
-import PollOptions from "../utils/PollOptions"
-import Poller from "../utils/Poller"
-import DynamoGateway from "./DynamoGateway"
+import PollOptions from "../../utils/PollOptions"
+import Poller from "../../utils/Poller"
+import DynamoGateway from "../DynamoGateway"
+import getTableAttributes from "./getTableAttributes"
+import getTableIndexes from "./getTableIndexes"
+import { SecondaryIndex } from "./SecondaryIndex"
 
 type KeyValue = string | number | boolean
+
+interface CreateTableOptions {
+  keyName: string
+  sortKey: string
+  secondaryIndexes: SecondaryIndex[]
+  skipIfExists: boolean
+}
 
 export default class TestDynamoGateway extends DynamoGateway {
   async tableExists(tableName: string): Promise<boolean> {
@@ -11,60 +21,26 @@ export default class TestDynamoGateway extends DynamoGateway {
     return !!tableResult.TableNames?.find((name) => name === tableName)
   }
 
-  async createTable(
-    tableName: string,
-    keyName: string,
-    sortKey: string,
-    skipIfExists = true
-  ): Promise<CreateTableOutput | undefined> {
+  async createTable(tableName: string, options: CreateTableOptions): Promise<CreateTableOutput | undefined> {
+    const { keyName, sortKey, secondaryIndexes, skipIfExists } = options
+
     if (skipIfExists && (await this.tableExists(tableName))) {
       return undefined
     }
 
+    const attributes = getTableAttributes(keyName, sortKey, secondaryIndexes)
+    const indexes = getTableIndexes(sortKey, secondaryIndexes)
+
     return this.service
       .createTable({
-        AttributeDefinitions: [
-          {
-            AttributeName: keyName,
-            AttributeType: "S"
-          },
-          {
-            AttributeName: sortKey,
-            AttributeType: "S"
-          },
-          {
-            AttributeName: "_",
-            AttributeType: "S"
-          }
-        ],
+        AttributeDefinitions: attributes,
         KeySchema: [
           {
             AttributeName: keyName,
             KeyType: "HASH"
           }
         ],
-        GlobalSecondaryIndexes: [
-          {
-            IndexName: `${sortKey}Index`,
-            KeySchema: [
-              {
-                AttributeName: "_",
-                KeyType: "HASH"
-              },
-              {
-                AttributeName: sortKey,
-                KeyType: "RANGE"
-              }
-            ],
-            Projection: {
-              ProjectionType: "ALL"
-            },
-            ProvisionedThroughput: {
-              ReadCapacityUnits: 1,
-              WriteCapacityUnits: 1
-            }
-          }
-        ],
+        GlobalSecondaryIndexes: indexes,
         ProvisionedThroughput: {
           ReadCapacityUnits: 1,
           WriteCapacityUnits: 1
