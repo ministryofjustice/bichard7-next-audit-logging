@@ -71,8 +71,11 @@ test("should return a single message when the message Id is given", async () => 
   const actualResponse = <APIGatewayProxyResult>messages
   expect(actualResponse.statusCode).toBe(HttpStatusCode.ok)
 
-  const actualMessage: AuditLog = JSON.parse(actualResponse.body)
-  expect(actualMessage).toBeDefined()
+  const actualMessages: AuditLog[] = JSON.parse(actualResponse.body)
+  expect(actualMessages).toBeDefined()
+  expect(actualMessages).toHaveLength(1)
+
+  const actualMessage = actualMessages[0]
   expect(actualMessage.messageId).toBe(log1.messageId)
   expect(actualMessage.externalCorrelationId).toBe(log1.externalCorrelationId)
   expect(actualMessage.caseId).toBe(log1.caseId)
