@@ -30,6 +30,6 @@ export default async function getMessages(event: APIGatewayProxyEvent): PromiseR
 
   return createJsonApiResult({
     statusCode: HttpStatusCode.ok,
-    body: fetchMessagesResult as AuditLog
+    body: [fetchMessagesResult as AuditLog]
   })
 }
