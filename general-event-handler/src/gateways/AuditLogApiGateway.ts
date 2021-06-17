@@ -16,6 +16,7 @@ export default class AuditLogApiGateway {
     return axios
       .get(`${this.apiUrl}/messages/${messageId}`)
       .then((response) => response.data)
+      .then((result) => result[0])
       .catch((error) => <Error>error)
   }
 
