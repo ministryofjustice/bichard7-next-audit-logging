@@ -1,5 +1,5 @@
 import { useState } from "react"
-import useSwr from "swr"
+import useSWR from "swr"
 import Error from "components/Error"
 import Header from "components/Header"
 import Layout from "components/Layout"
@@ -9,8 +9,7 @@ import MessageSearch from "components/MessageSearch"
 import MessageSearchModel from "types/MessageSearchModel"
 import convertObjectToURLSearchParams from "utils/convertObjectToURLSearchParams"
 import combineUrlAndQueryString from "utils/combineUrlAndQueryString"
-
-const fetcher = (url) => fetch(url).then((response) => response.json())
+import fetcher from "utils/fetcher"
 
 const resolveApiUrl = (searchModel: MessageSearchModel): string => {
   const params = convertObjectToURLSearchParams(searchModel)
@@ -20,7 +19,7 @@ const resolveApiUrl = (searchModel: MessageSearchModel): string => {
 const Index = () => {
   const [searchModel, setSearchModel] = useState<MessageSearchModel>({})
 
-  const { data, error } = useSwr(() => resolveApiUrl(searchModel), fetcher)
+  const { data, error } = useSWR(() => resolveApiUrl(searchModel), fetcher)
 
   return (
     <Layout pageTitle="Messages">
@@ -28,7 +27,6 @@ const Index = () => {
       <MessageSearch onSearch={(model) => setSearchModel(model)} disabled={!data} />
 
       {!!error && <Error message={error.message} />}
-
       {!!data && <Messages messages={data.messages || []} />}
 
       <Loading isLoading={!data} />
