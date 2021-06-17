@@ -1,28 +1,30 @@
-import type { GetServerSideProps } from "next"
-import { AuditLog } from "shared"
-import Layout from "components/Layout"
+import { useRouter } from "next/dist/client/router"
+import useSWR from "swr"
+import Error from "components/Error"
 import Events from "components/Events"
-import config from "config"
+import Header from "components/Header"
+import Layout from "components/Layout"
+import Loading from "components/Loading"
+import fetcher from "utils/fetcher"
 
-interface Props {
-  message: AuditLog
+const MessageView = () => {
+  const router = useRouter()
+  const { messageId } = router.query
+
+  const { data, error } = useSWR(`/api/messages/${messageId}`, fetcher)
+
+  console.log(data)
+
+  return (
+    <Layout pageTitle="Events">
+      <Header text="Events" />
+
+      {!!error && <Error message={error.message} />}
+      {!!data && <Events events={(data.message && data.message.events) || []} />}
+
+      <Loading isLoading={!data} />
+    </Layout>
+  )
 }
-
-const MessageView = ({ message }: Props) => (
-  <Layout pageTitle="Events">
-    <Events events={message.events || []} />
-  </Layout>
-)
 
 export default MessageView
-
-export const getServerSideProps: GetServerSideProps<Props> = async ({ params }) => {
-  const response = await fetch(`${config.apiUrl}/messages/${params.messageId}`)
-  const message = (await response.json()) as AuditLog
-
-  return {
-    props: {
-      message
-    }
-  }
-}
