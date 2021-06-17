@@ -17,8 +17,6 @@ const EventsContainer = ({ children }: { children: ReactNode }) => <div aria-lab
 
 const Events = ({ events }: Props) => (
   <>
-    <Header text="Events" />
-
     {events.length === 0 && <NoEvents />}
 
     {events.length > 0 && (
