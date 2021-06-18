@@ -24,12 +24,12 @@ const Index = () => {
   return (
     <Layout pageTitle="Messages">
       <Header text="Messages" />
-      <MessageSearch onSearch={(model) => setSearchModel(model)} disabled={!data} />
+      <MessageSearch onSearch={(model) => setSearchModel(model)} disabled={!data && !error} />
 
       {!!error && <Error message={error.message} />}
-      {!!data && <Messages messages={data.messages || []} />}
+      {!!data && !error && <Messages messages={data.messages || []} />}
 
-      <Loading isLoading={!data} />
+      <Loading isLoading={!data && !error} />
     </Layout>
   )
 }
