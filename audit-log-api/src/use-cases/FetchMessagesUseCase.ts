@@ -11,7 +11,7 @@ export default class FetchMessagesUseCase {
     return this.gateway.fetchOne(messageId)
   }
 
-  getByExternalCorrelationId(externalCorrelationId: string): PromiseResult<AuditLog> {
+  getByExternalCorrelationId(externalCorrelationId: string): PromiseResult<AuditLog | null> {
     return this.gateway.fetchByExternalCorrelationId(externalCorrelationId)
   }
 }

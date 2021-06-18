@@ -9,6 +9,12 @@ const config = createDynamoDbConfig()
 const auditLogGateway = new AuditLogDynamoGateway(config, config.AUDIT_LOG_TABLE_NAME)
 const fetchMessages = new FetchMessagesUseCase(auditLogGateway)
 
+const createOkResult = (messages: AuditLog[]): APIGatewayProxyResult =>
+  createJsonApiResult({
+    statusCode: HttpStatusCode.ok,
+    body: messages
+  })
+
 export default async function getMessages(event: APIGatewayProxyEvent): PromiseResult<APIGatewayProxyResult> {
   const parseRequestResult = parseGetMessagesRequest(event, fetchMessages)
   const fetchMessagesResult = await parseRequestResult.fetchMessages()
@@ -20,16 +26,14 @@ export default async function getMessages(event: APIGatewayProxyEvent): PromiseR
     })
   }
 
-  const messages = fetchMessagesResult as AuditLog[]
-  if (!!messages && Array.isArray(messages)) {
-    return createJsonApiResult({
-      statusCode: HttpStatusCode.ok,
-      body: messages
-    })
+  if (fetchMessagesResult === null) {
+    return createOkResult([])
   }
 
-  return createJsonApiResult({
-    statusCode: HttpStatusCode.ok,
-    body: [fetchMessagesResult as AuditLog]
-  })
+  const messages = fetchMessagesResult as AuditLog[]
+  if (!!messages && Array.isArray(messages)) {
+    return createOkResult(messages)
+  }
+
+  return createOkResult([fetchMessagesResult as AuditLog])
 }
