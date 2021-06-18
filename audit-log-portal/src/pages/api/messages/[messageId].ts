@@ -9,7 +9,11 @@ type Data = {
 export default async (request: NextApiRequest, response: NextApiResponse<Data>) => {
   const { messageId } = request.query
   const fetchResponse = await fetch(`${config.apiUrl}/messages/${messageId}`)
-  const message = await fetchResponse.json()
+  const messages = (await fetchResponse.json()) || []
 
-  response.status(200).json({ message })
+  if (messages.length === 0) {
+    response.status(404)
+  } else {
+    response.status(200).json({ message: messages[0] })
+  }
 }
