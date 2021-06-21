@@ -263,10 +263,8 @@ describe("AuditLogDynamoGateway", () => {
       const externalCorrelationId = "External correlation id does not exist"
       const result = await gateway.fetchByExternalCorrelationId(externalCorrelationId)
 
-      expect(isError(result)).toBe(true)
-
-      const error = <Error>result
-      expect(error.message).toBe(`Message with external correlation id '${externalCorrelationId}' does not exist.`)
+      expect(isError(result)).toBe(false)
+      expect(<AuditLog>result).toBeNull()
     })
   })
 

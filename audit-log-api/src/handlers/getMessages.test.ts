@@ -2,17 +2,24 @@ process.env.AWS_URL = "dummy"
 process.env.AWS_REGION = "dummy"
 process.env.AUDIT_LOG_TABLE_NAME = "dummy"
 
-import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda"
+import {
+  APIGatewayProxyEvent,
+  APIGatewayProxyEventPathParameters,
+  APIGatewayProxyEventQueryStringParameters,
+  APIGatewayProxyResult
+} from "aws-lambda"
 import { AuditLog, HttpStatusCode } from "shared"
 import FetchMessagesUseCase from "src/use-cases/FetchMessagesUseCase"
 import getMessages from "./getMessages"
 
-const createEvent = (messageId?: string): APIGatewayProxyEvent => {
+const createEvent = (
+  pathParameters?: APIGatewayProxyEventPathParameters,
+  queryStringParameters?: APIGatewayProxyEventQueryStringParameters
+): APIGatewayProxyEvent => {
   return <APIGatewayProxyEvent>JSON.parse(
     JSON.stringify({
-      pathParameters: {
-        messageId
-      }
+      pathParameters: pathParameters || {},
+      queryStringParameters: queryStringParameters || {}
     })
   )
 }
@@ -65,7 +72,42 @@ test("should respond with error", async () => {
 test("should return a single message when the message Id is given", async () => {
   jest.spyOn(FetchMessagesUseCase.prototype, "getById").mockResolvedValue(log1)
 
-  const event = createEvent("SomeMessageId")
+  const event = createEvent({ messageId: "SomeMessageId" })
+  const messages = await getMessages(event)
+
+  const actualResponse = <APIGatewayProxyResult>messages
+  expect(actualResponse.statusCode).toBe(HttpStatusCode.ok)
+
+  const actualMessages: AuditLog[] = JSON.parse(actualResponse.body)
+  expect(actualMessages).toBeDefined()
+  expect(actualMessages).toHaveLength(1)
+
+  const actualMessage = actualMessages[0]
+  expect(actualMessage.messageId).toBe(log1.messageId)
+  expect(actualMessage.externalCorrelationId).toBe(log1.externalCorrelationId)
+  expect(actualMessage.caseId).toBe(log1.caseId)
+  expect(actualMessage.receivedDate).toBe(log1.receivedDate)
+  expect(actualMessage.messageXml).toBe(log1.messageXml)
+})
+
+test("should return an empty array when externalCorrelationId is specified and no messages are found", async () => {
+  jest.spyOn(FetchMessagesUseCase.prototype, "getByExternalCorrelationId").mockResolvedValue(null)
+
+  const event = createEvent(undefined, { externalCorrelationId: "SomeExternalCorrelationId" })
+  const messages = await getMessages(event)
+
+  const actualResponse = <APIGatewayProxyResult>messages
+  expect(actualResponse.statusCode).toBe(HttpStatusCode.ok)
+
+  const actualMessages: AuditLog[] = JSON.parse(actualResponse.body)
+  expect(actualMessages).toBeDefined()
+  expect(actualMessages).toHaveLength(0)
+})
+
+test("should return a single message when the externalCorrelationId is given and a match is found", async () => {
+  jest.spyOn(FetchMessagesUseCase.prototype, "getByExternalCorrelationId").mockResolvedValue(log1)
+
+  const event = createEvent(undefined, { externalCorrelationId: "SomeExternalCorrelationId" })
   const messages = await getMessages(event)
 
   const actualResponse = <APIGatewayProxyResult>messages

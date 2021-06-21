@@ -3,7 +3,7 @@ import { PromiseResult, AuditLog } from "shared"
 import FetchMessagesUseCase from "./FetchMessagesUseCase"
 
 interface ParseGetMessagesRequestResult {
-  fetchMessages: () => PromiseResult<AuditLog | AuditLog[]>
+  fetchMessages: () => PromiseResult<AuditLog | AuditLog[] | null>
 }
 
 const parseGetMessagesRequest = (
@@ -12,7 +12,7 @@ const parseGetMessagesRequest = (
 ): ParseGetMessagesRequestResult => {
   const messageId = event.pathParameters?.messageId
   const externalCorrelationId = event.queryStringParameters?.externalCorrelationId
-  let fetchMessagesAction: () => PromiseResult<AuditLog | AuditLog[]>
+  let fetchMessagesAction: () => PromiseResult<AuditLog | AuditLog[] | null>
 
   if (messageId) {
     fetchMessagesAction = () => fetchMessages.getById(messageId)
