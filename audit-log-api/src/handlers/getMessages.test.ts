@@ -58,7 +58,7 @@ test("should respond with error", async () => {
   const messages = await getMessages(event)
   const actualResponse = <APIGatewayProxyResult>messages
 
-  expect(actualResponse.statusCode).toBe(HttpStatusCode.internalServerError)
+  expect(actualResponse.statusCode).toBe(HttpStatusCode.badRequest)
   expect(actualResponse.body).toEqual("Error: Expected Error")
 })
 

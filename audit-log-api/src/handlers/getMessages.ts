@@ -15,7 +15,7 @@ export default async function getMessages(event: APIGatewayProxyEvent): PromiseR
 
   if (isError(fetchMessagesResult)) {
     return createJsonApiResult({
-      statusCode: HttpStatusCode.internalServerError,
+      statusCode: HttpStatusCode.badRequest,
       body: String(fetchMessagesResult)
     })
   }
