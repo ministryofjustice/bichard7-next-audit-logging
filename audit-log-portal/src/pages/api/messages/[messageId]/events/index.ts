@@ -11,7 +11,11 @@ export default async (request: NextApiRequest, response: NextApiResponse<Data>) 
   const url = `${config.apiUrl}/messages/${messageId}/events`
 
   const fetchResponse = await fetch(url)
-  const events = await fetchResponse.json()
 
-  response.status(200).json({ events })
+  if (fetchResponse.status !== 200) {
+    response.status(404).end()
+  } else {
+    const events = (await fetchResponse.json()) || []
+    response.status(200).json({ events })
+  }
 }
