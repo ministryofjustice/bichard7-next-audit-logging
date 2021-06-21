@@ -290,6 +290,19 @@ describe("AuditLogDynamoGateway", () => {
       expect(events[2].eventType).toBe("Event 1")
     })
 
+    it("should return an empty array when message does not have events", async () => {
+      const auditLog = new AuditLog(`External correlation id 1`, new Date(), "XML")
+      await gateway.create(auditLog)
+
+      const result = await gateway.fetchEvents(auditLog.messageId)
+
+      expect(isError(result)).toBe(false)
+      expect(result).toBeDefined()
+
+      const events = <AuditLogEvent[]>result
+      expect(events).toHaveLength(0)
+    })
+
     it("should throw error when message id does not exist in the table", async () => {
       const messageId = "Message Id does not exist"
       const result = await gateway.fetchEvents(messageId)

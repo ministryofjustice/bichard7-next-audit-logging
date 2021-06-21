@@ -74,6 +74,10 @@ export default class AuditLogDynamoGateway extends DynamoGateway {
       return new Error(`Couldn't get events for message '${messageId}'.`)
     }
 
+    if (!result.events) {
+      return []
+    }
+
     const sortedEvents = result.events.sort((eventA, eventB) => (eventA.timestamp > eventB.timestamp ? -1 : 1))
 
     return sortedEvents
