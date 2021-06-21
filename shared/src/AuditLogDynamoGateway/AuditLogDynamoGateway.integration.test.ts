@@ -269,4 +269,37 @@ describe("AuditLogDynamoGateway", () => {
       expect(error.message).toBe(`Message with external correlation id '${externalCorrelationId}' does not exist.`)
     })
   })
+
+  describe("fetchEvents", () => {
+    it("should return AuditLogEvents ordered by timestamp when message id exists in the table", async () => {
+      const auditLog = new AuditLog(`External correlation id 1`, new Date(), "XML")
+      auditLog.events = [
+        new AuditLogEvent("information", new Date("2021-06-10T10:12:13"), "Event 1"),
+        new AuditLogEvent("information", new Date("2021-06-15T10:12:13"), "Event 2"),
+        new AuditLogEvent("information", new Date("2021-06-13T10:12:13"), "Event 3")
+      ]
+      await gateway.create(auditLog)
+
+      const result = await gateway.fetchEvents(auditLog.messageId)
+
+      expect(isError(result)).toBe(false)
+      expect(result).toBeDefined()
+
+      const events = <AuditLogEvent[]>result
+      expect(events).toHaveLength(3)
+      expect(events[0].eventType).toBe("Event 2")
+      expect(events[1].eventType).toBe("Event 3")
+      expect(events[2].eventType).toBe("Event 1")
+    })
+
+    it("should throw error when message id does not exist in the table", async () => {
+      const messageId = "Message Id does not exist"
+      const result = await gateway.fetchEvents(messageId)
+
+      expect(isError(result)).toBe(true)
+
+      const error = <Error>result
+      expect(error.message).toBe(`Couldn't get events for message '${messageId}'.`)
+    })
+  })
 })
