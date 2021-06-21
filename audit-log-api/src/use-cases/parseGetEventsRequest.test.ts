@@ -16,7 +16,7 @@ describe("parseGetEventsRequest()", () => {
     expect(actualMessageId).toBe(expectedMessageId)
   })
 
-  it("should return error when messageId does not exist in the path", async () => {
+  it("should return error when messageId does not exist in the path", () => {
     const proxyEvent = <APIGatewayProxyEvent>(<unknown>{
       pathParameters: {}
     })
