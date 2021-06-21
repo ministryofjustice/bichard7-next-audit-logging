@@ -3,7 +3,7 @@ import { APIGatewayProxyEvent } from "aws-lambda"
 import parseGetEventsRequest from "./parseGetEventsRequest"
 
 describe("parseGetEventsRequest()", () => {
-  it("should return events of the message when messageId exists in the path", async () => {
+  it("should return events of the message when messageId exists in the path", () => {
     const expectedMessageId = "Message Id 1"
     const proxyEvent = <APIGatewayProxyEvent>(<unknown>{
       pathParameters: {
