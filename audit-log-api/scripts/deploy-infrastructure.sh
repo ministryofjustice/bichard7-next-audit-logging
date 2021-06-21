@@ -69,7 +69,8 @@ function create_rest_endpoint {
   ENDPOINT=$2
   HTTP_METHOD=$3
   LAMBDA_NAME=$4
-  PARENT_RESOURCE_ID=$5
+  FULL_PATH=$5
+  PARENT_RESOURCE_ID=$6
 
   LAMBDA_ARN=$(get_lambda_arn $LAMBDA_NAME)
   API_ID=$(get_rest_api_id $API_NAME)
@@ -85,7 +86,7 @@ function create_rest_endpoint {
 
   RESOURCE_ID=$(awslocal apigateway get-resources \
     --rest-api-id "$API_ID" \
-    --query "items[?path=='/$ENDPOINT'].id" \
+    --query "items[?path=='$FULL_PATH'].id" \
     --output text \
     --region "$REGION" \
   )
@@ -129,25 +130,30 @@ function deploy_api {
 
 create_rest_api "AuditLogApi"
 
+# Paths
+MESSAGES_PATH="/messages"
+MESSAGES_PROXY_PATH="/messages/{messageId}"
+EVENTS_PATH="/messages/{messageId}/events"
+
 # GET /messages
 create_lambda "GetMessages" "getMessages.default"
-create_rest_endpoint "AuditLogApi" "messages" "GET" "GetMessages"
+create_rest_endpoint "AuditLogApi" "messages" "GET" "GetMessages" $MESSAGES_PATH
 MESSAGES_RESOURCE_ID=$(get_resource_id "AuditLogApi" "messages")
 
 # POST /messages
 create_lambda "CreateAuditLog" "createAuditLog.default"
-create_rest_endpoint "AuditLogApi" "messages" "POST" "CreateAuditLog"
+create_rest_endpoint "AuditLogApi" "messages" "POST" "CreateAuditLog" $MESSAGES_PATH
 
 # GET /messages/{messageId}
-create_rest_endpoint "AuditLogApi" "{messageId}" "GET" "GetMessages" $MESSAGES_RESOURCE_ID
+create_rest_endpoint "AuditLogApi" "{messageId}" "GET" "GetMessages" $MESSAGES_PROXY_PATH $MESSAGES_RESOURCE_ID
 MESSAGES_PROXY_RESOURCE_ID=$(get_resource_id "AuditLogApi" "messages/{messageId}")
-
-# POST /messages/{messageId}/events
-create_lambda "CreateAuditLogEvent" "createAuditLogEvent.default"
-create_rest_endpoint "AuditLogApi" "events" "POST" "CreateAuditLogEvent" $MESSAGES_PROXY_RESOURCE_ID
 
 # GET /messages/{messageId}/events
 create_lambda "GetEvents" "getEvents.default"
-create_rest_endpoint "AuditLogApi" "events" "GET" "GetEvents" $MESSAGES_PROXY_RESOURCE_ID
+create_rest_endpoint "AuditLogApi" "events" "GET" "GetEvents" $EVENTS_PATH $MESSAGES_PROXY_RESOURCE_ID
+
+# POST /messages/{messageId}/events
+create_lambda "CreateAuditLogEvent" "createAuditLogEvent.default"
+create_rest_endpoint "AuditLogApi" "events" "POST" "CreateAuditLogEvent" $EVENTS_PATH $MESSAGES_PROXY_RESOURCE_ID
 
 deploy_api "AuditLogApi"
