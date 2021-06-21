@@ -146,5 +146,8 @@ MESSAGES_PROXY_RESOURCE_ID=$(get_resource_id "AuditLogApi" "messages/{messageId}
 create_lambda "CreateAuditLogEvent" "createAuditLogEvent.default"
 create_rest_endpoint "AuditLogApi" "events" "POST" "CreateAuditLogEvent" $MESSAGES_PROXY_RESOURCE_ID
 
+# GET /messages/{messageId}/events
+create_lambda "GetEvents" "getEvents.default"
+create_rest_endpoint "AuditLogApi" "events" "GET" "GetEvents" $MESSAGES_PROXY_RESOURCE_ID
 
 deploy_api "AuditLogApi"
