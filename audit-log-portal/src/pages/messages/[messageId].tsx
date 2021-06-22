@@ -11,16 +11,17 @@ const MessageView = () => {
   const router = useRouter()
   const { messageId } = router.query
 
-  const { data, error } = useSWR(`/api/messages/${messageId}/events`, fetcher)
+  const { data: messageData } = useSWR(`/api/messages/${messageId}`, fetcher)
+  const { data: eventsData, error: eventsError } = useSWR(`/api/messages/${messageId}/events`, fetcher)
 
   return (
-    <Layout pageTitle="Events">
+    <Layout pageTitle={messageData && messageData.message.externalCorrelationId}>
       <Header text="Events" />
 
-      {!!error && <Error message={error.message} />}
-      {!!data && <Events events={(data && data.events) || []} />}
+      {!!eventsError && <Error message={eventsError.message} />}
+      {!!eventsData && <Events events={(eventsData && eventsData.events) || []} />}
 
-      <Loading isLoading={!data} />
+      <Loading isLoading={!eventsData || !messageData} />
     </Layout>
   )
 }
