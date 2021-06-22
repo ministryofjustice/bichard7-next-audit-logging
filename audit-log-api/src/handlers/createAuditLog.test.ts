@@ -1,7 +1,4 @@
-process.env.AWS_URL = "dummy"
-process.env.AWS_REGION = "dummy"
-process.env.AUDIT_LOG_TABLE_NAME = "dummy"
-
+import "src/testConfig"
 import { APIGatewayProxyEvent } from "aws-lambda"
 import { AuditLog, HttpStatusCode } from "shared"
 import CreateAuditLogUseCase from "src/use-cases/CreateAuditLogUseCase"
