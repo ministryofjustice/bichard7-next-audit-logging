@@ -132,7 +132,7 @@ create_rest_api "AuditLogApi"
 
 # Paths
 MESSAGES_PATH="/messages"
-MESSAGES_PROXY_PATH="/messages/{messageId}"
+SINGLE_MESSAGE_PATH="/messages/{messageId}"
 EVENTS_PATH="/messages/{messageId}/events"
 
 # GET /messages
@@ -145,7 +145,7 @@ create_lambda "CreateAuditLog" "createAuditLog.default"
 create_rest_endpoint "AuditLogApi" "messages" "POST" "CreateAuditLog" $MESSAGES_PATH
 
 # GET /messages/{messageId}
-create_rest_endpoint "AuditLogApi" "{messageId}" "GET" "GetMessages" $MESSAGES_PROXY_PATH $MESSAGES_RESOURCE_ID
+create_rest_endpoint "AuditLogApi" "{messageId}" "GET" "GetMessages" $SINGLE_MESSAGE_PATH $MESSAGES_RESOURCE_ID
 MESSAGES_PROXY_RESOURCE_ID=$(get_resource_id "AuditLogApi" "messages/{messageId}")
 
 # GET /messages/{messageId}/events
