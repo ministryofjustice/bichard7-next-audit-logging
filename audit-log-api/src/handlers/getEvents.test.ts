@@ -1,10 +1,9 @@
-process.env.AWS_URL = "dummy"
-process.env.AWS_REGION = "dummy"
-process.env.AUDIT_LOG_TABLE_NAME = "dummy"
+jest.mock("src/use-cases/parseGetEventsRequest")
 
+import "src/testConfig"
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda"
 import { AuditLog, AuditLogEvent, HttpStatusCode } from "shared"
-import { FetchEventsUseCase } from "src/use-cases"
+import { FetchEventsUseCase, parseGetEventsRequest } from "src/use-cases"
 import getEvents from "./getEvents"
 
 const createProxyEvent = (messageId?: string): APIGatewayProxyEvent => {
@@ -24,7 +23,7 @@ log.events = [
   new AuditLogEvent("information", new Date("2021-06-10T10:12:13"), "Event 3")
 ]
 
-test("should respond with a list of messages", async () => {
+test("should respond with a list of events when message id exists and message has events", async () => {
   jest.spyOn(FetchEventsUseCase.prototype, "get").mockResolvedValue(log.events)
 
   const proxyEvent = createProxyEvent("Message Id")
@@ -40,14 +39,29 @@ test("should respond with a list of messages", async () => {
   expect(actualEvents[2].eventType).toBe("Event 3")
 })
 
-test("should respond with error", async () => {
-  const error = new Error("Message Id must be provided in the URL.")
-  jest.spyOn(FetchEventsUseCase.prototype, "get").mockResolvedValue(error)
+test("should respond with bad request status when there is a validation error", async () => {
+  const error = new Error("Test Error")
+  const mockParseGetEventsRequest = parseGetEventsRequest as jest.MockedFunction<typeof parseGetEventsRequest>
+  mockParseGetEventsRequest.mockReturnValue(error)
 
   const proxyEvent = createProxyEvent()
   const response = await getEvents(proxyEvent)
   const actualResponse = <APIGatewayProxyResult>response
 
   expect(actualResponse.statusCode).toBe(HttpStatusCode.badRequest)
+  expect(actualResponse.body).toEqual(`Error: ${error.message}`)
+})
+
+test("should respond with internal server error status when there is an error with fetching events", async () => {
+  const error = new Error("Test Error")
+  const mockParseGetEventsRequest = parseGetEventsRequest as jest.MockedFunction<typeof parseGetEventsRequest>
+  mockParseGetEventsRequest.mockReturnValue("Message Id")
+  jest.spyOn(FetchEventsUseCase.prototype, "get").mockResolvedValue(error)
+
+  const proxyEvent = createProxyEvent()
+  const response = await getEvents(proxyEvent)
+  const actualResponse = <APIGatewayProxyResult>response
+
+  expect(actualResponse.statusCode).toBe(HttpStatusCode.internalServerError)
   expect(actualResponse.body).toEqual(`Error: ${error.message}`)
 })
