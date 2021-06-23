@@ -1,3 +1,4 @@
+export { default as AmazonMqEventSourceRecordEvent } from "./AmazonMqEventSourceRecordEvent"
 export { default as AuditLogEvent } from "./AuditLogEvent"
 export { default as AuditLogEventOptions } from "./AuditLogEventOptions"
 export { default as EventCategory } from "./EventCategory"
