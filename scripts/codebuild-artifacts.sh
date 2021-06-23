@@ -42,6 +42,7 @@ cd audit-log-api/build
 zip getMessages.zip getMessages.js
 zip createAuditLog.zip createAuditLog.js
 zip createAuditLogEvent.zip createAuditLogEvent.js
+zip getEvents.zip getEvents.js
 
 cd -
 
