@@ -25,6 +25,9 @@ export default async (event: AmazonMqEventSourceRecordEvent): Promise<void> => {
     throw xml
   }
 
+  console.log(`Extracted XML for message ${message.messageID}!`)
+  console.log(xml)
+
   const parseResult = await parseGeneralEventLogItem(xml)
   if (isError(parseResult)) {
     throw parseResult
