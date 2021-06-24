@@ -1,14 +1,19 @@
 import styled from "styled-components"
 import Link from "next/link"
-import { Badge, Button, Card, CardContent, Typography } from "@material-ui/core"
+import { Badge, Button, Card, CardContent, Typography, Tooltip } from "@material-ui/core"
 import { AuditLog } from "shared"
 import DateTime from "components/DateTime"
 import EventIcon from "icons/EventIcon"
 import getDaysOld from "./getDaysOld"
+import getStatusIcon from "./getStatusIcon"
 
 interface Props {
   message: AuditLog
 }
+
+const TypographyNoWrap = styled(Typography)`
+  white-space: nowrap;
+`
 
 const Container = styled(Card)`
   margin-bottom: 1rem;
@@ -19,6 +24,7 @@ const InnerContainer = styled(CardContent)`
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
+  gap: 0 1rem;
 
   &:last-child: {
     padding-bottom: 0;
@@ -26,44 +32,66 @@ const InnerContainer = styled(CardContent)`
 `
 
 const Block = styled.div`
-  margin-right: 1.5rem;
+  flex: 0;
 `
 
-const ReceivedDate = styled(Typography)`
+const StatusBlock = styled(Block)`
+  text-align: center;
+  flex-basis: 3rem;
+`
+
+const ReceivedDate = styled(TypographyNoWrap)`
   ${({ theme }) => `
     color: ${theme.palette.text.disabled};
   `}
 `
 
-const Actions = styled.div`
-  margin-left: 1rem;
+const DaysAgo = styled(Typography)`
+  flex: 1;
+  text-align: center;
 `
 
-const Message = ({ message }: Props) => (
-  <Container>
-    <InnerContainer>
-      <Block>
-        <Typography variant="h6">{message.externalCorrelationId}</Typography>
+const Actions = styled.div`
+  flex: 0;
+  white-space: nowrap;
+`
 
-        <ReceivedDate variant="caption">
-          <DateTime date={message.receivedDate} prefix="Received: " />
-        </ReceivedDate>
-      </Block>
+const Message = ({ message }: Props) => {
+  const StatusIcon = getStatusIcon(message.messageStatus)
 
-      <Typography variant="h6">{getDaysOld(message.receivedDate)}</Typography>
+  return (
+    <Container>
+      <InnerContainer>
+        <StatusBlock>
+          <Tooltip title={message.messageStatus} placement="top">
+            <div>
+              <StatusIcon />
+            </div>
+          </Tooltip>
+        </StatusBlock>
+        <Block>
+          <TypographyNoWrap variant="h6">{message.externalCorrelationId}</TypographyNoWrap>
 
-      <Actions>
-        {/* TODO: Button: View XML */}
-        <Badge badgeContent={(message.events || []).length} color="secondary">
-          <Link href={`/messages/${message.messageId}`}>
-            <Button variant="outlined" color="default" startIcon={<EventIcon />}>
-              {`View Events`}
-            </Button>
-          </Link>
-        </Badge>
-      </Actions>
-    </InnerContainer>
-  </Container>
-)
+          <ReceivedDate variant="caption">
+            <DateTime date={message.receivedDate} prefix="Received: " />
+          </ReceivedDate>
+        </Block>
+
+        <DaysAgo variant="h6">{getDaysOld(message.receivedDate)}</DaysAgo>
+
+        <Actions>
+          {/* TODO: Button: View XML */}
+          <Badge badgeContent={(message.events || []).length} color="secondary">
+            <Link href={`/messages/${message.messageId}`}>
+              <Button variant="outlined" color="default" startIcon={<EventIcon />}>
+                {`View Events`}
+              </Button>
+            </Link>
+          </Badge>
+        </Actions>
+      </InnerContainer>
+    </Container>
+  )
+}
 
 export default Message
