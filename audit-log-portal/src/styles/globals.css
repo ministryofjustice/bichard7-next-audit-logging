@@ -19,3 +19,12 @@ a {
 * {
   box-sizing: border-box;
 }
+
+@keyframes rotate-clockwise {
+  from {
+    transform: rotate(0);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
