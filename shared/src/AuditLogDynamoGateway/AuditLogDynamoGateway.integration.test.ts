@@ -68,7 +68,7 @@ describe("AuditLogDynamoGateway", () => {
 
   describe("addEvent()", () => {
     it("should only add an event to and update the status of the specified audit log", async () => {
-      const expectedEvent = new AuditLogEvent("information", new Date(), "Test event")
+      const expectedEvent = new AuditLogEvent("information", new Date(), "PNC Response received")
       expectedEvent.eventSource = "Test event source"
       const expectedEventAttributes = {
         "Attribute one": "Some value",
@@ -97,7 +97,7 @@ describe("AuditLogDynamoGateway", () => {
       expect(actualMessage).toBeDefined()
       expect(actualMessage.events).toBeDefined()
       expect(actualMessage.events).toHaveLength(1)
-      expect(actualMessage.messageStatus).toBe(expectedEvent.eventType)
+      expect(actualMessage.messageStatus).toBe("Completed")
 
       const actualEvent = actualMessage.events[0]
       expect(actualEvent.eventSource).toBe(expectedEvent.eventSource)
@@ -115,7 +115,7 @@ describe("AuditLogDynamoGateway", () => {
       const expectedEventOne = new AuditLogEvent("information", new Date(), "Test event one")
       expectedEventOne.eventSource = "Event source one"
       expectedEventOne.attributes = { EventOneAttribute: "Event one attribute" }
-      const expectedEventTwo = new AuditLogEvent("error", new Date(), "Test event two")
+      const expectedEventTwo = new AuditLogEvent("error", new Date(), "PNC Response not received")
       expectedEventTwo.eventSource = "Event source two"
       expectedEventTwo.attributes = { EventTwoAttribute: "Event two attribute" }
 
