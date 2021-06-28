@@ -5,7 +5,7 @@ import { AuditLog } from "shared"
 import DateTime from "components/DateTime"
 import EventIcon from "icons/EventIcon"
 import getDaysOld from "./getDaysOld"
-import getStatusIcon from "./getStatusIcon"
+import StatusIcon from "./StatusIcon"
 
 interface Props {
   message: AuditLog
@@ -53,17 +53,11 @@ const Actions = styled.div`
 `
 
 const Message = ({ message }: Props) => {
-  const StatusIcon = getStatusIcon(message.messageStatus)
-
   return (
     <Container>
       <InnerContainer>
         <StatusBlock>
-          <Tooltip title={message.messageStatus} placement="top">
-            <div>
-              <StatusIcon />
-            </div>
-          </Tooltip>
+          <StatusIcon message={message} />
         </StatusBlock>
         <Block>
           <Typography noWrap variant="h6">
