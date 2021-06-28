@@ -11,10 +11,6 @@ interface Props {
   message: AuditLog
 }
 
-const TypographyNoWrap = styled(Typography)`
-  white-space: nowrap;
-`
-
 const Container = styled(Card)`
   margin-bottom: 1rem;
 `
@@ -40,7 +36,7 @@ const StatusBlock = styled(Block)`
   flex-basis: 3rem;
 `
 
-const ReceivedDate = styled(TypographyNoWrap)`
+const ReceivedDate = styled(Typography)`
   ${({ theme }) => `
     color: ${theme.palette.text.disabled};
   `}
@@ -70,9 +66,11 @@ const Message = ({ message }: Props) => {
           </Tooltip>
         </StatusBlock>
         <Block>
-          <TypographyNoWrap variant="h6">{message.externalCorrelationId}</TypographyNoWrap>
+          <Typography noWrap variant="h6">
+            {message.externalCorrelationId}
+          </Typography>
 
-          <ReceivedDate variant="caption">
+          <ReceivedDate noWrap variant="caption">
             <DateTime date={message.receivedDate} prefix="Received: " />
           </ReceivedDate>
         </Block>

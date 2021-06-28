@@ -3,13 +3,13 @@
 exports[`matches snapshot 1`] = `
 <div>
   <div
-    class="MuiPaper-root MuiCard-root Message__Container-sc-12ihk2z-1 hnjfUm MuiPaper-elevation1 MuiPaper-rounded"
+    class="MuiPaper-root MuiCard-root Message__Container-sc-12ihk2z-0 jpkXTb MuiPaper-elevation1 MuiPaper-rounded"
   >
     <div
-      class="MuiCardContent-root Message__InnerContainer-sc-12ihk2z-2 dIYjAi"
+      class="MuiCardContent-root Message__InnerContainer-sc-12ihk2z-1 dVpOHV"
     >
       <div
-        class="Message__Block-sc-12ihk2z-3 Message__StatusBlock-sc-12ihk2z-4 fSjLmO cscEys"
+        class="Message__Block-sc-12ihk2z-2 Message__StatusBlock-sc-12ihk2z-3 fqgSQH jTzRbr"
       >
         <div
           class=""
@@ -33,15 +33,15 @@ exports[`matches snapshot 1`] = `
         </div>
       </div>
       <div
-        class="Message__Block-sc-12ihk2z-3 fSjLmO"
+        class="Message__Block-sc-12ihk2z-2 fqgSQH"
       >
         <h6
-          class="MuiTypography-root Message__TypographyNoWrap-sc-12ihk2z-0 jICGCC MuiTypography-h6"
+          class="MuiTypography-root MuiTypography-h6 MuiTypography-noWrap"
         >
           ExternalCorrelationId
         </h6>
         <span
-          class="MuiTypography-root Message__TypographyNoWrap-sc-12ihk2z-0 Message__ReceivedDate-sc-12ihk2z-5 jICGCC fQFTgq MuiTypography-caption"
+          class="MuiTypography-root Message__ReceivedDate-sc-12ihk2z-4 fgDTkH MuiTypography-caption MuiTypography-noWrap"
         >
           Received: 
           <time
@@ -52,12 +52,12 @@ exports[`matches snapshot 1`] = `
         </span>
       </div>
       <h6
-        class="MuiTypography-root Message__DaysAgo-sc-12ihk2z-6 bCdcHG MuiTypography-h6"
+        class="MuiTypography-root Message__DaysAgo-sc-12ihk2z-5 irzcVl MuiTypography-h6"
       >
         23 days old
       </h6>
       <div
-        class="Message__Actions-sc-12ihk2z-7 jbmPyI"
+        class="Message__Actions-sc-12ihk2z-6 gQqRjV"
       >
         <span
           class="MuiBadge-root"
