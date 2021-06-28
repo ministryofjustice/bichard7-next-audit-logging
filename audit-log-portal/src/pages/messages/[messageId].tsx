@@ -13,8 +13,6 @@ const MessageView = () => {
 
   const { data, error } = useSWR(`/api/messages/${messageId}`, fetcher)
 
-  console.log(data)
-
   return (
     <Layout pageTitle="Events">
       <Header text="Events" />
