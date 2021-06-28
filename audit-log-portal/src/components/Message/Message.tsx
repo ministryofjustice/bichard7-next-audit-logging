@@ -5,6 +5,7 @@ import { AuditLog } from "shared"
 import DateTime from "components/DateTime"
 import EventIcon from "icons/EventIcon"
 import getDaysOld from "./getDaysOld"
+import StatusIcon from "./StatusIcon"
 
 interface Props {
   message: AuditLog
@@ -19,6 +20,7 @@ const InnerContainer = styled(CardContent)`
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
+  gap: 0 1rem;
 
   &:last-child: {
     padding-bottom: 0;
@@ -26,7 +28,12 @@ const InnerContainer = styled(CardContent)`
 `
 
 const Block = styled.div`
-  margin-right: 1.5rem;
+  flex: 0;
+`
+
+const StatusBlock = styled(Block)`
+  text-align: center;
+  flex-basis: 3rem;
 `
 
 const ReceivedDate = styled(Typography)`
@@ -35,35 +42,48 @@ const ReceivedDate = styled(Typography)`
   `}
 `
 
-const Actions = styled.div`
-  margin-left: 1rem;
+const DaysAgo = styled(Typography)`
+  flex: 1;
+  text-align: center;
 `
 
-const Message = ({ message }: Props) => (
-  <Container>
-    <InnerContainer>
-      <Block>
-        <Typography variant="h6">{message.externalCorrelationId}</Typography>
+const Actions = styled.div`
+  flex: 0;
+  white-space: nowrap;
+`
 
-        <ReceivedDate variant="caption">
-          <DateTime date={message.receivedDate} prefix="Received: " />
-        </ReceivedDate>
-      </Block>
+const Message = ({ message }: Props) => {
+  return (
+    <Container>
+      <InnerContainer>
+        <StatusBlock>
+          <StatusIcon message={message} />
+        </StatusBlock>
+        <Block>
+          <Typography noWrap variant="h6">
+            {message.externalCorrelationId}
+          </Typography>
 
-      <Typography variant="h6">{getDaysOld(message.receivedDate)}</Typography>
+          <ReceivedDate noWrap variant="caption">
+            <DateTime date={message.receivedDate} prefix="Received: " />
+          </ReceivedDate>
+        </Block>
 
-      <Actions>
-        {/* TODO: Button: View XML */}
-        <Badge badgeContent={(message.events || []).length} color="secondary">
-          <Link href={`/messages/${message.messageId}`}>
-            <Button variant="outlined" color="default" startIcon={<EventIcon />}>
-              {`View Events`}
-            </Button>
-          </Link>
-        </Badge>
-      </Actions>
-    </InnerContainer>
-  </Container>
-)
+        <DaysAgo variant="h6">{getDaysOld(message.receivedDate)}</DaysAgo>
+
+        <Actions>
+          {/* TODO: Button: View XML */}
+          <Badge badgeContent={(message.events || []).length} color="secondary">
+            <Link href={`/messages/${message.messageId}`}>
+              <Button variant="outlined" color="default" startIcon={<EventIcon />}>
+                {`View Events`}
+              </Button>
+            </Link>
+          </Badge>
+        </Actions>
+      </InnerContainer>
+    </Container>
+  )
+}
 
 export default Message

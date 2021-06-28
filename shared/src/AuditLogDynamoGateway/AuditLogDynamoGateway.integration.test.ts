@@ -67,8 +67,8 @@ describe("AuditLogDynamoGateway", () => {
   })
 
   describe("addEvent()", () => {
-    it("should only add an event to the specified audit log", async () => {
-      const expectedEvent = new AuditLogEvent("information", new Date(), "Test event")
+    it("should only add an event to and update the status of the specified audit log", async () => {
+      const expectedEvent = new AuditLogEvent("information", new Date(), "PNC Response received")
       expectedEvent.eventSource = "Test event source"
       const expectedEventAttributes = {
         "Attribute one": "Some value",
@@ -91,11 +91,13 @@ describe("AuditLogDynamoGateway", () => {
       expect(actualOtherMessage).toBeDefined()
       expect(actualOtherMessage.events).toBeDefined()
       expect(actualOtherMessage.events).toHaveLength(0)
+      expect(actualOtherMessage.messageStatus).toBe(otherMessage.messageStatus)
 
       const actualMessage = <AuditLog>actualRecords.Items?.find((r) => r.messageId === message.messageId)
       expect(actualMessage).toBeDefined()
       expect(actualMessage.events).toBeDefined()
       expect(actualMessage.events).toHaveLength(1)
+      expect(actualMessage.messageStatus).toBe("Completed")
 
       const actualEvent = actualMessage.events[0]
       expect(actualEvent.eventSource).toBe(expectedEvent.eventSource)
@@ -109,11 +111,11 @@ describe("AuditLogDynamoGateway", () => {
       expect(actualEventAttributes["Attribute two"]).toBe(2)
     })
 
-    it("should add two events to the audit log", async () => {
+    it("should add two events to the audit log and update the message status to the latest event type", async () => {
       const expectedEventOne = new AuditLogEvent("information", new Date(), "Test event one")
       expectedEventOne.eventSource = "Event source one"
       expectedEventOne.attributes = { EventOneAttribute: "Event one attribute" }
-      const expectedEventTwo = new AuditLogEvent("error", new Date(), "Test event two")
+      const expectedEventTwo = new AuditLogEvent("error", new Date(), "PNC Response not received")
       expectedEventTwo.eventSource = "Event source two"
       expectedEventTwo.attributes = { EventTwoAttribute: "Event two attribute" }
 
@@ -132,6 +134,7 @@ describe("AuditLogDynamoGateway", () => {
       expect(actualMessage).toBeDefined()
       expect(actualMessage.events).toBeDefined()
       expect(actualMessage.events).toHaveLength(2)
+      expect(actualMessage.messageStatus).toBe(expectedEventTwo.eventType)
 
       const actualEventOne = actualMessage.events.find((e) => e.eventSource === expectedEventOne.eventSource)
       expect(actualEventOne?.eventSource).toBe(expectedEventOne.eventSource)
