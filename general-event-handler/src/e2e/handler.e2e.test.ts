@@ -1,8 +1,8 @@
-import { AuditLog, isError } from "shared"
-import AmazonMqEventSourceRecordEvent from "../AmazonMqEventSourceRecordEvent"
-import AuditLogApiGateway from "../gateways/AuditLogApiGateway"
-import getLocalAuditLogApiUrl from "../getLocalAuditLogApiUrl"
-import handler from "../handler"
+import { AuditLog, isError, encodeBase64 } from "shared"
+import AmazonMqEventSourceRecordEvent from "src/types/AmazonMqEventSourceRecordEvent"
+import AuditLogApiGateway from "src/gateways/AuditLogApiGateway"
+import getLocalAuditLogApiUrl from "src/getLocalAuditLogApiUrl"
+import handler from "src/handler"
 import invokeGeneralEventHandlerFunction from "./invokeGeneralEventHandlerFunction"
 
 const createMessage = (correlationId: string): string => {
@@ -39,7 +39,11 @@ const createMqEvent = (messages: string[]): AmazonMqEventSourceRecordEvent => {
   return {
     eventSource: "aws:amq",
     eventSourceArn: "ARN",
-    messages
+    messages: messages.map((messageXml, index) => ({
+      messageID: `msg-${index + 1}`,
+      messageType: "jms/text-message",
+      data: encodeBase64(messageXml)
+    }))
   }
 }
 

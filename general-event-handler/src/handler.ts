@@ -1,9 +1,9 @@
 import { isError } from "shared"
 import transformGeneralEventLogItem from "./use-cases/transformGeneralEventLogItem"
-import AmazonMqEventSourceRecordEvent from "./AmazonMqEventSourceRecordEvent"
 import SendCreateEventRequestUseCase from "./use-cases/SendCreateEventRequestUseCase"
 import parseGeneralEventLogItem from "./use-cases/parseGeneralEventLogItem"
-import { GeneralEventLogItem } from "./types"
+import { AmazonMqEventSourceRecordEvent } from "./types"
+import extractMessageXml from "./use-cases/extractMessageXml"
 
 export default async (event: AmazonMqEventSourceRecordEvent): Promise<void> => {
   const { messages } = event
@@ -18,12 +18,22 @@ export default async (event: AmazonMqEventSourceRecordEvent): Promise<void> => {
   }
 
   // TODO: Handle multiple messages with batching?
+  // See: https://dsdmoj.atlassian.net/browse/BICAWS-794
   const message = messages[0]
-  const logItem = <GeneralEventLogItem>await parseGeneralEventLogItem(message)
-  const auditLogEvent = transformGeneralEventLogItem(logItem)
+  const xml = extractMessageXml(message)
+  if (isError(xml)) {
+    throw xml
+  }
+
+  const parseResult = await parseGeneralEventLogItem(xml)
+  if (isError(parseResult)) {
+    throw parseResult
+  }
+
+  const auditLogEvent = transformGeneralEventLogItem(parseResult)
 
   const sendCreateEventRequest = new SendCreateEventRequestUseCase(apiUrl)
-  const result = await sendCreateEventRequest.execute(logItem.logEvent.correlationID, auditLogEvent)
+  const result = await sendCreateEventRequest.execute(parseResult.logEvent.correlationID, auditLogEvent)
 
   if (isError(result)) {
     throw result
