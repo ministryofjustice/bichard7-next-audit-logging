@@ -1,7 +1,4 @@
-process.env.AWS_URL = "dummy"
-process.env.AWS_REGION = "dummy"
-process.env.AUDIT_LOG_TABLE_NAME = "dummy"
-
+import "src/testConfig"
 import {
   APIGatewayProxyEvent,
   APIGatewayProxyEventPathParameters,
@@ -65,7 +62,7 @@ test("should respond with error", async () => {
   const messages = await getMessages(event)
   const actualResponse = <APIGatewayProxyResult>messages
 
-  expect(actualResponse.statusCode).toBe(HttpStatusCode.internalServerError)
+  expect(actualResponse.statusCode).toBe(HttpStatusCode.badRequest)
   expect(actualResponse.body).toEqual("Error: Expected Error")
 })
 

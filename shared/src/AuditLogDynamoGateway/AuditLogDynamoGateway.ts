@@ -63,6 +63,26 @@ export default class AuditLogDynamoGateway extends DynamoGateway {
     return result?.Item as AuditLog
   }
 
+  async fetchEvents(messageId: string): PromiseResult<AuditLogEvent[]> {
+    const result = await this.fetchOne(messageId)
+
+    if (isError(result)) {
+      return result
+    }
+
+    if (!result) {
+      return new Error(`Couldn't get events for message '${messageId}'.`)
+    }
+
+    if (!result.events) {
+      return []
+    }
+
+    const sortedEvents = result.events.sort((eventA, eventB) => (eventA.timestamp > eventB.timestamp ? -1 : 1))
+
+    return sortedEvents
+  }
+
   async addEvent(messageId: string, event: AuditLogEvent): PromiseResult<void> {
     const params = {
       keyName: this.tableKey,

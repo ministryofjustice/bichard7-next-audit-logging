@@ -11,16 +11,20 @@ const MessageView = () => {
   const router = useRouter()
   const { messageId } = router.query
 
-  const { data, error } = useSWR(`/api/messages/${messageId}`, fetcher)
+  const { data: messageData, error: messageError } = useSWR(`/api/messages/${messageId}`, fetcher)
+  const { data: eventsData, error: eventsError } = useSWR(`/api/messages/${messageId}/events`, fetcher)
+
+  const getPageTitle = () =>
+    messageError || !messageData ? "Message Detail" : messageData.message.externalCorrelationId
 
   return (
-    <Layout pageTitle="Events">
+    <Layout pageTitle={getPageTitle()}>
       <Header text="Events" />
 
-      {!!error && <Error message={error.message} />}
-      {!!data && <Events events={(data.message && data.message.events) || []} />}
+      {!!eventsError && <Error message={eventsError.message} />}
+      {!!eventsData && <Events events={(eventsData && eventsData.events) || []} />}
 
-      <Loading isLoading={!data} />
+      <Loading isLoading={!eventsData || !messageData} />
     </Layout>
   )
 }
