@@ -35,10 +35,10 @@ test("should transform to AuditLogEvent with matching values", () => {
 })
 
 test("should transform to AuditLogEvent with matching values when nameValuePairs does not exist", () => {
-  const actualLogItem = { ...eventDetails }
-  delete eventDetails.nameValuePairs
+  const actualEvent = { ...eventDetails }
+  delete actualEvent.nameValuePairs
 
-  const event = transformGeneralEventLogItem(actualLogItem)
+  const event = transformGeneralEventLogItem(actualEvent)
 
   expect(event.eventSource).toBe(eventDetails.componentID)
   expect(event.category).toBe(eventDetails.eventCategory)

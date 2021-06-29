@@ -81,7 +81,7 @@ test("should throw error when logEvent is not set", async () => {
   const item = await parseGeneralEventLogItem(actualXml).catch((error) => error)
 
   expect(isError(item)).toBe(true)
-  expect((<Error>item).message).toBe("logEvent must have value.")
+  expect((<Error>item).message).toBe("The XML must contain a logItem or auditEvent element at the root.")
 })
 
 test("should throw error when eventType is not set", async () => {
