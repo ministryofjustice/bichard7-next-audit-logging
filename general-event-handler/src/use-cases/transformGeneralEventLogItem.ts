@@ -1,4 +1,4 @@
-import { AuditLogEvent, EventCategory, GeneralEventLogItem } from "src/types"
+import { AuditLogEvent, EventCategory, EventDetails } from "src/types"
 
 const mapEventCategory = (category: string): EventCategory => {
   switch (category) {
@@ -13,18 +13,20 @@ const mapEventCategory = (category: string): EventCategory => {
   }
 }
 
-export default (generalEventLogItem: GeneralEventLogItem): AuditLogEvent => {
-  const category = mapEventCategory(generalEventLogItem.logEvent.eventCategory)
-  const timestamp = new Date(generalEventLogItem.logEvent.eventDateTime)
+export default (eventDetails: EventDetails): AuditLogEvent => {
+  const { eventCategory, eventDateTime, eventType, componentID, nameValuePairs } = eventDetails
+
+  const category = mapEventCategory(eventCategory)
+  const timestamp = new Date(eventDateTime)
 
   const event = new AuditLogEvent({
-    eventSource: generalEventLogItem.logEvent.componentID,
+    eventSource: componentID,
     category,
-    eventType: generalEventLogItem.logEvent.eventType,
+    eventType,
     timestamp
   })
 
-  const attributes = generalEventLogItem.logEvent.nameValuePairs?.nameValuePair
+  const attributes = nameValuePairs?.nameValuePair
   if (attributes && Array.isArray(attributes)) {
     attributes.forEach((attribute) => event.addAttribute(attribute.name, attribute.value))
   }
