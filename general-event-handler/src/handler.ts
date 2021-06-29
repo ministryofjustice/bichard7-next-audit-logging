@@ -33,7 +33,7 @@ export default async (event: AmazonMqEventSourceRecordEvent): Promise<void> => {
   const auditLogEvent = transformGeneralEventLogItem(parseResult)
 
   const sendCreateEventRequest = new SendCreateEventRequestUseCase(apiUrl)
-  const result = await sendCreateEventRequest.execute(parseResult.logEvent.correlationID, auditLogEvent)
+  const result = await sendCreateEventRequest.execute(parseResult.correlationID, auditLogEvent)
 
   if (isError(result)) {
     throw result
