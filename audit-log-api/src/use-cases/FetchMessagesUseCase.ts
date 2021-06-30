@@ -1,4 +1,4 @@
-import { PromiseResult, AuditLog, AuditLogDynamoGateway } from "shared"
+import { PromiseResult, AuditLog, AuditLogDynamoGateway, AuditLogStatus } from "shared"
 
 export default class FetchMessagesUseCase {
   constructor(private readonly gateway: AuditLogDynamoGateway) {}
@@ -13,5 +13,9 @@ export default class FetchMessagesUseCase {
 
   getByExternalCorrelationId(externalCorrelationId: string): PromiseResult<AuditLog | null> {
     return this.gateway.fetchByExternalCorrelationId(externalCorrelationId)
+  }
+
+  getByStatus(status: AuditLogStatus): PromiseResult<AuditLog[]> {
+    return this.gateway.fetchByStatus(status)
   }
 }

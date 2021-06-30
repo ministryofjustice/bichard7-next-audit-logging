@@ -81,4 +81,29 @@ describe("parseGetMessagesRequest()", () => {
     expect(actualMessage.messageId).toBe(expectedMessage.messageId)
     expect(actualMessage.externalCorrelationId).toBe(expectedMessage.externalCorrelationId)
   })
+
+  it("should return messages by status when status parameter exists in the query string", async () => {
+    const expectedStatus = "Error"
+    const expectedMessage = new AuditLog("1", new Date(), "Xml")
+    expectedMessage.status = expectedStatus
+    const event = <APIGatewayProxyEvent>(<unknown>{
+      queryStringParameters: {
+        status: expectedStatus
+      }
+    })
+    const fetchMessages = new FetchMessagesUseCase(<AuditLogDynamoGateway>{})
+    jest.spyOn(fetchMessages, "getByStatus").mockResolvedValue([expectedMessage])
+
+    const parseRequestResult = parseGetMessagesRequest(event, fetchMessages)
+    const result = await parseRequestResult.fetchMessages()
+
+    expect(isError(result)).toBe(false)
+
+    const actualMessages = <AuditLog[]>result
+    expect(actualMessages).toHaveLength(1)
+
+    const actualMessage = actualMessages[0]
+    expect(actualMessage.messageId).toBe(expectedMessage.messageId)
+    expect(actualMessage.status).toBe(expectedStatus)
+  })
 })
