@@ -1,13 +1,18 @@
 import AuditLogEvent from "src/AuditLogEvent"
 
-const getMessageStatus = (event: AuditLogEvent): string => {
+interface GetMessageStatusResult {
+  status: string
+  errorMessage?: string
+}
+
+const getMessageStatus = (event: AuditLogEvent): GetMessageStatusResult => {
   switch (event.eventType) {
     case "PNC Response received":
-      return "Completed"
+      return { status: "Completed" }
     case "PNC Response not received":
-      return event.eventType // Error status
+      return { status: "Error", errorMessage: event.eventType }
     default:
-      return "Processing"
+      return { status: "Processing" }
   }
 }
 

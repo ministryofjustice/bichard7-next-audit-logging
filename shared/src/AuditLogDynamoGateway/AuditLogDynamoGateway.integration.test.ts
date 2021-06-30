@@ -91,13 +91,13 @@ describe("AuditLogDynamoGateway", () => {
       expect(actualOtherMessage).toBeDefined()
       expect(actualOtherMessage.events).toBeDefined()
       expect(actualOtherMessage.events).toHaveLength(0)
-      expect(actualOtherMessage.messageStatus).toBe(otherMessage.messageStatus)
+      expect(actualOtherMessage.status).toBe(otherMessage.status)
 
       const actualMessage = <AuditLog>actualRecords.Items?.find((r) => r.messageId === message.messageId)
       expect(actualMessage).toBeDefined()
       expect(actualMessage.events).toBeDefined()
       expect(actualMessage.events).toHaveLength(1)
-      expect(actualMessage.messageStatus).toBe("Completed")
+      expect(actualMessage.status).toBe("Completed")
 
       const actualEvent = actualMessage.events[0]
       expect(actualEvent.eventSource).toBe(expectedEvent.eventSource)
@@ -134,7 +134,8 @@ describe("AuditLogDynamoGateway", () => {
       expect(actualMessage).toBeDefined()
       expect(actualMessage.events).toBeDefined()
       expect(actualMessage.events).toHaveLength(2)
-      expect(actualMessage.messageStatus).toBe(expectedEventTwo.eventType)
+      expect(actualMessage.status).toBe("Error")
+      expect(actualMessage.error).toBe(expectedEventTwo.eventType)
 
       const actualEventOne = actualMessage.events.find((e) => e.eventSource === expectedEventOne.eventSource)
       expect(actualEventOne?.eventSource).toBe(expectedEventOne.eventSource)

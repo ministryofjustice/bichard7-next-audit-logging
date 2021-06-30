@@ -6,7 +6,7 @@ module.exports = {
       receivedDate: "2021-11-14T00:00:00.000Z",
       messageXml: "XML-1",
       caseId: "1000",
-      messageStatus: "Processing",
+      status: "Processing",
       events: [
         {
           category: "information",
@@ -23,7 +23,8 @@ module.exports = {
       receivedDate: "2021-11-13T23:00:00.000Z",
       messageXml: "XML-2",
       caseId: "2000",
-      messageStatus: "PNC Response not received",
+      status: "Error",
+      error: "PNC Response not received",
       events: [
         {
           category: "information",
@@ -47,7 +48,8 @@ module.exports = {
       receivedDate: "2021-11-13T20:30:00.000Z",
       messageXml: "XML-3",
       caseId: "3000",
-      messageStatus: "PNC Response not received",
+      status: "Error",
+      error: "PNC Response not received",
       events: [
         {
           category: "information",
@@ -71,7 +73,7 @@ module.exports = {
       receivedDate: "2021-11-13T18:15:00.000Z",
       messageXml: "XML-4",
       caseId: "4000",
-      messageStatus: "Completed",
+      status: "Completed",
       events: [
         {
           category: "information",
@@ -95,7 +97,7 @@ module.exports = {
       receivedDate: "2021-11-13T17:12:00.000Z",
       messageXml: "XML-5",
       caseId: "5000",
-      messageStatus: "Completed",
+      status: "Completed",
       events: [
         {
           category: "information",
@@ -119,7 +121,7 @@ module.exports = {
       receivedDate: "2021-11-13T15:47:00.000Z",
       messageXml: "XML-6",
       caseId: "6000",
-      messageStatus: "Completed",
+      status: "Completed",
       events: [
         {
           category: "information",

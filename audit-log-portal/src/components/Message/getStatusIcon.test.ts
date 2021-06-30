@@ -9,7 +9,7 @@ interface TestInput {
 }
 
 test.each<TestInput>([
-  { status: "Error message", expectedIcon: ErrorIcon },
+  { status: "Error", expectedIcon: ErrorIcon },
   { status: "Completed", expectedIcon: SuccessIcon },
   { status: "Processing", expectedIcon: ProcessingIcon }
 ])("returns <$expected/> when status is $status", ({ status, expectedIcon }) => {
