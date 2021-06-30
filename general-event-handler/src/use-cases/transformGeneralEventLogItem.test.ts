@@ -1,50 +1,48 @@
-import { GeneralEventLogItem } from "src/types"
+import { EventDetails } from "src/types"
 import transformGeneralEventLogItem from "./transformGeneralEventLogItem"
 
-const logItem: GeneralEventLogItem = {
-  logEvent: {
-    componentID: "componentID",
-    correlationID: "correlationID",
-    eventCategory: "warning",
-    eventDateTime: new Date().toISOString(),
-    eventType: "eventType",
-    systemID: "BR7",
-    nameValuePairs: {
-      nameValuePair: [
-        {
-          name: "Attribute1",
-          value: "SomeValue"
-        },
-        {
-          name: "Attribute2",
-          value: "AnotherValue"
-        }
-      ]
-    }
+const eventDetails: EventDetails = {
+  componentID: "componentID",
+  correlationID: "correlationID",
+  eventCategory: "warning",
+  eventDateTime: new Date().toISOString(),
+  eventType: "eventType",
+  systemID: "BR7",
+  nameValuePairs: {
+    nameValuePair: [
+      {
+        name: "Attribute1",
+        value: "SomeValue"
+      },
+      {
+        name: "Attribute2",
+        value: "AnotherValue"
+      }
+    ]
   }
 }
 
 test("should transform to AuditLogEvent with matching values", () => {
-  const event = transformGeneralEventLogItem(logItem)
+  const event = transformGeneralEventLogItem(eventDetails)
 
-  expect(event.eventSource).toBe(logItem.logEvent.componentID)
-  expect(event.category).toBe(logItem.logEvent.eventCategory)
-  expect(event.timestamp).toBe(logItem.logEvent.eventDateTime)
-  expect(event.eventType).toBe(logItem.logEvent.eventType)
+  expect(event.eventSource).toBe(eventDetails.componentID)
+  expect(event.category).toBe(eventDetails.eventCategory)
+  expect(event.timestamp).toBe(eventDetails.eventDateTime)
+  expect(event.eventType).toBe(eventDetails.eventType)
   expect(Object.keys(event.attributes)).toHaveLength(2)
   expect(event.attributes.Attribute1).toBe("SomeValue")
   expect(event.attributes.Attribute2).toBe("AnotherValue")
 })
 
 test("should transform to AuditLogEvent with matching values when nameValuePairs does not exist", () => {
-  const actualLogItem = { ...logItem }
-  delete actualLogItem.logEvent.nameValuePairs
+  const actualEvent = { ...eventDetails }
+  delete actualEvent.nameValuePairs
 
-  const event = transformGeneralEventLogItem(actualLogItem)
+  const event = transformGeneralEventLogItem(actualEvent)
 
-  expect(event.eventSource).toBe(logItem.logEvent.componentID)
-  expect(event.category).toBe(logItem.logEvent.eventCategory)
-  expect(event.timestamp).toBe(logItem.logEvent.eventDateTime)
-  expect(event.eventType).toBe(logItem.logEvent.eventType)
+  expect(event.eventSource).toBe(eventDetails.componentID)
+  expect(event.category).toBe(eventDetails.eventCategory)
+  expect(event.timestamp).toBe(eventDetails.eventDateTime)
+  expect(event.eventType).toBe(eventDetails.eventType)
   expect(Object.keys(event.attributes)).toHaveLength(0)
 })

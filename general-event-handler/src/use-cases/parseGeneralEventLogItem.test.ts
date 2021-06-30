@@ -1,10 +1,10 @@
 import { isError } from "shared"
-import { GeneralEventLogItem } from "src/types"
+import { EventDetails } from "src/types"
 import { v4 as uuid } from "uuid"
 import parseGeneralEventLogItem from "./parseGeneralEventLogItem"
 
 const correlationId = uuid()
-const eventDateTime = "2021-05-10T10:09:54.477+00:00"
+const timestamp = "2021-05-10T10:09:54.477+00:00"
 const xml = `
   <?xml version="1.0" encoding="UTF-8"?>
   <logEvent xmlns="http://www.example.org/GeneralEventLogMessage" xmlns:ds="http://schemas.cjse.gov.uk/datastandards/2006-10" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
@@ -13,7 +13,7 @@ const xml = `
     <eventCategory>warning</eventCategory>
     <eventType>PNC Response not received</eventType>
     <correlationID>${correlationId}</correlationID>
-    <eventDateTime>${eventDateTime}</eventDateTime>
+    <eventDateTime>${timestamp}</eventDateTime>
     <nameValuePairs>
         <nameValuePair>
           <name>PNC Request Type</name>
@@ -32,19 +32,22 @@ const xml = `
 `
 
 test("should parse the values correctly", async () => {
-  const item = <GeneralEventLogItem>await parseGeneralEventLogItem(xml)
+  const result = await parseGeneralEventLogItem(xml)
 
-  expect(isError(item)).toBe(false)
-  expect(item).toBeDefined()
-  expect(item.logEvent).toBeDefined()
-  expect(item.logEvent.componentID).toBe("PNC Access Manager")
-  expect(item.logEvent.correlationID).toBe(correlationId)
-  expect(item.logEvent.eventCategory).toBe("warning")
-  expect(item.logEvent.eventDateTime).toBe(eventDateTime)
-  expect(item.logEvent.eventType).toBe("PNC Response not received")
-  expect(item.logEvent.systemID).toBe("BR7")
+  expect(isError(result)).toBe(false)
+  expect(result).toBeDefined()
 
-  const attributes = item.logEvent.nameValuePairs?.nameValuePair
+  const { componentID, correlationID, eventCategory, eventDateTime, eventType, systemID, nameValuePairs } = <
+    EventDetails
+  >result
+  expect(componentID).toBe("PNC Access Manager")
+  expect(correlationID).toBe(correlationId)
+  expect(eventCategory).toBe("warning")
+  expect(eventDateTime).toBe(timestamp)
+  expect(eventType).toBe("PNC Response not received")
+  expect(systemID).toBe("BR7")
+
+  const attributes = nameValuePairs?.nameValuePair
   expect(attributes).toBeDefined()
   expect(attributes).toHaveLength(3)
 
@@ -78,7 +81,7 @@ test("should throw error when logEvent is not set", async () => {
   const item = await parseGeneralEventLogItem(actualXml).catch((error) => error)
 
   expect(isError(item)).toBe(true)
-  expect((<Error>item).message).toBe("logEvent must have value.")
+  expect((<Error>item).message).toBe("The XML must contain a logItem or auditEvent element at the root.")
 })
 
 test("should throw error when eventType is not set", async () => {
