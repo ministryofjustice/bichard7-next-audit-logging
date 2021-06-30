@@ -26,7 +26,12 @@ describe("AuditLogDynamoGateway", () => {
       secondaryIndexes: [
         {
           name: "externalCorrelationIdIndex",
-          key: "externalCorrelationId"
+          hashKey: "externalCorrelationId"
+        },
+        {
+          name: "statusIndex",
+          hashKey: "status",
+          rangeKey: "receivedDate"
         }
       ],
       skipIfExists: true
@@ -269,6 +274,31 @@ describe("AuditLogDynamoGateway", () => {
 
       expect(isError(result)).toBe(false)
       expect(<AuditLog>result).toBeNull()
+    })
+  })
+
+  describe("fetchByStatus", () => {
+    it("should return one AuditLog when there is a record with Completed status", async () => {
+      await Promise.allSettled(
+        [...Array(3).keys()].map(async (i: number) => {
+          const auditLog = new AuditLog(`External correlation id ${i}`, new Date(), "XML")
+          await gateway.create(auditLog)
+        })
+      )
+      const expectedAuditLog = new AuditLog(`External correlation id`, new Date(), "XML")
+      expectedAuditLog.status = "Completed"
+      await gateway.create(expectedAuditLog)
+
+      const result = await gateway.fetchByStatus("Completed")
+
+      expect(isError(result)).toBe(false)
+      expect(result).toBeDefined()
+
+      const items = <AuditLog[]>result
+      expect(items).toHaveLength(1)
+
+      const item = items[0]
+      expect(item.status).toBe(expectedAuditLog.status)
     })
   })
 

@@ -54,6 +54,23 @@ export default class AuditLogDynamoGateway extends DynamoGateway {
     return items[0]
   }
 
+  async fetchByStatus(status: AuditLogStatus): PromiseResult<AuditLog[]> {
+    const options = {
+      indexName: "statusIndex",
+      attributeName: "status",
+      attributeValue: status,
+      isAscendingOrder: false
+    }
+
+    const result = await this.fetchByIndex(this.tableName, options)
+
+    if (isError(result)) {
+      return result
+    }
+
+    return <AuditLog[]>result?.Items
+  }
+
   async fetchOne(messageId: string): PromiseResult<AuditLog> {
     const result = await this.getOne(this.tableName, this.tableKey, messageId)
 
