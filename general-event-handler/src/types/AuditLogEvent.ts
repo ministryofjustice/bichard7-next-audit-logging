@@ -1,3 +1,4 @@
+import { KeyValuePair } from "shared"
 import AuditLogEventOptions from "./AuditLogEventOptions"
 import EventCategory from "./EventCategory"
 
@@ -11,7 +12,7 @@ export default class AuditLogEvent {
 
   public readonly timestamp: string
 
-  public readonly attributes: { [name: string]: string } = {}
+  public readonly attributes: KeyValuePair = {}
 
   constructor(options: AuditLogEventOptions) {
     this.eventSource = options.eventSource

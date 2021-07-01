@@ -5,15 +5,15 @@ import {
   ExpressionAttributeValueMap,
   UpdateExpression
 } from "aws-sdk/clients/dynamodb"
-import { PromiseResult } from "../types"
+import { KeyValuePair, PromiseResult } from "../types"
 import DynamoDbConfig from "./DynamoDbConfig"
 
 interface UpdateOptions {
   keyName: string
   keyValue: unknown
   updateExpression: UpdateExpression
-  updateExpressionValues: ExpressionAttributeValueMap | { [name: string]: unknown }
-  expressionAttributeNames?: ExpressionAttributeNameMap | { [name: string]: unknown }
+  updateExpressionValues: ExpressionAttributeValueMap | KeyValuePair
+  expressionAttributeNames?: ExpressionAttributeNameMap | KeyValuePair
 }
 
 interface FetchByIndexOptions {
