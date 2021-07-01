@@ -1,12 +1,15 @@
 import { render } from "testing/render"
-import { AuditLog } from "shared"
+import { AuditLog, AuditLogStatus } from "shared"
 import StatusIcon from "./StatusIcon"
 
-test.each<string>(["Processing", "Completed", "Error message"])("matches the snapshot when status is %s", (status) => {
-  const message = new AuditLog("ExternalCorrelationId", new Date(), "XML")
-  message.status = status
+test.each<string>([AuditLogStatus.processing, AuditLogStatus.completed, AuditLogStatus.error])(
+  "matches the snapshot when status is %s",
+  (status) => {
+    const message = new AuditLog("ExternalCorrelationId", new Date(), "XML")
+    message.status = status
 
-  const { container } = render(<StatusIcon message={message} />)
+    const { container } = render(<StatusIcon message={message} />)
 
-  expect(container).toMatchSnapshot()
-})
+    expect(container).toMatchSnapshot()
+  }
+)

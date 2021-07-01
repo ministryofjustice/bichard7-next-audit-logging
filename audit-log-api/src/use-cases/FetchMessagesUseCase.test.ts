@@ -1,4 +1,4 @@
-import { isError, DynamoDbConfig, AuditLog, AuditLogDynamoGateway } from "shared"
+import { isError, DynamoDbConfig, AuditLog, AuditLogDynamoGateway, AuditLogStatus } from "shared"
 import FetchMessagesUseCase from "./FetchMessagesUseCase"
 
 const config: DynamoDbConfig = {
@@ -74,7 +74,7 @@ describe("FetchMessagesUseCase", () => {
 
     jest.spyOn(gateway, "fetchByStatus").mockResolvedValue([expectedMessage])
 
-    const result = await useCase.getByStatus("Processing")
+    const result = await useCase.getByStatus(AuditLogStatus.processing)
 
     expect(isError(result)).toBe(false)
 
@@ -86,14 +86,14 @@ describe("FetchMessagesUseCase", () => {
     expect(actualMessage.externalCorrelationId).toBe(expectedMessage.externalCorrelationId)
     expect(actualMessage.caseId).toBe(expectedMessage.caseId)
     expect(actualMessage.receivedDate).toContain("2021-03-24")
-    expect(actualMessage.status).toBe("Processing")
+    expect(actualMessage.status).toBe(AuditLogStatus.processing)
   })
 
   it("should return an error when fetchByStatus fails", async () => {
     const expectedError = new Error("Results not found")
     jest.spyOn(gateway, "fetchByStatus").mockResolvedValue(expectedError)
 
-    const result = await useCase.getByStatus("Processing")
+    const result = await useCase.getByStatus(AuditLogStatus.processing)
 
     expect(isError(result)).toBe(true)
     expect(result).toBe(expectedError)
@@ -116,7 +116,7 @@ describe("FetchMessagesUseCase", () => {
     expect(actualMessage.externalCorrelationId).toBe(expectedMessage.externalCorrelationId)
     expect(actualMessage.caseId).toBe(expectedMessage.caseId)
     expect(actualMessage.receivedDate).toContain("2021-03-24")
-    expect(actualMessage.status).toBe("Processing")
+    expect(actualMessage.status).toBe(AuditLogStatus.processing)
   })
 
   it("should return an error when fetchByExternalCorrelationId fails", async () => {

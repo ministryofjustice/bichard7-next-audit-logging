@@ -1,4 +1,5 @@
 import AuditLogEvent from "src/AuditLogEvent"
+import { AuditLogStatus } from "../utils"
 
 interface GetMessageStatusResult {
   status: string
@@ -8,11 +9,11 @@ interface GetMessageStatusResult {
 const getMessageStatus = (event: AuditLogEvent): GetMessageStatusResult => {
   switch (event.eventType) {
     case "PNC Response received":
-      return { status: "Completed" }
+      return { status: AuditLogStatus.completed }
     case "PNC Response not received":
-      return { status: "Error", errorMessage: event.eventType }
+      return { status: AuditLogStatus.error, errorMessage: event.eventType }
     default:
-      return { status: "Processing" }
+      return { status: AuditLogStatus.processing }
   }
 }
 

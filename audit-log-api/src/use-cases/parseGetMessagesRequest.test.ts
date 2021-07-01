@@ -1,4 +1,4 @@
-import { AuditLog, AuditLogDynamoGateway, isError } from "shared"
+import { AuditLog, AuditLogDynamoGateway, AuditLogStatus, isError } from "shared"
 import { APIGatewayProxyEvent } from "aws-lambda"
 import parseGetMessagesRequest from "./parseGetMessagesRequest"
 import FetchMessagesUseCase from "./FetchMessagesUseCase"
@@ -83,7 +83,7 @@ describe("parseGetMessagesRequest()", () => {
   })
 
   it("should return messages by status when status parameter exists in the query string", async () => {
-    const expectedStatus = "Error"
+    const expectedStatus = AuditLogStatus.error
     const expectedMessage = new AuditLog("1", new Date(), "Xml")
     expectedMessage.status = expectedStatus
     const event = <APIGatewayProxyEvent>(<unknown>{

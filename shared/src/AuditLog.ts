@@ -1,5 +1,6 @@
 import { v4 as uuid } from "uuid"
 import AuditLogEvent from "./AuditLogEvent"
+import { AuditLogStatus } from "./utils"
 
 export default class AuditLog {
   public readonly messageId: string
@@ -10,7 +11,7 @@ export default class AuditLog {
 
   public events: AuditLogEvent[] = []
 
-  public status = "Processing"
+  public status = AuditLogStatus.processing
 
   public error: string
 

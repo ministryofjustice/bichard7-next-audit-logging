@@ -1,5 +1,5 @@
 import { APIGatewayProxyEvent } from "aws-lambda"
-import { PromiseResult, AuditLog, AuditLogStatus } from "shared"
+import { PromiseResult, AuditLog } from "shared"
 import FetchMessagesUseCase from "./FetchMessagesUseCase"
 
 interface ParseGetMessagesRequestResult {
@@ -12,7 +12,7 @@ const parseGetMessagesRequest = (
 ): ParseGetMessagesRequestResult => {
   const messageId = event.pathParameters?.messageId
   const externalCorrelationId = event.queryStringParameters?.externalCorrelationId
-  const status = <AuditLogStatus>event.queryStringParameters?.status
+  const status = event.queryStringParameters?.status
   let fetchMessagesAction: () => PromiseResult<AuditLog | AuditLog[] | null>
 
   if (messageId) {

@@ -1,6 +1,6 @@
 import AuditLogEvent from "src/AuditLogEvent"
 import getMessageStatus from "./getMessageStatus"
-import { AuditLogStatus, isError, PromiseResult } from "../types"
+import { isError, PromiseResult } from "../types"
 import { DynamoGateway, DynamoDbConfig } from "../DynamoGateway"
 import AuditLog from "../AuditLog"
 
@@ -54,7 +54,7 @@ export default class AuditLogDynamoGateway extends DynamoGateway {
     return items[0]
   }
 
-  async fetchByStatus(status: AuditLogStatus): PromiseResult<AuditLog[]> {
+  async fetchByStatus(status: string): PromiseResult<AuditLog[]> {
     const options = {
       indexName: "statusIndex",
       attributeName: "status",

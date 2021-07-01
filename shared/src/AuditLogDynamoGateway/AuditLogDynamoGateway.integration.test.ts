@@ -6,6 +6,7 @@ import { DynamoDbConfig } from "../DynamoGateway"
 import TestDynamoGateway from "../DynamoGateway/TestDynamoGateway"
 import AuditLogDynamoGateway from "./AuditLogDynamoGateway"
 import { AuditLogEvent } from ".."
+import { AuditLogStatus } from "../utils"
 
 const config: DynamoDbConfig = {
   DYNAMO_URL: "http://localhost:4566",
@@ -102,7 +103,7 @@ describe("AuditLogDynamoGateway", () => {
       expect(actualMessage).toBeDefined()
       expect(actualMessage.events).toBeDefined()
       expect(actualMessage.events).toHaveLength(1)
-      expect(actualMessage.status).toBe("Completed")
+      expect(actualMessage.status).toBe(AuditLogStatus.completed)
 
       const actualEvent = actualMessage.events[0]
       expect(actualEvent.eventSource).toBe(expectedEvent.eventSource)
@@ -139,7 +140,7 @@ describe("AuditLogDynamoGateway", () => {
       expect(actualMessage).toBeDefined()
       expect(actualMessage.events).toBeDefined()
       expect(actualMessage.events).toHaveLength(2)
-      expect(actualMessage.status).toBe("Error")
+      expect(actualMessage.status).toBe(AuditLogStatus.error)
       expect(actualMessage.error).toBe(expectedEventTwo.eventType)
 
       const actualEventOne = actualMessage.events.find((e) => e.eventSource === expectedEventOne.eventSource)
@@ -286,10 +287,10 @@ describe("AuditLogDynamoGateway", () => {
         })
       )
       const expectedAuditLog = new AuditLog(`External correlation id`, new Date(), "XML")
-      expectedAuditLog.status = "Completed"
+      expectedAuditLog.status = AuditLogStatus.completed
       await gateway.create(expectedAuditLog)
 
-      const result = await gateway.fetchByStatus("Completed")
+      const result = await gateway.fetchByStatus(AuditLogStatus.completed)
 
       expect(isError(result)).toBe(false)
       expect(result).toBeDefined()
