@@ -1,5 +1,5 @@
 import AuditLogEvent from "src/AuditLogEvent"
-import { AuditLogStatus } from "src/utils"
+import { AuditLogStatus } from "../utils"
 import getMessageStatus from "./getMessageStatus"
 
 interface TestInput {

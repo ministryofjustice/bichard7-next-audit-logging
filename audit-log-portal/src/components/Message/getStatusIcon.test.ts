@@ -1,8 +1,8 @@
 import ErrorIcon from "icons/ErrorIcon"
 import SuccessIcon from "icons/SuccessIcon"
 import ProcessingIcon from "icons/ProcessingIcon"
+import { AuditLogStatus } from "shared"
 import getStatusIcon from "./getStatusIcon"
-import { AuditLogStatus } from "../../../../shared/dist"
 
 interface TestInput {
   status: string
