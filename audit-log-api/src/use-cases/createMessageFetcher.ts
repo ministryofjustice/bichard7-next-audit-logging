@@ -3,14 +3,7 @@ import MessageFetcher from "src/types/MessageFetcher"
 import { FetchAll, FetchByExternalCorrelationId, FetchById, FetchByStatus } from "src/utils/MessageFetchers"
 import FetchMessagesUseCase from "./FetchMessagesUseCase"
 
-interface ParseGetMessagesRequestResult {
-  messageFetcher: MessageFetcher
-}
-
-const parseGetMessagesRequest = (
-  event: APIGatewayProxyEvent,
-  fetchMessages: FetchMessagesUseCase
-): ParseGetMessagesRequestResult => {
+const createMessageFetcher = (event: APIGatewayProxyEvent, fetchMessages: FetchMessagesUseCase): MessageFetcher => {
   const messageId = event.pathParameters?.messageId
   const externalCorrelationId = event.queryStringParameters?.externalCorrelationId
   const status = event.queryStringParameters?.status
@@ -27,7 +20,7 @@ const parseGetMessagesRequest = (
     messageFetcher = new FetchAll(fetchMessages)
   }
 
-  return { messageFetcher }
+  return messageFetcher
 }
 
-export default parseGetMessagesRequest
+export default createMessageFetcher

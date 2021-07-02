@@ -1,9 +1,9 @@
 import { AuditLog, AuditLogDynamoGateway, AuditLogStatus, isError } from "shared"
 import { APIGatewayProxyEvent } from "aws-lambda"
-import parseGetMessagesRequest from "./parseGetMessagesRequest"
+import createMessageFetcher from "./createMessageFetcher"
 import FetchMessagesUseCase from "./FetchMessagesUseCase"
 
-describe("parseGetMessagesRequest()", () => {
+describe("createMessageFetcher()", () => {
   it("should return all messages when there are no path or query string parameters", async () => {
     const expectedMessages = [
       new AuditLog("1", new Date(), "Xml"),
@@ -14,7 +14,7 @@ describe("parseGetMessagesRequest()", () => {
     const fetchMessages = new FetchMessagesUseCase(<AuditLogDynamoGateway>{})
     jest.spyOn(fetchMessages, "get").mockResolvedValue(expectedMessages)
 
-    const { messageFetcher } = parseGetMessagesRequest(event, fetchMessages)
+    const messageFetcher = createMessageFetcher(event, fetchMessages)
     const result = await messageFetcher.fetch()
 
     expect(isError(result)).toBe(false)
@@ -34,7 +34,7 @@ describe("parseGetMessagesRequest()", () => {
     const fetchMessages = new FetchMessagesUseCase(<AuditLogDynamoGateway>{})
     jest.spyOn(fetchMessages, "getById").mockResolvedValue(expectedMessage)
 
-    const { messageFetcher } = parseGetMessagesRequest(event, fetchMessages)
+    const messageFetcher = createMessageFetcher(event, fetchMessages)
     const result = await messageFetcher.fetch()
 
     expect(isError(result)).toBe(false)
@@ -53,7 +53,7 @@ describe("parseGetMessagesRequest()", () => {
     const fetchMessages = new FetchMessagesUseCase(<AuditLogDynamoGateway>{})
     jest.spyOn(fetchMessages, "getByExternalCorrelationId").mockResolvedValue(expectedMessage)
 
-    const { messageFetcher } = parseGetMessagesRequest(event, fetchMessages)
+    const messageFetcher = createMessageFetcher(event, fetchMessages)
     const result = await messageFetcher.fetch()
 
     expect(isError(result)).toBe(false)
@@ -75,7 +75,7 @@ describe("parseGetMessagesRequest()", () => {
     const fetchMessages = new FetchMessagesUseCase(<AuditLogDynamoGateway>{})
     jest.spyOn(fetchMessages, "getById").mockResolvedValue(expectedMessage)
 
-    const { messageFetcher } = parseGetMessagesRequest(event, fetchMessages)
+    const messageFetcher = createMessageFetcher(event, fetchMessages)
     const result = await messageFetcher.fetch()
 
     expect(isError(result)).toBe(false)
@@ -97,7 +97,7 @@ describe("parseGetMessagesRequest()", () => {
     const fetchMessages = new FetchMessagesUseCase(<AuditLogDynamoGateway>{})
     jest.spyOn(fetchMessages, "getByStatus").mockResolvedValue([expectedMessage])
 
-    const { messageFetcher } = parseGetMessagesRequest(event, fetchMessages)
+    const messageFetcher = createMessageFetcher(event, fetchMessages)
     const result = await messageFetcher.fetch()
 
     expect(isError(result)).toBe(false)
