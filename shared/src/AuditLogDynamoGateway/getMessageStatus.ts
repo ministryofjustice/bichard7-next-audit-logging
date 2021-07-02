@@ -3,18 +3,23 @@ import { AuditLogStatus } from "../utils"
 
 interface GetMessageStatusResult {
   status: string
-  errorMessage?: string
+  lastEventType?: string
 }
 
 const getMessageStatus = (event: AuditLogEvent): GetMessageStatusResult => {
+  let status: string
   switch (event.eventType) {
     case "PNC Response received":
-      return { status: AuditLogStatus.completed }
+      status = AuditLogStatus.completed
+      break
     case "PNC Response not received":
-      return { status: AuditLogStatus.error, errorMessage: event.eventType }
+      status = AuditLogStatus.error
+      break
     default:
-      return { status: AuditLogStatus.processing }
+      status = AuditLogStatus.processing
   }
+
+  return { status, lastEventType: event.eventType }
 }
 
 export default getMessageStatus

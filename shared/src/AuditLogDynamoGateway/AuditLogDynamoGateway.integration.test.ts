@@ -141,7 +141,7 @@ describe("AuditLogDynamoGateway", () => {
       expect(actualMessage.events).toBeDefined()
       expect(actualMessage.events).toHaveLength(2)
       expect(actualMessage.status).toBe(AuditLogStatus.error)
-      expect(actualMessage.error).toBe(expectedEventTwo.eventType)
+      expect(actualMessage.lastEventType).toBe(expectedEventTwo.eventType)
 
       const actualEventOne = actualMessage.events.find((e) => e.eventSource === expectedEventOne.eventSource)
       expect(actualEventOne?.eventSource).toBe(expectedEventOne.eventSource)

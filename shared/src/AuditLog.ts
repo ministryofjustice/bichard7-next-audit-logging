@@ -13,7 +13,7 @@ export default class AuditLog {
 
   public status = AuditLogStatus.processing
 
-  public error: string
+  public lastEventType: string
 
   constructor(public readonly externalCorrelationId: string, receivedDate: Date, public readonly messageXml: string) {
     this.messageId = uuid()

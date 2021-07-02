@@ -10,7 +10,7 @@ const StatusIcon = ({ message }: Props) => {
   const Icon = getStatusIcon(message.status)
 
   return (
-    <Tooltip title={message.error || message.status} placement="top">
+    <Tooltip title={message.lastEventType || message.status} placement="top">
       <div>
         <Icon />
       </div>

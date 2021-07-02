@@ -102,7 +102,7 @@ export default class AuditLogDynamoGateway extends DynamoGateway {
   }
 
   async addEvent(messageId: string, event: AuditLogEvent): PromiseResult<void> {
-    const { status, errorMessage } = getMessageStatus(event)
+    const { status, lastEventType } = getMessageStatus(event)
 
     const options: UpdateOptions = {
       keyName: this.tableKey,
@@ -110,16 +110,16 @@ export default class AuditLogDynamoGateway extends DynamoGateway {
       updateExpression:
         "set events = list_append(if_not_exists(events, :empty_list), :event)," +
         "#status = :status," +
-        "#error = :error",
+        "#lastEventType = :lastEventType",
       expressionAttributeNames: {
         "#status": "status",
-        "#error": "error"
+        "#lastEventType": "lastEventType"
       },
       updateExpressionValues: {
         ":event": [event],
         ":empty_list": <AuditLogEvent[]>[],
         ":status": status,
-        ":error": errorMessage || ""
+        ":lastEventType": lastEventType
       }
     }
 
