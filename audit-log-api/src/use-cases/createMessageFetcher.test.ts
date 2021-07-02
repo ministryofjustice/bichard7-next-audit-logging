@@ -1,112 +1,71 @@
-import { AuditLog, AuditLogDynamoGateway, AuditLogStatus, isError } from "shared"
+import { AuditLogDynamoGateway } from "shared"
 import { APIGatewayProxyEvent } from "aws-lambda"
+import { FetchAll, FetchByExternalCorrelationId, FetchById, FetchByStatus } from "src/utils/MessageFetchers"
 import createMessageFetcher from "./createMessageFetcher"
 import FetchMessagesUseCase from "./FetchMessagesUseCase"
 
 describe("createMessageFetcher()", () => {
-  it("should return all messages when there are no path or query string parameters", async () => {
-    const expectedMessages = [
-      new AuditLog("1", new Date(), "Xml"),
-      new AuditLog("2", new Date(), "Xml"),
-      new AuditLog("3", new Date(), "Xml")
-    ]
+  it("should return FetchAll when there are no path or query string parameters", () => {
     const event = <APIGatewayProxyEvent>{}
     const fetchMessages = new FetchMessagesUseCase(<AuditLogDynamoGateway>{})
-    jest.spyOn(fetchMessages, "get").mockResolvedValue(expectedMessages)
 
     const messageFetcher = createMessageFetcher(event, fetchMessages)
-    const result = await messageFetcher.fetch()
 
-    expect(isError(result)).toBe(false)
-
-    const actualMessages = <AuditLog[]>result
-    expect(actualMessages).toBeDefined()
-    expect(actualMessages).toHaveLength(3)
+    expect(messageFetcher instanceof FetchAll).toBe(true)
   })
 
-  it("should return one message when messageId exists in the path", async () => {
-    const expectedMessage = new AuditLog("1", new Date(), "Xml")
+  it("should return FetchById when messageId exists in the path", () => {
     const event = <APIGatewayProxyEvent>(<unknown>{
       pathParameters: {
-        messageId: expectedMessage.messageId
+        messageId: "1"
       }
     })
     const fetchMessages = new FetchMessagesUseCase(<AuditLogDynamoGateway>{})
-    jest.spyOn(fetchMessages, "getById").mockResolvedValue(expectedMessage)
 
     const messageFetcher = createMessageFetcher(event, fetchMessages)
-    const result = await messageFetcher.fetch()
 
-    expect(isError(result)).toBe(false)
-
-    const actualMessage = <AuditLog>result
-    expect(actualMessage.messageId).toBe(expectedMessage.messageId)
+    expect(messageFetcher instanceof FetchById).toBe(true)
   })
 
-  it("should return one message when externalCorrelationId exists in the query string", async () => {
-    const expectedMessage = new AuditLog("1", new Date(), "Xml")
+  it("should return FetchByExternalCorrelationId when externalCorrelationId exists in the query string", () => {
     const event = <APIGatewayProxyEvent>(<unknown>{
       queryStringParameters: {
         externalCorrelationId: "1"
       }
     })
     const fetchMessages = new FetchMessagesUseCase(<AuditLogDynamoGateway>{})
-    jest.spyOn(fetchMessages, "getByExternalCorrelationId").mockResolvedValue(expectedMessage)
 
     const messageFetcher = createMessageFetcher(event, fetchMessages)
-    const result = await messageFetcher.fetch()
 
-    expect(isError(result)).toBe(false)
-
-    const actualMessage = <AuditLog>result
-    expect(actualMessage.externalCorrelationId).toBe("1")
+    expect(messageFetcher instanceof FetchByExternalCorrelationId).toBe(true)
   })
 
-  it("should return one message by messageId when messageId and externalCorrelationId exist in the path and query string", async () => {
-    const expectedMessage = new AuditLog("1", new Date(), "Xml")
+  it("should return FetchById when messageId and externalCorrelationId exist in the path and query string", () => {
     const event = <APIGatewayProxyEvent>(<unknown>{
       pathParameters: {
-        messageId: expectedMessage.messageId
+        messageId: "1"
       },
       queryStringParameters: {
         externalCorrelationId: "2"
       }
     })
     const fetchMessages = new FetchMessagesUseCase(<AuditLogDynamoGateway>{})
-    jest.spyOn(fetchMessages, "getById").mockResolvedValue(expectedMessage)
 
     const messageFetcher = createMessageFetcher(event, fetchMessages)
-    const result = await messageFetcher.fetch()
 
-    expect(isError(result)).toBe(false)
-
-    const actualMessage = <AuditLog>result
-    expect(actualMessage.messageId).toBe(expectedMessage.messageId)
-    expect(actualMessage.externalCorrelationId).toBe(expectedMessage.externalCorrelationId)
+    expect(messageFetcher instanceof FetchById).toBe(true)
   })
 
-  it("should return messages by status when status parameter exists in the query string", async () => {
-    const expectedStatus = AuditLogStatus.error
-    const expectedMessage = new AuditLog("1", new Date(), "Xml")
-    expectedMessage.status = expectedStatus
+  it("should return messages by status when status parameter exists in the query string", () => {
     const event = <APIGatewayProxyEvent>(<unknown>{
       queryStringParameters: {
-        status: expectedStatus
+        status: "Status"
       }
     })
     const fetchMessages = new FetchMessagesUseCase(<AuditLogDynamoGateway>{})
-    jest.spyOn(fetchMessages, "getByStatus").mockResolvedValue([expectedMessage])
 
     const messageFetcher = createMessageFetcher(event, fetchMessages)
-    const result = await messageFetcher.fetch()
 
-    expect(isError(result)).toBe(false)
-
-    const actualMessages = <AuditLog[]>result
-    expect(actualMessages).toHaveLength(1)
-
-    const actualMessage = actualMessages[0]
-    expect(actualMessage.messageId).toBe(expectedMessage.messageId)
-    expect(actualMessage.status).toBe(expectedStatus)
+    expect(messageFetcher instanceof FetchByStatus).toBe(true)
   })
 })
