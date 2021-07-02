@@ -1,8 +1,8 @@
-import IMessageFetcher from "src/types/IMessageFetcher"
+import MessageFetcher from "src/types/MessageFetcher"
 import { FetchMessagesUseCase } from "src/use-cases"
 import { PromiseResult, AuditLog } from "shared"
 
-export default class FetchByExternalCorrelationId implements IMessageFetcher {
+export default class FetchByExternalCorrelationId implements MessageFetcher {
   constructor(private fetchMessages: FetchMessagesUseCase, private externalCorrelationId: string) {}
 
   fetch(): PromiseResult<AuditLog | null> {

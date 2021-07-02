@@ -1,10 +1,10 @@
 import { APIGatewayProxyEvent } from "aws-lambda"
-import IMessageFetcher from "src/types/IMessageFetcher"
+import MessageFetcher from "src/types/MessageFetcher"
 import { FetchAll, FetchByExternalCorrelationId, FetchById, FetchByStatus } from "src/utils/MessageFetchers"
 import FetchMessagesUseCase from "./FetchMessagesUseCase"
 
 interface ParseGetMessagesRequestResult {
-  messageFetcher: IMessageFetcher
+  messageFetcher: MessageFetcher
 }
 
 const parseGetMessagesRequest = (
@@ -15,7 +15,7 @@ const parseGetMessagesRequest = (
   const externalCorrelationId = event.queryStringParameters?.externalCorrelationId
   const status = event.queryStringParameters?.status
 
-  let messageFetcher: IMessageFetcher
+  let messageFetcher: MessageFetcher
 
   if (messageId) {
     messageFetcher = new FetchById(fetchMessages, messageId)
