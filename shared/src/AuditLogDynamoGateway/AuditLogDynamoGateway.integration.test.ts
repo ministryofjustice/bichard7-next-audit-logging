@@ -1,12 +1,12 @@
 import { DocumentClient } from "aws-sdk/clients/dynamodb"
 import { v4 as uuid } from "uuid"
+import AuditLogStatus from "../AuditLogStatus"
 import { isError } from "../types"
 import AuditLog from "../AuditLog"
 import { DynamoDbConfig } from "../DynamoGateway"
 import TestDynamoGateway from "../DynamoGateway/TestDynamoGateway"
 import AuditLogDynamoGateway from "./AuditLogDynamoGateway"
 import { AuditLogEvent } from ".."
-import { AuditLogStatus } from "../utils"
 
 const config: DynamoDbConfig = {
   DYNAMO_URL: "http://localhost:4566",
