@@ -16,8 +16,8 @@ const createOkResult = (messages: AuditLog[]): APIGatewayProxyResult =>
   })
 
 export default async function getMessages(event: APIGatewayProxyEvent): PromiseResult<APIGatewayProxyResult> {
-  const parseRequestResult = parseGetMessagesRequest(event, fetchMessages)
-  const fetchMessagesResult = await parseRequestResult.fetchMessages()
+  const { messageFetcher } = parseGetMessagesRequest(event, fetchMessages)
+  const fetchMessagesResult = await messageFetcher.fetch()
 
   if (isError(fetchMessagesResult)) {
     return createJsonApiResult({

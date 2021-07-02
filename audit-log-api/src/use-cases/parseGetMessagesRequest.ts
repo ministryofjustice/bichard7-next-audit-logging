@@ -1,9 +1,10 @@
 import { APIGatewayProxyEvent } from "aws-lambda"
-import { PromiseResult, AuditLog } from "shared"
+import IMessageFetcher from "src/types/IMessageFetcher"
+import { FetchAll, FetchByExternalCorrelationId, FetchById, FetchByStatus } from "src/utils/MessageFetchers"
 import FetchMessagesUseCase from "./FetchMessagesUseCase"
 
 interface ParseGetMessagesRequestResult {
-  fetchMessages: () => PromiseResult<AuditLog | AuditLog[] | null>
+  messageFetcher: IMessageFetcher
 }
 
 const parseGetMessagesRequest = (
@@ -13,19 +14,20 @@ const parseGetMessagesRequest = (
   const messageId = event.pathParameters?.messageId
   const externalCorrelationId = event.queryStringParameters?.externalCorrelationId
   const status = event.queryStringParameters?.status
-  let fetchMessagesAction: () => PromiseResult<AuditLog | AuditLog[] | null>
+
+  let messageFetcher: IMessageFetcher
 
   if (messageId) {
-    fetchMessagesAction = () => fetchMessages.getById(messageId)
+    messageFetcher = new FetchById(fetchMessages, messageId)
   } else if (externalCorrelationId) {
-    fetchMessagesAction = () => fetchMessages.getByExternalCorrelationId(externalCorrelationId)
+    messageFetcher = new FetchByExternalCorrelationId(fetchMessages, externalCorrelationId)
   } else if (status) {
-    fetchMessagesAction = () => fetchMessages.getByStatus(status)
+    messageFetcher = new FetchByStatus(fetchMessages, status)
   } else {
-    fetchMessagesAction = () => fetchMessages.get()
+    messageFetcher = new FetchAll(fetchMessages)
   }
 
-  return { fetchMessages: fetchMessagesAction }
+  return { messageFetcher }
 }
 
 export default parseGetMessagesRequest
