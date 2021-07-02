@@ -14,12 +14,12 @@ describe("Index Page", () => {
         cy.get("h4").should("contain", "Messages")
       })
 
-      it("should show 6 messages", () => {
+      it("should show 7 messages", () => {
         cy.get(".MuiPaper-root")
-          .should("have.length", 6)
+          .should("have.length", 7)
           .first()
           .should("contain", "Message1")
-          .should("contain", "14/11/2021 00:00:00")
+          .should("contain", "14/11/2021 05:10:00")
       })
     })
   })
