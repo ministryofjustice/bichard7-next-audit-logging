@@ -1,26 +1,23 @@
 import { APIGatewayProxyEvent } from "aws-lambda"
 import MessageFetcher from "src/types/MessageFetcher"
-import { FetchAll, FetchByExternalCorrelationId, FetchById, FetchByStatus } from "src/utils/MessageFetchers"
-import FetchMessagesUseCase from "./FetchMessagesUseCase"
+import { FetchAll, FetchByExternalCorrelationId, FetchById, FetchByStatus } from "src/use-cases/MessageFetchers"
+import { AuditLogDynamoGateway } from "shared"
 
-const createMessageFetcher = (event: APIGatewayProxyEvent, fetchMessages: FetchMessagesUseCase): MessageFetcher => {
+const createMessageFetcher = (event: APIGatewayProxyEvent, auditLogGateway: AuditLogDynamoGateway): MessageFetcher => {
   const messageId = event.pathParameters?.messageId
   const externalCorrelationId = event.queryStringParameters?.externalCorrelationId
   const status = event.queryStringParameters?.status
 
-  let messageFetcher: MessageFetcher
-
   if (messageId) {
-    messageFetcher = new FetchById(fetchMessages, messageId)
-  } else if (externalCorrelationId) {
-    messageFetcher = new FetchByExternalCorrelationId(fetchMessages, externalCorrelationId)
-  } else if (status) {
-    messageFetcher = new FetchByStatus(fetchMessages, status)
-  } else {
-    messageFetcher = new FetchAll(fetchMessages)
+    return new FetchById(auditLogGateway, messageId)
   }
-
-  return messageFetcher
+  if (externalCorrelationId) {
+    return new FetchByExternalCorrelationId(auditLogGateway, externalCorrelationId)
+  }
+  if (status) {
+    return new FetchByStatus(auditLogGateway, status)
+  }
+  return new FetchAll(auditLogGateway)
 }
 
 export default createMessageFetcher

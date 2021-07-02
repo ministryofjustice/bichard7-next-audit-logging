@@ -1,15 +1,15 @@
 import { AuditLogDynamoGateway } from "shared"
 import { APIGatewayProxyEvent } from "aws-lambda"
-import { FetchAll, FetchByExternalCorrelationId, FetchById, FetchByStatus } from "src/utils/MessageFetchers"
+import { FetchAll, FetchByExternalCorrelationId, FetchById, FetchByStatus } from "src/use-cases/MessageFetchers"
 import createMessageFetcher from "./createMessageFetcher"
-import FetchMessagesUseCase from "./FetchMessagesUseCase"
+
+const gateway = <AuditLogDynamoGateway>{}
 
 describe("createMessageFetcher()", () => {
   it("should return FetchAll when there are no path or query string parameters", () => {
     const event = <APIGatewayProxyEvent>{}
-    const fetchMessages = new FetchMessagesUseCase(<AuditLogDynamoGateway>{})
 
-    const messageFetcher = createMessageFetcher(event, fetchMessages)
+    const messageFetcher = createMessageFetcher(event, gateway)
 
     expect(messageFetcher instanceof FetchAll).toBe(true)
   })
@@ -20,9 +20,8 @@ describe("createMessageFetcher()", () => {
         messageId: "1"
       }
     })
-    const fetchMessages = new FetchMessagesUseCase(<AuditLogDynamoGateway>{})
 
-    const messageFetcher = createMessageFetcher(event, fetchMessages)
+    const messageFetcher = createMessageFetcher(event, gateway)
 
     expect(messageFetcher instanceof FetchById).toBe(true)
   })
@@ -33,9 +32,8 @@ describe("createMessageFetcher()", () => {
         externalCorrelationId: "1"
       }
     })
-    const fetchMessages = new FetchMessagesUseCase(<AuditLogDynamoGateway>{})
 
-    const messageFetcher = createMessageFetcher(event, fetchMessages)
+    const messageFetcher = createMessageFetcher(event, gateway)
 
     expect(messageFetcher instanceof FetchByExternalCorrelationId).toBe(true)
   })
@@ -49,9 +47,8 @@ describe("createMessageFetcher()", () => {
         externalCorrelationId: "2"
       }
     })
-    const fetchMessages = new FetchMessagesUseCase(<AuditLogDynamoGateway>{})
 
-    const messageFetcher = createMessageFetcher(event, fetchMessages)
+    const messageFetcher = createMessageFetcher(event, gateway)
 
     expect(messageFetcher instanceof FetchById).toBe(true)
   })
@@ -62,9 +59,8 @@ describe("createMessageFetcher()", () => {
         status: "Status"
       }
     })
-    const fetchMessages = new FetchMessagesUseCase(<AuditLogDynamoGateway>{})
 
-    const messageFetcher = createMessageFetcher(event, fetchMessages)
+    const messageFetcher = createMessageFetcher(event, gateway)
 
     expect(messageFetcher instanceof FetchByStatus).toBe(true)
   })
