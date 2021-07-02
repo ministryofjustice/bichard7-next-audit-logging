@@ -12,7 +12,7 @@ export default class AuditLogEvent {
 
   public readonly timestamp: string
 
-  public readonly attributes: KeyValuePair = {}
+  public readonly attributes: KeyValuePair<string, unknown> = {}
 
   constructor(options: AuditLogEventOptions) {
     this.eventSource = options.eventSource

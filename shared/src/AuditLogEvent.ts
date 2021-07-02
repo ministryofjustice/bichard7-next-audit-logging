@@ -5,7 +5,7 @@ export default class AuditLogEvent {
 
   public readonly timestamp: string
 
-  public attributes: KeyValuePair = {}
+  public attributes: KeyValuePair<string, unknown> = {}
 
   constructor(public readonly category: EventCategory, timestamp: Date, public readonly eventType: string) {
     this.timestamp = timestamp.toISOString()

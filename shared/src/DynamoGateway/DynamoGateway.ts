@@ -12,8 +12,8 @@ export interface UpdateOptions {
   keyName: string
   keyValue: unknown
   updateExpression: UpdateExpression
-  updateExpressionValues: ExpressionAttributeValueMap | KeyValuePair
-  expressionAttributeNames?: ExpressionAttributeNameMap | KeyValuePair
+  updateExpressionValues: ExpressionAttributeValueMap | KeyValuePair<string, unknown>
+  expressionAttributeNames?: ExpressionAttributeNameMap | KeyValuePair<string, string>
 }
 
 export interface FetchByIndexOptions {
