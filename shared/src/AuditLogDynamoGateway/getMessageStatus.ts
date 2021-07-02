@@ -1,25 +1,15 @@
 import AuditLogEvent from "src/AuditLogEvent"
 import { AuditLogStatus } from "../utils"
 
-interface GetMessageStatusResult {
-  status: string
-  lastEventType?: string
-}
-
-const getMessageStatus = (event: AuditLogEvent): GetMessageStatusResult => {
-  let status: string
+const getMessageStatus = (event: AuditLogEvent): string => {
   switch (event.eventType) {
     case "PNC Response received":
-      status = AuditLogStatus.completed
-      break
+      return AuditLogStatus.completed
     case "PNC Response not received":
-      status = AuditLogStatus.error
-      break
+      return AuditLogStatus.error
     default:
-      status = AuditLogStatus.processing
+      return AuditLogStatus.processing
   }
-
-  return { status, lastEventType: event.eventType }
 }
 
 export default getMessageStatus
