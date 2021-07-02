@@ -1,7 +1,7 @@
 import AuditLogEvent from "src/AuditLogEvent"
 import getMessageStatus from "./getMessageStatus"
 import { isError, PromiseResult } from "../types"
-import { DynamoGateway, DynamoDbConfig } from "../DynamoGateway"
+import { DynamoGateway, DynamoDbConfig, FetchByIndexOptions, UpdateOptions } from "../DynamoGateway"
 import AuditLog from "../AuditLog"
 
 export default class AuditLogDynamoGateway extends DynamoGateway {
@@ -34,7 +34,7 @@ export default class AuditLogDynamoGateway extends DynamoGateway {
   }
 
   async fetchByExternalCorrelationId(externalCorrelationId: string): PromiseResult<AuditLog | null> {
-    const options = {
+    const options: FetchByIndexOptions = {
       indexName: "externalCorrelationIdIndex",
       attributeName: "externalCorrelationId",
       attributeValue: externalCorrelationId
@@ -55,7 +55,7 @@ export default class AuditLogDynamoGateway extends DynamoGateway {
   }
 
   async fetchByStatus(status: string): PromiseResult<AuditLog[]> {
-    const options = {
+    const options: FetchByIndexOptions = {
       indexName: "statusIndex",
       attributeName: "status",
       attributeValue: status,
@@ -104,7 +104,7 @@ export default class AuditLogDynamoGateway extends DynamoGateway {
   async addEvent(messageId: string, event: AuditLogEvent): PromiseResult<void> {
     const { status, errorMessage } = getMessageStatus(event)
 
-    const params = {
+    const options: UpdateOptions = {
       keyName: this.tableKey,
       keyValue: messageId,
       updateExpression:
@@ -123,7 +123,7 @@ export default class AuditLogDynamoGateway extends DynamoGateway {
       }
     }
 
-    const result = await this.updateEntry(this.tableName, params)
+    const result = await this.updateEntry(this.tableName, options)
 
     if (isError(result)) {
       return result

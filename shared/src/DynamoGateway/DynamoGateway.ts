@@ -8,7 +8,7 @@ import {
 import { KeyValuePair, PromiseResult } from "../types"
 import DynamoDbConfig from "./DynamoDbConfig"
 
-interface UpdateOptions {
+export interface UpdateOptions {
   keyName: string
   keyValue: unknown
   updateExpression: UpdateExpression
@@ -16,7 +16,7 @@ interface UpdateOptions {
   expressionAttributeNames?: ExpressionAttributeNameMap | KeyValuePair
 }
 
-interface FetchByIndexOptions {
+export interface FetchByIndexOptions {
   indexName: string
   attributeName: string
   attributeValue: unknown
