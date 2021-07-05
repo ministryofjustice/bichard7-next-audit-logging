@@ -1,3 +1,5 @@
+jest.mock("src/use-cases/createMessageFetcher")
+
 import "src/testConfig"
 import {
   APIGatewayProxyEvent,
@@ -5,9 +7,16 @@ import {
   APIGatewayProxyEventQueryStringParameters,
   APIGatewayProxyResult
 } from "aws-lambda"
-import { AuditLog, HttpStatusCode } from "shared"
-import FetchMessagesUseCase from "src/use-cases/FetchMessagesUseCase"
+import { AuditLog, HttpStatusCode, Result } from "shared"
+import { createMessageFetcher } from "src/use-cases"
+import MessageFetcher from "src/use-cases/MessageFetcher"
 import getMessages from "./getMessages"
+
+const mockCreateMessageFetcher = createMessageFetcher as jest.MockedFunction<typeof createMessageFetcher>
+
+const createDummyMessageFetcher = (returnValue: Result<AuditLog | AuditLog[] | null>): MessageFetcher => ({
+  fetch: () => Promise.resolve(returnValue)
+})
 
 const createEvent = (
   pathParameters?: APIGatewayProxyEventPathParameters,
@@ -28,7 +37,7 @@ const log2 = new AuditLog("2", new Date(2021, 10, 13), "XML")
 log2.caseId = "456"
 
 test("should respond with a list of messages", async () => {
-  jest.spyOn(FetchMessagesUseCase.prototype, "get").mockResolvedValue([log1, log2])
+  mockCreateMessageFetcher.mockReturnValue(createDummyMessageFetcher([log1, log2]))
 
   const event = createEvent()
   const messages = await getMessages(event)
@@ -56,7 +65,7 @@ test("should respond with a list of messages", async () => {
 
 test("should respond with error", async () => {
   const error = new Error("Expected Error")
-  jest.spyOn(FetchMessagesUseCase.prototype, "get").mockResolvedValue(error)
+  mockCreateMessageFetcher.mockReturnValue(createDummyMessageFetcher(error))
 
   const event = createEvent()
   const messages = await getMessages(event)
@@ -67,7 +76,7 @@ test("should respond with error", async () => {
 })
 
 test("should return a single message when the message Id is given", async () => {
-  jest.spyOn(FetchMessagesUseCase.prototype, "getById").mockResolvedValue(log1)
+  mockCreateMessageFetcher.mockReturnValue(createDummyMessageFetcher(log1))
 
   const event = createEvent({ messageId: "SomeMessageId" })
   const messages = await getMessages(event)
@@ -88,7 +97,7 @@ test("should return a single message when the message Id is given", async () => 
 })
 
 test("should return an empty array when externalCorrelationId is specified and no messages are found", async () => {
-  jest.spyOn(FetchMessagesUseCase.prototype, "getByExternalCorrelationId").mockResolvedValue(null)
+  mockCreateMessageFetcher.mockReturnValue(createDummyMessageFetcher(null))
 
   const event = createEvent(undefined, { externalCorrelationId: "SomeExternalCorrelationId" })
   const messages = await getMessages(event)
@@ -102,7 +111,7 @@ test("should return an empty array when externalCorrelationId is specified and n
 })
 
 test("should return a single message when the externalCorrelationId is given and a match is found", async () => {
-  jest.spyOn(FetchMessagesUseCase.prototype, "getByExternalCorrelationId").mockResolvedValue(log1)
+  mockCreateMessageFetcher.mockReturnValue(createDummyMessageFetcher(log1))
 
   const event = createEvent(undefined, { externalCorrelationId: "SomeExternalCorrelationId" })
   const messages = await getMessages(event)

@@ -3,10 +3,12 @@ import { IconButton, TextField } from "@material-ui/core"
 import styled from "styled-components"
 import SearchIcon from "icons/SearchIcon"
 import MessageSearchModel from "types/MessageSearchModel"
+import StatusField from "./StatusField"
 
 const Container = styled.form`
   display: flex;
   flex-direction: row;
+  gap: 0 0.5rem;
 `
 
 const ExternalCorrelationIdField = styled(TextField)`
@@ -20,8 +22,17 @@ interface Props {
 
 const MessageSearch = ({ onSearch, disabled = false }: Props) => {
   const [externalCorrelationId, setExternalCorrelationId] = useState("")
+  const [status, setStatus] = useState("")
 
-  const triggerSearch = () => onSearch({ externalCorrelationId })
+  const triggerSearch = () => onSearch({ externalCorrelationId, status })
+  const onStatusChange = (value: string) => {
+    setStatus(value)
+    setExternalCorrelationId("")
+  }
+  const onExternalCorrelationIdChange = (value: string) => {
+    setStatus("")
+    setExternalCorrelationId(value)
+  }
 
   return (
     <Container
@@ -30,10 +41,12 @@ const MessageSearch = ({ onSearch, disabled = false }: Props) => {
         triggerSearch()
       }}
     >
+      <StatusField value={status} onChange={onStatusChange} />
+
       <ExternalCorrelationIdField
         label="Search by External Correlation Id"
         value={externalCorrelationId}
-        onChange={(e) => setExternalCorrelationId(e.target.value || "")}
+        onChange={(e) => onExternalCorrelationIdChange(e.target.value || "")}
         disabled={disabled}
         fullWidth
         autoFocus

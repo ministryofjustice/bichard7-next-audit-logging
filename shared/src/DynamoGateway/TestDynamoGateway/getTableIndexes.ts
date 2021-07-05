@@ -1,25 +1,41 @@
 import DynamoDB from "aws-sdk/clients/dynamodb"
 import { SecondaryIndex } from "./SecondaryIndex"
 
-const getTableIndexes = (sortKey: string, secondaryIndexes: SecondaryIndex[]): DynamoDB.GlobalSecondaryIndexList => {
-  const indexes = secondaryIndexes.map((index) => ({
-    IndexName: index.name,
-    KeySchema: [
-      {
-        AttributeName: index.key,
-        KeyType: "HASH"
-      }
-    ],
-    Projection: {
-      ProjectionType: "ALL"
-    },
-    ProvisionedThroughput: {
-      ReadCapacityUnits: 1,
-      WriteCapacityUnits: 1
+const getKeySchema = (hashKey: string, rangeKey?: string) => {
+  const keySchema = [
+    {
+      AttributeName: hashKey,
+      KeyType: "HASH"
     }
-  }))
+  ]
 
-  // Sory key index
+  if (rangeKey) {
+    keySchema.push({
+      AttributeName: rangeKey,
+      KeyType: "RANGE"
+    })
+  }
+
+  return keySchema
+}
+
+const getTableIndexes = (sortKey: string, secondaryIndexes: SecondaryIndex[]): DynamoDB.GlobalSecondaryIndexList => {
+  const indexes = secondaryIndexes.map((index) => {
+    const { hashKey, rangeKey, name } = index
+
+    return {
+      IndexName: name,
+      KeySchema: getKeySchema(hashKey, rangeKey),
+      Projection: {
+        ProjectionType: "ALL"
+      },
+      ProvisionedThroughput: {
+        ReadCapacityUnits: 1,
+        WriteCapacityUnits: 1
+      }
+    }
+  })
+
   indexes.push({
     IndexName: `${sortKey}Index`,
     KeySchema: [
