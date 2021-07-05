@@ -12,6 +12,8 @@ import { createMessageFetcher } from "src/use-cases"
 import MessageFetcher from "src/types/MessageFetcher"
 import getMessages from "./getMessages"
 
+const mockCreateMessageFetcher = createMessageFetcher as jest.MockedFunction<typeof createMessageFetcher>
+
 const createDummyMessageFetcher = (returnValue: Result<AuditLog | AuditLog[] | null>): MessageFetcher => ({
   fetch: () => Promise.resolve(returnValue)
 })
@@ -35,7 +37,6 @@ const log2 = new AuditLog("2", new Date(2021, 10, 13), "XML")
 log2.caseId = "456"
 
 test("should respond with a list of messages", async () => {
-  const mockCreateMessageFetcher = createMessageFetcher as jest.MockedFunction<typeof createMessageFetcher>
   mockCreateMessageFetcher.mockReturnValue(createDummyMessageFetcher([log1, log2]))
 
   const event = createEvent()
@@ -64,7 +65,6 @@ test("should respond with a list of messages", async () => {
 
 test("should respond with error", async () => {
   const error = new Error("Expected Error")
-  const mockCreateMessageFetcher = createMessageFetcher as jest.MockedFunction<typeof createMessageFetcher>
   mockCreateMessageFetcher.mockReturnValue(createDummyMessageFetcher(error))
 
   const event = createEvent()
@@ -76,7 +76,6 @@ test("should respond with error", async () => {
 })
 
 test("should return a single message when the message Id is given", async () => {
-  const mockCreateMessageFetcher = createMessageFetcher as jest.MockedFunction<typeof createMessageFetcher>
   mockCreateMessageFetcher.mockReturnValue(createDummyMessageFetcher(log1))
 
   const event = createEvent({ messageId: "SomeMessageId" })
@@ -98,7 +97,6 @@ test("should return a single message when the message Id is given", async () => 
 })
 
 test("should return an empty array when externalCorrelationId is specified and no messages are found", async () => {
-  const mockCreateMessageFetcher = createMessageFetcher as jest.MockedFunction<typeof createMessageFetcher>
   mockCreateMessageFetcher.mockReturnValue(createDummyMessageFetcher(null))
 
   const event = createEvent(undefined, { externalCorrelationId: "SomeExternalCorrelationId" })
@@ -113,7 +111,6 @@ test("should return an empty array when externalCorrelationId is specified and n
 })
 
 test("should return a single message when the externalCorrelationId is given and a match is found", async () => {
-  const mockCreateMessageFetcher = createMessageFetcher as jest.MockedFunction<typeof createMessageFetcher>
   mockCreateMessageFetcher.mockReturnValue(createDummyMessageFetcher(log1))
 
   const event = createEvent(undefined, { externalCorrelationId: "SomeExternalCorrelationId" })
