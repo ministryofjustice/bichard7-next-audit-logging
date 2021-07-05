@@ -44,6 +44,7 @@ const MessageSearch = ({ onSearch, disabled = false }: Props) => {
       <StatusField value={status} onChange={onStatusChange} />
 
       <ExternalCorrelationIdField
+        variant="outlined"
         label="Search by External Correlation Id"
         value={externalCorrelationId}
         onChange={(e) => onExternalCorrelationIdChange(e.target.value || "")}

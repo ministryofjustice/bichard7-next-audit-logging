@@ -1,12 +1,8 @@
 import type { NextApiRequest, NextApiResponse } from "next"
-import { AuditLogEvent } from "shared"
+import type GetMessageEventsResult from "types/GetMessageEventsResult"
 import config from "config"
 
-type Data = {
-  events: AuditLogEvent[]
-}
-
-export default async (request: NextApiRequest, response: NextApiResponse<Data>) => {
+export default async (request: NextApiRequest, response: NextApiResponse<GetMessageEventsResult>) => {
   const { messageId } = request.query
   const url = `${config.apiUrl}/messages/${messageId}/events`
 

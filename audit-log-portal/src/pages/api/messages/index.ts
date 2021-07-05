@@ -1,14 +1,10 @@
 import type { NextApiRequest, NextApiResponse } from "next"
-import { AuditLog } from "shared"
+import type MessageSearchResult from "types/MessageSearchResult"
 import config from "config"
 import convertObjectToURLSearchParams from "utils/convertObjectToURLSearchParams"
 import combineUrlAndQueryString from "utils/combineUrlAndQueryString"
 
-type Data = {
-  messages: AuditLog[]
-}
-
-export default async (request: NextApiRequest, response: NextApiResponse<Data | string>) => {
+export default async (request: NextApiRequest, response: NextApiResponse<MessageSearchResult | string>) => {
   const params = convertObjectToURLSearchParams(request.query)
   const baseUrl = `${config.apiUrl}/messages`
   const url = combineUrlAndQueryString(baseUrl, params.toString())
