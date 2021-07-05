@@ -6,6 +6,7 @@ const config: DynamoDbConfig = {
   AUDIT_LOG_TABLE_NAME: "audit-log"
 }
 
-const getTestDynamoGateway = (): AuditLogDynamoGateway => new AuditLogDynamoGateway(config, config.AUDIT_LOG_TABLE_NAME)
+const createTestDynamoGateway = (): AuditLogDynamoGateway =>
+  new AuditLogDynamoGateway(config, config.AUDIT_LOG_TABLE_NAME)
 
-export default getTestDynamoGateway
+export default createTestDynamoGateway

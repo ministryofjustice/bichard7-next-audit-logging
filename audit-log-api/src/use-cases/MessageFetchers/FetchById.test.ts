@@ -1,8 +1,8 @@
 import { AuditLog, isError } from "shared"
-import getTestDynamoGateway from "src/getTestAuditLogDynamoGateway"
+import createTestDynamoGateway from "src/createTestAuditLogDynamoGateway"
 import { FetchById } from "."
 
-const gateway = getTestDynamoGateway()
+const gateway = createTestDynamoGateway()
 
 it("should return one message when messageId exists", async () => {
   const expectedMessage = new AuditLog("1", new Date(), "Xml")

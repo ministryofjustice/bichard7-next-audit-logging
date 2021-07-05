@@ -1,8 +1,8 @@
 import { AuditLogStatus, AuditLog, isError } from "shared"
-import getTestDynamoGateway from "src/getTestAuditLogDynamoGateway"
+import createTestDynamoGateway from "src/createTestAuditLogDynamoGateway"
 import FetchByStatus from "./FetchByStatus"
 
-const gateway = getTestDynamoGateway()
+const gateway = createTestDynamoGateway()
 
 it("should return one message when there is a message with the specified status", async () => {
   const expectedStatus = AuditLogStatus.error
