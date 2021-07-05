@@ -1,5 +1,5 @@
-import MessageFetcher from "src/types/MessageFetcher"
 import { PromiseResult, AuditLog, AuditLogDynamoGateway } from "shared"
+import MessageFetcher from "./MessageFetcher"
 
 export default class FetchByExternalCorrelationId implements MessageFetcher {
   constructor(private readonly gateway: AuditLogDynamoGateway, private externalCorrelationId: string) {}

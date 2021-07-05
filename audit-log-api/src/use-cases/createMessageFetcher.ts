@@ -1,7 +1,10 @@
 import { APIGatewayProxyEvent } from "aws-lambda"
-import MessageFetcher from "src/types/MessageFetcher"
-import { FetchAll, FetchByExternalCorrelationId, FetchById, FetchByStatus } from "src/use-cases/MessageFetchers"
 import { AuditLogDynamoGateway } from "shared"
+import MessageFetcher from "./MessageFetcher"
+import FetchById from "./FetchById"
+import FetchByExternalCorrelationId from "./FetchByExternalCorrelationId"
+import FetchByStatus from "./FetchByStatus"
+import FetchAll from "./FetchAll"
 
 const createMessageFetcher = (event: APIGatewayProxyEvent, auditLogGateway: AuditLogDynamoGateway): MessageFetcher => {
   const messageId = event.pathParameters?.messageId
