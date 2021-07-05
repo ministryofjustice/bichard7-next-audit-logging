@@ -1,12 +1,9 @@
 import type { NextApiRequest, NextApiResponse } from "next"
 import { AuditLog } from "shared"
+import GetMessageByIdResult from "types/GetMessageByIdResult"
 import config from "config"
 
-type Data = {
-  message: AuditLog
-}
-
-export default async (request: NextApiRequest, response: NextApiResponse<Data>) => {
+export default async (request: NextApiRequest, response: NextApiResponse<GetMessageByIdResult>) => {
   const { messageId } = request.query
   const fetchResponse = await fetch(`${config.apiUrl}/messages/${messageId}`)
   const messages = (await fetchResponse.json()) || []

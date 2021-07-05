@@ -5,14 +5,19 @@ import Events from "components/Events"
 import Header from "components/Header"
 import Layout from "components/Layout"
 import Loading from "components/Loading"
+import GetMessageByIdResult from "types/GetMessageByIdResult"
 import fetcher from "utils/fetcher"
+import GetMessageEventsResult from "types/GetMessageEventsResult"
 
 const MessageView = () => {
   const router = useRouter()
   const { messageId } = router.query
 
-  const { data: messageData, error: messageError } = useSWR(`/api/messages/${messageId}`, fetcher)
-  const { data: eventsData, error: eventsError } = useSWR(`/api/messages/${messageId}/events`, fetcher)
+  const { data: messageData, error: messageError } = useSWR<GetMessageByIdResult>(`/api/messages/${messageId}`, fetcher)
+  const { data: eventsData, error: eventsError } = useSWR<GetMessageEventsResult>(
+    `/api/messages/${messageId}/events`,
+    fetcher
+  )
 
   const getPageTitle = () =>
     messageError || !messageData ? "Message Detail" : messageData.message.externalCorrelationId
