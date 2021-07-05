@@ -1,6 +1,6 @@
 import { AuditLog, isError } from "shared"
 import createTestDynamoGateway from "src/createTestAuditLogDynamoGateway"
-import { FetchByExternalCorrelationId } from "."
+import FetchByExternalCorrelationId from "./FetchByExternalCorrelationId"
 
 const gateway = createTestDynamoGateway()
 
