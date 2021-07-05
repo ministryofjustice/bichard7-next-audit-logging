@@ -31,6 +31,7 @@ const MessageSearch = ({ onSearch, disabled = false }: Props) => {
       }}
     >
       <ExternalCorrelationIdField
+        variant="outlined"
         label="Search by External Correlation Id"
         value={externalCorrelationId}
         onChange={(e) => setExternalCorrelationId(e.target.value || "")}
