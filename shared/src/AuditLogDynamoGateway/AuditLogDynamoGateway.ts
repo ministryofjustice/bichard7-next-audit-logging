@@ -107,10 +107,11 @@ export default class AuditLogDynamoGateway extends DynamoGateway {
     const options: UpdateOptions = {
       keyName: this.tableKey,
       keyValue: messageId,
-      updateExpression:
-        "set events = list_append(if_not_exists(events, :empty_list), :event)," +
-        "#status = :status," +
-        "#lastEventType = :lastEventType",
+      updateExpression: `
+        set events = list_append(if_not_exists(events, :empty_list), :event),
+        #status = :status,
+        #lastEventType = :lastEventType
+      `,
       expressionAttributeNames: {
         "#status": "status",
         "#lastEventType": "lastEventType"
