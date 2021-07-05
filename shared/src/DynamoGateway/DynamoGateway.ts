@@ -1,27 +1,9 @@
 import { DynamoDB } from "aws-sdk"
-import {
-  DocumentClient,
-  ExpressionAttributeNameMap,
-  ExpressionAttributeValueMap,
-  UpdateExpression
-} from "aws-sdk/clients/dynamodb"
-import { KeyValuePair, PromiseResult } from "../types"
+import { DocumentClient } from "aws-sdk/clients/dynamodb"
+import { PromiseResult } from "../types"
 import DynamoDbConfig from "./DynamoDbConfig"
-
-export interface UpdateOptions {
-  keyName: string
-  keyValue: unknown
-  updateExpression: UpdateExpression
-  updateExpressionValues: ExpressionAttributeValueMap | KeyValuePair<string, unknown>
-  expressionAttributeNames?: ExpressionAttributeNameMap | KeyValuePair<string, string>
-}
-
-export interface FetchByIndexOptions {
-  indexName: string
-  attributeName: string
-  attributeValue: unknown
-  isAscendingOrder?: boolean
-}
+import FetchByIndexOptions from "./FetchByIndexOptions"
+import UpdateOptions from "./UpdateOptions"
 
 export default class DynamoGateway {
   protected readonly service: DynamoDB
