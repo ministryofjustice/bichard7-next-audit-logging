@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from "next"
-import MessageSearchResult from "types/MessageSearchResult"
+import type MessageSearchResult from "types/MessageSearchResult"
 import config from "config"
 import convertObjectToURLSearchParams from "utils/convertObjectToURLSearchParams"
 import combineUrlAndQueryString from "utils/combineUrlAndQueryString"

@@ -1,6 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from "next"
-import { AuditLog } from "shared"
-import GetMessageByIdResult from "types/GetMessageByIdResult"
+import type GetMessageByIdResult from "types/GetMessageByIdResult"
 import config from "config"
 
 export default async (request: NextApiRequest, response: NextApiResponse<GetMessageByIdResult>) => {

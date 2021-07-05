@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from "next"
-import GetMessageEventsResult from "types/GetMessageEventsResult"
+import type GetMessageEventsResult from "types/GetMessageEventsResult"
 import config from "config"
 
 export default async (request: NextApiRequest, response: NextApiResponse<GetMessageEventsResult>) => {

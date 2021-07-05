@@ -5,9 +5,9 @@ import Events from "components/Events"
 import Header from "components/Header"
 import Layout from "components/Layout"
 import Loading from "components/Loading"
-import GetMessageByIdResult from "types/GetMessageByIdResult"
+import type GetMessageByIdResult from "types/GetMessageByIdResult"
+import type GetMessageEventsResult from "types/GetMessageEventsResult"
 import fetcher from "utils/fetcher"
-import GetMessageEventsResult from "types/GetMessageEventsResult"
 
 const MessageView = () => {
   const router = useRouter()
