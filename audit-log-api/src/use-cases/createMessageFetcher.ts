@@ -14,12 +14,15 @@ const createMessageFetcher = (event: APIGatewayProxyEvent, auditLogGateway: Audi
   if (messageId) {
     return new FetchById(auditLogGateway, messageId)
   }
+
   if (externalCorrelationId) {
     return new FetchByExternalCorrelationId(auditLogGateway, externalCorrelationId)
   }
+
   if (status) {
     return new FetchByStatus(auditLogGateway, status)
   }
+
   return new FetchAll(auditLogGateway)
 }
 
