@@ -1,4 +1,4 @@
-export default (url) =>
+export default function fetcher(url) {
   fetch(url).then(async (response) => {
     if (response.status !== 200) {
       const text = await response.text()
@@ -7,3 +7,4 @@ export default (url) =>
 
     return response.json()
   })
+}

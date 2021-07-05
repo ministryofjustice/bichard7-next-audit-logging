@@ -11,9 +11,13 @@ export default async (request: NextApiRequest, response: NextApiResponse<Data>) 
   const fetchResponse = await fetch(`${config.apiUrl}/messages/${messageId}`)
   const messages = (await fetchResponse.json()) || []
 
+  console.log(`Found ${messages.length} messages`)
+
   if (messages.length === 0) {
-    response.status(404)
+    console.log("Returning not found")
+    response.status(404).end()
   } else {
+    console.log("Returning messages")
     response.status(200).json({ message: messages[0] })
   }
 }
