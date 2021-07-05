@@ -25,11 +25,11 @@ exports[`matches the snapshot when status is Completed 1`] = `
 </div>
 `;
 
-exports[`matches the snapshot when status is Error message 1`] = `
+exports[`matches the snapshot when status is Error 1`] = `
 <div>
   <div
     class=""
-    title="Error message"
+    title="Error"
   >
     <svg
       aria-hidden="true"

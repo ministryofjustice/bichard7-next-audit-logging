@@ -1,4 +1,5 @@
 export interface SecondaryIndex {
   name: string
-  key: string
+  hashKey: string
+  rangeKey?: string
 }

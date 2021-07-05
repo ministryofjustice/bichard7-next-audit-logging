@@ -20,7 +20,7 @@ describe("DynamoGateway", () => {
       secondaryIndexes: [
         {
           name: "someOtherValueSecondaryIndex",
-          key: "someOtherValue"
+          hashKey: "someOtherValue"
         }
       ],
       skipIfExists: true
@@ -101,7 +101,7 @@ describe("DynamoGateway", () => {
     })
   })
 
-  describe("queryIndex()", () => {
+  describe("fetchByIndex()", () => {
     beforeEach(async () => {
       await Promise.allSettled(
         [...Array(3).keys()].map(async (i: number) => {
@@ -197,7 +197,10 @@ describe("DynamoGateway", () => {
       const options = {
         keyName: "id",
         keyValue: recordId,
-        updateExpression: "set someOtherValue = :newValue",
+        updateExpression: "set #attributeName = :newValue",
+        expressionAttributeNames: {
+          "#attributeName": "someOtherValue"
+        },
         updateExpressionValues: {
           ":newValue": expectedValue
         }

@@ -2,20 +2,41 @@ import DynamoDB from "aws-sdk/clients/dynamodb"
 import { SecondaryIndex } from "./SecondaryIndex"
 
 const getTableAttributes = (
-  keyName: string,
+  partitionKey: string,
   sortKey: string,
   secondaryIndexes: SecondaryIndex[]
 ): DynamoDB.AttributeDefinitions => {
-  const attributesInIndexes = secondaryIndexes
-    .filter((index) => index.key !== keyName && index.key !== sortKey)
-    .map((index) => ({
-      AttributeName: index.key,
-      AttributeType: "S"
-    }))
+  const attributesInIndexes: DynamoDB.AttributeDefinition[] = []
+
+  secondaryIndexes.forEach((index) => {
+    const { hashKey, rangeKey } = index
+    if (
+      hashKey !== partitionKey &&
+      hashKey !== sortKey &&
+      attributesInIndexes.filter((x) => x.AttributeName === hashKey).length === 0
+    ) {
+      attributesInIndexes.push({
+        AttributeName: hashKey,
+        AttributeType: "S"
+      })
+    }
+
+    if (
+      !!rangeKey &&
+      rangeKey !== partitionKey &&
+      rangeKey !== sortKey &&
+      attributesInIndexes.filter((x) => x.AttributeName === rangeKey).length === 0
+    ) {
+      attributesInIndexes.push({
+        AttributeName: rangeKey,
+        AttributeType: "S"
+      })
+    }
+  })
 
   return [
     {
-      AttributeName: keyName,
+      AttributeName: partitionKey,
       AttributeType: "S"
     },
     {

@@ -1,7 +1,7 @@
 import AuditLogEvent from "src/AuditLogEvent"
+import { DynamoGateway, DynamoDbConfig, FetchByIndexOptions, UpdateOptions } from "../DynamoGateway"
 import getMessageStatus from "./getMessageStatus"
 import { isError, PromiseResult } from "../types"
-import { DynamoGateway, DynamoDbConfig } from "../DynamoGateway"
 import AuditLog from "../AuditLog"
 
 export default class AuditLogDynamoGateway extends DynamoGateway {
@@ -34,7 +34,7 @@ export default class AuditLogDynamoGateway extends DynamoGateway {
   }
 
   async fetchByExternalCorrelationId(externalCorrelationId: string): PromiseResult<AuditLog | null> {
-    const options = {
+    const options: FetchByIndexOptions = {
       indexName: "externalCorrelationIdIndex",
       attributeName: "externalCorrelationId",
       attributeValue: externalCorrelationId
@@ -52,6 +52,23 @@ export default class AuditLogDynamoGateway extends DynamoGateway {
 
     const items = <AuditLog[]>result?.Items
     return items[0]
+  }
+
+  async fetchByStatus(status: string): PromiseResult<AuditLog[]> {
+    const options: FetchByIndexOptions = {
+      indexName: "statusIndex",
+      attributeName: "status",
+      attributeValue: status,
+      isAscendingOrder: false
+    }
+
+    const result = await this.fetchByIndex(this.tableName, options)
+
+    if (isError(result)) {
+      return result
+    }
+
+    return <AuditLog[]>result?.Items
   }
 
   async fetchOne(messageId: string): PromiseResult<AuditLog> {
@@ -86,18 +103,28 @@ export default class AuditLogDynamoGateway extends DynamoGateway {
 
   async addEvent(messageId: string, event: AuditLogEvent): PromiseResult<void> {
     const status = getMessageStatus(event)
-    const params = {
+
+    const options: UpdateOptions = {
       keyName: this.tableKey,
       keyValue: messageId,
-      updateExpression: "set events = list_append(if_not_exists(events, :empty_list), :event), messageStatus = :status",
+      updateExpression: `
+        set events = list_append(if_not_exists(events, :empty_list), :event),
+        #status = :status,
+        #lastEventType = :lastEventType
+      `,
+      expressionAttributeNames: {
+        "#status": "status",
+        "#lastEventType": "lastEventType"
+      },
       updateExpressionValues: {
         ":event": [event],
         ":empty_list": <AuditLogEvent[]>[],
-        ":status": status
+        ":status": status,
+        ":lastEventType": event.eventType
       }
     }
 
-    const result = await this.updateEntry(this.tableName, params)
+    const result = await this.updateEntry(this.tableName, options)
 
     if (isError(result)) {
       return result

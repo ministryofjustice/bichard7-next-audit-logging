@@ -1,5 +1,6 @@
 import { DocumentClient } from "aws-sdk/clients/dynamodb"
 import { v4 as uuid } from "uuid"
+import AuditLogStatus from "../AuditLogStatus"
 import { isError } from "../types"
 import AuditLog from "../AuditLog"
 import { DynamoDbConfig } from "../DynamoGateway"
@@ -26,7 +27,12 @@ describe("AuditLogDynamoGateway", () => {
       secondaryIndexes: [
         {
           name: "externalCorrelationIdIndex",
-          key: "externalCorrelationId"
+          hashKey: "externalCorrelationId"
+        },
+        {
+          name: "statusIndex",
+          hashKey: "status",
+          rangeKey: "receivedDate"
         }
       ],
       skipIfExists: true
@@ -91,13 +97,13 @@ describe("AuditLogDynamoGateway", () => {
       expect(actualOtherMessage).toBeDefined()
       expect(actualOtherMessage.events).toBeDefined()
       expect(actualOtherMessage.events).toHaveLength(0)
-      expect(actualOtherMessage.messageStatus).toBe(otherMessage.messageStatus)
+      expect(actualOtherMessage.status).toBe(otherMessage.status)
 
       const actualMessage = <AuditLog>actualRecords.Items?.find((r) => r.messageId === message.messageId)
       expect(actualMessage).toBeDefined()
       expect(actualMessage.events).toBeDefined()
       expect(actualMessage.events).toHaveLength(1)
-      expect(actualMessage.messageStatus).toBe("Completed")
+      expect(actualMessage.status).toBe(AuditLogStatus.completed)
 
       const actualEvent = actualMessage.events[0]
       expect(actualEvent.eventSource).toBe(expectedEvent.eventSource)
@@ -134,7 +140,8 @@ describe("AuditLogDynamoGateway", () => {
       expect(actualMessage).toBeDefined()
       expect(actualMessage.events).toBeDefined()
       expect(actualMessage.events).toHaveLength(2)
-      expect(actualMessage.messageStatus).toBe(expectedEventTwo.eventType)
+      expect(actualMessage.status).toBe(AuditLogStatus.error)
+      expect(actualMessage.lastEventType).toBe(expectedEventTwo.eventType)
 
       const actualEventOne = actualMessage.events.find((e) => e.eventSource === expectedEventOne.eventSource)
       expect(actualEventOne?.eventSource).toBe(expectedEventOne.eventSource)
@@ -268,6 +275,31 @@ describe("AuditLogDynamoGateway", () => {
 
       expect(isError(result)).toBe(false)
       expect(<AuditLog>result).toBeNull()
+    })
+  })
+
+  describe("fetchByStatus", () => {
+    it("should return one AuditLog when there is a record with Completed status", async () => {
+      await Promise.allSettled(
+        [...Array(3).keys()].map(async (i: number) => {
+          const auditLog = new AuditLog(`External correlation id ${i}`, new Date(), "XML")
+          await gateway.create(auditLog)
+        })
+      )
+      const expectedAuditLog = new AuditLog(`External correlation id`, new Date(), "XML")
+      expectedAuditLog.status = AuditLogStatus.completed
+      await gateway.create(expectedAuditLog)
+
+      const result = await gateway.fetchByStatus(AuditLogStatus.completed)
+
+      expect(isError(result)).toBe(false)
+      expect(result).toBeDefined()
+
+      const items = <AuditLog[]>result
+      expect(items).toHaveLength(1)
+
+      const item = items[0]
+      expect(item.status).toBe(expectedAuditLog.status)
     })
   })
 

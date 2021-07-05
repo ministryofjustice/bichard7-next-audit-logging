@@ -1,5 +1,6 @@
 import { v4 as uuid } from "uuid"
 import AuditLogEvent from "./AuditLogEvent"
+import AuditLogStatus from "./AuditLogStatus"
 
 export default class AuditLog {
   public readonly messageId: string
@@ -10,7 +11,9 @@ export default class AuditLog {
 
   public events: AuditLogEvent[] = []
 
-  public messageStatus = "Processing"
+  public status = AuditLogStatus.processing
+
+  public lastEventType: string
 
   constructor(public readonly externalCorrelationId: string, receivedDate: Date, public readonly messageXml: string) {
     this.messageId = uuid()

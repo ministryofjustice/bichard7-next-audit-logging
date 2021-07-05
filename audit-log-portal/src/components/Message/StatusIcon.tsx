@@ -7,10 +7,10 @@ interface Props {
 }
 
 const StatusIcon = ({ message }: Props) => {
-  const Icon = getStatusIcon(message.messageStatus)
+  const Icon = getStatusIcon(message.status)
 
   return (
-    <Tooltip title={message.messageStatus} placement="top">
+    <Tooltip title={message.lastEventType || message.status} placement="top">
       <div>
         <Icon />
       </div>

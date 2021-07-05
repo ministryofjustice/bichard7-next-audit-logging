@@ -1,20 +1,9 @@
 import { DynamoDB } from "aws-sdk"
-import { DocumentClient, ExpressionAttributeValueMap, UpdateExpression } from "aws-sdk/clients/dynamodb"
+import { DocumentClient } from "aws-sdk/clients/dynamodb"
 import { PromiseResult } from "../types"
 import DynamoDbConfig from "./DynamoDbConfig"
-
-interface UpdateOptions {
-  keyName: string
-  keyValue: unknown
-  updateExpression: UpdateExpression
-  updateExpressionValues: ExpressionAttributeValueMap | { [name: string]: unknown }
-}
-
-interface FetchByIndexOptions {
-  indexName: string
-  attributeName: string
-  attributeValue: unknown
-}
+import FetchByIndexOptions from "./FetchByIndexOptions"
+import UpdateOptions from "./UpdateOptions"
 
 export default class DynamoGateway {
   protected readonly service: DynamoDB
@@ -66,7 +55,7 @@ export default class DynamoGateway {
   }
 
   fetchByIndex(tableName: string, options: FetchByIndexOptions): PromiseResult<DocumentClient.QueryOutput> {
-    const { indexName, attributeName, attributeValue } = options
+    const { indexName, attributeName, attributeValue, isAscendingOrder } = options
 
     return this.client
       .query({
@@ -78,7 +67,8 @@ export default class DynamoGateway {
         },
         ExpressionAttributeNames: {
           "#keyName": attributeName
-        }
+        },
+        ScanIndexForward: isAscendingOrder
       })
       .promise()
       .catch((error) => <Error>error)
@@ -108,6 +98,7 @@ export default class DynamoGateway {
       },
       UpdateExpression: options.updateExpression,
       ExpressionAttributeValues: options.updateExpressionValues,
+      ExpressionAttributeNames: options.expressionAttributeNames,
       ConditionExpression: `attribute_exists(${options.keyName})`
     }
 
