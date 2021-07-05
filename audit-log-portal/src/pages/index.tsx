@@ -7,6 +7,7 @@ import Loading from "components/Loading"
 import Messages from "components/Messages"
 import MessageSearch from "components/MessageSearch"
 import MessageSearchModel from "types/MessageSearchModel"
+import MessageSearchResult from "types/MessageSearchResult"
 import convertObjectToURLSearchParams from "utils/convertObjectToURLSearchParams"
 import combineUrlAndQueryString from "utils/combineUrlAndQueryString"
 import fetcher from "utils/fetcher"
@@ -19,7 +20,7 @@ const resolveApiUrl = (searchModel: MessageSearchModel): string => {
 const Index = () => {
   const [searchModel, setSearchModel] = useState<MessageSearchModel>({})
 
-  const { data, error } = useSWR(() => resolveApiUrl(searchModel), fetcher)
+  const { data, error } = useSWR<MessageSearchResult>(() => resolveApiUrl(searchModel), fetcher)
 
   return (
     <Layout pageTitle="Messages">
