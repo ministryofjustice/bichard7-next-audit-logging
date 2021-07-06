@@ -113,9 +113,8 @@ export default class AuditLogDynamoGateway extends DynamoGateway {
     return sortedEvents
   }
 
-  async addEvent(message: AuditLog, event: AuditLogEvent): PromiseResult<void> {
+  async addEvent(messageId: string, messageVersion: number, event: AuditLogEvent): PromiseResult<void> {
     const status = getMessageStatus(event)
-    const { messageId, version } = message
 
     const options: UpdateOptions = {
       keyName: this.tableKey,
@@ -135,7 +134,7 @@ export default class AuditLogDynamoGateway extends DynamoGateway {
         ":status": status,
         ":lastEventType": event.eventType
       },
-      currentVersion: version
+      currentVersion: messageVersion
     }
 
     const result = await this.updateEntry(this.tableName, options)
