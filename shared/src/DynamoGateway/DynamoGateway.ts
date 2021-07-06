@@ -97,7 +97,7 @@ export default class DynamoGateway {
       ":version": options.currentVersion,
       ":version_increment": 1
     }
-    const updateExpression = `${options.updateExpression}, version = version + :version_increment`
+    const updateExpression = `${options.updateExpression} ADD version :version_increment`
 
     const updateParams = <DocumentClient.UpdateItemInput>{
       TableName: tableName,
