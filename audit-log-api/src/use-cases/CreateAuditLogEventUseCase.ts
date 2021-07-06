@@ -2,7 +2,7 @@ import { AuditLogEvent, AuditLogDynamoGateway, isError } from "shared"
 import { isConditionalExpressionViolationError } from "src/utils"
 
 interface CreateAuditLogEventResult {
-  resultType: "success" | "notFound" | "error"
+  resultType: "success" | "notFound" | "invalidVersion" | "error"
   resultDescription?: string
 }
 
@@ -10,13 +10,29 @@ export default class CreateAuditLogEventUseCase {
   constructor(private readonly auditLogGateway: AuditLogDynamoGateway) {}
 
   async create(messageId: string, event: AuditLogEvent): Promise<CreateAuditLogEventResult> {
-    const result = await this.auditLogGateway.addEvent(messageId, event)
+    const messageVersion = await this.auditLogGateway.fetchVersion(messageId)
+
+    if (isError(messageVersion)) {
+      return {
+        resultType: "error",
+        resultDescription: messageVersion.message
+      }
+    }
+
+    if (messageVersion === null) {
+      return {
+        resultType: "notFound",
+        resultDescription: `A message with Id ${messageId} does not exist in the database`
+      }
+    }
+
+    const result = await this.auditLogGateway.addEvent(messageId, messageVersion, event)
 
     if (isError(result)) {
       if (isConditionalExpressionViolationError(result)) {
         return {
-          resultType: "notFound",
-          resultDescription: `A message with Id ${messageId} does not exist in the database`
+          resultType: "invalidVersion",
+          resultDescription: `Message with Id ${messageId} has a different version in the database.`
         }
       }
 
