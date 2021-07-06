@@ -15,6 +15,8 @@ export default class AuditLog {
 
   public lastEventType: string
 
+  public readonly version = 0
+
   constructor(public readonly externalCorrelationId: string, receivedDate: Date, public readonly messageXml: string) {
     this.messageId = uuid()
     this.receivedDate = receivedDate.toISOString()

@@ -1,5 +1,4 @@
 import { DocumentClient } from "aws-sdk/clients/dynamodb"
-import { v4 as uuid } from "uuid"
 import AuditLogStatus from "../AuditLogStatus"
 import { isError } from "../types"
 import AuditLog from "../AuditLog"
@@ -87,7 +86,7 @@ describe("AuditLogDynamoGateway", () => {
       await gateway.create(message)
       await gateway.create(otherMessage)
 
-      const result = await gateway.addEvent(message.messageId, expectedEvent)
+      const result = await gateway.addEvent(message, expectedEvent)
 
       expect(isError(result)).toBe(false)
 
@@ -125,13 +124,14 @@ describe("AuditLogDynamoGateway", () => {
       expectedEventTwo.eventSource = "Event source two"
       expectedEventTwo.attributes = { EventTwoAttribute: "Event two attribute" }
 
-      const message = new AuditLog("one", new Date(), "XML")
+      let message = new AuditLog("one", new Date(), "XML")
       await gateway.create(message)
 
-      const resultOne = await gateway.addEvent(message.messageId, expectedEventOne)
+      const resultOne = await gateway.addEvent(message, expectedEventOne)
       expect(isError(resultOne)).toBe(false)
 
-      const resultTwo = await gateway.addEvent(message.messageId, expectedEventTwo)
+      message = (await gateway.fetchOne(message.messageId)) as AuditLog
+      const resultTwo = await gateway.addEvent(message, expectedEventTwo)
       expect(isError(resultTwo)).toBe(false)
 
       const actualRecords = <DocumentClient.ScanOutput>await gateway.getMany(config.AUDIT_LOG_TABLE_NAME, sortKey, 1)
@@ -166,9 +166,9 @@ describe("AuditLogDynamoGateway", () => {
 
     it("should return error when audit log does not exist", async () => {
       const event = new AuditLogEvent("information", new Date(), "Test event one")
-      const randomMessageId = uuid()
+      const nonExistentMessage = new AuditLog("External correlation id", new Date(), "Xml")
 
-      const resultOne = await gateway.addEvent(randomMessageId, event)
+      const resultOne = await gateway.addEvent(nonExistentMessage, event)
 
       expect(isError(resultOne)).toBe(true)
     })

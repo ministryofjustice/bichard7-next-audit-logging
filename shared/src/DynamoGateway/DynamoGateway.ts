@@ -91,15 +91,23 @@ export default class DynamoGateway {
   }
 
   updateEntry(tableName: string, options: UpdateOptions): PromiseResult<DocumentClient.UpdateItemOutput> {
+    const { keyName, keyValue, expressionAttributeNames } = options
+    const expressionAttributeValues = {
+      ...options.updateExpressionValues,
+      ":version": options.currentVersion,
+      ":version_increment": 1
+    }
+    const updateExpression = `${options.updateExpression}, version = version + :version_increment`
+
     const updateParams = <DocumentClient.UpdateItemInput>{
       TableName: tableName,
       Key: {
-        [options.keyName]: options.keyValue
+        [keyName]: keyValue
       },
-      UpdateExpression: options.updateExpression,
-      ExpressionAttributeValues: options.updateExpressionValues,
-      ExpressionAttributeNames: options.expressionAttributeNames,
-      ConditionExpression: `attribute_exists(${options.keyName})`
+      UpdateExpression: updateExpression,
+      ExpressionAttributeValues: expressionAttributeValues,
+      ExpressionAttributeNames: expressionAttributeNames,
+      ConditionExpression: `attribute_exists(${keyName}) and version = :version`
     }
 
     return this.client

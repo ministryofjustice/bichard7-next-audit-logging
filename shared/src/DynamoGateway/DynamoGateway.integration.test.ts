@@ -1,4 +1,5 @@
 import { DocumentClient } from "aws-sdk/clients/dynamodb"
+import UpdateOptions from "./UpdateOptions"
 import { isError } from "../types"
 import DynamoDbConfig from "./DynamoDbConfig"
 import TestDynamoGateway from "./TestDynamoGateway"
@@ -184,7 +185,8 @@ describe("DynamoGateway", () => {
         [...Array(3).keys()].map(async (i: number) => {
           const record = {
             id: `Record ${i}`,
-            someOtherValue: `Value ${i}`
+            someOtherValue: `Value ${i}`,
+            version: 0
           }
           await gateway.insertOne(config.AUDIT_LOG_TABLE_NAME, record, "messageId")
         })
@@ -194,7 +196,7 @@ describe("DynamoGateway", () => {
     it("should update one entry when key exists", async () => {
       const recordId = "Record 1"
       const expectedValue = "Updated value"
-      const options = {
+      const options: UpdateOptions = {
         keyName: "id",
         keyValue: recordId,
         updateExpression: "set #attributeName = :newValue",
@@ -203,7 +205,8 @@ describe("DynamoGateway", () => {
         },
         updateExpressionValues: {
           ":newValue": expectedValue
-        }
+        },
+        currentVersion: 0
       }
       const result = await gateway.updateEntry(config.AUDIT_LOG_TABLE_NAME, options)
 
@@ -211,21 +214,38 @@ describe("DynamoGateway", () => {
 
       const actualRecords = <DocumentClient.ScanOutput>await gateway.getMany(config.AUDIT_LOG_TABLE_NAME, sortKey, 3)
       expect(isError(actualRecords)).toBeFalsy()
-      const filteredRecords = actualRecords.Items?.filter((r) => r.id === recordId)
 
+      const filteredRecords = actualRecords.Items?.filter((r) => r.id === recordId)
       expect(filteredRecords).toHaveLength(1)
       expect(filteredRecords?.[0].someOtherValue).toBe(expectedValue)
     })
 
     it("should return error when key does not exist", async () => {
       const recordId = "Invalid record Id"
-      const options = {
+      const options: UpdateOptions = {
         keyName: "id",
         keyValue: recordId,
         updateExpression: "set someOtherValue = :newValue",
         updateExpressionValues: {
           ":newValue": "Some value"
-        }
+        },
+        currentVersion: 0
+      }
+      const result = await gateway.updateEntry(config.AUDIT_LOG_TABLE_NAME, options)
+
+      expect(isError(result)).toBe(true)
+    })
+
+    it("should return error when current version does not match the value in the database", async () => {
+      const recordId = "Record 1"
+      const options: UpdateOptions = {
+        keyName: "id",
+        keyValue: recordId,
+        updateExpression: "set someOtherValue = :newValue",
+        updateExpressionValues: {
+          ":newValue": "Some value"
+        },
+        currentVersion: 1
       }
       const result = await gateway.updateEntry(config.AUDIT_LOG_TABLE_NAME, options)
 
