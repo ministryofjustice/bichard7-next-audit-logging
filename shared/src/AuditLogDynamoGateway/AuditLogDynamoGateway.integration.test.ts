@@ -200,6 +200,26 @@ describe("AuditLogDynamoGateway", () => {
     })
   })
 
+  describe("fetchVersion", () => {
+    it("should return the version of the matching AuditLog", async () => {
+      const expectedAuditLog = new AuditLog("ExternalCorrelationId", new Date(), "XML")
+      await gateway.create(expectedAuditLog)
+
+      const result = await gateway.fetchVersion(expectedAuditLog.messageId)
+
+      expect(isError(result)).toBe(false)
+
+      expect(<number>result).toBe(expectedAuditLog.version)
+    })
+
+    it("should return null when no AuditLog matches the given messageId", async () => {
+      const result = await gateway.fetchVersion("InvalidMessageId")
+
+      expect(isError(result)).toBe(false)
+      expect(result).toBeNull()
+    })
+  })
+
   describe("fetchMany", () => {
     it("should return limited amount of AuditLogs", async () => {
       await Promise.allSettled(

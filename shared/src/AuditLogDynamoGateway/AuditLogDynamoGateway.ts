@@ -81,6 +81,18 @@ export default class AuditLogDynamoGateway extends DynamoGateway {
     return result?.Item as AuditLog
   }
 
+  async fetchVersion(messageId: string): PromiseResult<number | null> {
+    const result = await this.getRecordVersion(this.tableName, this.tableKey, messageId)
+
+    if (isError(result)) {
+      return result
+    }
+
+    const auditLog = result?.Item as AuditLog
+
+    return auditLog ? auditLog.version : null
+  }
+
   async fetchEvents(messageId: string): PromiseResult<AuditLogEvent[]> {
     const result = await this.fetchOne(messageId)
 
