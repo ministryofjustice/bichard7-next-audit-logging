@@ -90,6 +90,23 @@ export default class DynamoGateway {
       .catch((error) => <Error>error)
   }
 
+  getRecordVersion(
+    tableName: string,
+    keyName: string,
+    keyValue: unknown
+  ): PromiseResult<DocumentClient.GetItemOutput | Error | null> {
+    return this.client
+      .get({
+        TableName: tableName,
+        Key: {
+          [keyName]: keyValue
+        },
+        ProjectionExpression: "version"
+      })
+      .promise()
+      .catch((error) => <Error>error)
+  }
+
   updateEntry(tableName: string, options: UpdateOptions): PromiseResult<DocumentClient.UpdateItemOutput> {
     const { keyName, keyValue, expressionAttributeNames } = options
     const expressionAttributeValues = {

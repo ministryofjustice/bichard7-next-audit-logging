@@ -1,4 +1,4 @@
-import { DocumentClient } from "aws-sdk/clients/dynamodb"
+import { DocumentClient, GetItemOutput } from "aws-sdk/clients/dynamodb"
 import UpdateOptions from "./UpdateOptions"
 import { isError } from "../types"
 import DynamoDbConfig from "./DynamoDbConfig"
@@ -176,6 +176,41 @@ describe("DynamoGateway", () => {
 
       expect(isError(result)).toBe(false)
       expect(result).toBeNull()
+    })
+  })
+
+  describe("getRecordVersion()", () => {
+    it("should return only record version when key exists", async () => {
+      const expectedRecord = {
+        id: "Record1",
+        someOtherValue: "Value 1",
+        version: 1
+      }
+
+      await gateway.insertOne(config.AUDIT_LOG_TABLE_NAME, expectedRecord, "id")
+
+      const result = await gateway.getRecordVersion(config.AUDIT_LOG_TABLE_NAME, "id", "Record1")
+
+      expect(result).toBeDefined()
+      expect(isError(result)).toBe(false)
+
+      const itemResult = result as GetItemOutput
+      expect(itemResult.Item).toBeDefined()
+
+      const actualRecord = itemResult.Item as { id: string; someOtherValue: string; version: number }
+      expect(actualRecord?.id).toBeUndefined()
+      expect(actualRecord?.someOtherValue).toBeUndefined()
+      expect(actualRecord?.version).toBe(expectedRecord.version)
+    })
+
+    it("should return null when no item has a matching key", async () => {
+      const result = await gateway.getRecordVersion(config.AUDIT_LOG_TABLE_NAME, "id", "InvalidKey")
+
+      expect(isError(result)).toBe(false)
+      expect(result).toBeDefined()
+
+      const itemResult = result as GetItemOutput
+      expect(itemResult.Item).toBeUndefined()
     })
   })
 
