@@ -81,6 +81,18 @@ export default class AuditLogDynamoGateway extends DynamoGateway {
     return result?.Item as AuditLog
   }
 
+  async fetchVersion(messageId: string): PromiseResult<number | null> {
+    const result = await this.getRecordVersion(this.tableName, this.tableKey, messageId)
+
+    if (isError(result)) {
+      return result
+    }
+
+    const auditLog = result?.Item as AuditLog
+
+    return auditLog ? auditLog.version : null
+  }
+
   async fetchEvents(messageId: string): PromiseResult<AuditLogEvent[]> {
     const result = await this.fetchOne(messageId)
 
@@ -101,7 +113,7 @@ export default class AuditLogDynamoGateway extends DynamoGateway {
     return sortedEvents
   }
 
-  async addEvent(messageId: string, event: AuditLogEvent): PromiseResult<void> {
+  async addEvent(messageId: string, messageVersion: number, event: AuditLogEvent): PromiseResult<void> {
     const status = getMessageStatus(event)
 
     const options: UpdateOptions = {
@@ -121,7 +133,8 @@ export default class AuditLogDynamoGateway extends DynamoGateway {
         ":empty_list": <AuditLogEvent[]>[],
         ":status": status,
         ":lastEventType": event.eventType
-      }
+      },
+      currentVersion: messageVersion
     }
 
     const result = await this.updateEntry(this.tableName, options)

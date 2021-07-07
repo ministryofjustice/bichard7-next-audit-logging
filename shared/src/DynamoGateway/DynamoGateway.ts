@@ -90,16 +90,41 @@ export default class DynamoGateway {
       .catch((error) => <Error>error)
   }
 
+  getRecordVersion(
+    tableName: string,
+    keyName: string,
+    keyValue: unknown
+  ): PromiseResult<DocumentClient.GetItemOutput | Error | null> {
+    return this.client
+      .get({
+        TableName: tableName,
+        Key: {
+          [keyName]: keyValue
+        },
+        ProjectionExpression: "version"
+      })
+      .promise()
+      .catch((error) => <Error>error)
+  }
+
   updateEntry(tableName: string, options: UpdateOptions): PromiseResult<DocumentClient.UpdateItemOutput> {
+    const { keyName, keyValue, expressionAttributeNames } = options
+    const expressionAttributeValues = {
+      ...options.updateExpressionValues,
+      ":version": options.currentVersion,
+      ":version_increment": 1
+    }
+    const updateExpression = `${options.updateExpression} ADD version :version_increment`
+
     const updateParams = <DocumentClient.UpdateItemInput>{
       TableName: tableName,
       Key: {
-        [options.keyName]: options.keyValue
+        [keyName]: keyValue
       },
-      UpdateExpression: options.updateExpression,
-      ExpressionAttributeValues: options.updateExpressionValues,
-      ExpressionAttributeNames: options.expressionAttributeNames,
-      ConditionExpression: `attribute_exists(${options.keyName})`
+      UpdateExpression: updateExpression,
+      ExpressionAttributeValues: expressionAttributeValues,
+      ExpressionAttributeNames: expressionAttributeNames,
+      ConditionExpression: `attribute_exists(${keyName}) and version = :version`
     }
 
     return this.client

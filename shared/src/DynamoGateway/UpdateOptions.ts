@@ -7,4 +7,5 @@ export default interface UpdateOptions {
   updateExpression: UpdateExpression
   updateExpressionValues: ExpressionAttributeValueMap | KeyValuePair<string, unknown>
   expressionAttributeNames?: ExpressionAttributeNameMap | KeyValuePair<string, string>
+  currentVersion: number
 }
