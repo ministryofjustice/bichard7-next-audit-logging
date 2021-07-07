@@ -5,8 +5,8 @@ set -e
 LAMBDA_NAME=IncomingMessageHandler
 BUCKET_NAME=incoming-messages
 MESSAGE_PATH=$PWD/scripts/message.xml
-RECEIVED_DATE=$(date +'%Y/%m/%d/%H/%M')
-MESSAGE_ID="LIBRA-EXISS-$(date +'%s')"
+RECEIVED_DATE=$(date -u +'%Y/%m/%d/%H/%M')
+MESSAGE_ID="LIBRA-EXISS-$(date -u +'%s')"
 S3_MESSAGE_PATH=$RECEIVED_DATE/$MESSAGE_ID.xml
 ESCAPED_MESSAGE_PATH=$(echo $S3_MESSAGE_PATH | sed -e "s/\///g")
 
