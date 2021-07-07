@@ -5,8 +5,8 @@ import getLocalAuditLogApiUrl from "src/getLocalAuditLogApiUrl"
 import handler from "src/handler"
 import invokeGeneralEventHandlerFunction from "./invokeGeneralEventHandlerFunction"
 
-const createMessage = (correlationId: string): string => {
-  const eventDateTime = new Date().toISOString()
+const createMessage = (correlationId: string, eventDateTime: Date): string => {
+  const isoEventDateTime = eventDateTime.toISOString()
 
   return `
     <?xml version="1.0" encoding="UTF-8"?>
@@ -16,7 +16,7 @@ const createMessage = (correlationId: string): string => {
       <eventCategory>warning</eventCategory>
       <eventType>PNC Response not received</eventType>
       <correlationID>${correlationId}</correlationID>
-      <eventDateTime>${eventDateTime}</eventDateTime>
+      <eventDateTime>${isoEventDateTime}</eventDateTime>
       <nameValuePairs>
           <nameValuePair>
             <name>PNC Request Type</name>
@@ -61,7 +61,8 @@ test("should transform the message and attach as an event to an existing AuditLo
   const auditLog = new AuditLog("ExternalCorrelationId", new Date(), "XML")
   await apiGateway.createAuditLog(auditLog)
 
-  const message = createMessage(auditLog.messageId)
+  const expectedTimestamp = new Date()
+  const message = createMessage(auditLog.messageId, expectedTimestamp)
   const event = createMqEvent([message])
 
   await invokeGeneralEventHandlerFunction(JSON.stringify(event))
@@ -76,8 +77,7 @@ test("should transform the message and attach as an event to an existing AuditLo
   expect(actualEvent.category).toBe("warning")
   expect(actualEvent.eventSource).toBe("PNC Access Manager")
   expect(actualEvent.eventType).toBe("PNC Response not received")
-  // TODO: Dates aren't working quite right due to timezones and milliseconds. Need to dig into it.
-  // expect(actualEvent.timestamp).toBe(expectedTimestamp.toISOString())
+  expect(actualEvent.timestamp).toBe(expectedTimestamp.toISOString())
   expect(actualEvent.attributes).toBeDefined()
   expect(Object.keys(actualEvent.attributes)).toHaveLength(3)
   expect(actualEvent.attributes["PNC Request Type"]).toBe("ENQASI")
@@ -88,7 +88,7 @@ test("should transform the message and attach as an event to an existing AuditLo
 })
 
 test("should throw an error when the referenced AuditLog record does not exist", async () => {
-  const message = createMessage("Message1")
+  const message = createMessage("Message1", new Date())
   const event = createMqEvent([message])
 
   let actualError: Error | undefined
