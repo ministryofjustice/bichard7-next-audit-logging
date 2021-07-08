@@ -1,7 +1,6 @@
-import { isError } from "shared"
+import { isError, S3Gateway } from "shared"
 import { createS3Config } from "src/configs"
 import { S3PutObjectEvent, ReceivedMessage } from "src/entities"
-import S3Gateway from "src/gateways/S3Gateway"
 import validateS3Key, { ValidateS3KeyResult } from "src/use-cases/validateS3Key"
 import readReceivedDateFromS3ObjectKey from "src/utils/readReceivedDateFromS3ObjectKey"
 

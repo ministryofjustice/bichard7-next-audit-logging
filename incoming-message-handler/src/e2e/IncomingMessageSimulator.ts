@@ -1,6 +1,5 @@
-import { isError } from "shared"
+import { isError, S3Gateway } from "shared"
 import { StepFunctions } from "aws-sdk"
-import S3Gateway from "src/gateways/S3Gateway"
 
 export default class IncomingMessageSimulator {
   private readonly s3Gateway: S3Gateway
@@ -9,10 +8,9 @@ export default class IncomingMessageSimulator {
 
   constructor(awsUrl: string) {
     this.s3Gateway = new S3Gateway({
-      S3_URL: awsUrl,
-      S3_REGION: "us-east-1",
-      INCOMING_MESSAGE_BUCKET_NAME: "incoming-messages",
-      S3_FORCE_PATH_STYLE: "true"
+      url: awsUrl,
+      region: "us-east-1",
+      bucketName: "incoming-messages"
     })
 
     this.stateMachine = new StepFunctions({
