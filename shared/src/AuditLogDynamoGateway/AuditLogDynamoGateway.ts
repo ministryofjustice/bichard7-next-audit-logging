@@ -1,8 +1,9 @@
 import AuditLogEvent from "src/AuditLogEvent"
-import { DynamoGateway, DynamoDbConfig, FetchByIndexOptions, UpdateOptions } from "../DynamoGateway"
+import { DynamoGateway, DynamoDbConfig, FetchByIndexOptions, UpdateOptions, GetManyOptions } from "../DynamoGateway"
 import getMessageStatus from "./getMessageStatus"
 import { isError, PromiseResult } from "../types"
 import AuditLog from "../AuditLog"
+import AuditLogPagination from "./AuditLogPagination"
 
 export default class AuditLogDynamoGateway extends DynamoGateway {
   private readonly tableKey: string = "messageId"
@@ -23,8 +24,11 @@ export default class AuditLogDynamoGateway extends DynamoGateway {
     return message
   }
 
-  async fetchMany(limit = 10): PromiseResult<AuditLog[]> {
-    const result = await this.getMany(this.tableName, this.sortKey, limit)
+  async fetchMany(limit = 10, lastMessage?: AuditLog): PromiseResult<AuditLog[]> {
+    const pagination = new AuditLogPagination(limit).createDefaultPagination(lastMessage)
+    const options: GetManyOptions = { sortKey: this.sortKey, pagination }
+
+    const result = await this.getMany(this.tableName, options)
 
     if (isError(result)) {
       return result
@@ -37,7 +41,8 @@ export default class AuditLogDynamoGateway extends DynamoGateway {
     const options: FetchByIndexOptions = {
       indexName: "externalCorrelationIdIndex",
       attributeName: "externalCorrelationId",
-      attributeValue: externalCorrelationId
+      attributeValue: externalCorrelationId,
+      pagination: { limit: 1 }
     }
 
     const result = await this.fetchByIndex(this.tableName, options)
@@ -54,12 +59,14 @@ export default class AuditLogDynamoGateway extends DynamoGateway {
     return items[0]
   }
 
-  async fetchByStatus(status: string): PromiseResult<AuditLog[]> {
+  async fetchByStatus(status: string, limit = 10, lastMessage?: AuditLog): PromiseResult<AuditLog[]> {
+    const pagination = new AuditLogPagination(limit).createStatusPagination(lastMessage)
     const options: FetchByIndexOptions = {
       indexName: "statusIndex",
       attributeName: "status",
       attributeValue: status,
-      isAscendingOrder: false
+      isAscendingOrder: false,
+      pagination
     }
 
     const result = await this.fetchByIndex(this.tableName, options)

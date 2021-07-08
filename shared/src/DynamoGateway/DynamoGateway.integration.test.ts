@@ -3,6 +3,8 @@ import UpdateOptions from "./UpdateOptions"
 import { isError } from "../types"
 import DynamoDbConfig from "./DynamoDbConfig"
 import TestDynamoGateway from "./TestDynamoGateway"
+import { GetManyOptions } from "."
+import FetchByIndexOptions from "./FetchByIndexOptions"
 
 const config: DynamoDbConfig = {
   DYNAMO_URL: "http://localhost:4566",
@@ -70,7 +72,7 @@ describe("DynamoGateway", () => {
     })
   })
 
-  describe("getAll()", () => {
+  describe("getMany()", () => {
     beforeEach(async () => {
       await Promise.allSettled(
         [...Array(3).keys()].map(async (i: number) => {
@@ -85,13 +87,21 @@ describe("DynamoGateway", () => {
     })
 
     it("should return limited amount of records", async () => {
-      const actualRecords = await gateway.getMany(config.AUDIT_LOG_TABLE_NAME, sortKey, 1)
+      const options: GetManyOptions = {
+        sortKey,
+        pagination: { limit: 1 }
+      }
+      const actualRecords = await gateway.getMany(config.AUDIT_LOG_TABLE_NAME, options)
       const results = <DocumentClient.ScanOutput>actualRecords
       expect(results.Count).toBe(1)
     })
 
     it("should return records ordered by sort key", async () => {
-      const actualRecords = await gateway.getMany(config.AUDIT_LOG_TABLE_NAME, sortKey, 3)
+      const options: GetManyOptions = {
+        sortKey,
+        pagination: { limit: 3 }
+      }
+      const actualRecords = await gateway.getMany(config.AUDIT_LOG_TABLE_NAME, options)
       const results = <DocumentClient.ScanOutput>actualRecords
       expect(results.Count).toBe(3)
 
@@ -99,6 +109,24 @@ describe("DynamoGateway", () => {
       expect(items?.[0].someOtherValue).toBe("Value 2")
       expect(items?.[1].someOtherValue).toBe("Value 1")
       expect(items?.[2].someOtherValue).toBe("Value 0")
+    })
+
+    it("should return records from the last key provided", async () => {
+      const lastItemKey = { id: "Record 1", someOtherValue: "Value 1" }
+      const options: GetManyOptions = {
+        sortKey,
+        pagination: {
+          limit: 1,
+          lastItemKey
+        }
+      }
+      const actualRecords = await gateway.getMany(config.AUDIT_LOG_TABLE_NAME, options)
+      const results = <DocumentClient.ScanOutput>actualRecords
+      expect(results.Count).toBe(1)
+
+      const item = results.Items![0]
+      expect(item.id).toBe("Record 0")
+      expect(item.someOtherValue).toBe("Value 0")
     })
   })
 
@@ -117,10 +145,11 @@ describe("DynamoGateway", () => {
     })
 
     it("should return one record when key value exists", async () => {
-      const options = {
+      const options: FetchByIndexOptions = {
         indexName: "someOtherValueSecondaryIndex",
         attributeName: "someOtherValue",
-        attributeValue: "Value 1"
+        attributeValue: "Value 1",
+        pagination: { limit: 10 }
       }
 
       const actualRecords = await gateway.fetchByIndex(config.AUDIT_LOG_TABLE_NAME, options)
@@ -136,10 +165,11 @@ describe("DynamoGateway", () => {
     })
 
     it("should return null when key value does not exist", async () => {
-      const options = {
+      const options: FetchByIndexOptions = {
         indexName: "someOtherValueSecondaryIndex",
         attributeName: "someOtherValue",
-        attributeValue: "Value doesn't exist"
+        attributeValue: "Value doesn't exist",
+        pagination: { limit: 10 }
       }
 
       const actualRecords = await gateway.fetchByIndex(config.AUDIT_LOG_TABLE_NAME, options)
@@ -247,7 +277,13 @@ describe("DynamoGateway", () => {
 
       expect(isError(result)).toBe(false)
 
-      const actualRecords = <DocumentClient.ScanOutput>await gateway.getMany(config.AUDIT_LOG_TABLE_NAME, sortKey, 3)
+      const getManyOptions: GetManyOptions = {
+        sortKey,
+        pagination: { limit: 3 }
+      }
+      const actualRecords = <DocumentClient.ScanOutput>(
+        await gateway.getMany(config.AUDIT_LOG_TABLE_NAME, getManyOptions)
+      )
       expect(isError(actualRecords)).toBeFalsy()
 
       const filteredRecords = actualRecords.Items?.filter((r) => r.id === recordId)
