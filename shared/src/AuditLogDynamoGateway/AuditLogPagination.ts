@@ -1,10 +1,11 @@
 import AuditLog from "src/AuditLog"
 import Pagination from "src/DynamoGateway/Pagination"
+import { KeyValuePair } from "src/types"
 
 export default class AuditLogPagination {
   constructor(private limit = 10) {}
 
-  createDefaultPagination(lastMessage?: AuditLog): Pagination {
+  private createPagination(itemKeyValues: KeyValuePair<string, unknown>, lastMessage?: AuditLog) {
     const pagination: Pagination = {
       limit: this.limit
     }
@@ -12,27 +13,30 @@ export default class AuditLogPagination {
     if (lastMessage) {
       pagination.lastItemKey = {
         messageId: lastMessage.messageId,
-        _: "_",
-        receivedDate: lastMessage.receivedDate
+        ...itemKeyValues
       }
     }
 
     return pagination
   }
 
+  createDefaultPagination(lastMessage?: AuditLog): Pagination {
+    return this.createPagination(
+      {
+        _: "_",
+        receivedDate: lastMessage?.receivedDate
+      },
+      lastMessage
+    )
+  }
+
   createStatusPagination(lastMessage?: AuditLog): Pagination {
-    const pagination: Pagination = {
-      limit: this.limit
-    }
-
-    if (lastMessage) {
-      pagination.lastItemKey = {
-        messageId: lastMessage.messageId,
-        status: lastMessage.status,
-        receivedDate: lastMessage.receivedDate
-      }
-    }
-
-    return pagination
+    return this.createPagination(
+      {
+        status: lastMessage?.status,
+        receivedDate: lastMessage?.receivedDate
+      },
+      lastMessage
+    )
   }
 }
