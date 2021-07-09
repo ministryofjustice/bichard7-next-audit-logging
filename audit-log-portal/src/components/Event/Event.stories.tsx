@@ -1,3 +1,4 @@
+import { AuditLogEvent } from "shared"
 import Event from "./Event"
 
 export default {
@@ -7,36 +8,39 @@ export default {
 
 export const Information = () => (
   <Event
-    event={{
-      attributes: {},
-      category: "information",
-      eventSource: "Event Source",
-      eventType: "Event Type",
-      timestamp: new Date().toISOString()
-    }}
+    event={
+      new AuditLogEvent({
+        category: "information",
+        eventSource: "Event Source",
+        eventType: "Event Type",
+        timestamp: new Date()
+      })
+    }
   />
 )
 
 export const Warning = () => (
   <Event
-    event={{
-      attributes: {},
-      category: "warning",
-      eventSource: "Event Source",
-      eventType: "Event Type",
-      timestamp: new Date().toISOString()
-    }}
+    event={
+      new AuditLogEvent({
+        category: "warning",
+        eventSource: "Event Source",
+        eventType: "Event Type",
+        timestamp: new Date()
+      })
+    }
   />
 )
 
 export const Error = () => (
   <Event
-    event={{
-      attributes: {},
-      category: "error",
-      eventSource: "Event Source",
-      eventType: "Event Type",
-      timestamp: new Date().toISOString()
-    }}
+    event={
+      new AuditLogEvent({
+        category: "error",
+        eventSource: "Event Source",
+        eventType: "Event Type",
+        timestamp: new Date()
+      })
+    }
   />
 )

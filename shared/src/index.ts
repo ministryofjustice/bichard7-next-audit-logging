@@ -1,3 +1,4 @@
+export { default as AuditLogDynamoGateway } from "./AuditLogDynamoGateway"
 export * from "./DynamoGateway"
 export * from "./S3Gateway"
 export * from "./types"
