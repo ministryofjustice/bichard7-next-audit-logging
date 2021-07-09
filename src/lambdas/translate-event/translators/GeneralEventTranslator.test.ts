@@ -1,11 +1,12 @@
 import fs from "fs"
-import { isError } from "shared"
+import { encodeBase64, isError } from "shared"
 import type { AuditLogEvent } from "shared"
 import GeneralEventTranslator from "./GeneralEventTranslator"
 
 test("parses the message data and returns an AuditLogEvent", async () => {
   const generalEventData = fs.readFileSync("../../../events/general-event.xml")
-  const result = await GeneralEventTranslator(generalEventData.toString())
+  const messageData = encodeBase64(generalEventData.toString())
+  const result = await GeneralEventTranslator(messageData)
 
   expect(isError(result)).toBe(false)
 
@@ -13,5 +14,5 @@ test("parses the message data and returns an AuditLogEvent", async () => {
   expect(category).toBe("information")
   expect(eventSource).toBe("Hearing Outcome Publication Choreography")
   expect(eventType).toBe("Message Received")
-  expect(timestamp).toBe("2021-06-29T08:35:36.031+00:00")
+  expect(timestamp).toBe("2021-06-29T08:35:36.031Z")
 })

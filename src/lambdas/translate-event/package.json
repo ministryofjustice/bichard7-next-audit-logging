@@ -15,7 +15,8 @@
     "test:e2e": "npm run setup:env && ../../../scripts/test.sh e2e"
   },
   "dependencies": {
-    "shared": "file:../../../shared"
+    "shared": "file:../../../shared",
+    "xml2js": "^0.4.23"
   },
   "devDependencies": {
     "@babel/preset-env": "^7.13.12",
@@ -30,8 +31,7 @@
     "ts-jest": "^26.5.4",
     "typescript": "^4.2.3",
     "webpack": "^5.27.2",
-    "webpack-cli": "^4.5.0",
-    "xml2js": "^0.4.19"
+    "webpack-cli": "^4.5.0"
   },
   "author": "",
   "license": "ISC"

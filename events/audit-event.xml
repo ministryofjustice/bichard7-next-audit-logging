@@ -2,7 +2,7 @@
 <auditEvent xmlns="http://www.example.org/GeneralEventLogMessage" xmlns:ds="http://schemas.cjse.gov.uk/datastandards/2006-10" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <systemID>Bichard7</systemID>
     <componentID>ErrorHandlerScreenFlow</componentID>
-    <eventCategory>user</eventCategory>
+    <eventCategory>warning</eventCategory>
     <eventType>Trigger Instances resolved</eventType>
     <correlationID>EXTERNAL_CORRELATION_ID</correlationID>
     <eventDateTime>2021-06-29T08:34:22.789+00:00</eventDateTime>
