@@ -1,8 +1,8 @@
-import AuditLogEvent from "src/AuditLogEvent"
-import { DynamoGateway, DynamoDbConfig, FetchByIndexOptions, UpdateOptions } from "../DynamoGateway"
+import { DynamoGateway } from "../DynamoGateway"
+import type { DynamoDbConfig, FetchByIndexOptions, UpdateOptions } from "../DynamoGateway"
+import type { AuditLog, AuditLogEvent, PromiseResult } from "../types"
+import { isError } from "../types"
 import getMessageStatus from "./getMessageStatus"
-import { isError, PromiseResult } from "../types"
-import AuditLog from "../AuditLog"
 
 export default class AuditLogDynamoGateway extends DynamoGateway {
   private readonly tableKey: string = "messageId"

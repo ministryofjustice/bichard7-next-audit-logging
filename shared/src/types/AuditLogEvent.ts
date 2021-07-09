@@ -1,4 +1,6 @@
-import type { EventCategory, KeyValuePair, AuditLogEventOptions } from "src/types"
+import type EventCategory from "./EventCategory"
+import type KeyValuePair from "./KeyValuePair"
+import type AuditLogEventOptions from "./AuditLogEventOptions"
 
 export default class AuditLogEvent {
   public readonly eventSource: string
@@ -18,7 +20,7 @@ export default class AuditLogEvent {
     this.timestamp = options.timestamp.toISOString()
   }
 
-  addAttribute(name: string, value: string): void {
+  addAttribute(name: string, value: unknown): void {
     this.attributes[name] = value
   }
 }

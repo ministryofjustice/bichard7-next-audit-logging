@@ -1,5 +1,5 @@
-import AuditLogEvent from "../AuditLogEvent"
-import AuditLogStatus from "../AuditLogStatus"
+import AuditLogEvent from "../types/AuditLogEvent"
+import AuditLogStatus from "../types/AuditLogStatus"
 import getMessageStatus from "./getMessageStatus"
 
 interface TestInput {
@@ -13,7 +13,13 @@ test.each<TestInput>([
   { eventType: "PNC Response not received", expectedStatus: AuditLogStatus.error },
   { eventType: "Other event types", expectedStatus: AuditLogStatus.processing }
 ])("returns <$expected/> when eventType is $eventType", ({ eventType, expectedStatus }) => {
-  const auditLogEvent = new AuditLogEvent("information", new Date(), eventType)
+  const auditLogEvent = new AuditLogEvent({
+    category: "information",
+    timestamp: new Date(),
+    eventType,
+    eventSource: "Test"
+  })
+
   const actualStatus = getMessageStatus(auditLogEvent)
   expect(actualStatus).toBe(expectedStatus)
 })

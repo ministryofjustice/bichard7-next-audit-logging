@@ -1,10 +1,19 @@
-import type { AuditLogEvent, PromiseResult } from "shared"
+import { AuditLogEvent, PromiseResult, decodeBase64, parseXml } from "shared"
+
 import type Translator from "./Translator"
+import type { AuditEvent } from "../types"
+import transformEventDetails from "./transformEventDetails"
 
 const AuditEventTranslator: Translator = async (messageData: string): PromiseResult<AuditLogEvent> => {
-  await Promise.resolve()
+  // Audit events are in base64 encoded XML
+  const xml = decodeBase64(messageData)
+  const logItem = await parseXml<AuditEvent>(xml)
 
-  return new Error(`Not yet implemented${messageData}`)
+  if (!logItem || !logItem.auditEvent) {
+    return new Error("Failed to parse the Audit Event")
+  }
+
+  return transformEventDetails(logItem.auditEvent)
 }
 
 export default AuditEventTranslator

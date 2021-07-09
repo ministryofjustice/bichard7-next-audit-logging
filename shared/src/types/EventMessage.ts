@@ -1,4 +1,4 @@
-import type { MessageFormat } from "src/types"
+import type MessageFormat from "./MessageFormat"
 
 export default interface EventMessage {
   messageData: string

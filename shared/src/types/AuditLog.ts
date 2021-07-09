@@ -1,5 +1,6 @@
 import { v4 as uuid } from "uuid"
-import type { AuditLogEvent, AuditLogStatus } from "src/types"
+import type AuditLogEvent from "./AuditLogEvent"
+import AuditLogStatus from "./AuditLogStatus"
 
 export default class AuditLog {
   public readonly messageId: string

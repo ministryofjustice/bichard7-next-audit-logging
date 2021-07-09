@@ -1,5 +1,5 @@
-import AuditLogEvent from "../AuditLogEvent"
-import AuditLogStatus from "../AuditLogStatus"
+import type { AuditLogEvent } from "../types"
+import { AuditLogStatus } from "../types"
 
 const getMessageStatus = (event: AuditLogEvent): string => {
   switch (event.eventType) {
