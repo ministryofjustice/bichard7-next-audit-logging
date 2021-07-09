@@ -11,8 +11,9 @@ it("should return all messages", async () => {
     new AuditLog("3", new Date(), "Xml")
   ]
   jest.spyOn(gateway, "fetchMany").mockResolvedValue(expectedMessages)
+  jest.spyOn(gateway, "fetchOne").mockResolvedValue(new AuditLog("test id", new Date(), "Xml"))
 
-  const messageFetcher = new FetchAll(gateway)
+  const messageFetcher = new FetchAll(gateway, "messageId")
   const result = await messageFetcher.fetch()
 
   expect(isError(result)).toBe(false)

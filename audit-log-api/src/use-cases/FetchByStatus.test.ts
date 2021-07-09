@@ -9,8 +9,9 @@ it("should return one message when there is a message with the specified status"
   const expectedMessage = new AuditLog("1", new Date(), "Xml")
   expectedMessage.status = expectedStatus
   jest.spyOn(gateway, "fetchByStatus").mockResolvedValue([expectedMessage])
+  jest.spyOn(gateway, "fetchOne").mockResolvedValue(new AuditLog("test id", new Date(), "Xml"))
 
-  const messageFetcher = new FetchByStatus(gateway, expectedStatus)
+  const messageFetcher = new FetchByStatus(gateway, expectedStatus, "messageId")
   const result = await messageFetcher.fetch()
 
   expect(isError(result)).toBe(false)
