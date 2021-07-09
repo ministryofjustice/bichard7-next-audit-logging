@@ -1,5 +1,4 @@
 import { useState } from "react"
-import useSWR from "swr"
 import Error from "components/Error"
 import Header from "components/Header"
 import Layout from "components/Layout"
@@ -7,30 +6,42 @@ import Loading from "components/Loading"
 import Messages from "components/Messages"
 import MessageSearch from "components/MessageSearch"
 import type MessageSearchModel from "types/MessageSearchModel"
-import type MessageSearchResult from "types/MessageSearchResult"
 import convertObjectToURLSearchParams from "utils/convertObjectToURLSearchParams"
 import combineUrlAndQueryString from "utils/combineUrlAndQueryString"
-import fetcher from "utils/fetcher"
+import InfiniteScroll from "react-infinite-scroll-component"
+import useGetMessages from "utils/useGetMessages"
 
-const resolveApiUrl = (searchModel: MessageSearchModel): string => {
+const resolveApiUrl = (searchModel: MessageSearchModel, lastMessageId?: string): string => {
   const params = convertObjectToURLSearchParams(searchModel)
+  if (lastMessageId) {
+    params.append("lastMessageId", lastMessageId)
+  }
   return combineUrlAndQueryString(`/api/messages`, params.toString())
 }
 
 const Index = () => {
   const [searchModel, setSearchModel] = useState<MessageSearchModel>({})
 
-  const { data, error } = useSWR<MessageSearchResult>(() => resolveApiUrl(searchModel), fetcher)
+  const { messages, error, size, setSize, isLoadingInitialData, isLoadingMore, isReachingEnd } = useGetMessages(
+    (pageIndex, previousMessages) => {
+      const lastMessageId = previousMessages.slice(-1)?.[0].messageId
+      return resolveApiUrl(searchModel, lastMessageId)
+    }
+  )
 
   return (
     <Layout pageTitle="Messages">
       <Header text="Messages" />
-      <MessageSearch onSearch={(model) => setSearchModel(model)} disabled={!data && !error} />
+      <MessageSearch onSearch={(model) => setSearchModel(model)} disabled={!messages && !error} />
 
       {!!error && <Error message={error.message} />}
-      {!!data && !error && <Messages messages={data.messages || []} />}
+      {!!messages && !error && (
+        <InfiniteScroll next={() => setSize(size + 1)} hasMore={!isReachingEnd} dataLength={messages.length} loader>
+          <Messages messages={messages || []} />
+        </InfiniteScroll>
+      )}
 
-      <Loading isLoading={!data && !error} />
+      <Loading isLoading={isLoadingMore} blockScreen={isLoadingInitialData} />
     </Layout>
   )
 }
