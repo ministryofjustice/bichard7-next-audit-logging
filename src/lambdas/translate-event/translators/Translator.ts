@@ -1,6 +1,5 @@
-import { PromiseResult } from "shared"
-import type TranslationResult from "./TranslationResult"
+import type { PromiseResult, AuditLogEvent } from "shared"
 
-type Translator = (messageData: string) => PromiseResult<TranslationResult>
+type Translator = (messageData: string) => PromiseResult<AuditLogEvent>
 
 export default Translator
