@@ -2,7 +2,7 @@ import { v4 as uuid } from "uuid"
 import format from "xml-formatter"
 import { isError, DynamoDbConfig } from "shared"
 import TestDynamoGateway from "shared/dist/DynamoGateway/TestDynamoGateway"
-import TestS3Gateway from "src/gateways/S3Gateway/TestS3Gateway"
+import TestS3Gateway from "shared/dist/S3Gateway/TestS3Gateway"
 import TestMqGateway from "src/gateways/MqGateway/TestMqGateway"
 import replaceMessageIdInXml from "src/use-cases/replaceMessageIdInXml"
 import IncomingMessageSimulator from "./IncomingMessageSimulator"
@@ -43,10 +43,9 @@ const dynamoConfig: DynamoDbConfig = {
 const dynamoGateway = new TestDynamoGateway(dynamoConfig)
 
 const s3Gateway = new TestS3Gateway({
-  S3_URL: AWS_URL,
-  S3_REGION: REGION,
-  S3_FORCE_PATH_STYLE: "true",
-  INCOMING_MESSAGE_BUCKET_NAME: "incoming-messages"
+  url: AWS_URL,
+  region: REGION,
+  bucketName: "incoming-messages"
 })
 
 const simulator = new IncomingMessageSimulator(AWS_URL)

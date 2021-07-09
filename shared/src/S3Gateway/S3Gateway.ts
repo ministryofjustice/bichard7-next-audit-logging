@@ -1,6 +1,6 @@
 import { S3 } from "aws-sdk"
-import { PromiseResult } from "shared"
-import { S3Config } from "src/configs"
+import { PromiseResult } from "src/types"
+import S3Config from "./S3Config"
 
 export default class S3Gateway {
   private readonly s3: S3
@@ -8,17 +8,18 @@ export default class S3Gateway {
   protected readonly bucketName: string
 
   constructor(config: S3Config) {
-    const { S3_URL, S3_REGION, S3_FORCE_PATH_STYLE, INCOMING_MESSAGE_BUCKET_NAME } = config
+    const { url, region, bucketName } = config
 
-    if (!INCOMING_MESSAGE_BUCKET_NAME) {
-      throw Error("INCOMING_MESSAGE_BUCKET_NAME must have value.")
+    if (!bucketName) {
+      throw Error("bucketName must have value.")
     }
-    this.bucketName = INCOMING_MESSAGE_BUCKET_NAME
+
+    this.bucketName = bucketName
 
     this.s3 = new S3({
-      endpoint: S3_URL,
-      region: S3_REGION,
-      s3ForcePathStyle: S3_FORCE_PATH_STYLE === "true"
+      endpoint: url,
+      region,
+      s3ForcePathStyle: true
     })
   }
 
