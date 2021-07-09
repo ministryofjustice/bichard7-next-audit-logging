@@ -1,3 +1,5 @@
 export * from "./Result"
 export * from "./EventCategory"
+export { default as EventMessage } from "./EventMessage"
+export { default as MessageFormat } from "./MessageFormat"
 export * from "./KeyValuePair"

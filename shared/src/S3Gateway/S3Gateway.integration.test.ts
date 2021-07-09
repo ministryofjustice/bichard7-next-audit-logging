@@ -1,13 +1,12 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { isError } from "shared"
-import { S3Config } from "src/configs"
+import { isError } from "src/types"
+import S3Config from "./S3Config"
 import TestS3Gateway from "./TestS3Gateway"
 
 const config: S3Config = {
-  S3_URL: "http://localhost:4566",
-  S3_REGION: "eu-west-2",
-  S3_FORCE_PATH_STYLE: "true",
-  INCOMING_MESSAGE_BUCKET_NAME: "test-bucket"
+  url: "http://localhost:4566",
+  region: "eu-west-2",
+  bucketName: "test-bucket"
 }
 
 const gateway = new TestS3Gateway(config)
@@ -15,7 +14,7 @@ const fileName = "2021/04/09/12/06/123456.xml"
 
 describe("S3Gateway", () => {
   beforeAll(async () => {
-    await gateway.createBucket(config.INCOMING_MESSAGE_BUCKET_NAME!)
+    await gateway.createBucket(config.bucketName!)
     await gateway.deleteAll()
   })
 
@@ -23,7 +22,7 @@ describe("S3Gateway", () => {
     it("should return the contents of a file when it exists in the bucket", async () => {
       await gateway.upload(fileName, "Message to be saved")
 
-      const content = await gateway.getItem(config.INCOMING_MESSAGE_BUCKET_NAME!, fileName)
+      const content = await gateway.getItem(config.bucketName!, fileName)
 
       expect(content).toBe("Message to be saved")
     })
