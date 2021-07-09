@@ -1,8 +1,7 @@
-import type { PromiseResult } from "shared"
+import type { PromiseResult, AuditLogEvent } from "shared"
 import type Translator from "./Translator"
-import type TranslationResult from "./TranslationResult"
 
-const GeneralEventTranslator: Translator = async (messageData: string): PromiseResult<TranslationResult> => {
+const GeneralEventTranslator: Translator = async (messageData: string): PromiseResult<AuditLogEvent> => {
   await Promise.resolve()
 
   return new Error(`Not yet implemented${messageData}`)
