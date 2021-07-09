@@ -1,4 +1,4 @@
-import type { EventMessage, MessageFormat, AuditLogEvent } from "shared"
+import type { EventMessage, AuditLogEvent } from "shared"
 import { isError } from "shared"
 import getTranslator from "translators/getTranslator"
 
@@ -8,7 +8,6 @@ interface TranslateEventInput extends EventMessage {
 
 interface TranslateEventResult {
   event: AuditLogEvent
-  messageFormat: MessageFormat
   s3Path: string
 }
 
@@ -24,7 +23,6 @@ export default async (event: TranslateEventInput): Promise<TranslateEventResult>
   }
 
   return {
-    messageFormat: event.messageFormat,
     s3Path: event.s3Path,
     event: translationResult
   }
