@@ -2,7 +2,7 @@ import { EventMessage, isError, S3Gateway } from "shared"
 import StoreInS3UseCase from "./StoreInS3UseCase"
 import createS3Config from "./createS3Config"
 
-interface StoreInS3Result extends EventMessage {
+export interface StoreInS3Result extends EventMessage {
   s3Path: string
 }
 

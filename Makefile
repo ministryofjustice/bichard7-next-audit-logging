@@ -1,6 +1,22 @@
 SHELL := /bin/bash
 
 ########################################
+# Install, Build, Test Commands
+########################################
+
+.PHONY: build
+build:
+	scripts/install-all.sh && scripts/build-all.sh
+
+.PHONY: test
+test:
+	scripts/test-all.sh
+
+.PHONY: validate
+validate:
+	npm i && npm run lint
+
+########################################
 # Run Commands
 ########################################
 
