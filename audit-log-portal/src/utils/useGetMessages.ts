@@ -13,8 +13,7 @@ interface UseGetMessagesResult {
   isLoadingInitialData: boolean
   isLoadingMore: boolean
   isReachingEnd: boolean
-  size: number
-  setSize: (size: number | ((size: number) => number)) => Promise<AuditLog[][]>
+  loadMore: () => Promise<AuditLog[][]>
 }
 
 const fetchLimit = 10
@@ -25,10 +24,17 @@ export default function useGetMessages(url: KeyLoader<AuditLog[]>): UseGetMessag
   )
 
   const messages = <AuditLog[]>(data && !error ? [].concat(...data) : [])
-  const isLoadingInitialData = !data && !error
-  const isLoadingMore = isLoadingInitialData || (size > 0 && data && typeof data[size - 1] === "undefined")
-  const isEmpty = data?.[0]?.length === 0
-  const isReachingEnd = isEmpty || (data && data[data.length - 1]?.length < fetchLimit)
+  const lastFetchResult = size > 0 && data?.[size - 1]
 
-  return { messages, error, isLoadingMore, size, setSize, isReachingEnd, isLoadingInitialData }
+  const isLoadingInitialData = !data && !error
+  const isLoadingData = typeof lastFetchResult === "undefined"
+  const isLoadingMore = isLoadingInitialData || isLoadingData
+
+  const islastFetchResultLessThanLimit = lastFetchResult && lastFetchResult.length < fetchLimit
+  const isEmpty = messages.length === 0
+  const isReachingEnd = isEmpty || islastFetchResultLessThanLimit
+
+  const loadMore = () => setSize(size + 1)
+
+  return { messages, error, loadMore, isLoadingMore, isLoadingInitialData, isReachingEnd }
 }

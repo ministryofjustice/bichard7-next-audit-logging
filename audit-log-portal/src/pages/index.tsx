@@ -23,7 +23,7 @@ const resolveApiUrl = (searchModel: MessageSearchModel, lastMessageId?: string):
 const Index = () => {
   const [searchModel, setSearchModel] = useState<MessageSearchModel>({})
 
-  const { messages, error, size, setSize, isLoadingInitialData, isLoadingMore, isReachingEnd } = useGetMessages(
+  const { messages, error, loadMore, isLoadingInitialData, isLoadingMore, isReachingEnd } = useGetMessages(
     (_, previousMessages) => {
       const lastMessageId = previousMessages?.slice(-1)?.[0].messageId
       return resolveApiUrl(searchModel, lastMessageId)
@@ -38,7 +38,7 @@ const Index = () => {
       <Error message={error?.message} visibleIf={!!error} />
 
       <If condition={!!messages && !error}>
-        <InfiniteScroll next={() => setSize(size + 1)} hasMore={!isReachingEnd} dataLength={messages.length} loader>
+        <InfiniteScroll next={loadMore} hasMore={!isReachingEnd} dataLength={messages.length} loader>
           <Messages messages={messages || []} />
         </InfiniteScroll>
       </If>
