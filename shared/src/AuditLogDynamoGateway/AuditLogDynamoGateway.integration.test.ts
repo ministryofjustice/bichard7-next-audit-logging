@@ -1,11 +1,9 @@
 import { DocumentClient } from "aws-sdk/clients/dynamodb"
-import AuditLogStatus from "../AuditLogStatus"
-import { isError } from "../types"
-import AuditLog from "../AuditLog"
-import { DynamoDbConfig } from "../DynamoGateway"
+import type { EventCategory } from "../types"
+import { isError, AuditLog, AuditLogEvent, AuditLogStatus } from "../types"
+import type { DynamoDbConfig } from "../DynamoGateway"
 import TestDynamoGateway from "../DynamoGateway/TestDynamoGateway"
 import AuditLogDynamoGateway from "./AuditLogDynamoGateway"
-import { AuditLogEvent } from ".."
 
 const config: DynamoDbConfig = {
   DYNAMO_URL: "http://localhost:4566",
@@ -17,6 +15,19 @@ const gateway = new AuditLogDynamoGateway(config, config.AUDIT_LOG_TABLE_NAME)
 const testGateway = new TestDynamoGateway(config)
 const primaryKey = "messageId"
 const sortKey = "receivedDate"
+
+const createAuditLogEvent = (
+  category: EventCategory,
+  timestamp: Date,
+  eventType: string,
+  eventSource?: string
+): AuditLogEvent =>
+  new AuditLogEvent({
+    category,
+    timestamp,
+    eventType,
+    eventSource: eventSource || "Test"
+  })
 
 describe("AuditLogDynamoGateway", () => {
   beforeAll(async () => {
@@ -73,16 +84,14 @@ describe("AuditLogDynamoGateway", () => {
 
   describe("addEvent()", () => {
     it("should only add an event to and update the status of the specified audit log", async () => {
-      const expectedEvent = new AuditLogEvent("information", new Date(), "PNC Response received")
-      expectedEvent.eventSource = "Test event source"
-      const expectedEventAttributes = {
-        "Attribute one": "Some value",
-        "Attribute two": 2
-      }
-      expectedEvent.attributes = expectedEventAttributes
+      const expectedEvent = createAuditLogEvent("information", new Date(), "PNC Response received")
+
+      expectedEvent.addAttribute("Attribute one", "Some value")
+      expectedEvent.addAttribute("Attribute two", 2)
 
       const message = new AuditLog("one", new Date(), "XML1")
       const otherMessage = new AuditLog("two", new Date(), "XML2")
+
       await gateway.create(message)
       await gateway.create(otherMessage)
 
@@ -123,12 +132,11 @@ describe("AuditLogDynamoGateway", () => {
     })
 
     it("should add two events to the audit log and update the message status to the latest event type", async () => {
-      const expectedEventOne = new AuditLogEvent("information", new Date(), "Test event one")
-      expectedEventOne.eventSource = "Event source one"
-      expectedEventOne.attributes = { EventOneAttribute: "Event one attribute" }
-      const expectedEventTwo = new AuditLogEvent("error", new Date(), "PNC Response not received")
-      expectedEventTwo.eventSource = "Event source two"
-      expectedEventTwo.attributes = { EventTwoAttribute: "Event two attribute" }
+      const expectedEventOne = createAuditLogEvent("information", new Date(), "Test event one", "Event source one")
+      expectedEventOne.addAttribute("EventOneAttribute", "Event one attribute")
+
+      const expectedEventTwo = createAuditLogEvent("error", new Date(), "PNC Response not received", "Event source two")
+      expectedEventTwo.addAttribute("EventTwoAttribute", "Event two attribute")
 
       let message = new AuditLog("one", new Date(), "XML")
       await gateway.create(message)
@@ -177,7 +185,7 @@ describe("AuditLogDynamoGateway", () => {
     })
 
     it("should return error when audit log does not exist", async () => {
-      const event = new AuditLogEvent("information", new Date(), "Test event one")
+      const event = createAuditLogEvent("information", new Date(), "Test event one")
       const { messageId, version } = new AuditLog("External correlation id", new Date(), "Xml")
 
       const resultOne = await gateway.addEvent(messageId, version, event)
@@ -339,9 +347,9 @@ describe("AuditLogDynamoGateway", () => {
     it("should return AuditLogEvents ordered by timestamp when message id exists in the table", async () => {
       const auditLog = new AuditLog(`External correlation id 1`, new Date(), "XML")
       auditLog.events = [
-        new AuditLogEvent("information", new Date("2021-06-10T10:12:13"), "Event 1"),
-        new AuditLogEvent("information", new Date("2021-06-15T10:12:13"), "Event 2"),
-        new AuditLogEvent("information", new Date("2021-06-13T10:12:13"), "Event 3")
+        createAuditLogEvent("information", new Date("2021-06-10T10:12:13"), "Event 1"),
+        createAuditLogEvent("information", new Date("2021-06-15T10:12:13"), "Event 2"),
+        createAuditLogEvent("information", new Date("2021-06-13T10:12:13"), "Event 3")
       ]
       await gateway.create(auditLog)
 

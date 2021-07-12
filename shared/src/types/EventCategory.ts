@@ -1,1 +1,3 @@
-export type EventCategory = "information" | "error" | "warning"
+type EventCategory = "information" | "error" | "warning"
+
+export default EventCategory

@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { isError } from "src/types"
+import { isError } from "../types"
 import S3Config from "./S3Config"
 import TestS3Gateway from "./TestS3Gateway"
 

@@ -1,4 +1,4 @@
-import AuditLog from "src/AuditLog"
+import AuditLog from "src/types/AuditLog"
 import Pagination from "src/DynamoGateway/Pagination"
 import { KeyValuePair } from "src/types"
 

@@ -1,0 +1,315 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<auditEvent xmlns="http://www.example.org/GeneralEventLogMessage" xmlns:ds="http://schemas.cjse.gov.uk/datastandards/2006-10" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <systemID>Bichard7</systemID>
+    <componentID>ErrorHandlerScreenFlow</componentID>
+    <eventCategory>warning</eventCategory>
+    <eventType>Trigger Instances resolved</eventType>
+    <correlationID>EXTERNAL_CORRELATION_ID</correlationID>
+    <eventDateTime>2021-06-29T08:34:22.789+00:00</eventDateTime>
+    <nameValuePairs>
+        <nameValuePair>
+            <name>Original Hearing Outcome / PNC Update Dataset</name>
+            <value>&lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;
+&lt;AnnotatedPNCUpdateDataset xmlns="http://www.example.org/NewXMLSchema" xmlns:ds="http://schemas.cjse.gov.uk/datastandards/2006-10" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"&gt;
+    &lt;PNCUpdateDataset&gt;
+        &lt;br7:AnnotatedHearingOutcome xmlns:br7="http://schemas.cjse.gov.uk/datastandards/BR7/2007-12"&gt;
+            &lt;br7:HearingOutcome&gt;
+                &lt;br7:Hearing hasError="false" SchemaVersion="4.0"&gt;
+                    &lt;ds:CourtHearingLocation SchemaVersion="2.0"&gt;
+                        &lt;ds:TopLevelCode&gt;B&lt;/ds:TopLevelCode&gt;
+                        &lt;ds:SecondLevelCode&gt;41&lt;/ds:SecondLevelCode&gt;
+                        &lt;ds:ThirdLevelCode&gt;ME&lt;/ds:ThirdLevelCode&gt;
+                        &lt;ds:BottomLevelCode&gt;00&lt;/ds:BottomLevelCode&gt;
+                        &lt;ds:OrganisationUnitCode&gt;B41ME00&lt;/ds:OrganisationUnitCode&gt;
+                    &lt;/ds:CourtHearingLocation&gt;
+                    &lt;ds:DateOfHearing&gt;2011-09-26&lt;/ds:DateOfHearing&gt;
+                    &lt;ds:TimeOfHearing&gt;10:00&lt;/ds:TimeOfHearing&gt;
+                    &lt;ds:HearingLanguage Literal="Don't Know"&gt;D&lt;/ds:HearingLanguage&gt;
+                    &lt;ds:HearingDocumentationLanguage Literal="Don't Know"&gt;D&lt;/ds:HearingDocumentationLanguage&gt;
+                    &lt;ds:DefendantPresentAtHearing Literal="Defendant was not present, but appeared by the presence of his/her barrister or solicitor"&gt;A&lt;/ds:DefendantPresentAtHearing&gt;
+                    &lt;br7:SourceReference&gt;
+                        &lt;br7:DocumentName&gt;SPI TRPRFOUR SEXOFFENCE&lt;/br7:DocumentName&gt;
+                        &lt;br7:UniqueID&gt;EXTERNAL_CORRELATION_ID&lt;/br7:UniqueID&gt;
+                        &lt;br7:DocumentType&gt;SPI Case Result&lt;/br7:DocumentType&gt;
+                    &lt;/br7:SourceReference&gt;
+                    &lt;br7:CourtType Literal="MC adult"&gt;MCA&lt;/br7:CourtType&gt;
+                    &lt;br7:CourtHouseCode&gt;2576&lt;/br7:CourtHouseCode&gt;
+                    &lt;br7:CourtHouseName&gt;B41ME00&lt;/br7:CourtHouseName&gt;
+                &lt;/br7:Hearing&gt;
+                &lt;br7:Case hasError="false" SchemaVersion="4.0"&gt;
+                    &lt;ds:PTIURN&gt;01ZD0303208&lt;/ds:PTIURN&gt;
+                    &lt;ds:PreChargeDecisionIndicator Literal="No"&gt;N&lt;/ds:PreChargeDecisionIndicator&gt;
+                    &lt;ds:CourtCaseReferenceNumber&gt;97/1626/008395Q&lt;/ds:CourtCaseReferenceNumber&gt;
+                    &lt;br7:CourtReference&gt;
+                        &lt;ds:MagistratesCourtReference&gt;01ZD0303208&lt;/ds:MagistratesCourtReference&gt;
+                    &lt;/br7:CourtReference&gt;
+                    &lt;br7:RecordableOnPNCindicator Literal="Yes"&gt;Y&lt;/br7:RecordableOnPNCindicator&gt;
+                    &lt;br7:Urgent&gt;
+                        &lt;br7:urgent Literal="Yes"&gt;Y&lt;/br7:urgent&gt;
+                        &lt;br7:urgency&gt;24&lt;/br7:urgency&gt;
+                    &lt;/br7:Urgent&gt;
+                    &lt;br7:ForceOwner SchemaVersion="2.0"&gt;
+                        &lt;ds:SecondLevelCode&gt;04&lt;/ds:SecondLevelCode&gt;
+                        &lt;ds:ThirdLevelCode&gt;CA&lt;/ds:ThirdLevelCode&gt;
+                        &lt;ds:BottomLevelCode&gt;00&lt;/ds:BottomLevelCode&gt;
+                        &lt;ds:OrganisationUnitCode&gt;04CA00&lt;/ds:OrganisationUnitCode&gt;
+                    &lt;/br7:ForceOwner&gt;
+                    &lt;br7:HearingDefendant hasError="false"&gt;
+                        &lt;br7:ArrestSummonsNumber&gt;1101ZD0100000448754K&lt;/br7:ArrestSummonsNumber&gt;
+                        &lt;br7:PNCIdentifier&gt;2000/0448754K&lt;/br7:PNCIdentifier&gt;
+                        &lt;br7:PNCCheckname&gt;SEXOFFENCE&lt;/br7:PNCCheckname&gt;
+                        &lt;br7:DefendantDetail&gt;
+                            &lt;br7:PersonName&gt;
+                                &lt;ds:Title&gt;Mr&lt;/ds:Title&gt;
+                                &lt;ds:GivenName NameSequence="1"&gt;TRPRFOUR&lt;/ds:GivenName&gt;
+                                &lt;ds:FamilyName NameSequence="1"&gt;SEXOFFENCE&lt;/ds:FamilyName&gt;
+                            &lt;/br7:PersonName&gt;
+                            &lt;br7:GeneratedPNCFilename&gt;SEXOFFENCE/TRPRFOUR&lt;/br7:GeneratedPNCFilename&gt;
+                            &lt;br7:BirthDate&gt;1948-11-11&lt;/br7:BirthDate&gt;
+                            &lt;br7:Gender Literal="male"&gt;1&lt;/br7:Gender&gt;
+                        &lt;/br7:DefendantDetail&gt;
+                        &lt;br7:Address&gt;
+                            &lt;ds:AddressLine1&gt;Scenario1 Address Line 1&lt;/ds:AddressLine1&gt;
+                            &lt;ds:AddressLine2&gt;Scenario1 Address Line 2&lt;/ds:AddressLine2&gt;
+                            &lt;ds:AddressLine3&gt;Scenario1 Address Line 3&lt;/ds:AddressLine3&gt;
+                        &lt;/br7:Address&gt;
+                        &lt;br7:RemandStatus Literal="Unconditional Bail"&gt;UB&lt;/br7:RemandStatus&gt;
+                        &lt;br7:Offence hasError="false" SchemaVersion="4.0"&gt;
+                            &lt;ds:CriminalProsecutionReference SchemaVersion="2.0"&gt;
+                                &lt;ds:DefendantOrOffender&gt;
+                                    &lt;ds:Year&gt;11&lt;/ds:Year&gt;
+                                    &lt;ds:OrganisationUnitIdentifierCode SchemaVersion="2.0"&gt;
+                                        &lt;ds:SecondLevelCode&gt;01&lt;/ds:SecondLevelCode&gt;
+                                        &lt;ds:ThirdLevelCode&gt;ZD&lt;/ds:ThirdLevelCode&gt;
+                                        &lt;ds:BottomLevelCode&gt;01&lt;/ds:BottomLevelCode&gt;
+                                        &lt;ds:OrganisationUnitCode&gt;01ZD01&lt;/ds:OrganisationUnitCode&gt;
+                                    &lt;/ds:OrganisationUnitIdentifierCode&gt;
+                                    &lt;ds:DefendantOrOffenderSequenceNumber&gt;00000448754&lt;/ds:DefendantOrOffenderSequenceNumber&gt;
+                                    &lt;ds:CheckDigit&gt;K&lt;/ds:CheckDigit&gt;
+                                &lt;/ds:DefendantOrOffender&gt;
+                                &lt;ds:OffenceReason&gt;
+                                    &lt;ds:OffenceCode&gt;
+                                        &lt;ds:ActOrSource&gt;SX&lt;/ds:ActOrSource&gt;
+                                        &lt;ds:Year&gt;03&lt;/ds:Year&gt;
+                                        &lt;ds:Reason&gt;001&lt;/ds:Reason&gt;
+                                        &lt;ds:Qualifier&gt;A&lt;/ds:Qualifier&gt;
+                                    &lt;/ds:OffenceCode&gt;
+                                &lt;/ds:OffenceReason&gt;
+                                &lt;ds:OffenceReasonSequence&gt;001&lt;/ds:OffenceReasonSequence&gt;
+                            &lt;/ds:CriminalProsecutionReference&gt;
+                            &lt;ds:OffenceCategory Literal="Indictable"&gt;CI&lt;/ds:OffenceCategory&gt;
+                            &lt;ds:ArrestDate&gt;2010-12-01&lt;/ds:ArrestDate&gt;
+                            &lt;ds:ChargeDate&gt;2010-12-02&lt;/ds:ChargeDate&gt;
+                            &lt;ds:ActualOffenceDateCode Literal="on or in"&gt;1&lt;/ds:ActualOffenceDateCode&gt;
+                            &lt;ds:ActualOffenceStartDate&gt;
+                                &lt;ds:StartDate&gt;2010-11-28&lt;/ds:StartDate&gt;
+                            &lt;/ds:ActualOffenceStartDate&gt;
+                            &lt;ds:LocationOfOffence&gt;Kingston High Street&lt;/ds:LocationOfOffence&gt;
+                            &lt;ds:OffenceTitle&gt;Attempt to rape a girl aged 13 / 14 / 15 years of age - SOA 2003&lt;/ds:OffenceTitle&gt;
+                            &lt;ds:ActualOffenceWording&gt;Attempt to rape a girl aged 13 / 14 / 15 / years of age - SOA 2003.&lt;/ds:ActualOffenceWording&gt;
+                            &lt;ds:RecordableOnPNCindicator Literal="Yes"&gt;Y&lt;/ds:RecordableOnPNCindicator&gt;
+                            &lt;ds:NotifiableToHOindicator Literal="Yes"&gt;Y&lt;/ds:NotifiableToHOindicator&gt;
+                            &lt;ds:HomeOfficeClassification&gt;019/11&lt;/ds:HomeOfficeClassification&gt;
+                            &lt;ds:ConvictionDate&gt;2011-09-26&lt;/ds:ConvictionDate&gt;
+                            &lt;br7:CommittedOnBail Literal="Don't Know"&gt;D&lt;/br7:CommittedOnBail&gt;
+                            &lt;br7:CourtOffenceSequenceNumber&gt;1&lt;/br7:CourtOffenceSequenceNumber&gt;
+                            &lt;br7:Result hasError="false" SchemaVersion="2.0"&gt;
+                                &lt;ds:CJSresultCode&gt;3078&lt;/ds:CJSresultCode&gt;
+                                &lt;ds:SourceOrganisation SchemaVersion="2.0"&gt;
+                                    &lt;ds:TopLevelCode&gt;B&lt;/ds:TopLevelCode&gt;
+                                    &lt;ds:SecondLevelCode&gt;41&lt;/ds:SecondLevelCode&gt;
+                                    &lt;ds:ThirdLevelCode&gt;ME&lt;/ds:ThirdLevelCode&gt;
+                                    &lt;ds:BottomLevelCode&gt;00&lt;/ds:BottomLevelCode&gt;
+                                    &lt;ds:OrganisationUnitCode&gt;B41ME00&lt;/ds:OrganisationUnitCode&gt;
+                                &lt;/ds:SourceOrganisation&gt;
+                                &lt;ds:CourtType&gt;MCA&lt;/ds:CourtType&gt;
+                                &lt;ds:ResultHearingType Literal="Other"&gt;OTHER&lt;/ds:ResultHearingType&gt;
+                                &lt;ds:ResultHearingDate&gt;2011-09-26&lt;/ds:ResultHearingDate&gt;
+                                &lt;ds:PleaStatus Literal="Not Guilty"&gt;NG&lt;/ds:PleaStatus&gt;
+                                &lt;ds:Verdict Literal="Guilty"&gt;G&lt;/ds:Verdict&gt;
+                                &lt;ds:ModeOfTrialReason Literal="Summary only"&gt;SUM&lt;/ds:ModeOfTrialReason&gt;
+                                &lt;ds:ResultVariableText&gt;Travel Restriction Order&lt;/ds:ResultVariableText&gt;
+                                &lt;ds:ResultHalfLifeHours&gt;72&lt;/ds:ResultHalfLifeHours&gt;
+                                &lt;br7:PNCDisposalType&gt;3078&lt;/br7:PNCDisposalType&gt;
+                                &lt;br7:ResultClass&gt;Judgement with final result&lt;/br7:ResultClass&gt;
+                                &lt;br7:PNCAdjudicationExists Literal="No"&gt;N&lt;/br7:PNCAdjudicationExists&gt;
+                            &lt;/br7:Result&gt;
+                        &lt;/br7:Offence&gt;
+                        &lt;br7:Offence hasError="false" SchemaVersion="4.0"&gt;
+                            &lt;ds:CriminalProsecutionReference SchemaVersion="2.0"&gt;
+                                &lt;ds:DefendantOrOffender&gt;
+                                    &lt;ds:Year&gt;11&lt;/ds:Year&gt;
+                                    &lt;ds:OrganisationUnitIdentifierCode SchemaVersion="2.0"&gt;
+                                        &lt;ds:SecondLevelCode&gt;01&lt;/ds:SecondLevelCode&gt;
+                                        &lt;ds:ThirdLevelCode&gt;ZD&lt;/ds:ThirdLevelCode&gt;
+                                        &lt;ds:BottomLevelCode&gt;01&lt;/ds:BottomLevelCode&gt;
+                                        &lt;ds:OrganisationUnitCode&gt;01ZD01&lt;/ds:OrganisationUnitCode&gt;
+                                    &lt;/ds:OrganisationUnitIdentifierCode&gt;
+                                    &lt;ds:DefendantOrOffenderSequenceNumber&gt;00000448754&lt;/ds:DefendantOrOffenderSequenceNumber&gt;
+                                    &lt;ds:CheckDigit&gt;K&lt;/ds:CheckDigit&gt;
+                                &lt;/ds:DefendantOrOffender&gt;
+                                &lt;ds:OffenceReason&gt;
+                                    &lt;ds:OffenceCode&gt;
+                                        &lt;ds:ActOrSource&gt;SX&lt;/ds:ActOrSource&gt;
+                                        &lt;ds:Year&gt;03&lt;/ds:Year&gt;
+                                        &lt;ds:Reason&gt;001&lt;/ds:Reason&gt;
+                                    &lt;/ds:OffenceCode&gt;
+                                &lt;/ds:OffenceReason&gt;
+                                &lt;ds:OffenceReasonSequence&gt;002&lt;/ds:OffenceReasonSequence&gt;
+                            &lt;/ds:CriminalProsecutionReference&gt;
+                            &lt;ds:OffenceCategory Literal="Indictable"&gt;CI&lt;/ds:OffenceCategory&gt;
+                            &lt;ds:ArrestDate&gt;2010-12-01&lt;/ds:ArrestDate&gt;
+                            &lt;ds:ChargeDate&gt;2010-12-02&lt;/ds:ChargeDate&gt;
+                            &lt;ds:ActualOffenceDateCode Literal="on or in"&gt;1&lt;/ds:ActualOffenceDateCode&gt;
+                            &lt;ds:ActualOffenceStartDate&gt;
+                                &lt;ds:StartDate&gt;2010-11-28&lt;/ds:StartDate&gt;
+                            &lt;/ds:ActualOffenceStartDate&gt;
+                            &lt;ds:LocationOfOffence&gt;Kingston High Street&lt;/ds:LocationOfOffence&gt;
+                            &lt;ds:OffenceTitle&gt;Rape a girl aged 13 / 14 / 15 - SOA 2003&lt;/ds:OffenceTitle&gt;
+                            &lt;ds:ActualOffenceWording&gt;Rape of a Female&lt;/ds:ActualOffenceWording&gt;
+                            &lt;ds:RecordableOnPNCindicator Literal="Yes"&gt;Y&lt;/ds:RecordableOnPNCindicator&gt;
+                            &lt;ds:NotifiableToHOindicator Literal="Yes"&gt;Y&lt;/ds:NotifiableToHOindicator&gt;
+                            &lt;ds:HomeOfficeClassification&gt;019/07&lt;/ds:HomeOfficeClassification&gt;
+                            &lt;ds:ConvictionDate&gt;2011-09-26&lt;/ds:ConvictionDate&gt;
+                            &lt;br7:CommittedOnBail Literal="Don't Know"&gt;D&lt;/br7:CommittedOnBail&gt;
+                            &lt;br7:CourtOffenceSequenceNumber&gt;2&lt;/br7:CourtOffenceSequenceNumber&gt;
+                            &lt;br7:Result hasError="false" SchemaVersion="2.0"&gt;
+                                &lt;ds:CJSresultCode&gt;3052&lt;/ds:CJSresultCode&gt;
+                                &lt;ds:SourceOrganisation SchemaVersion="2.0"&gt;
+                                    &lt;ds:TopLevelCode&gt;B&lt;/ds:TopLevelCode&gt;
+                                    &lt;ds:SecondLevelCode&gt;41&lt;/ds:SecondLevelCode&gt;
+                                    &lt;ds:ThirdLevelCode&gt;ME&lt;/ds:ThirdLevelCode&gt;
+                                    &lt;ds:BottomLevelCode&gt;00&lt;/ds:BottomLevelCode&gt;
+                                    &lt;ds:OrganisationUnitCode&gt;B41ME00&lt;/ds:OrganisationUnitCode&gt;
+                                &lt;/ds:SourceOrganisation&gt;
+                                &lt;ds:CourtType&gt;MCA&lt;/ds:CourtType&gt;
+                                &lt;ds:ResultHearingType Literal="Other"&gt;OTHER&lt;/ds:ResultHearingType&gt;
+                                &lt;ds:ResultHearingDate&gt;2011-09-26&lt;/ds:ResultHearingDate&gt;
+                                &lt;ds:PleaStatus Literal="Not Guilty"&gt;NG&lt;/ds:PleaStatus&gt;
+                                &lt;ds:Verdict Literal="Guilty"&gt;G&lt;/ds:Verdict&gt;
+                                &lt;ds:ModeOfTrialReason Literal="Summary only"&gt;SUM&lt;/ds:ModeOfTrialReason&gt;
+                                &lt;ds:ResultVariableText&gt;defendant must never be allowed out&lt;/ds:ResultVariableText&gt;
+                                &lt;ds:ResultHalfLifeHours&gt;24&lt;/ds:ResultHalfLifeHours&gt;
+                                &lt;br7:PNCDisposalType&gt;3052&lt;/br7:PNCDisposalType&gt;
+                                &lt;br7:ResultClass&gt;Judgement with final result&lt;/br7:ResultClass&gt;
+                                &lt;br7:Urgent&gt;
+                                    &lt;br7:urgent Literal="Yes"&gt;Y&lt;/br7:urgent&gt;
+                                    &lt;br7:urgency&gt;24&lt;/br7:urgency&gt;
+                                &lt;/br7:Urgent&gt;
+                                &lt;br7:PNCAdjudicationExists Literal="No"&gt;N&lt;/br7:PNCAdjudicationExists&gt;
+                            &lt;/br7:Result&gt;
+                        &lt;/br7:Offence&gt;
+                        &lt;br7:Offence hasError="false" SchemaVersion="4.0"&gt;
+                            &lt;ds:CriminalProsecutionReference SchemaVersion="2.0"&gt;
+                                &lt;ds:DefendantOrOffender&gt;
+                                    &lt;ds:Year&gt;11&lt;/ds:Year&gt;
+                                    &lt;ds:OrganisationUnitIdentifierCode SchemaVersion="2.0"&gt;
+                                        &lt;ds:SecondLevelCode&gt;01&lt;/ds:SecondLevelCode&gt;
+                                        &lt;ds:ThirdLevelCode&gt;ZD&lt;/ds:ThirdLevelCode&gt;
+                                        &lt;ds:BottomLevelCode&gt;01&lt;/ds:BottomLevelCode&gt;
+                                        &lt;ds:OrganisationUnitCode&gt;01ZD01&lt;/ds:OrganisationUnitCode&gt;
+                                    &lt;/ds:OrganisationUnitIdentifierCode&gt;
+                                    &lt;ds:DefendantOrOffenderSequenceNumber&gt;00000448754&lt;/ds:DefendantOrOffenderSequenceNumber&gt;
+                                    &lt;ds:CheckDigit&gt;K&lt;/ds:CheckDigit&gt;
+                                &lt;/ds:DefendantOrOffender&gt;
+                                &lt;ds:OffenceReason&gt;
+                                    &lt;ds:OffenceCode&gt;
+                                        &lt;ds:ActOrSource&gt;RT&lt;/ds:ActOrSource&gt;
+                                        &lt;ds:Year&gt;88&lt;/ds:Year&gt;
+                                        &lt;ds:Reason&gt;191&lt;/ds:Reason&gt;
+                                    &lt;/ds:OffenceCode&gt;
+                                &lt;/ds:OffenceReason&gt;
+                                &lt;ds:OffenceReasonSequence&gt;003&lt;/ds:OffenceReasonSequence&gt;
+                            &lt;/ds:CriminalProsecutionReference&gt;
+                            &lt;ds:OffenceCategory Literal="Summary Motoring"&gt;CM&lt;/ds:OffenceCategory&gt;
+                            &lt;ds:ArrestDate&gt;2010-12-01&lt;/ds:ArrestDate&gt;
+                            &lt;ds:ChargeDate&gt;2010-12-02&lt;/ds:ChargeDate&gt;
+                            &lt;ds:ActualOffenceDateCode Literal="on or in"&gt;1&lt;/ds:ActualOffenceDateCode&gt;
+                            &lt;ds:ActualOffenceStartDate&gt;
+                                &lt;ds:StartDate&gt;2010-11-28&lt;/ds:StartDate&gt;
+                            &lt;/ds:ActualOffenceStartDate&gt;
+                            &lt;ds:LocationOfOffence&gt;Kingston High Street&lt;/ds:LocationOfOffence&gt;
+                            &lt;ds:OffenceTitle&gt;Use a motor vehicle on a road / public place without third party insurance&lt;/ds:OffenceTitle&gt;
+                            &lt;ds:ActualOffenceWording&gt;Use a motor vehicle without third party insurance.&lt;/ds:ActualOffenceWording&gt;
+                            &lt;ds:RecordableOnPNCindicator Literal="No"&gt;N&lt;/ds:RecordableOnPNCindicator&gt;
+                            &lt;ds:NotifiableToHOindicator Literal="No"&gt;N&lt;/ds:NotifiableToHOindicator&gt;
+                            &lt;ds:HomeOfficeClassification&gt;809/01&lt;/ds:HomeOfficeClassification&gt;
+                            &lt;ds:ConvictionDate&gt;2011-09-26&lt;/ds:ConvictionDate&gt;
+                            &lt;br7:CommittedOnBail Literal="Don't Know"&gt;D&lt;/br7:CommittedOnBail&gt;
+                            &lt;br7:CourtOffenceSequenceNumber&gt;3&lt;/br7:CourtOffenceSequenceNumber&gt;
+                            &lt;br7:Result hasError="false" SchemaVersion="2.0"&gt;
+                                &lt;ds:CJSresultCode&gt;1015&lt;/ds:CJSresultCode&gt;
+                                &lt;ds:SourceOrganisation SchemaVersion="2.0"&gt;
+                                    &lt;ds:TopLevelCode&gt;B&lt;/ds:TopLevelCode&gt;
+                                    &lt;ds:SecondLevelCode&gt;41&lt;/ds:SecondLevelCode&gt;
+                                    &lt;ds:ThirdLevelCode&gt;ME&lt;/ds:ThirdLevelCode&gt;
+                                    &lt;ds:BottomLevelCode&gt;00&lt;/ds:BottomLevelCode&gt;
+                                    &lt;ds:OrganisationUnitCode&gt;B41ME00&lt;/ds:OrganisationUnitCode&gt;
+                                &lt;/ds:SourceOrganisation&gt;
+                                &lt;ds:CourtType&gt;MCA&lt;/ds:CourtType&gt;
+                                &lt;ds:ResultHearingType Literal="Other"&gt;OTHER&lt;/ds:ResultHearingType&gt;
+                                &lt;ds:ResultHearingDate&gt;2011-09-26&lt;/ds:ResultHearingDate&gt;
+                                &lt;ds:AmountSpecifiedInResult Type="Fine"&gt;100.00&lt;/ds:AmountSpecifiedInResult&gt;
+                                &lt;ds:PleaStatus Literal="Not Guilty"&gt;NG&lt;/ds:PleaStatus&gt;
+                                &lt;ds:Verdict Literal="Guilty"&gt;G&lt;/ds:Verdict&gt;
+                                &lt;ds:ModeOfTrialReason Literal="Summary only"&gt;SUM&lt;/ds:ModeOfTrialReason&gt;
+                                &lt;ds:ResultVariableText&gt;Fined 100.&lt;/ds:ResultVariableText&gt;
+                                &lt;ds:ResultHalfLifeHours&gt;72&lt;/ds:ResultHalfLifeHours&gt;
+                                &lt;br7:PNCDisposalType&gt;1015&lt;/br7:PNCDisposalType&gt;
+                                &lt;br7:ResultClass&gt;Judgement with final result&lt;/br7:ResultClass&gt;
+                                &lt;br7:PNCAdjudicationExists Literal="No"&gt;N&lt;/br7:PNCAdjudicationExists&gt;
+                            &lt;/br7:Result&gt;
+                        &lt;/br7:Offence&gt;
+                    &lt;/br7:HearingDefendant&gt;
+                &lt;/br7:Case&gt;
+            &lt;/br7:HearingOutcome&gt;
+            &lt;br7:HasError&gt;false&lt;/br7:HasError&gt;
+            &lt;CXE01 xmlns=""&gt;
+                &lt;FSC FSCode="04CA" IntfcUpdateType="K"/&gt;
+                &lt;IDS CRONumber="" Checkname="SEXOFFENCE" IntfcUpdateType="K" PNCID="2000/0448754K"/&gt;
+                &lt;CourtCases&gt;
+                    &lt;CourtCase&gt;
+                        &lt;CCR CourtCaseRefNo="97/1626/008395Q" CrimeOffenceRefNo="" IntfcUpdateType="K"/&gt;
+                        &lt;Offences&gt;
+                            &lt;Offence&gt;
+                                &lt;COF ACPOOffenceCode="12:15:24:1" CJSOffenceCode="SX03001A" IntfcUpdateType="K" OffEndDate="" OffEndTime="" OffStartDate="28112010" OffStartTime="0000" OffenceQualifier1="" OffenceQualifier2="" OffenceTitle="Attempt to rape a girl aged 13 / 14 / 15 years of age - SOA 2003" ReferenceNumber="001"/&gt;
+                            &lt;/Offence&gt;
+                            &lt;Offence&gt;
+                                &lt;COF ACPOOffenceCode="12:15:24:1" CJSOffenceCode="SX03001" IntfcUpdateType="K" OffEndDate="" OffEndTime="" OffStartDate="28112010" OffStartTime="0000" OffenceQualifier1="" OffenceQualifier2="" OffenceTitle="Rape a girl aged 13 / 14 / 15 - SOA 2003" ReferenceNumber="002"/&gt;
+                            &lt;/Offence&gt;
+                            &lt;Offence&gt;
+                                &lt;COF ACPOOffenceCode="12:15:24:1" CJSOffenceCode="RT88191" IntfcUpdateType="K" OffEndDate="" OffEndTime="" OffStartDate="28112010" OffStartTime="0000" OffenceQualifier1="" OffenceQualifier2="" OffenceTitle="Use a motor vehicle on a road / public place without third party insurance" ReferenceNumber="003"/&gt;
+                            &lt;/Offence&gt;
+                        &lt;/Offences&gt;
+                    &lt;/CourtCase&gt;
+                &lt;/CourtCases&gt;
+            &lt;/CXE01&gt;
+            &lt;br7:PNCQueryDate&gt;2021-06-29&lt;/br7:PNCQueryDate&gt;
+        &lt;/br7:AnnotatedHearingOutcome&gt;
+        &lt;Operation&gt;
+            &lt;operationCode&gt;
+                &lt;DISARR/&gt;
+            &lt;/operationCode&gt;
+            &lt;operationStatus&gt;C&lt;/operationStatus&gt;
+        &lt;/Operation&gt;
+    &lt;/PNCUpdateDataset&gt;
+&lt;/AnnotatedPNCUpdateDataset&gt;
+
+</value>
+        </nameValuePair>
+        <nameValuePair>
+            <name>Trigger Code 01</name>
+            <value>TRPR0003</value>
+        </nameValuePair>
+        <nameValuePair>
+            <name>Trigger Code 02</name>
+            <value>TRPR0004</value>
+        </nameValuePair>
+        <nameValuePair>
+            <name>Trigger Code 03</name>
+            <value>TRPR0004</value>
+        </nameValuePair>
+    </nameValuePairs>
+    <userID>supervisor1</userID>
+  </auditEvent>
+

@@ -1,5 +1,5 @@
 import DynamoDB from "aws-sdk/clients/dynamodb"
-import AuditLog from "src/AuditLog"
+import AuditLog from "src/types/AuditLog"
 import AuditLogPagination from "./AuditLogPagination"
 
 describe("createDefaultPagination", () => {

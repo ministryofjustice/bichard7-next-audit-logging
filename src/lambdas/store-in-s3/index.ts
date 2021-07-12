@@ -1,20 +1,23 @@
-import { EventMessage } from "shared"
+import { EventMessage, isError, S3Gateway } from "shared"
+import StoreInS3UseCase from "./StoreInS3UseCase"
+import createS3Config from "./createS3Config"
 
 interface StoreInS3Result extends EventMessage {
   s3Path: string
 }
 
+const gateway = new S3Gateway(createS3Config())
+const storeInS3 = new StoreInS3UseCase(gateway)
+
 export default async (message: EventMessage): Promise<StoreInS3Result> => {
-  await Promise.resolve()
+  const storeResult = await storeInS3.execute(message)
 
-  // TODO: Store in S3.
-  // TODO: Return S3 path.
-  console.log(message)
-
-  const s3Path = ""
+  if (isError(storeResult)) {
+    throw storeResult
+  }
 
   return {
     ...message,
-    s3Path
+    s3Path: storeResult.s3Path
   }
 }

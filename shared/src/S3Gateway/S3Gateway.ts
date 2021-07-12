@@ -1,5 +1,5 @@
 import { S3 } from "aws-sdk"
-import { PromiseResult } from "src/types"
+import { PromiseResult } from "../types"
 import S3Config from "./S3Config"
 
 export default class S3Gateway {

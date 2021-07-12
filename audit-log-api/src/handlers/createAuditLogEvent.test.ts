@@ -5,7 +5,12 @@ import { CreateAuditLogEventUseCase } from "src/use-cases"
 import createAuditLogEvent from "./createAuditLogEvent"
 
 const createHandlerEvent = (): APIGatewayProxyEvent => {
-  const event = new AuditLogEvent("information", new Date(), "Test event")
+  const event = new AuditLogEvent({
+    category: "information",
+    timestamp: new Date(),
+    eventType: "Test event",
+    eventSource: "Test"
+  })
 
   return <APIGatewayProxyEvent>{
     body: JSON.stringify(event),
