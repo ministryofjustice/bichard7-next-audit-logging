@@ -1,4 +1,5 @@
-import { AuditLogEvent, isError } from "shared"
+import type { AuditLogEvent } from "shared"
+import { isError } from "shared"
 import AuditLogApiGateway from "./AuditLogApiGateway"
 
 interface RecordEventInput {
