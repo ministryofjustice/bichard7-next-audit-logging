@@ -29,5 +29,11 @@ export default async <TPayload, TResponse>(
   }
 
   const response = <InvocationResponse>await lambda.invoke(params).promise()
-  return <TResponse>JSON.parse(<string>response.Payload)
+  const responsePayload = JSON.parse(<string>response.Payload)
+
+  if (responsePayload.errorMessage) {
+    return new Error(responsePayload.errorMessage)
+  }
+
+  return <TResponse>responsePayload
 }

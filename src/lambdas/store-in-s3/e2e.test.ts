@@ -1,19 +1,19 @@
-const bucketName = "store-in-s3-e2e-test"
-
-process.env.AWS_URL = "http://localhost:4566"
-process.env.AWS_REGION = "eu-west-1"
-process.env.EVENTS_BUCKET_NAME = bucketName
-
-import type { EventMessage } from "shared"
+import { EventMessage, isError, S3Config } from "shared"
 import TestS3Gateway from "shared/dist/S3Gateway/TestS3Gateway"
-import createS3Config from "createS3Config"
-import handler from "./index"
+import { invokeFunction } from "@bichard/testing"
+import { StoreInS3Result } from "./index"
 
-const gateway = new TestS3Gateway(createS3Config())
+const config: S3Config = {
+  url: "http://localhost:4566",
+  region: "us-east-1",
+  bucketName: "store-in-s3"
+}
+
+const gateway = new TestS3Gateway(config)
 
 describe("Store in S3 end-to-end", () => {
   beforeAll(async () => {
-    await gateway.createBucket(bucketName, true)
+    await gateway.createBucket(config.bucketName!, true)
   })
 
   beforeEach(async () => {
@@ -27,12 +27,13 @@ test("given message is stored in S3", async () => {
     messageFormat: "AuditEvent"
   }
 
-  // TODO: Invoke lambda function instead of calling directly.
-  const result = await handler(message)
+  const result = await invokeFunction<EventMessage, StoreInS3Result>("store-in-s3", message)
+  expect(isError(result)).toBe(false)
 
-  expect(result.messageData).toBe(message.messageData)
-  expect(result.messageFormat).toBe(message.messageFormat)
+  const { messageData, messageFormat, s3Path } = <StoreInS3Result>result
+  expect(messageData).toBe(message.messageData)
+  expect(messageFormat).toBe(message.messageFormat)
 
-  const actualMessageData = await gateway.getItem(bucketName, result.s3Path)
+  const actualMessageData = await gateway.getItem(config.bucketName!, s3Path)
   expect(actualMessageData).toBe(message.messageData)
 })
