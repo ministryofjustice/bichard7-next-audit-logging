@@ -1,12 +1,12 @@
 /* eslint-disable react/jsx-boolean-value */
 import { render } from "@testing-library/react"
-import IF from "./If"
+import If from "./If"
 
 it("should not render children when condition is not valid", () => {
   const result = render(
-    <IF condition={false}>
+    <If condition={false}>
       <span>{`This text should not be rendered.`}</span>
-    </IF>
+    </If>
   )
 
   expect(result.container.innerHTML).toBe("")
@@ -14,9 +14,9 @@ it("should not render children when condition is not valid", () => {
 
 it("should render children when condition is valid", () => {
   const result = render(
-    <IF condition={true}>
+    <If condition={true}>
       <span>{`This text should be rendered.`}</span>
-    </IF>
+    </If>
   )
 
   expect(result.container.innerHTML).toContain("This text should be rendered.")

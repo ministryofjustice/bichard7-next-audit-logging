@@ -4,7 +4,7 @@ interface Props {
   condition: boolean
   children: ReactNode
 }
-const IF = ({ condition, children }: Props) => {
+const If = ({ condition, children }: Props) => {
   if (!condition) {
     return null
   }
@@ -12,4 +12,4 @@ const IF = ({ condition, children }: Props) => {
   return <>{children}</>
 }
 
-export default IF
+export default If

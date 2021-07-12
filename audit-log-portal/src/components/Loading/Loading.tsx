@@ -1,6 +1,6 @@
 import styled from "styled-components"
 import { Backdrop, CircularProgress } from "@material-ui/core"
-import IF from "components/If"
+import If from "components/If"
 
 interface Props {
   isLoading: boolean
@@ -23,11 +23,11 @@ const Loading = ({ isLoading, blockScreen }: Props) => {
 
   return (
     <>
-      <IF condition={isLoading}>
+      <If condition={isLoading}>
         <Block>
           <CircularProgress color="primary" />
         </Block>
-      </IF>
+      </If>
     </>
   )
 }
