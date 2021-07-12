@@ -1,4 +1,5 @@
 shared
+src/@bichard/testing
 src/lambdas/store-in-s3
 src/lambdas/translate-event
 incoming-message-handler
