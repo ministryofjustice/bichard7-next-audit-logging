@@ -15,6 +15,7 @@
     "test:e2e": "npm run setup:env && ../../../scripts/test.sh e2e"
   },
   "dependencies": {
+    "axios": "^0.21.1",
     "shared": "file:../../../shared"
   },
   "devDependencies": {
