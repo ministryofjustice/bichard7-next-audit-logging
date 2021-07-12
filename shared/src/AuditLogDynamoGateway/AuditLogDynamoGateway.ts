@@ -1,9 +1,8 @@
-import { DynamoGateway, GetManyOptions } from "../DynamoGateway"
+import { DynamoGateway, GetManyOptions, Pagination } from "../DynamoGateway"
 import type { DynamoDbConfig, FetchByIndexOptions, UpdateOptions } from "../DynamoGateway"
 import type { AuditLog, AuditLogEvent, PromiseResult } from "../types"
 import { isError } from "../types"
 import getMessageStatus from "./getMessageStatus"
-import AuditLogPagination from "./AuditLogPagination"
 
 export default class AuditLogDynamoGateway extends DynamoGateway {
   private readonly tableKey: string = "messageId"
@@ -25,7 +24,18 @@ export default class AuditLogDynamoGateway extends DynamoGateway {
   }
 
   async fetchMany(limit = 10, lastMessage?: AuditLog): PromiseResult<AuditLog[]> {
-    const pagination = new AuditLogPagination(limit).createDefaultPagination(lastMessage)
+    let lastItemKey
+    if (lastMessage) {
+      lastItemKey = {
+        messageId: lastMessage.messageId,
+        _: "_",
+        receivedDate: lastMessage.receivedDate
+      }
+    }
+    const pagination = <Pagination>{
+      limit,
+      lastItemKey
+    }
     const options: GetManyOptions = { sortKey: this.sortKey, pagination }
 
     const result = await this.getMany(this.tableName, options)
@@ -60,7 +70,18 @@ export default class AuditLogDynamoGateway extends DynamoGateway {
   }
 
   async fetchByStatus(status: string, limit = 10, lastMessage?: AuditLog): PromiseResult<AuditLog[]> {
-    const pagination = new AuditLogPagination(limit).createStatusPagination(lastMessage)
+    let lastItemKey
+    if (lastMessage) {
+      lastItemKey = {
+        messageId: lastMessage.messageId,
+        status: lastMessage.status,
+        receivedDate: lastMessage.receivedDate
+      }
+    }
+    const pagination = <Pagination>{
+      limit,
+      lastItemKey
+    }
     const options: FetchByIndexOptions = {
       indexName: "statusIndex",
       attributeName: "status",
