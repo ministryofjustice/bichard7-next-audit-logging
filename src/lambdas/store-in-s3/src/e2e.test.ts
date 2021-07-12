@@ -28,6 +28,11 @@ test("given message is stored in S3", async () => {
   }
 
   const result = await invokeFunction<EventMessage, StoreInS3Result>("store-in-s3", message)
+
+  if (isError(result)) {
+    console.error(result)
+  }
+
   expect(isError(result)).toBe(false)
 
   const { messageData, messageFormat, s3Path } = <StoreInS3Result>result
