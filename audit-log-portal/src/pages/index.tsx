@@ -10,6 +10,7 @@ import convertObjectToURLSearchParams from "utils/convertObjectToURLSearchParams
 import combineUrlAndQueryString from "utils/combineUrlAndQueryString"
 import InfiniteScroll from "react-infinite-scroll-component"
 import useGetMessages from "utils/useGetMessages"
+import IF from "components/If"
 
 const resolveApiUrl = (searchModel: MessageSearchModel, lastMessageId?: string): string => {
   const params = convertObjectToURLSearchParams(searchModel)
@@ -34,12 +35,15 @@ const Index = () => {
       <Header text="Messages" />
       <MessageSearch onSearch={(model) => setSearchModel(model)} disabled={!messages && !error} />
 
-      {!!error && <Error message={error.message} />}
-      {!!messages && !error && (
+      <IF condition={!!error}>
+        <Error message={error?.message} />
+      </IF>
+
+      <IF condition={!!messages && !error}>
         <InfiniteScroll next={() => setSize(size + 1)} hasMore={!isReachingEnd} dataLength={messages.length} loader>
           <Messages messages={messages || []} />
         </InfiniteScroll>
-      )}
+      </IF>
 
       <Loading isLoading={isLoadingMore} blockScreen={isLoadingInitialData} />
     </Layout>

@@ -1,6 +1,8 @@
+import { ReactNode } from "react"
+
 interface Props {
   condition: boolean
-  children: React.ReactNode
+  children: ReactNode
 }
 const IF = ({ condition, children }: Props) => {
   if (!condition) {

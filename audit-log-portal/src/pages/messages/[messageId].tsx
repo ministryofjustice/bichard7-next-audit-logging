@@ -5,6 +5,7 @@ import Events from "components/Events"
 import Header from "components/Header"
 import Layout from "components/Layout"
 import Loading from "components/Loading"
+import IF from "components/If"
 import type GetMessageByIdResult from "types/GetMessageByIdResult"
 import type GetMessageEventsResult from "types/GetMessageEventsResult"
 import fetcher from "utils/fetcher"
@@ -26,8 +27,13 @@ const MessageView = () => {
     <Layout pageTitle={getPageTitle()}>
       <Header text="Events" />
 
-      {!!eventsError && <Error message={eventsError.message} />}
-      {!!eventsData && <Events events={(eventsData && eventsData.events) || []} />}
+      <IF condition={!!eventsError}>
+        <Error message={eventsError?.message} />
+      </IF>
+
+      <IF condition={!!eventsData}>
+        <Events events={eventsData?.events || []} />
+      </IF>
 
       <Loading isLoading={!eventsData || !messageData} />
     </Layout>
