@@ -35,9 +35,7 @@ const Index = () => {
       <Header text="Messages" />
       <MessageSearch onSearch={(model) => setSearchModel(model)} disabled={!messages && !error} />
 
-      <If condition={!!error}>
-        <Error message={error?.message} />
-      </If>
+      <Error message={error?.message} visibleIf={!!error} />
 
       <If condition={!!messages && !error}>
         <InfiniteScroll next={() => setSize(size + 1)} hasMore={!isReachingEnd} dataLength={messages.length} loader>

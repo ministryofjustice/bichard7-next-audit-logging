@@ -27,9 +27,7 @@ const MessageView = () => {
     <Layout pageTitle={getPageTitle()}>
       <Header text="Events" />
 
-      <If condition={!!eventsError}>
-        <Error message={eventsError?.message} />
-      </If>
+      <Error message={eventsError?.message} visibleIf={!!eventsError} />
 
       <If condition={!!eventsData}>
         <Events events={eventsData?.events || []} />
