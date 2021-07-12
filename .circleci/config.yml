@@ -13,6 +13,10 @@ jobs:
           keys:
             - v1-npm-deps-{{ checksum "package-lock.json" }}
             - v1-npm-deps-{{ checksum "shared/package-lock.json" }}
+            - v1-npm-deps-{{ checksum "src/@bichard/testing/package-lock.json" }}
+            - v1-npm-deps-{{ checksum "src/@lambdas/store-in-s3/package-lock.json" }}
+            - v1-npm-deps-{{ checksum "src/@lambdas/translate-event/package-lock.json" }}
+            - v1-npm-deps-{{ checksum "src/@lambdas/record-event/package-lock.json" }}
             - v1-npm-deps-{{ checksum "incoming-message-handler/package-lock.json" }}
             - v1-npm-deps-{{ checksum "audit-log-api/package-lock.json" }}
             - v1-npm-deps-{{ checksum "audit-log-portal/package-lock.json" }}
@@ -21,7 +25,7 @@ jobs:
 
       - run: ./scripts/install-all.sh
       - run: ./scripts/build-all.sh
-      
+
       - run:
           name: Build Portal Stories
           command: cd audit-log-portal && npm run build-storybook && cd -
@@ -36,6 +40,22 @@ jobs:
       - save_cache:
           key: v1-npm-deps-{{ checksum "shared/package-lock.json" }}
           paths: shared/node_modules
+
+      - save_cache:
+          key: v1-npm-deps-{{ checksum "shared/package-lock.json" }}
+          paths: src/@bichard/testing/node_modules
+
+      - save_cache:
+          key: v1-npm-deps-{{ checksum "shared/package-lock.json" }}
+          paths: src/lambdas/store-in-s3/node_modules
+
+      - save_cache:
+          key: v1-npm-deps-{{ checksum "shared/package-lock.json" }}
+          paths: src/lambdas/translate-event/node_modules
+
+      - save_cache:
+          key: v1-npm-deps-{{ checksum "shared/package-lock.json" }}
+          paths: src/lambdas/record-event/node_modules
 
       - save_cache:
           key: v1-npm-deps-{{ checksum "incoming-message-handler/package-lock.json" }}
@@ -62,6 +82,10 @@ jobs:
           root: .
           paths:
             - shared/dist
+            - src/@bichard/testing/dist
+            - src/lambdas/store-in-s3/build
+            - src/lambdas/translate-event/build
+            - src/lambdas/record-event/build
             - incoming-message-handler/build
             - audit-log-api/build
             - audit-log-portal/.next
@@ -81,6 +105,18 @@ jobs:
 
       - restore_cache:
           key: v1-npm-deps-{{ checksum "shared/package-lock.json" }}
+
+      - restore_cache:
+          key: v1-npm-deps-{{ checksum "src/@bichard/testing/package-lock.json" }}
+
+      - restore_cache:
+          key: v1-npm-deps-{{ checksum "src/lambdas/store-in-s3/package-lock.json" }}
+
+      - restore_cache:
+          key: v1-npm-deps-{{ checksum "src/lambdas/translate-event/package-lock.json" }}
+
+      - restore_cache:
+          key: v1-npm-deps-{{ checksum "src/lambdas/record-event/package-lock.json" }}
 
       - restore_cache:
           key: v1-npm-deps-{{ checksum "incoming-message-handler/package-lock.json" }}
@@ -112,13 +148,21 @@ jobs:
       # Attach the workspace to retrieve the dist/build folders so we don't have to rebuild
       - attach_workspace:
           at: .
-      
+
       - run:
-          name: Running unit, integration, and end-to-end tests 
+          name: Running unit, integration, and end-to-end tests
           command: ./scripts/test-all.sh
 
       - store_test_results:
           path: ./shared/test-results/jest/
+      - store_test_results:
+          path: ./src/@bichard/testing/test-results/jest/
+      - store_test_results:
+          path: ./src/lambdas/store-in-s3/test-results/jest/
+      - store_test_results:
+          path: ./src/lambdas/translate-event/test-results/jest/
+      - store_test_results:
+          path: ./src/lambdas/record-event/test-results/jest/
       - store_test_results:
           path: ./incoming-message-handler/test-results/jest/
       - store_test_results:
@@ -129,9 +173,9 @@ jobs:
           path: ./general-event-handler/test-results/jest/
 
       - run:
-          name: Installing Cypress 
+          name: Installing Cypress
           command: ./.circleci/scripts/install-cypress.sh
-          
+
       - run:
           name: Running UI tests
           command: cd ./audit-log-portal && npm run test:ui && cd -

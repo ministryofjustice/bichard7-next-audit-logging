@@ -25,7 +25,7 @@ case $STYLE in
   "ci")
     echo "Running CI tests..."
     export JEST_JUNIT_OUTPUT_DIR=./test-results/jest
-    PARAMS+=(--coverage --ci --watchAll false --runInBand --reporters=default --reporters=jest-junit)
+    PARAMS+=(--coverage --ci --watchAll false --runInBand --reporters=default --reporters=jest-junit --passWithNoTests)
     ;;
 
     *)
