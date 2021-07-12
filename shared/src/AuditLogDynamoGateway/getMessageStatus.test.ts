@@ -1,5 +1,4 @@
-import AuditLogEvent from "../types/AuditLogEvent"
-import AuditLogStatus from "../types/AuditLogStatus"
+import { AuditLogEvent, AuditLogStatus } from "../types"
 import getMessageStatus from "./getMessageStatus"
 
 interface TestInput {
