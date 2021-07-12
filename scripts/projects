@@ -1,5 +1,6 @@
 shared
 src/lambdas/store-in-s3
+src/lambdas/translate-event
 incoming-message-handler
 audit-log-api
 general-event-handler

@@ -14,8 +14,12 @@ const createAuditLogEventUseCase = new CreateAuditLogEventUseCase(auditLogDynamo
 
 const createAuditLog = (): AuditLog => new AuditLog("CorrelationId", new Date(), "XML")
 const createAuditLogEvent = (): AuditLogEvent => {
-  const event = new AuditLogEvent("information", new Date(), "Create audit log event test")
-  event.eventSource = "Integration Test"
+  const event = new AuditLogEvent({
+    category: "information",
+    timestamp: new Date(),
+    eventType: "Create audit log event test",
+    eventSource: "Integration Test"
+  })
 
   return event
 }

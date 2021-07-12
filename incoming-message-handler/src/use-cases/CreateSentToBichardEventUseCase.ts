@@ -10,8 +10,12 @@ export default class CreateSentToBichardEventUseCase {
   constructor(private readonly apiUrl: string) {}
 
   create(message: AuditLog): PromiseResult<void> {
-    const event = new AuditLogEvent("information", new Date(), "Message Sent to Bichard")
-    event.eventSource = "Incoming Message Handler"
+    const event = new AuditLogEvent({
+      category: "information",
+      timestamp: new Date(),
+      eventType: "Message Sent to Bichard",
+      eventSource: "Incoming Message Handler"
+    })
 
     return axios
       .post(`${this.apiUrl}/messages/${message.messageId}/events`, event, {

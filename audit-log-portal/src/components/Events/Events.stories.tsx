@@ -6,13 +6,13 @@ export default {
   component: Events
 }
 
-const createEvent = (category: EventCategory): AuditLogEvent => ({
-  attributes: {},
-  category,
-  eventSource: "Event Source",
-  eventType: "Event Type",
-  timestamp: new Date().toISOString()
-})
+const createEvent = (category: EventCategory): AuditLogEvent =>
+  new AuditLogEvent({
+    category,
+    eventSource: "Event Source",
+    eventType: "Event Type",
+    timestamp: new Date()
+  })
 
 export const NoEvents = () => <Events events={[]} />
 

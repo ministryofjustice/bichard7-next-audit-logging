@@ -4,7 +4,12 @@ import parseCreateAuditLogEventRequest, {
   ParseCreateAuditLogEventRequestResult
 } from "./parseCreateAuditLogEventRequest"
 
-const expectedAuditLogEvent = new AuditLogEvent("information", new Date(), "Test parsing request")
+const expectedAuditLogEvent = new AuditLogEvent({
+  category: "information",
+  timestamp: new Date(),
+  eventType: "Test parsing request",
+  eventSource: "Test"
+})
 const expectedMessageId = "0197bffc-fbf0-4ddd-9324-462d224c6c2e"
 
 test("should return audit log event and messageId when request body has value and messageId is in path", () => {

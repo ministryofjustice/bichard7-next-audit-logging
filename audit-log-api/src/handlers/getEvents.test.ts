@@ -16,11 +16,19 @@ const createProxyEvent = (messageId?: string): APIGatewayProxyEvent => {
   )
 }
 
+const createAuditLogEvent = (timestamp: Date, eventType: string): AuditLogEvent =>
+  new AuditLogEvent({
+    category: "information",
+    timestamp,
+    eventType,
+    eventSource: "Test"
+  })
+
 const log = new AuditLog("1", new Date(2021, 10, 12), "XML")
 log.events = [
-  new AuditLogEvent("information", new Date("2021-06-20T10:12:13"), "Event 1"),
-  new AuditLogEvent("information", new Date("2021-06-15T10:12:13"), "Event 2"),
-  new AuditLogEvent("information", new Date("2021-06-10T10:12:13"), "Event 3")
+  createAuditLogEvent(new Date("2021-06-20T10:12:13"), "Event 1"),
+  createAuditLogEvent(new Date("2021-06-15T10:12:13"), "Event 2"),
+  createAuditLogEvent(new Date("2021-06-10T10:12:13"), "Event 3")
 ]
 
 test("should respond with a list of events when message id exists and message has events", async () => {
