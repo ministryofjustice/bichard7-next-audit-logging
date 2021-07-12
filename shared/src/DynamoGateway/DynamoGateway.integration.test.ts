@@ -3,7 +3,7 @@ import UpdateOptions from "./UpdateOptions"
 import { isError } from "../types"
 import DynamoDbConfig from "./DynamoDbConfig"
 import TestDynamoGateway from "./TestDynamoGateway"
-import { GetManyOptions } from "."
+import GetManyOptions from "./GetManyOptions"
 import FetchByIndexOptions from "./FetchByIndexOptions"
 
 const config: DynamoDbConfig = {
