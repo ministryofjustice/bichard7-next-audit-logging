@@ -1,0 +1,7 @@
+{
+  "Variables": {
+    "AWS_URL": "http://localhost:4566",
+    "AWS_REGION": "eu-west-1",
+    "EVENTS_BUCKET_NAME": "store-in-s3"
+  }
+}
