@@ -19,26 +19,26 @@ describe("Store in S3 end-to-end", () => {
   beforeEach(async () => {
     await gateway.deleteAll()
   })
-})
 
-test("given message is stored in S3", async () => {
-  const message: EventMessage = {
-    messageData: "DummyData",
-    messageFormat: "AuditEvent"
-  }
+  test("given message is stored in S3", async () => {
+    const message: EventMessage = {
+      messageData: "DummyData",
+      messageFormat: "AuditEvent"
+    }
 
-  const result = await invokeFunction<EventMessage, StoreInS3Result>("store-in-s3", message)
+    const result = await invokeFunction<EventMessage, StoreInS3Result>("store-in-s3", message)
 
-  if (isError(result)) {
-    console.error(result)
-  }
+    if (isError(result)) {
+      console.error(result)
+    }
 
-  expect(isError(result)).toBe(false)
+    expect(isError(result)).toBe(false)
 
-  const { messageData, messageFormat, s3Path } = <StoreInS3Result>result
-  expect(messageData).toBe(message.messageData)
-  expect(messageFormat).toBe(message.messageFormat)
+    const { messageData, messageFormat, s3Path } = <StoreInS3Result>result
+    expect(messageData).toBe(message.messageData)
+    expect(messageFormat).toBe(message.messageFormat)
 
-  const actualMessageData = await gateway.getItem(config.bucketName!, s3Path)
-  expect(actualMessageData).toBe(message.messageData)
+    const actualMessageData = await gateway.getItem(config.bucketName!, s3Path)
+    expect(actualMessageData).toBe(message.messageData)
+  })
 })
