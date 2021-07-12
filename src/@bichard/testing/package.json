@@ -1,0 +1,19 @@
+{
+  "name": "@bichard/testing",
+  "version": "1.0.0",
+  "description": "",
+  "author": "",
+  "license": "ISC",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist/**/*"
+  ],
+  "dependencies": {
+    "aws-sdk": "^2.943.0",
+    "shared": "file:../../../shared"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json"
+  }
+}
