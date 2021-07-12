@@ -1,6 +1,6 @@
 import fs from "fs"
 import { encodeBase64, isError } from "shared"
-import type { AuditLogEvent } from "shared"
+import type TranslationResult from "./TranslationResult"
 import AuditEventTranslator from "./AuditEventTranslator"
 
 test("parses the message data and returns an AuditLogEvent", async () => {
@@ -10,9 +10,10 @@ test("parses the message data and returns an AuditLogEvent", async () => {
 
   expect(isError(result)).toBe(false)
 
-  const { category, eventSource, eventType, timestamp } = <AuditLogEvent>result
-  expect(category).toBe("warning")
-  expect(eventSource).toBe("ErrorHandlerScreenFlow")
-  expect(eventType).toBe("Trigger Instances resolved")
-  expect(timestamp).toBe("2021-06-29T08:34:22.789Z")
+  const { messageId, event } = <TranslationResult>result
+  expect(messageId).toBe("EXTERNAL_CORRELATION_ID")
+  expect(event.category).toBe("warning")
+  expect(event.eventSource).toBe("ErrorHandlerScreenFlow")
+  expect(event.eventType).toBe("Trigger Instances resolved")
+  expect(event.timestamp).toBe("2021-06-29T08:34:22.789Z")
 })
