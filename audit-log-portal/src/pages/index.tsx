@@ -24,7 +24,7 @@ const Index = () => {
 
   const { messages, error, size, setSize, isLoadingInitialData, isLoadingMore, isReachingEnd } = useGetMessages(
     (pageIndex, previousMessages) => {
-      const lastMessageId = previousMessages.slice(-1)?.[0].messageId
+      const lastMessageId = previousMessages?.slice(-1)?.[0].messageId
       return resolveApiUrl(searchModel, lastMessageId)
     }
   )
