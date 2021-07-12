@@ -7,6 +7,7 @@ interface TranslateEventInput extends EventMessage {
 }
 
 interface TranslateEventResult {
+  messageId: string
   event: AuditLogEvent
   s3Path: string
 }
@@ -23,7 +24,7 @@ export default async (event: TranslateEventInput): Promise<TranslateEventResult>
   }
 
   return {
-    s3Path: event.s3Path,
-    event: translationResult
+    ...translationResult,
+    s3Path: event.s3Path
   }
 }

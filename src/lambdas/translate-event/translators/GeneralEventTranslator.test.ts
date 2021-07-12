@@ -1,6 +1,6 @@
 import fs from "fs"
 import { encodeBase64, isError } from "shared"
-import type { AuditLogEvent } from "shared"
+import type TranslationResult from "./TranslationResult"
 import GeneralEventTranslator from "./GeneralEventTranslator"
 
 test("parses the message data and returns an AuditLogEvent", async () => {
@@ -10,9 +10,10 @@ test("parses the message data and returns an AuditLogEvent", async () => {
 
   expect(isError(result)).toBe(false)
 
-  const { category, eventSource, eventType, timestamp } = <AuditLogEvent>result
-  expect(category).toBe("information")
-  expect(eventSource).toBe("Hearing Outcome Publication Choreography")
-  expect(eventType).toBe("Message Received")
-  expect(timestamp).toBe("2021-06-29T08:35:36.031Z")
+  const { messageId, event } = <TranslationResult>result
+  expect(messageId).toBe("EXTERNAL_CORRELATION_ID")
+  expect(event.category).toBe("information")
+  expect(event.eventSource).toBe("Hearing Outcome Publication Choreography")
+  expect(event.eventType).toBe("Message Received")
+  expect(event.timestamp).toBe("2021-06-29T08:35:36.031Z")
 })
