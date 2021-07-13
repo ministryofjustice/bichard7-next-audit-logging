@@ -1,4 +1,4 @@
-import { AuditLog, AuditLogEvent, AuditLogDynamoGateway, DynamoDbConfig } from "shared"
+import { AuditLog, AuditLogEvent, AwsAuditLogDynamoGateway, DynamoDbConfig } from "shared"
 import TestDynamoGateway from "shared/dist/DynamoGateway/TestDynamoGateway"
 import CreateAuditLogEventUseCase from "./CreateAuditLogEventUseCase"
 
@@ -9,7 +9,7 @@ const config: DynamoDbConfig = {
 }
 
 const testDynamoGateway = new TestDynamoGateway(config)
-const auditLogDynamoGateway = new AuditLogDynamoGateway(config, config.AUDIT_LOG_TABLE_NAME)
+const auditLogDynamoGateway = new AwsAuditLogDynamoGateway(config, config.AUDIT_LOG_TABLE_NAME)
 const createAuditLogEventUseCase = new CreateAuditLogEventUseCase(auditLogDynamoGateway)
 
 const createAuditLog = (): AuditLog => new AuditLog("CorrelationId", new Date(), "XML")

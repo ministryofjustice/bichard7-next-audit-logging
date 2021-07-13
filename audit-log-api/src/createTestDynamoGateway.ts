@@ -1,4 +1,4 @@
-import { AuditLogDynamoGateway, DynamoDbConfig } from "shared"
+import { AwsAuditLogDynamoGateway, DynamoDbConfig } from "shared"
 
 const config: DynamoDbConfig = {
   DYNAMO_URL: "localhost",
@@ -6,7 +6,7 @@ const config: DynamoDbConfig = {
   AUDIT_LOG_TABLE_NAME: "audit-log"
 }
 
-const createTestDynamoGateway = (): AuditLogDynamoGateway =>
-  new AuditLogDynamoGateway(config, config.AUDIT_LOG_TABLE_NAME)
+const createTestDynamoGateway = (): AwsAuditLogDynamoGateway =>
+  new AwsAuditLogDynamoGateway(config, config.AUDIT_LOG_TABLE_NAME)
 
 export default createTestDynamoGateway

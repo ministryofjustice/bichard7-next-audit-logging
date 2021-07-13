@@ -1,5 +1,5 @@
 import { PromiseResult, AuditLog, AuditLogDynamoGateway, isError } from "shared"
-import { getMessageById } from "src/utils"
+import getMessageById from "./getMessageById"
 import MessageFetcher from "./MessageFetcher"
 
 export default class FetchByStatus implements MessageFetcher {

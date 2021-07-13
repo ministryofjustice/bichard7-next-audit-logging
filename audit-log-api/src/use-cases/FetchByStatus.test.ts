@@ -1,8 +1,8 @@
-jest.mock("src/utils/getMessageById")
+jest.mock("src/use-cases/getMessageById")
 
 import { AuditLogStatus, AuditLog, isError } from "shared"
 import createTestDynamoGateway from "src/createTestDynamoGateway"
-import { getMessageById } from "src/utils"
+import getMessageById from "./getMessageById"
 import FetchByStatus from "./FetchByStatus"
 
 const gateway = createTestDynamoGateway()

@@ -1,4 +1,4 @@
-import { isError, DynamoDbConfig, AuditLogDynamoGateway, AuditLogEvent, EventCategory } from "shared"
+import { isError, DynamoDbConfig, AwsAuditLogDynamoGateway, AuditLogEvent, EventCategory } from "shared"
 import FetchEventsUseCase from "./FetchEventsUseCase"
 
 const config: DynamoDbConfig = {
@@ -7,7 +7,7 @@ const config: DynamoDbConfig = {
   AUDIT_LOG_TABLE_NAME: "audit-log"
 }
 
-const gateway = new AuditLogDynamoGateway(config, config.AUDIT_LOG_TABLE_NAME)
+const gateway = new AwsAuditLogDynamoGateway(config, config.AUDIT_LOG_TABLE_NAME)
 const useCase = new FetchEventsUseCase(gateway)
 
 const createAuditLogEvent = (category: EventCategory, timestamp: Date, eventType: string): AuditLogEvent =>
