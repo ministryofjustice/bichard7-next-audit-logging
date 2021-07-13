@@ -1,8 +1,12 @@
-import createTestDynamoGateway from "src/createTestDynamoGateway"
+import { FakeAuditLogDynamoGateway } from "@bichard/testing"
 import { AuditLog, isError } from "../../../shared/dist"
 import getMessageById from "./getMessageById"
 
-const gateway = createTestDynamoGateway()
+const gateway = new FakeAuditLogDynamoGateway()
+
+beforeEach(() => {
+  gateway.reset()
+})
 
 it("returns undefined when messageId does not have value", async () => {
   const result = await getMessageById(gateway, "")
@@ -13,8 +17,8 @@ it("returns undefined when messageId does not have value", async () => {
 
 it("returns the message when messageId exists in the database", async () => {
   const expectedMessage = new AuditLog("External correlation id", new Date(), "Xml")
-  jest.spyOn(gateway, "fetchOne").mockResolvedValue(expectedMessage)
-  const result = await getMessageById(gateway, "Valid message Id")
+  gateway.reset([expectedMessage])
+  const result = await getMessageById(gateway, expectedMessage.messageId)
 
   expect(isError(result)).toBe(false)
   expect(result).toBeDefined()
@@ -25,7 +29,7 @@ it("returns the message when messageId exists in the database", async () => {
 
 it("returns error when an error has occured in the database", async () => {
   const expectedError = new Error("Error")
-  jest.spyOn(gateway, "fetchOne").mockResolvedValue(expectedError)
+  gateway.shouldReturnError(expectedError)
   const result = await getMessageById(gateway, "message Id")
 
   expect(isError(result)).toBe(true)

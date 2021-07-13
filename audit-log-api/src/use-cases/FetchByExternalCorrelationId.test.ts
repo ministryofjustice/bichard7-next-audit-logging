@@ -1,12 +1,12 @@
 import { AuditLog, isError } from "shared"
-import createTestDynamoGateway from "src/createTestDynamoGateway"
+import { FakeAuditLogDynamoGateway } from "@bichard/testing"
 import FetchByExternalCorrelationId from "./FetchByExternalCorrelationId"
 
-const gateway = createTestDynamoGateway()
+const gateway = new FakeAuditLogDynamoGateway()
 
 it("should return one message when externalCorrelationId exists", async () => {
   const expectedMessage = new AuditLog("1", new Date(), "Xml")
-  jest.spyOn(gateway, "fetchByExternalCorrelationId").mockResolvedValue(expectedMessage)
+  gateway.reset([expectedMessage])
 
   const messageFetcher = new FetchByExternalCorrelationId(gateway, expectedMessage.externalCorrelationId)
   const result = await messageFetcher.fetch()
@@ -19,7 +19,7 @@ it("should return one message when externalCorrelationId exists", async () => {
 
 it("should return an error when fetchByExternalCorrelationId fails", async () => {
   const expectedError = new Error("Results not found")
-  jest.spyOn(gateway, "fetchByExternalCorrelationId").mockResolvedValue(expectedError)
+  gateway.shouldReturnError(expectedError)
 
   const messageFetcher = new FetchByExternalCorrelationId(gateway, "External correlation id")
   const result = await messageFetcher.fetch()

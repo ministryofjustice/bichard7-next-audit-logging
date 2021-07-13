@@ -1,12 +1,12 @@
-import { AuditLogDynamoGateway } from "shared"
 import { APIGatewayProxyEvent } from "aws-lambda"
+import { FakeAuditLogDynamoGateway } from "@bichard/testing"
 import FetchAll from "./FetchAll"
 import FetchById from "./FetchById"
 import FetchByExternalCorrelationId from "./FetchByExternalCorrelationId"
 import FetchByStatus from "./FetchByStatus"
 import createMessageFetcher from "./createMessageFetcher"
 
-const gateway = <AuditLogDynamoGateway>{}
+const gateway = new FakeAuditLogDynamoGateway()
 
 describe("createMessageFetcher()", () => {
   it("should return FetchAll when there are no path or query string parameters", () => {
