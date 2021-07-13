@@ -1,3 +1,5 @@
+jest.setTimeout(10000)
+
 import fs from "fs"
 import { encodeBase64 } from "shared"
 import type { MessageFormat, EventCategory } from "shared"
