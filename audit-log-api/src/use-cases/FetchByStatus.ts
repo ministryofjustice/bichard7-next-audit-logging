@@ -1,4 +1,5 @@
 import { PromiseResult, AuditLog, AuditLogDynamoGateway, isError } from "shared"
+import { getMessageById } from "src/utils"
 import MessageFetcher from "./MessageFetcher"
 
 export default class FetchByStatus implements MessageFetcher {
@@ -9,16 +10,10 @@ export default class FetchByStatus implements MessageFetcher {
   ) {}
 
   async fetch(): PromiseResult<AuditLog[]> {
-    let lastMessage: AuditLog | undefined
+    const lastMessage = await getMessageById(this.gateway, this.lastMessageId)
 
-    if (this.lastMessageId) {
-      const lastMessageResult = await this.gateway.fetchOne(this.lastMessageId)
-
-      if (isError(lastMessageResult)) {
-        return lastMessageResult
-      }
-
-      lastMessage = lastMessageResult
+    if (isError(lastMessage)) {
+      return lastMessage
     }
 
     return this.gateway.fetchByStatus(this.status, 10, lastMessage)

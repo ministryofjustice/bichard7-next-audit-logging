@@ -1,20 +1,16 @@
-import { PromiseResult, AuditLog, AuditLogDynamoGateway, isError } from "shared"
-import MessageFetcher from "./MessageFetcher"
+import type { PromiseResult, AuditLog, AuditLogDynamoGateway } from "shared"
+import { isError } from "shared"
+import { getMessageById } from "src/utils"
+import type MessageFetcher from "./MessageFetcher"
 
 export default class FetchAll implements MessageFetcher {
   constructor(private readonly gateway: AuditLogDynamoGateway, private lastMessageId?: string) {}
 
   async fetch(): PromiseResult<AuditLog[]> {
-    let lastMessage: AuditLog | undefined
+    const lastMessage = await getMessageById(this.gateway, this.lastMessageId)
 
-    if (this.lastMessageId) {
-      const lastMessageResult = await this.gateway.fetchOne(this.lastMessageId)
-
-      if (isError(lastMessageResult)) {
-        return lastMessageResult
-      }
-
-      lastMessage = lastMessageResult
+    if (isError(lastMessage)) {
+      return lastMessage
     }
 
     return this.gateway.fetchMany(10, lastMessage)

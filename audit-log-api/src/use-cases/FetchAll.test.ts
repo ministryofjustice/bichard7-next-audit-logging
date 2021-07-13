@@ -1,5 +1,8 @@
+jest.mock("src/utils/getMessageById")
+
 import { AuditLog, isError } from "shared"
 import createTestDynamoGateway from "src/createTestDynamoGateway"
+import { getMessageById } from "src/utils"
 import FetchAll from "./FetchAll"
 
 const gateway = createTestDynamoGateway()
@@ -10,8 +13,9 @@ it("should return all messages", async () => {
     new AuditLog("2", new Date(), "Xml"),
     new AuditLog("3", new Date(), "Xml")
   ]
+  const mockGetMessageById = getMessageById as jest.MockedFunction<typeof getMessageById>
+  mockGetMessageById.mockResolvedValue(new AuditLog("test id", new Date(), "Xml"))
   jest.spyOn(gateway, "fetchMany").mockResolvedValue(expectedMessages)
-  jest.spyOn(gateway, "fetchOne").mockResolvedValue(new AuditLog("test id", new Date(), "Xml"))
 
   const messageFetcher = new FetchAll(gateway, "messageId")
   const result = await messageFetcher.fetch()
@@ -25,6 +29,8 @@ it("should return all messages", async () => {
 
 it("should return an error when fetchMany fails", async () => {
   const expectedError = new Error("Results not found")
+  const mockGetMessageById = getMessageById as jest.MockedFunction<typeof getMessageById>
+  mockGetMessageById.mockResolvedValue(undefined)
   jest.spyOn(gateway, "fetchMany").mockResolvedValue(expectedError)
 
   const messageFetcher = new FetchAll(gateway)

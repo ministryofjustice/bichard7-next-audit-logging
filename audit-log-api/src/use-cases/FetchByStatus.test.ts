@@ -1,5 +1,8 @@
+jest.mock("src/utils/getMessageById")
+
 import { AuditLogStatus, AuditLog, isError } from "shared"
 import createTestDynamoGateway from "src/createTestDynamoGateway"
+import { getMessageById } from "src/utils"
 import FetchByStatus from "./FetchByStatus"
 
 const gateway = createTestDynamoGateway()
@@ -8,8 +11,10 @@ it("should return one message when there is a message with the specified status"
   const expectedStatus = AuditLogStatus.error
   const expectedMessage = new AuditLog("1", new Date(), "Xml")
   expectedMessage.status = expectedStatus
+
+  const mockGetMessageById = getMessageById as jest.MockedFunction<typeof getMessageById>
+  mockGetMessageById.mockResolvedValue(new AuditLog("test id", new Date(), "Xml"))
   jest.spyOn(gateway, "fetchByStatus").mockResolvedValue([expectedMessage])
-  jest.spyOn(gateway, "fetchOne").mockResolvedValue(new AuditLog("test id", new Date(), "Xml"))
 
   const messageFetcher = new FetchByStatus(gateway, expectedStatus, "messageId")
   const result = await messageFetcher.fetch()
@@ -26,6 +31,8 @@ it("should return one message when there is a message with the specified status"
 
 it("should return an error when fetchByStatus fails", async () => {
   const expectedError = new Error("Results not found")
+  const mockGetMessageById = getMessageById as jest.MockedFunction<typeof getMessageById>
+  mockGetMessageById.mockResolvedValue(undefined)
   jest.spyOn(gateway, "fetchByStatus").mockResolvedValue(expectedError)
 
   const messageFetcher = new FetchByStatus(gateway, AuditLogStatus.processing)
