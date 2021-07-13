@@ -1,6 +1,6 @@
 import type { PromiseResult } from "shared"
 import { decodeBase64, parseXml } from "shared"
-import type GeneralEventLogItem from "types/GeneralEventLogItem"
+import type GeneralEventLogItem from "src/types/GeneralEventLogItem"
 import type TranslationResult from "./TranslationResult"
 import type Translator from "./Translator"
 import transformEventDetails from "./transformEventDetails"
