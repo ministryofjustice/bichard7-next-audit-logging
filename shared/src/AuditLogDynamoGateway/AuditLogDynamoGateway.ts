@@ -1,4 +1,4 @@
-import type { AuditLog, AuditLogEvent, PromiseResult } from "src/types"
+import type { AuditLog, AuditLogEvent, PromiseResult } from "../types"
 
 export default interface AuditLogDynamoGateway {
   create(message: AuditLog): PromiseResult<AuditLog>
