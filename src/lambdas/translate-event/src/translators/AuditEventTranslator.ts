@@ -1,8 +1,8 @@
 import type { PromiseResult } from "shared"
 import { decodeBase64, parseXml } from "shared"
+import type { AuditEvent } from "src/types"
 import type TranslationResult from "./TranslationResult"
 import type Translator from "./Translator"
-import type { AuditEvent } from "../types"
 import transformEventDetails from "./transformEventDetails"
 
 const AuditEventTranslator: Translator = async (messageData: string): PromiseResult<TranslationResult> => {

@@ -3,7 +3,7 @@ const ForkTsCheckerWebpackPlugin = require("fork-ts-checker-webpack-plugin")
 
 module.exports = {
   entry: {
-    translateEvent: "./index.ts"
+    translateEvent: "./src/index.ts"
   },
   resolve: {
     modules: [path.resolve("./node_modules"), path.resolve(".")],

@@ -1,12 +1,12 @@
 import type { EventMessage, AuditLogEvent } from "shared"
 import { isError } from "shared"
-import getTranslator from "translators/getTranslator"
+import getTranslator from "src/translators/getTranslator"
 
-interface TranslateEventInput extends EventMessage {
+export interface TranslateEventInput extends EventMessage {
   s3Path: string
 }
 
-interface TranslateEventResult {
+export interface TranslateEventResult {
   messageId: string
   event: AuditLogEvent
   s3Path: string
