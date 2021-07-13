@@ -1,4 +1,6 @@
 export { default as DynamoGateway } from "./DynamoGateway"
 export { default as DynamoDbConfig } from "./DynamoDbConfig"
 export { default as FetchByIndexOptions } from "./FetchByIndexOptions"
+export { default as GetManyOptions } from "./GetManyOptions"
 export { default as UpdateOptions } from "./UpdateOptions"
+export { default as Pagination } from "./Pagination"
