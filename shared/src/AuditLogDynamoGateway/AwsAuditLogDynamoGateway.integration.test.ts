@@ -3,7 +3,7 @@ import type { EventCategory } from "../types"
 import { isError, AuditLog, AuditLogEvent, AuditLogStatus } from "../types"
 import type { DynamoDbConfig } from "../DynamoGateway"
 import TestDynamoGateway from "../DynamoGateway/TestDynamoGateway"
-import AuditLogDynamoGateway from "./AuditLogDynamoGateway"
+import AwsAuditLogDynamoGateway from "./AwsAuditLogDynamoGateway"
 
 const config: DynamoDbConfig = {
   DYNAMO_URL: "http://localhost:4566",
@@ -11,7 +11,7 @@ const config: DynamoDbConfig = {
   AUDIT_LOG_TABLE_NAME: "TestAuditLog"
 }
 
-const gateway = new AuditLogDynamoGateway(config, config.AUDIT_LOG_TABLE_NAME)
+const gateway = new AwsAuditLogDynamoGateway(config, config.AUDIT_LOG_TABLE_NAME)
 const testGateway = new TestDynamoGateway(config)
 const primaryKey = "messageId"
 const sortKey = "receivedDate"
