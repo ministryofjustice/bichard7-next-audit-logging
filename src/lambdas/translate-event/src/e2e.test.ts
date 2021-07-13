@@ -1,5 +1,5 @@
 import fs from "fs"
-import { encodeBase64, isError } from "shared"
+import { encodeBase64 } from "shared"
 import type { MessageFormat, EventCategory } from "shared"
 import { invokeFunction } from "@bichard/testing"
 import type { TranslateEventInput, TranslateEventResult } from "./index"
@@ -51,8 +51,7 @@ test.each<TestInput>([
   const payload = createPayload(input.messageFormat)
 
   const result = await invokeFunction<TranslateEventInput, TranslateEventResult>("translate-event", payload)
-
-  expect(isError(result)).toBe(false)
+  expect(result).toNotBeError()
 
   const { messageId, event, s3Path } = <TranslateEventResult>result
   expect(messageId).toBe(input.messageId)
