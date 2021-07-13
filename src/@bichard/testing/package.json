@@ -15,11 +15,14 @@
     "shared": "file:../../../shared"
   },
   "scripts": {
-    "build": "tsc -p tsconfig.json",
+    "clean": "rimraf dist",
+    "build:dev": "npm run clean && tsc -p tsconfig.json",
+    "build": "npm run clean && tsc -p tsconfig.prod.json",
     "test": "jest"
   },
   "devDependencies": {
     "@types/jest": "^26.0.24",
+    "rimraf": "^3.0.2",
     "ts-jest": "^27.0.3"
   }
 }
