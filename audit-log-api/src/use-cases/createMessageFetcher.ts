@@ -10,6 +10,7 @@ const createMessageFetcher = (event: APIGatewayProxyEvent, auditLogGateway: Audi
   const messageId = event.pathParameters?.messageId
   const externalCorrelationId = event.queryStringParameters?.externalCorrelationId
   const status = event.queryStringParameters?.status
+  const lastMessageId = event.queryStringParameters?.lastMessageId
 
   if (messageId) {
     return new FetchById(auditLogGateway, messageId)
@@ -20,10 +21,10 @@ const createMessageFetcher = (event: APIGatewayProxyEvent, auditLogGateway: Audi
   }
 
   if (status) {
-    return new FetchByStatus(auditLogGateway, status)
+    return new FetchByStatus(auditLogGateway, status, lastMessageId)
   }
 
-  return new FetchAll(auditLogGateway)
+  return new FetchAll(auditLogGateway, lastMessageId)
 }
 
 export default createMessageFetcher

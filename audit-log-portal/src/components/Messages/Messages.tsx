@@ -1,6 +1,7 @@
 import { ReactNode } from "react"
 import { AuditLog } from "shared"
 import Message from "components/Message"
+import If from "components/If"
 
 interface Props {
   messages: AuditLog[]
@@ -16,13 +17,19 @@ const MessagesContainer = ({ children }: { children: ReactNode }) => <div aria-l
 
 const Messages = ({ messages }: Props) => (
   <>
-    {messages.length === 0 && <NoMessages />}
+    <If condition={messages.length === 0}>
+      <NoMessages />
+    </If>
 
-    {messages.length > 0 && (
+    <If condition={messages.length > 0}>
       <MessagesContainer>
-        {messages.length > 0 && messages.map((message) => <Message key={message.messageId} message={message} />)}
+        <If condition={messages.length > 0}>
+          {messages.map((message) => (
+            <Message key={message.messageId} message={message} />
+          ))}
+        </If>
       </MessagesContainer>
-    )}
+    </If>
   </>
 )
 

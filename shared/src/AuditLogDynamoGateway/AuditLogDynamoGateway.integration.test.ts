@@ -99,7 +99,13 @@ describe("AuditLogDynamoGateway", () => {
 
       expect(isError(result)).toBe(false)
 
-      const actualRecords = <DocumentClient.ScanOutput>await gateway.getMany(config.AUDIT_LOG_TABLE_NAME, sortKey, 2)
+      const getManyOptions = {
+        sortKey,
+        pagination: { limit: 2 }
+      }
+      const actualRecords = <DocumentClient.ScanOutput>(
+        await gateway.getMany(config.AUDIT_LOG_TABLE_NAME, getManyOptions)
+      )
 
       const actualOtherMessage = <AuditLog>actualRecords.Items?.find((r) => r.messageId === otherMessage.messageId)
       expect(actualOtherMessage).toBeDefined()
@@ -142,7 +148,13 @@ describe("AuditLogDynamoGateway", () => {
       const resultTwo = await gateway.addEvent(message.messageId, message.version, expectedEventTwo)
       expect(isError(resultTwo)).toBe(false)
 
-      const actualRecords = <DocumentClient.ScanOutput>await gateway.getMany(config.AUDIT_LOG_TABLE_NAME, sortKey, 1)
+      const getManyOptions = {
+        sortKey,
+        pagination: { limit: 1 }
+      }
+      const actualRecords = <DocumentClient.ScanOutput>(
+        await gateway.getMany(config.AUDIT_LOG_TABLE_NAME, getManyOptions)
+      )
 
       const actualMessage = <AuditLog>actualRecords.Items?.find((r) => r.messageId === message.messageId)
       expect(actualMessage).toBeDefined()

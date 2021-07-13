@@ -2,6 +2,7 @@ import { ReactNode } from "react"
 import { AuditLogEvent } from "shared"
 import Header from "components/Header"
 import Event from "components/Event"
+import If from "components/If"
 
 interface Props {
   events: AuditLogEvent[]
@@ -17,13 +18,19 @@ const EventsContainer = ({ children }: { children: ReactNode }) => <div aria-lab
 
 const Events = ({ events }: Props) => (
   <>
-    {events.length === 0 && <NoEvents />}
+    <If condition={events.length === 0}>
+      <NoEvents />
+    </If>
 
-    {events.length > 0 && (
+    <If condition={events.length > 0}>
       <EventsContainer>
-        {events.length > 0 && events.map((event) => <Event key={event.timestamp} event={event} />)}
+        <If condition={events.length > 0}>
+          {events.map((event) => (
+            <Event key={event.timestamp} event={event} />
+          ))}
+        </If>
       </EventsContainer>
-    )}
+    </If>
   </>
 )
 

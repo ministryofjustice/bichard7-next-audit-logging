@@ -4,6 +4,7 @@ import { PromiseResult } from "../types"
 import DynamoDbConfig from "./DynamoDbConfig"
 import FetchByIndexOptions from "./FetchByIndexOptions"
 import UpdateOptions from "./UpdateOptions"
+import GetManyOptions from "./GetManyOptions"
 
 export default class DynamoGateway {
   protected readonly service: DynamoDB
@@ -35,41 +36,55 @@ export default class DynamoGateway {
       .catch((error) => <Error>error)
   }
 
-  getMany(tableName: string, sortKey: string, limit: number): PromiseResult<DocumentClient.QueryOutput> {
+  getMany(tableName: string, options: GetManyOptions): PromiseResult<DocumentClient.QueryOutput> {
+    const { sortKey } = options
+    const { limit, lastItemKey } = options.pagination
+
+    const queryOptions: DynamoDB.DocumentClient.QueryInput = {
+      TableName: tableName,
+      IndexName: `${sortKey}Index`,
+      KeyConditionExpression: "#dummyKey = :dummyValue",
+      ExpressionAttributeValues: {
+        ":dummyValue": "_"
+      },
+      ExpressionAttributeNames: {
+        "#dummyKey": "_"
+      },
+      Limit: limit,
+      ScanIndexForward: false // Descending order
+    }
+
+    if (lastItemKey) {
+      queryOptions.ExclusiveStartKey = { ...lastItemKey, _: "_" }
+    }
+
     return this.client
-      .query({
-        TableName: tableName,
-        IndexName: `${sortKey}Index`,
-        KeyConditionExpression: "#dummyKey = :dummyValue",
-        ExpressionAttributeValues: {
-          ":dummyValue": "_"
-        },
-        ExpressionAttributeNames: {
-          "#dummyKey": "_"
-        },
-        Limit: limit,
-        ScanIndexForward: false // Descending order
-      })
+      .query(queryOptions)
       .promise()
       .catch((error) => <Error>error)
   }
 
   fetchByIndex(tableName: string, options: FetchByIndexOptions): PromiseResult<DocumentClient.QueryOutput> {
     const { indexName, attributeName, attributeValue, isAscendingOrder } = options
+    const { limit, lastItemKey } = options.pagination
+
+    const queryOptions: DynamoDB.DocumentClient.QueryInput = {
+      TableName: tableName,
+      IndexName: indexName,
+      KeyConditionExpression: "#keyName = :keyValue",
+      ExpressionAttributeValues: {
+        ":keyValue": attributeValue
+      },
+      ExpressionAttributeNames: {
+        "#keyName": attributeName
+      },
+      ScanIndexForward: isAscendingOrder,
+      Limit: limit,
+      ExclusiveStartKey: lastItemKey
+    }
 
     return this.client
-      .query({
-        TableName: tableName,
-        IndexName: indexName,
-        KeyConditionExpression: "#keyName = :keyValue",
-        ExpressionAttributeValues: {
-          ":keyValue": attributeValue
-        },
-        ExpressionAttributeNames: {
-          "#keyName": attributeName
-        },
-        ScanIndexForward: isAscendingOrder
-      })
+      .query(queryOptions)
       .promise()
       .catch((error) => <Error>error)
   }
