@@ -1,3 +1,5 @@
+jest.setTimeout(10000)
+
 import { EventMessage, S3Config } from "shared"
 import TestS3Gateway from "shared/dist/S3Gateway/TestS3Gateway"
 import { invokeFunction } from "@bichard/testing"
