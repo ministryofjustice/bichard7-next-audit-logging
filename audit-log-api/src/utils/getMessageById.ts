@@ -3,7 +3,7 @@ import type { AuditLog, AuditLogDynamoGateway, PromiseResult } from "shared"
 
 const getMessageById = async (
   gateway: AuditLogDynamoGateway,
-  messageId: string
+  messageId?: string
 ): PromiseResult<AuditLog | undefined> => {
   if (!messageId) {
     return undefined
