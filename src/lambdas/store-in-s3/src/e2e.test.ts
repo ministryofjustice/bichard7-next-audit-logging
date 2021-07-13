@@ -1,4 +1,6 @@
-import { EventMessage, isError, S3Config } from "shared"
+jest.setTimeout(10000)
+
+import { EventMessage, S3Config } from "shared"
 import TestS3Gateway from "shared/dist/S3Gateway/TestS3Gateway"
 import { invokeFunction } from "@bichard/testing"
 import { StoreInS3Result } from "./index"
@@ -27,12 +29,7 @@ describe("Store in S3 end-to-end", () => {
     }
 
     const result = await invokeFunction<EventMessage, StoreInS3Result>("store-in-s3", message)
-
-    if (isError(result)) {
-      console.error(result)
-    }
-
-    expect(isError(result)).toBe(false)
+    expect(result).toNotBeError()
 
     const { messageData, messageFormat, s3Path } = <StoreInS3Result>result
     expect(messageData).toBe(message.messageData)

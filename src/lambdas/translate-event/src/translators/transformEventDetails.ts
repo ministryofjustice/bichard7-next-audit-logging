@@ -1,4 +1,4 @@
-import type { EventDetails } from "types"
+import type { EventDetails } from "src/types"
 import type { EventCategory } from "shared"
 import { AuditLogEvent } from "shared"
 

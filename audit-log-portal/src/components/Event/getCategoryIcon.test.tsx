@@ -13,7 +13,7 @@ test.each<TestInput>([
   { category: "error", expectedIcon: ErrorIcon },
   { category: "warning", expectedIcon: WarningIcon },
   { category: "information", expectedIcon: InformationIcon }
-])("returns <$expected/> when category is $category", ({ category, expectedIcon }) => {
+])("returns <$expectedIcon/> when category is $category", ({ category, expectedIcon }: TestInput) => {
   const Component = getCategoryIcon(category)
   expect(Component).toBe(expectedIcon)
 })
