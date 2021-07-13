@@ -1,6 +1,8 @@
 shared
+src/@bichard/testing
 src/lambdas/store-in-s3
 src/lambdas/translate-event
+src/lambdas/record-event
 incoming-message-handler
 audit-log-api
 general-event-handler
