@@ -1,4 +1,4 @@
-import { AuditLogEvent, AwsAuditLogDynamoGateway, isError } from "shared"
+import { AuditLogEvent, AuditLogDynamoGateway, isError } from "shared"
 import { isConditionalExpressionViolationError } from "src/utils"
 
 interface CreateAuditLogEventResult {
@@ -7,7 +7,7 @@ interface CreateAuditLogEventResult {
 }
 
 export default class CreateAuditLogEventUseCase {
-  constructor(private readonly auditLogGateway: AwsAuditLogDynamoGateway) {}
+  constructor(private readonly auditLogGateway: AuditLogDynamoGateway) {}
 
   async create(messageId: string, event: AuditLogEvent): Promise<CreateAuditLogEventResult> {
     const messageVersion = await this.auditLogGateway.fetchVersion(messageId)
