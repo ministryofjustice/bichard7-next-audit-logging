@@ -1,5 +1,5 @@
 {
-  "name": "record-event",
+  "name": "message-receiver",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -13,11 +13,6 @@
     "test:unit": "../scripts/test.sh unit",
     "test:integration": "npm run setup:env && ../../../scripts/test.sh integration",
     "test:e2e": "npm run setup:env && ../../../scripts/test.sh e2e"
-  },
-  "dependencies": {
-    "@bichard/testing": "file:../../@bichard/testing",
-    "axios": "^0.21.1",
-    "shared": "file:../../../shared"
   },
   "devDependencies": {
     "@babel/preset-env": "^7.13.12",
