@@ -7,7 +7,7 @@
     "clean": "rimraf build",
     "build": "npm run clean && webpack --config ./.webpack/webpack.prod.js",
     "build:dev": "npm run clean && webpack --config ./.webpack/webpack.dev.js",
-    "setup:env": "cd ../../../environment && ./setup.sh && cd -",
+    "setup:env": "scripts/environment.sh && scripts/deploy.sh",
     "test": "npm run setup:env && ../../../scripts/test.sh",
     "test:ci": "npm run setup:env && ../../../scripts/test.sh ci",
     "test:unit": "../scripts/test.sh unit",
@@ -15,6 +15,7 @@
     "test:e2e": "npm run setup:env && ../../../scripts/test.sh e2e"
   },
   "dependencies": {
+    "@bichard/testing": "file:../../@bichard/testing",
     "axios": "^0.21.1",
     "shared": "file:../../../shared"
   },

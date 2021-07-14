@@ -9,5 +9,5 @@
     "paths": {}
   },
   "compileOnSave": true,
-  "include": ["**/*.ts"]
+  "include": ["src/**/*.ts"]
 }

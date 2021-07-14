@@ -2,7 +2,7 @@ import type { AuditLogEvent } from "shared"
 import { isError } from "shared"
 import AuditLogApiGateway from "./AuditLogApiGateway"
 
-interface RecordEventInput {
+export interface RecordEventInput {
   messageId: string
   event: AuditLogEvent
   s3Path: string
