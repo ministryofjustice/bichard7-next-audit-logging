@@ -15,13 +15,13 @@
     "test:e2e": "npm run setup:env && ../../../scripts/test.sh e2e"
   },
   "dependencies": {
-    "@bichard/testing": "file:../../@bichard/testing",
     "axios": "^0.21.1",
     "shared": "file:../../../shared"
   },
   "devDependencies": {
     "@babel/preset-env": "^7.13.12",
     "@babel/preset-typescript": "^7.13.0",
+    "@bichard/testing": "file:../../@bichard/testing",
     "@types/jest": "^26.0.21",
     "aws-sdk": "^2.942.0",
     "babel-loader": "^8.2.2",
