@@ -9,19 +9,19 @@
   "files": [
     "dist/**/*"
   ],
-  "dependencies": {
-    "aws-sdk": "^2.943.0",
-    "jest": "^27.0.6",
-    "shared": "file:../../../shared"
-  },
   "scripts": {
     "clean": "rimraf dist",
     "build:dev": "npm run clean && tsc -p tsconfig.json",
     "build": "npm run clean && tsc -p tsconfig.prod.json",
     "test": "jest"
   },
+  "dependencies": {
+    "aws-sdk": "^2.943.0",
+    "shared": "file:../../../shared"
+  },
   "devDependencies": {
     "@types/jest": "^26.0.24",
+    "jest": "^27.0.6",
     "rimraf": "^3.0.2",
     "ts-jest": "^27.0.3"
   }

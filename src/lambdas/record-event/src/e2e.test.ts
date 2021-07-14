@@ -2,7 +2,7 @@ jest.setTimeout(10000)
 
 import { invokeFunction } from "@bichard/testing"
 import type { DynamoDbConfig } from "shared"
-import { AuditLog, AuditLogEvent, AuditLogDynamoGateway } from "shared"
+import { AuditLog, AuditLogEvent, AwsAuditLogDynamoGateway } from "shared"
 import TestDynamoGateway from "shared/dist/DynamoGateway/TestDynamoGateway"
 import type { RecordEventInput } from "./index"
 
@@ -13,7 +13,7 @@ const config: DynamoDbConfig = {
 }
 
 const testGateway = new TestDynamoGateway(config)
-const gateway = new AuditLogDynamoGateway(config, config.AUDIT_LOG_TABLE_NAME)
+const gateway = new AwsAuditLogDynamoGateway(config, config.AUDIT_LOG_TABLE_NAME)
 
 describe("Record Event end-to-end", () => {
   beforeEach(async () => {

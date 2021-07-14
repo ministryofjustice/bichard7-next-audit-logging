@@ -1,11 +1,11 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda"
-import { isError, PromiseResult, AuditLogDynamoGateway, HttpStatusCode, AuditLogEvent } from "shared"
+import { isError, PromiseResult, AwsAuditLogDynamoGateway, HttpStatusCode, AuditLogEvent } from "shared"
 import createDynamoDbConfig from "src/createDynamoDbConfig"
 import { FetchEventsUseCase, parseGetEventsRequest } from "src/use-cases"
 import { createJsonApiResult } from "src/utils"
 
 const config = createDynamoDbConfig()
-const auditLogGateway = new AuditLogDynamoGateway(config, config.AUDIT_LOG_TABLE_NAME)
+const auditLogGateway = new AwsAuditLogDynamoGateway(config, config.AUDIT_LOG_TABLE_NAME)
 const fetchEvents = new FetchEventsUseCase(auditLogGateway)
 
 export default async function getEvents(event: APIGatewayProxyEvent): PromiseResult<APIGatewayProxyResult> {
