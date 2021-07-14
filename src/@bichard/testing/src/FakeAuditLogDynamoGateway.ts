@@ -11,7 +11,8 @@ export default class FakeAuditLogDynamoGateway implements AuditLogDynamoGateway 
     throw new Error("Method not implemented.")
   }
 
-  fetchMany(_limit?: number, _lastMessage?: AuditLog): PromiseResult<AuditLog[]> {
+  // @ts-ignore
+  fetchMany(limit?: number, lastMessage?: AuditLog): PromiseResult<AuditLog[]> {
     if (this.error) {
       return Promise.resolve(this.error)
     }
@@ -29,7 +30,8 @@ export default class FakeAuditLogDynamoGateway implements AuditLogDynamoGateway 
     return Promise.resolve(message ?? null)
   }
 
-  fetchByStatus(_status: string, _limit?: number, _lastMessage?: AuditLog): PromiseResult<AuditLog[]> {
+  // @ts-ignore
+  fetchByStatus(status: string, limit?: number, lastMessage?: AuditLog): PromiseResult<AuditLog[]> {
     if (this.error) {
       return Promise.resolve(this.error)
     }
@@ -65,11 +67,13 @@ export default class FakeAuditLogDynamoGateway implements AuditLogDynamoGateway 
     return Promise.resolve(result ?? [])
   }
 
-  addEvent(_messageId: string, _messageVersion: number, _event: AuditLogEvent): PromiseResult<void> {
+  // @ts-ignore
+  addEvent(messageId: string, messageVersion: number, event: AuditLogEvent): PromiseResult<void> {
     throw new Error("Method not implemented.")
   }
 
-  insertOne<T>(_tableName: string, _record: T, _keyName: string): PromiseResult<void> {
+  // @ts-ignore
+  insertOne<T>(tableName: string, record: T, keyName: string): PromiseResult<void> {
     throw new Error("Method not implemented.")
   }
 
