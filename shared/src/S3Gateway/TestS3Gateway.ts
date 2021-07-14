@@ -1,7 +1,6 @@
 /* eslint-disable import/no-duplicates */
 import type { CreateBucketOutput, ObjectIdentifierList } from "aws-sdk/clients/s3"
 import type S3 from "aws-sdk/clients/s3"
-
 import S3Gateway from "./S3Gateway"
 
 export default class TestS3Gateway extends S3Gateway {
