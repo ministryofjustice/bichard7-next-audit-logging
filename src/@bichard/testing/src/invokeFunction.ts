@@ -13,7 +13,7 @@ export default async <TPayload, TResponse>(
   functionName: string,
   payload: TPayload,
   options?: InvocationOptions
-): PromiseResult<TResponse> => {
+): PromiseResult<TResponse | null> => {
   const lambda = new Lambda({
     endpoint: options?.endpoint || "http://localhost:4566",
     region: options?.region || "us-east-1",
@@ -30,6 +30,10 @@ export default async <TPayload, TResponse>(
 
   const response = <InvocationResponse>await lambda.invoke(params).promise()
   const responsePayload = JSON.parse(<string>response.Payload)
+
+  if (!responsePayload) {
+    return null
+  }
 
   if (responsePayload.errorMessage) {
     return new Error(responsePayload.errorMessage)
