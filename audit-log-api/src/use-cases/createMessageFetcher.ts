@@ -1,6 +1,6 @@
-import { APIGatewayProxyEvent } from "aws-lambda"
+import type { APIGatewayProxyEvent } from "aws-lambda"
 import type { AuditLogDynamoGateway } from "shared"
-import MessageFetcher from "./MessageFetcher"
+import type MessageFetcher from "./MessageFetcher"
 import FetchById from "./FetchById"
 import FetchByExternalCorrelationId from "./FetchByExternalCorrelationId"
 import FetchByStatus from "./FetchByStatus"

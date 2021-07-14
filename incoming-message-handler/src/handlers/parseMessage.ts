@@ -1,5 +1,6 @@
-import { isError, AuditLog } from "shared"
-import { ReceivedMessage } from "src/entities"
+import type { AuditLog } from "shared"
+import { isError } from "shared"
+import type { ReceivedMessage } from "src/entities"
 import readMessage from "src/use-cases/readMessage"
 
 export default async function parseMessage(event: ReceivedMessage): Promise<AuditLog> {

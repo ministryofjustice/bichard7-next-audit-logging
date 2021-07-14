@@ -1,6 +1,6 @@
 /* no-underscore-dangle rule disabled as properties are used in this class */
 /* eslint-disable no-underscore-dangle */
-import PollCondition from "./PollCondition"
+import type PollCondition from "./PollCondition"
 
 export default class PollOptions<T> {
   private _delay = 0

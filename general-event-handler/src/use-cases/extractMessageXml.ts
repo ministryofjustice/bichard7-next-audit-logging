@@ -1,5 +1,6 @@
-import { Result, decodeBase64 } from "shared"
-import JmsTextMessage from "src/types/JmsTextMessage"
+import type { Result } from "shared"
+import { decodeBase64 } from "shared"
+import type JmsTextMessage from "src/types/JmsTextMessage"
 
 export default (message: JmsTextMessage): Result<string> => {
   if (!message || !message.data) {

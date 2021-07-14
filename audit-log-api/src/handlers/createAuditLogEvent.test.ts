@@ -1,5 +1,5 @@
 import "src/testConfig"
-import { APIGatewayProxyEvent } from "aws-lambda"
+import type { APIGatewayProxyEvent } from "aws-lambda"
 import { AuditLogEvent, HttpStatusCode } from "shared"
 import { CreateAuditLogEventUseCase } from "src/use-cases"
 import createAuditLogEvent from "./createAuditLogEvent"

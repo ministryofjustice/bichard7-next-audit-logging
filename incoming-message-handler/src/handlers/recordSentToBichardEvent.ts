@@ -1,4 +1,5 @@
-import { isError, AuditLog } from "shared"
+import type { AuditLog } from "shared"
+import { isError } from "shared"
 import { getApiUrl } from "src/configs"
 import CreateSentToBichardEventUseCase from "src/use-cases/CreateSentToBichardEventUseCase"
 

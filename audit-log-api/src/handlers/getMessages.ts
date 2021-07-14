@@ -1,5 +1,6 @@
-import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda"
-import { isError, PromiseResult, AwsAuditLogDynamoGateway, HttpStatusCode, AuditLog } from "shared"
+import type { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda"
+import type { PromiseResult, AuditLog } from "shared"
+import { isError, AwsAuditLogDynamoGateway, HttpStatusCode } from "shared"
 import createDynamoDbConfig from "src/createDynamoDbConfig"
 import createMessageFetcher from "src/use-cases/createMessageFetcher"
 import { createJsonApiResult } from "src/utils"

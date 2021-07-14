@@ -1,6 +1,8 @@
-import { Client, connect, ConnectFailover } from "stompit"
-import { isError, PromiseResult } from "shared"
-import { MqConfig } from "src/configs"
+import type { Client, connect } from "stompit"
+import { ConnectFailover } from "stompit"
+import type { PromiseResult } from "shared"
+import { isError } from "shared"
+import type { MqConfig } from "src/configs"
 import deconstructServers from "./deconstructServers"
 
 export default class MqGateway {

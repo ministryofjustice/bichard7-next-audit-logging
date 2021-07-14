@@ -1,4 +1,5 @@
-import { AuditLogEvent, EventCategory, EventDetails } from "src/types"
+import type { EventCategory, EventDetails } from "src/types"
+import { AuditLogEvent } from "src/types"
 
 const mapEventCategory = (category: string): EventCategory => {
   switch (category) {

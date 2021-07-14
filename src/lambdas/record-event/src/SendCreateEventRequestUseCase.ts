@@ -1,5 +1,5 @@
 import type { PromiseResult, AuditLogEvent } from "shared"
-import AuditLogApiGateway from "./AuditLogApiGateway"
+import type AuditLogApiGateway from "./AuditLogApiGateway"
 
 export default class SendCreateEventRequestUseCase {
   constructor(private readonly api: AuditLogApiGateway) {}

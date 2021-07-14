@@ -1,5 +1,5 @@
 import { isError } from "shared"
-import { APIGatewayProxyEvent } from "aws-lambda"
+import type { APIGatewayProxyEvent } from "aws-lambda"
 import parseGetEventsRequest from "./parseGetEventsRequest"
 
 describe("parseGetEventsRequest()", () => {

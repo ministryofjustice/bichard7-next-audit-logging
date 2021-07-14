@@ -1,5 +1,5 @@
-import { ReactNode } from "react"
-import { AuditLogEvent } from "shared"
+import type { ReactNode } from "react"
+import type { AuditLogEvent } from "shared"
 import Header from "components/Header"
 import Event from "components/Event"
 import If from "components/If"

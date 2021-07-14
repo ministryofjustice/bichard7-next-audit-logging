@@ -1,4 +1,4 @@
-import { S3Config } from "shared"
+import type { S3Config } from "shared"
 
 export default (): S3Config => ({
   url: process.env.AWS_URL,

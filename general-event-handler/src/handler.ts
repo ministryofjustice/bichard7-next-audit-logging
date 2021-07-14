@@ -2,7 +2,7 @@ import { isError } from "shared"
 import transformGeneralEventLogItem from "./use-cases/transformGeneralEventLogItem"
 import SendCreateEventRequestUseCase from "./use-cases/SendCreateEventRequestUseCase"
 import parseGeneralEventLogItem from "./use-cases/parseGeneralEventLogItem"
-import { AmazonMqEventSourceRecordEvent } from "./types"
+import type { AmazonMqEventSourceRecordEvent } from "./types"
 import extractMessageXml from "./use-cases/extractMessageXml"
 
 export default async (event: AmazonMqEventSourceRecordEvent): Promise<void> => {
