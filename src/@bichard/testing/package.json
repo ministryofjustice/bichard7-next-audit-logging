@@ -11,14 +11,14 @@
   ],
   "dependencies": {
     "aws-sdk": "^2.943.0",
-    "jest": "^27.0.6",
     "shared": "file:../../../shared"
   },
   "scripts": {
     "clean": "rimraf dist",
     "build:dev": "npm run clean && tsc -p tsconfig.json",
     "build": "npm run clean && tsc -p tsconfig.prod.json",
-    "test": "jest"
+    "test": "jest",
+    "jest": "^27.0.6"
   },
   "devDependencies": {
     "@types/jest": "^26.0.24",
