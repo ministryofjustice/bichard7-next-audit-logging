@@ -7,7 +7,7 @@ export default class FakeAuditLogDynamoGateway implements AuditLogDynamoGateway 
 
   private error?: Error
 
-  create(_message: AuditLog): PromiseResult<AuditLog> {
+  create(_: AuditLog): PromiseResult<AuditLog> {
     throw new Error("Method not implemented.")
   }
 
@@ -51,7 +51,7 @@ export default class FakeAuditLogDynamoGateway implements AuditLogDynamoGateway 
     return Promise.resolve(message)
   }
 
-  fetchVersion(_messageId: string): PromiseResult<number | null> {
+  fetchVersion(_: string): PromiseResult<number | null> {
     throw new Error("Method not implemented.")
   }
 
