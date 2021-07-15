@@ -31,6 +31,7 @@
   "devDependencies": {
     "@babel/preset-env": "^7.13.12",
     "@babel/preset-typescript": "^7.13.0",
+    "@bichard/testing": "file:../src/@bichard/testing",
     "@types/aws-lambda": "^8.10.73",
     "@types/jest": "^26.0.21",
     "babel-loader": "^8.2.2",

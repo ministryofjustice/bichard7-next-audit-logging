@@ -15,7 +15,6 @@
     "test:e2e": "npm run setup:env && ../../../scripts/test.sh e2e"
   },
   "dependencies": {
-    "@bichard/testing": "file:../../@bichard/testing",
     "shared": "file:../../../shared",
     "uuid": "^8.3.2",
     "xml2js": "^0.4.23"
@@ -23,6 +22,7 @@
   "devDependencies": {
     "@babel/preset-env": "^7.13.12",
     "@babel/preset-typescript": "^7.13.0",
+    "@bichard/testing": "file:../../@bichard/testing",
     "@types/jest": "^26.0.21",
     "@types/uuid": "^8.3.1",
     "aws-sdk": "^2.942.0",

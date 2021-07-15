@@ -1,6 +1,6 @@
 import type { PromiseResult, AuditLog, AuditLogDynamoGateway } from "shared"
 import { isError } from "shared"
-import { getMessageById } from "src/utils"
+import getMessageById from "./getMessageById"
 import type MessageFetcher from "./MessageFetcher"
 
 export default class FetchAll implements MessageFetcher {

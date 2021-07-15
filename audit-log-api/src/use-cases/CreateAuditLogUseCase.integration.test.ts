@@ -1,4 +1,4 @@
-import { AuditLog, AuditLogDynamoGateway, DynamoDbConfig } from "shared"
+import { AuditLog, AwsAuditLogDynamoGateway, DynamoDbConfig } from "shared"
 import TestDynamoGateway from "shared/dist/DynamoGateway/TestDynamoGateway"
 import CreateAuditLogUseCase from "./CreateAuditLogUseCase"
 
@@ -9,7 +9,7 @@ const config: DynamoDbConfig = {
 }
 
 const testDynamoGateway = new TestDynamoGateway(config)
-const auditLogDynamoGateway = new AuditLogDynamoGateway(config, config.AUDIT_LOG_TABLE_NAME)
+const auditLogDynamoGateway = new AwsAuditLogDynamoGateway(config, config.AUDIT_LOG_TABLE_NAME)
 const createAuditLogUseCase = new CreateAuditLogUseCase(auditLogDynamoGateway)
 
 const createAuditLog = (): AuditLog => new AuditLog("CorrelationId", new Date(), "XML")
@@ -33,7 +33,7 @@ describe("CreateAuditLogUseCase", () => {
   })
 
   it("should return an error result when an unknown error occurs within the database", async () => {
-    const gateway = new AuditLogDynamoGateway(config, "Invalid Table Name")
+    const gateway = new AwsAuditLogDynamoGateway(config, "Invalid Table Name")
     const useCase = new CreateAuditLogUseCase(gateway)
 
     const auditLog = createAuditLog()

@@ -8,6 +8,7 @@ const getMessageById = async (
   if (!messageId) {
     return undefined
   }
+
   const message = await gateway.fetchOne(messageId)
 
   if (isError(message)) {
