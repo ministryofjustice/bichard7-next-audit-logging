@@ -1,20 +1,25 @@
-import type { MessageFormat } from "shared"
+import { isError, MessageFormat } from "shared"
 import type AmazonMqEventSourceRecordEvent from "./AmazonMqEventSourceRecordEvent"
+import createStepFunctionConfig from "./createStepFunctionConfig"
 import embellishMessages from "./embellishMessages"
+import StepFunctionInvocationGateway from "./StepFunctionInvocationGateway"
 
 const messageFormat = process.env.MESSAGE_FORMAT as MessageFormat
 if (!messageFormat) {
   throw new Error("MESSAGE_FORMAT is either unset or an unsupported value")
 }
 
-export default (event: AmazonMqEventSourceRecordEvent): void => {
+const gateway = new StepFunctionInvocationGateway(createStepFunctionConfig())
+
+export default async (event: AmazonMqEventSourceRecordEvent): Promise<void> => {
   if (!event.messages || event.messages.length === 0) {
     throw new Error("No messages were found in the event")
   }
 
   const events = embellishMessages(event, messageFormat)
-  // eslint-disable-next-line no-console
-  console.log(events)
+  const result = await gateway.execute(events)
 
-  // TODO: Invoke Step Function
+  if (isError(result)) {
+    throw result
+  }
 }
