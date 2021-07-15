@@ -1,4 +1,4 @@
-import { DynamoGateway, GetManyOptions, Pagination } from "../DynamoGateway"
+import { DynamoGateway, IndexSearcher } from "../DynamoGateway"
 import type { DynamoDbConfig, FetchByIndexOptions, UpdateOptions } from "../DynamoGateway"
 import type { AuditLog, AuditLogEvent, PromiseResult } from "../types"
 import { isError } from "../types"
@@ -25,27 +25,17 @@ export default class AwsAuditLogDynamoGateway extends DynamoGateway implements A
   }
 
   async fetchMany(limit = 10, lastMessage?: AuditLog): PromiseResult<AuditLog[]> {
-    let lastItemKey
-    if (lastMessage) {
-      lastItemKey = {
-        messageId: lastMessage.messageId,
-        _: "_",
-        receivedDate: lastMessage.receivedDate
-      }
-    }
-    const pagination = <Pagination>{
-      limit,
-      lastItemKey
-    }
-    const options: GetManyOptions = { sortKey: this.sortKey, pagination }
-
-    const result = await this.getMany(this.tableName, options)
+    const result = await new IndexSearcher<AuditLog[]>(this, this.tableName, this.tableKey)
+      .useIndex(`${this.sortKey}Index`)
+      .setIndexKeys("_", "_", "receivedDate")
+      .paginate(limit, lastMessage)
+      .execute()
 
     if (isError(result)) {
       return result
     }
 
-    return <AuditLog[]>result.Items
+    return <AuditLog[]>result
   }
 
   async fetchByExternalCorrelationId(externalCorrelationId: string): PromiseResult<AuditLog | null> {
@@ -71,33 +61,17 @@ export default class AwsAuditLogDynamoGateway extends DynamoGateway implements A
   }
 
   async fetchByStatus(status: string, limit = 10, lastMessage?: AuditLog): PromiseResult<AuditLog[]> {
-    let lastItemKey
-    if (lastMessage) {
-      lastItemKey = {
-        messageId: lastMessage.messageId,
-        status: lastMessage.status,
-        receivedDate: lastMessage.receivedDate
-      }
-    }
-    const pagination = <Pagination>{
-      limit,
-      lastItemKey
-    }
-    const options: FetchByIndexOptions = {
-      indexName: "statusIndex",
-      attributeName: "status",
-      attributeValue: status,
-      isAscendingOrder: false,
-      pagination
-    }
-
-    const result = await this.fetchByIndex(this.tableName, options)
+    const result = await new IndexSearcher<AuditLog[]>(this, this.tableName, this.tableKey)
+      .useIndex("statusIndex")
+      .setIndexKeys("status", status, "receivedDate")
+      .paginate(limit, lastMessage)
+      .execute()
 
     if (isError(result)) {
       return result
     }
 
-    return <AuditLog[]>result?.Items
+    return <AuditLog[]>result
   }
 
   async fetchOne(messageId: string): PromiseResult<AuditLog> {
