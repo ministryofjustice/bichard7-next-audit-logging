@@ -53,7 +53,7 @@ beforeAll(async () => {
   )
 })
 
-it("should return first 3 records when last record is not provided in pagination", async () => {
+it("should return first 3 records when last record is not provided in the pagination", async () => {
   const result = await new IndexSearcher<TestRecord[]>(gateway, config.AUDIT_LOG_TABLE_NAME, partitionKey)
     .useIndex(indexName)
     .setIndexKeys(hashKey, hashKeyValue, rangeKey)
@@ -68,7 +68,7 @@ it("should return first 3 records when last record is not provided in pagination
   expect(records[2].id).toBe("Record 22")
 })
 
-it("should return last 5 records when last record is provided in pagination", async () => {
+it("should return last 3 records when last record is provided in the pagination", async () => {
   const lastRecord: TestRecord = {
     id: `Record 13`,
     someOtherValue: hashKeyValue,
