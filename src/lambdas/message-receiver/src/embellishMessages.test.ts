@@ -1,6 +1,6 @@
 import type AmazonMqEventSourceRecordEvent from "./AmazonMqEventSourceRecordEvent"
 import embellishMessages from "./embellishMessages"
-import JmsTextMessage from "./JmsTextMessage"
+import type JmsTextMessage from "./JmsTextMessage"
 
 test("returns all messages with message format attached", () => {
   const expectedMessage1: JmsTextMessage = {

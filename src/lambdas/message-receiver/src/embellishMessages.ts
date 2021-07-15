@@ -1,5 +1,5 @@
 import type { EventMessage, MessageFormat } from "shared"
-import AmazonMqEventSourceRecordEvent from "./AmazonMqEventSourceRecordEvent"
+import type AmazonMqEventSourceRecordEvent from "./AmazonMqEventSourceRecordEvent"
 
 export default ({ messages }: AmazonMqEventSourceRecordEvent, messageFormat: MessageFormat): EventMessage[] =>
   messages.map((message) => ({
