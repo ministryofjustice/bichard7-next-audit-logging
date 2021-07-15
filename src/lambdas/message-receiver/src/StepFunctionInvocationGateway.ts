@@ -1,5 +1,6 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { StepFunctions } from "aws-sdk"
+import { v4 as uuid } from "uuid"
 import type { PromiseResult } from "shared"
 import StepFunctionConfig from "./StepFunctionConfig"
 
@@ -22,7 +23,7 @@ export default class StepFunctionInvocationGateway {
       .startExecution({
         stateMachineArn: this.stateMachineArn,
         input: JSON.stringify(payload),
-        name: "TODO: Execution Name?"
+        name: `message-receiver-${uuid()}`
       })
       .promise()
       .catch((error) => error)
