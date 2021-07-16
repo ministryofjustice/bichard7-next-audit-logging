@@ -4,8 +4,22 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "setup:env": "scripts/environment.sh && scripts/deploy.sh"
+    "setup:env": "scripts/environment.sh && scripts/deploy.sh",
+    "build": "tsc -p tsconfig.json",
+    "test": "npm run setup:env && ../../scripts/test.sh",
+    "test:ci": "npm run setup:env && ../../scripts/test.sh ci",
+    "test:unit": "../../scripts/test.sh unit",
+    "test:integration": "npm run setup:env && ../../scripts/test.sh integration",
+    "test:e2e": "npm run setup:env && ../../scripts/test.sh e2e"
   },
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "@bichard/testing": "file:../@bichard/testing",
+    "@types/jest": "^26.0.24",
+    "jest": "^27.0.6",
+    "message-receiver": "file:../lambdas/message-receiver",
+    "shared": "file:../../shared",
+    "ts-jest": "^27.0.3"
+  }
 }

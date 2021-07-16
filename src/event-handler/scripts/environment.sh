@@ -2,6 +2,11 @@
 
 set -e
 
+if [[ "$SKIP_ENV" == "true" ]]; then
+  echo "Skipping environment setup"
+  exit 0
+fi
+
 # Spin up the base infrastructure
 cd ../../environment
 ./setup.sh

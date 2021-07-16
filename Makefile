@@ -73,8 +73,8 @@ destroy-mq-listener:
 destroy-infra:
 	docker-compose -f ./environment/docker-compose.yml down
 
-.PHONY: destroy-all
-destroy-all: destroy-mq-listener destroy-infra
+.PHONY: destroy
+destroy: destroy-mq-listener destroy-infra
 
 ########################################
 # Action Commands

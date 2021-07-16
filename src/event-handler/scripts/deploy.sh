@@ -46,7 +46,7 @@ function create_message_receiver {
     sed "s/{STEP_FUNCTION_ARN}/$STATE_MACHINE_ARN/g" | \
     sed "s/{MESSAGE_FORMAT}/$format/g" > "$env_vars_file"
 
-  create_lambda "message-receiver-$name" "MessageReceiver$format" "$env_vars_file"
+  create_lambda "$name-receiver" "messageReceiver.default" "$env_vars_file" "$PWD/../lambdas/message-receiver/build"
 }
 
 create_message_receiver "AuditEvent" "audit-event"
