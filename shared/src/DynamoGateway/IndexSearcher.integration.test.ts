@@ -54,26 +54,28 @@ beforeAll(async () => {
   )
 })
 
-it("should return first 3 records when last record is not provided in the pagination", async () => {
+it("should return first 5 records when last record is not provided in the pagination", async () => {
   const result = await new IndexSearcher<TestRecord[]>(gateway, config.AUDIT_LOG_TABLE_NAME, partitionKey)
     .useIndex(indexName)
     .setIndexKeys(hashKey, hashKeyValue, rangeKey)
-    .paginate(3)
+    .paginate(5)
     .execute()
 
   expect(result).toBeDefined()
   const records = result as TestRecord[]
-  expect(records).toHaveLength(3)
+  expect(records).toHaveLength(5)
   expect(records[0].id).toBe("Record 24")
   expect(records[1].id).toBe("Record 23")
   expect(records[2].id).toBe("Record 22")
+  expect(records[3].id).toBe("Record 21")
+  expect(records[4].id).toBe("Record 20")
 })
 
-it("should return last 3 records when last record is provided in the pagination", async () => {
+it("should return last 4 records when last record is provided in the pagination", async () => {
   const lastRecord: TestRecord = {
-    id: `Record 13`,
+    id: `Record 14`,
     someOtherValue: hashKeyValue,
-    someOtherValue2: `Value 13`
+    someOtherValue2: `Value 14`
   }
 
   const result = await new IndexSearcher<TestRecord[]>(gateway, config.AUDIT_LOG_TABLE_NAME, partitionKey)
@@ -84,10 +86,11 @@ it("should return last 3 records when last record is provided in the pagination"
 
   expect(result).toBeDefined()
   const records = result as TestRecord[]
-  expect(records).toHaveLength(3)
-  expect(records[0].id).toBe("Record 12")
-  expect(records[1].id).toBe("Record 11")
-  expect(records[2].id).toBe("Record 10")
+  expect(records).toHaveLength(4)
+  expect(records[0].id).toBe("Record 13")
+  expect(records[1].id).toBe("Record 12")
+  expect(records[2].id).toBe("Record 11")
+  expect(records[3].id).toBe("Record 10")
 })
 
 it("should return records in ascending order when pagination is set to order ascending", async () => {
