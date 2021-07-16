@@ -1,3 +1,4 @@
+import { isError } from "../types"
 import type DynamoDbConfig from "./DynamoDbConfig"
 import IndexSearcher from "./IndexSearcher"
 import TestDynamoGateway from "./TestDynamoGateway"
@@ -102,4 +103,58 @@ it("should return records in ascending order when pagination is set to order asc
   expect(records[0].id).toBe("Record 10")
   expect(records[1].id).toBe("Record 11")
   expect(records[2].id).toBe("Record 12")
+})
+
+it("should return error when provided last item for pagination does not contain the partition key", async () => {
+  const lastRecord = {
+    someOtherValue: hashKeyValue,
+    someOtherValue2: `Value 13`
+  }
+
+  const result = await new IndexSearcher<TestRecord[]>(gateway, config.AUDIT_LOG_TABLE_NAME, partitionKey)
+    .useIndex(indexName)
+    .setIndexKeys(hashKey, hashKeyValue, rangeKey)
+    .paginate(3, lastRecord, true)
+    .execute()
+
+  expect(isError(result)).toBe(true)
+
+  const error = <Error>result
+  expect(error.message).toBe(`lastItemForPagination does not contain '${partitionKey}' field`)
+})
+
+it("should return error when provided last item for pagination does not contain the hash key", async () => {
+  const lastRecord = {
+    id: `Record 13`,
+    someOtherValue2: `Value 13`
+  }
+
+  const result = await new IndexSearcher<TestRecord[]>(gateway, config.AUDIT_LOG_TABLE_NAME, partitionKey)
+    .useIndex(indexName)
+    .setIndexKeys(hashKey, hashKeyValue, rangeKey)
+    .paginate(3, lastRecord, true)
+    .execute()
+
+  expect(isError(result)).toBe(true)
+
+  const error = <Error>result
+  expect(error.message).toBe(`lastItemForPagination does not contain '${hashKey}' field`)
+})
+
+it("should return error when provided last item for pagination does not contain the range key", async () => {
+  const lastRecord = {
+    id: `Record 13`,
+    someOtherValue: hashKeyValue
+  }
+
+  const result = await new IndexSearcher<TestRecord[]>(gateway, config.AUDIT_LOG_TABLE_NAME, partitionKey)
+    .useIndex(indexName)
+    .setIndexKeys(hashKey, hashKeyValue, rangeKey)
+    .paginate(3, lastRecord, true)
+    .execute()
+
+  expect(isError(result)).toBe(true)
+
+  const error = <Error>result
+  expect(error.message).toBe(`lastItemForPagination does not contain '${rangeKey}' field`)
 })

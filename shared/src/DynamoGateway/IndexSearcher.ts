@@ -1,4 +1,5 @@
-import type { KeyValuePair, PromiseResult } from "../types"
+/* eslint-disable no-prototype-builtins */
+import type { KeyValuePair, PromiseResult, Result } from "../types"
 import { isError } from "../types"
 import type DynamoGateway from "./DynamoGateway"
 import type FetchByIndexOptions from "./FetchByIndexOptions"
@@ -20,6 +21,26 @@ export default class IndexSearcher<TResult> {
   private lastItemForPagination?: KeyValuePair<string, unknown>
 
   private isAscendingOrder: boolean
+
+  private validateLastItemForPagination(): Result<undefined> {
+    if (!this.lastItemForPagination) {
+      return undefined
+    }
+
+    if (!this.lastItemForPagination.hasOwnProperty(this.partitionKey)) {
+      return new Error(`lastItemForPagination does not contain '${this.partitionKey}' field`)
+    }
+
+    if (!this.lastItemForPagination.hasOwnProperty(this.hashKey)) {
+      return new Error(`lastItemForPagination does not contain '${this.hashKey}' field`)
+    }
+
+    if (this.rangeKey && !this.lastItemForPagination.hasOwnProperty(this.rangeKey)) {
+      return new Error(`lastItemForPagination does not contain '${this.rangeKey}' field`)
+    }
+
+    return undefined
+  }
 
   useIndex(indexName: string): IndexSearcher<TResult> {
     this.indexName = indexName
@@ -50,6 +71,12 @@ export default class IndexSearcher<TResult> {
     }
 
     if (this.lastItemForPagination) {
+      const validationResult = this.validateLastItemForPagination()
+
+      if (isError(validationResult)) {
+        return validationResult
+      }
+
       pagination.lastItemKey = {
         [this.partitionKey]: this.lastItemForPagination[this.partitionKey],
         [this.hashKey]: this.lastItemForPagination[this.hashKey]
