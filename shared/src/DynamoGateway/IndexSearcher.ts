@@ -1,5 +1,5 @@
 /* eslint-disable no-prototype-builtins */
-import { DocumentClient } from "aws-sdk/clients/dynamodb"
+import type { DocumentClient } from "aws-sdk/clients/dynamodb"
 import type { KeyValuePair, PromiseResult, Result } from "../types"
 import { isError } from "../types"
 import type DynamoGateway from "./DynamoGateway"
