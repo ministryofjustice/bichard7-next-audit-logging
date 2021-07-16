@@ -23,7 +23,7 @@ export default class IndexSearcher<TResult> {
 
   private isAscendingOrder: boolean
 
-  private validateLastItemForPagination(): Result<undefined> {
+  private validateLastItemForPagination(): Result<void> {
     if (!this.lastItemForPagination) {
       return undefined
     }
