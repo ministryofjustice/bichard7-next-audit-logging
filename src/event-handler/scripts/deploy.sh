@@ -3,6 +3,7 @@
 set -e
 
 source "$PWD/../../environment/get-lambda-arn.sh"
+source "$PWD/../../environment/create-lambda.sh"
 
 # Grab all lambda ARNs
 STORE_IN_S3_LAMBDA_ARN=$(get_lambda_arn "store-in-s3")
@@ -27,3 +28,26 @@ if [[ -z $(awslocal stepfunctions list-state-machines | grep "$STATE_MACHINE_NAM
 fi
 
 rm "$STATE_MACHINE_CONFIG_PATH"
+
+STATE_MACHINE_ARN=$( \
+  awslocal stepfunctions list-state-machines | \
+  jq -r ".[] | map(select(.name == \"$STATE_MACHINE_NAME\")) | .[0].stateMachineArn" \
+)
+
+echo "STATE_MACHINE_ARN=$STATE_MACHINE_ARN"
+
+ENV_VARS_TEMPLATE_FILE="$PWD/scripts/message-receiver-env-vars.json.tpl"
+function create_message_receiver {
+  local format=$1
+  local name=$2
+  local env_vars_file="/tmp/message-receiver-$format-env-vars.json"
+
+  cat "$ENV_VARS_TEMPLATE_FILE" | \
+    sed "s/{STEP_FUNCTION_ARN}/$STATE_MACHINE_ARN/g" | \
+    sed "s/{MESSAGE_FORMAT}/$format/g" > "$env_vars_file"
+
+  create_lambda "message-receiver-$name" "MessageReceiver$format" "$env_vars_file"
+}
+
+create_message_receiver "AuditEvent" "audit-event"
+create_message_receiver "GeneralEvent" "general-event"
