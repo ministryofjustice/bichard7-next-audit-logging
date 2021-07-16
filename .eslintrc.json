@@ -46,6 +46,7 @@
       "rules": {
         "prettier/prettier": ["error"],
         "@typescript-eslint/ban-ts-comment": "off",
+        "@typescript-eslint/consistent-type-imports": ["error"],
         "no-plusplus": "off",
         "react/react-in-jsx-scope": "off",
         "react/jsx-curly-brace-presence": ["off"],

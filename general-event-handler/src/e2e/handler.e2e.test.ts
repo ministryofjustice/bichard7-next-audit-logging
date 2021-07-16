@@ -1,5 +1,5 @@
 import { AuditLog, isError, encodeBase64 } from "shared"
-import AmazonMqEventSourceRecordEvent from "src/types/AmazonMqEventSourceRecordEvent"
+import type AmazonMqEventSourceRecordEvent from "src/types/AmazonMqEventSourceRecordEvent"
 import AuditLogApiGateway from "src/gateways/AuditLogApiGateway"
 import getLocalAuditLogApiUrl from "src/getLocalAuditLogApiUrl"
 import handler from "src/handler"

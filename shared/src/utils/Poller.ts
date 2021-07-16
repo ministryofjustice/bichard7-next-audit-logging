@@ -1,5 +1,5 @@
-import PollAction from "./PollAction"
-import PollOptions from "./PollOptions"
+import type PollAction from "./PollAction"
+import type PollOptions from "./PollOptions"
 
 const clearTimeouts = (handles: NodeJS.Timeout[]): void => handles.forEach(clearTimeout)
 

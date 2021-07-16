@@ -1,10 +1,10 @@
-import { DocumentClient, GetItemOutput } from "aws-sdk/clients/dynamodb"
-import UpdateOptions from "./UpdateOptions"
+import type { DocumentClient, GetItemOutput } from "aws-sdk/clients/dynamodb"
+import type UpdateOptions from "./UpdateOptions"
 import { isError } from "../types"
-import DynamoDbConfig from "./DynamoDbConfig"
+import type DynamoDbConfig from "./DynamoDbConfig"
 import TestDynamoGateway from "./TestDynamoGateway"
-import GetManyOptions from "./GetManyOptions"
-import FetchByIndexOptions from "./FetchByIndexOptions"
+import type GetManyOptions from "./GetManyOptions"
+import type FetchByIndexOptions from "./FetchByIndexOptions"
 
 const config: DynamoDbConfig = {
   DYNAMO_URL: "http://localhost:4566",

@@ -1,15 +1,16 @@
 jest.mock("src/use-cases/createMessageFetcher")
 
 import "src/testConfig"
-import {
+import type {
   APIGatewayProxyEvent,
   APIGatewayProxyEventPathParameters,
   APIGatewayProxyEventQueryStringParameters,
   APIGatewayProxyResult
 } from "aws-lambda"
-import { AuditLog, HttpStatusCode, Result } from "shared"
+import type { Result } from "shared"
+import { AuditLog, HttpStatusCode } from "shared"
 import { createMessageFetcher } from "src/use-cases"
-import MessageFetcher from "src/use-cases/MessageFetcher"
+import type MessageFetcher from "src/use-cases/MessageFetcher"
 import getMessages from "./getMessages"
 
 const mockCreateMessageFetcher = createMessageFetcher as jest.MockedFunction<typeof createMessageFetcher>

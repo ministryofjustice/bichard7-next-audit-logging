@@ -1,5 +1,5 @@
-import { DynamoGateway, GetManyOptions, Pagination } from "../DynamoGateway"
-import type { DynamoDbConfig, FetchByIndexOptions, UpdateOptions } from "../DynamoGateway"
+import { DynamoGateway } from "../DynamoGateway"
+import type { DynamoDbConfig, FetchByIndexOptions, UpdateOptions, GetManyOptions, Pagination } from "../DynamoGateway"
 import type { AuditLog, AuditLogEvent, PromiseResult } from "../types"
 import { isError } from "../types"
 import getMessageStatus from "./getMessageStatus"

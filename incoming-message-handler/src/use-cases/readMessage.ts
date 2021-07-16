@@ -1,5 +1,6 @@
-import { AuditLog, isError, PromiseResult, Result, parseXml } from "shared"
-import { DeliveryMessage, ReceivedMessage } from "src/entities"
+import type { PromiseResult, Result } from "shared"
+import { AuditLog, isError, parseXml } from "shared"
+import type { DeliveryMessage, ReceivedMessage } from "src/entities"
 import ApplicationError from "src/errors/ApplicationError"
 
 const getCaseId = (xml: DeliveryMessage): Result<string> => {

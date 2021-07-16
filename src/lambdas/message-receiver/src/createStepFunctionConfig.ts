@@ -1,4 +1,4 @@
-import StepFunctionConfig from "./StepFunctionConfig"
+import type StepFunctionConfig from "./StepFunctionConfig"
 
 export default (): StepFunctionConfig => {
   const { AWS_URL, AWS_REGION, STEP_FUNCTION_ARN } = process.env

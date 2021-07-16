@@ -1,4 +1,4 @@
-import Pagination from "./Pagination"
+import type Pagination from "./Pagination"
 
 export default interface FetchByIndexOptions {
   indexName: string

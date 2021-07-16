@@ -1,4 +1,5 @@
-import axios, { AxiosError } from "axios"
+import type { AxiosError } from "axios"
+import axios from "axios"
 import { isError, AuditLog } from "shared"
 import PersistMessageUseCase from "./PersistMessageUseCase"
 

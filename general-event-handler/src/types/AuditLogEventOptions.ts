@@ -1,4 +1,4 @@
-import EventCategory from "./EventCategory"
+import type EventCategory from "./EventCategory"
 
 export default interface AuditLogEventOptions {
   eventSource: string

@@ -1,4 +1,4 @@
-import { ComponentType } from "react"
+import type { ComponentType } from "react"
 import ErrorIcon from "icons/ErrorIcon"
 import SuccessIcon from "icons/SuccessIcon"
 import ProcessingIcon from "icons/ProcessingIcon"

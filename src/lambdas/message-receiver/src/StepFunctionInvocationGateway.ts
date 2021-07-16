@@ -2,7 +2,7 @@
 import { StepFunctions } from "aws-sdk"
 import { v4 as uuid } from "uuid"
 import type { PromiseResult } from "shared"
-import StepFunctionConfig from "./StepFunctionConfig"
+import type StepFunctionConfig from "./StepFunctionConfig"
 
 export default class StepFunctionInvocationGateway {
   private readonly stateMachine: StepFunctions

@@ -1,10 +1,10 @@
-import { CreateTableOutput, DocumentClient } from "aws-sdk/clients/dynamodb"
+import type { CreateTableOutput, DocumentClient } from "aws-sdk/clients/dynamodb"
 import PollOptions from "../../utils/PollOptions"
 import Poller from "../../utils/Poller"
 import DynamoGateway from "../DynamoGateway"
 import getTableAttributes from "./getTableAttributes"
 import getTableIndexes from "./getTableIndexes"
-import { SecondaryIndex } from "./SecondaryIndex"
+import type { SecondaryIndex } from "./SecondaryIndex"
 
 type KeyValue = string | number | boolean
 
