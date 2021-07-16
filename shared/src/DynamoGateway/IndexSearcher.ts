@@ -1,4 +1,5 @@
 /* eslint-disable no-prototype-builtins */
+import { DocumentClient } from "aws-sdk/clients/dynamodb"
 import type { KeyValuePair, PromiseResult, Result } from "../types"
 import { isError } from "../types"
 import type DynamoGateway from "./DynamoGateway"
@@ -42,6 +43,29 @@ export default class IndexSearcher<TResult> {
     return undefined
   }
 
+  private createLastItemKey(): Result<DocumentClient.Key | undefined> {
+    if (!this.lastItemForPagination) {
+      return undefined
+    }
+
+    const validationResult = this.validateLastItemForPagination()
+
+    if (isError(validationResult)) {
+      return validationResult
+    }
+
+    const lastItemKey = {
+      [this.partitionKey]: this.lastItemForPagination[this.partitionKey],
+      [this.hashKey]: this.lastItemForPagination[this.hashKey]
+    }
+
+    if (this.rangeKey) {
+      lastItemKey[this.rangeKey] = this.lastItemForPagination[this.rangeKey]
+    }
+
+    return lastItemKey
+  }
+
   useIndex(indexName: string): IndexSearcher<TResult> {
     this.indexName = indexName
     return this
@@ -70,22 +94,13 @@ export default class IndexSearcher<TResult> {
       limit: this.limit
     }
 
-    if (this.lastItemForPagination) {
-      const validationResult = this.validateLastItemForPagination()
+    const lastItemKey = this.createLastItemKey()
 
-      if (isError(validationResult)) {
-        return validationResult
-      }
-
-      pagination.lastItemKey = {
-        [this.partitionKey]: this.lastItemForPagination[this.partitionKey],
-        [this.hashKey]: this.lastItemForPagination[this.hashKey]
-      }
-
-      if (this.rangeKey) {
-        pagination.lastItemKey[this.rangeKey] = this.lastItemForPagination[this.rangeKey]
-      }
+    if (isError(lastItemKey)) {
+      return lastItemKey
     }
+
+    pagination.lastItemKey = lastItemKey
 
     const options: FetchByIndexOptions = {
       indexName: this.indexName,
