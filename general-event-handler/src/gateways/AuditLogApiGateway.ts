@@ -1,6 +1,6 @@
 import axios from "axios"
-import { AuditLog, PromiseResult } from "shared"
-import { AuditLogEvent } from "src/types"
+import type { AuditLog, PromiseResult } from "shared"
+import type { AuditLogEvent } from "src/types"
 
 export default class AuditLogApiGateway {
   constructor(private readonly apiUrl: string) {}

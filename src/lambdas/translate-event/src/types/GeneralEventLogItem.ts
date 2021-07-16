@@ -1,4 +1,4 @@
-import EventDetails from "./EventDetails"
+import type EventDetails from "./EventDetails"
 
 export default interface GeneralEventLogItem {
   logEvent: EventDetails

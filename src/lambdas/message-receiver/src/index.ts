@@ -1,4 +1,5 @@
-import { isError, MessageFormat } from "shared"
+import type { MessageFormat } from "shared"
+import { isError } from "shared"
 import type AmazonMqEventSourceRecordEvent from "./AmazonMqEventSourceRecordEvent"
 import createStepFunctionConfig from "./createStepFunctionConfig"
 import embellishMessages from "./embellishMessages"

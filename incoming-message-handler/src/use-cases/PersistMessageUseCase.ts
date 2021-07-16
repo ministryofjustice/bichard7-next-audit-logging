@@ -1,6 +1,8 @@
-import axios, { AxiosError } from "axios"
+import type { AxiosError } from "axios"
+import axios from "axios"
 import * as https from "https"
-import { AuditLog, HttpStatusCode, PromiseResult } from "shared"
+import type { AuditLog, PromiseResult } from "shared"
+import { HttpStatusCode } from "shared"
 
 const httpsAgent = new https.Agent({
   rejectUnauthorized: false

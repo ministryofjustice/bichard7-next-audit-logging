@@ -1,4 +1,4 @@
-import { AuditLog } from "shared"
+import type { AuditLog } from "shared"
 
 export default (auditLog: AuditLog): string => {
   const newElement = `<msg:MessageIdentifier>${auditLog.messageId}</msg:MessageIdentifier>`

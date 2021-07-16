@@ -1,5 +1,5 @@
 import { isError } from "shared"
-import { MqConfig } from "src/configs"
+import type { MqConfig } from "src/configs"
 import MqGateway from "src/gateways/MqGateway"
 import SendMessageUseCase from "./SendMessageUseCase"
 

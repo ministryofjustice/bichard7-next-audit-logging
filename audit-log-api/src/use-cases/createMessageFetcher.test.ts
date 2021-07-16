@@ -1,4 +1,4 @@
-import { APIGatewayProxyEvent } from "aws-lambda"
+import type { APIGatewayProxyEvent } from "aws-lambda"
 import { FakeAuditLogDynamoGateway } from "@bichard/testing"
 import FetchAll from "./FetchAll"
 import FetchById from "./FetchById"

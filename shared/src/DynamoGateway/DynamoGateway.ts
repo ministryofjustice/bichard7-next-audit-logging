@@ -1,10 +1,10 @@
 import { DynamoDB } from "aws-sdk"
 import { DocumentClient } from "aws-sdk/clients/dynamodb"
-import { PromiseResult } from "../types"
-import DynamoDbConfig from "./DynamoDbConfig"
-import FetchByIndexOptions from "./FetchByIndexOptions"
-import UpdateOptions from "./UpdateOptions"
-import GetManyOptions from "./GetManyOptions"
+import type { PromiseResult } from "../types"
+import type DynamoDbConfig from "./DynamoDbConfig"
+import type FetchByIndexOptions from "./FetchByIndexOptions"
+import type UpdateOptions from "./UpdateOptions"
+import type GetManyOptions from "./GetManyOptions"
 
 export default class DynamoGateway {
   protected readonly service: DynamoDB

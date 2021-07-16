@@ -1,4 +1,4 @@
-import PollAction from "./PollAction"
+import type PollAction from "./PollAction"
 import Poller from "./Poller"
 import PollOptions from "./PollOptions"
 
