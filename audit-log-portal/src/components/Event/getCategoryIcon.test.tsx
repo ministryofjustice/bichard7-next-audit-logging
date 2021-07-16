@@ -1,4 +1,4 @@
-import { EventCategory } from "shared"
+import type { EventCategory } from "shared"
 import ErrorIcon from "icons/ErrorIcon"
 import WarningIcon from "icons/WarningIcon"
 import InformationIcon from "icons/InformationIcon"

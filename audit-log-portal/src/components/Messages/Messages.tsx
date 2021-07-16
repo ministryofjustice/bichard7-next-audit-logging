@@ -1,5 +1,5 @@
-import { ReactNode } from "react"
-import { AuditLog } from "shared"
+import type { ReactNode } from "react"
+import type { AuditLog } from "shared"
 import Message from "components/Message"
 import If from "components/If"
 

@@ -1,5 +1,6 @@
-import { isError, PromiseResult } from "shared"
-import { Client } from "stompit"
+import type { PromiseResult } from "shared"
+import { isError } from "shared"
+import type { Client } from "stompit"
 import MqGateway from "./MqGateway"
 
 const readMessage = (message: Client.Message): PromiseResult<string> => {

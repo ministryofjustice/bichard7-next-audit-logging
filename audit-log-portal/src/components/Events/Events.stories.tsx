@@ -1,4 +1,5 @@
-import { AuditLogEvent, EventCategory } from "shared"
+import type { EventCategory } from "shared"
+import { AuditLogEvent } from "shared"
 import Events from "./Events"
 
 export default {

@@ -1,5 +1,9 @@
-import { ExpressionAttributeNameMap, ExpressionAttributeValueMap, UpdateExpression } from "aws-sdk/clients/dynamodb"
-import { KeyValuePair } from "../types"
+import type {
+  ExpressionAttributeNameMap,
+  ExpressionAttributeValueMap,
+  UpdateExpression
+} from "aws-sdk/clients/dynamodb"
+import type { KeyValuePair } from "../types"
 
 export default interface UpdateOptions {
   keyName: string

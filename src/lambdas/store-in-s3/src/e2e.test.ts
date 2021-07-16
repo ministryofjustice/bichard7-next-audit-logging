@@ -1,9 +1,9 @@
 jest.setTimeout(10000)
 
-import { EventMessage, S3Config } from "shared"
+import type { EventMessage, S3Config } from "shared"
 import TestS3Gateway from "shared/dist/S3Gateway/TestS3Gateway"
 import { invokeFunction } from "@bichard/testing"
-import { StoreInS3Result } from "./index"
+import type { StoreInS3Result } from "./index"
 
 const config: S3Config = {
   url: "http://localhost:4566",

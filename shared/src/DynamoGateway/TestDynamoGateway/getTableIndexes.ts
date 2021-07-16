@@ -1,5 +1,5 @@
-import DynamoDB from "aws-sdk/clients/dynamodb"
-import { SecondaryIndex } from "./SecondaryIndex"
+import type DynamoDB from "aws-sdk/clients/dynamodb"
+import type { SecondaryIndex } from "./SecondaryIndex"
 
 const getKeySchema = (hashKey: string, rangeKey?: string) => {
   const keySchema = [

@@ -1,4 +1,5 @@
-import { isError, AuditLog } from "shared"
+import type { AuditLog } from "shared"
+import { isError } from "shared"
 import { createMqConfig } from "src/configs"
 import MqGateway from "src/gateways/MqGateway"
 import replaceMessageIdInXml from "src/use-cases/replaceMessageIdInXml"

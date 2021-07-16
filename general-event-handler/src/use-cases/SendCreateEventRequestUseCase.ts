@@ -1,6 +1,6 @@
-import { PromiseResult } from "shared"
+import type { PromiseResult } from "shared"
 import AuditLogApiGateway from "src/gateways/AuditLogApiGateway"
-import { AuditLogEvent } from "src/types"
+import type { AuditLogEvent } from "src/types"
 
 export default class SendCreateEventRequestUseCase {
   private readonly gateway: AuditLogApiGateway

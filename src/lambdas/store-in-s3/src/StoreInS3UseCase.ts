@@ -1,5 +1,6 @@
 import { v4 as uuid } from "uuid"
-import { S3Gateway, EventMessage, PromiseResult, isError, MessageFormat } from "shared"
+import type { S3Gateway, EventMessage, PromiseResult, MessageFormat } from "shared"
+import { isError } from "shared"
 
 export type StoreInS3Result = {
   s3Path: string

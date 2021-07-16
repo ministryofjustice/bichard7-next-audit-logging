@@ -1,4 +1,4 @@
-import { PromiseResult, AuditLogDynamoGateway, AuditLogEvent } from "shared"
+import type { PromiseResult, AuditLogDynamoGateway, AuditLogEvent } from "shared"
 
 export default class FetchEventsUseCase {
   constructor(private readonly gateway: AuditLogDynamoGateway) {}

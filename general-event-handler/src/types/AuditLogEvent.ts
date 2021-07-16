@@ -1,6 +1,6 @@
-import { KeyValuePair } from "shared"
-import AuditLogEventOptions from "./AuditLogEventOptions"
-import EventCategory from "./EventCategory"
+import type { KeyValuePair } from "shared"
+import type AuditLogEventOptions from "./AuditLogEventOptions"
+import type EventCategory from "./EventCategory"
 
 // TODO: This will need to move into shared once the API endpoint exists.
 export default class AuditLogEvent {

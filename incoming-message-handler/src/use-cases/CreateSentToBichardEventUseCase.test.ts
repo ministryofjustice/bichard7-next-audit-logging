@@ -1,4 +1,5 @@
-import axios, { AxiosError } from "axios"
+import type { AxiosError } from "axios"
+import axios from "axios"
 import { AuditLog, isError } from "shared"
 import CreateSentToBichardEventUseCase from "./CreateSentToBichardEventUseCase"
 

@@ -1,7 +1,7 @@
 import styled from "styled-components"
 import Link from "next/link"
 import { Badge, Button, Card, CardContent, Typography } from "@material-ui/core"
-import { AuditLog } from "shared"
+import type { AuditLog } from "shared"
 import DateTime from "components/DateTime"
 import EventIcon from "icons/EventIcon"
 import getDaysOld from "./getDaysOld"

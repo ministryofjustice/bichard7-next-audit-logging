@@ -1,4 +1,4 @@
-import JmsTextMessage from "./JmsTextMessage"
+import type JmsTextMessage from "./JmsTextMessage"
 
 export default interface AmazonMqEventSourceRecordEvent {
   eventSource: string

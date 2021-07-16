@@ -1,5 +1,5 @@
 import { isError } from "shared"
-import { EventDetails } from "src/types"
+import type { EventDetails } from "src/types"
 import { v4 as uuid } from "uuid"
 import parseGeneralEventLogItem from "./parseGeneralEventLogItem"
 

@@ -1,5 +1,6 @@
-import { parseXml, PromiseResult } from "shared"
-import { GeneralEventLogItem, EventDetails } from "src/types"
+import type { PromiseResult } from "shared"
+import { parseXml } from "shared"
+import type { GeneralEventLogItem, EventDetails } from "src/types"
 
 export default async (xml: string): PromiseResult<EventDetails> => {
   const logItem = await parseXml<GeneralEventLogItem>(xml)

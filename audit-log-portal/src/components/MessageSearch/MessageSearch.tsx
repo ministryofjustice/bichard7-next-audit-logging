@@ -2,7 +2,7 @@ import { memo, useState } from "react"
 import { IconButton, TextField } from "@material-ui/core"
 import styled from "styled-components"
 import SearchIcon from "icons/SearchIcon"
-import MessageSearchModel from "types/MessageSearchModel"
+import type MessageSearchModel from "types/MessageSearchModel"
 import StatusField from "./StatusField"
 
 const Container = styled.form`
