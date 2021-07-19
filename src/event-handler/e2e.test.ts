@@ -1,6 +1,8 @@
+jest.setTimeout(50000)
+
 import fs from "fs"
-import type { AmazonMqEventSourceRecordEvent, DynamoDbConfig } from "shared"
-import { encodeBase64, AuditLog, AwsAuditLogDynamoGateway } from "shared"
+import type { AmazonMqEventSourceRecordEvent, DynamoDbConfig, AuditLogEvent } from "shared"
+import { encodeBase64, AuditLog, AwsAuditLogDynamoGateway, Poller, PollOptions } from "shared"
 import TestDynamoGateway from "shared/dist/DynamoGateway/TestDynamoGateway"
 import { invokeFunction } from "@bichard/testing"
 
@@ -12,6 +14,21 @@ const config: DynamoDbConfig = {
 
 const gateway = new AwsAuditLogDynamoGateway(config, config.AUDIT_LOG_TABLE_NAME)
 const testGateway = new TestDynamoGateway(config)
+
+type PollResult = {
+  actualEvents1: AuditLogEvent[]
+  actualEvents2: AuditLogEvent[]
+}
+
+const getEvents = async (messageId1: string, messageId2: string): Promise<PollResult> => {
+  const actualEvents1 = <AuditLogEvent[]>await gateway.fetchEvents(messageId1)
+  const actualEvents2 = <AuditLogEvent[]>await gateway.fetchEvents(messageId2)
+
+  return {
+    actualEvents1,
+    actualEvents2
+  }
+}
 
 beforeEach(async () => {
   await testGateway.deleteAll(config.AUDIT_LOG_TABLE_NAME, "messageId")
@@ -55,13 +72,14 @@ test.each<string>(["audit-event", "general-event"])(
     const result = await invokeFunction(`${eventFilename}-receiver`, event)
     expect(result).toNotBeError()
 
-    const actualAuditLogs = <AuditLog[]>await gateway.fetchMany()
-    expect(actualAuditLogs).toHaveLength(2)
+    const poller = new Poller(() => getEvents(auditLog1.messageId, auditLog2.messageId))
 
-    const actualAuditLog1 = actualAuditLogs.find((x) => x.messageId === auditLog1.messageId)!
-    expect(actualAuditLog1.events).toHaveLength(2)
+    const options = new PollOptions<PollResult>(40000)
+    options.delay = 300
+    options.condition = ({ actualEvents1, actualEvents2 }) => {
+      return actualEvents1.length === 2 && actualEvents2.length === 1
+    }
 
-    const actualAuditLog2 = actualAuditLogs.find((x) => x.messageId === auditLog2.messageId)!
-    expect(actualAuditLog2.events).toHaveLength(1)
+    await poller.poll(options)
   }
 )
