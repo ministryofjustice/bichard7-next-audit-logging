@@ -18,6 +18,7 @@
     "@bichard/testing": "file:../@bichard/testing",
     "@types/jest": "^26.0.24",
     "jest": "^27.0.6",
+    "jest-junit": "^12.2.0",
     "message-receiver": "file:../lambdas/message-receiver",
     "shared": "file:../../shared",
     "ts-jest": "^27.0.3"
