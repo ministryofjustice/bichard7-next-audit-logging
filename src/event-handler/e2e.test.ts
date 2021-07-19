@@ -13,7 +13,7 @@ const config: DynamoDbConfig = {
 const gateway = new AwsAuditLogDynamoGateway(config, config.AUDIT_LOG_TABLE_NAME)
 const testGateway = new TestDynamoGateway(config)
 
-beforeAll(async () => {
+beforeEach(async () => {
   await testGateway.deleteAll(config.AUDIT_LOG_TABLE_NAME, "messageId")
 })
 
