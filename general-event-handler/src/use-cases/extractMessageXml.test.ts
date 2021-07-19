@@ -1,6 +1,6 @@
 import format from "xml-formatter"
 import { isError } from "shared"
-import JmsTextMessage from "src/types/JmsTextMessage"
+import type JmsTextMessage from "src/types/JmsTextMessage"
 import extractMessageXml from "./extractMessageXml"
 
 const formatXml = (xml: string): string => format(xml, { indentation: "  " })

@@ -1,6 +1,8 @@
-import { EventMessage, isError, S3Config } from "shared"
+import type { EventMessage, S3Config } from "shared"
+import { isError } from "shared"
 import TestS3Gateway from "shared/dist/S3Gateway/TestS3Gateway"
-import StoreInS3UseCase, { StoreInS3Result } from "./StoreInS3UseCase"
+import type { StoreInS3Result } from "./StoreInS3UseCase"
+import StoreInS3UseCase from "./StoreInS3UseCase"
 
 const config: S3Config = {
   url: "http://localhost:4566",

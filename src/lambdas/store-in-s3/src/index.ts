@@ -1,4 +1,5 @@
-import { EventMessage, isError, S3Gateway } from "shared"
+import type { EventMessage } from "shared"
+import { isError, S3Gateway } from "shared"
 import StoreInS3UseCase from "./StoreInS3UseCase"
 import createS3Config from "./createS3Config"
 

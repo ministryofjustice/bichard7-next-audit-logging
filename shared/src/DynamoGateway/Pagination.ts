@@ -1,4 +1,4 @@
-import DynamoDB from "aws-sdk/clients/dynamodb"
+import type DynamoDB from "aws-sdk/clients/dynamodb"
 
 export default interface Pagination {
   limit: number

@@ -1,4 +1,4 @@
-import { AppProps } from "next/app"
+import type { AppProps } from "next/app"
 import { CssBaseline, MuiThemeProvider } from "@material-ui/core"
 import { ThemeProvider } from "styled-components"
 import theme from "styles/theme"

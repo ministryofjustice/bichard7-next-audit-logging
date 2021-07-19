@@ -1,4 +1,5 @@
-import { AuditLog, AwsAuditLogDynamoGateway, DynamoDbConfig } from "shared"
+import type { DynamoDbConfig } from "shared"
+import { AuditLog, AwsAuditLogDynamoGateway } from "shared"
 import TestDynamoGateway from "shared/dist/DynamoGateway/TestDynamoGateway"
 import CreateAuditLogUseCase from "./CreateAuditLogUseCase"
 

@@ -1,4 +1,5 @@
-import { isError, AuditLogEvent, EventCategory, AuditLog } from "shared"
+import type { EventCategory } from "shared"
+import { isError, AuditLogEvent, AuditLog } from "shared"
 import { FakeAuditLogDynamoGateway } from "@bichard/testing"
 import FetchEventsUseCase from "./FetchEventsUseCase"
 

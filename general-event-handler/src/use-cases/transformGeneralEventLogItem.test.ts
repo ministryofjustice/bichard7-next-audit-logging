@@ -1,4 +1,4 @@
-import { EventDetails } from "src/types"
+import type { EventDetails } from "src/types"
 import transformGeneralEventLogItem from "./transformGeneralEventLogItem"
 
 const eventDetails: EventDetails = {

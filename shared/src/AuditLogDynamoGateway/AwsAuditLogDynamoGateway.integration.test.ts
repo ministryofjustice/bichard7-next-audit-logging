@@ -1,4 +1,4 @@
-import { DocumentClient } from "aws-sdk/clients/dynamodb"
+import type { DocumentClient } from "aws-sdk/clients/dynamodb"
 import type { EventCategory } from "../types"
 import { isError, AuditLog, AuditLogEvent, AuditLogStatus } from "../types"
 import type { DynamoDbConfig } from "../DynamoGateway"

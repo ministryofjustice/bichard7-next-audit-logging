@@ -1,6 +1,6 @@
 import { Lambda } from "aws-sdk"
-import { InvocationRequest } from "aws-sdk/clients/lambda"
-import { PromiseResult } from "shared"
+import type { InvocationRequest } from "aws-sdk/clients/lambda"
+import type { PromiseResult } from "shared"
 
 const invokeGeneralEventHandlerFunction = (payload: string): PromiseResult<Lambda.InvocationResponse> => {
   const lambda = new Lambda({

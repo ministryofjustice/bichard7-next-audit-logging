@@ -1,6 +1,7 @@
 import { v4 as uuid } from "uuid"
 import format from "xml-formatter"
-import { isError, DynamoDbConfig } from "shared"
+import type { DynamoDbConfig } from "shared"
+import { isError } from "shared"
 import TestDynamoGateway from "shared/dist/DynamoGateway/TestDynamoGateway"
 import TestS3Gateway from "shared/dist/S3Gateway/TestS3Gateway"
 import TestMqGateway from "src/gateways/MqGateway/TestMqGateway"

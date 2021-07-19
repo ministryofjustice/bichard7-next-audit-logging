@@ -1,4 +1,4 @@
-import { ReactNode } from "react"
+import type { ReactNode } from "react"
 import Image from "next/image"
 import styled from "styled-components"
 import Head from "components/Head"

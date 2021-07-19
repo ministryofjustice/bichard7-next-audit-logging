@@ -1,5 +1,5 @@
 import { screen } from "@testing-library/react"
-import { AuditLogEvent, EventCategory } from "shared"
+import type { AuditLogEvent, EventCategory } from "shared"
 import { render } from "testing/render"
 import Events from "./Events"
 
