@@ -1,6 +1,7 @@
 import type { PromiseResult } from "shared"
+import type { TranslateEventInput } from "src"
 import type TranslationResult from "./TranslationResult"
 
-type Translator = (messageData: string) => PromiseResult<TranslationResult>
+type Translator = (eventInput: TranslateEventInput) => PromiseResult<TranslationResult>
 
 export default Translator
