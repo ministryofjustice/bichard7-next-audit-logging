@@ -17,6 +17,7 @@ jobs:
             - v1-npm-deps-{{ checksum "src/@lambdas/store-in-s3/package-lock.json" }}
             - v1-npm-deps-{{ checksum "src/@lambdas/translate-event/package-lock.json" }}
             - v1-npm-deps-{{ checksum "src/@lambdas/record-event/package-lock.json" }}
+            - v1-npm-deps-{{ checksum "src/event-handler/package-lock.json" }}
             - v1-npm-deps-{{ checksum "incoming-message-handler/package-lock.json" }}
             - v1-npm-deps-{{ checksum "audit-log-api/package-lock.json" }}
             - v1-npm-deps-{{ checksum "audit-log-portal/package-lock.json" }}
@@ -58,6 +59,10 @@ jobs:
           paths: src/lambdas/record-event/node_modules
 
       - save_cache:
+          key: v1-npm-deps-{{ checksum "shared/package-lock.json" }}
+          paths: src/event-handler/node_modules
+
+      - save_cache:
           key: v1-npm-deps-{{ checksum "incoming-message-handler/package-lock.json" }}
           paths: incoming-message-handler/node_modules
 
@@ -86,6 +91,7 @@ jobs:
             - src/lambdas/store-in-s3/build
             - src/lambdas/translate-event/build
             - src/lambdas/record-event/build
+            - src/event-handler/build
             - incoming-message-handler/build
             - audit-log-api/build
             - audit-log-portal/.next
@@ -117,6 +123,9 @@ jobs:
 
       - restore_cache:
           key: v1-npm-deps-{{ checksum "src/lambdas/record-event/package-lock.json" }}
+
+      - restore_cache:
+          key: v1-npm-deps-{{ checksum "src/event-handler/package-lock.json" }}
 
       - restore_cache:
           key: v1-npm-deps-{{ checksum "incoming-message-handler/package-lock.json" }}
@@ -163,6 +172,8 @@ jobs:
           path: ./src/lambdas/translate-event/test-results/jest/
       - store_test_results:
           path: ./src/lambdas/record-event/test-results/jest/
+      - store_test_results:
+          path: ./src/event-handler/test-results/jest/
       - store_test_results:
           path: ./incoming-message-handler/test-results/jest/
       - store_test_results:
