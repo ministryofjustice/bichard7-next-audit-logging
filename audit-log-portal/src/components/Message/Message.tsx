@@ -4,6 +4,8 @@ import { Badge, Button, Card, CardContent, Typography } from "@material-ui/core"
 import type { AuditLog } from "shared"
 import DateTime from "components/DateTime"
 import EventIcon from "icons/EventIcon"
+import RetryIcon from "icons/RetryIcon"
+import If from "components/If"
 import getDaysOld from "./getDaysOld"
 import StatusIcon from "./StatusIcon"
 
@@ -52,6 +54,14 @@ const Actions = styled.div`
   white-space: nowrap;
 `
 
+const RetryAction = styled.div`
+  flex: 0;
+`
+
+const ViewEventAction = styled.div`
+  flex: 0;
+`
+
 const Message = ({ message }: Props) => {
   return (
     <Container>
@@ -73,13 +83,23 @@ const Message = ({ message }: Props) => {
 
         <Actions>
           {/* TODO: Button: View XML */}
-          <Badge badgeContent={(message.events || []).length} color="secondary">
-            <Link href={`/messages/${message.messageId}`}>
-              <Button variant="outlined" color="default" startIcon={<EventIcon />}>
-                {`View Events`}
+          <RetryAction>
+            <If condition={message.status === "Error"}>
+              <Button variant="outlined" color="default" startIcon={<RetryIcon />}>
+                {`Retry Message`}
               </Button>
-            </Link>
-          </Badge>
+            </If>
+          </RetryAction>
+
+          <ViewEventAction>
+            <Badge badgeContent={(message.events || []).length} color="secondary">
+              <Link href={`/messages/${message.messageId}`}>
+                <Button variant="outlined" color="default" startIcon={<EventIcon />}>
+                  {`View Events`}
+                </Button>
+              </Link>
+            </Badge>
+          </ViewEventAction>
         </Actions>
       </InnerContainer>
     </Container>
