@@ -4,6 +4,8 @@ import { Badge, Button, Card, CardContent, Typography } from "@material-ui/core"
 import type { AuditLog } from "shared"
 import DateTime from "components/DateTime"
 import EventIcon from "icons/EventIcon"
+import RetryIcon from "icons/RetryIcon"
+import If from "components/If"
 import getDaysOld from "./getDaysOld"
 import StatusIcon from "./StatusIcon"
 
@@ -73,6 +75,14 @@ const Message = ({ message }: Props) => {
 
         <Actions>
           {/* TODO: Button: View XML */}
+
+          <If condition={message.status === "Error"}>
+            {/* TODO: Add link to relevant backend logic to trigger retry functionality */}
+            <Button variant="outlined" color="default" startIcon={<RetryIcon />}>
+              {`Retry Message`}
+            </Button>
+          </If>
+
           <Badge badgeContent={(message.events || []).length} color="secondary">
             <Link href={`/messages/${message.messageId}`}>
               <Button variant="outlined" color="default" startIcon={<EventIcon />}>
