@@ -56,6 +56,7 @@ const Actions = styled.div`
 
 const RetryAction = styled.div`
   flex: 0;
+  padding-top: 0.5rem;
 `
 
 const ViewEventAction = styled.div`
@@ -83,14 +84,6 @@ const Message = ({ message }: Props) => {
 
         <Actions>
           {/* TODO: Button: View XML */}
-          <RetryAction>
-            <If condition={message.status === "Error"}>
-              <Button variant="outlined" color="default" startIcon={<RetryIcon />}>
-                {`Retry Message`}
-              </Button>
-            </If>
-          </RetryAction>
-
           <ViewEventAction>
             <Badge badgeContent={(message.events || []).length} color="secondary">
               <Link href={`/messages/${message.messageId}`}>
@@ -100,6 +93,14 @@ const Message = ({ message }: Props) => {
               </Link>
             </Badge>
           </ViewEventAction>
+
+          <RetryAction>
+            <If condition={message.status === "Error"}>
+              <Button variant="outlined" color="default" startIcon={<RetryIcon />}>
+                {`Retry Event`}
+              </Button>
+            </If>
+          </RetryAction>
         </Actions>
       </InnerContainer>
     </Container>
