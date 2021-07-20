@@ -1,6 +1,5 @@
-import type AmazonMqEventSourceRecordEvent from "./AmazonMqEventSourceRecordEvent"
+import type { AmazonMqEventSourceRecordEvent, JmsTextMessage } from "shared"
 import embellishMessages from "./embellishMessages"
-import type JmsTextMessage from "./JmsTextMessage"
 
 test("returns all messages with message format attached", () => {
   const expectedMessage1: JmsTextMessage = {
@@ -17,7 +16,7 @@ test("returns all messages with message format attached", () => {
 
   const event: AmazonMqEventSourceRecordEvent = {
     eventSource: "",
-    eventSourceArn: "",
+    eventSourceArn: "DummyArn",
     messages: [expectedMessage1, expectedMessage2]
   }
 
@@ -27,8 +26,10 @@ test("returns all messages with message format attached", () => {
   const actualMessage1 = messages[0]
   expect(actualMessage1.messageData).toBe(expectedMessage1.data)
   expect(actualMessage1.messageFormat).toBe("AuditEvent")
+  expect(actualMessage1.eventSourceArn).toBe("DummyArn")
 
   const actualMessage2 = messages[1]
   expect(actualMessage2.messageData).toBe(expectedMessage2.data)
   expect(actualMessage2.messageFormat).toBe("AuditEvent")
+  expect(actualMessage2.eventSourceArn).toBe("DummyArn")
 })
