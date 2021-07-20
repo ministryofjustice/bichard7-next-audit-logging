@@ -4,7 +4,7 @@ import fs from "fs"
 import { encodeBase64 } from "shared"
 import type { MessageFormat, EventCategory } from "shared"
 import { invokeFunction } from "@bichard/testing"
-import type { TranslateEventInput } from "./index"
+import type TranslateEventInput from "./TranslateEventInput"
 import type TranslationResult from "./translators/TranslationResult"
 
 const filenameMappings: Record<MessageFormat, string> = {

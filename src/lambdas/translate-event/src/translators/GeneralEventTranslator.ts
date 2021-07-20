@@ -1,7 +1,7 @@
 import type { PromiseResult } from "shared"
 import { decodeBase64, parseXml } from "shared"
 import type GeneralEventLogItem from "src/types/GeneralEventLogItem"
-import type { TranslateEventInput } from "src"
+import type TranslateEventInput from "src/TranslateEventInput"
 import type TranslationResult from "./TranslationResult"
 import type Translator from "./Translator"
 import transformEventDetails from "./transformEventDetails"
