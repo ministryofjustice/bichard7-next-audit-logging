@@ -14,7 +14,7 @@ test:
 
 .PHONY: validate
 validate:
-	npm i && npm run lint
+	npm i && NODE_OPTIONS=--max_old_space_size=4096 npm run lint
 
 ########################################
 # Run Commands
@@ -73,8 +73,8 @@ destroy-mq-listener:
 destroy-infra:
 	docker-compose -f ./environment/docker-compose.yml down
 
-.PHONY: destroy-all
-destroy-all: destroy-mq-listener destroy-infra
+.PHONY: destroy
+destroy: destroy-mq-listener destroy-infra
 
 ########################################
 # Action Commands

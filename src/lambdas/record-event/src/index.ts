@@ -5,7 +5,6 @@ import AuditLogApiGateway from "./AuditLogApiGateway"
 export interface RecordEventInput {
   messageId: string
   event: AuditLogEvent
-  s3Path: string
 }
 
 const apiUrl = process.env.API_URL

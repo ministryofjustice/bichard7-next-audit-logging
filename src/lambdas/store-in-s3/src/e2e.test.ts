@@ -1,4 +1,4 @@
-jest.setTimeout(10000)
+jest.setTimeout(30000)
 
 import type { EventMessage, S3Config } from "shared"
 import TestS3Gateway from "shared/dist/S3Gateway/TestS3Gateway"
@@ -25,7 +25,8 @@ describe("Store in S3 end-to-end", () => {
   test("given message is stored in S3", async () => {
     const message: EventMessage = {
       messageData: "DummyData",
-      messageFormat: "AuditEvent"
+      messageFormat: "AuditEvent",
+      eventSourceArn: "DummyArn"
     }
 
     const result = await invokeFunction<EventMessage, StoreInS3Result>("store-in-s3", message)

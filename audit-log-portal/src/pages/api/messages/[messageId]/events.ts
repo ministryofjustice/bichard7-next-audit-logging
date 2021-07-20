@@ -2,7 +2,7 @@ import type { NextApiRequest, NextApiResponse } from "next"
 import type GetMessageEventsResult from "types/GetMessageEventsResult"
 import config from "config"
 
-export default async (request: NextApiRequest, response: NextApiResponse<GetMessageEventsResult>) => {
+export default async (request: NextApiRequest, response: NextApiResponse<GetMessageEventsResult>): Promise<void> => {
   const { messageId } = request.query
   const url = `${config.apiUrl}/messages/${messageId}/events`
 

@@ -1,10 +1,11 @@
-jest.setTimeout(10000)
+jest.setTimeout(30000)
 
 import fs from "fs"
 import { encodeBase64 } from "shared"
 import type { MessageFormat, EventCategory } from "shared"
 import { invokeFunction } from "@bichard/testing"
-import type { TranslateEventInput, TranslateEventResult } from "./index"
+import type TranslateEventInput from "./TranslateEventInput"
+import type TranslationResult from "./translators/TranslationResult"
 
 const filenameMappings: Record<MessageFormat, string> = {
   AuditEvent: "audit-event",
@@ -19,6 +20,7 @@ const createPayload = (messageFormat: MessageFormat): TranslateEventInput => {
   return {
     messageData: encodeBase64(content),
     messageFormat,
+    eventSourceArn: "DummyArn",
     s3Path: "UNUSED"
   }
 }
@@ -52,14 +54,15 @@ test.each<TestInput>([
 ])("$messageFormat is translated to AuditLogEvent type", async (input: TestInput) => {
   const payload = createPayload(input.messageFormat)
 
-  const result = await invokeFunction<TranslateEventInput, TranslateEventResult>("translate-event", payload)
+  const result = await invokeFunction<TranslateEventInput, TranslationResult>("translate-event", payload)
   expect(result).toNotBeError()
 
-  const { messageId, event, s3Path } = <TranslateEventResult>result
+  const { messageId, event } = <TranslationResult>result
   expect(messageId).toBe(input.messageId)
   expect(event.category).toBe(input.category)
   expect(event.eventSource).toBe(input.eventSource)
   expect(event.eventType).toBe(input.eventType)
   expect(event.timestamp).toBe(input.timestamp)
-  expect(s3Path).toBe(payload.s3Path)
+  expect(event.eventSourceArn).toBe(payload.eventSourceArn)
+  expect(event.s3Path).toBe(payload.s3Path)
 })
