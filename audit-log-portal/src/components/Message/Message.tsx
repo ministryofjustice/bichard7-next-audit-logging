@@ -1,13 +1,14 @@
 import styled from "styled-components"
 import Link from "next/link"
-import { Badge, Button, Card, CardContent, Typography } from "@material-ui/core"
+import { Badge, Card, CardContent, CircularProgress, IconButton, Tooltip, Typography } from "@material-ui/core"
 import type { AuditLog } from "shared"
+import AuditLogStatus from "shared/dist/types/AuditLogStatus"
 import DateTime from "components/DateTime"
 import EventIcon from "icons/EventIcon"
-import RetryIcon from "icons/RetryIcon"
 import If from "components/If"
 import getDaysOld from "./getDaysOld"
 import StatusIcon from "./StatusIcon"
+import RetryDialogButton from "./RetryDialogConfirm"
 
 interface Props {
   message: AuditLog
@@ -50,17 +51,15 @@ const DaysAgo = styled(Typography)`
 `
 
 const Actions = styled.div`
-  flex: 0;
-  white-space: nowrap;
+  width: 100px;
 `
 
-const RetryAction = styled.div`
-  flex: 0;
-  padding-top: 0.5rem;
+const RetryAction = styled(Block)`
+  float: left;
 `
 
-const ViewEventAction = styled.div`
-  flex: 0;
+const ViewEventAction = styled(Block)`
+  float: right;
 `
 
 const Message = ({ message }: Props) => {
@@ -84,23 +83,30 @@ const Message = ({ message }: Props) => {
 
         <Actions>
           {/* TODO: Button: View XML */}
+          <RetryAction>
+            <If condition={retryActionVisible}>
+              <If condition={!retrying}>
+                <RetryDialogButton message={message} />
+              </If>
+              <If condition={retrying}>
+                <Tooltip title="Retrying" aria-label="retry">
+                  <CircularProgress color="secondary" />
+                </Tooltip>
+              </If>
+            </If>
+          </RetryAction>
+
           <ViewEventAction>
             <Badge badgeContent={(message.events || []).length} color="secondary">
               <Link href={`/messages/${message.messageId}`}>
-                <Button variant="outlined" color="default" startIcon={<EventIcon />}>
-                  {`View Events`}
-                </Button>
+                <Tooltip title="View events" aria-label="view">
+                  <IconButton color="default">
+                    <EventIcon />
+                  </IconButton>
+                </Tooltip>
               </Link>
             </Badge>
           </ViewEventAction>
-
-          <RetryAction>
-            <If condition={message.status === "Error"}>
-              <Button variant="outlined" color="default" startIcon={<RetryIcon />}>
-                {`Retry Event`}
-              </Button>
-            </If>
-          </RetryAction>
         </Actions>
       </InnerContainer>
     </Container>
