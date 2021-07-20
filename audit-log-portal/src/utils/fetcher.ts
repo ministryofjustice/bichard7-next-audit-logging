@@ -1,4 +1,4 @@
-export default function fetcher<TResult>(url): Promise<TResult> {
+export default function fetcher<TResult>(url: string): Promise<TResult> {
   return fetch(url).then<TResult>(async (response) => {
     if (response.status !== 200) {
       const text = await response.text()
