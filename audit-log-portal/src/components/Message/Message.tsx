@@ -1,13 +1,12 @@
 import styled from "styled-components"
-import Link from "next/link"
-import { Badge, Card, CardContent, IconButton, Tooltip, Typography } from "@material-ui/core"
+import { Card, CardContent, Typography } from "@material-ui/core"
 import type { AuditLog } from "shared"
 import AuditLogStatus from "shared/dist/types/AuditLogStatus"
 import DateTime from "components/DateTime"
-import EventIcon from "icons/EventIcon"
 import getDaysOld from "./getDaysOld"
 import StatusIcon from "./StatusIcon"
 import RetryDialogButton from "./RetryDialogButton"
+import ViewEventsButton from "./ViewEventsButton"
 
 interface Props {
   message: AuditLog
@@ -52,15 +51,9 @@ const DaysAgo = styled(Typography)`
 const Actions = styled.div`
   display: flex;
   justify-content: flex-end;
-  width: 100px;
 `
 
-const RetryAction = styled(Block)``
-
-const ViewEventAction = styled(Block)``
-
 const Message = ({ message }: Props) => {
-  const retryActionVisible = String(message.status) === String(AuditLogStatus.error)
   const retrying = false // TODO: replace this boolean with status from AuditLog API.
   return (
     <Container>
@@ -82,21 +75,8 @@ const Message = ({ message }: Props) => {
 
         <Actions>
           {/* TODO: Button: View XML */}
-          <RetryAction>
-            <RetryDialogButton message={message} isVisible={retryActionVisible} isRetrying={retrying} />
-          </RetryAction>
-
-          <ViewEventAction>
-            <Badge badgeContent={(message.events || []).length} color="secondary">
-              <Link href={`/messages/${message.messageId}`}>
-                <Tooltip title="View events" aria-label="view">
-                  <IconButton color="default">
-                    <EventIcon />
-                  </IconButton>
-                </Tooltip>
-              </Link>
-            </Badge>
-          </ViewEventAction>
+          <RetryDialogButton message={message} show={message.status === AuditLogStatus.error} isRetrying={retrying} />
+          <ViewEventsButton message={message} />
         </Actions>
       </InnerContainer>
     </Container>

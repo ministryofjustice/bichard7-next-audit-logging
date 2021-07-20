@@ -1,4 +1,4 @@
-import React from "react"
+import { useState } from "react"
 import RetryIcon from "icons/RetryIcon"
 import { CircularProgress, IconButton, Tooltip } from "@material-ui/core"
 import type { AuditLog } from "shared"
@@ -7,40 +7,29 @@ import { RetryDialogConfirm } from "./RetryDialogConfirm"
 
 interface Props {
   message: AuditLog
-  isVisible: boolean
+  show: boolean
   isRetrying: boolean
 }
 
-export default function RetryDialogButton({ message, isVisible, isRetrying }: Props) {
-  const [open, setOpen] = React.useState(false)
-  const selectedValue = message
-
-  const handleClickOpen = () => {
-    setOpen(true)
-  }
-
-  const handleClose = () => {
-    setOpen(false)
-  }
+export default function RetryDialogButton({ message, show, isRetrying }: Props) {
+  const [open, setOpen] = useState(false)
 
   return (
-    <div>
-      <If condition={isVisible}>
-        {!isRetrying ? (
-          <div>
-            <IconButton color="default" onClick={handleClickOpen}>
-              <RetryIcon />
-            </IconButton>
-            <RetryDialogConfirm selectedValue={selectedValue} open={open} onClose={handleClose} />
-          </div>
-        ) : (
-          <div>
-            <Tooltip title="Retrying" aria-label="retry">
-              <CircularProgress color="secondary" />
-            </Tooltip>
-          </div>
-        )}
-      </If>
-    </div>
+    <If condition={show}>
+      {isRetrying ? (
+        <>
+          <Tooltip title="Retrying" aria-label="retry">
+            <CircularProgress color="secondary" />
+          </Tooltip>
+        </>
+      ) : (
+        <>
+          <IconButton onClick={() => setOpen(true)}>
+            <RetryIcon />
+          </IconButton>
+          <RetryDialogConfirm selectedValue={message} open={open} onClose={() => setOpen(false)} />
+        </>
+      )}
+    </If>
   )
 }
