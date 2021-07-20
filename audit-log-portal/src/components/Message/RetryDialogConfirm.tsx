@@ -1,10 +1,12 @@
+import styled from "styled-components"
 import React from "react"
 import Button from "@material-ui/core/Button"
 import DialogTitle from "@material-ui/core/DialogTitle"
 import Dialog from "@material-ui/core/Dialog"
 import RetryIcon from "icons/RetryIcon"
-import { DialogActions, IconButton } from "@material-ui/core"
+import { DialogActions, DialogContent, DialogContentText, IconButton } from "@material-ui/core"
 import type { AuditLog } from "shared"
+import InformationIcon from "icons/InformationIcon/InformationIcon"
 
 interface Props {
   message: AuditLog
@@ -15,6 +17,14 @@ export interface SimpleDialogProps {
   selectedValue: AuditLog
   onClose: () => void
 }
+
+const InfoParagraph = styled.div`
+  vertical-align: middle;
+`
+
+const InfoText = styled.div`
+  padding-left: 10px;
+`
 
 function RetryDialogConfirm(props: SimpleDialogProps) {
   const { onClose, selectedValue, open } = props
@@ -28,17 +38,32 @@ function RetryDialogConfirm(props: SimpleDialogProps) {
   }
 
   return (
-    <Dialog onClose={handleClose} aria-labelledby="simple-dialog-title" open={open}>
-      <DialogTitle id="simple-dialog-title">
-        Are you sure you wish to retry this event(s):
-        {selectedValue.externalCorrelationId}
-      </DialogTitle>
+    <Dialog aria-labelledby="retry-dialog-title" open={open}>
+      <DialogTitle id="retry-dialog-title">Retry Message</DialogTitle>
+      <DialogContent>
+        <DialogContentText>
+          <InfoParagraph>
+            <tr>
+              <td>
+                <InformationIcon />
+              </td>
+              <td>
+                <InfoText>
+                  Are you sure you wish to retry &quot;
+                  {selectedValue.externalCorrelationId}
+                  &quot; from the last failure?
+                </InfoText>
+              </td>
+            </tr>
+          </InfoParagraph>
+        </DialogContentText>
+      </DialogContent>
       <DialogActions>
-        <Button onClick={triggerRetry} color="primary">
+        <Button onClick={triggerRetry} color="primary" variant="contained">
           Yes
         </Button>
         <Button onClick={handleClose} color="default">
-          Cancel
+          No
         </Button>
       </DialogActions>
     </Dialog>

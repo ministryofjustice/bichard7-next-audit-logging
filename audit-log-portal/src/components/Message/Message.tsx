@@ -63,6 +63,8 @@ const ViewEventAction = styled(Block)`
 `
 
 const Message = ({ message }: Props) => {
+  const retryActionVisible = String(message.status) === String(AuditLogStatus.error)
+  const retrying = false // TODO: replace this boolean with status from AuditLog API.
   return (
     <Container>
       <InnerContainer>
