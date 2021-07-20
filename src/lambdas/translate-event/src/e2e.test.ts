@@ -1,4 +1,4 @@
-jest.setTimeout(10000)
+jest.setTimeout(30000)
 
 import fs from "fs"
 import { encodeBase64 } from "shared"
