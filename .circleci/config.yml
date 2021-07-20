@@ -43,27 +43,27 @@ jobs:
           paths: shared/node_modules
 
       - save_cache:
-          key: v1-npm-deps-{{ checksum "shared/package-lock.json" }}
+          key: v1-npm-deps-{{ checksum "src/@bichard/testing/package-lock.json" }}
           paths: src/@bichard/testing/node_modules
 
       - save_cache:
-          key: v1-npm-deps-{{ checksum "shared/package-lock.json" }}
+          key: v1-npm-deps-{{ checksum "src/lambdas/store-in-s3/package-lock.json" }}
           paths: src/lambdas/store-in-s3/node_modules
 
       - save_cache:
-          key: v1-npm-deps-{{ checksum "shared/package-lock.json" }}
+          key: v1-npm-deps-{{ checksum "src/lambdas/translate-event/package-lock.json" }}
           paths: src/lambdas/translate-event/node_modules
 
       - save_cache:
-          key: v1-npm-deps-{{ checksum "shared/package-lock.json" }}
+          key: v1-npm-deps-{{ checksum "src/lambdas/record-event/package-lock.json" }}
           paths: src/lambdas/record-event/node_modules
 
       - save_cache:
-          key: v1-npm-deps-{{ checksum "shared/package-lock.json" }}
+          key: v1-npm-deps-{{ checksum "src/lambdas/message-receiver/package-lock.json" }}
           paths: src/lambdas/message-receiver/node_modules
 
       - save_cache:
-          key: v1-npm-deps-{{ checksum "shared/package-lock.json" }}
+          key: v1-npm-deps-{{ checksum "src/event-handler/package-lock.json" }}
           paths: src/event-handler/node_modules
 
       - save_cache:
