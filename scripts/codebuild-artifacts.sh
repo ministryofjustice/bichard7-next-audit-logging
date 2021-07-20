@@ -2,6 +2,34 @@
 
 set -e
 
+function upload_to_s3 {
+  local sourceFilename=$1
+  local destinationFilename=$2
+
+  aws s3 cp "$sourceFilename" "s3://$S3_BUCKET/audit-logging/$destinationFilename" --acl bucket-owner-full-control
+}
+
+############################################
+# Lambdas
+############################################
+
+LAMBDAS=$(ls src/lambdas)
+
+echo "Packaging each lambda..."
+for lambda in ${LAMBDAS}; do
+  NAME=$(echo "$lambda" | sed -r "s/(-)([a-z])/\U\2/g")
+
+  echo "Packaging $lambda as $NAME..."
+  cd "src/lambdas/$lambda/build"
+
+  zip "$NAME.zip" "$NAME.js"
+
+  # Upload to S3
+  upload_to_s3 "$NAME.zip" "$NAME.zip"
+
+  cd -
+done
+
 ############################################
 # Incoming Message Handler
 ############################################
@@ -27,10 +55,7 @@ aws s3 cp \
   --include "*.zip" \
   --acl bucket-owner-full-control
 
-aws s3 cp \
-  ./incoming-message-handler/scripts/state-machine.json.tpl \
-  s3://$S3_BUCKET/audit-logging/state-machine.json.tpl \
-  --acl bucket-owner-full-control
+upload_to_s3 "./incoming-message-handler/scripts/state-machine.json.tpl" "state-machine.json.tpl"
 
 ############################################
 # Audit Log API
@@ -65,12 +90,16 @@ cd general-event-handler/build
 zip generalEventHandler.zip generalEventHandler.js
 
 # Upload the package to the artifact bucket
-aws s3 cp \
-  ./generalEventHandler.zip \
-  s3://$S3_BUCKET/audit-logging/ \
-  --acl bucket-owner-full-control
+upload_to_s3 "./generalEventHandler.zip" "generalEventHandler.zip"
 
 cd -
+
+############################################
+# Event Handler
+############################################
+
+# Zip any lambdas from the General Event Handler
+upload_to_s3 "src/event-handler/scripts/state-machine.json.tpl" "event-handler-state-machine.json.tpl"
 
 ############################################
 # Audit Log Portal
