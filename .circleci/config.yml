@@ -17,6 +17,7 @@ jobs:
             - v1-npm-deps-{{ checksum "src/@lambdas/store-in-s3/package-lock.json" }}
             - v1-npm-deps-{{ checksum "src/@lambdas/translate-event/package-lock.json" }}
             - v1-npm-deps-{{ checksum "src/@lambdas/record-event/package-lock.json" }}
+            - v1-npm-deps-{{ checksum "src/@lambdas/message-receiver/package-lock.json" }}
             - v1-npm-deps-{{ checksum "src/event-handler/package-lock.json" }}
             - v1-npm-deps-{{ checksum "incoming-message-handler/package-lock.json" }}
             - v1-npm-deps-{{ checksum "audit-log-api/package-lock.json" }}
@@ -59,6 +60,10 @@ jobs:
 
       - save_cache:
           key: v1-npm-deps-{{ checksum "shared/package-lock.json" }}
+          paths: src/lambdas/message-receiver/node_modules
+
+      - save_cache:
+          key: v1-npm-deps-{{ checksum "shared/package-lock.json" }}
           paths: src/event-handler/node_modules
 
       - save_cache:
@@ -90,6 +95,7 @@ jobs:
             - src/lambdas/store-in-s3/build
             - src/lambdas/translate-event/build
             - src/lambdas/record-event/build
+            - src/lambdas/message-receiver/build
             - src/event-handler/build
             - incoming-message-handler/build
             - audit-log-api/build
@@ -122,6 +128,9 @@ jobs:
 
       - restore_cache:
           key: v1-npm-deps-{{ checksum "src/lambdas/record-event/package-lock.json" }}
+
+      - restore_cache:
+          key: v1-npm-deps-{{ checksum "src/lambdas/message-receiver/package-lock.json" }}
 
       - restore_cache:
           key: v1-npm-deps-{{ checksum "src/event-handler/package-lock.json" }}
@@ -171,6 +180,8 @@ jobs:
           path: ./src/lambdas/translate-event/test-results/jest/
       - store_test_results:
           path: ./src/lambdas/record-event/test-results/jest/
+      - store_test_results:
+          path: ./src/lambdas/message-receiver/test-results/jest/
       - store_test_results:
           path: ./src/event-handler/test-results/jest/
       - store_test_results:
