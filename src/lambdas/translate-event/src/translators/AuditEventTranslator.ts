@@ -6,11 +6,8 @@ import type TranslationResult from "./TranslationResult"
 import type Translator from "./Translator"
 import transformEventDetails from "./transformEventDetails"
 
-const AuditEventTranslator: Translator = async ({
-  messageData,
-  s3Path,
-  eventSourceArn
-}: TranslateEventInput): PromiseResult<TranslationResult> => {
+const AuditEventTranslator: Translator = async (input: TranslateEventInput): PromiseResult<TranslationResult> => {
+  const { messageData, s3Path, eventSourceArn } = input
   // Audit events are in base64 encoded XML
   const xml = decodeBase64(messageData)
   const logItem = await parseXml<AuditEvent>(xml)
