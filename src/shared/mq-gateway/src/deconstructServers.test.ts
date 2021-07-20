@@ -6,7 +6,7 @@ const config: MqConfig = {
   url: "failover:(stomp://localhost:51613)",
   username: "admin",
   password: "admin",
-  queueName: "queueName"
+  defaultQueueName: "queueName"
 }
 
 describe("deconstructServers()", () => {
