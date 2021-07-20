@@ -1,3 +1,5 @@
+jest.setTimeout(30000)
+
 import { invokeFunction } from "@bichard/testing"
 import type AmazonMqEventSourceRecordEvent from "./AmazonMqEventSourceRecordEvent"
 
