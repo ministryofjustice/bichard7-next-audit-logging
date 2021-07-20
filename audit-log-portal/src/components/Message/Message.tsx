@@ -1,14 +1,13 @@
 import styled from "styled-components"
 import Link from "next/link"
-import { Badge, Card, CardContent, CircularProgress, IconButton, Tooltip, Typography } from "@material-ui/core"
+import { Badge, Card, CardContent, IconButton, Tooltip, Typography } from "@material-ui/core"
 import type { AuditLog } from "shared"
 import AuditLogStatus from "shared/dist/types/AuditLogStatus"
 import DateTime from "components/DateTime"
 import EventIcon from "icons/EventIcon"
-import If from "components/If"
 import getDaysOld from "./getDaysOld"
 import StatusIcon from "./StatusIcon"
-import RetryDialogButton from "./RetryDialogConfirm"
+import RetryDialogButton from "./RetryDialogButton"
 
 interface Props {
   message: AuditLog
@@ -51,16 +50,14 @@ const DaysAgo = styled(Typography)`
 `
 
 const Actions = styled.div`
+  display: flex;
+  justify-content: flex-end;
   width: 100px;
 `
 
-const RetryAction = styled(Block)`
-  float: left;
-`
+const RetryAction = styled(Block)``
 
-const ViewEventAction = styled(Block)`
-  float: right;
-`
+const ViewEventAction = styled(Block)``
 
 const Message = ({ message }: Props) => {
   const retryActionVisible = String(message.status) === String(AuditLogStatus.error)
@@ -86,16 +83,7 @@ const Message = ({ message }: Props) => {
         <Actions>
           {/* TODO: Button: View XML */}
           <RetryAction>
-            <If condition={retryActionVisible}>
-              <If condition={!retrying}>
-                <RetryDialogButton message={message} />
-              </If>
-              <If condition={retrying}>
-                <Tooltip title="Retrying" aria-label="retry">
-                  <CircularProgress color="secondary" />
-                </Tooltip>
-              </If>
-            </If>
+            <RetryDialogButton message={message} isVisible={retryActionVisible} isRetrying={retrying} />
           </RetryAction>
 
           <ViewEventAction>
