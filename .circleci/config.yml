@@ -24,14 +24,13 @@ jobs:
             - v1-npm-deps-{{ checksum "general-event-handler/package-lock.json" }}
             - v1-npm-deps-{{ checksum "mq-listener/package-lock.json" }}
 
-      - run: ./scripts/install-all.sh
-      - run: ./scripts/build-all.sh
+      - run: make build
 
       - run:
           name: Build Portal Stories
           command: cd audit-log-portal && npm run build-storybook && cd -
 
-      - run: NODE_OPTIONS=--max_old_space_size=4096 npm run lint
+      - run: make validate
 
       # Update the cache with the latest installed dependencies to speed up future installs
       - save_cache:
@@ -160,7 +159,7 @@ jobs:
 
       - run:
           name: Running unit, integration, and end-to-end tests
-          command: ./scripts/test-all.sh
+          command: make test
 
       - store_test_results:
           path: ./shared/test-results/jest/
