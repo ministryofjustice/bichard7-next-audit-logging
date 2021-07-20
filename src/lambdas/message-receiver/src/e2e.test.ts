@@ -1,5 +1,7 @@
+jest.setTimeout(30000)
+
 import { invokeFunction } from "@bichard/testing"
-import type AmazonMqEventSourceRecordEvent from "./AmazonMqEventSourceRecordEvent"
+import type { AmazonMqEventSourceRecordEvent } from "shared"
 
 test("given a message, the Step Function is invoked", async () => {
   const event: AmazonMqEventSourceRecordEvent = {

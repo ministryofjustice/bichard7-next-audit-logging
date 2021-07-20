@@ -4,7 +4,10 @@ import config from "config"
 import convertObjectToURLSearchParams from "utils/convertObjectToURLSearchParams"
 import combineUrlAndQueryString from "utils/combineUrlAndQueryString"
 
-export default async (request: NextApiRequest, response: NextApiResponse<MessageSearchResult | string>) => {
+export default async (
+  request: NextApiRequest,
+  response: NextApiResponse<MessageSearchResult | string>
+): Promise<void> => {
   const params = convertObjectToURLSearchParams(request.query)
   const baseUrl = `${config.apiUrl}/messages`
   const url = combineUrlAndQueryString(baseUrl, params.toString())

@@ -1,4 +1,4 @@
-jest.setTimeout(10000)
+jest.setTimeout(30000)
 
 import type { EventMessage, S3Config } from "shared"
 import TestS3Gateway from "shared/dist/S3Gateway/TestS3Gateway"

@@ -1,5 +1,4 @@
-import type { EventMessage, MessageFormat } from "shared"
-import type AmazonMqEventSourceRecordEvent from "./AmazonMqEventSourceRecordEvent"
+import type { EventMessage, MessageFormat, AmazonMqEventSourceRecordEvent } from "shared"
 
 export default (
   { messages, eventSourceArn }: AmazonMqEventSourceRecordEvent,
