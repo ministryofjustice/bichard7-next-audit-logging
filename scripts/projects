@@ -3,6 +3,7 @@ src/@bichard/testing
 src/lambdas/store-in-s3
 src/lambdas/translate-event
 src/lambdas/record-event
+src/lambdas/message-receiver
 src/event-handler
 incoming-message-handler
 audit-log-api
