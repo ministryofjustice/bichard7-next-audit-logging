@@ -1,6 +1,6 @@
 import type { EventDetails } from "src/types"
 import type { EventCategory } from "shared"
-import { AuditLogEvent } from "shared"
+import { BichardAuditLogEvent } from "shared"
 
 const mapEventCategory = (category: string): EventCategory => {
   switch (category) {
@@ -15,17 +15,19 @@ const mapEventCategory = (category: string): EventCategory => {
   }
 }
 
-export default (eventDetails: EventDetails): AuditLogEvent => {
+export default (eventDetails: EventDetails, s3Path: string, eventSourceArn: string): BichardAuditLogEvent => {
   const { eventCategory, eventDateTime, eventType, componentID, nameValuePairs } = eventDetails
 
   const category = mapEventCategory(eventCategory)
   const timestamp = new Date(eventDateTime)
 
-  const event = new AuditLogEvent({
+  const event = new BichardAuditLogEvent({
     eventSource: componentID,
     category,
     eventType,
-    timestamp
+    timestamp,
+    s3Path,
+    eventSourceArn
   })
 
   const attributes = nameValuePairs?.nameValuePair
