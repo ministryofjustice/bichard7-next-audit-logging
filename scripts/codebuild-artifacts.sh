@@ -6,7 +6,7 @@ function upload_to_s3 {
   local sourceFilename=$1
   local destinationFilename=$2
 
-  aws s3 cp "$sourceFilename" "s3://audit-logging/$destinationFilename" --acl bucket-owner-full-control
+  aws s3 cp "$sourceFilename" "s3://$S3_BUCKET/audit-logging/$destinationFilename" --acl bucket-owner-full-control
 }
 
 ############################################
