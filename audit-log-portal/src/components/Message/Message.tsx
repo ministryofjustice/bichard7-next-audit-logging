@@ -5,8 +5,8 @@ import AuditLogStatus from "shared/dist/types/AuditLogStatus"
 import DateTime from "components/DateTime"
 import getDaysOld from "./getDaysOld"
 import StatusIcon from "./StatusIcon"
-import RetryButton from "./RetryButton"
 import ViewEventsButton from "./ViewEventsButton"
+import RetryButton from "./RetryButton"
 
 interface Props {
   message: AuditLog
@@ -54,7 +54,6 @@ const Actions = styled.div`
 `
 
 const Message = ({ message }: Props) => {
-  const retrying = false // TODO: replace this boolean with status from AuditLog API.
   return (
     <Container>
       <InnerContainer>
@@ -75,7 +74,7 @@ const Message = ({ message }: Props) => {
 
         <Actions>
           {/* TODO: Button: View XML */}
-          <RetryButton message={message} show={message.status === AuditLogStatus.error} isRetrying={retrying} />
+          <RetryButton message={message} show={message.status === AuditLogStatus.error} isRetrying={false} />
           <ViewEventsButton message={message} />
         </Actions>
       </InnerContainer>

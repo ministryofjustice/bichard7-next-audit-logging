@@ -1,4 +1,4 @@
-import { useState } from "react"
+import React from "react"
 import RetryIcon from "icons/RetryIcon"
 import ProcessingIcon from "icons/ProcessingIcon"
 import { IconButton, Tooltip } from "@material-ui/core"
@@ -12,25 +12,48 @@ interface Props {
   isRetrying: boolean
 }
 
-export default function RetryButton({ message, show, isRetrying }: Props) {
-  const [open, setOpen] = useState(false)
+interface RetryButtonState {
+  message: AuditLog
+  show: boolean
+  isOpen: boolean
+  isRetrying: boolean
+}
 
-  return (
-    <If condition={show}>
-      {isRetrying ? (
-        <Tooltip title="Retrying" aria-label="retry">
-          <ProcessingIcon />
-        </Tooltip>
-      ) : (
-        <>
-          <Tooltip title="Retry message" aria-label="retry">
-            <IconButton onClick={() => setOpen(true)}>
-              <RetryIcon />
-            </IconButton>
+export default class RetryButton extends React.Component<Props, RetryButtonState> {
+  constructor(props: Props) {
+    super(props)
+    this.state = { message: props.message, show: props.show, isOpen: false, isRetrying: props.isRetrying }
+  }
+
+  render() {
+    const { message, show, isOpen, isRetrying } = this.state
+    return (
+      <If condition={show}>
+        {isRetrying === true ? (
+          <Tooltip title="Retrying" aria-label="retry">
+            <ProcessingIcon />
           </Tooltip>
-          <RetryConfirmationDialog selectedValue={message} open={open} onClose={() => setOpen(false)} />
-        </>
-      )}
-    </If>
-  )
+        ) : (
+          <>
+            <Tooltip title="Retry message" aria-label="retry">
+              <IconButton
+                onClick={() => {
+                  this.setState({ isOpen: true })
+                }}
+              >
+                <RetryIcon />
+              </IconButton>
+            </Tooltip>
+            <RetryConfirmationDialog
+              selectedValue={message}
+              open={isOpen}
+              onClose={(r) => {
+                this.setState({ isOpen: false, isRetrying: r })
+              }}
+            />
+          </>
+        )}
+      </If>
+    )
+  }
 }
