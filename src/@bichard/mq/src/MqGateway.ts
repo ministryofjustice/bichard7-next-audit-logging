@@ -1,6 +1,6 @@
 import type { Client, connect } from "stompit"
 import { ConnectFailover } from "stompit"
-import type { PromiseResult } from "shared"
+import type { PromiseResult, Result } from "shared"
 import { isError } from "shared"
 import type MqConfig from "./MqConfig"
 import deconstructServers from "./deconstructServers"
@@ -55,14 +55,19 @@ export default class MqGateway {
       return client
     }
 
+    let result: Result<void>
     try {
-      const result = await this.sendMessage(message, queueName)
+      result = await this.sendMessage(message, queueName)
         .then(() => undefined)
         .catch((error: Error) => error)
 
       return result
     } finally {
-      await this.dispose()
+      const disposeResult = await this.dispose()
+      if (!isError(result) && isError(disposeResult)) {
+        // eslint-disable-next-line no-unsafe-finally
+        return disposeResult
+      }
     }
   }
 
