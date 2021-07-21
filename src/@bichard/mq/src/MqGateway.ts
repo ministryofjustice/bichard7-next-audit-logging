@@ -72,15 +72,20 @@ export default class MqGateway {
     }
 
     return new Promise<void>((resolve, reject) => {
+      if (!this.client) {
+        reject(new Error("MQ connection has not been established"))
+        return
+      }
+
       const options: Client.SendOptions = {
         onReceipt: () => resolve(),
         onError: (error: Error) => reject(error)
       }
 
-      const writable = this.client?.send(headers, options)
+      const writable = this.client.send(headers, options)
 
-      writable?.write(message)
-      writable?.end()
+      writable.write(message)
+      writable.end()
     })
   }
 
