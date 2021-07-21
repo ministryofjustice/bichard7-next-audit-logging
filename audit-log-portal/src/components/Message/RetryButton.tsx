@@ -18,11 +18,9 @@ export default function RetryButton({ message, show, isRetrying }: Props) {
   return (
     <If condition={show}>
       {isRetrying ? (
-        <>
-          <Tooltip title="Retrying" aria-label="retry">
-            <ProcessingIcon />
-          </Tooltip>
-        </>
+        <Tooltip title="Retrying" aria-label="retry">
+          <ProcessingIcon />
+        </Tooltip>
       ) : (
         <>
           <Tooltip title="Retry message" aria-label="retry">

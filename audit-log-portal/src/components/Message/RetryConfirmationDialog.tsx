@@ -40,9 +40,9 @@ export function RetryConfirmationDialog(props: SimpleDialogProps) {
       </DialogContent>
       <DialogActions>
         <Button onClick={triggerRetry} color="primary" variant="contained">
-          Yes
+          {`Yes`}
         </Button>
-        <Button onClick={() => onClose()}>No</Button>
+        <Button onClick={() => onClose()}>{`No`}</Button>
       </DialogActions>
     </Dialog>
   )
