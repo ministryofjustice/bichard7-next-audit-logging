@@ -17,7 +17,7 @@ export default class MqGateway {
 
   private client: Client | null
 
-  constructor(private readonly config: MqConfig) {
+  constructor(config: MqConfig) {
     this.connectionOptions = deconstructServers(config)
   }
 
@@ -48,20 +48,14 @@ export default class MqGateway {
     return this.client
   }
 
-  async execute(message: string, queueName?: string): PromiseResult<void> {
-    const queue = queueName ?? this.config.defaultQueueName
-
-    if (!queue) {
-      return new Error("Queue name must be provided")
-    }
-
+  async execute(message: string, queueName: string): PromiseResult<void> {
     const client = await this.connectIfRequired()
 
     if (isError(client)) {
       return client
     }
 
-    const result = await this.sendMessage(message, queue)
+    const result = await this.sendMessage(message, queueName)
       .then(() => undefined)
       .catch((error: Error) => error)
 
