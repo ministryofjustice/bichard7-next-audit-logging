@@ -1,5 +1,5 @@
 shared
-src/shared/mq-gateway
+src/@bichard/mq
 src/@bichard/testing
 src/lambdas/store-in-s3
 src/lambdas/translate-event
