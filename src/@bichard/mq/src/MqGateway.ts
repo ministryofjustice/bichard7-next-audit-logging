@@ -110,7 +110,6 @@ export default class MqGateway {
 
   private disconnectAsync(): Promise<void> {
     return new Promise<void>((resolve, reject) => {
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       this.client!.disconnect((error: Error | null) => {
         if (error) {
           reject(error)
