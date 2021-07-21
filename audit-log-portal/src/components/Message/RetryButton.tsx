@@ -1,6 +1,7 @@
 import { useState } from "react"
 import RetryIcon from "icons/RetryIcon"
-import { CircularProgress, IconButton, Tooltip } from "@material-ui/core"
+import ProcessingIcon from "icons/ProcessingIcon"
+import { IconButton, Tooltip } from "@material-ui/core"
 import type { AuditLog } from "shared"
 import If from "components/If"
 import { RetryConfirmationDialog } from "./RetryConfirmationDialog"
@@ -19,14 +20,16 @@ export default function RetryButton({ message, show, isRetrying }: Props) {
       {isRetrying ? (
         <>
           <Tooltip title="Retrying" aria-label="retry">
-            <CircularProgress color="secondary" />
+            <ProcessingIcon />
           </Tooltip>
         </>
       ) : (
         <>
-          <IconButton onClick={() => setOpen(true)}>
-            <RetryIcon />
-          </IconButton>
+          <Tooltip title="Retry message" aria-label="retry">
+            <IconButton onClick={() => setOpen(true)}>
+              <RetryIcon />
+            </IconButton>
+          </Tooltip>
           <RetryConfirmationDialog selectedValue={message} open={open} onClose={() => setOpen(false)} />
         </>
       )}
