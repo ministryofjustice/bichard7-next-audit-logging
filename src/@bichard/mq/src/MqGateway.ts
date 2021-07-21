@@ -55,13 +55,15 @@ export default class MqGateway {
       return client
     }
 
-    const result = await this.sendMessage(message, queueName)
-      .then(() => undefined)
-      .catch((error: Error) => error)
+    try {
+      const result = await this.sendMessage(message, queueName)
+        .then(() => undefined)
+        .catch((error: Error) => error)
 
-    await this.dispose()
-
-    return result
+      return result
+    } finally {
+      await this.dispose()
+    }
   }
 
   private sendMessage(message: string, queueName: string): Promise<void> {

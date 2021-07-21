@@ -1,15 +1,15 @@
+import "@bichard/testing"
 import type MqConfig from "./MqConfig"
 import MqGateway from "./MqGateway"
 import TestMqGateway from "./TestMqGateway"
 
 jest.setTimeout(30000)
 
-const defaultQueueName = "mq-gateway-integration-testing"
+const queueName = "mq-gateway-integration-testing"
 const config: MqConfig = {
   url: "failover:(stomp://localhost:51613)",
   username: "admin",
-  password: "admin",
-  defaultQueueName
+  password: "admin"
 }
 
 const gateway = new MqGateway(config)
@@ -24,11 +24,11 @@ describe("MqGateway", () => {
   it("should create the queue and send the message", async () => {
     const expectedMessage = '<?xml version="1.0" ?><root><element>value</element></root>'
 
-    const result = await gateway.execute(expectedMessage)
+    const result = await gateway.execute(expectedMessage, queueName)
 
     expect(result).toNotBeError()
 
-    const actualMessage = await testGateway.getMessage(defaultQueueName)
+    const actualMessage = await testGateway.getMessage(queueName)
     expect(actualMessage).toBeDefined()
     expect(actualMessage).toNotBeError()
     expect(actualMessage).toBe(expectedMessage)
