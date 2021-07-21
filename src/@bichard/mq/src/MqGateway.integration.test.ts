@@ -1,4 +1,3 @@
-import { isError } from "shared"
 import type MqConfig from "./MqConfig"
 import MqGateway from "./MqGateway"
 import TestMqGateway from "./TestMqGateway"
@@ -27,11 +26,11 @@ describe("MqGateway", () => {
 
     const result = await gateway.execute(expectedMessage)
 
-    expect(isError(result)).toBe(false)
+    expect(result).toNotBeError()
 
     const actualMessage = await testGateway.getMessage(defaultQueueName)
     expect(actualMessage).toBeDefined()
-    expect(isError(actualMessage)).toBe(false)
+    expect(actualMessage).toNotBeError()
     expect(actualMessage).toBe(expectedMessage)
   })
 })
