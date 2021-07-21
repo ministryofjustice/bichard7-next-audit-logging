@@ -1,5 +1,5 @@
 {
-  "name": "mq",
+  "name": "@bichard/mq",
   "description": "Provides a higher level set of abstractions to work with MQ",
   "version": "0.0.1",
   "private": true,
