@@ -5,27 +5,25 @@ import { isError } from "shared"
 import type MqConfig from "./MqConfig"
 import deconstructServers from "./deconstructServers"
 
+const reconnectOptions: ConnectFailover.ConnectFailoverOptions = {
+  initialReconnectDelay: 1000,
+  maxReconnectDelay: 3000,
+  maxReconnects: 2,
+  useExponentialBackOff: false
+}
+
 export default class MqGateway {
   private readonly connectionOptions: connect.ConnectOptions[]
-
-  private readonly reconnectOptions: ConnectFailover.ConnectFailoverOptions
 
   private client: Client | null
 
   constructor(private readonly config: MqConfig) {
     this.connectionOptions = deconstructServers(config)
-
-    this.reconnectOptions = {
-      initialReconnectDelay: 1000,
-      maxReconnectDelay: 3000,
-      maxReconnects: 2,
-      useExponentialBackOff: false
-    }
   }
 
   private connectAsync(): PromiseResult<Client> {
     return new Promise((resolve, reject) => {
-      const connectionManager = new ConnectFailover(this.connectionOptions, this.reconnectOptions)
+      const connectionManager = new ConnectFailover(this.connectionOptions, reconnectOptions)
       connectionManager.connect((error: Error | null, client: Client) => {
         if (error) {
           reject(error)
