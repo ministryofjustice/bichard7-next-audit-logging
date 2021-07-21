@@ -3,7 +3,7 @@ import RetryIcon from "icons/RetryIcon"
 import { CircularProgress, IconButton, Tooltip } from "@material-ui/core"
 import type { AuditLog } from "shared"
 import If from "components/If"
-import { RetryDialogConfirm } from "./RetryDialogConfirm"
+import { RetryConfirmationDialog } from "./RetryConfirmationDialog"
 
 interface Props {
   message: AuditLog
@@ -11,7 +11,7 @@ interface Props {
   isRetrying: boolean
 }
 
-export default function RetryDialogButton({ message, show, isRetrying }: Props) {
+export default function RetryButton({ message, show, isRetrying }: Props) {
   const [open, setOpen] = useState(false)
 
   return (
@@ -27,7 +27,7 @@ export default function RetryDialogButton({ message, show, isRetrying }: Props) 
           <IconButton onClick={() => setOpen(true)}>
             <RetryIcon />
           </IconButton>
-          <RetryDialogConfirm selectedValue={message} open={open} onClose={() => setOpen(false)} />
+          <RetryConfirmationDialog selectedValue={message} open={open} onClose={() => setOpen(false)} />
         </>
       )}
     </If>

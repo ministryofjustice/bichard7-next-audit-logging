@@ -13,8 +13,12 @@ export interface SimpleDialogProps {
 const InfoText = styled.div`
   padding-left: 10px;
 `
+const InfoParagraph = styled.div`
+  display: flex;
+  align-items: center;
+`
 
-export function RetryDialogConfirm(props: SimpleDialogProps) {
+export function RetryConfirmationDialog(props: SimpleDialogProps) {
   const { onClose, selectedValue, open } = props
 
   const triggerRetry = () => {
@@ -26,16 +30,12 @@ export function RetryDialogConfirm(props: SimpleDialogProps) {
       <DialogTitle id="retry-dialog-title">Retry Message</DialogTitle>
       <DialogContent>
         <DialogContentText>
-          <tr>
-            <td>
-              <InformationIcon />
-            </td>
-            <td>
-              <InfoText>
-                {`Are you sure you wish to retry "${selectedValue.externalCorrelationId}" from the last failure?`}
-              </InfoText>
-            </td>
-          </tr>
+          <InfoParagraph>
+            <InformationIcon />
+            <InfoText>
+              {`Are you sure you wish to retry "${selectedValue.externalCorrelationId}" from the last failure?`}
+            </InfoText>
+          </InfoParagraph>
         </DialogContentText>
       </DialogContent>
       <DialogActions>

@@ -5,7 +5,7 @@ import AuditLogStatus from "shared/dist/types/AuditLogStatus"
 import DateTime from "components/DateTime"
 import getDaysOld from "./getDaysOld"
 import StatusIcon from "./StatusIcon"
-import RetryDialogButton from "./RetryDialogButton"
+import RetryButton from "./RetryButton"
 import ViewEventsButton from "./ViewEventsButton"
 
 interface Props {
@@ -75,7 +75,7 @@ const Message = ({ message }: Props) => {
 
         <Actions>
           {/* TODO: Button: View XML */}
-          <RetryDialogButton message={message} show={message.status === AuditLogStatus.error} isRetrying={retrying} />
+          <RetryButton message={message} show={message.status === AuditLogStatus.error} isRetrying={retrying} />
           <ViewEventsButton message={message} />
         </Actions>
       </InnerContainer>
