@@ -33,8 +33,9 @@ const handleGetMessages = (req, res, ctx) => {
   const status = req.url.searchParams.get("status")
   const lastMessageId = req.url.searchParams.get("lastMessageId")
   let result
+
   if (externalCorrelationId) {
-    result = res(ctx.json(getMessageByExternalCorrelationId(externalCorrelationId)))
+    result = getMessageByExternalCorrelationId(externalCorrelationId)
   } else {
     result = filterByLastMessage(messages, lastMessageId)
   }
