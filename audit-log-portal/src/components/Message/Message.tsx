@@ -3,6 +3,7 @@ import { Card, CardContent, Typography } from "@material-ui/core"
 import type { AuditLog } from "shared"
 import AuditLogStatus from "shared/dist/types/AuditLogStatus"
 import DateTime from "components/DateTime"
+import If from "components/If"
 import getDaysOld from "./getDaysOld"
 import StatusIcon from "./StatusIcon"
 import ViewEventsButton from "./ViewEventsButton"
@@ -59,9 +60,13 @@ const Message = ({ message, onRetry }: Props) => (
     <InnerContainer>
       <StatusBlock>
         <StatusIcon message={message} />
+
+        <If condition={message.status === AuditLogStatus.processing || message.status === AuditLogStatus.retrying}>
+          <i>{message.status}</i>
+        </If>
       </StatusBlock>
+
       <Block>
-        ß
         <Typography noWrap variant="h6">
           {message.externalCorrelationId}
         </Typography>

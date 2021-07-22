@@ -1,4 +1,5 @@
 const { rest } = require("msw")
+const { AuditLogStatus } = require("shared")
 const { messages } = require("./data/messages")
 
 const baseApiUrl = "http*://*/restapis/*"
@@ -47,7 +48,7 @@ const handleGetMessages = (req, res, ctx) => {
 
 const handleRetryMessage = (req, res, ctx) => {
   const message = getMessage(req.params.messageId)
-  message.status = "Retrying"
+  message.status = AuditLogStatus.retrying
 
   return res(ctx.json(message))
 }
