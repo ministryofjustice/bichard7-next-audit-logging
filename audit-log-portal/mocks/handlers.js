@@ -1,4 +1,5 @@
 const { rest } = require("msw")
+const { AuditLogStatus } = require("shared")
 const { messages } = require("./data/messages")
 
 const baseApiUrl = "http*://*/restapis/*"
@@ -45,12 +46,20 @@ const handleGetMessages = (req, res, ctx) => {
   return res(ctx.json(result))
 }
 
+const handleRetryMessage = (req, res, ctx) => {
+  const message = getMessage(req.params.messageId)
+  message.status = AuditLogStatus.retrying
+
+  return res(ctx.json(message))
+}
+
 module.exports = {
   handlers: [
     rest.get(`${baseApiUrl}/messages`, handleGetMessages),
     rest.get(`${baseApiUrl}/messages/:messageId`, (req, res, ctx) => res(ctx.json(getMessage(req.params.messageId)))),
     rest.get(`${baseApiUrl}/messages/:messageId/events`, (req, res, ctx) =>
       res(ctx.json(getEvents(req.params.messageId)))
-    )
+    ),
+    rest.post(`${baseApiUrl}/messages/:messageId/retry`, handleRetryMessage)
   ]
 }
