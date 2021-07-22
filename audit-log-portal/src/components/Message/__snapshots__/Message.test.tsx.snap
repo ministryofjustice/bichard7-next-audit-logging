@@ -35,6 +35,9 @@ exports[`matches snapshot 1`] = `
             </svg>
           </div>
         </div>
+        <i>
+          Processing
+        </i>
       </div>
       <div
         class="Message__Block-sc-12ihk2z-2 fqgSQH"
@@ -61,7 +64,7 @@ exports[`matches snapshot 1`] = `
         23 days old
       </h6>
       <div
-        class="Message__Actions-sc-12ihk2z-6 kziMlb"
+        class="Message__Actions-sc-12ihk2z-6 hGPgnE"
       >
         <span
           class="MuiBadge-root"
