@@ -109,3 +109,9 @@ send-message:
 	cd incoming-message-handler && \
 		scripts/trigger-state-machine.sh && \
 		cd -
+
+/PHONY: send-failed-message
+send-failed-message:
+	cd incoming-message-handler && \
+		scripts/trigger-state-machine.sh -f && \
+		cd -
