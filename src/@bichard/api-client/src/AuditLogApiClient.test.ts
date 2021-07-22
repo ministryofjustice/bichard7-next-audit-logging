@@ -2,9 +2,9 @@ import "@bichard/testing"
 import type { AxiosError } from "axios"
 import axios from "axios"
 import { AuditLog, AuditLogEvent, isError } from "shared"
-import ApiClient from "./ApiClient"
+import AuditLogApiClient from "./AuditLogApiClient"
 
-const apiClient = new ApiClient("http://localhost")
+const apiClient = new AuditLogApiClient("http://localhost")
 const message = new AuditLog("b5edf595-16a9-450f-a52b-40628cd58c29", new Date(), "<XML></XML>")
 const event = new AuditLogEvent({
   category: "information",

@@ -1,2 +1,2 @@
-// eslint-disable-next-line import/prefer-default-export
-export { default as ApiClient } from "./ApiClient"
+export { default as AuditLogApiClient } from "./AuditLogApiClient"
+export type { default as ApiClient } from "./ApiClient"
