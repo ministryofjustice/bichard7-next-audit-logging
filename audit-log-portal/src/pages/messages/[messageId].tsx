@@ -8,6 +8,7 @@ import Loading from "components/Loading"
 import If from "components/If"
 import type GetMessageByIdResult from "types/GetMessageByIdResult"
 import type GetMessageEventsResult from "types/GetMessageEventsResult"
+import type PostMessageRetry from "types/PostMessageRetry"
 import fetcher from "utils/fetcher"
 
 const MessageView = () => {
@@ -19,6 +20,7 @@ const MessageView = () => {
     `/api/messages/${messageId}/events`,
     fetcher
   )
+  const { error: retryError } = useSWR<PostMessageRetry>(`/api/messages/${messageId}/retry`, fetcher)
 
   const getPageTitle = () =>
     messageError || !messageData ? "Message Detail" : messageData.message.externalCorrelationId
@@ -27,7 +29,9 @@ const MessageView = () => {
     <Layout pageTitle={getPageTitle()}>
       <Header text="Events" />
 
+      <Error message={messageError?.message} visibleIf={!!messageError} />
       <Error message={eventsError?.message} visibleIf={!!eventsError} />
+      <Error message={retryError?.message} visibleIf={!!retryError} />
 
       <If condition={!!eventsData}>
         <Events events={eventsData?.events || []} />

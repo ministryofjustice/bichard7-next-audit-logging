@@ -1,14 +1,17 @@
 import styled from "styled-components"
-import Link from "next/link"
-import { Badge, Button, Card, CardContent, Typography } from "@material-ui/core"
+import { Card, CardContent, Typography } from "@material-ui/core"
 import type { AuditLog } from "shared"
+import AuditLogStatus from "shared/dist/types/AuditLogStatus"
 import DateTime from "components/DateTime"
-import EventIcon from "icons/EventIcon"
+import If from "components/If"
 import getDaysOld from "./getDaysOld"
 import StatusIcon from "./StatusIcon"
+import ViewEventsButton from "./ViewEventsButton"
+import RetryButton from "./RetryButton"
 
 interface Props {
   message: AuditLog
+  onRetry: () => void
 }
 
 const Container = styled(Card)`
@@ -47,43 +50,40 @@ const DaysAgo = styled(Typography)`
   text-align: center;
 `
 
-const Actions = styled.div`
-  flex: 0;
-  white-space: nowrap;
+const Actions = styled.div`ß
+  display: flex;
+  justify-content: flex-end;
 `
 
-const Message = ({ message }: Props) => {
-  return (
-    <Container>
-      <InnerContainer>
-        <StatusBlock>
-          <StatusIcon message={message} />
-        </StatusBlock>
-        <Block>
-          <Typography noWrap variant="h6">
-            {message.externalCorrelationId}
-          </Typography>
+const Message = ({ message, onRetry }: Props) => (
+  <Container>
+    <InnerContainer>
+      <StatusBlock>
+        <StatusIcon message={message} />
 
-          <ReceivedDate noWrap variant="caption">
-            <DateTime date={message.receivedDate} prefix="Received: " />
-          </ReceivedDate>
-        </Block>
+        <If condition={message.status === AuditLogStatus.processing || message.status === AuditLogStatus.retrying}>
+          <i>{message.status}</i>
+        </If>
+      </StatusBlock>
 
-        <DaysAgo variant="h6">{getDaysOld(message.receivedDate)}</DaysAgo>
+      <Block>
+        <Typography noWrap variant="h6">
+          {message.externalCorrelationId}
+        </Typography>
+        <ReceivedDate noWrap variant="caption">
+          <DateTime date={message.receivedDate} prefix="Received: " />
+        </ReceivedDate>
+      </Block>
 
-        <Actions>
-          {/* TODO: Button: View XML */}
-          <Badge badgeContent={(message.events || []).length} color="secondary">
-            <Link href={`/messages/${message.messageId}`}>
-              <Button variant="outlined" color="default" startIcon={<EventIcon />}>
-                {`View Events`}
-              </Button>
-            </Link>
-          </Badge>
-        </Actions>
-      </InnerContainer>
-    </Container>
-  )
-}
+      <DaysAgo variant="h6">{getDaysOld(message.receivedDate)}</DaysAgo>
+
+      <Actions>
+        {/* TODO: Button: View XML */}
+        <RetryButton message={message} show={message.status === AuditLogStatus.error} onRetry={onRetry} />
+        <ViewEventsButton message={message} />
+      </Actions>
+    </InnerContainer>
+  </Container>
+)
 
 export default Message
