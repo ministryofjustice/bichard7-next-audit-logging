@@ -15,6 +15,7 @@ jobs:
             - v1-npm-deps-{{ checksum "shared/package-lock.json" }}
             - v1-npm-deps-{{ checksum "src/@bichard/api-client/package-lock.json" }}
             - v1-npm-deps-{{ checksum "src/@bichard/mq/package-lock.json" }}
+            - v1-npm-deps-{{ checksum "src/@bichard/s3/package-lock.json" }}
             - v1-npm-deps-{{ checksum "src/@bichard/testing/package-lock.json" }}
             - v1-npm-deps-{{ checksum "src/@lambdas/store-in-s3/package-lock.json" }}
             - v1-npm-deps-{{ checksum "src/@lambdas/translate-event/package-lock.json" }}
@@ -51,6 +52,10 @@ jobs:
       - save_cache:
           key: v1-npm-deps-{{ checksum "src/@bichard/mq/package-lock.json" }}
           paths: src/@bichard/mq/node_modules
+
+      - save_cache:
+          key: v1-npm-deps-{{ checksum "src/@bichard/s3/package-lock.json" }}
+          paths: src/@bichard/s3/node_modules
 
       - save_cache:
           key: v1-npm-deps-{{ checksum "src/@bichard/testing/package-lock.json" }}
@@ -103,6 +108,7 @@ jobs:
             - shared/dist
             - src/@bichard/api-client/dist
             - src/@bichard/mq/dist
+            - src/@bichard/s3/dist
             - src/@bichard/testing/dist
             - src/lambdas/store-in-s3/build
             - src/lambdas/translate-event/build
@@ -134,6 +140,9 @@ jobs:
 
       - restore_cache:
           key: v1-npm-deps-{{ checksum "src/@bichard/mq/package-lock.json" }}
+
+      - restore_cache:
+          key: v1-npm-deps-{{ checksum "src/@bichard/s3/package-lock.json" }}
 
       - restore_cache:
           key: v1-npm-deps-{{ checksum "src/@bichard/testing/package-lock.json" }}
@@ -194,6 +203,8 @@ jobs:
           path: ./src/@bichard/api-client/test-results/jest/
       - store_test_results:
           path: ./src/@bichard/mq/test-results/jest/
+      - store_test_results:
+          path: ./src/@bichard/s3/test-results/jest/
       - store_test_results:
           path: ./src/@bichard/testing/test-results/jest/
       - store_test_results:
