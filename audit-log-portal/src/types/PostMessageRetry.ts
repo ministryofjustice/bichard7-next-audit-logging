@@ -1,3 +1,5 @@
+import type { AuditLog } from "shared"
+
 export default interface PostMessageRetry {
-  messageId: string
+  message: AuditLog
 }

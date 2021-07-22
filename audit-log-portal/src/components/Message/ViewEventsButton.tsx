@@ -7,16 +7,16 @@ interface Props {
   message: AuditLog
 }
 
-export default function ViewEventsButton({ message }: Props) {
-  return (
-    <Badge badgeContent={(message.events || []).length} color="secondary">
-      <Link href={`/messages/${message.messageId}`}>
-        <Tooltip title="View events" aria-label="view">
-          <IconButton>
-            <EventIcon />
-          </IconButton>
-        </Tooltip>
-      </Link>
-    </Badge>
-  )
-}
+const ViewEventsButton = ({ message }: Props) => (
+  <Badge badgeContent={(message.events || []).length} color="secondary">
+    <Link href={`/messages/${message.messageId}`}>
+      <Tooltip title="View events" aria-label="view">
+        <IconButton>
+          <EventIcon />
+        </IconButton>
+      </Tooltip>
+    </Link>
+  </Badge>
+)
+
+export default ViewEventsButton

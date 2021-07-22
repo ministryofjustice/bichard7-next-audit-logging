@@ -4,7 +4,7 @@ import { render } from "testing/render"
 import Messages from "./Messages"
 
 test("should render 'No Messages' when no messages are given", () => {
-  render(<Messages messages={[]} />)
+  render(<Messages messages={[]} onRetryMessage={() => {}} />)
 
   const noMessages = screen.getByLabelText("No Messages")
   const messagesContainer = screen.queryByLabelText("Messages")
@@ -19,7 +19,7 @@ test("should render 2 messages when 2 messages are given", () => {
     new AuditLog("Message2", new Date(), "XML")
   ]
 
-  render(<Messages messages={messages} />)
+  render(<Messages messages={messages} onRetryMessage={() => {}} />)
 
   expect(screen.queryByLabelText("No Messages")).not.toBeInTheDocument()
 

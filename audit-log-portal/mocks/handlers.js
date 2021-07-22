@@ -45,9 +45,11 @@ const handleGetMessages = (req, res, ctx) => {
   return res(ctx.json(result))
 }
 
-const handleRetryMessage = (res) => {
-  // Do nothing for now
-  return res()
+const handleRetryMessage = (req, res, ctx) => {
+  const message = getMessage(req.params.messageId)
+  message.status = "Retrying"
+
+  return res(ctx.json(message))
 }
 
 module.exports = {

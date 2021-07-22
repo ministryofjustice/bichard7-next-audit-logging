@@ -39,7 +39,7 @@ const Index = () => {
 
       <If condition={!!messages && !error}>
         <InfiniteScroll next={loadMore} hasMore={!isReachingEnd} dataLength={messages.length} loader>
-          <Messages messages={messages || []} />
+          <Messages messages={messages || []} onRetryMessage={(message) => console.log(message)} />
         </InfiniteScroll>
       </If>
 

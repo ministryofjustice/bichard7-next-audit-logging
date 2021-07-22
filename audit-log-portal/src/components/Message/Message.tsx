@@ -10,6 +10,7 @@ import RetryButton from "./RetryButton"
 
 interface Props {
   message: AuditLog
+  onRetry: () => void
 }
 
 const Container = styled(Card)`
@@ -48,38 +49,36 @@ const DaysAgo = styled(Typography)`
   text-align: center;
 `
 
-const Actions = styled.div`
+const Actions = styled.div`ß
   display: flex;
   justify-content: flex-end;
 `
 
-const Message = ({ message }: Props) => {
-  return (
-    <Container>
-      <InnerContainer>
-        <StatusBlock>
-          <StatusIcon message={message} />
-        </StatusBlock>
-        <Block>
-          <Typography noWrap variant="h6">
-            {message.externalCorrelationId}
-          </Typography>
+const Message = ({ message, onRetry }: Props) => (
+  <Container>
+    <InnerContainer>
+      <StatusBlock>
+        <StatusIcon message={message} />
+      </StatusBlock>
+      <Block>
+        ß
+        <Typography noWrap variant="h6">
+          {message.externalCorrelationId}
+        </Typography>
+        <ReceivedDate noWrap variant="caption">
+          <DateTime date={message.receivedDate} prefix="Received: " />
+        </ReceivedDate>
+      </Block>
 
-          <ReceivedDate noWrap variant="caption">
-            <DateTime date={message.receivedDate} prefix="Received: " />
-          </ReceivedDate>
-        </Block>
+      <DaysAgo variant="h6">{getDaysOld(message.receivedDate)}</DaysAgo>
 
-        <DaysAgo variant="h6">{getDaysOld(message.receivedDate)}</DaysAgo>
-
-        <Actions>
-          {/* TODO: Button: View XML */}
-          <RetryButton message={message} show={message.status === AuditLogStatus.error} isRetrying={false} />
-          <ViewEventsButton message={message} />
-        </Actions>
-      </InnerContainer>
-    </Container>
-  )
-}
+      <Actions>
+        {/* TODO: Button: View XML */}
+        <RetryButton message={message} show={message.status === AuditLogStatus.error} onRetry={onRetry} />
+        <ViewEventsButton message={message} />
+      </Actions>
+    </InnerContainer>
+  </Container>
+)
 
 export default Message
