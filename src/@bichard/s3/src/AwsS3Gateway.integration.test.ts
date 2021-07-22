@@ -1,4 +1,4 @@
-import { isError } from "shared"
+import "@bichard/testing"
 import type S3Config from "./S3Config"
 import TestAwsS3Gateway from "./TestAwsS3Gateway"
 
@@ -30,7 +30,7 @@ describe("S3Gateway", () => {
     it("should save the message in the bucket", async () => {
       const result = await gateway.upload(fileName, "Message to be saved")
 
-      expect(isError(result)).toBe(false)
+      expect(result).toNotBeError()
       expect(result).toBeUndefined()
     })
   })
