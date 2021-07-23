@@ -63,7 +63,7 @@ aws s3 cp \
   --include "*.zip" \
   --acl bucket-owner-full-control
 
-upload_to_s3 "./incoming-message-handler/scripts/state-machine.json.tpl" "state-machine.json.tpl" "application/json"
+upload_to_s3 "./incoming-message-handler/scripts/state-machine.json.tpl" "incoming-message-handler-state-machine.json.tpl" "application/json"
 
 ############################################
 # Audit Log API
