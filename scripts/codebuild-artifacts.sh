@@ -8,7 +8,7 @@ function upload_to_s3 {
   local contentType=$3
 
   if [[ -z "$contentType" ]]; then
-    contentType = "application/octet-stream"
+    contentType="application/octet-stream"
   fi
 
   aws s3 cp "$sourceFilename" \
