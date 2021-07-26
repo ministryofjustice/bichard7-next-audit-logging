@@ -17,7 +17,6 @@ const createPayload = (messageFormat: MessageFormat): TranslateEventInput => {
   const filename = filenameMappings[messageFormat]
   const path = `../../../events/${filename}.xml`
   const content = fs.readFileSync(path).toString()
-  console.log(content)
 
   return {
     messageData: encodeBase64(content),
@@ -55,18 +54,16 @@ test.each<TestInput>([
   },
   {
     messageFormat: "CourtResultInput",
-    messageId: "EXTERNAL_CORRELATION_ID",
-    category: "information",
-    eventSource: "Hearing Outcome Publication Choreography",
-    eventType: "Message Received",
-    timestamp: "2021-06-29T08:35:36.031Z"
+    messageId: "String",
+    category: "result",
+    eventSource: "CJSEZ000000",
+    eventType: "SPIResults",
+    timestamp: "2001-12-17T14:30:47.000Z"
   }
 ])("$messageFormat is translated to AuditLogEvent type", async (input: TestInput) => {
   const payload = createPayload(input.messageFormat)
 
-  console.log(payload)
   const result = await invokeFunction<TranslateEventInput, TranslationResult>("translate-event", payload)
-  console.log(result)
   expect(result).toNotBeError()
 
   const { messageId, event } = <TranslationResult>result
