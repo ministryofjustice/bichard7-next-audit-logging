@@ -17,7 +17,6 @@ export default async (event: AmazonMqEventSourceRecordEvent): Promise<void> => {
   }
 
   const events = embellishMessages(event, messageFormat)
-  console.log("Payload", events)
   const result = await gateway.execute(events)
 
   if (isError(result)) {
