@@ -76,10 +76,17 @@ test.each<string>(["audit-event", "general-event"])(
 
     const options = new PollOptions<PollResult>(40000)
     options.delay = 300
-    options.condition = ({ actualEvents1, actualEvents2 }) => {
-      return actualEvents1.length === 2 && actualEvents2.length === 1
-    }
+    options.condition = ({ actualEvents1, actualEvents2 }) => actualEvents1.length === 2 && actualEvents2.length === 1
 
-    await poller.poll(options)
+    try {
+      await poller.poll(options)
+    } catch (error) {
+      console.error(`Event Handler e2e (${eventFilename}) failed when polling for events`)
+
+      const events = await getEvents(auditLog1.messageId, auditLog2.messageId)
+      console.log(events)
+
+      throw error
+    }
   }
 )
