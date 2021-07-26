@@ -13,6 +13,9 @@ jobs:
           keys:
             - v1-npm-deps-{{ checksum "package-lock.json" }}
             - v1-npm-deps-{{ checksum "shared/package-lock.json" }}
+            - v1-npm-deps-{{ checksum "src/@bichard/api-client/package-lock.json" }}
+            - v1-npm-deps-{{ checksum "src/@bichard/mq/package-lock.json" }}
+            - v1-npm-deps-{{ checksum "src/@bichard/s3/package-lock.json" }}
             - v1-npm-deps-{{ checksum "src/@bichard/testing/package-lock.json" }}
             - v1-npm-deps-{{ checksum "src/@lambdas/store-in-s3/package-lock.json" }}
             - v1-npm-deps-{{ checksum "src/@lambdas/translate-event/package-lock.json" }}
@@ -22,7 +25,6 @@ jobs:
             - v1-npm-deps-{{ checksum "incoming-message-handler/package-lock.json" }}
             - v1-npm-deps-{{ checksum "audit-log-api/package-lock.json" }}
             - v1-npm-deps-{{ checksum "audit-log-portal/package-lock.json" }}
-            - v1-npm-deps-{{ checksum "general-event-handler/package-lock.json" }}
             - v1-npm-deps-{{ checksum "mq-listener/package-lock.json" }}
 
       - run: make build
@@ -41,6 +43,18 @@ jobs:
       - save_cache:
           key: v1-npm-deps-{{ checksum "shared/package-lock.json" }}
           paths: shared/node_modules
+
+      - save_cache:
+          key: v1-npm-deps-{{ checksum "src/@bichard/api-client/package-lock.json" }}
+          paths: src/@bichard/api-client/node_modules
+
+      - save_cache:
+          key: v1-npm-deps-{{ checksum "src/@bichard/mq/package-lock.json" }}
+          paths: src/@bichard/mq/node_modules
+
+      - save_cache:
+          key: v1-npm-deps-{{ checksum "src/@bichard/s3/package-lock.json" }}
+          paths: src/@bichard/s3/node_modules
 
       - save_cache:
           key: v1-npm-deps-{{ checksum "src/@bichard/testing/package-lock.json" }}
@@ -79,10 +93,6 @@ jobs:
           paths: audit-log-portal/node_modules
 
       - save_cache:
-          key: v1-npm-deps-{{ checksum "general-event-handler/package-lock.json" }}
-          paths: general-event-handler/node_modules
-
-      - save_cache:
           key: v1-npm-deps-{{ checksum "mq-listener/package-lock.json" }}
           paths: mq-listener/node_modules
 
@@ -91,6 +101,9 @@ jobs:
           root: .
           paths:
             - shared/dist
+            - src/@bichard/api-client/dist
+            - src/@bichard/mq/dist
+            - src/@bichard/s3/dist
             - src/@bichard/testing/dist
             - src/lambdas/store-in-s3/build
             - src/lambdas/translate-event/build
@@ -100,7 +113,6 @@ jobs:
             - incoming-message-handler/build
             - audit-log-api/build
             - audit-log-portal/.next
-            - general-event-handler/build
 
   test:
     machine:
@@ -116,6 +128,15 @@ jobs:
 
       - restore_cache:
           key: v1-npm-deps-{{ checksum "shared/package-lock.json" }}
+
+      - restore_cache:
+          key: v1-npm-deps-{{ checksum "src/@bichard/api-client/package-lock.json" }}
+
+      - restore_cache:
+          key: v1-npm-deps-{{ checksum "src/@bichard/mq/package-lock.json" }}
+
+      - restore_cache:
+          key: v1-npm-deps-{{ checksum "src/@bichard/s3/package-lock.json" }}
 
       - restore_cache:
           key: v1-npm-deps-{{ checksum "src/@bichard/testing/package-lock.json" }}
@@ -145,9 +166,6 @@ jobs:
           key: v1-npm-deps-{{ checksum "audit-log-portal/package-lock.json" }}
 
       - restore_cache:
-          key: v1-npm-deps-{{ checksum "general-event-handler/package-lock.json" }}
-
-      - restore_cache:
           key: v1-npm-deps-{{ checksum "mq-listener/package-lock.json" }}
 
       - run:
@@ -173,6 +191,12 @@ jobs:
       - store_test_results:
           path: ./shared/test-results/jest/
       - store_test_results:
+          path: ./src/@bichard/api-client/test-results/jest/
+      - store_test_results:
+          path: ./src/@bichard/mq/test-results/jest/
+      - store_test_results:
+          path: ./src/@bichard/s3/test-results/jest/
+      - store_test_results:
           path: ./src/@bichard/testing/test-results/jest/
       - store_test_results:
           path: ./src/lambdas/store-in-s3/test-results/jest/
@@ -190,8 +214,6 @@ jobs:
           path: ./audit-log-api/test-results/jest/
       - store_test_results:
           path: ./audit-log-portal/test-results/jest/
-      - store_test_results:
-          path: ./general-event-handler/test-results/jest/
 
       - run:
           name: Installing Cypress

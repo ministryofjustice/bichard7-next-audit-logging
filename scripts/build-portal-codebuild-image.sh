@@ -29,3 +29,8 @@ docker tag ${REPOSITORY_NAME}:latest ${DOCKER_IMAGE_PREFIX}:${CODEBUILD_RESOLVED
 
 echo "Push Docker image on `date`"
 docker push ${DOCKER_IMAGE_PREFIX}:${CODEBUILD_RESOLVED_SOURCE_VERSION}-${CODEBUILD_START_TIME}
+
+if [ "${IS_CD}" = "true" ]; then
+  echo "Starting build ${DEPLOY_JOB_NAME}"
+  aws codebuild start-build --project-name "${DEPLOY_JOB_NAME}"
+fi

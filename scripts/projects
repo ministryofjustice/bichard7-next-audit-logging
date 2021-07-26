@@ -1,4 +1,7 @@
 shared
+src/@bichard/api-client
+src/@bichard/mq
+src/@bichard/s3
 src/@bichard/testing
 src/lambdas/store-in-s3
 src/lambdas/translate-event
@@ -7,6 +10,5 @@ src/lambdas/message-receiver
 src/event-handler
 incoming-message-handler
 audit-log-api
-general-event-handler
 mq-listener
 audit-log-portal
