@@ -89,20 +89,6 @@ aws s3 cp \
   --acl bucket-owner-full-control
 
 ############################################
-# General Event Handler
-############################################
-
-# Zip any lambdas from the General Event Handler
-cd general-event-handler/build
-
-zip generalEventHandler.zip generalEventHandler.js
-
-# Upload the package to the artifact bucket
-upload_to_s3 "./generalEventHandler.zip" "generalEventHandler.zip"
-
-cd -
-
-############################################
 # Event Handler
 ############################################
 

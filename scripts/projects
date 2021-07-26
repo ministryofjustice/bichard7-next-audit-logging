@@ -10,6 +10,5 @@ src/lambdas/message-receiver
 src/event-handler
 incoming-message-handler
 audit-log-api
-general-event-handler
 mq-listener
 audit-log-portal

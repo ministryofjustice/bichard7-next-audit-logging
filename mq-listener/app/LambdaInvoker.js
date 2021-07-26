@@ -14,7 +14,7 @@ class LambdaInvoker {
 
   invokeGeneralEventHandler(payload) {
     const params = {
-      FunctionName: "GeneralEventHandler",
+      FunctionName: "general-event-receiver",
       Payload: payload
     }
 

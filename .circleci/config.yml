@@ -25,7 +25,6 @@ jobs:
             - v1-npm-deps-{{ checksum "incoming-message-handler/package-lock.json" }}
             - v1-npm-deps-{{ checksum "audit-log-api/package-lock.json" }}
             - v1-npm-deps-{{ checksum "audit-log-portal/package-lock.json" }}
-            - v1-npm-deps-{{ checksum "general-event-handler/package-lock.json" }}
             - v1-npm-deps-{{ checksum "mq-listener/package-lock.json" }}
 
       - run: make build
@@ -94,10 +93,6 @@ jobs:
           paths: audit-log-portal/node_modules
 
       - save_cache:
-          key: v1-npm-deps-{{ checksum "general-event-handler/package-lock.json" }}
-          paths: general-event-handler/node_modules
-
-      - save_cache:
           key: v1-npm-deps-{{ checksum "mq-listener/package-lock.json" }}
           paths: mq-listener/node_modules
 
@@ -118,7 +113,6 @@ jobs:
             - incoming-message-handler/build
             - audit-log-api/build
             - audit-log-portal/.next
-            - general-event-handler/build
 
   test:
     machine:
@@ -172,9 +166,6 @@ jobs:
           key: v1-npm-deps-{{ checksum "audit-log-portal/package-lock.json" }}
 
       - restore_cache:
-          key: v1-npm-deps-{{ checksum "general-event-handler/package-lock.json" }}
-
-      - restore_cache:
           key: v1-npm-deps-{{ checksum "mq-listener/package-lock.json" }}
 
       - run:
@@ -223,8 +214,6 @@ jobs:
           path: ./audit-log-api/test-results/jest/
       - store_test_results:
           path: ./audit-log-portal/test-results/jest/
-      - store_test_results:
-          path: ./general-event-handler/test-results/jest/
 
       - run:
           name: Installing Cypress

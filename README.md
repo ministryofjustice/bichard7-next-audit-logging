@@ -22,8 +22,7 @@ This repository currently contains multiple projects to support easy local refer
 1. [Handlers Common](shared/) - Library of components common to multiple projects in this repository
 2. [API](audit-log-api/) - API exposing Audit Log records and attached events
 3. [Incoming Message Handler](incoming-message-handler/) - AWS Step Functions and Lambdas for intercepting and processing messages coming into the Bichard system
-4. [General Event Handler](general-event-handler/) - Lambda for transforming events coming from the Bichard system and attaching to Audit Log records
-5. [Portal](audit-log-portal/) - Web-based portal allowing access to view and explore all Audit Log records and their events
+4. [Portal](audit-log-portal/) - Web-based portal allowing access to view and explore all Audit Log records and their events
 
 ## Quickstart
 
@@ -75,7 +74,7 @@ Before you commit and push your code, and especially before raising a pull reque
 # A note on running the docker container locally
 
 Nginx is doing ssl termination and requires a certificate and key pair to be in the `/certs` path.
-In order to run this locally you can generate a self-signed certificate and key using [this method](https://linuxize.com/post/creating-a-self-signed-ssl-certificate/) and then mount 
+In order to run this locally you can generate a self-signed certificate and key using [this method](https://linuxize.com/post/creating-a-self-signed-ssl-certificate/) and then mount
 this as a volume in your container
 
 ie `docker run --rm -v /path/to/your/certificates:/certs -p 80:80 -p 443:443 -e API_URL=xxx audit-logging-portal:latest`
