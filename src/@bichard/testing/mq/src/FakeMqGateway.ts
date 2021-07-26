@@ -4,6 +4,7 @@ import type { PromiseResult } from "shared"
 export default class FakeMqGateway implements MqGateway {
   private error?: Error
 
+  // @ts-ignore
   // eslint-disable-next-line @typescript-eslint/no-unused-vars, class-methods-use-this
   execute(message: string, queueName: string): PromiseResult<void> {
     if (this.error) {
