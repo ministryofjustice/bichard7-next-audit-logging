@@ -6,6 +6,7 @@ phases:
   install:
     commands:
       - yum install -y zip
+      - amazon-linux-extras install docker
   build:
     commands:
       - scripts/install-all.sh
