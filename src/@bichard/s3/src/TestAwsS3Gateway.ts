@@ -1,6 +1,5 @@
 /* eslint-disable import/no-duplicates */
-import type { CreateBucketOutput, ObjectIdentifierList } from "aws-sdk/clients/s3"
-import type S3 from "aws-sdk/clients/s3"
+import type * as S3 from "aws-sdk/clients/s3"
 import AwsS3Gateway from "./AwsS3Gateway"
 
 export default class TestAwsS3Gateway extends AwsS3Gateway {
@@ -9,7 +8,7 @@ export default class TestAwsS3Gateway extends AwsS3Gateway {
     return !!buckets.Buckets?.find((bucket) => bucket.Name === bucketName)
   }
 
-  async createBucket(skipIfExists = true): Promise<CreateBucketOutput | undefined> {
+  async createBucket(skipIfExists = true): Promise<S3.CreateBucketOutput | undefined> {
     if (skipIfExists && (await this.bucketExists(this.bucketName))) {
       return undefined
     }
@@ -30,7 +29,7 @@ export default class TestAwsS3Gateway extends AwsS3Gateway {
     const contents = await this.getAll()
 
     if (contents && contents.length > 0) {
-      const obj = <ObjectIdentifierList>contents.map(({ Key }) => ({ Key }))
+      const obj = <S3.Types.ObjectIdentifierList>contents.map(({ Key }) => ({ Key }))
       const params: S3.Types.DeleteObjectsRequest = {
         Bucket: this.bucketName,
         Delete: {

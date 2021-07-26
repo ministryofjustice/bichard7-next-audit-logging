@@ -12,7 +12,7 @@ const testGateway = new TestAwsS3Gateway(config)
 const gateway = new AwsS3Gateway(config)
 const fileName = "2021/04/09/12/06/123456.xml"
 
-describe("S3Gateway", () => {
+describe("AwsS3Gateway", () => {
   beforeAll(async () => {
     await testGateway.createBucket()
     await testGateway.deleteAll()

@@ -29,7 +29,7 @@ export default class AwsS3Gateway implements S3Gateway {
   }
 
   getItem(key: string): PromiseResult<string> {
-    const params = {
+    const params: S3.GetObjectRequest = {
       Bucket: this.bucketName,
       Key: key
     }
