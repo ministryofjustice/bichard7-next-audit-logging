@@ -1,6 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable class-methods-use-this */
-/* eslint-disable no-prototype-builtins */
 import type { S3Gateway } from "@bichard/s3"
 import type { KeyValuePair, PromiseResult } from "shared"
 
@@ -14,6 +11,7 @@ export default class FakeS3Gateway implements S3Gateway {
       return Promise.resolve(this.error)
     }
 
+    // eslint-disable-next-line no-prototype-builtins
     if (!this.items.hasOwnProperty(key)) {
       return Promise.resolve(new Error(`No item with key '${key}' found in the S3 bucket.`))
     }
@@ -22,6 +20,7 @@ export default class FakeS3Gateway implements S3Gateway {
   }
 
   // @ts-ignore
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars, class-methods-use-this
   upload<T>(fileName: string, content: T): PromiseResult<void> {
     throw new Error("Method not implemented.")
   }
