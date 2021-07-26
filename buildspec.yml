@@ -1,12 +1,11 @@
+---
+
 version: 0.2
 
 phases:
-  install:
-    commands:
-      - scripts/codebuild-install.sh
-
   build:
     commands:
       - scripts/install-all.sh
       - scripts/build-all.sh
       - scripts/codebuild-artifacts.sh
+...
