@@ -16,6 +16,7 @@
     "test": "jest"
   },
   "dependencies": {
+    "@bichard/s3": "file:../s3",
     "aws-sdk": "^2.943.0",
     "shared": "file:../../../shared"
   },
