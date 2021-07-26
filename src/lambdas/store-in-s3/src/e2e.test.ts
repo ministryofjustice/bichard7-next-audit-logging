@@ -1,8 +1,9 @@
 jest.setTimeout(30000)
 
+import "@bichard-testing/extensions"
 import type { EventMessage, S3Config } from "shared"
 import TestS3Gateway from "shared/dist/S3Gateway/TestS3Gateway"
-import { invokeFunction } from "@bichard/testing"
+import { invokeFunction } from "@bichard-testing/lambda"
 import type { StoreInS3Result } from "./index"
 
 const config: S3Config = {

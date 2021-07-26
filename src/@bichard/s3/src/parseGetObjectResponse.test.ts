@@ -1,4 +1,4 @@
-import "@bichard/testing"
+import "@bichard-testing/extensions"
 import type { AWSError, S3 } from "aws-sdk"
 import type { PromiseResult } from "aws-sdk/lib/request"
 import { isError } from "shared"

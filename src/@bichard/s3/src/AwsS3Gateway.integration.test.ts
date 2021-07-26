@@ -1,4 +1,4 @@
-import "@bichard/testing"
+import "@bichard-testing/extensions"
 import AwsS3Gateway from "./AwsS3Gateway"
 import type S3Config from "./S3Config"
 import TestAwsS3Gateway from "./TestAwsS3Gateway"

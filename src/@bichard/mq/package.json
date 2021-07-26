@@ -9,7 +9,7 @@
     "dist/**/*"
   ],
   "devDependencies": {
-    "@bichard/testing": "file:../testing",
+    "@bichard-testing/extensions": "file:../testing/extensions",
     "@types/jest": "^26.0.24",
     "@types/stompit": "^0.26.1",
     "@typescript-eslint/eslint-plugin": "^4.9.0",

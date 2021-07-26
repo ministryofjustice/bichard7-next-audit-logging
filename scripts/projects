@@ -2,7 +2,11 @@ shared
 src/@bichard/api-client
 src/@bichard/mq
 src/@bichard/s3
-src/@bichard/testing
+src/@bichard/testing/extensions
+src/@bichard/testing/mq
+src/@bichard/testing/s3
+src/@bichard/testing/lambda
+src/@bichard/testing/dynamodb
 src/lambdas/store-in-s3
 src/lambdas/translate-event
 src/lambdas/record-event

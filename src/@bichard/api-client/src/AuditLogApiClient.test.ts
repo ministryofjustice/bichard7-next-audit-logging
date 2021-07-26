@@ -1,4 +1,4 @@
-import "@bichard/testing"
+import "@bichard-testing/extensions"
 import type { AxiosError } from "axios"
 import axios from "axios"
 import { AuditLog, AuditLogEvent, isError } from "shared"
