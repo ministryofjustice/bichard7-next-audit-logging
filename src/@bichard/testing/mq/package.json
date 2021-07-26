@@ -1,0 +1,28 @@
+{
+  "name": "@bichard/testing/mq",
+  "description": "Provides fake implementation of MQ gateway for testing",
+  "version": "0.0.1",
+  "private": true,
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist/**/*"
+  ],
+  "devDependencies": {
+    "@bichard/testing": "file:../testing",
+    "@types/jest": "^26.0.24",
+    "jest": "^27.0.6",
+    "rimraf": "^3.0.2",
+    "ts-jest": "^27.0.3"
+  },
+  "dependencies": {
+    "@bichard/mq": "file:../../mq",
+    "shared": "file:../../../../shared"
+  },
+  "scripts": {
+    "clean": "rimraf dist",
+    "build:dev": "npm run clean && tsc -p tsconfig.json",
+    "build": "npm run clean && tsc -p tsconfig.prod.json",
+    "test": "jest"
+  }
+}

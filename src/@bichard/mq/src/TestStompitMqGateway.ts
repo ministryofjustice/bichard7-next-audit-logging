@@ -1,7 +1,7 @@
 import type { PromiseResult } from "shared"
 import { isError } from "shared"
 import type { Client } from "stompit"
-import MqGateway from "./MqGateway"
+import StompitMqGateway from "./StompitMqGateway"
 
 const readMessage = (message: Client.Message): PromiseResult<string> => {
   return new Promise<string>((resolve, reject) => {
@@ -35,7 +35,7 @@ const getMessage = (client: Client, queueName: string): Promise<Client.Message> 
   })
 }
 
-export default class TestMqGateway extends MqGateway {
+export default class TestStompitMqGateway extends StompitMqGateway {
   async getMessage(queueName: string): PromiseResult<string> {
     const client = await this.connectIfRequired()
 
