@@ -1,5 +1,6 @@
 import { S3 } from "aws-sdk"
 import type { PromiseResult } from "shared"
+import parseGetObjectResponse from "./parseGetObjectResponse"
 import type S3Config from "./S3Config"
 import type S3Gateway from "./S3Gateway"
 
@@ -37,7 +38,7 @@ export default class AwsS3Gateway implements S3Gateway {
     return this.s3
       .getObject(params)
       .promise()
-      .then((response) => response.Body?.toString("utf-8") ?? Error(`Content is empty for key ${key}.`))
+      .then((response) => parseGetObjectResponse(response, key))
       .catch((error) => <Error>error)
   }
 
