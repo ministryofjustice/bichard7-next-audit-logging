@@ -4,6 +4,7 @@
   "States": {
     "Iterate Messages": {
       "Type": "Map",
+      "ItemsPath": "$.messages",
       "Iterator": {
         "StartAt": "Store in S3",
         "States": {
