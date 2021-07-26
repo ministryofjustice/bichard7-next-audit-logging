@@ -5,8 +5,16 @@ set -e
 function upload_to_s3 {
   local sourceFilename=$1
   local destinationFilename=$2
+  local contentType=$3
 
-  aws s3 cp "$sourceFilename" "s3://$S3_BUCKET/audit-logging/$destinationFilename" --acl bucket-owner-full-control
+  if [[ -z "$contentType" ]]; then
+    contentType="application/octet-stream"
+  fi
+
+  aws s3 cp "$sourceFilename" \
+    "s3://$S3_BUCKET/audit-logging/$destinationFilename" \
+    --content-type "$contentType" \
+    --acl bucket-owner-full-control
 }
 
 ############################################
@@ -55,7 +63,7 @@ aws s3 cp \
   --include "*.zip" \
   --acl bucket-owner-full-control
 
-upload_to_s3 "./incoming-message-handler/scripts/state-machine.json.tpl" "state-machine.json.tpl"
+upload_to_s3 "./incoming-message-handler/scripts/state-machine.json.tpl" "incoming-message-handler-state-machine.json.tpl" "application/json"
 
 ############################################
 # Audit Log API
@@ -81,25 +89,11 @@ aws s3 cp \
   --acl bucket-owner-full-control
 
 ############################################
-# General Event Handler
-############################################
-
-# Zip any lambdas from the General Event Handler
-cd general-event-handler/build
-
-zip generalEventHandler.zip generalEventHandler.js
-
-# Upload the package to the artifact bucket
-upload_to_s3 "./generalEventHandler.zip" "generalEventHandler.zip"
-
-cd -
-
-############################################
 # Event Handler
 ############################################
 
 # Zip any lambdas from the General Event Handler
-upload_to_s3 "src/event-handler/scripts/state-machine.json.tpl" "event-handler-state-machine.json.tpl"
+upload_to_s3 "src/event-handler/scripts/state-machine.json.tpl" "event-handler-state-machine.json.tpl" "application/json"
 
 ############################################
 # Audit Log Portal

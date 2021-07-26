@@ -12,7 +12,8 @@ interface TestInput {
 test.each<TestInput>([
   { status: AuditLogStatus.error, expectedIcon: ErrorIcon },
   { status: AuditLogStatus.completed, expectedIcon: SuccessIcon },
-  { status: AuditLogStatus.processing, expectedIcon: ProcessingIcon }
+  { status: AuditLogStatus.processing, expectedIcon: ProcessingIcon },
+  { status: AuditLogStatus.retrying, expectedIcon: ProcessingIcon }
 ])("returns <$expected/> when status is $status", ({ status, expectedIcon }) => {
   const Component = getStatusIcon(status)
   expect(Component).toBe(expectedIcon)

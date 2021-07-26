@@ -118,7 +118,6 @@ junit.xml
 
 # Auto-generated env-vars.json
 incoming-message-handler/scripts/env-vars.json
-general-event-handler/scripts/env-vars.json
 
 # Storybook output
 **/storybook-static

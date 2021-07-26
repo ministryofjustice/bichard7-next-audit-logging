@@ -7,6 +7,7 @@ import AuditLogStatus from "shared/dist/types/AuditLogStatus"
 export default function getStatusIcon(status: string): ComponentType {
   switch (status) {
     case AuditLogStatus.processing:
+    case AuditLogStatus.retrying:
       return ProcessingIcon
 
     case AuditLogStatus.completed:

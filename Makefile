@@ -30,12 +30,6 @@ run-incoming-message-handler:
 		npm run setup:env && \
 		cd -
 
-.PHONY: run-general-event-handler
-run-general-event-handler:
-	cd ./general-event-handler && \
-		npm run setup:env && \
-		cd -
-
 .PHONY: run-api
 run-api:
 	cd ./audit-log-api && \
@@ -49,7 +43,7 @@ run-portal:
 		cd -
 
 .PHONY: run-all-without-portal
-run-all-without-portal: run-api run-incoming-message-handler run-general-event-handler
+run-all-without-portal: run-api run-incoming-message-handler
 
 .PHONY: run-infra
 run-all: run-all-without-portal run-portal
