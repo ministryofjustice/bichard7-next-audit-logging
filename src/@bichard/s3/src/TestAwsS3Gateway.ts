@@ -1,4 +1,3 @@
-/* eslint-disable import/no-duplicates */
 import type * as S3 from "aws-sdk/clients/s3"
 import AwsS3Gateway from "./AwsS3Gateway"
 
