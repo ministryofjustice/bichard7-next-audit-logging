@@ -1,4 +1,5 @@
 import "@bichard/testing"
+import AwsS3Gateway from "./AwsS3Gateway"
 import type S3Config from "./S3Config"
 import TestAwsS3Gateway from "./TestAwsS3Gateway"
 
@@ -7,13 +8,14 @@ const config: S3Config = {
   region: "eu-west-2",
   bucketName: "test-bucket"
 }
-const gateway = new TestAwsS3Gateway(config)
+const testGateway = new TestAwsS3Gateway(config)
+const gateway = new AwsS3Gateway(config)
 const fileName = "2021/04/09/12/06/123456.xml"
 
 describe("S3Gateway", () => {
   beforeAll(async () => {
-    await gateway.createBucket()
-    await gateway.deleteAll()
+    await testGateway.createBucket()
+    await testGateway.deleteAll()
   })
 
   describe("getItem()", () => {
