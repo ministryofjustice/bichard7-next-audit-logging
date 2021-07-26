@@ -110,8 +110,6 @@ send-message:
 		scripts/trigger-state-machine.sh && \
 		cd -
 
-/PHONY: send-failed-message
-send-failed-message:
-	cd incoming-message-handler && \
-		scripts/trigger-state-machine.sh -f && \
-		cd -
+.PHONY: send-court-result-input-failure-event
+send-court-result-input-failure-event:
+	scripts/send-failure-event.sh court-result-input-event

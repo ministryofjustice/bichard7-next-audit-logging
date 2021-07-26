@@ -9,7 +9,8 @@ import type TranslationResult from "./translators/TranslationResult"
 
 const filenameMappings: Record<MessageFormat, string> = {
   AuditEvent: "audit-event",
-  GeneralEvent: "general-event"
+  GeneralEvent: "general-event",
+  CourtResultInput: "court-result-input"
 }
 
 const createPayload = (messageFormat: MessageFormat): TranslateEventInput => {
@@ -45,6 +46,14 @@ test.each<TestInput>([
   },
   {
     messageFormat: "GeneralEvent",
+    messageId: "EXTERNAL_CORRELATION_ID",
+    category: "information",
+    eventSource: "Hearing Outcome Publication Choreography",
+    eventType: "Message Received",
+    timestamp: "2021-06-29T08:35:36.031Z"
+  },
+  {
+    messageFormat: "CourtResultInput",
     messageId: "EXTERNAL_CORRELATION_ID",
     category: "information",
     eventSource: "Hearing Outcome Publication Choreography",
