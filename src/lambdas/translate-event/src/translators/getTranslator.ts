@@ -2,7 +2,7 @@ import type { MessageFormat, Result } from "shared"
 import type Translator from "./Translator"
 import AuditEventTranslator from "./AuditEventTranslator"
 import GeneralEventTranslator from "./GeneralEventTranslator"
-import CourtResultInputEventTranslator from "./CourtResultInputTranslator"
+import CourtResultInputTranslator from "./CourtResultInputTranslator"
 
 export default (messageFormat: MessageFormat): Result<Translator> => {
   switch (messageFormat) {
@@ -13,7 +13,7 @@ export default (messageFormat: MessageFormat): Result<Translator> => {
       return GeneralEventTranslator
 
     case "CourtResultInput":
-      return CourtResultInputEventTranslator
+      return CourtResultInputTranslator
 
     default:
       return new Error(`Unsupported message format: ${messageFormat}`)

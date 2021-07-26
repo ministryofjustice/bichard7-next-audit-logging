@@ -10,7 +10,22 @@ const CourtResultInputTranslator: Translator = async (input: TranslateEventInput
   const { messageData, s3Path, eventSourceArn } = input
   // Court Result Inputs are in base64 encoded XML
   const xml = decodeBase64(messageData)
-  const logItem = await parseXml<CourtResultInput>(xml)
+  const inputItem = await parseXml<CourtResultInput>(xml)
+  // These values will probably need updating
+  const logItem = {
+    logEvent: {
+      systemID: inputItem.DeliverRequest.MessageIdentifier,
+      componentID:
+        inputItem.DeliverRequest.RequestingSystem.Name + inputItem.DeliverRequest.RequestingSystem.OrgUnitCode,
+      eventType: "SPIResults",
+      eventCategory: "SPIResults",
+      correlationID: inputItem.DeliverRequest.MessageMetadata.SenderRequestedDestination,
+      eventDateTime: inputItem.DeliverRequest.MessageMetadata.CreationDateTime,
+      eventSource:
+        inputItem.DeliverRequest.RequestingSystem.OrgUnitCode + inputItem.DeliverRequest.RequestingSystem.Environment,
+      eventSourceArn: "DummyArn"
+    }
+  }
 
   if (!logItem || !logItem.logEvent) {
     return new Error("Failed to parse the Court Result Input")
