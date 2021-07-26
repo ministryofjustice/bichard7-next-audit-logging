@@ -1,5 +1,5 @@
 {
-  "name": "@bichard-testing/dynamo",
+  "name": "@bichard-testing/dynamodb",
   "description": "Provides fake implementation of DynamoDB gateway for testing",
   "version": "0.0.1",
   "private": true,
