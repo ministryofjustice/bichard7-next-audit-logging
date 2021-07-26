@@ -3,6 +3,9 @@
 version: 0.2
 
 phases:
+  install:
+    commands:
+      - yum install -y zip
   build:
     commands:
       - scripts/install-all.sh
