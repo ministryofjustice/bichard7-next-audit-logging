@@ -1,7 +1,7 @@
 {
-  "name": "@bichard/testing",
+  "name": "@bichard-testing/extensions",
+  "description": "Provides extensions for testing",
   "version": "1.0.0",
-  "description": "",
   "author": "",
   "license": "ISC",
   "main": "dist/index.js",
@@ -16,9 +16,7 @@
     "test": "jest"
   },
   "dependencies": {
-    "@bichard/s3": "file:../s3",
-    "aws-sdk": "^2.943.0",
-    "shared": "file:../../../shared"
+    "shared": "file:../../../../shared"
   },
   "devDependencies": {
     "@types/jest": "^26.0.24",
