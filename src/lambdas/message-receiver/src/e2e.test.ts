@@ -1,6 +1,6 @@
 jest.setTimeout(30000)
 
-import "@bichard-testing/extensions"
+import "@bichard-testing/jest"
 import { invokeFunction } from "@bichard-testing/lambda"
 import type { AmazonMqEventSourceRecordEvent } from "shared"
 

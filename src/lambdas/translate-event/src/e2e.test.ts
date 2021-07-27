@@ -1,6 +1,6 @@
 jest.setTimeout(30000)
 
-import "@bichard-testing/extensions"
+import "@bichard-testing/jest"
 import fs from "fs"
 import { encodeBase64 } from "shared"
 import type { MessageFormat, EventCategory } from "shared"
