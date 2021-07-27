@@ -106,4 +106,4 @@ send-message:
 
 .PHONY: send-court-result-input-failure-event
 send-court-result-input-failure-event:
-	scripts/send-failure-event.sh court-result-input-event
+	scripts/send-failure-event.sh court-result-input
