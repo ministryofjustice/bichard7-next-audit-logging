@@ -1,6 +1,7 @@
 jest.setTimeout(30000)
 
-import { invokeFunction } from "@bichard/testing"
+import "@bichard/testing-jest"
+import { invokeFunction } from "@bichard/testing-lambda"
 import type { DynamoDbConfig } from "shared"
 import { AuditLog, BichardAuditLogEvent, AwsAuditLogDynamoGateway } from "shared"
 import TestDynamoGateway from "shared/dist/DynamoGateway/TestDynamoGateway"
