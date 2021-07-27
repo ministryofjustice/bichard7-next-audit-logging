@@ -2,6 +2,7 @@ import type { PromiseResult } from "shared"
 import { decodeBase64, parseXml } from "shared"
 import type CourtResultInput from "src/types/CourtResultInput"
 import type TranslateEventInput from "src/TranslateEventInput"
+import type EventDetails from "src/types/EventDetails"
 import type TranslationResult from "./TranslationResult"
 import type Translator from "./Translator"
 import transformEventDetails from "./transformEventDetails"
@@ -16,15 +17,13 @@ const CourtResultInputTranslator: Translator = async (input: TranslateEventInput
     return new Error("Failed to parse the Court Result Input")
   }
 
-  const logItem = {
+  const logItem: EventDetails = {
     systemID: "Audit Logging Event Handler",
     componentID: "Translate Event",
-    eventType: "error",
+    eventType: "Court Result Input Queue Failure",
     eventCategory: "error",
     correlationID: inputItem.DeliverRequest.MessageIdentifier,
-    eventDateTime: inputItem.DeliverRequest.MessageMetadata.CreationDateTime,
-    eventSource: "COURT_RESULT_INPUT_QUEUE",
-    eventSourceArn: input.eventSourceArn
+    eventDateTime: new Date().toString()
   }
 
   const event = transformEventDetails(logItem, s3Path, eventSourceArn)

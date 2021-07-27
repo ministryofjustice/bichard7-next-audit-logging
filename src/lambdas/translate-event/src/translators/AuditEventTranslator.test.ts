@@ -11,8 +11,7 @@ test("parses the message data and returns an AuditLogEvent", async () => {
     messageData,
     s3Path: "DummyPath",
     eventSourceArn: "DummyArn",
-    messageFormat: "AuditEvent",
-    messageType: ""
+    messageFormat: "AuditEvent"
   }
   const result = await AuditEventTranslator(eventInput)
 

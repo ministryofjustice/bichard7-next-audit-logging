@@ -25,7 +25,6 @@ describe("StoreInS3UseCase", () => {
     const message: EventMessage = {
       messageData: "DummyXML",
       messageFormat: "AuditEvent",
-      messageType: "",
       eventSourceArn: "DummyArn"
     }
 
