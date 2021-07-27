@@ -1,4 +1,4 @@
-jest.setTimeout(75000)
+jest.setTimeout(90000)
 
 import fs from "fs"
 import type { AmazonMqEventSourceRecordEvent, DynamoDbConfig, AuditLogEvent } from "shared"
