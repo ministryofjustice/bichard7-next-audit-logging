@@ -62,11 +62,11 @@ export default class FakeAuditLogDynamoGateway implements AuditLogDynamoGateway 
       return Promise.resolve(this.error)
     }
 
-    const events = this.messages.find((x) => x.messageId === messageId)?.events
+    const events = this.messages.find((x) => x.messageId === messageId)?.events || []
 
-    const sortedEvents = events?.sort((eventA, eventB) => (eventA.timestamp > eventB.timestamp ? -1 : 1))
+    const sortedEvents = events.sort((eventA, eventB) => (eventA.timestamp > eventB.timestamp ? -1 : 1))
 
-    return Promise.resolve(sortedEvents ?? [])
+    return Promise.resolve(sortedEvents)
   }
 
   // @ts-ignore
