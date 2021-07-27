@@ -55,10 +55,10 @@ test.each<TestInput>([
   },
   {
     messageFormat: "CourtResultInput",
-    messageId: "EXTERNAL_CORRELATION_ID",
+    messageId: "{EXTERNAL_CORRELATION_ID}",
     category: "error",
     eventSource: "Translate Event",
-    eventType: "error",
+    eventType: "Court Result Input Queue Failure",
     timestamp: "2001-12-17T14:30:47.000Z"
   }
 ])("$messageFormat is translated to AuditLogEvent type", async (input: TestInput) => {
