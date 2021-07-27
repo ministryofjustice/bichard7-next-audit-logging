@@ -1,6 +1,6 @@
 jest.setTimeout(50000)
 
-import "@bichard-testing/extensions"
+import "@bichard-testing/jest"
 import fs from "fs"
 import type { AmazonMqEventSourceRecordEvent, DynamoDbConfig, AuditLogEvent } from "shared"
 import { encodeBase64, AuditLog, AwsAuditLogDynamoGateway, Poller, PollOptions } from "shared"

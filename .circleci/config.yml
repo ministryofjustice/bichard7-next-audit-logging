@@ -16,7 +16,7 @@ jobs:
             - v1-npm-deps-{{ checksum "src/@bichard/api-client/package-lock.json" }}
             - v1-npm-deps-{{ checksum "src/@bichard/mq/package-lock.json" }}
             - v1-npm-deps-{{ checksum "src/@bichard/s3/package-lock.json" }}
-            - v1-npm-deps-{{ checksum "src/@bichard/testing/extensions/package-lock.json" }}
+            - v1-npm-deps-{{ checksum "src/@bichard/testing/jest/package-lock.json" }}
             - v1-npm-deps-{{ checksum "src/@bichard/testing/mq/package-lock.json" }}
             - v1-npm-deps-{{ checksum "src/@bichard/testing/s3/package-lock.json" }}
             - v1-npm-deps-{{ checksum "src/@bichard/testing/dynamodb/package-lock.json" }}
@@ -60,8 +60,8 @@ jobs:
           paths: src/@bichard/s3/node_modules
 
       - save_cache:
-          key: v1-npm-deps-{{ checksum "src/@bichard/testing/extensions/package-lock.json" }}
-          paths: src/@bichard/testing/extensions/node_modules
+          key: v1-npm-deps-{{ checksum "src/@bichard/testing/jest/package-lock.json" }}
+          paths: src/@bichard/testing/jest/node_modules
 
       - save_cache:
           key: v1-npm-deps-{{ checksum "src/@bichard/testing/mq/package-lock.json" }}
@@ -123,7 +123,7 @@ jobs:
             - src/@bichard/api-client/dist
             - src/@bichard/mq/dist
             - src/@bichard/s3/dist
-            - src/@bichard/testing/extensions/dist
+            - src/@bichard/testing/jest/dist
             - src/@bichard/testing/mq/dist
             - src/@bichard/testing/s3/dist
             - src/@bichard/testing/lambda/dist
@@ -162,7 +162,7 @@ jobs:
           key: v1-npm-deps-{{ checksum "src/@bichard/s3/package-lock.json" }}
 
       - restore_cache:
-          key: v1-npm-deps-{{ checksum "src/@bichard/testing/extensions/package-lock.json" }}
+          key: v1-npm-deps-{{ checksum "src/@bichard/testing/jest/package-lock.json" }}
 
       - restore_cache:
           key: v1-npm-deps-{{ checksum "src/@bichard/testing/mq/package-lock.json" }}
@@ -232,7 +232,7 @@ jobs:
       - store_test_results:
           path: ./src/@bichard/s3/test-results/jest/
       - store_test_results:
-          path: ./src/@bichard/testing/extensions/test-results/jest/
+          path: ./src/@bichard/testing/jest/test-results/jest/
       - store_test_results:
           path: ./src/@bichard/testing/mq/test-results/jest/
       - store_test_results:

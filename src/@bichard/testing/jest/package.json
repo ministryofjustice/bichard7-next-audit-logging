@@ -1,5 +1,5 @@
 {
-  "name": "@bichard-testing/extensions",
+  "name": "@bichard-testing/jest",
   "description": "Provides extensions for testing",
   "version": "1.0.0",
   "author": "",

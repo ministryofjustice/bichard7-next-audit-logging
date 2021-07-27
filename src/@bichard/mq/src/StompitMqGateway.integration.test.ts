@@ -1,4 +1,4 @@
-import "@bichard-testing/extensions"
+import "@bichard-testing/jest"
 import type MqConfig from "./MqConfig"
 import StompitMqGateway from "./StompitMqGateway"
 import TestStompitMqGateway from "./TestStompitMqGateway"

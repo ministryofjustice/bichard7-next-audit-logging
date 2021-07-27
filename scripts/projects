@@ -2,7 +2,7 @@ shared
 src/@bichard/api-client
 src/@bichard/mq
 src/@bichard/s3
-src/@bichard/testing/extensions
+src/@bichard/testing/jest
 src/@bichard/testing/mq
 src/@bichard/testing/s3
 src/@bichard/testing/lambda
