@@ -15,18 +15,9 @@ const mapEventCategory = (category: string): EventCategory => {
   }
 }
 
-export default (
-  eventDetails: EventDetails,
-  s3Path: string,
-  eventSourceArn: string,
-  messageType = ""
-): BichardAuditLogEvent => {
+export default (eventDetails: EventDetails, s3Path: string, eventSourceArn: string): BichardAuditLogEvent => {
   const { eventCategory, eventDateTime, eventType, componentID, nameValuePairs } = eventDetails
-  let category = mapEventCategory(eventCategory)
-  if (messageType) {
-    // override the category if messagetype is provided
-    category = mapEventCategory(messageType)
-  }
+  const category = mapEventCategory(eventCategory)
   const timestamp = new Date(eventDateTime)
 
   const event = new BichardAuditLogEvent({

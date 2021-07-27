@@ -7,31 +7,29 @@ import type Translator from "./Translator"
 import transformEventDetails from "./transformEventDetails"
 
 const CourtResultInputTranslator: Translator = async (input: TranslateEventInput): PromiseResult<TranslationResult> => {
-  const { messageData, s3Path, eventSourceArn, messageType } = input
+  const { messageData, s3Path, eventSourceArn } = input
   // Court Result Inputs are in base64 encoded XML
   const xml = decodeBase64(messageData)
   const inputItem = await parseXml<CourtResultInput>(xml)
-  // These values will probably need updating
-  const logItem = {
-    logEvent: {
-      systemID: "Audit Logging Event Handler",
-      componentID: "Translate Event",
-      eventType: "error",
-      eventCategory: "error",
-      correlationID: inputItem.DeliverRequest.MessageIdentifier,
-      eventDateTime: inputItem.DeliverRequest.MessageMetadata.CreationDateTime,
-      eventSource: "COURT_RESULT_INPUT_QUEUE",
-      eventSourceArn: input.eventSourceArn
-    }
-  }
 
-  if (!logItem || !logItem.logEvent) {
+  if (!inputItem) {
     return new Error("Failed to parse the Court Result Input")
   }
 
-  const event = transformEventDetails(logItem.logEvent, s3Path, eventSourceArn, messageType)
+  const logItem = {
+    systemID: "Audit Logging Event Handler",
+    componentID: "Translate Event",
+    eventType: "error",
+    eventCategory: "error",
+    correlationID: inputItem.DeliverRequest.MessageIdentifier,
+    eventDateTime: inputItem.DeliverRequest.MessageMetadata.CreationDateTime,
+    eventSource: "COURT_RESULT_INPUT_QUEUE",
+    eventSourceArn: input.eventSourceArn
+  }
+
+  const event = transformEventDetails(logItem, s3Path, eventSourceArn)
   return {
-    messageId: logItem.logEvent.correlationID,
+    messageId: logItem.correlationID,
     event
   }
 }
