@@ -15,7 +15,7 @@ const config: MqConfig = {
 const gateway = new StompitMqGateway(config)
 const testGateway = new TestStompitMqGateway(config)
 
-describe("MqGateway", () => {
+describe("StompitMqGateway", () => {
   afterAll(async () => {
     await gateway.dispose()
     await testGateway.dispose()
