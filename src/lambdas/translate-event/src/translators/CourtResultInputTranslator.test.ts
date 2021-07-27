@@ -20,7 +20,7 @@ test("parses the message data and returns an AuditLogEvent", async () => {
   expect(messageId).toBe("{EXTERNAL_CORRELATION_ID}")
   expect(event.category).toBe("error")
   expect(event.eventSource).toBe("Translate Event")
-  expect(event.eventType).toBe("error")
+  expect(event.eventType).toBe("Court Result Input Queue Failure")
   expect(event.timestamp).toBe("2001-12-17T14:30:47.000Z")
   expect(event.s3Path).toBe("DummyPath")
   expect(event.eventSourceArn).toBe("DummyArn")
