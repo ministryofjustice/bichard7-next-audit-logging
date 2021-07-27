@@ -6,13 +6,7 @@ set -e
 LAMBDA_NAME=IncomingMessageHandler
 BUCKET_NAME=incoming-messages
 
-if [ "$#" -eq 1 ] && [ ${args[0]} = '-f' ]
-then
-  MESSAGE_PATH=$PWD/scripts/failed-message.xml
-else
-  MESSAGE_PATH=$PWD/scripts/message.xml
-fi
-echo "Using message: $MESSAGE_PATH"
+MESSAGE_PATH=$PWD/scripts/message.xml
 RECEIVED_DATE=$(date -u +'%Y/%m/%d/%H/%M')
 MESSAGE_ID="LIBRA-EXISS-$(date -u +'%s')"
 S3_MESSAGE_PATH=$RECEIVED_DATE/$MESSAGE_ID.xml

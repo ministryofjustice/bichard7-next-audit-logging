@@ -19,10 +19,9 @@ const CourtResultInputTranslator: Translator = async (input: TranslateEventInput
         inputItem.DeliverRequest.RequestingSystem.Name + inputItem.DeliverRequest.RequestingSystem.OrgUnitCode,
       eventType: "SPIResults",
       eventCategory: "SPIResults",
-      correlationID: inputItem.DeliverRequest.MessageMetadata.SenderRequestedDestination,
+      correlationID: inputItem.DeliverRequest.MessageMetadata.OriginatingSystem.OrgUnitCode,
       eventDateTime: inputItem.DeliverRequest.MessageMetadata.CreationDateTime,
-      eventSource:
-        inputItem.DeliverRequest.RequestingSystem.OrgUnitCode + inputItem.DeliverRequest.RequestingSystem.Environment,
+      eventSource: inputItem.DeliverRequest.RequestingSystem.OrgUnitCode,
       eventSourceArn: "DummyArn"
     }
   }
