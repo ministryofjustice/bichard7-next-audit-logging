@@ -34,7 +34,7 @@ beforeEach(async () => {
   await testGateway.deleteAll(config.AUDIT_LOG_TABLE_NAME, "messageId")
 })
 
-test.each<string>(["audit-event", "general-event", "court-result-input-event"])(
+test.each<string>(["audit-event", "general-event", "court-result-input"])(
   "given the event, the step function is invoked with 3 duplicate events across 2 messages",
   async (eventFilename: string) => {
     const auditLog1 = new AuditLog("CorrelationId1", new Date(), "XML")
