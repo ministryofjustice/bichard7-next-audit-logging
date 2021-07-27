@@ -1,7 +1,7 @@
-import "@bichard/testing"
+import "@bichard/testing-jest"
 import type MqConfig from "./MqConfig"
-import MqGateway from "./MqGateway"
-import TestMqGateway from "./TestMqGateway"
+import StompitMqGateway from "./StompitMqGateway"
+import TestStompitMqGateway from "./TestStompitMqGateway"
 
 jest.setTimeout(30000)
 
@@ -12,10 +12,10 @@ const config: MqConfig = {
   password: "admin"
 }
 
-const gateway = new MqGateway(config)
-const testGateway = new TestMqGateway(config)
+const gateway = new StompitMqGateway(config)
+const testGateway = new TestStompitMqGateway(config)
 
-describe("MqGateway", () => {
+describe("StompitMqGateway", () => {
   afterAll(async () => {
     await gateway.dispose()
     await testGateway.dispose()
