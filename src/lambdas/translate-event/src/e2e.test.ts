@@ -56,7 +56,7 @@ test.each<TestInput>([
   {
     messageFormat: "CourtResultInput",
     messageId: "String",
-    category: "result",
+    category: "error",
     eventSource: "CJSEZ000000",
     eventType: "SPIResults",
     timestamp: "2001-12-17T14:30:47.000Z"
