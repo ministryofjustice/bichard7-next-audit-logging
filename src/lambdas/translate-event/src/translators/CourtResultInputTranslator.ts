@@ -14,15 +14,14 @@ const CourtResultInputTranslator: Translator = async (input: TranslateEventInput
   // These values will probably need updating
   const logItem = {
     logEvent: {
-      systemID: inputItem.DeliverRequest.MessageIdentifier,
-      componentID:
-        inputItem.DeliverRequest.RequestingSystem.Name + inputItem.DeliverRequest.RequestingSystem.OrgUnitCode,
-      eventType: "SPIResults",
-      eventCategory: "SPIResults",
-      correlationID: inputItem.DeliverRequest.MessageMetadata.OriginatingSystem.OrgUnitCode,
+      systemID: "Audit Logging Event Handler",
+      componentID: "Translate Event",
+      eventType: "error",
+      eventCategory: "error",
+      correlationID: inputItem.DeliverRequest.MessageIdentifier,
       eventDateTime: inputItem.DeliverRequest.MessageMetadata.CreationDateTime,
-      eventSource: inputItem.DeliverRequest.RequestingSystem.OrgUnitCode,
-      eventSourceArn: "DummyArn"
+      eventSource: "COURT_RESULT_INPUT_QUEUE",
+      eventSourceArn: input.eventSourceArn
     }
   }
 

@@ -18,10 +18,10 @@ test("parses the message data and returns an AuditLogEvent", async () => {
   expect(isError(result)).toBe(false)
 
   const { messageId, event } = <TranslationResult>result
-  expect(messageId).toBe("String")
-  expect(event.category).toBe("result")
-  expect(event.eventSource).toBe("CJSEZ000000")
-  expect(event.eventType).toBe("SPIResults")
+  expect(messageId).toBe("EXTERNAL_CORRELATION_ID")
+  expect(event.category).toBe("error")
+  expect(event.eventSource).toBe("Translate Event")
+  expect(event.eventType).toBe("error")
   expect(event.timestamp).toBe("2001-12-17T14:30:47.000Z")
   expect(event.s3Path).toBe("DummyPath")
   expect(event.eventSourceArn).toBe("DummyArn")

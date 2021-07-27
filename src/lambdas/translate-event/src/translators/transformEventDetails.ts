@@ -10,9 +10,6 @@ const mapEventCategory = (category: string): EventCategory => {
     case "warning":
       return "warning"
 
-    case "SPIResults":
-      return "result"
-
     default:
       return "information"
   }
