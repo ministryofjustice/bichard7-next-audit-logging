@@ -55,10 +55,10 @@ test.each<TestInput>([
   },
   {
     messageFormat: "CourtResultInput",
-    messageId: "String",
+    messageId: "EXTERNAL_CORRELATION_ID",
     category: "error",
-    eventSource: "CJSEZ000000",
-    eventType: "SPIResults",
+    eventSource: "Translate Event",
+    eventType: "error",
     timestamp: "2001-12-17T14:30:47.000Z"
   }
 ])("$messageFormat is translated to AuditLogEvent type", async (input: TestInput) => {
