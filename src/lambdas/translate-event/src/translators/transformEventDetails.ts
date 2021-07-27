@@ -15,7 +15,12 @@ const mapEventCategory = (category: string): EventCategory => {
   }
 }
 
-export default (eventDetails: EventDetails, s3Path: string, eventSourceArn: string): BichardAuditLogEvent => {
+export default (
+  eventDetails: EventDetails,
+  s3Path: string,
+  eventSourceArn: string,
+  eventSourceQueueName: string
+): BichardAuditLogEvent => {
   const { eventCategory, eventDateTime, eventType, componentID, nameValuePairs } = eventDetails
 
   const category = mapEventCategory(eventCategory)
@@ -27,7 +32,8 @@ export default (eventDetails: EventDetails, s3Path: string, eventSourceArn: stri
     eventType,
     timestamp,
     s3Path,
-    eventSourceArn
+    eventSourceArn,
+    eventSourceQueueName
   })
 
   const attributes = nameValuePairs?.nameValuePair

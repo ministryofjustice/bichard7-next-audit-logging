@@ -22,7 +22,8 @@ const createPayload = (messageFormat: MessageFormat): TranslateEventInput => {
     messageData: encodeBase64(content),
     messageFormat,
     eventSourceArn: "DummyArn",
-    s3Path: "UNUSED"
+    s3Path: "UNUSED",
+    eventSourceQueueName: "DummyQueueName"
   }
 }
 
@@ -66,4 +67,5 @@ test.each<TestInput>([
   expect(event.timestamp).toBe(input.timestamp)
   expect(event.eventSourceArn).toBe(payload.eventSourceArn)
   expect(event.s3Path).toBe(payload.s3Path)
+  expect(event.eventSourceQueueName).toBe(payload.eventSourceQueueName)
 })

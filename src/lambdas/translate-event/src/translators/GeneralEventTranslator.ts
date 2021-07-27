@@ -7,7 +7,7 @@ import type Translator from "./Translator"
 import transformEventDetails from "./transformEventDetails"
 
 const GeneralEventTranslator: Translator = async (input: TranslateEventInput): PromiseResult<TranslationResult> => {
-  const { messageData, s3Path, eventSourceArn } = input
+  const { messageData, s3Path, eventSourceArn, eventSourceQueueName } = input
   // General events are in base64 encoded XML
   const xml = decodeBase64(messageData)
   const logItem = await parseXml<GeneralEventLogItem>(xml)
@@ -16,7 +16,7 @@ const GeneralEventTranslator: Translator = async (input: TranslateEventInput): P
     return new Error("Failed to parse the General Event")
   }
 
-  const event = transformEventDetails(logItem.logEvent, s3Path, eventSourceArn)
+  const event = transformEventDetails(logItem.logEvent, s3Path, eventSourceArn, eventSourceQueueName)
   return {
     messageId: logItem.logEvent.correlationID,
     event
