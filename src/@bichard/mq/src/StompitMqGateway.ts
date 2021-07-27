@@ -13,7 +13,7 @@ const reconnectOptions: ConnectFailover.ConnectFailoverOptions = {
   useExponentialBackOff: false
 }
 
-export default class ActiveMqGateway implements MqGateway {
+export default class StompitMqGateway implements MqGateway {
   private readonly connectionOptions: connect.ConnectOptions[]
 
   private client: Client | null
