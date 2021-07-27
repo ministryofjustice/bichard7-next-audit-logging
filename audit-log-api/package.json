@@ -31,7 +31,7 @@
   "devDependencies": {
     "@babel/preset-env": "^7.13.12",
     "@babel/preset-typescript": "^7.13.0",
-    "@bichard-testing/dynamodb": "file:../src/@bichard/testing/dynamodb",
+    "@bichard/testing-dynamodb": "file:../src/@bichard/testing-dynamodb",
     "@bichard/testing-jest": "file:../src/@bichard/testing-jest",
     "@types/aws-lambda": "^8.10.73",
     "@types/jest": "^26.0.21",
