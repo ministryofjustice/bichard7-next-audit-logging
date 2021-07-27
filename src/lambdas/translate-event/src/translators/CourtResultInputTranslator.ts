@@ -7,7 +7,7 @@ import type Translator from "./Translator"
 import transformEventDetails from "./transformEventDetails"
 
 const CourtResultInputTranslator: Translator = async (input: TranslateEventInput): PromiseResult<TranslationResult> => {
-  const { messageData, s3Path, eventSourceArn } = input
+  const { messageData, s3Path, eventSourceArn, messageType } = input
   // Court Result Inputs are in base64 encoded XML
   const xml = decodeBase64(messageData)
   const inputItem = await parseXml<CourtResultInput>(xml)
@@ -31,7 +31,7 @@ const CourtResultInputTranslator: Translator = async (input: TranslateEventInput
     return new Error("Failed to parse the Court Result Input")
   }
 
-  const event = transformEventDetails(logItem.logEvent, s3Path, eventSourceArn)
+  const event = transformEventDetails(logItem.logEvent, s3Path, eventSourceArn, messageType)
   return {
     messageId: logItem.logEvent.correlationID,
     event

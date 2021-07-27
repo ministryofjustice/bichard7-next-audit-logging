@@ -22,6 +22,7 @@ const createPayload = (messageFormat: MessageFormat): TranslateEventInput => {
     messageData: encodeBase64(content),
     messageFormat,
     eventSourceArn: "DummyArn",
+    messageType: "UNUSED",
     s3Path: "UNUSED"
   }
 }
