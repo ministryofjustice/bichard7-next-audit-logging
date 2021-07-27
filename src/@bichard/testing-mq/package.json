@@ -1,6 +1,6 @@
 {
-  "name": "@bichard-testing/lambda",
-  "description": "Provides functions to help with testing lambda functions",
+  "name": "@bichard/testing-mq",
+  "description": "Provides fake implementation of MQ gateway for testing",
   "version": "0.0.1",
   "private": true,
   "main": "dist/index.js",
@@ -9,15 +9,14 @@
     "dist/**/*"
   ],
   "devDependencies": {
-    "@bichard/testing": "file:../shared",
     "@types/jest": "^26.0.24",
     "jest": "^27.0.6",
     "rimraf": "^3.0.2",
     "ts-jest": "^27.0.3"
   },
   "dependencies": {
-    "aws-sdk": "^2.943.0",
-    "shared": "file:../../../../shared"
+    "@bichard/mq": "file:../mq",
+    "shared": "file:../../../shared"
   },
   "scripts": {
     "clean": "rimraf dist",

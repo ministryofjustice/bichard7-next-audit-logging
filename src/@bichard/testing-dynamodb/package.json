@@ -1,5 +1,5 @@
 {
-  "name": "@bichard-testing/dynamodb",
+  "name": "@bichard/testing-dynamodb",
   "description": "Provides fake implementation of DynamoDB gateway for testing",
   "version": "0.0.1",
   "private": true,
@@ -9,7 +9,6 @@
     "dist/**/*"
   ],
   "devDependencies": {
-    "@bichard/testing": "file:../shared",
     "@types/jest": "^26.0.24",
     "jest": "^27.0.6",
     "rimraf": "^3.0.2",
@@ -17,7 +16,7 @@
   },
   "dependencies": {
     "aws-sdk": "^2.943.0",
-    "shared": "file:../../../../shared"
+    "shared": "file:../../../shared"
   },
   "scripts": {
     "clean": "rimraf dist",

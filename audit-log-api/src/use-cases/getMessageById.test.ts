@@ -1,4 +1,4 @@
-import { FakeAuditLogDynamoGateway } from "@bichard-testing/dynamodb"
+import { FakeAuditLogDynamoGateway } from "@bichard/testing-dynamodb"
 import { AuditLog, isError } from "../../../shared/dist"
 import getMessageById from "./getMessageById"
 

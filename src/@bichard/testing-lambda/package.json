@@ -1,6 +1,6 @@
 {
-  "name": "@bichard-testing/s3",
-  "description": "Provides fake implementation of S3 gateway for testing",
+  "name": "@bichard/testing-lambda",
+  "description": "Provides functions to help with testing lambda functions",
   "version": "0.0.1",
   "private": true,
   "main": "dist/index.js",
@@ -9,16 +9,14 @@
     "dist/**/*"
   ],
   "devDependencies": {
-    "@bichard/testing": "file:../shared",
     "@types/jest": "^26.0.24",
     "jest": "^27.0.6",
     "rimraf": "^3.0.2",
     "ts-jest": "^27.0.3"
   },
   "dependencies": {
-    "@bichard/s3": "file:../../s3",
     "aws-sdk": "^2.943.0",
-    "shared": "file:../../../../shared"
+    "shared": "file:../../../shared"
   },
   "scripts": {
     "clean": "rimraf dist",

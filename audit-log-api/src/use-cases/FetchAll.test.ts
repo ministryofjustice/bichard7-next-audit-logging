@@ -1,5 +1,5 @@
 import { AuditLog, isError } from "shared"
-import { FakeAuditLogDynamoGateway } from "@bichard-testing/dynamodb"
+import { FakeAuditLogDynamoGateway } from "@bichard/testing-dynamodb"
 import FetchAll from "./FetchAll"
 
 const gateway = new FakeAuditLogDynamoGateway()

@@ -1,11 +1,11 @@
 jest.setTimeout(50000)
 
-import "@bichard-testing/jest"
+import "@bichard/testing-jest"
 import fs from "fs"
 import type { AmazonMqEventSourceRecordEvent, DynamoDbConfig, AuditLogEvent } from "shared"
 import { encodeBase64, AuditLog, AwsAuditLogDynamoGateway, Poller, PollOptions } from "shared"
 import TestDynamoGateway from "shared/dist/DynamoGateway/TestDynamoGateway"
-import { invokeFunction } from "@bichard-testing/lambda"
+import { invokeFunction } from "@bichard/testing-lambda"
 
 const config: DynamoDbConfig = {
   DYNAMO_URL: "http://localhost:4566",
