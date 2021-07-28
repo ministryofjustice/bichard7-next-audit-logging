@@ -21,15 +21,14 @@ test("parses the message data and returns an AuditLogEvent", async () => {
   const afterDate = new Date()
 
   const { messageId, event } = <TranslationResult>result
-  console.log(beforeDate, event.timestamp, afterDate)
   expect(messageId).toBe("{MESSAGE_ID}")
   expect(event.category).toBe("error")
   expect(event.eventSource).toBe("Translate Event")
   expect(event.eventType).toBe("Court Result Input Queue Failure")
 
-  const eventTimestamp = new Date(event.timestamp).getTime()
-  expect(eventTimestamp).toBeGreaterThanOrEqual(beforeDate.getTime())
-  expect(eventTimestamp).toBeLessThanOrEqual(afterDate.getTime())
+  const eventTimestamp = new Date(event.timestamp)
+  expect(eventTimestamp > beforeDate).toBe(true)
+  expect(eventTimestamp < afterDate).toBe(true)
 
   expect(event.s3Path).toBe("DummyPath")
   expect(event.eventSourceArn).toBe("DummyArn")
