@@ -4,7 +4,7 @@
   <componentID>Hearing Outcome Publication Choreography</componentID>
   <eventCategory>information</eventCategory>
   <eventType>Message Received</eventType>
-  <correlationID>EXTERNAL_CORRELATION_ID</correlationID>
+  <correlationID>{MESSAGE_ID}</correlationID>
   <eventDateTime>2021-06-29T08:35:36.031+00:00</eventDateTime>
   <nameValuePairs>
       <nameValuePair>
