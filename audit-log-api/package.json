@@ -36,6 +36,7 @@
   "devDependencies": {
     "@babel/preset-env": "^7.13.12",
     "@babel/preset-typescript": "^7.13.0",
+    "@bichard/testing-config": "file:../src/@bichard/testing-config",
     "@bichard/testing-dynamodb": "file:../src/@bichard/testing-dynamodb",
     "@bichard/testing-jest": "file:../src/@bichard/testing-jest",
     "@bichard/testing-mq": "file:../src/@bichard/testing-mq",

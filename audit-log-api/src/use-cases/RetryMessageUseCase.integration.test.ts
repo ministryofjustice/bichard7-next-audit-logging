@@ -2,46 +2,40 @@ jest.setTimeout(15000)
 
 import "@bichard/testing-jest"
 import fs from "fs"
-import type { DynamoDbConfig } from "shared"
+import { setEnvironmentVariables } from "@bichard/testing-config"
 import { AuditLog, BichardAuditLogEvent, AwsAuditLogDynamoGateway } from "shared"
 import TestDynamoGateway from "shared/dist/DynamoGateway/TestDynamoGateway"
 import * as Mq from "@bichard/mq"
 import * as S3 from "@bichard/s3"
 import { AuditLogApiClient } from "@bichard/api-client"
+import createDynamoDbConfig from "src/createDynamoDbConfig"
+import createS3Config from "src/createS3Config"
 import RetryMessageUseCase from "./RetryMessageUseCase"
 import GetLastEventUseCase from "./GetLastEventUseCase"
 import SendMessageToQueueUseCase from "./SendMessageToQueueUseCase"
 import RetrieveEventXmlFromS3UseCase from "./RetrieveEventXmlFromS3UseCase"
 import CreateRetryingEventUseCase from "./CreateRetryingEventUseCase"
 
-const awsUrl = "http://localhost:4566"
 const environmentVariables = JSON.parse(fs.readFileSync(`./scripts/env-vars.json`).toString())
 const apiUrl = String(environmentVariables.Variables.API_URL).replace("localstack_main", "localhost")
 
-const dynamoDbConfig: DynamoDbConfig = {
-  DYNAMO_URL: awsUrl,
-  DYNAMO_REGION: "us-east-1",
-  AUDIT_LOG_TABLE_NAME: "audit-log"
-}
+setEnvironmentVariables({
+  API_URL: apiUrl,
+  AUDIT_LOG_TABLE_NAME: "audit-log",
+  AUDIT_LOG_EVENTS_BUCKET: "audit-log-events"
+})
+
+const dynamoDbConfig = createDynamoDbConfig()
 const testDynamoGateway = new TestDynamoGateway(dynamoDbConfig)
 const auditLogDynamoGateway = new AwsAuditLogDynamoGateway(dynamoDbConfig, dynamoDbConfig.AUDIT_LOG_TABLE_NAME)
 const getLastEventUseCase = new GetLastEventUseCase(auditLogDynamoGateway)
 
 const queueName = "retry-event-integration-testing"
-const mqConfig: Mq.MqConfig = {
-  url: "failover:(stomp://localhost:51613)",
-  username: "admin",
-  password: "admin"
-}
+const mqConfig = Mq.createMqConfig()
 const mqGateway = new Mq.TestStompitMqGateway(mqConfig)
 const sendMessageToQueueUseCase = new SendMessageToQueueUseCase(mqGateway)
 
-const s3Config: S3.S3Config = {
-  url: awsUrl,
-  region: "us-east-1",
-  bucketName: "audit-log-events"
-}
-const s3Gateway = new S3.TestAwsS3Gateway(s3Config)
+const s3Gateway = new S3.TestAwsS3Gateway(createS3Config())
 const retrieveEventXmlFromS3UseCase = new RetrieveEventXmlFromS3UseCase(s3Gateway)
 
 const apiClient = new AuditLogApiClient(apiUrl)
