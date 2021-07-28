@@ -15,7 +15,6 @@ export default (
   messages: messages.map((message) => ({
     messageData: message.data,
     messageFormat,
-    messageType: message.messageType,
     eventSourceArn,
     eventSourceQueueName: getEventSourceQueueName(message)
   }))
