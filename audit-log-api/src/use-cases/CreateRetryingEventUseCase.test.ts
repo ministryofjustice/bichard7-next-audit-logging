@@ -1,14 +1,13 @@
 import "@bichard/testing-jest"
 import { isError } from "shared"
-import { AuditLogApiClient } from "@bichard/api-client"
+import { FakeApiClient } from "@bichard/testing-api-client"
 import CreateRetryingEventUseCase from "./CreateRetryingEventUseCase"
 
-const apiClient = new AuditLogApiClient("Dummy API URL")
-const useCase = new CreateRetryingEventUseCase(apiClient)
+const fakeApiClient = new FakeApiClient()
+const useCase = new CreateRetryingEventUseCase(fakeApiClient)
 
 it("should create event when message id exists in the database", async () => {
-  jest.spyOn(apiClient, "createEvent").mockResolvedValue()
-
+  fakeApiClient.reset()
   const result = await useCase.create("Message ID")
 
   expect(result).toNotBeError()
@@ -16,7 +15,7 @@ it("should create event when message id exists in the database", async () => {
 
 it("should return error when API returns error", async () => {
   const expectedError = new Error("Expected Error Message")
-  jest.spyOn(apiClient, "createEvent").mockResolvedValue(expectedError)
+  fakeApiClient.shouldReturnError(expectedError)
 
   const result = await useCase.create("Message ID")
 
