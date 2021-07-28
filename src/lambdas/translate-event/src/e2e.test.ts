@@ -39,7 +39,7 @@ interface TestInput {
 test.each<TestInput>([
   {
     messageFormat: "AuditEvent",
-    messageId: "EXTERNAL_CORRELATION_ID",
+    messageId: "{MESSAGE_ID}",
     category: "warning",
     eventSource: "ErrorHandlerScreenFlow",
     eventType: "Trigger Instances resolved",
@@ -47,7 +47,7 @@ test.each<TestInput>([
   },
   {
     messageFormat: "GeneralEvent",
-    messageId: "EXTERNAL_CORRELATION_ID",
+    messageId: "{MESSAGE_ID}",
     category: "information",
     eventSource: "Hearing Outcome Publication Choreography",
     eventType: "Message Received",
@@ -55,24 +55,31 @@ test.each<TestInput>([
   },
   {
     messageFormat: "CourtResultInput",
-    messageId: "EXTERNAL_CORRELATION_ID",
+    messageId: "{MESSAGE_ID}",
     category: "error",
     eventSource: "Translate Event",
     eventType: "Court Result Input Queue Failure",
-    timestamp: "2001-12-17T14:30:47.000Z"
+    timestamp: "UNUSED"
   }
 ])("$messageFormat is translated to AuditLogEvent type", async (input: TestInput) => {
+  const beforeTimestamp = new Date().toString()
   const payload = createPayload(input.messageFormat)
 
   const result = await invokeFunction<TranslateEventInput, TranslationResult>("translate-event", payload)
   expect(result).toNotBeError()
+  const afterTimestamp = new Date().toString()
 
   const { messageId, event } = <TranslationResult>result
   expect(messageId).toBe(input.messageId)
   expect(event.category).toBe(input.category)
   expect(event.eventSource).toBe(input.eventSource)
   expect(event.eventType).toBe(input.eventType)
-  expect(event.timestamp).toBe(input.timestamp)
+  if (filenameMappings[input.messageFormat] === "court-result-input") {
+    expect(new Date(event.timestamp).getTime()).toBeGreaterThanOrEqual(new Date(beforeTimestamp).getTime())
+    expect(new Date(event.timestamp).getTime()).toBeLessThanOrEqual(new Date(afterTimestamp).getTime())
+  } else {
+    expect(event.timestamp).toBe(input.timestamp)
+  }
   expect(event.eventSourceArn).toBe(payload.eventSourceArn)
   expect(event.s3Path).toBe(payload.s3Path)
 })

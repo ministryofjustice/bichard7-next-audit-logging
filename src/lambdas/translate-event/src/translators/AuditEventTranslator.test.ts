@@ -18,7 +18,7 @@ test("parses the message data and returns an AuditLogEvent", async () => {
   expect(isError(result)).toBe(false)
 
   const { messageId, event } = <TranslationResult>result
-  expect(messageId).toBe("EXTERNAL_CORRELATION_ID")
+  expect(messageId).toBe("{MESSAGE_ID}")
   expect(event.category).toBe("warning")
   expect(event.eventSource).toBe("ErrorHandlerScreenFlow")
   expect(event.eventType).toBe("Trigger Instances resolved")

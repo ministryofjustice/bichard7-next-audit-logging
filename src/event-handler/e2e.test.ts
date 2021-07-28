@@ -45,8 +45,8 @@ test.each<string>(["audit-event", "general-event", "court-result-input"])(
     await gateway.create(auditLog2)
 
     const rawMessage = fs.readFileSync(`../../events/${eventFilename}.xml`).toString()
-    const messageData1 = encodeBase64(rawMessage.replace("EXTERNAL_CORRELATION_ID", auditLog1.messageId))
-    const messageData2 = encodeBase64(rawMessage.replace("EXTERNAL_CORRELATION_ID", auditLog2.messageId))
+    const messageData1 = encodeBase64(rawMessage.replace("{MESSAGE_ID}", auditLog1.messageId))
+    const messageData2 = encodeBase64(rawMessage.replace("{MESSAGE_ID}", auditLog2.messageId))
 
     const event: AmazonMqEventSourceRecordEvent = {
       eventSource: eventFilename,
