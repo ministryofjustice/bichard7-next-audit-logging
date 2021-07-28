@@ -55,7 +55,7 @@ test.each<TestInput>([
   },
   {
     messageFormat: "CourtResultInput",
-    messageId: "{EXTERNAL_CORRELATION_ID}",
+    messageId: "EXTERNAL_CORRELATION_ID",
     category: "error",
     eventSource: "Translate Event",
     eventType: "Court Result Input Queue Failure",
