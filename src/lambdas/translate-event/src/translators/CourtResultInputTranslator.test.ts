@@ -14,18 +14,18 @@ test("parses the message data and returns an AuditLogEvent", async () => {
     messageFormat: "CourtResultInput",
     eventSourceQueueName: "DummyQueueName"
   }
-  const beforeDate = new Date().toString()
+  const beforeDate = new Date()
   const result = await CourtResultInputTranslator(eventInput)
   expect(isError(result)).toBe(false)
-  const afterDate = new Date().toString()
+  const afterDate = new Date()
 
   const { messageId, event } = <TranslationResult>result
   expect(messageId).toBe("{MESSAGE_ID}")
   expect(event.category).toBe("error")
   expect(event.eventSource).toBe("Translate Event")
   expect(event.eventType).toBe("Court Result Input Queue Failure")
-  expect(new Date(event.timestamp).getTime()).toBeGreaterThanOrEqual(new Date(beforeDate).getTime())
-  expect(new Date(event.timestamp).getTime()).toBeLessThanOrEqual(new Date(afterDate).getTime())
+  expect(new Date(event.timestamp).getTime()).toBeGreaterThanOrEqual(beforeDate.getTime())
+  expect(new Date(event.timestamp).getTime()).toBeLessThanOrEqual(afterDate.getTime())
 
   expect(event.s3Path).toBe("DummyPath")
   expect(event.eventSourceArn).toBe("DummyArn")

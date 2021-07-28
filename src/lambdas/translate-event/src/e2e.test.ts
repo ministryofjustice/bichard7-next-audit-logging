@@ -34,7 +34,6 @@ interface TestInput {
   category: EventCategory
   eventSource: string
   eventType: string
-  timestamp: string
 }
 
 test.each<TestInput>([
@@ -43,44 +42,33 @@ test.each<TestInput>([
     messageId: "{MESSAGE_ID}",
     category: "warning",
     eventSource: "ErrorHandlerScreenFlow",
-    eventType: "Trigger Instances resolved",
-    timestamp: "2021-06-29T08:34:22.789Z"
+    eventType: "Trigger Instances resolved"
   },
   {
     messageFormat: "GeneralEvent",
     messageId: "{MESSAGE_ID}",
     category: "information",
     eventSource: "Hearing Outcome Publication Choreography",
-    eventType: "Message Received",
-    timestamp: "2021-06-29T08:35:36.031Z"
+    eventType: "Message Received"
   },
   {
     messageFormat: "CourtResultInput",
     messageId: "{MESSAGE_ID}",
     category: "error",
     eventSource: "Translate Event",
-    eventType: "Court Result Input Queue Failure",
-    timestamp: "UNUSED"
+    eventType: "Court Result Input Queue Failure"
   }
 ])("$messageFormat is translated to AuditLogEvent type", async (input: TestInput) => {
-  const beforeTimestamp = new Date().toString()
   const payload = createPayload(input.messageFormat)
 
   const result = await invokeFunction<TranslateEventInput, TranslationResult>("translate-event", payload)
   expect(result).toNotBeError()
-  const afterTimestamp = new Date().toString()
 
   const { messageId, event } = <TranslationResult>result
   expect(messageId).toBe(input.messageId)
   expect(event.category).toBe(input.category)
   expect(event.eventSource).toBe(input.eventSource)
   expect(event.eventType).toBe(input.eventType)
-  if (filenameMappings[input.messageFormat] === "court-result-input") {
-    expect(new Date(event.timestamp).getTime()).toBeGreaterThanOrEqual(new Date(beforeTimestamp).getTime())
-    expect(new Date(event.timestamp).getTime()).toBeLessThanOrEqual(new Date(afterTimestamp).getTime())
-  } else {
-    expect(event.timestamp).toBe(input.timestamp)
-  }
   expect(event.eventSourceArn).toBe(payload.eventSourceArn)
   expect(event.s3Path).toBe(payload.s3Path)
   expect(event.eventSourceQueueName).toBe(payload.eventSourceQueueName)
