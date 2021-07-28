@@ -17,6 +17,7 @@ jobs:
             - v1-npm-deps-{{ checksum "src/@bichard/mq/package-lock.json" }}
             - v1-npm-deps-{{ checksum "src/@bichard/s3/package-lock.json" }}
             - v1-npm-deps-{{ checksum "src/@bichard/testing-jest/package-lock.json" }}
+            - v1-npm-deps-{{ checksum "src/@bichard/testing-config/package-lock.json" }}
             - v1-npm-deps-{{ checksum "src/@bichard/testing-mq/package-lock.json" }}
             - v1-npm-deps-{{ checksum "src/@bichard/testing-s3/package-lock.json" }}
             - v1-npm-deps-{{ checksum "src/@bichard/testing-lambda/package-lock.json" }}
