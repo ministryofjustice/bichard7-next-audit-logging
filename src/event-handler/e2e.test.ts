@@ -55,17 +55,26 @@ test.each<string>(["audit-event", "general-event"])(
         {
           messageID: auditLog1.messageId,
           messageType: "messageType",
-          data: messageData1
+          data: messageData1,
+          destination: {
+            physicalName: ""
+          }
         },
         {
           messageID: auditLog1.messageId,
           messageType: "messageType",
-          data: messageData1
+          data: messageData1,
+          destination: {
+            physicalName: ""
+          }
         },
         {
           messageID: auditLog2.messageId,
           messageType: "messageType",
-          data: messageData2
+          data: messageData2,
+          destination: {
+            physicalName: ""
+          }
         }
       ]
     }

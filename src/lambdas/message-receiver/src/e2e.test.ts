@@ -12,7 +12,10 @@ test("given a message, the Step Function is invoked", async () => {
       {
         messageID: "",
         messageType: "",
-        data: ""
+        data: "",
+        destination: {
+          physicalName: ""
+        }
       }
     ]
   }

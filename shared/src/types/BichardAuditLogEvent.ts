@@ -6,9 +6,12 @@ export default class BichardAuditLogEvent extends AuditLogEvent {
 
   public readonly eventSourceArn: string
 
-  constructor({ eventSourceArn, s3Path, ...options }: BichardAuditLogEventOptions) {
+  public readonly eventSourceQueueName: string
+
+  constructor({ eventSourceQueueName, eventSourceArn, s3Path, ...options }: BichardAuditLogEventOptions) {
     super(options)
 
+    this.eventSourceQueueName = eventSourceQueueName
     this.eventSourceArn = eventSourceArn
     this.s3Path = s3Path
   }
