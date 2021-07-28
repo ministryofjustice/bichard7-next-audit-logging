@@ -23,9 +23,8 @@ const CourtResultInputTranslator: Translator = async (input: TranslateEventInput
     eventType: "Court Result Input Queue Failure",
     eventCategory: "error",
     correlationID: inputItem.DeliverRequest.MessageIdentifier,
-    eventDateTime: new Date().toString()
+    eventDateTime: new Date().toUTCString()
   }
-
   const event = transformEventDetails(logItem, s3Path, eventSourceArn, eventSourceQueueName)
   return {
     messageId: logItem.correlationID,
