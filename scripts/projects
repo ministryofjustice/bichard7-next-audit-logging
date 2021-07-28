@@ -3,6 +3,7 @@ src/@bichard/api-client
 src/@bichard/mq
 src/@bichard/s3
 src/@bichard/testing-jest
+src/@bichard/testing-config
 src/@bichard/testing-mq
 src/@bichard/testing-s3
 src/@bichard/testing-lambda
