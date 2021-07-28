@@ -22,6 +22,7 @@ jobs:
             - v1-npm-deps-{{ checksum "src/@bichard/testing-s3/package-lock.json" }}
             - v1-npm-deps-{{ checksum "src/@bichard/testing-lambda/package-lock.json" }}
             - v1-npm-deps-{{ checksum "src/@bichard/testing-dynamodb/package-lock.json" }}
+            - v1-npm-deps-{{ checksum "src/@bichard/testing-api-client/package-lock.json" }}
             - v1-npm-deps-{{ checksum "src/@lambdas/store-in-s3/package-lock.json" }}
             - v1-npm-deps-{{ checksum "src/@lambdas/translate-event/package-lock.json" }}
             - v1-npm-deps-{{ checksum "src/@lambdas/record-event/package-lock.json" }}
@@ -86,6 +87,10 @@ jobs:
           paths: src/@bichard/testing-dynamodb/node_modules
 
       - save_cache:
+          key: v1-npm-deps-{{ checksum "src/@bichard/testing-api-client/package-lock.json" }}
+          paths: src/@bichard/testing-api-client/node_modules
+
+      - save_cache:
           key: v1-npm-deps-{{ checksum "src/lambdas/store-in-s3/package-lock.json" }}
           paths: src/lambdas/store-in-s3/node_modules
 
@@ -135,6 +140,7 @@ jobs:
             - src/@bichard/testing-s3/dist
             - src/@bichard/testing-lambda/dist
             - src/@bichard/testing-dynamodb/dist
+            - src/@bichard/testing-api-client/dist
             - src/lambdas/store-in-s3/build
             - src/lambdas/translate-event/build
             - src/lambdas/record-event/build
@@ -185,6 +191,9 @@ jobs:
 
       - restore_cache:
           key: v1-npm-deps-{{ checksum "src/@bichard/testing-dynamodb/package-lock.json" }}
+
+      - restore_cache:
+          key: v1-npm-deps-{{ checksum "src/@bichard/testing-api-client/package-lock.json" }}
 
       - restore_cache:
           key: v1-npm-deps-{{ checksum "src/lambdas/store-in-s3/package-lock.json" }}
@@ -253,6 +262,8 @@ jobs:
           path: ./src/@bichard/testing-lambda/test-results/jest/
       - store_test_results:
           path: ./src/@bichard/testing-dynamodb/test-results/jest/
+      - store_test_results:
+          path: ./src/@bichard/testing-api-client/test-results/jest/
       - store_test_results:
           path: ./src/lambdas/store-in-s3/test-results/jest/
       - store_test_results:
