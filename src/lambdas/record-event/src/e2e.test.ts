@@ -31,7 +31,8 @@ describe("Record Event end-to-end", () => {
       eventType: "Test Event",
       timestamp: new Date(),
       eventSourceArn: "DummyArn",
-      s3Path: "DummyPath"
+      s3Path: "DummyPath",
+      eventSourceQueueName: "DummyQueue"
     })
 
     const input: RecordEventInput = {

@@ -25,7 +25,8 @@ describe("StoreInS3UseCase", () => {
     const message: EventMessage = {
       messageData: "DummyXML",
       messageFormat: "AuditEvent",
-      eventSourceArn: "DummyArn"
+      eventSourceArn: "DummyArn",
+      eventSourceQueueName: "DummyQueueName"
     }
 
     const useCase = new StoreInS3UseCase(gateway)

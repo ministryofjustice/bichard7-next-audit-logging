@@ -27,7 +27,8 @@ describe("Store in S3 end-to-end", () => {
     const message: EventMessage = {
       messageData: "DummyData",
       messageFormat: "AuditEvent",
-      eventSourceArn: "DummyArn"
+      eventSourceArn: "DummyArn",
+      eventSourceQueueName: "DummyQueueName"
     }
 
     const result = await invokeFunction<EventMessage, StoreInS3Result>("store-in-s3", message)
