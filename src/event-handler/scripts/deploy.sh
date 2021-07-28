@@ -51,3 +51,4 @@ function create_message_receiver {
 
 create_message_receiver "AuditEvent" "audit-event"
 create_message_receiver "GeneralEvent" "general-event"
+create_message_receiver "CourtResultInput" "court-result-input"

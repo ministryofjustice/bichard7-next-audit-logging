@@ -4,7 +4,7 @@
     <componentID>ErrorHandlerScreenFlow</componentID>
     <eventCategory>warning</eventCategory>
     <eventType>Trigger Instances resolved</eventType>
-    <correlationID>EXTERNAL_CORRELATION_ID</correlationID>
+    <correlationID>{MESSAGE_ID}</correlationID>
     <eventDateTime>2021-06-29T08:34:22.789+00:00</eventDateTime>
     <nameValuePairs>
         <nameValuePair>
