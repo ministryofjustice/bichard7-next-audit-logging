@@ -8,7 +8,6 @@ export default async (event: TranslateEventInput): Promise<TranslationResult> =>
   if (isError(translator)) {
     throw translator
   }
-
   const translationResult = await translator(event)
 
   if (isError(translationResult)) {

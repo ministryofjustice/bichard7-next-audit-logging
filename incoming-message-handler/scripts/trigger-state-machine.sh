@@ -1,9 +1,11 @@
 #!/bin/bash
 
+args=("$@")
 set -e
 
 LAMBDA_NAME=IncomingMessageHandler
 BUCKET_NAME=incoming-messages
+
 MESSAGE_PATH=$PWD/scripts/message.xml
 RECEIVED_DATE=$(date -u +'%Y/%m/%d/%H/%M')
 MESSAGE_ID="LIBRA-EXISS-$(date -u +'%s')"

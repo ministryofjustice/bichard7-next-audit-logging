@@ -22,7 +22,6 @@ export default (
   eventSourceQueueName: string
 ): BichardAuditLogEvent => {
   const { eventCategory, eventDateTime, eventType, componentID, nameValuePairs } = eventDetails
-
   const category = mapEventCategory(eventCategory)
   const timestamp = new Date(eventDateTime)
 

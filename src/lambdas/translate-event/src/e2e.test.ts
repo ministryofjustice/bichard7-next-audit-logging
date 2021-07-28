@@ -10,7 +10,8 @@ import type TranslationResult from "./translators/TranslationResult"
 
 const filenameMappings: Record<MessageFormat, string> = {
   AuditEvent: "audit-event",
-  GeneralEvent: "general-event"
+  GeneralEvent: "general-event",
+  CourtResultInput: "court-result-input"
 }
 
 const createPayload = (messageFormat: MessageFormat): TranslateEventInput => {
@@ -33,25 +34,29 @@ interface TestInput {
   category: EventCategory
   eventSource: string
   eventType: string
-  timestamp: string
 }
 
 test.each<TestInput>([
   {
     messageFormat: "AuditEvent",
-    messageId: "EXTERNAL_CORRELATION_ID",
+    messageId: "{MESSAGE_ID}",
     category: "warning",
     eventSource: "ErrorHandlerScreenFlow",
-    eventType: "Trigger Instances resolved",
-    timestamp: "2021-06-29T08:34:22.789Z"
+    eventType: "Trigger Instances resolved"
   },
   {
     messageFormat: "GeneralEvent",
-    messageId: "EXTERNAL_CORRELATION_ID",
+    messageId: "{MESSAGE_ID}",
     category: "information",
     eventSource: "Hearing Outcome Publication Choreography",
-    eventType: "Message Received",
-    timestamp: "2021-06-29T08:35:36.031Z"
+    eventType: "Message Received"
+  },
+  {
+    messageFormat: "CourtResultInput",
+    messageId: "{MESSAGE_ID}",
+    category: "error",
+    eventSource: "Translate Event",
+    eventType: "Court Result Input Queue Failure"
   }
 ])("$messageFormat is translated to AuditLogEvent type", async (input: TestInput) => {
   const payload = createPayload(input.messageFormat)
@@ -64,7 +69,6 @@ test.each<TestInput>([
   expect(event.category).toBe(input.category)
   expect(event.eventSource).toBe(input.eventSource)
   expect(event.eventType).toBe(input.eventType)
-  expect(event.timestamp).toBe(input.timestamp)
   expect(event.eventSourceArn).toBe(payload.eventSourceArn)
   expect(event.s3Path).toBe(payload.s3Path)
   expect(event.eventSourceQueueName).toBe(payload.eventSourceQueueName)

@@ -1,4 +1,4 @@
-jest.setTimeout(50000)
+jest.setTimeout(90000)
 
 import "@bichard/testing-jest"
 import fs from "fs"
@@ -35,7 +35,7 @@ beforeEach(async () => {
   await testGateway.deleteAll(config.AUDIT_LOG_TABLE_NAME, "messageId")
 })
 
-test.each<string>(["audit-event", "general-event"])(
+test.each<string>(["audit-event", "general-event", "court-result-input"])(
   "given the event, the step function is invoked with 3 duplicate events across 2 messages",
   async (eventFilename: string) => {
     const auditLog1 = new AuditLog("CorrelationId1", new Date(), "XML")
@@ -45,8 +45,8 @@ test.each<string>(["audit-event", "general-event"])(
     await gateway.create(auditLog2)
 
     const rawMessage = fs.readFileSync(`../../events/${eventFilename}.xml`).toString()
-    const messageData1 = encodeBase64(rawMessage.replace("EXTERNAL_CORRELATION_ID", auditLog1.messageId))
-    const messageData2 = encodeBase64(rawMessage.replace("EXTERNAL_CORRELATION_ID", auditLog2.messageId))
+    const messageData1 = encodeBase64(rawMessage.replace("{MESSAGE_ID}", auditLog1.messageId))
+    const messageData2 = encodeBase64(rawMessage.replace("{MESSAGE_ID}", auditLog2.messageId))
 
     const event: AmazonMqEventSourceRecordEvent = {
       eventSource: eventFilename,
