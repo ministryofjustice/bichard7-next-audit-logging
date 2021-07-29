@@ -27,8 +27,7 @@ test("parses the message data and returns an AuditLogEvent", async () => {
   expect(event.eventType).toBe("Court Result Input Queue Failure")
 
   const eventTimestamp = new Date(event.timestamp)
-  expect(eventTimestamp > beforeDate).toBe(true)
-  expect(eventTimestamp < afterDate).toBe(true)
+  expect(eventTimestamp).toBeBetween(beforeDate, afterDate)
 
   expect(event.s3Path).toBe("DummyPath")
   expect(event.eventSourceArn).toBe("DummyArn")
