@@ -19,18 +19,31 @@ The following requirements must be installed to develop on and run the projects 
 
 This repository currently contains multiple projects to support easy local referencing and development. The future vision is to move some/all of the individual projects out into their own repositories/packages. For more information on what the purpose of each project is, take a look at the README file for each.
 
-1. [Handlers Common](shared/) - Library of components common to multiple projects in this repository
-2. [API](audit-log-api/) - API exposing Audit Log records and attached events
-3. [Incoming Message Handler](incoming-message-handler/) - AWS Step Functions and Lambdas for intercepting and processing messages coming into the Bichard system
-4. [Portal](audit-log-portal/) - Web-based portal allowing access to view and explore all Audit Log records and their events
+1. [Shared](shared/) - Library of components common to multiple projects in this repository. It is a work in progress to break this out into separate libraries under the `src/@bichard/` folder.
+1. [Libraries](src/@bichard/) - A collection of shared libraries, separated into specific modules.
+   1. [API Client](src/@bichard/api-client/)
+   1. [MQ](src/@bichard/mq/)
+   1. [S3](src/@bichard/s3/)
+1. Testing Libraries - A collection of extensions for other shared libraries to support testing scenarios.
+   1. [API Client](src/@bichard/testing-api-client/)
+   1. [Config](src/@bichard/testing-config/)
+   1. [DynamoDB](src/@bichard/testing-dynamodb/)
+   1. [Jest](src/@bichard/testing-jest/)
+   1. [Lambda](src/@bichard/testing-lambda/)
+   1. [MQ](src/@bichard/testing-mq/)
+   1. [S3](src/@bichard/testing-s3/)
+1. [API](audit-log-api/) - API exposing Audit Log records and attached events
+1. [Incoming Message Handler](incoming-message-handler/) - AWS Step Functions and Lambdas for intercepting and processing messages coming into the Bichard system
+1. [Event Handler](src/event-handler/) - A component that handles messages received from queues and translates them into Audit Log events.
+1. [Portal](audit-log-portal/) - Web-based portal allowing access to view and explore all Audit Log records and their events
 
 ## Quickstart
 
 Once all prerequisites are installed, you can do the followings:
 
 - Run `make run-all` to deploy and run all components. After running this command, you should be able to access to the portal at [http://localhost:3000](http://localhost:3000)
-- Run `make run-all-e2e` to deploy and run all components required for solution-level end-to-end testing.
-- Run `make destroy-all` to destroy the local infrastructure.
+  > Note: If you want to develop against the portal, you will need to instead run `make run-all-without-portal` and then launch the Portal from the `audit-logging-portal/` folder with the command `npm run dev`.
+- Run `make destroy` to destroy the local infrastructure.
 
 ## Development
 
@@ -39,15 +52,18 @@ Once all prerequisites are installed, you can do the followings:
 Since we use shared local modules in these projects, there are some dependencies that denote a build order for dependent projects. The easiest way is to using the preset scripts to build:
 
 ```shell
-$ scripts/install-all.sh
-$ scripts/build-all.sh
+$ make build
 ```
 
 > Check the `scripts/projects` file to see the build order.
 
-You will also need to run `npm i` in the root directory to install any local configuration dependencies that manage the repository as a whole, such as Husky for pre-commit handling.
-
 ### Testing
+
+The easiest way to run all tests is with the Make command:
+
+```shell
+$ make test
+```
 
 Where applicable, each project has tests that are run by Jest. To run these, simply run `npm test` from within the relevant project folder. Projects may also have different test scripts that you can run with the following commands:
 
@@ -66,10 +82,9 @@ All of these approaches will execute tests in a watch mode, which will allow you
 
 Before you commit and push your code, and especially before raising a pull request, make sure you run through the following steps first.
 
-1. All projects and modules build.
-2. You have run `npm run lint` from the root of the repository and fixed any related errors or warnings.
-3. You have built all projects using `npm run build` or `npm run build:dev` where applicable.
-4. You have run `npm test` in all projects where appropriate and all tests pass.
+1. You have run `make validate` from the root of the repository and fixed any related errors or warnings.
+1. You have built all projects using `make build`.
+1. You have run `make test` and all tests pass.
 
 # A note on running the docker container locally
 
