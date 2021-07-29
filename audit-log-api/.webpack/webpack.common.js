@@ -6,7 +6,8 @@ module.exports = {
     getMessages: "./src/handlers/getMessages.ts",
     createAuditLog: "./src/handlers/createAuditLog.ts",
     createAuditLogEvent: "./src/handlers/createAuditLogEvent.ts",
-    getEvents: "./src/handlers/getEvents.ts"
+    getEvents: "./src/handlers/getEvents.ts",
+    retryMessage: "./src/handlers/retryMessage.ts"
   },
   resolve: {
     modules: [path.resolve("./node_modules"), path.resolve(".")],

@@ -7,6 +7,8 @@ const getMessageStatus = (event: AuditLogEvent): string => {
       return AuditLogStatus.completed
     case "PNC Response not received":
       return AuditLogStatus.error
+    case "Retrying failed message":
+      return AuditLogStatus.retrying
     default:
       return AuditLogStatus.processing
   }

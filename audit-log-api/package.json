@@ -7,11 +7,11 @@
     "build": "rimraf build && webpack --config ./.webpack/webpack.prod.js",
     "build:dev": "rimraf build && webpack --config ./.webpack/webpack.dev.js",
     "setup:env": "cd ../environment && ./setup.sh && cd -",
-    "test": "npm run setup:env && ../scripts/test.sh",
-    "test:ci": "npm run setup:env && ../scripts/test.sh ci",
+    "test": "npm run start && ../scripts/test.sh",
+    "test:ci": "npm run start && ../scripts/test.sh ci",
     "test:unit": "../scripts/test.sh unit",
-    "test:integration": "npm run setup:env && ../scripts/test.sh integration",
-    "test:e2e": "npm run setup:env && ../scripts/test.sh e2e",
+    "test:integration": "npm run start && ../scripts/test.sh integration",
+    "test:e2e": "npm run start && ../scripts/test.sh e2e",
     "start": "npm run build:dev && npm run setup:env && ./scripts/deploy-infrastructure.sh"
   },
   "repository": {
@@ -25,14 +25,23 @@
   },
   "homepage": "https://github.com/ministryofjustice/bichard7-next-services#readme",
   "dependencies": {
+    "@bichard/api-client": "file:../src/@bichard/api-client",
+    "@bichard/mq": "file:../src/@bichard/mq",
+    "@bichard/s3": "file:../src/@bichard/s3",
     "aws-lambda": "^1.0.6",
-    "shared": "file:../shared"
+    "axios": "^0.21.1",
+    "shared": "file:../shared",
+    "stompit": "^1.0.0"
   },
   "devDependencies": {
     "@babel/preset-env": "^7.13.12",
     "@babel/preset-typescript": "^7.13.0",
+    "@bichard/testing-api-client": "file:../src/@bichard/testing-api-client",
+    "@bichard/testing-config": "file:../src/@bichard/testing-config",
     "@bichard/testing-dynamodb": "file:../src/@bichard/testing-dynamodb",
     "@bichard/testing-jest": "file:../src/@bichard/testing-jest",
+    "@bichard/testing-mq": "file:../src/@bichard/testing-mq",
+    "@bichard/testing-s3": "file:../src/@bichard/testing-s3",
     "@types/aws-lambda": "^8.10.73",
     "@types/jest": "^26.0.21",
     "babel-loader": "^8.2.2",
