@@ -1,5 +1,6 @@
+import "@bichard/testing-jest"
 import type { EventCategory } from "shared"
-import { BichardAuditLogEvent, isError } from "shared"
+import { BichardAuditLogEvent } from "shared"
 import validateEventForRetry from "./validateEventForRetry"
 
 const createAuditLogEvent = (category: EventCategory, s3Path?: string, eventSourceQueueName?: string) => {
@@ -19,10 +20,7 @@ it("should return error when event category is not error", () => {
 
   const result = validateEventForRetry(event)
 
-  expect(isError(result)).toBe(true)
-
-  const error = <Error>result
-  expect(error.message).toBe("This message has not failed and cannot be retried")
+  expect(result).toBeError("This message has not failed and cannot be retried")
 })
 
 it("should return error when event does not have S3 path and queue name", () => {
@@ -30,8 +28,5 @@ it("should return error when event does not have S3 path and queue name", () => 
 
   const result = validateEventForRetry(event)
 
-  expect(isError(result)).toBe(true)
-
-  const error = <Error>result
-  expect(error.message).toBe("Failed to retrieve the source event, so unable to retry")
+  expect(result).toBeError("Failed to retrieve the source event, so unable to retry")
 })

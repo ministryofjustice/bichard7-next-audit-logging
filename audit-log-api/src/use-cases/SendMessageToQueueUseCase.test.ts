@@ -1,6 +1,5 @@
 import "@bichard/testing-jest"
 import { FakeMqGateway } from "@bichard/testing-mq"
-import { isError } from "shared"
 import SendMessageToQueueUseCase from "./SendMessageToQueueUseCase"
 
 const gateway = new FakeMqGateway()
@@ -19,8 +18,5 @@ it("should return error when MQ gateway throws exception", async () => {
   gateway.shouldReturnError(expectedError)
   const result = await useCase.send("Dummy Queue Name", "Dummy Message")
 
-  expect(isError(result)).toBe(true)
-
-  const error = <Error>result
-  expect(error.message).toBe(expectedError.message)
+  expect(result).toBeError(expectedError.message)
 })

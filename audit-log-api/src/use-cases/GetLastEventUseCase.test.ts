@@ -1,7 +1,7 @@
 import "@bichard/testing-jest"
 import { FakeAuditLogDynamoGateway } from "@bichard/testing-dynamodb"
 import type { EventCategory } from "shared"
-import { AuditLog, AuditLogEvent, BichardAuditLogEvent, isError } from "shared"
+import { AuditLog, AuditLogEvent, BichardAuditLogEvent } from "shared"
 import GetLastEventUseCase from "./GetLastEventUseCase"
 
 const auditLogDynamoGateway = new FakeAuditLogDynamoGateway()
@@ -58,18 +58,12 @@ it("should return error when there are no events against the message", async () 
   auditLogDynamoGateway.reset([message])
   const result = await useCase.get(message.messageId)
 
-  expect(isError(result)).toBe(true)
-
-  const error = <Error>result
-  expect(error.message).toBe(`No events found for message '${message.messageId}'`)
+  expect(result).toBeError(`No events found for message '${message.messageId}'`)
 })
 
 it("should return error when message does not exist", async () => {
   auditLogDynamoGateway.reset([])
   const result = await useCase.get("Dummy Message Id")
 
-  expect(isError(result)).toBe(true)
-
-  const error = <Error>result
-  expect(error.message).toBe("No events found for message 'Dummy Message Id'")
+  expect(result).toBeError("No events found for message 'Dummy Message Id'")
 })

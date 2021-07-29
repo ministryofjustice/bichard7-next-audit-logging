@@ -1,5 +1,4 @@
 import "@bichard/testing-jest"
-import { isError } from "shared"
 import { FakeApiClient } from "@bichard/testing-api-client"
 import CreateRetryingEventUseCase from "./CreateRetryingEventUseCase"
 
@@ -19,8 +18,5 @@ it("should return error when API returns error", async () => {
 
   const result = await useCase.create("Message ID")
 
-  expect(isError(result)).toBe(true)
-
-  const error = <Error>result
-  expect(error.message).toBe(expectedError.message)
+  expect(result).toBeError(expectedError.message)
 })
