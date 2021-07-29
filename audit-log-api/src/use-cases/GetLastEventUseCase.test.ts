@@ -16,16 +16,21 @@ const createEvent = (date: string, category: EventCategory): AuditLogEvent => {
     eventSource: "Dummy Event Source"
   })
 }
+const createBichardEvent = (date: string, category: EventCategory): BichardAuditLogEvent => {
+  const event = createEvent(date, category)
+
+  return {
+    ...event,
+    s3Path: "Expected S3 Path",
+    eventSourceArn: "Expected Event Source ARN",
+    eventSourceQueueName: "Expected Queue Name"
+  } as BichardAuditLogEvent
+}
 
 it("should return the last event when message exists and has events", async () => {
   const message = createAuditLog()
   message.events.push(createEvent("2021-07-22T09:10:10", "information"))
-  message.events.push({
-    ...createEvent("2021-07-22T12:10:10", "error"),
-    s3Path: "Expected S3 Path",
-    eventSourceArn: "Expected Event Source ARN",
-    eventSourceQueueName: "Expected Queue Name"
-  } as BichardAuditLogEvent)
+  message.events.push(createBichardEvent("2021-07-22T12:10:10", "error"))
   message.events.push(createEvent("2021-07-22T10:10:10", "information"))
 
   auditLogDynamoGateway.reset([message])
