@@ -6,7 +6,7 @@ import SendMessageToQueueUseCase from "./SendMessageToQueueUseCase"
 const gateway = new FakeMqGateway()
 const useCase = new SendMessageToQueueUseCase(gateway)
 
-it("should be sucessfull when MQ gateway successfully pushes the message to the queue", async () => {
+it("should be sucessful when MQ gateway successfully pushes the message to the queue", async () => {
   gateway.reset()
   const result = await useCase.send("Dummy Queue Name", "Dummy Message")
 

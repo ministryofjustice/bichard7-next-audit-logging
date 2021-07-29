@@ -5,11 +5,11 @@ import fs from "fs"
 import { setEnvironmentVariables } from "@bichard/testing-config"
 import { AuditLog, BichardAuditLogEvent, AwsAuditLogDynamoGateway } from "shared"
 import TestDynamoGateway from "shared/dist/DynamoGateway/TestDynamoGateway"
-import * as Mq from "@bichard/mq"
-import * as S3 from "@bichard/s3"
 import { AuditLogApiClient } from "@bichard/api-client"
 import createDynamoDbConfig from "src/createDynamoDbConfig"
 import createS3Config from "src/createS3Config"
+import { createMqConfig, TestStompitMqGateway } from "@bichard/mq"
+import { TestAwsS3Gateway } from "@bichard/s3"
 import RetryMessageUseCase from "./RetryMessageUseCase"
 import GetLastEventUseCase from "./GetLastEventUseCase"
 import SendMessageToQueueUseCase from "./SendMessageToQueueUseCase"
@@ -31,11 +31,11 @@ const auditLogDynamoGateway = new AwsAuditLogDynamoGateway(dynamoDbConfig, dynam
 const getLastEventUseCase = new GetLastEventUseCase(auditLogDynamoGateway)
 
 const queueName = "retry-event-integration-testing"
-const mqConfig = Mq.createMqConfig()
-const mqGateway = new Mq.TestStompitMqGateway(mqConfig)
+const mqConfig = createMqConfig()
+const mqGateway = new TestStompitMqGateway(mqConfig)
 const sendMessageToQueueUseCase = new SendMessageToQueueUseCase(mqGateway)
 
-const s3Gateway = new S3.TestAwsS3Gateway(createS3Config())
+const s3Gateway = new TestAwsS3Gateway(createS3Config())
 const retrieveEventXmlFromS3UseCase = new RetrieveEventXmlFromS3UseCase(s3Gateway)
 
 const apiClient = new AuditLogApiClient(apiUrl)

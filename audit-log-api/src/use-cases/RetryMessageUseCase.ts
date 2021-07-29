@@ -44,10 +44,6 @@ export default class RetryMessageUseCase {
 
     const createRetryingEventResult = await this.createRetryingEventUseCase.create(messageId)
 
-    if (isError(createRetryingEventResult)) {
-      return createRetryingEventResult
-    }
-
-    return undefined
+    return createRetryingEventResult
   }
 }
