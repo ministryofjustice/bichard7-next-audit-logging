@@ -2,6 +2,10 @@
 
 set -e
 
+SCRIPTS_PATH=$PWD/scripts
+
+source $SCRIPTS_PATH/../../environment/audit-log-api-url.sh
+
 REGION=us-east-1
 STAGE=dev
 
@@ -15,7 +19,8 @@ function create_lambda {
       --code S3Bucket="__local__",S3Key="$PWD/build" \
       --handler "$HANDLER_NAME" \
       --runtime nodejs14.x \
-      --role whatever
+      --role whatever \
+      --timeout 15
   fi
 
   # Configure the lambda with environment variables
@@ -128,12 +133,46 @@ function deploy_api {
   echo "API available at: http://localhost:4566/restapis/$API_ID/$STAGE/_user_request_/"
 }
 
+function update_env_vars_file {
+  local env_path=$SCRIPTS_PATH/env-vars.json
+  local api_url=$(get_audit_log_api_url localstack_main)
+
+  if [[ -z $api_url ]]; then
+    echo "Failed to retrieve the API URL"
+    exit 1
+  fi
+
+  if [[ -z "$MQ_HOST" ]]; then
+    MQ_HOST=mq:61613
+  fi
+
+  cat > $env_path <<- EOM
+{
+  "Variables": {
+    "MQ_URL": "failover:(stomp://$MQ_HOST)",
+    "MQ_USER": "admin",
+    "MQ_PASSWORD": "admin",
+    "AWS_URL": "http://localstack_main:4566",
+    "AWS_REGION": "us-east-1",
+    "AUDIT_LOG_EVENTS_BUCKET": "audit-log-events",
+    "AUDIT_LOG_TABLE_NAME": "audit-log",
+    "API_URL": "$api_url"
+  }
+}
+EOM
+}
+
+# Create audit log api
 create_rest_api "AuditLogApi"
+
+# Update environment variables file
+update_env_vars_file
 
 # Paths
 MESSAGES_PATH="/messages"
 SINGLE_MESSAGE_PATH="/messages/{messageId}"
 EVENTS_PATH="/messages/{messageId}/events"
+RETRY_MESSAGE_PATH="/messages/{messageId}/retry"
 
 # GET /messages
 create_lambda "GetMessages" "getMessages.default"
@@ -155,5 +194,9 @@ create_rest_endpoint "AuditLogApi" "events" "GET" "GetEvents" $EVENTS_PATH $MESS
 # POST /messages/{messageId}/events
 create_lambda "CreateAuditLogEvent" "createAuditLogEvent.default"
 create_rest_endpoint "AuditLogApi" "events" "POST" "CreateAuditLogEvent" $EVENTS_PATH $MESSAGES_PROXY_RESOURCE_ID
+
+# POST /messages/{messageId}/retry
+create_lambda "RetryMessage" "retryMessage.default"
+create_rest_endpoint "AuditLogApi" "retry" "POST" "RetryMessage" $RETRY_MESSAGE_PATH $MESSAGES_PROXY_RESOURCE_ID
 
 deploy_api "AuditLogApi"

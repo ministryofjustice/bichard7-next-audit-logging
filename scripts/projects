@@ -3,10 +3,12 @@ src/@bichard/api-client
 src/@bichard/mq
 src/@bichard/s3
 src/@bichard/testing-jest
+src/@bichard/testing-config
 src/@bichard/testing-mq
 src/@bichard/testing-s3
 src/@bichard/testing-lambda
 src/@bichard/testing-dynamodb
+src/@bichard/testing-api-client
 src/lambdas/store-in-s3
 src/lambdas/translate-event
 src/lambdas/record-event
