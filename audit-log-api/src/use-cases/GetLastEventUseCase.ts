@@ -15,15 +15,6 @@ export default class GetLastEventUseCase {
       return new Error(`No events found for message '${messageId}'`)
     }
 
-    const lastEvent = events[0] as BichardAuditLogEvent
-    if (lastEvent.category !== "error") {
-      return new Error("This message has not failed and cannot be retried")
-    }
-
-    if (!lastEvent.s3Path || !lastEvent.eventSourceQueueName) {
-      return new Error("Both s3Path and eventSourceQueueName in the failed event must have values")
-    }
-
-    return lastEvent
+    return events[0] as BichardAuditLogEvent
   }
 }

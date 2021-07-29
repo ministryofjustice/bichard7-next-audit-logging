@@ -7,11 +7,7 @@ import GetLastEventUseCase from "./GetLastEventUseCase"
 const auditLogDynamoGateway = new FakeAuditLogDynamoGateway()
 const useCase = new GetLastEventUseCase(auditLogDynamoGateway)
 
-const createAuditLog = (
-  eventCategory: EventCategory,
-  eventS3Path?: string,
-  eventSourceQueueName?: string
-): AuditLog => {
+const createAuditLog = (eventCategory: EventCategory): AuditLog => {
   const message = new AuditLog("External Correlation Id", new Date("2021-07-22T08:10:10"), "Xml")
 
   message.events = [
@@ -26,9 +22,9 @@ const createAuditLog = (
       timestamp: new Date("2021-07-22T12:10:10"),
       eventType: "Expected Event type",
       eventSource: "Expected Event Source",
-      s3Path: eventS3Path ?? "Expected S3 Path",
+      s3Path: "Expected S3 Path",
       eventSourceArn: "Expected Event Source ARN",
-      eventSourceQueueName: eventSourceQueueName ?? "Expected Queue Name"
+      eventSourceQueueName: "Expected Queue Name"
     }),
     new AuditLogEvent({
       category: "information",
@@ -53,30 +49,6 @@ it("should return the last event when message exists and has events", async () =
   expect(event.s3Path).toBe("Expected S3 Path")
   expect(event.eventSourceArn).toBe("Expected Event Source ARN")
   expect(event.eventSourceQueueName).toBe("Expected Queue Name")
-})
-
-it("should return error when last event category is not error", async () => {
-  const message = createAuditLog("information")
-
-  auditLogDynamoGateway.reset([message])
-  const result = await useCase.get(message.messageId)
-
-  expect(isError(result)).toBe(true)
-
-  const error = <Error>result
-  expect(error.message).toBe("This message has not failed and cannot be retried")
-})
-
-it("should return error when last event does not have S3 path and queue name", async () => {
-  const message = createAuditLog("error", "", "")
-
-  auditLogDynamoGateway.reset([message])
-  const result = await useCase.get(message.messageId)
-
-  expect(isError(result)).toBe(true)
-
-  const error = <Error>result
-  expect(error.message).toBe("Both s3Path and eventSourceQueueName in the failed event must have values")
 })
 
 it("should return error when there are no events against the message", async () => {

@@ -4,6 +4,7 @@ import type GetLastEventUseCase from "./GetLastEventUseCase"
 import type RetrieveEventXmlFromS3 from "./RetrieveEventXmlFromS3UseCase"
 import type CreateRetryingEventUseCase from "./CreateRetryingEventUseCase"
 import type SendMessageToQueueUseCase from "./SendMessageToQueueUseCase"
+import validateEventForRetry from "./validateEventForRetry"
 
 export default class RetryMessageUseCase {
   constructor(
@@ -18,6 +19,12 @@ export default class RetryMessageUseCase {
 
     if (isError(event)) {
       return event
+    }
+
+    const eventValidationResult = validateEventForRetry(event)
+
+    if (isError(eventValidationResult)) {
+      return eventValidationResult
     }
 
     const eventXmlContent = await this.retrieveEventXmlFromS3UseCase.retrieve(event.s3Path)
