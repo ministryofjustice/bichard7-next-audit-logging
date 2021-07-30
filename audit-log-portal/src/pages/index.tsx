@@ -10,6 +10,7 @@ import convertObjectToURLSearchParams from "utils/convertObjectToURLSearchParams
 import combineUrlAndQueryString from "utils/combineUrlAndQueryString"
 import InfiniteScroll from "react-infinite-scroll-component"
 import useGetMessages from "utils/useGetMessages"
+import useRetryMessage from "utils/useRetryMessage"
 import If from "components/If"
 
 const resolveApiUrl = (searchModel: MessageSearchModel, lastMessageId?: string): string => {
@@ -39,7 +40,7 @@ const Index = () => {
 
       <If condition={!!messages && !error}>
         <InfiniteScroll next={loadMore} hasMore={!isReachingEnd} dataLength={messages.length} loader>
-          <Messages messages={messages || []} onRetryMessage={(message) => console.log(message)} />
+          <Messages messages={messages || []} onRetryMessage={useRetryMessage()} />
         </InfiniteScroll>
       </If>
 

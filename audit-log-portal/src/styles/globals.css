@@ -20,6 +20,10 @@ a {
   box-sizing: border-box;
 }
 
+.retry-icon__spinning {
+  animation: rotate-clockwise linear 0.5s infinite
+}
+
 @keyframes rotate-clockwise {
   from {
     transform: rotate(0);

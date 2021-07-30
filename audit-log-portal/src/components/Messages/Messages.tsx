@@ -2,10 +2,11 @@ import type { ReactNode } from "react"
 import type { AuditLog } from "shared"
 import Message from "components/Message"
 import If from "components/If"
+import type { UseFetch } from "use-http"
 
 interface Props {
   messages: AuditLog[]
-  onRetryMessage: (message: AuditLog) => void
+  onRetryMessage: (message: AuditLog) => Promise<void>
 }
 
 const NoMessages = () => (

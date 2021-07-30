@@ -11,7 +11,7 @@ import RetryButton from "./RetryButton"
 
 interface Props {
   message: AuditLog
-  onRetry: () => void
+  onRetry: () => Promise<void>
 }
 
 const Container = styled(Card)`
