@@ -3,9 +3,9 @@
   <systemID>BR7</systemID>
   <componentID>Hearing Outcome Publication Choreography</componentID>
   <eventCategory>information</eventCategory>
-  <eventType>Message Received</eventType>
+  <eventType>{EVENT_TYPE}</eventType>
   <correlationID>{MESSAGE_ID}</correlationID>
-  <eventDateTime>2021-06-29T08:35:36.031+00:00</eventDateTime>
+  <eventDateTime>{EVENT_DATE_TIME}</eventDateTime>
   <nameValuePairs>
       <nameValuePair>
           <name>Requesting System Org Unit Code</name>
