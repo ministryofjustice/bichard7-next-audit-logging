@@ -8,12 +8,12 @@ import RetryConfirmationDialog from "./RetryConfirmationDialog"
 interface Props {
   message: AuditLog
   show: boolean
-  onRetry: () => Promise<void>
+  isRetrying: boolean
+  onRetry: () => void
 }
 
-const RetryButton = ({ message, show, onRetry }: Props) => {
+const RetryButton = ({ message, show, isRetrying, onRetry }: Props) => {
   const [isOpen, setIsOpen] = useState(false)
-  const [isRetrying, setIsRetrying] = useState(false)
 
   return (
     <If condition={show}>
@@ -30,8 +30,7 @@ const RetryButton = ({ message, show, onRetry }: Props) => {
           setIsOpen(false)
 
           if (shouldRetry) {
-            setIsRetrying(true)
-            onRetry().catch(() => setIsRetrying(false))
+            onRetry()
           }
         }}
       />
