@@ -36,7 +36,8 @@
     "serverless-http": "^2.7.0",
     "shared": "file:../shared",
     "styled-components": "^5.3.0",
-    "swr": "^0.5.6"
+    "swr": "^0.5.6",
+    "use-http": "^1.0.22"
   },
   "devDependencies": {
     "@aws-sdk/client-api-gateway": "^3.13.0",

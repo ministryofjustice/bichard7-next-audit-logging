@@ -5,7 +5,7 @@ import If from "components/If"
 
 interface Props {
   messages: AuditLog[]
-  onRetryMessage: (message: AuditLog) => void
+  reloadMessages: () => void
 }
 
 const NoMessages = () => (
@@ -16,7 +16,7 @@ const NoMessages = () => (
 
 const MessagesContainer = ({ children }: { children: ReactNode }) => <div aria-label="Messages">{children}</div>
 
-const Messages = ({ messages, onRetryMessage }: Props) => (
+const Messages = ({ messages, reloadMessages }: Props) => (
   <>
     <If condition={messages.length === 0}>
       <NoMessages />
@@ -26,7 +26,7 @@ const Messages = ({ messages, onRetryMessage }: Props) => (
       <MessagesContainer>
         <If condition={messages.length > 0}>
           {messages.map((message) => (
-            <Message key={message.messageId} message={message} onRetry={() => onRetryMessage(message)} />
+            <Message key={message.messageId} message={message} reloadMessages={reloadMessages} />
           ))}
         </If>
       </MessagesContainer>

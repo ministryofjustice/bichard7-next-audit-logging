@@ -8,17 +8,18 @@ import RetryConfirmationDialog from "./RetryConfirmationDialog"
 interface Props {
   message: AuditLog
   show: boolean
+  isRetrying: boolean
   onRetry: () => void
 }
 
-const RetryButton = ({ message, show, onRetry }: Props) => {
+const RetryButton = ({ message, show, isRetrying, onRetry }: Props) => {
   const [isOpen, setIsOpen] = useState(false)
 
   return (
     <If condition={show}>
       <Tooltip title="Retry message" aria-label="retry">
-        <IconButton onClick={() => setIsOpen(true)}>
-          <RetryIcon />
+        <IconButton onClick={() => setIsOpen(true)} disabled={isRetrying}>
+          <RetryIcon spin={isRetrying} />
         </IconButton>
       </Tooltip>
 

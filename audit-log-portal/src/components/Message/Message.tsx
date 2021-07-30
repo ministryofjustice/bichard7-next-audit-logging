@@ -4,6 +4,8 @@ import type { AuditLog } from "shared"
 import AuditLogStatus from "shared/dist/types/AuditLogStatus"
 import DateTime from "components/DateTime"
 import If from "components/If"
+import useFetch from "use-http"
+import Error from "components/Error"
 import getDaysOld from "./getDaysOld"
 import StatusIcon from "./StatusIcon"
 import ViewEventsButton from "./ViewEventsButton"
@@ -11,7 +13,7 @@ import RetryButton from "./RetryButton"
 
 interface Props {
   message: AuditLog
-  onRetry: () => void
+  reloadMessages: () => void
 }
 
 const Container = styled(Card)`
@@ -19,15 +21,16 @@ const Container = styled(Card)`
 `
 
 const InnerContainer = styled(CardContent)`
+  padding: 0 !important;
+`
+
+const Content = styled.div`
   display: flex;
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
   gap: 0 1rem;
-
-  &:last-child: {
-    padding-bottom: 0;
-  }
+  padding: 16px;
 `
 
 const Block = styled.div`
@@ -55,35 +58,56 @@ const Actions = styled.div`ß
   justify-content: flex-end;
 `
 
-const Message = ({ message, onRetry }: Props) => (
-  <Container>
-    <InnerContainer>
-      <StatusBlock>
-        <StatusIcon message={message} />
+const Message = ({ message, reloadMessages }: Props) => {
+  const { error, loading, response, post } = useFetch<void>("/api/messages")
 
-        <If condition={message.status === AuditLogStatus.processing || message.status === AuditLogStatus.retrying}>
-          <i>{message.status}</i>
-        </If>
-      </StatusBlock>
+  const onRetry = async (): Promise<void> => {
+    await post(`${message.messageId}/retry`)
 
-      <Block>
-        <Typography noWrap variant="h6">
-          {message.externalCorrelationId}
-        </Typography>
-        <ReceivedDate noWrap variant="caption">
-          <DateTime date={message.receivedDate} prefix="Received: " />
-        </ReceivedDate>
-      </Block>
+    if (response.ok) {
+      reloadMessages()
+    }
+  }
 
-      <DaysAgo variant="h6">{getDaysOld(message.receivedDate)}</DaysAgo>
+  return (
+    <Container>
+      <InnerContainer>
+        <Error message={error?.message} visibleIf={!!error} />
 
-      <Actions>
-        {/* TODO: Button: View XML */}
-        <RetryButton message={message} show={message.status === AuditLogStatus.error} onRetry={onRetry} />
-        <ViewEventsButton message={message} />
-      </Actions>
-    </InnerContainer>
-  </Container>
-)
+        <Content>
+          <StatusBlock>
+            <StatusIcon message={message} />
+
+            <If condition={message.status === AuditLogStatus.processing || message.status === AuditLogStatus.retrying}>
+              <i>{message.status}</i>
+            </If>
+          </StatusBlock>
+
+          <Block>
+            <Typography noWrap variant="h6">
+              {message.externalCorrelationId}
+            </Typography>
+            <ReceivedDate noWrap variant="caption">
+              <DateTime date={message.receivedDate} prefix="Received: " />
+            </ReceivedDate>
+          </Block>
+
+          <DaysAgo variant="h6">{getDaysOld(message.receivedDate)}</DaysAgo>
+
+          <Actions>
+            {/* TODO: Button: View XML */}
+            <RetryButton
+              message={message}
+              show={message.status === AuditLogStatus.error}
+              onRetry={onRetry}
+              isRetrying={loading}
+            />
+            <ViewEventsButton message={message} />
+          </Actions>
+        </Content>
+      </InnerContainer>
+    </Container>
+  )
+}
 
 export default Message
