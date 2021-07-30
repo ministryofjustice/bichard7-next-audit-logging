@@ -48,10 +48,20 @@ const handleGetMessages = (req, res, ctx) => {
 }
 
 const handleRetryMessage = (req, res, ctx) => {
-  const message = getMessage(req.params.messageId)
+  const { messageId } = req.params
+  const message = getMessage(messageId)[0]
+  const retryingEvent = {
+    category: "information",
+    eventType: "Retrying failed message",
+    eventSource: "Failed Message",
+    timestamp: new Date().toISOString(),
+    attributes: {}
+  }
   message.status = AuditLogStatus.retrying
+  message.lastEventType = retryingEvent.eventType
+  message.events.push(retryingEvent)
 
-  return res(ctx.json(message))
+  return res(ctx.delay(2000), ctx.json({}))
 }
 
 module.exports = {

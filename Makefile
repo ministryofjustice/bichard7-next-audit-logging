@@ -42,11 +42,17 @@ run-portal:
 		npm run start && \
 		cd -
 
+.PHONY: run-event-handler
+run-event-handler:
+	cd ./src/event-handler && \
+		npm run setup:env && \
+		cd -
+
 .PHONY: run-all-without-portal
-run-all-without-portal: run-api run-incoming-message-handler
+run-all-without-portal: run-api run-incoming-message-handler run-event-handler
 
 .PHONY: run-infra
-run-all: run-all-without-portal run-portal
+run-infra: run-all-without-portal run-portal
 
 .PHONY: run-all
 run-all: run-all-without-portal run-portal run-mq-listener

@@ -6,106 +6,110 @@ exports[`matches snapshot 1`] = `
     class="MuiPaper-root MuiCard-root Message__Container-sc-12ihk2z-0 jpkXTb MuiPaper-elevation1 MuiPaper-rounded"
   >
     <div
-      class="MuiCardContent-root Message__InnerContainer-sc-12ihk2z-1 dVpOHV"
+      class="MuiCardContent-root Message__InnerContainer-sc-12ihk2z-1 hDBlMZ"
     >
       <div
-        class="Message__Block-sc-12ihk2z-2 Message__StatusBlock-sc-12ihk2z-3 fqgSQH jTzRbr"
+        class="Message__Content-sc-12ihk2z-2 gVhdpe"
       >
         <div
-          class=""
-          title="Processing"
+          class="Message__Block-sc-12ihk2z-3 Message__StatusBlock-sc-12ihk2z-4 fSjLmO cscEys"
         >
           <div
-            class="MuiCircularProgress-root MuiCircularProgress-colorPrimary MuiCircularProgress-indeterminate"
-            role="progressbar"
-            style="width: 40px; height: 40px;"
+            class=""
+            title="Processing"
           >
-            <svg
-              class="MuiCircularProgress-svg"
-              viewBox="22 22 44 44"
-            >
-              <circle
-                class="MuiCircularProgress-circle MuiCircularProgress-circleIndeterminate"
-                cx="44"
-                cy="44"
-                fill="none"
-                r="20.2"
-                stroke-width="3.6"
-              />
-            </svg>
-          </div>
-        </div>
-        <i>
-          Processing
-        </i>
-      </div>
-      <div
-        class="Message__Block-sc-12ihk2z-2 fqgSQH"
-      >
-        <h6
-          class="MuiTypography-root MuiTypography-h6 MuiTypography-noWrap"
-        >
-          ExternalCorrelationId
-        </h6>
-        <span
-          class="MuiTypography-root Message__ReceivedDate-sc-12ihk2z-4 fgDTkH MuiTypography-caption MuiTypography-noWrap"
-        >
-          Received: 
-          <time
-            aria-label="time"
-          >
-            01/05/2021 10:25:53
-          </time>
-        </span>
-      </div>
-      <h6
-        class="MuiTypography-root Message__DaysAgo-sc-12ihk2z-5 irzcVl MuiTypography-h6"
-      >
-        23 days old
-      </h6>
-      <div
-        class="Message__Actions-sc-12ihk2z-6 hGPgnE"
-      >
-        <span
-          class="MuiBadge-root"
-        >
-          <button
-            aria-label="view"
-            class="MuiButtonBase-root MuiIconButton-root"
-            tabindex="0"
-            title="View events"
-            type="button"
-          >
-            <span
-              class="MuiIconButton-label"
+            <div
+              class="MuiCircularProgress-root MuiCircularProgress-colorPrimary MuiCircularProgress-indeterminate"
+              role="progressbar"
+              style="width: 40px; height: 40px;"
             >
               <svg
-                aria-hidden="true"
-                class="svg-inline--fa fa-calendar-day fa-w-14 "
-                data-icon="calendar-day"
-                data-prefix="fas"
-                focusable="false"
-                role="img"
-                style="width: 18px; height: 18px;"
-                viewBox="0 0 448 512"
-                xmlns="http://www.w3.org/2000/svg"
+                class="MuiCircularProgress-svg"
+                viewBox="22 22 44 44"
               >
-                <path
-                  d="M0 464c0 26.5 21.5 48 48 48h352c26.5 0 48-21.5 48-48V192H0v272zm64-192c0-8.8 7.2-16 16-16h96c8.8 0 16 7.2 16 16v96c0 8.8-7.2 16-16 16H80c-8.8 0-16-7.2-16-16v-96zM400 64h-48V16c0-8.8-7.2-16-16-16h-32c-8.8 0-16 7.2-16 16v48H160V16c0-8.8-7.2-16-16-16h-32c-8.8 0-16 7.2-16 16v48H48C21.5 64 0 85.5 0 112v48h448v-48c0-26.5-21.5-48-48-48z"
-                  fill="currentColor"
+                <circle
+                  class="MuiCircularProgress-circle MuiCircularProgress-circleIndeterminate"
+                  cx="44"
+                  cy="44"
+                  fill="none"
+                  r="20.2"
+                  stroke-width="3.6"
                 />
               </svg>
-            </span>
-            <span
-              class="MuiTouchRipple-root"
-            />
-          </button>
-          <span
-            class="MuiBadge-badge MuiBadge-anchorOriginTopRightRectangle MuiBadge-colorSecondary MuiBadge-invisible"
+            </div>
+          </div>
+          <i>
+            Processing
+          </i>
+        </div>
+        <div
+          class="Message__Block-sc-12ihk2z-3 fSjLmO"
+        >
+          <h6
+            class="MuiTypography-root MuiTypography-h6 MuiTypography-noWrap"
           >
-            0
+            ExternalCorrelationId
+          </h6>
+          <span
+            class="MuiTypography-root Message__ReceivedDate-sc-12ihk2z-5 fQFTgq MuiTypography-caption MuiTypography-noWrap"
+          >
+            Received: 
+            <time
+              aria-label="time"
+            >
+              01/05/2021 10:25:53
+            </time>
           </span>
-        </span>
+        </div>
+        <h6
+          class="MuiTypography-root Message__DaysAgo-sc-12ihk2z-6 bCdcHG MuiTypography-h6"
+        >
+          23 days old
+        </h6>
+        <div
+          class="Message__Actions-sc-12ihk2z-7 fXpzZx"
+        >
+          <span
+            class="MuiBadge-root"
+          >
+            <button
+              aria-label="view"
+              class="MuiButtonBase-root MuiIconButton-root"
+              tabindex="0"
+              title="View events"
+              type="button"
+            >
+              <span
+                class="MuiIconButton-label"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="svg-inline--fa fa-calendar-day fa-w-14 "
+                  data-icon="calendar-day"
+                  data-prefix="fas"
+                  focusable="false"
+                  role="img"
+                  style="width: 18px; height: 18px;"
+                  viewBox="0 0 448 512"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M0 464c0 26.5 21.5 48 48 48h352c26.5 0 48-21.5 48-48V192H0v272zm64-192c0-8.8 7.2-16 16-16h96c8.8 0 16 7.2 16 16v96c0 8.8-7.2 16-16 16H80c-8.8 0-16-7.2-16-16v-96zM400 64h-48V16c0-8.8-7.2-16-16-16h-32c-8.8 0-16 7.2-16 16v48H160V16c0-8.8-7.2-16-16-16h-32c-8.8 0-16 7.2-16 16v48H48C21.5 64 0 85.5 0 112v48h448v-48c0-26.5-21.5-48-48-48z"
+                    fill="currentColor"
+                  />
+                </svg>
+              </span>
+              <span
+                class="MuiTouchRipple-root"
+              />
+            </button>
+            <span
+              class="MuiBadge-badge MuiBadge-anchorOriginTopRightRectangle MuiBadge-colorSecondary MuiBadge-invisible"
+            >
+              0
+            </span>
+          </span>
+        </div>
       </div>
     </div>
   </div>

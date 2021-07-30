@@ -14,12 +14,13 @@ interface UseGetMessagesResult {
   isLoadingMore: boolean
   isReachingEnd: boolean
   loadMore: () => Promise<AuditLog[][]>
+  reload: () => Promise<AuditLog[][]>
 }
 
 const fetchLimit = 10
 
 export default function useGetMessages(url: KeyLoader<AuditLog[]>): UseGetMessagesResult {
-  const { data, error, size, setSize } = useSWRInfinite(url, (fetchUrl: string) =>
+  const { data, error, size, setSize, mutate } = useSWRInfinite(url, (fetchUrl: string) =>
     fetcher<MessagesResult>(fetchUrl).then((result) => result.messages)
   )
 
@@ -36,5 +37,5 @@ export default function useGetMessages(url: KeyLoader<AuditLog[]>): UseGetMessag
 
   const loadMore = () => setSize(size + 1)
 
-  return { messages, error, loadMore, isLoadingMore, isLoadingInitialData, isReachingEnd }
+  return { messages, error, loadMore, isLoadingMore, isLoadingInitialData, isReachingEnd, reload: mutate }
 }

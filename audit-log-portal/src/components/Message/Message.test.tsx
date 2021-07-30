@@ -1,3 +1,4 @@
+import "testing/mockUseFetch"
 import { render } from "testing/render"
 import { AuditLog } from "shared"
 import MockDate from "mockdate"
@@ -8,7 +9,7 @@ test("matches snapshot", () => {
 
   const message = new AuditLog("ExternalCorrelationId", new Date("2021-05-01T10:25:53"), "XML")
 
-  const { container } = render(<Message message={message} />)
+  const { container } = render(<Message message={message} reloadMessages={() => {}} />)
 
   expect(container).toMatchSnapshot()
 
