@@ -42,8 +42,6 @@ PAYLOAD=$(cat <<- EOM
 EOM
 )
 
-curl -d "body=$MESSAGE_DATA" "http://admin:admin@localhost:58161/api/message/$QUEUE_NAME?type=queue"
-
 awslocal lambda invoke \
   --function-name "$EVENT_NAME-receiver" \
   --invocation-type Event \
