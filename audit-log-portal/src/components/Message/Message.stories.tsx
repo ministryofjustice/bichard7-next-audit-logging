@@ -1,3 +1,4 @@
+import { action } from "@storybook/addon-actions"
 import type { Meta } from "@storybook/react"
 import { AuditLog, AuditLogStatus } from "shared"
 import Message from "./Message"
@@ -6,8 +7,8 @@ export default {
   title: "components/Message",
   component: Message,
   argTypes: {
-    onRetry: {
-      action: "retry"
+    reloadMessages: {
+      action: "reload messages"
     }
   }
 } as Meta
@@ -19,11 +20,15 @@ const createMessage = (status: string) => {
   return message
 }
 
-const onRetry = (): Promise<void> => {
-  return Promise.resolve()
-}
-
-export const Processing = () => <Message message={createMessage(AuditLogStatus.processing)} onRetry={onRetry} />
-export const Retrying = () => <Message message={createMessage(AuditLogStatus.retrying)} onRetry={onRetry} />
-export const Completed = () => <Message message={createMessage(AuditLogStatus.completed)} onRetry={onRetry} />
-export const Failed = () => <Message message={createMessage(AuditLogStatus.error)} onRetry={onRetry} />
+export const Processing = () => (
+  <Message message={createMessage(AuditLogStatus.processing)} reloadMessages={action("reload messages")} />
+)
+export const Retrying = () => (
+  <Message message={createMessage(AuditLogStatus.retrying)} reloadMessages={action("reload messages")} />
+)
+export const Completed = () => (
+  <Message message={createMessage(AuditLogStatus.completed)} reloadMessages={action("reload messages")} />
+)
+export const Failed = () => (
+  <Message message={createMessage(AuditLogStatus.error)} reloadMessages={action("reload messages")} />
+)
