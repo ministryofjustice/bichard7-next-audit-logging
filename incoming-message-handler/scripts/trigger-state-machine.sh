@@ -34,8 +34,7 @@ function trigger_state_machine {
     sed 's,{OBJECT_KEY},'"$S3_MESSAGE_PATH"',g' > $TMP_PATH
 
   STATE_MACHINE_ARN=$(awslocal stepfunctions list-state-machines | \
-    jq ".stateMachines[].stateMachineArn" | \
-    sed -e "s/\"//g")
+    jq -r ".stateMachines[].stateMachineArn | select(contains(\"IncomingMessageHandler\"))")
 
   awslocal stepfunctions start-execution \
     --state-machine $STATE_MACHINE_ARN \
