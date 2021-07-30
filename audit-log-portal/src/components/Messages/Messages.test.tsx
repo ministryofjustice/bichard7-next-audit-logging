@@ -1,3 +1,4 @@
+import "testing/mockUseFetch"
 import { screen } from "@testing-library/react"
 import { AuditLog } from "shared"
 import { render } from "testing/render"

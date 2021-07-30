@@ -1,3 +1,4 @@
+import "testing/mockUseFetch"
 import { render } from "testing/render"
 import { AuditLog } from "shared"
 import MockDate from "mockdate"
