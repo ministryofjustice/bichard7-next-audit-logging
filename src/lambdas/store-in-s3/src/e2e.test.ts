@@ -9,7 +9,7 @@ import type { StoreInS3Result } from "./index"
 const config: S3Config = {
   url: "http://localhost:4566",
   region: "us-east-1",
-  bucketName: "store-in-s3"
+  bucketName: "audit-log-events"
 }
 
 const gateway = new TestS3Gateway(config)
