@@ -2,7 +2,7 @@
 
 This project provides the API for accessing everything relating to Audit Log records. These come from messages from an external system, and also comprise of events emitted from the internal Bichard7 system. The API is built as an AWS API Gateway and backed by individual AWS Lambda Functions to serve each individual endpoint.
 
-> Note: Check prerequisites in the main [README](..#README.md) at the root of the repository.
+> Note: Check prerequisites in the main [README](..) at the root of the repository.
 
 ## Development
 
