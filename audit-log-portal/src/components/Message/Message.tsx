@@ -61,8 +61,12 @@ const Actions = styled.div`ß
 const Message = ({ message, reloadMessages }: Props) => {
   const { error, loading, response, post } = useFetch<void>("/api/messages")
 
-  if (response.ok) {
-    reloadMessages()
+  const onRetry = async (): Promise<void> => {
+    await post(`${message.messageId}/retry`)
+
+    if (response.ok) {
+      reloadMessages()
+    }
   }
 
   return (
@@ -95,7 +99,7 @@ const Message = ({ message, reloadMessages }: Props) => {
             <RetryButton
               message={message}
               show={message.status === AuditLogStatus.error}
-              onRetry={() => post(`${message.messageId}/retry`)}
+              onRetry={onRetry}
               isRetrying={loading}
             />
             <ViewEventsButton message={message} />
