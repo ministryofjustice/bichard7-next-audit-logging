@@ -39,7 +39,7 @@ function update_env_vars_file {
   fi
 
   if [[ -z "$MQ_INCOMING_MESSAGE_HANDLER_QUEUE" ]]; then
-    MQ_INCOMING_MESSAGE_HANDLER_QUEUE=incoming-message-handler-e2e-testing
+    MQ_INCOMING_MESSAGE_HANDLER_QUEUE=INCOMING_MESSAGE_HANDLER_QUEUE
   fi
 
   cat > $env_path <<- EOM

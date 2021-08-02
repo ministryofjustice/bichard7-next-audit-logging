@@ -51,7 +51,7 @@ const s3Gateway = new TestS3Gateway({
 
 const simulator = new IncomingMessageSimulator(AWS_URL)
 
-const queueName = "incoming-message-handler-e2e-testing"
+const queueName = "INCOMING_MESSAGE_HANDLER_QUEUE"
 const testMqGateway = new TestMqGateway({
   url: "failover:(stomp://localhost:51613)",
   username: "admin",

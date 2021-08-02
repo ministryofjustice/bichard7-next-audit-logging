@@ -112,4 +112,8 @@ send-message:
 
 .PHONY: send-court-result-input-failure-event
 send-court-result-input-failure-event:
-	scripts/send-failure-event.sh court-result-input
+	scripts/send-event.sh "court-result-input" "COURT_RESULT_INPUT.FAILURE"
+
+.PHONY: send-pnc-response-received
+send-pnc-response-received:
+	scripts/send-event.sh "pnc-response-received" "GENERAL_EVENT_QUEUE"
