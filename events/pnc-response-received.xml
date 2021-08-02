@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<logEvent xmlns="http://www.example.org/GeneralEventLogMessage" xmlns:ds="http://schemas.cjse.gov.uk/datastandards/2006-10" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <systemID>BR7</systemID>
+  <componentID>Hearing Outcome Publication Choreography</componentID>
+  <eventCategory>information</eventCategory>
+  <eventType>PNC Response received</eventType>
+  <correlationID>{MESSAGE_ID}</correlationID>
+  <eventDateTime>{EVENT_DATE_TIME}</eventDateTime>
+  <nameValuePairs>
+      <nameValuePair>
+          <name>Requesting System Org Unit Code</name>
+          <value>Z000000</value>
+      </nameValuePair>
+      <nameValuePair>
+          <name>Requesting System Name</name>
+          <value>CJSE</value>
+      </nameValuePair>
+      <nameValuePair>
+          <name>External Correlation Identifier</name>
+          <value>EXTERNAL_CORRELATION_ID</value>
+      </nameValuePair>
+  </nameValuePairs>
+</logEvent>
+
