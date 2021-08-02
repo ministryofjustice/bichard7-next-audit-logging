@@ -116,4 +116,4 @@ send-court-result-input-failure-event:
 
 .PHONY: send-pnc-response-received
 send-pnc-response-received:
-	EVENT_TYPE="PNC Response received" scripts/send-event.sh "general-event" "GENERAL_EVENT_QUEUE"
+	scripts/send-event.sh "pnc-response-received" "GENERAL_EVENT_QUEUE"

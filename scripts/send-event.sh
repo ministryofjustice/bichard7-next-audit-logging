@@ -20,7 +20,6 @@ fi
 
 MESSAGE_DATA=$(cat "events/$EVENT_NAME.xml" | \
   sed "s#{MESSAGE_ID}#$MESSAGE_ID#g" | \
-  sed "s#{EVENT_TYPE}#$EVENT_TYPE#g" | \
   sed "s#{EVENT_DATE_TIME}#$EVENT_DATE_TIME#g" | \
   base64)
 
