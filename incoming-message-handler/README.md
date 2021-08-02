@@ -24,7 +24,7 @@ Messages that come through the lambda are sent off to an Active MQ queue once pr
 
 > Password: **admin**
 
-A queue will be created when a message is sent to the instance or a listener subscries to it.
+A queue will be created when a message is sent to the instance or a listener subscribes to it.
 
 ### LocalStack (Local AWS Infrastructure)
 
