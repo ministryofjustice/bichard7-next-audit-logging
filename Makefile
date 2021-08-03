@@ -117,3 +117,13 @@ send-court-result-input-failure-event:
 .PHONY: send-pnc-response-received
 send-pnc-response-received:
 	scripts/send-event.sh "pnc-response-received" "GENERAL_EVENT_QUEUE"
+
+########################################
+# AWS - Action Commands
+########################################
+
+.PHONY: upload-message-to-s3
+upload-message-to-s3:
+	cd incoming-message-handler && \
+		scripts/upload-message-to-s3.sh && \
+		cd -
