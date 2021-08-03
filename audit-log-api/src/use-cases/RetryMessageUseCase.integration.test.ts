@@ -3,7 +3,7 @@ jest.setTimeout(15000)
 import "@bichard/testing-jest"
 import fs from "fs"
 import { setEnvironmentVariables } from "@bichard/testing-config"
-import { AuditLog, BichardAuditLogEvent, AwsAuditLogDynamoGateway } from "shared"
+import { AuditLog, BichardAuditLogEvent, AwsAuditLogDynamoGateway, encodeBase64 } from "shared"
 import TestDynamoGateway from "shared/dist/DynamoGateway/TestDynamoGateway"
 import { AuditLogApiClient } from "@bichard/api-client"
 import createDynamoDbConfig from "src/createDynamoDbConfig"
@@ -63,7 +63,7 @@ describe("RetryMessageUseCase", () => {
   })
 
   it("should retry message when last event is error", async () => {
-    await s3Gateway.upload(eventXmlFileName, eventXml)
+    await s3Gateway.upload(eventXmlFileName, encodeBase64(eventXml))
 
     const message = new AuditLog("External Correlation ID", new Date(), "Xml")
     message.events.push(
