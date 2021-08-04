@@ -127,8 +127,8 @@ export default class AwsAuditLogDynamoGateway extends DynamoGateway implements A
       ":lastEventType": event.eventType
     }
     let updateExpression = `
-    set events = list_append(if_not_exists(events, :empty_list), :event),
-    #lastEventType = :lastEventType
+      set events = list_append(if_not_exists(events, :empty_list), :event),
+      #lastEventType = :lastEventType
     `
 
     if (status) {
