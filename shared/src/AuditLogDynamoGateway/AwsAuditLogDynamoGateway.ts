@@ -1,6 +1,6 @@
 import { DynamoGateway, IndexSearcher } from "../DynamoGateway"
 import type { DynamoDbConfig, FetchByIndexOptions, UpdateOptions } from "../DynamoGateway"
-import type { AuditLog, AuditLogEvent, PromiseResult } from "../types"
+import type { AuditLog, AuditLogEvent, KeyValuePair, PromiseResult } from "../types"
 import { isError } from "../types"
 import getMessageStatus from "./getMessageStatus"
 import type AuditLogDynamoGateway from "./AuditLogDynamoGateway"
@@ -118,25 +118,31 @@ export default class AwsAuditLogDynamoGateway extends DynamoGateway implements A
 
   async addEvent(messageId: string, messageVersion: number, event: AuditLogEvent): PromiseResult<void> {
     const status = getMessageStatus(event)
+    const expressionAttributeNames: KeyValuePair<string, string> = {
+      "#lastEventType": "lastEventType"
+    }
+    const updateExpressionValues: KeyValuePair<string, unknown> = {
+      ":event": [event],
+      ":empty_list": <AuditLogEvent[]>[],
+      ":lastEventType": event.eventType
+    }
+    let updateExpression = `
+    set events = list_append(if_not_exists(events, :empty_list), :event),
+    #lastEventType = :lastEventType
+    `
+
+    if (status) {
+      expressionAttributeNames["#status"] = "status"
+      updateExpressionValues[":status"] = status
+      updateExpression += ",#status = :status"
+    }
 
     const options: UpdateOptions = {
       keyName: this.tableKey,
       keyValue: messageId,
-      updateExpression: `
-        set events = list_append(if_not_exists(events, :empty_list), :event),
-        #status = :status,
-        #lastEventType = :lastEventType
-      `,
-      expressionAttributeNames: {
-        "#status": "status",
-        "#lastEventType": "lastEventType"
-      },
-      updateExpressionValues: {
-        ":event": [event],
-        ":empty_list": <AuditLogEvent[]>[],
-        ":status": status,
-        ":lastEventType": event.eventType
-      },
+      updateExpression,
+      expressionAttributeNames,
+      updateExpressionValues,
       currentVersion: messageVersion
     }
 

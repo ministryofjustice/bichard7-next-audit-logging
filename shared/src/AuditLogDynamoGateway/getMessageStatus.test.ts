@@ -5,14 +5,14 @@ import getMessageStatus from "./getMessageStatus"
 interface TestInput {
   eventType: string
   category: EventCategory
-  expectedStatus: string
+  expectedStatus: string | null
   expectedEventType?: string
 }
 
 test.each<TestInput>([
   { eventType: "PNC Response received", category: "information", expectedStatus: AuditLogStatus.completed },
   { eventType: "PNC Response not received", category: "error", expectedStatus: AuditLogStatus.error },
-  { eventType: "Other event types", category: "information", expectedStatus: AuditLogStatus.processing }
+  { eventType: "Other event types", category: "information", expectedStatus: null }
 ])("returns <$expected/> when eventType is $eventType", ({ eventType, category, expectedStatus }) => {
   const auditLogEvent = new AuditLogEvent({
     category,
