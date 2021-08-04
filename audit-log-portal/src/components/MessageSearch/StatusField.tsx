@@ -28,6 +28,7 @@ const StatusField = ({ onChange, value }: Props) => {
           <em>All</em>
         </MenuItem>
         <MenuItem value="Processing">Processing</MenuItem>
+        <MenuItem value="Retrying">Retrying</MenuItem>
         <MenuItem value="Completed">Completed</MenuItem>
         <MenuItem value="Error">Error</MenuItem>
       </Select>
