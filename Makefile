@@ -124,6 +124,4 @@ send-pnc-response-received:
 
 .PHONY: upload-message-to-s3
 upload-message-to-s3:
-	cd incoming-message-handler && \
-		scripts/upload-message-to-s3.sh && \
-		cd -
+	incoming-message-handler/scripts/upload-message-to-s3.sh

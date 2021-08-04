@@ -2,6 +2,7 @@
 
 set -e
 
+SCRIPTS_PATH=$(dirname "$0")
 BUCKET_NAME=$(aws lambda list-functions | jq -r ".Functions[] | select(.FunctionName | contains(\"retrieve-from-s3\")) | .Environment.Variables.INCOMING_MESSAGE_BUCKET_NAME")
 
 RECEIVED_DATE=$(date -u +'%Y/%m/%d/%H/%M')
@@ -10,7 +11,7 @@ S3_MESSAGE_PATH=$RECEIVED_DATE/$MESSAGE_ID.xml
 ESCAPED_MESSAGE_PATH=$(echo $S3_MESSAGE_PATH | sed -e "s/\///g")
 
 if [[ -z $MESSAGE_PATH ]]; then
-  MESSAGE_PATH=$PWD/scripts/message.xml
+  MESSAGE_PATH=$SCRIPTS_PATH/message.xml
 fi
 
 function store_file_in_s3 {
