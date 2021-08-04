@@ -1,6 +1,5 @@
 #!/bin/bash
 
-args=("$@")
 set -e
 
 BUCKET_NAME=$(aws lambda list-functions | jq -r ".Functions[] | select(.FunctionName | contains(\"retrieve-from-s3\")) | .Environment.Variables.INCOMING_MESSAGE_BUCKET_NAME")
