@@ -8,8 +8,8 @@ export default function createS3Config(): S3Config {
   }
 
   return {
-    url: process.env.AWS_URL,
-    region: process.env.AWS_REGION,
+    url: process.env.S3_URL,
+    region: process.env.S3_REGION,
     bucketName: AUDIT_LOG_EVENTS_BUCKET
   }
 }

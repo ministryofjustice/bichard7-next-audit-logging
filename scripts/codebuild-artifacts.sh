@@ -76,6 +76,7 @@ zip getMessages.zip getMessages.js
 zip createAuditLog.zip createAuditLog.js
 zip createAuditLogEvent.zip createAuditLogEvent.js
 zip getEvents.zip getEvents.js
+zip retryMessage.zip retryMessage.js
 
 cd -
 
