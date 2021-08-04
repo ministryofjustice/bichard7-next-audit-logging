@@ -15,10 +15,11 @@ const StatusField = ({ onChange, value }: Props) => {
   const triggerOnChange = (newStatus) => onChange(newStatus === "all" ? "" : newStatus)
 
   return (
-    <StatusFormControl component="fieldset">
+    <StatusFormControl variant="outlined">
       <InputLabel id="status-select-label">Status</InputLabel>
       <Select
         labelId="status-select-label"
+        label="Status"
         id="status-select"
         value={value || "all"}
         onChange={(e) => triggerOnChange(e.target.value as string)}
@@ -27,6 +28,7 @@ const StatusField = ({ onChange, value }: Props) => {
           <em>All</em>
         </MenuItem>
         <MenuItem value="Processing">Processing</MenuItem>
+        <MenuItem value="Retrying">Retrying</MenuItem>
         <MenuItem value="Completed">Completed</MenuItem>
         <MenuItem value="Error">Error</MenuItem>
       </Select>
