@@ -1,6 +1,5 @@
 #!/bin/bash
 
-args=("$@")
 set -e
 
 LAMBDA_NAME=IncomingMessageHandler

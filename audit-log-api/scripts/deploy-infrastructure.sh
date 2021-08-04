@@ -154,6 +154,8 @@ function update_env_vars_file {
     "MQ_PASSWORD": "admin",
     "AWS_URL": "http://localstack_main:4566",
     "AWS_REGION": "us-east-1",
+    "S3_URL": "http://localstack_main:4566",
+    "S3_REGION": "us-east-1",
     "AUDIT_LOG_EVENTS_BUCKET": "audit-log-events",
     "AUDIT_LOG_TABLE_NAME": "audit-log",
     "API_URL": "$api_url"
