@@ -9,8 +9,7 @@ MESSAGE_ID="LIBRA-EXISS-$(date -u +'%s')"
 S3_MESSAGE_PATH=$RECEIVED_DATE/$MESSAGE_ID.xml
 ESCAPED_MESSAGE_PATH=$(echo $S3_MESSAGE_PATH | sed -e "s/\///g")
 
-if [[ -z $MESSAGE_PATH ]]
-then
+if [[ -z $MESSAGE_PATH ]]; then
   MESSAGE_PATH=$PWD/scripts/message.xml
 fi
 
