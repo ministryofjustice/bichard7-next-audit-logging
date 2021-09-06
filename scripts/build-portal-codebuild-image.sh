@@ -27,6 +27,35 @@ docker build --build-arg "NODE_IMAGE=${DOCKER_IMAGE_HASH}" -t ${REPOSITORY_NAME}
 
 docker tag ${REPOSITORY_NAME}:latest ${DOCKER_IMAGE_PREFIX}:${CODEBUILD_RESOLVED_SOURCE_VERSION}-${CODEBUILD_START_TIME}
 
+## Install goss/trivy
+if [ ! -f "/usr/local/bin/goss" ]; then
+  curl -L https://github.com/aelsabbahy/goss/releases/latest/download/goss-linux-amd64 -o /usr/local/bin/goss
+  chmod +rx /usr/local/bin/goss
+fi
+if [ ! -f "/usr/local/bin/dgoss" ]; then
+  curl -L https://github.com/aelsabbahy/goss/releases/latest/download/dgoss -o /usr/local/bin/dgoss
+  chmod +rx /usr/local/bin/dgoss
+fi
+
+get_latest_release() {
+  curl --silent "https://api.github.com/repos/$1/releases/latest" | # Get latest release from GitHub api
+    grep '"tag_name":' |                                            # Get tag line
+    sed -E 's/.*"([^"]+)".*/\1/'                                    # Pluck JSON value
+}
+
+install_trivy() {
+  echo "Installing trivy binary"
+  TRIVY_VERSION=$(get_latest_release "aquasecurity/trivy" | sed 's/v//')
+  yum install -y https://github.com/aquasecurity/trivy/releases/download/v${TRIVY_VERSION}/trivy_${TRIVY_VERSION}_Linux-64bit.rpm
+}
+
+install_trivy
+
+## Run goss tests
+GOSS_SLEEP=15 dgoss run e API_URL=xxx ${REPOSITORY_NAME}:latest
+## Run Trivy scan
+trivy image ${REPOSITORY_NAME}:latest
+
 echo "Push Docker image on `date`"
 docker push ${DOCKER_IMAGE_PREFIX}:${CODEBUILD_RESOLVED_SOURCE_VERSION}-${CODEBUILD_START_TIME}
 
