@@ -28,14 +28,10 @@ docker build --build-arg "NODE_IMAGE=${DOCKER_IMAGE_HASH}" -t ${REPOSITORY_NAME}
 docker tag ${REPOSITORY_NAME}:latest ${DOCKER_IMAGE_PREFIX}:${CODEBUILD_RESOLVED_SOURCE_VERSION}-${CODEBUILD_START_TIME}
 
 ## Install goss/trivy
-if [ ! -f "/usr/local/bin/goss" ]; then
-  curl -L https://github.com/aelsabbahy/goss/releases/latest/download/goss-linux-amd64 -o /usr/local/bin/goss
-  chmod +rx /usr/local/bin/goss
-fi
-if [ ! -f "/usr/local/bin/dgoss" ]; then
-  curl -L https://github.com/aelsabbahy/goss/releases/latest/download/dgoss -o /usr/local/bin/dgoss
-  chmod +rx /usr/local/bin/dgoss
-fi
+curl -L https://github.com/aelsabbahy/goss/releases/latest/download/goss-linux-amd64 -o /usr/local/bin/goss
+chmod +rx /usr/local/bin/goss
+curl -L https://github.com/aelsabbahy/goss/releases/latest/download/dgoss -o /usr/local/bin/dgoss
+chmod +rx /usr/local/bin/dgoss
 
 get_latest_release() {
   curl --silent "https://api.github.com/repos/$1/releases/latest" | # Get latest release from GitHub api
