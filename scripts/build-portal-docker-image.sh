@@ -28,7 +28,7 @@ echo "Building Audit Log Portal Docker Image on $(date)"
 
 # Get our latest staged nodejs image
 IMAGE_HASH=$(aws ecr describe-images \
-    --repository-name nodejs \
+    --repository-name nginx-nodejs-supervisord \
     --query 'to_string(sort_by(imageDetails,& imagePushedAt)[-1].imageDigest)'
 )
 
