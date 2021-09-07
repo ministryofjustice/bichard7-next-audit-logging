@@ -47,7 +47,7 @@ This repository currently contains multiple projects to support easy local refer
 Once all prerequisites are installed, you can do the followings:
 
 - Run `make run-all` to deploy and run all components. After running this command, you should be able to access to the portal at [http://localhost:3000](http://localhost:3000)
-  > Note: If you want to develop against the portal, you will need to instead run `make run-all-without-portal` and then launch the Portal from the `audit-logging-portal/` folder with the command `npm run dev`.
+  > Note: If you want to develop against the portal, you will need to instead run `make run-all-without-portal` and then launch the Portal from the `audit-log-portal/` folder with the command `npm run dev`.
 - Run `make destroy` to destroy the local infrastructure.
 
 ## Development
