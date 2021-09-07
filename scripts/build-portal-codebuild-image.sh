@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -e
+set -evx
 
 readonly REPOSITORY_NAME="audit-log-portal"
 readonly SOURCE_REPOSITORY_NAME="nginx-nodejs-supervisord"
@@ -25,8 +25,6 @@ echo "Building from ${DOCKER_IMAGE_HASH}"
 
 docker build --build-arg "NODE_IMAGE=${DOCKER_IMAGE_HASH}" -t ${REPOSITORY_NAME} .
 
-docker tag ${REPOSITORY_NAME}:latest ${DOCKER_IMAGE_PREFIX}:${CODEBUILD_RESOLVED_SOURCE_VERSION}-${CODEBUILD_START_TIME}
-
 ## Install goss/trivy
 curl -L https://github.com/aelsabbahy/goss/releases/latest/download/goss-linux-amd64 -o /usr/local/bin/goss
 chmod +rx /usr/local/bin/goss
@@ -50,10 +48,11 @@ install_trivy() {
 install_trivy
 
 ## Run goss tests
-GOSS_SLEEP=15 dgoss run e API_URL=xxx ${REPOSITORY_NAME}:latest
+GOSS_SLEEP=15 dgoss run e API_URL=xxx "${REPOSITORY_NAME}:latest"
 ## Run Trivy scan
-trivy image ${REPOSITORY_NAME}:latest
+trivy image "${REPOSITORY_NAME}:latest"
 
+docker tag "${REPOSITORY_NAME}:latest" ${DOCKER_IMAGE_PREFIX}:${CODEBUILD_RESOLVED_SOURCE_VERSION}-${CODEBUILD_START_TIME}
 echo "Push Docker image on `date`"
 docker push ${DOCKER_IMAGE_PREFIX}:${CODEBUILD_RESOLVED_SOURCE_VERSION}-${CODEBUILD_START_TIME}
 
