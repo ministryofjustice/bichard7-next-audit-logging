@@ -48,7 +48,7 @@ install_trivy() {
 install_trivy
 
 ## Run goss tests
-GOSS_SLEEP=15 dgoss run e API_URL=xxx "${REPOSITORY_NAME}:latest"
+GOSS_SLEEP=15 dgoss run -e API_URL=xxx "${REPOSITORY_NAME}:latest"
 ## Run Trivy scan
 trivy image "${REPOSITORY_NAME}:latest"
 
