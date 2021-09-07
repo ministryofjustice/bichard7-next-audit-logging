@@ -33,6 +33,8 @@ chmod +rx /usr/local/bin/goss
 curl -L https://github.com/aelsabbahy/goss/releases/latest/download/dgoss -o /usr/local/bin/dgoss
 chmod +rx /usr/local/bin/dgoss
 
+export GOSS_PATH="/usr/local/bin/goss"
+
 get_latest_release() {
   curl --silent "https://api.github.com/repos/$1/releases/latest" | # Get latest release from GitHub api
     grep '"tag_name":' |                                            # Get tag line
