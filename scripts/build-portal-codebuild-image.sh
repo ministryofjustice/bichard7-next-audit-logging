@@ -65,7 +65,7 @@ if [ "${IS_CD}" = "true" ]; then
     export AWS_SECRET_ACCESS_KEY=$(echo $temp_role | jq -r .Credentials.SecretAccessKey)
     export AWS_SESSION_TOKEN=$(echo $temp_role | jq -r .Credentials.SessionToken)
 
-    aws ssm put-parameter --name "/cjse-bichard7-${DEPLOY_NAME}/audit_logging/image_hash" --value "${IMAGE_SHA_HASH}" --type "SecureString" --overwrite
+    aws ssm put-parameter --name "/cjse-${DEPLOY_NAME}-bichard7/audit_logging/image_hash" --value "${IMAGE_SHA_HASH}" --type "SecureString" --overwrite
   )
   echo "Starting build ${DEPLOY_JOB_NAME}"
   aws codebuild start-build --project-name "${DEPLOY_JOB_NAME}"
