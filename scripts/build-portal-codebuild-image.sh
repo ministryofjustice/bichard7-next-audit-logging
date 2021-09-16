@@ -2,6 +2,9 @@
 
 set -evx
 
+
+yum install -y jq
+
 readonly REPOSITORY_NAME="audit-log-portal"
 readonly SOURCE_REPOSITORY_NAME="nginx-nodejs-supervisord"
 readonly REPOSITORY="${AWS_ACCOUNT_ID}.dkr.ecr.eu-west-2.amazonaws.com"
