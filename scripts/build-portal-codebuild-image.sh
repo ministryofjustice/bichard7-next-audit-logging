@@ -69,5 +69,5 @@ if [ "${IS_CD}" = "true" ]; then
  }
 EOF
 
-  aws s3 cp /tmp/user-service.json ${ARTIFACT_BUCKET}/semaphores/audit-logging.json
+  aws s3 cp /tmp/audit-logging.json ${ARTIFACT_BUCKET}/semaphores/audit-logging.json
 fi
