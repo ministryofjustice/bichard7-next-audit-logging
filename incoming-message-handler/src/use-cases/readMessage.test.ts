@@ -23,15 +23,15 @@ const expectedMessage = formatXml(`
   </RequestFromSystem>
 	<DataStream>
     <DataStreamContent>
-      <ResultedCaseMessage xmlns:DC="http://www.dca.gov.uk/xmlschemas/libra" Flow='ResultedCasesForThePolice' Interface='LibraStandardProsecutorPolice' SchemaVersion='0.6g'>
-        <Session>
-          <Case>
-            <PTIURN>
+      <DC:ResultedCaseMessage xmlns:DC="http://www.dca.gov.uk/xmlschemas/libra" Flow='ResultedCasesForThePolice' Interface='LibraStandardProsecutorPolice' SchemaVersion='0.6g'>
+        <DC:Session>
+          <DC:Case>
+            <DC:PTIURN>
               ${expectedCaseId}
-            </PTIURN>
-          </Case>
-        </Session>
-      </ResultedCaseMessage>
+            </DC:PTIURN>
+          </DC:Case>
+        </DC:Session>
+      </DC:ResultedCaseMessage>
     </DataStreamContent>
 	</DataStream>
 </RouteData>
@@ -76,7 +76,7 @@ describe("handleMessage", () => {
   })
 
   it("should handle missing case id error", async () => {
-    message.messageXml = expectedMessage.replace(/<PTIURN>.+?<\/PTIURN>/s, "")
+    message.messageXml = expectedMessage.replace(/<DC:PTIURN>.+?<\/DC:PTIURN>/s, "")
 
     const result = await readMessage(message)
 

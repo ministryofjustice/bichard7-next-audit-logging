@@ -25,15 +25,15 @@ const originalXml = formatXml(`
     </RequestFromSystem>
     <DataStream>
       <DataStreamContent>
-        <ResultedCaseMessage xmlns:DC="http://www.dca.gov.uk/xmlschemas/libra" Flow="ResultedCasesForThePolice" Interface="LibraStandardProsecutorPolice" SchemaVersion="0.6g">
-          <Session>
-            <Case>
-              <PTIURN>
+        &lt;DC:ResultedCaseMessage xmlns:DC="http://www.dca.gov.uk/xmlschemas/libra" Flow="ResultedCasesForThePolice" Interface="LibraStandardProsecutorPolice" SchemaVersion="0.6g"&gt;
+          &lt;DC:Session&gt;
+            &lt;DC:Case&gt;
+              &lt;DC:PTIURN&gt;
                 ${expectedCaseId}
-              </PTIURN>
-            </Case>
-          </Session>
-        </ResultedCaseMessage>
+              &lt;/DC:PTIURN&gt;
+            &lt;/DC:Case&gt;
+          &lt;/DC:Session&gt;
+        &lt;/DC:ResultedCaseMessage&gt;
       </DataStreamContent>
     </DataStream>
   </RouteData>
