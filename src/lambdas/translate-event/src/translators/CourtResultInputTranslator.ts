@@ -10,7 +10,9 @@ import transformEventDetails from "./transformEventDetails"
 const CourtResultInputTranslator: Translator = async (input: TranslateEventInput): PromiseResult<TranslationResult> => {
   const { messageData, s3Path, eventSourceArn, eventSourceQueueName } = input
   // Court Result Inputs are in base64 encoded XML
-  const xml = decodeBase64(messageData)
+  let xml = decodeBase64(messageData)
+  xml = xml.replace(/&lt;/g, "<")
+  xml = xml.replace(/&gt;/g, ">")
   const inputItem = await parseXml<CourtResultInput>(xml)
 
   if (!inputItem) {
