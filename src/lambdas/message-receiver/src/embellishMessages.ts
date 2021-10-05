@@ -10,6 +10,10 @@ const getEventSourceQueueName = (message: JmsTextMessage): string => {
 }
 
 const castToOldMessageVersion = function (transformedXml: string) {
+  if (!transformedXml.includes("<RouteData ")) {
+    return transformedXml
+  }
+
   let resultXml = decodeBase64(transformedXml)
   resultXml = resultXml.replace(/&lt;/g, "<")
   resultXml = resultXml.replace(/&gt;/g, ">")
