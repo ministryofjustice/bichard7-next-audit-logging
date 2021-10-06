@@ -17,48 +17,24 @@ const castToOldMessageVersion = function (transformedXml: string) {
   let resultXml = decodeBase64(transformedXml)
   resultXml = resultXml.replace(/&lt;/g, "<")
   resultXml = resultXml.replace(/&gt;/g, ">")
+  resultXml = resultXml.replace(/(\n|\t)/gm, "")
   resultXml = resultXml.replace("RouteData", "DeliverRequest")
 
-  let organizationalUnitID = ""
-  let messageType = ""
-  let messageContent = ""
-  let correlationID = ""
-
-  const messageOrg = resultXml
-    .split(/<OrganizationalUnitID literalvalue="String">/)[1]
-    .split(/<\/OrganizationalUnitID>/)[0]
-  if (messageOrg) {
-    organizationalUnitID = messageOrg
-    organizationalUnitID = organizationalUnitID.trim()
-  }
-
-  const messageT = resultXml.split(/<DataStreamType literalvalue="String">/)[1].split(/<\/DataStreamType>/)[0]
-  if (messageT) {
-    messageType = messageT
-    messageType = messageType.trim()
-  }
-
-  const match = resultXml.match(/<CorrelationID>([^<]*)<\/CorrelationID>/)
-  if (match && match.length > 1) {
-    ;[, correlationID] = match
-    correlationID = correlationID.trim()
-  }
-
-  const messageC = resultXml.split(/<DataStreamContent>/)[1].split(/<\/DataStreamContent>/)[0]
-  if (messageC) {
-    messageContent = messageC
-    messageContent = messageContent.trim()
-  }
+  const organizationalUnitId =
+    resultXml.match('<OrganizationalUnitID literalvalue="String">(.*)</OrganizationalUnitID>')?.[1]?.trim() ?? ""
+  const messageType = resultXml.match('<DataStreamType literalvalue="String">(.*)</DataStreamType>')?.[1]?.trim() ?? ""
+  const correlationId = resultXml.match("<CorrelationID>(.*)</CorrelationID>")?.[1]?.trim() ?? ""
+  const messageContent = resultXml.match("<DataStreamContent>(.*)</DataStreamContent>")?.[1]?.trim() ?? ""
 
   // remove the request from and replace it with old version of xml
   const firstRequestFromSystemSection = resultXml.split(/<RequestFromSystem VersionNumber="1.0">/)[0]
   const thirdRequestFromSystemSection = resultXml.split(/<\/RequestFromSystem>/)[1]
   resultXml = `${firstRequestFromSystemSection}<msg:MessageIdentifier>
-    ${correlationID}
+    ${correlationId}
   </msg:MessageIdentifier>
 	<msg:RequestingSystem>
 		<msg:Name>CJSE</msg:Name>
-		<msg:OrgUnitCode>${organizationalUnitID}</msg:OrgUnitCode>
+		<msg:OrgUnitCode>${organizationalUnitId}</msg:OrgUnitCode>
 		<msg:Environment>Production</msg:Environment>
 	</msg:RequestingSystem>
 	<msg:AckRequested>1</msg:AckRequested>
@@ -93,6 +69,7 @@ const castToOldMessageVersion = function (transformedXml: string) {
   resultXml = `${firstMessageSection}<Message>${messageContent}</Message>${thirdMessageSection}`
   ;[resultXml] = resultXml.split(/<Routes VersionNumber="1.0">/) // remove the last portion of the new XML format
   resultXml += "</DeliverRequest>"
+  resultXml = resultXml.replace(/(\n|\t)/gm, "")
   return encodeBase64(resultXml)
 }
 
