@@ -5,12 +5,13 @@ import ApplicationError from "src/errors/ApplicationError"
 
 const getCaseId = (xml: DeliveryMessage): Result<string> => {
   const caseId =
-    xml.DeliverRequest &&
-    xml.DeliverRequest.Message &&
-    xml.DeliverRequest.Message.ResultedCaseMessage &&
-    xml.DeliverRequest.Message.ResultedCaseMessage.Session &&
-    xml.DeliverRequest.Message.ResultedCaseMessage.Session.Case &&
-    xml.DeliverRequest.Message.ResultedCaseMessage.Session.Case.PTIURN
+    xml.RouteData &&
+    xml.RouteData.DataStream &&
+    xml.RouteData.DataStream.DataStreamContent &&
+    xml.RouteData.DataStream.DataStreamContent.ResultedCaseMessage &&
+    xml.RouteData.DataStream.DataStreamContent.ResultedCaseMessage.Session &&
+    xml.RouteData.DataStream.DataStreamContent.ResultedCaseMessage.Session.Case &&
+    xml.RouteData.DataStream.DataStreamContent.ResultedCaseMessage.Session.Case.PTIURN
 
   if (!caseId) {
     return new Error("Case Id cannot be found")
@@ -20,7 +21,8 @@ const getCaseId = (xml: DeliveryMessage): Result<string> => {
 }
 
 const getExternalCorrelationId = (xml: DeliveryMessage): Result<string> => {
-  const externalCorrelationId = xml.DeliverRequest && xml.DeliverRequest.MessageIdentifier
+  const externalCorrelationId =
+    xml.RouteData && xml.RouteData.RequestFromSystem && xml.RouteData.RequestFromSystem.CorrelationID
 
   if (!externalCorrelationId) {
     return new Error("The External Correlation Id cannot be found")

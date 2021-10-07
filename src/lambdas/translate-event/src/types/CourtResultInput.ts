@@ -1,5 +1,7 @@
 export default interface CourtResultInput {
-  DeliverRequest: {
-    MessageIdentifier: string
+  RouteData: {
+    RequestFromSystem: {
+      CorrelationID: string
+    }
   }
 }
