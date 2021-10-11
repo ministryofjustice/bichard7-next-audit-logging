@@ -1,4 +1,5 @@
 module.exports = {
+  basePath: "/audit-logging",
   future: {
     webpack5: true
   },

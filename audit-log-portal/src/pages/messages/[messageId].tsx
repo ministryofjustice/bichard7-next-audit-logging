@@ -14,9 +14,12 @@ const MessageView = () => {
   const router = useRouter()
   const { messageId } = router.query
 
-  const { data: messageData, error: messageError } = useSWR<GetMessageByIdResult>(`/api/messages/${messageId}`, fetcher)
+  const { data: messageData, error: messageError } = useSWR<GetMessageByIdResult>(
+    `/audit-logging/api/messages/${messageId}`,
+    fetcher
+  )
   const { data: eventsData, error: eventsError } = useSWR<GetMessageEventsResult>(
-    `/api/messages/${messageId}/events`,
+    `/audit-logging/api/messages/${messageId}/events`,
     fetcher
   )
   const getPageTitle = () =>
