@@ -28,7 +28,7 @@ const Layout = ({ pageTitle, children }: Props) => (
     <Page>
       <Content>
         <NavBar
-          logo={<Image src="/logo.png" alt="Bichard7 Audit Log Portal" width="64" height="64" />}
+          logo={<Image src="/audit-logging/logo.png" alt="Bichard7 Audit Log Portal" width="64" height="64" />}
           title={`Bichard7 Audit Log Portal - ${pageTitle}`}
         />
 
