@@ -76,7 +76,7 @@ user:
   nginx:
     exists: true
     uid: 999
-    gid: 998
+    gid: 999
     groups:
     - nginx
     home: /var/lib/nginx
