@@ -17,7 +17,7 @@ const resolveApiUrl = (searchModel: MessageSearchModel, lastMessageId?: string):
   if (lastMessageId) {
     params.append("lastMessageId", lastMessageId)
   }
-  return combineUrlAndQueryString(`/api/messages`, params.toString())
+  return combineUrlAndQueryString(`/audit-logging/api/messages`, params.toString())
 }
 
 const Index = () => {

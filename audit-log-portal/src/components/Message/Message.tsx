@@ -59,7 +59,7 @@ const Actions = styled.div`ß
 `
 
 const Message = ({ message, reloadMessages }: Props) => {
-  const { error, loading, response, post } = useFetch<void>("/api/messages")
+  const { error, loading, response, post } = useFetch<void>("/audit-logging/api/messages")
 
   const onRetry = async (): Promise<void> => {
     await post(`${message.messageId}/retry`)
