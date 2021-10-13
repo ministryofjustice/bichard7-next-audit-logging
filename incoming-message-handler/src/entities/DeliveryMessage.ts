@@ -1,15 +1,11 @@
 type DeliveryMessage = {
-  RouteData: {
-    RequestFromSystem: {
-      CorrelationID: string
-    }
-    DataStream: {
-      DataStreamContent: {
-        ResultedCaseMessage: {
-          Session: {
-            Case: {
-              PTIURN: string
-            }
+  DeliverRequest: {
+    MessageIdentifier: string
+    Message: {
+      ResultedCaseMessage: {
+        Session: {
+          Case: {
+            PTIURN: string
           }
         }
       }

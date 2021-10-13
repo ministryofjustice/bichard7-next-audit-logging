@@ -22,14 +22,14 @@ describe("formatMessageXml()", () => {
   })
 
   it("should format the message", () => {
-    expect(xml.RouteData).toBeDefined()
+    expect(xml.DeliverRequest).toBeDefined()
   })
 
   it("should provide a message id", () => {
-    expect(xml.RouteData.RequestFromSystem.CorrelationID).toBeDefined()
+    expect(xml.DeliverRequest.MessageIdentifier).toBeDefined()
   })
 
   it("should provide a case id", () => {
-    expect(xml.RouteData.DataStream.DataStreamContent.ResultedCaseMessage.Session.Case.PTIURN).toBe("123456789")
+    expect(xml.DeliverRequest.Message.ResultedCaseMessage.Session.Case.PTIURN).toBe("123456789")
   })
 })
