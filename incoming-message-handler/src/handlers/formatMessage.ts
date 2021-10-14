@@ -5,9 +5,11 @@ import formatMessageXml from "src/use-cases/formatMessageXml"
 export default async function formatMessage(event: ReceivedMessage): Promise<ReceivedMessage> {
   let formattedMessage = event.messageXml
 
-  const hasDeliveryElement = await hasRootElement(formattedMessage, "DeliverRequest")
-  if (!hasDeliveryElement) {
-    formattedMessage = formatMessageXml(clean(formattedMessage))
+  formattedMessage = clean(formattedMessage)
+  const hasRouteDataElement = await hasRootElement(formattedMessage, "RouteData")
+
+  if (!hasRouteDataElement) {
+    formattedMessage = formatMessageXml(formattedMessage)
   }
 
   return {

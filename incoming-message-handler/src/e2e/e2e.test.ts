@@ -5,7 +5,7 @@ import { isError } from "shared"
 import TestDynamoGateway from "shared/dist/DynamoGateway/TestDynamoGateway"
 import TestS3Gateway from "shared/dist/S3Gateway/TestS3Gateway"
 import TestMqGateway from "src/gateways/MqGateway/TestMqGateway"
-import replaceMessageIdInXml from "src/use-cases/replaceMessageIdInXml"
+import transformMessageXml from "src/use-cases/transformMessageXml"
 import IncomingMessageSimulator from "./IncomingMessageSimulator"
 import TestApi from "./TestApi"
 
@@ -17,20 +17,26 @@ const expectedExternalCorrelationId = uuid()
 const expectedCaseId = "41BP0510007"
 const originalXml = formatXml(`
   <?xml version="1.0" encoding="UTF-8"?>
-  <DeliverRequest xmlns="http://schemas.cjse.gov.uk/messages/deliver/2006-05" xmlns:ex="http://schemas.cjse.gov.uk/messages/exception/2006-06" xmlns:mf="http://schemas.cjse.gov.uk/messages/format/2006-05" xmlns:mm="http://schemas.cjse.gov.uk/messages/metadata/2006-05" xmlns:msg="http://schemas.cjse.gov.uk/messages/messaging/2006-05" xmlns:xmime="http://www.w3.org/2005/05/xmlmime" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-    <msg:MessageIdentifier>${expectedExternalCorrelationId}</msg:MessageIdentifier>
-    <Message>
-      <DC:ResultedCaseMessage xmlns:DC="http://www.dca.gov.uk/xmlschemas/libra" Flow="ResultedCasesForThePolice" Interface="LibraStandardProsecutorPolice" SchemaVersion="0.6g">
-        <DC:Session>
-          <DC:Case>
-            <DC:PTIURN>
-              ${expectedCaseId}
-            </DC:PTIURN>
-          </DC:Case>
-        </DC:Session>
-      </DC:ResultedCaseMessage>
-    </Message>
-  </DeliverRequest>
+  <RouteData xmlns="http://schemas.cjse.gov.uk/messages/deliver/2006-05" xmlns:ex="http://schemas.cjse.gov.uk/messages/exception/2006-06" xmlns:mf="http://schemas.cjse.gov.uk/messages/format/2006-05" xmlns:mm="http://schemas.cjse.gov.uk/messages/metadata/2006-05" xmlns:msg="http://schemas.cjse.gov.uk/messages/messaging/2006-05" xmlns:xmime="http://www.w3.org/2005/05/xmlmime" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <RequestFromSystem>
+      <CorrelationID>
+        ${expectedExternalCorrelationId}
+      </CorrelationID>
+    </RequestFromSystem>
+    <DataStream>
+      <DataStreamContent>
+        &lt;DC:ResultedCaseMessage xmlns:DC="http://www.dca.gov.uk/xmlschemas/libra" Flow="ResultedCasesForThePolice" Interface="LibraStandardProsecutorPolice" SchemaVersion="0.6g"&gt;
+          &lt;DC:Session&gt;
+            &lt;DC:Case&gt;
+              &lt;DC:PTIURN&gt;
+                ${expectedCaseId}
+              &lt;/DC:PTIURN&gt;
+            &lt;/DC:Case&gt;
+          &lt;/DC:Session&gt;
+        &lt;/DC:ResultedCaseMessage&gt;
+      </DataStreamContent>
+    </DataStream>
+  </RouteData>
 `)
 
 const AWS_URL = "http://localhost:4566"
@@ -98,7 +104,7 @@ describe("e2e tests", () => {
     const actualMessage = await testMqGateway.getMessage(queueName)
     expect(isError(actualMessage)).toBe(false)
 
-    const expectedXml = formatXml(replaceMessageIdInXml(persistedMessage))
+    const expectedXml = formatXml(transformMessageXml(persistedMessage))
     expect(formatXml(<string>actualMessage)).toBe(expectedXml)
   })
 })
