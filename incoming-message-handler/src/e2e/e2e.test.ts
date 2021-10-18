@@ -5,7 +5,7 @@ import { isError } from "shared"
 import TestDynamoGateway from "shared/dist/DynamoGateway/TestDynamoGateway"
 import TestS3Gateway from "shared/dist/S3Gateway/TestS3Gateway"
 import TestMqGateway from "src/gateways/MqGateway/TestMqGateway"
-import replaceMessageIdInXml from "src/use-cases/replaceMessageIdInXml"
+import transformMessageXml from "src/use-cases/transformMessageXml"
 import IncomingMessageSimulator from "./IncomingMessageSimulator"
 import TestApi from "./TestApi"
 
@@ -104,7 +104,7 @@ describe("e2e tests", () => {
     const actualMessage = await testMqGateway.getMessage(queueName)
     expect(isError(actualMessage)).toBe(false)
 
-    const expectedXml = formatXml(replaceMessageIdInXml(persistedMessage))
+    const expectedXml = formatXml(transformMessageXml(persistedMessage))
     expect(formatXml(<string>actualMessage)).toBe(expectedXml)
   })
 })

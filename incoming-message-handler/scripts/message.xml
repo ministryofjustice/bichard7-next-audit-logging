@@ -1,21 +1,164 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<RouteData xmlns="http://schemas.cjse.gov.uk/messages/deliver/2006-05" xmlns:ex="http://schemas.cjse.gov.uk/messages/exception/2006-06" xmlns:mf="http://schemas.cjse.gov.uk/messages/format/2006-05" xmlns:mm="http://schemas.cjse.gov.uk/messages/metadata/2006-05" xmlns:msg="http://schemas.cjse.gov.uk/messages/messaging/2006-05" xmlns:xmime="http://www.w3.org/2005/05/xmlmime" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-	<RequestFromSystem>
+<RouteData xmlns="http://schemas.cjse.gov.uk/common/operations" xmlns:cjseEntity="http://schemas.cjse.gov.uk/common/businessentities" xmlns:cjseType="http://schemas.cjse.gov.uk/common/businesstypes" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" VersionNumber="1.0" RequestResponse="Request">
+  <RequestFromSystem VersionNumber="1.0">
     <CorrelationID>
       {MESSAGE_ID}
     </CorrelationID>
+    <SystemID literalvalue="String">
+        B00LIBRA
+    </SystemID>
+    <OrganizationalUnitID literalvalue="String">
+        0000000
+    </OrganizationalUnitID>
+    <DataController literalvalue="String">
+        lee.flaxington
+    </DataController>
+    <User literalvalue="String">
+        lee.flaxington
+    </User>
+    <SourceID literalvalue="String">
+        B00LIBRA
+    </SourceID>
+    <DestinationID literalvalue="String">
+        Z00CJSE
+    </DestinationID>
+    <TestOperation>
+        true
+    </TestOperation>
   </RequestFromSystem>
-	<DataStream>
-	  <DataStreamContent>
-      &lt;DC:ResultedCaseMessage xmlns:DC="http://www.dca.gov.uk/xmlschemas/libra" Flow="ResultedCasesForThePolice" Interface="LibraStandardProsecutorPolice" SchemaVersion="0.6g"&gt;
-        &lt;DC:Session&gt;
-          &lt;DC:Case&gt;
-            &lt;DC:PTIURN&gt;
-              41BP0510007
-            &lt;/DC:PTIURN&gt;
-          &lt;/DC:Case&gt;
-        &lt;/DC:Session&gt;
-      &lt;/DC:ResultedCaseMessage&gt;
-	  </DataStreamContent>
-	</DataStream>
+  <DataStream VersionNumber="1.0">
+    <System literalvalue="String">
+        B00LIBRA
+    </System>
+    <DataStreamType literalvalue="String">
+        SPIResults
+    </DataStreamType>
+    <SystemDataStreamID>
+        29_09_2021_105710_000000350512
+    </SystemDataStreamID>
+    <Name>
+        SPI Results DISARR NEWREM
+    </Name>
+    <Reference>
+        29_09_2021_105710_000000350512
+    </Reference>
+    <ReferenceType>
+        SPIResults
+    </ReferenceType>
+    <Dated>
+        2013-12-01
+    </Dated>
+    <Timed>
+        10:57:17.043Z
+    </Timed>
+    <ContentType>
+        text/plain
+    </ContentType>
+    <DataStreamContent>
+        <DC:ResultedCaseMessage xmlns:DC='http://www.dca.gov.uk/xmlschemas/libra' Flow='ResultedCasesForThePolice'
+                      Interface='LibraStandardProsecutorPolice' SchemaVersion='0.6g'>
+                      <DC:Session>
+                              <DC:CourtHearing>
+                                      <DC:Hearing>
+                                              <DC:CourtHearingLocation>B41ME00</DC:CourtHearingLocation>
+                                              <DC:DateOfHearing>2008-01-11</DC:DateOfHearing>
+                                              <DC:TimeOfHearing>13:30:00</DC:TimeOfHearing>
+                                      </DC:Hearing>
+                                      <DC:PSAcode>1892</DC:PSAcode>
+                              </DC:CourtHearing>
+                              <DC:Case>
+                                      <DC:PTIURN>41BP0510007</DC:PTIURN>
+                                      <DC:Defendant>
+                                              <DC:ProsecutorReference>9625UC0000000118191Z</DC:ProsecutorReference>
+                                              <DC:CourtIndividualDefendant>
+                                                      <DC:PersonDefendant>
+                                                              <DC:BasePersonDetails>
+                                                                      <DC:PersonName>
+                                                                              <DC:PersonTitle>Mr</DC:PersonTitle>
+                                                                              <DC:PersonGivenName1>Dean</DC:PersonGivenName1>
+                                                                              <DC:PersonFamilyName>Rigout</DC:PersonFamilyName>
+                                                                      </DC:PersonName>
+                                                                      <DC:TelephoneDetails>
+                                                                              <DC:TelephoneNumberBusiness>020771112222</DC:TelephoneNumberBusiness>
+                                                                              <DC:TelephoneNumberHome>020781112222</DC:TelephoneNumberHome>
+                                                                              <DC:TelephoneNumberMobile>07956111272</DC:TelephoneNumberMobile>
+                                                                      </DC:TelephoneDetails>
+                                                                      <DC:EmailDetails>
+                                                                              <DC:EmailAddress1>email1@test.com</DC:EmailAddress1>
+                                                                              <DC:EmailAddress2>email2@test.com</DC:EmailAddress2>
+                                                                      </DC:EmailDetails>
+                                                                      <DC:Birthdate>1949-10-29</DC:Birthdate>
+                                                                      <DC:Gender>1</DC:Gender>
+                                                              </DC:BasePersonDetails>
+                                                              <DC:PNCidentifier>27061234567P</DC:PNCidentifier>
+                                                              <DC:PersonStatedNationality>1</DC:PersonStatedNationality>
+                                                              <DC:BailConditions>give to the court any passport held</DC:BailConditions>
+                                                      </DC:PersonDefendant>
+                                                      <DC:BailStatus>B</DC:BailStatus>
+                                                      <DC:Address>
+                                                              <DC:SimpleAddress>
+                                                                      <DC:AddressLine1>112 Letsbeavenue</DC:AddressLine1>
+                                                                      <DC:AddressLine2>Frimley,Camberley, Surrey</DC:AddressLine2>
+                                                              </DC:SimpleAddress>
+                                                      </DC:Address>
+                                                      <DC:PresentAtHearing>Y</DC:PresentAtHearing>
+                                                      <DC:ReasonForBailConditionsOrCustody>to ensure appearance;</DC:ReasonForBailConditionsOrCustody>
+                                              </DC:CourtIndividualDefendant>
+                                              <DC:Offence>
+                                                      <DC:BaseOffenceDetails>
+                                                              <DC:OffenceSequenceNumber>001</DC:OffenceSequenceNumber>
+                                                              <DC:OffenceCode>TH68027</DC:OffenceCode>
+                                                              <DC:OffenceWording>Burglary (with intent to steal - other than in dwelling)</DC:OffenceWording>
+                                                              <DC:OffenceTiming>
+                                                                      <DC:OffenceDateCode>1</DC:OffenceDateCode>
+                                                                      <DC:OffenceStart>
+                                                                              <DC:OffenceDateStartDate>2007-09-15</DC:OffenceDateStartDate>
+                                                                      </DC:OffenceStart>
+                                                              </DC:OffenceTiming>
+                                                              <DC:ChargeDate>2007-09-15</DC:ChargeDate>
+                                                              <DC:ArrestDate>2007-09-15</DC:ArrestDate>
+                                                              <DC:LocationOfOffence>Woolwich Common London</DC:LocationOfOffence>
+                                                      </DC:BaseOffenceDetails>
+                                                      <DC:InitiatedDate>2007-10-31</DC:InitiatedDate>
+                                                      <DC:Plea>2</DC:Plea>
+                                                      <DC:ModeOfTrial>03</DC:ModeOfTrial>
+                                                      <DC:FinalDisposalIndicator>Y</DC:FinalDisposalIndicator>
+                                                      <DC:ConvictionDate>2007-04-29</DC:ConvictionDate>
+                                                      <DC:ConvictingCourt>2723</DC:ConvictingCourt>
+                                                      <DC:Finding>G</DC:Finding>
+                                                      <DC:Result>
+                                                              <DC:ResultCode>4023</DC:ResultCode>
+                                                              <DC:ResultText>Remittal for Sentence on Adjournment</DC:ResultText>
+                                                              <DC:NextHearing>
+                                                                      <DC:NextHearingDetails>
+                                                                              <DC:CourtHearingLocation>B41ME00</DC:CourtHearingLocation>
+                                                                              <DC:DateOfHearing>2008-02-01</DC:DateOfHearing>
+                                                                              <DC:TimeOfHearing>13:30:00</DC:TimeOfHearing>
+                                                                      </DC:NextHearingDetails>
+                                                                      <DC:BailStatusOffence>B</DC:BailStatusOffence>
+                                                              </DC:NextHearing>
+                                                      </DC:Result>
+                                              </DC:Offence>
+                                      </DC:Defendant>
+                              </DC:Case>
+                      </DC:Session>
+              </DC:ResultedCaseMessage>
+    </DataStreamContent>
+  </DataStream>
+  <Routes VersionNumber="1.0">
+      <Route VersionNumber="1.0">
+          <RouteID>
+            001
+          </RouteID>
+          <RouteSourceSystem literalvalue="String">
+            B00LIBRA
+          </RouteSourceSystem>
+          <RouteDestinationSystem literalvalue="String">
+            00101PoliceCaseSystem
+          </RouteDestinationSystem>
+          <Descriptor>
+            String
+          </Descriptor>
+      </Route>
+  </Routes>
 </RouteData>

@@ -17,7 +17,7 @@ const getCaseId = (xml: DeliveryMessage): Result<string> => {
     return new Error("Case Id cannot be found")
   }
 
-  return caseId
+  return caseId.trim()
 }
 
 const getExternalCorrelationId = (xml: DeliveryMessage): Result<string> => {

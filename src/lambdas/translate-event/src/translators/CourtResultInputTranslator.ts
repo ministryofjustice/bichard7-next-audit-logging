@@ -10,9 +10,7 @@ import transformEventDetails from "./transformEventDetails"
 const CourtResultInputTranslator: Translator = async (input: TranslateEventInput): PromiseResult<TranslationResult> => {
   const { messageData, s3Path, eventSourceArn, eventSourceQueueName } = input
   // Court Result Inputs are in base64 encoded XML
-  let xml = decodeBase64(messageData)
-  xml = xml.replace(/&lt;/g, "<")
-  xml = xml.replace(/&gt;/g, ">")
+  const xml = decodeBase64(messageData)
   const inputItem = await parseXml<CourtResultInput>(xml)
 
   if (!inputItem) {
@@ -24,7 +22,7 @@ const CourtResultInputTranslator: Translator = async (input: TranslateEventInput
     componentID: "Translate Event",
     eventType: "Court Result Input Queue Failure",
     eventCategory: "error",
-    correlationID: inputItem.RouteData.RequestFromSystem.CorrelationID,
+    correlationID: inputItem.DeliverRequest.MessageIdentifier,
     eventDateTime: new Date().toISOString()
   }
   const event = transformEventDetails(logItem, s3Path, eventSourceArn, eventSourceQueueName)

@@ -1,8 +1,10 @@
+jest.mock("uuid")
 import { hasRootElement } from "shared"
 import type { ReceivedMessage } from "src/entities"
+import { v4 } from "uuid"
 import formatMessage from "./formatMessage"
 
-const unformattedMessage = `
+const unformattedMessageWithoutRouteData = `
 &lt;DC:ResultedCaseMessage xmlns:DC="http://www.dca.gov.uk/xmlschemas/libra" Flow="ResultedCasesForThePolice" Interface="LibraStandardProsecutorPolice" SchemaVersion="0.6g"&gt;
   &lt;DC:Session&gt;
     &lt;DC:Case&gt;
@@ -15,7 +17,7 @@ const unformattedMessage = `
 
 `
 
-const expectedUnformattedMessage = `
+const formattedMessageWithoutRouteData = `
 <DC:ResultedCaseMessage xmlns:DC="http://www.dca.gov.uk/xmlschemas/libra" Flow="ResultedCasesForThePolice" Interface="LibraStandardProsecutorPolice" SchemaVersion="0.6g">
   <DC:Session>
     <DC:Case>
@@ -28,61 +30,46 @@ const expectedUnformattedMessage = `
 
 `
 
-const formattedMessage = `
+const formattedMessageWithRouteData = `
 <?xml version="1.0" encoding="UTF-8"?>
-<RouteData xmlns="http://schemas.cjse.gov.uk/messages/deliver/2006-05" xmlns:ex="http://schemas.cjse.gov.uk/messages/exception/2006-06" xmlns:mf="http://schemas.cjse.gov.uk/messages/format/2006-05" xmlns:mm="http://schemas.cjse.gov.uk/messages/metadata/2006-05" xmlns:msg="http://schemas.cjse.gov.uk/messages/messaging/2006-05" xmlns:xmime="http://www.w3.org/2005/05/xmlmime" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-  <RequestFromSystem>
+<RouteData xmlns="http://schemas.cjse.gov.uk/common/operations" xmlns:cjseEntity="http://schemas.cjse.gov.uk/common/businessentities" xmlns:cjseType="http://schemas.cjse.gov.uk/common/businesstypes" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" VersionNumber="1.0" RequestResponse="Request">
+  <RequestFromSystem VersionNumber="1.0">
     <CorrelationID>
       1234
     </CorrelationID>
   </RequestFromSystem>
-  <DataStream>
-    <DataStreamContent>
-      ${unformattedMessage}
-    </DataStreamContent>
-	</DataStream>
-</RouteData>
-`
-
-const expectedFormattedMessage = `
-<?xml version="1.0" encoding="UTF-8"?>
-<RouteData xmlns="http://schemas.cjse.gov.uk/messages/deliver/2006-05" xmlns:ex="http://schemas.cjse.gov.uk/messages/exception/2006-06" xmlns:mf="http://schemas.cjse.gov.uk/messages/format/2006-05" xmlns:mm="http://schemas.cjse.gov.uk/messages/metadata/2006-05" xmlns:msg="http://schemas.cjse.gov.uk/messages/messaging/2006-05" xmlns:xmime="http://www.w3.org/2005/05/xmlmime" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-  <RequestFromSystem>
-    <CorrelationID>
-      1234
-    </CorrelationID>
-  </RequestFromSystem>
-  <DataStream>
-    <DataStreamContent>
-      ${expectedUnformattedMessage}
-    </DataStreamContent>
+  <DataStream VersionNumber="1.0">
+    <DataStreamContent>${formattedMessageWithoutRouteData}</DataStreamContent>
 	</DataStream>
 </RouteData>
 `
 
 describe("formatMessage()", () => {
+  const mockedUuidV4 = v4 as jest.MockedFunction<typeof v4>
+  mockedUuidV4.mockReturnValue("1234")
+
   it("should not format the message when it is already formatted", async () => {
     const expectedMessage: ReceivedMessage = {
       receivedDate: new Date().toISOString(),
-      messageXml: formattedMessage
+      messageXml: formattedMessageWithRouteData
     }
 
     const actualMessage = await formatMessage(expectedMessage)
 
     expect(actualMessage.receivedDate).toBe(expectedMessage.receivedDate)
-    expect(actualMessage.messageXml).toBe(expectedFormattedMessage)
+    expect(actualMessage.messageXml).toMatchSnapshot()
   })
 
   it("should format the message when it is not already formatted", async () => {
     const expectedMessage: ReceivedMessage = {
       receivedDate: new Date().toISOString(),
-      messageXml: unformattedMessage
+      messageXml: unformattedMessageWithoutRouteData
     }
 
     const actualMessage = await formatMessage(expectedMessage)
 
     expect(actualMessage.receivedDate).toBe(expectedMessage.receivedDate)
-    expect(actualMessage.messageXml).toContain(expectedUnformattedMessage)
+    expect(actualMessage.messageXml).toMatchSnapshot()
 
     const isFormatted = await hasRootElement(actualMessage.messageXml, "RouteData")
     expect(isFormatted).toBe(true)
