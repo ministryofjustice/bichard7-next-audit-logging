@@ -11,7 +11,8 @@ import type TranslationResult from "./translators/TranslationResult"
 const filenameMappings: Record<MessageFormat, string> = {
   AuditEvent: "audit-event",
   GeneralEvent: "general-event",
-  CourtResultInput: "court-result-input"
+  CourtResultInput: "court-result-input",
+  HearingOutcomePNCUpdate: "hearing-outcome-pnc-update"
 }
 
 const createPayload = (messageFormat: MessageFormat): TranslateEventInput => {
@@ -57,6 +58,13 @@ test.each<TestInput>([
     category: "error",
     eventSource: "Translate Event",
     eventType: "Court Result Input Queue Failure"
+  },
+  {
+    messageFormat: "HearingOutcomePNCUpdate",
+    messageId: "{MESSAGE_ID}",
+    category: "error",
+    eventSource: "Translate Event",
+    eventType: "Hearing Outcome PNC Update Queue Failure"
   }
 ])("$messageFormat is translated to AuditLogEvent type", async (input: TestInput) => {
   const payload = createPayload(input.messageFormat)
