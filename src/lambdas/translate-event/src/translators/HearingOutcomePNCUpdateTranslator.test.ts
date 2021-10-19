@@ -1,11 +1,12 @@
+import "@bichard/testing-jest"
 import fs from "fs"
-import { encodeBase64, isError } from "shared"
+import { encodeBase64 } from "shared"
 import type TranslateEventInput from "src/TranslateEventInput"
 import HearingOutcomePNCUpdateTranslator from "./HearingOutcomePNCUpdateTranslator"
 import type TranslationResult from "./TranslationResult"
 
-test("parses the message data and returns an AuditLogEvent", async () => {
-  const generalEventData = fs.readFileSync("../../../events/general-event.xml")
+test("parses the message data and returns a HearingOutcomePNCUpdate", async () => {
+  const generalEventData = fs.readFileSync("../../../events/hearing-outcome-pnc-update.xml")
   const messageData = encodeBase64(generalEventData.toString())
   const eventInput: TranslateEventInput = {
     messageData,
@@ -14,16 +15,20 @@ test("parses the message data and returns an AuditLogEvent", async () => {
     messageFormat: "GeneralEvent",
     eventSourceQueueName: "DummyQueueName"
   }
+  const beforeDate = new Date()
   const result = await HearingOutcomePNCUpdateTranslator(eventInput)
-
-  expect(isError(result)).toBe(false)
+  expect(result).toNotBeError()
+  const afterDate = new Date()
 
   const { messageId, event } = <TranslationResult>result
   expect(messageId).toBe("{MESSAGE_ID}")
-  expect(event.category).toBe("information")
-  expect(event.eventSource).toBe("Hearing Outcome Publication Choreography")
-  expect(event.eventType).toBe("Message Received")
-  expect(event.timestamp).toBe("2021-06-29T08:35:36.031Z")
+  expect(event.category).toBe("error")
+  expect(event.eventSource).toBe("Translate Event")
+  expect(event.eventType).toBe("Hearing Outcome PNC Update Queue Failure")
+
+  const eventTimestamp = new Date(event.timestamp)
+  expect(eventTimestamp).toBeBetween(beforeDate, afterDate)
+
   expect(event.s3Path).toBe("DummyPath")
   expect(event.eventSourceArn).toBe("DummyArn")
 })
