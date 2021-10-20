@@ -12,6 +12,7 @@ const filenameMappings: Record<MessageFormat, string> = {
   AuditEvent: "audit-event",
   GeneralEvent: "general-event",
   CourtResultInput: "court-result-input",
+  HearingOutcomePncUpdate: "hearing-outcome-pnc-update",
   DataSetPncUpdate: "data-set-pnc-update"
 }
 
@@ -58,6 +59,13 @@ test.each<TestInput>([
     category: "error",
     eventSource: "Translate Event",
     eventType: "Court Result Input Queue Failure"
+  },
+  {
+    messageFormat: "HearingOutcomePncUpdate",
+    messageId: "{MESSAGE_ID}",
+    category: "error",
+    eventSource: "Translate Event",
+    eventType: "Hearing Outcome PNC Update Queue Failure"
   },
   {
     messageFormat: "DataSetPncUpdate",

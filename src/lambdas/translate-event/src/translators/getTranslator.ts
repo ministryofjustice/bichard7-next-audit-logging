@@ -3,6 +3,7 @@ import type Translator from "./Translator"
 import AuditEventTranslator from "./AuditEventTranslator"
 import GeneralEventTranslator from "./GeneralEventTranslator"
 import CourtResultInputTranslator from "./CourtResultInputTranslator"
+import HearingOutcomePncUpdateTranslator from "./HearingOutcomePncUpdateTranslator"
 import DataSetPncUpdateTranslator from "./DataSetPncUpdateTranslator"
 
 export default (messageFormat: MessageFormat): Result<Translator> => {
@@ -15,6 +16,9 @@ export default (messageFormat: MessageFormat): Result<Translator> => {
 
     case "CourtResultInput":
       return CourtResultInputTranslator
+
+    case "HearingOutcomePncUpdate":
+      return HearingOutcomePncUpdateTranslator
 
     case "DataSetPncUpdate":
       return DataSetPncUpdateTranslator

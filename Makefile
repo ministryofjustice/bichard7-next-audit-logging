@@ -114,6 +114,10 @@ send-message:
 send-court-result-input-failure-event:
 	scripts/send-event.sh "court-result-input" "COURT_RESULT_INPUT.FAILURE"
 
+.PHONY: send-hearing-outcome-pnc-update-failure-event
+send-hearing-outcome-pnc-update-failure-event:
+	scripts/send-event.sh "hearing-outcome-pnc-update" "HEARING_OUTCOME_PNC_UPDATE.FAILURE"
+
 .PHONY: send-pnc-response-received
 send-pnc-response-received:
 	scripts/send-event.sh "pnc-response-received" "GENERAL_EVENT_QUEUE"
