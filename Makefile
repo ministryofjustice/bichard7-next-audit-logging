@@ -118,6 +118,10 @@ send-court-result-input-failure-event:
 send-pnc-response-received:
 	scripts/send-event.sh "pnc-response-received" "GENERAL_EVENT_QUEUE"
 
+.PHONY: send-data-set-pnc-update-failure-event
+send-data-set-pnc-update-failure-event:
+	scripts/send-event.sh "data-set-pnc-update" "DATA_SET_PNC_UPDATE_QUEUE.FAILURE"
+
 ########################################
 # AWS - Action Commands
 ########################################
