@@ -16,7 +16,7 @@ export default (messageFormat: MessageFormat): Result<Translator> => {
     case "CourtResultInput":
       return CourtResultInputTranslator
 
-    case "DataSetPncUpdate":
+    case "DataSetPNCUpdate":
       return DataSetPncUpdateTranslator
 
     default:

@@ -1,3 +1,3 @@
-type MessageFormat = "AuditEvent" | "GeneralEvent" | "CourtResultInput" | "DataSetPncUpdate"
+type MessageFormat = "AuditEvent" | "GeneralEvent" | "CourtResultInput" | "DataSetPNCUpdate"
 
 export default MessageFormat

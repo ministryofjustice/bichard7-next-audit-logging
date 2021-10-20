@@ -52,4 +52,4 @@ function create_message_receiver {
 create_message_receiver "AuditEvent" "audit-event"
 create_message_receiver "GeneralEvent" "general-event"
 create_message_receiver "CourtResultInput" "court-result-input"
-create_message_receiver "DataSetPncUpdate" "data-set-pnc-update"
+create_message_receiver "DataSetPNCUpdate" "data-set-pnc-update"
