@@ -4,6 +4,7 @@ import AuditEventTranslator from "./AuditEventTranslator"
 import GeneralEventTranslator from "./GeneralEventTranslator"
 import CourtResultInputTranslator from "./CourtResultInputTranslator"
 import HearingOutcomePncUpdateTranslator from "./HearingOutcomePncUpdateTranslator"
+import DataSetPncUpdateTranslator from "./DataSetPncUpdateTranslator"
 
 export default (messageFormat: MessageFormat): Result<Translator> => {
   switch (messageFormat) {
@@ -18,6 +19,9 @@ export default (messageFormat: MessageFormat): Result<Translator> => {
 
     case "HearingOutcomePncUpdate":
       return HearingOutcomePncUpdateTranslator
+
+    case "DataSetPncUpdate":
+      return DataSetPncUpdateTranslator
 
     default:
       return new Error(`Unsupported message format: ${messageFormat}`)

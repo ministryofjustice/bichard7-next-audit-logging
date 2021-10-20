@@ -23,10 +23,10 @@ jobs:
             - v1-npm-deps-{{ checksum "src/@bichard/testing-lambda/package-lock.json" }}
             - v1-npm-deps-{{ checksum "src/@bichard/testing-dynamodb/package-lock.json" }}
             - v1-npm-deps-{{ checksum "src/@bichard/testing-api-client/package-lock.json" }}
-            - v1-npm-deps-{{ checksum "src/@lambdas/store-in-s3/package-lock.json" }}
-            - v1-npm-deps-{{ checksum "src/@lambdas/translate-event/package-lock.json" }}
-            - v1-npm-deps-{{ checksum "src/@lambdas/record-event/package-lock.json" }}
-            - v1-npm-deps-{{ checksum "src/@lambdas/message-receiver/package-lock.json" }}
+            - v1-npm-deps-{{ checksum "src/lambdas/store-in-s3/package-lock.json" }}
+            - v1-npm-deps-{{ checksum "src/lambdas/translate-event/package-lock.json" }}
+            - v1-npm-deps-{{ checksum "src/lambdas/record-event/package-lock.json" }}
+            - v1-npm-deps-{{ checksum "src/lambdas/message-receiver/package-lock.json" }}
             - v1-npm-deps-{{ checksum "src/event-handler/package-lock.json" }}
             - v1-npm-deps-{{ checksum "incoming-message-handler/package-lock.json" }}
             - v1-npm-deps-{{ checksum "audit-log-api/package-lock.json" }}

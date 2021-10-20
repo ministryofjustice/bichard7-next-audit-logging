@@ -12,7 +12,8 @@ const filenameMappings: Record<MessageFormat, string> = {
   AuditEvent: "audit-event",
   GeneralEvent: "general-event",
   CourtResultInput: "court-result-input",
-  HearingOutcomePncUpdate: "hearing-outcome-pnc-update"
+  HearingOutcomePncUpdate: "hearing-outcome-pnc-update",
+  DataSetPncUpdate: "data-set-pnc-update"
 }
 
 const createPayload = (messageFormat: MessageFormat): TranslateEventInput => {
@@ -65,6 +66,13 @@ test.each<TestInput>([
     category: "error",
     eventSource: "Translate Event",
     eventType: "Hearing Outcome PNC Update Queue Failure"
+  },
+  {
+    messageFormat: "DataSetPncUpdate",
+    messageId: "{MESSAGE_ID}",
+    category: "error",
+    eventSource: "Translate Event",
+    eventType: "Data Set PNC Update Queue Failure"
   }
 ])("$messageFormat is translated to AuditLogEvent type", async (input: TestInput) => {
   const payload = createPayload(input.messageFormat)
