@@ -12,7 +12,7 @@ const filenameMappings: Record<MessageFormat, string> = {
   AuditEvent: "audit-event",
   GeneralEvent: "general-event",
   CourtResultInput: "court-result-input",
-  HearingOutcomePNCUpdate: "hearing-outcome-pnc-update"
+  HearingOutcomePncUpdate: "hearing-outcome-pnc-update"
 }
 
 const createPayload = (messageFormat: MessageFormat): TranslateEventInput => {
@@ -60,7 +60,7 @@ test.each<TestInput>([
     eventType: "Court Result Input Queue Failure"
   },
   {
-    messageFormat: "HearingOutcomePNCUpdate",
+    messageFormat: "HearingOutcomePncUpdate",
     messageId: "{MESSAGE_ID}",
     category: "error",
     eventSource: "Translate Event",

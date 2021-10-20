@@ -1,4 +1,4 @@
-export default interface HearingOutcomePNCUpdate {
+export default interface HearingOutcomePncUpdate {
   AnnotatedHearingOutcome: {
     HearingOutcome: {
       Hearing: {

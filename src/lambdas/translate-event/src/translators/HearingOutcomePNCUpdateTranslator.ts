@@ -1,19 +1,19 @@
 import type { PromiseResult } from "shared"
 import { decodeBase64, parseXml } from "shared"
 import type TranslateEventInput from "src/TranslateEventInput"
-import type HearingOutcomePNCUpdate from "src/types/HearingOutcomePNCUpdate"
+import type HearingOutcomePncUpdate from "src/types/HearingOutcomePncUpdate"
 import type { EventDetails } from "src/types"
 import type TranslationResult from "./TranslationResult"
 import type Translator from "./Translator"
 import transformEventDetails from "./transformEventDetails"
 
-const HearingOutcomePNCUpdateTranslator: Translator = async (
+const HearingOutcomePncUpdateTranslator: Translator = async (
   input: TranslateEventInput
 ): PromiseResult<TranslationResult> => {
   const { messageData, s3Path, eventSourceArn, eventSourceQueueName } = input
   // Hearing Outcome PNC Updates are in base64 encoded XML
   const xml = decodeBase64(messageData)
-  const inputItem = await parseXml<HearingOutcomePNCUpdate>(xml)
+  const inputItem = await parseXml<HearingOutcomePncUpdate>(xml)
 
   if (!inputItem) {
     return new Error("Failed to parse the Hearing Outcome PNC Update")
@@ -34,4 +34,4 @@ const HearingOutcomePNCUpdateTranslator: Translator = async (
   }
 }
 
-export default HearingOutcomePNCUpdateTranslator
+export default HearingOutcomePncUpdateTranslator

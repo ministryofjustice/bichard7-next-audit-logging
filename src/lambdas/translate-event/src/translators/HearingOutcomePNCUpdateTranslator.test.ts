@@ -2,21 +2,21 @@ import "@bichard/testing-jest"
 import fs from "fs"
 import { encodeBase64 } from "shared"
 import type TranslateEventInput from "src/TranslateEventInput"
-import HearingOutcomePNCUpdateTranslator from "./HearingOutcomePNCUpdateTranslator"
+import HearingOutcomePncUpdateTranslator from "./HearingOutcomePncUpdateTranslator"
 import type TranslationResult from "./TranslationResult"
 
-test("parses the message data and returns a HearingOutcomePNCUpdate", async () => {
-  const generalEventData = fs.readFileSync("../../../events/hearing-outcome-pnc-update.xml")
-  const messageData = encodeBase64(generalEventData.toString())
+test("parses the message data and returns a HearingOutcomePncUpdate", async () => {
+  const eventData = fs.readFileSync("../../../events/hearing-outcome-pnc-update.xml")
+  const messageData = encodeBase64(eventData.toString())
   const eventInput: TranslateEventInput = {
     messageData,
     s3Path: "DummyPath",
     eventSourceArn: "DummyArn",
-    messageFormat: "GeneralEvent",
+    messageFormat: "HearingOutcomePncUpdate",
     eventSourceQueueName: "DummyQueueName"
   }
   const beforeDate = new Date()
-  const result = await HearingOutcomePNCUpdateTranslator(eventInput)
+  const result = await HearingOutcomePncUpdateTranslator(eventInput)
   expect(result).toNotBeError()
   const afterDate = new Date()
 
