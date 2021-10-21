@@ -24,7 +24,7 @@ const HearingOutcomeInputTranslator: Translator = async (
     componentID: "Translate Event",
     eventType: "Court Result Input Queue Failure",
     eventCategory: "error",
-    correlationID: "", // inputItem.DeliverRequest.MessageIdentifier,
+    correlationID: inputItem.AnnotatedHearingOutcome.HearingOutcome.Hearing.SourceReference.UniqueID,
     eventDateTime: new Date().toISOString()
   }
   const event = transformEventDetails(logItem, s3Path, eventSourceArn, eventSourceQueueName)
