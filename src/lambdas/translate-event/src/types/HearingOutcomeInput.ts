@@ -1,10 +1,8 @@
 export default interface HearingOutcomeInput {
-  AnnotatedHearingOutcome: {
-    HearingOutcome: {
-      Hearing: {
-        SourceReference: {
-          UniqueID: string
-        }
+  HearingOutcome: {
+    Hearing: {
+      SourceReference: {
+        UniqueID: string
       }
     }
   }

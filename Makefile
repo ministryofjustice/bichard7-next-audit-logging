@@ -128,7 +128,7 @@ send-data-set-pnc-update-failure-event:
 
 .PHONY: send-hearing-outcome-input-failure-event
 send-hearing-outcome-input-failure-event:
-	scripts/send-event.sh "data-set-pnc-update" "SEND_HEARING_OUTCOME_INPUT_QUEUE.FAILURE"
+	scripts/send-event.sh "hearing-outcome-input" "SEND_HEARING_OUTCOME_INPUT_QUEUE.FAILURE"
 
 .PHONY: send-pnc-update-request-failure-event
 send-pnc-update-request-failure-event:
