@@ -126,6 +126,10 @@ send-pnc-response-received:
 send-data-set-pnc-update-failure-event:
 	scripts/send-event.sh "data-set-pnc-update" "DATA_SET_PNC_UPDATE_QUEUE.FAILURE"
 
+.PHONY: send-pnc-update-request-failure-event
+send-data-set-pnc-update-failure-event:
+	scripts/send-event.sh "pnc-update-request" "PNC_UPDATE_REQUEST_QUEUE.FAILURE"
+
 ########################################
 # AWS - Action Commands
 ########################################
