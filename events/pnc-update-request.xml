@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<tns:PNCUpdateDataset xmlns:br7="http://schemas.cjse.gov.uk/datastandards/BR7/2007-12" xmlns:tns="http://www.example.org/NewXMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.example.org/NewXMLSchema BR7PNCUpdateDataset.xsd http://schemas.cjse.gov.uk/datastandards/BR7/2007-12 Annotated%20-%20BR7%20Hearing%20Outcome.xsd ">
+    <br7:AnnotatedHearingOutcome>
+	    <HearingOutcome xmlns="http://schemas.cjse.gov.uk/datastandards/BR7/2007-12">
+	        <Hearing hasError="false" SchemaVersion="4.0">
+	            <ns1:CourtHearingLocation SchemaVersion="2.0" xmlns:ns1="http://schemas.cjse.gov.uk/datastandards/2006-10">
+	                <ns1:TopLevelCode>B</ns1:TopLevelCode>
+	                <ns1:SecondLevelCode>46</ns1:SecondLevelCode>
+	                <ns1:ThirdLevelCode>IR</ns1:ThirdLevelCode>
+	                <ns1:BottomLevelCode>00</ns1:BottomLevelCode>
+	                <ns1:OrganisationUnitCode>B46IR00</ns1:OrganisationUnitCode>
+	            </ns1:CourtHearingLocation>
+	            <ns2:DateOfHearing xmlns:ns2="http://schemas.cjse.gov.uk/datastandards/2006-10">2099-12-31</ns2:DateOfHearing>
+	            <ns3:TimeOfHearing xmlns:ns3="http://schemas.cjse.gov.uk/datastandards/2006-10">11:00</ns3:TimeOfHearing>
+	            <ns4:HearingLanguage Literal="Don't Know" xmlns:ns4="http://schemas.cjse.gov.uk/datastandards/2006-10">D</ns4:HearingLanguage>
+	            <ns5:HearingDocumentationLanguage Literal="Don't Know" xmlns:ns5="http://schemas.cjse.gov.uk/datastandards/2006-10">D</ns5:HearingDocumentationLanguage>
+	            <ns6:DefendantPresentAtHearing Literal="Yes" xmlns:ns6="http://schemas.cjse.gov.uk/datastandards/2006-10">Y</ns6:DefendantPresentAtHearing>
+	            <ns7:ReportRequestedDate xmlns:ns7="http://schemas.cjse.gov.uk/datastandards/2006-10">2008-04-02</ns7:ReportRequestedDate>
+	            <ns8:ReportCompletedDate xmlns:ns8="http://schemas.cjse.gov.uk/datastandards/2006-10">2008-04-02</ns8:ReportCompletedDate>
+	            <SourceReference>
+	                <DocumentName>DocumentName</DocumentName>
+	                <UniqueID>{MESSAGE_ID}</UniqueID>
+	                <DocumentType>DocumentType</DocumentType>
+	                <TimeStamp>2008-04-02T11:00:00</TimeStamp>
+	                <Version>Version</Version>
+	                <SecurityClassification>SecurityClassification</SecurityClassification>
+	                <SellByDate>2008-04-02</SellByDate>
+	                <XSLstylesheetURL>XSLstylesheetURL</XSLstylesheetURL>
+	                <DocumentInformation>DocumentInformation</DocumentInformation>
+	            </SourceReference>
+	            <CourtType Literal="MC adult">MCA</CourtType>
+	            <CourtHouseCode>1960</CourtHouseCode>
+	            <CourtHouseName>Magistrates' Courts Kent Maidstone</CourtHouseName>
+	        </Hearing>
+	        <Case hasError="false" SchemaVersion="4.0">
+	            <ns9:CPSOrganisation SchemaVersion="2.0" xmlns:ns9="http://schemas.cjse.gov.uk/datastandards/2006-10">
+	                <ns9:TopLevelCode>B</ns9:TopLevelCode>
+	                <ns9:SecondLevelCode>46</ns9:SecondLevelCode>
+	                <ns9:ThirdLevelCode>IR</ns9:ThirdLevelCode>
+	                <ns9:BottomLevelCode>00</ns9:BottomLevelCode>
+	                <ns9:OrganisationUnitCode>B46IR00</ns9:OrganisationUnitCode>
+	            </ns9:CPSOrganisation>
+	            <ns10:PTIURN xmlns:ns10="http://schemas.cjse.gov.uk/datastandards/2006-10">01ST0000107</ns10:PTIURN>
+	            <ns11:CaseMarker xmlns:ns11="http://schemas.cjse.gov.uk/datastandards/2006-10">M</ns11:CaseMarker>
+	            <ns12:PreChargeDecisionIndicator Literal="No" xmlns:ns12="http://schemas.cjse.gov.uk/datastandards/2006-10">N</ns12:PreChargeDecisionIndicator>
+	            <ns13:CourtCaseReferenceNumber xmlns:ns13="http://schemas.cjse.gov.uk/datastandards/2006-10">12/3456/789012A</ns13:CourtCaseReferenceNumber>
+	            <CourtReference>
+	                <ns14:MagistratesCourtReference xmlns:ns14="http://schemas.cjse.gov.uk/datastandards/2006-10">01ST0000107</ns14:MagistratesCourtReference>
+	            </CourtReference>
+	            <RecordableOnPNCindicator Literal="Yes">Y</RecordableOnPNCindicator>
+	            <Urgent>
+	                <urgent Literal="Yes">Y</urgent>
+	                <urgency>1</urgency>
+	            </Urgent>
+	            <HearingDefendant hasError="false">
+	                <ArrestSummonsNumber>0701VK0100000001852B</ArrestSummonsNumber>
+	                <CRONumber>0/12H</CRONumber>
+	                <DriverNumber>AB123456789CD0EF</DriverNumber>
+	                <PNCIdentifier>2706/1234567P</PNCIdentifier>
+	                <PNCCheckname>pncCheckName</PNCCheckname>
+	                <OrganisationName>OrganisationName</OrganisationName>
+	                <Address>
+	                    <ns15:AddressLine1 xmlns:ns15="http://schemas.cjse.gov.uk/datastandards/2006-10">AddressLine1</ns15:AddressLine1>
+	                    <ns16:AddressLine2 xmlns:ns16="http://schemas.cjse.gov.uk/datastandards/2006-10">AddressLine2</ns16:AddressLine2>
+	                    <ns17:AddressLine3 xmlns:ns17="http://schemas.cjse.gov.uk/datastandards/2006-10">AddressLine3</ns17:AddressLine3>
+	                    <ns18:AddressLine4 xmlns:ns18="http://schemas.cjse.gov.uk/datastandards/2006-10">AddressLine4</ns18:AddressLine4>
+	                    <ns19:AddressLine5 xmlns:ns19="http://schemas.cjse.gov.uk/datastandards/2006-10">AddressLine5</ns19:AddressLine5>
+	                    <ns20:UKpostcode xmlns:ns20="http://schemas.cjse.gov.uk/datastandards/2006-10">SO21 2JN</ns20:UKpostcode>
+	                    <ns21:Country Literal="United Kingdom of Great Britain &amp; N. Ireland" xmlns:ns21="http://schemas.cjse.gov.uk/datastandards/2006-10">GBR</ns21:Country>
+	                </Address>
+	                <RemandStatus Literal="Conditional Bail">CB</RemandStatus>
+	                <BailConditions>BailConditions</BailConditions>
+	                <ReasonForBailConditions>ReasonForBailConditions</ReasonForBailConditions>
+	                <CourtPNCIdentifier>2706/1234567P</CourtPNCIdentifier>
+	                <Offence hasError="false" SchemaVersion="4.0">
+	                    <ns22:CriminalProsecutionReference SchemaVersion="2.0" xmlns:ns22="http://schemas.cjse.gov.uk/datastandards/2006-10">
+	                        <ns22:DefendantOrOffender>
+	                            <ns22:Year>08</ns22:Year>
+	                            <ns22:OrganisationUnitIdentifierCode SchemaVersion="2.0">
+	                                <ns22:TopLevelCode>B</ns22:TopLevelCode>
+	                                <ns22:SecondLevelCode>46</ns22:SecondLevelCode>
+	                                <ns22:ThirdLevelCode>IR</ns22:ThirdLevelCode>
+	                                <ns22:BottomLevelCode>00</ns22:BottomLevelCode>
+	                                <ns22:OrganisationUnitCode>B46IR00</ns22:OrganisationUnitCode>
+	                            </ns22:OrganisationUnitIdentifierCode>
+	                            <ns22:DefendantOrOffenderSequenceNumber>12345678901</ns22:DefendantOrOffenderSequenceNumber>
+	                            <ns22:CheckDigit>Z</ns22:CheckDigit>
+	                        </ns22:DefendantOrOffender>
+	                        <ns22:OffenceReason>
+	                            <ns22:OffenceCode>
+	                                <ns22:ActOrSource>TH</ns22:ActOrSource>
+	                                <ns22:Year>68</ns22:Year>
+	                                <ns22:Reason>139</ns22:Reason>
+	                                <ns22:Qualifier>I</ns22:Qualifier>
+	                            </ns22:OffenceCode>
+	                        </ns22:OffenceReason>
+	                        <ns22:OffenceReasonSequence>1</ns22:OffenceReasonSequence>
+	                    </ns22:CriminalProsecutionReference>
+	                    <ns23:OffenceCategory Literal="Summary Non-motoring" xmlns:ns23="http://schemas.cjse.gov.uk/datastandards/2006-10">CS</ns23:OffenceCategory>
+	                    <ns24:OffenceInitiationCode Literal="Charge" xmlns:ns24="http://schemas.cjse.gov.uk/datastandards/2006-10">C</ns24:OffenceInitiationCode>
+	                    <ns25:SummonsCode Literal="On Application" xmlns:ns25="http://schemas.cjse.gov.uk/datastandards/2006-10">A</ns25:SummonsCode>
+	                    <ns26:Informant xmlns:ns26="http://schemas.cjse.gov.uk/datastandards/2006-10">Informant</ns26:Informant>
+	                    <ns27:ArrestDate xmlns:ns27="http://schemas.cjse.gov.uk/datastandards/2006-10">2008-02-04</ns27:ArrestDate>
+	                    <ns28:ChargeDate xmlns:ns28="http://schemas.cjse.gov.uk/datastandards/2006-10">2008-02-04</ns28:ChargeDate>
+	                    <ns29:ActualOffenceDateCode Literal="on or about" xmlns:ns29="http://schemas.cjse.gov.uk/datastandards/2006-10">5</ns29:ActualOffenceDateCode>
+	                    <ns30:ActualOffenceStartDate xmlns:ns30="http://schemas.cjse.gov.uk/datastandards/2006-10">
+	                        <ns30:StartDate>2008-02-04</ns30:StartDate>
+	                    </ns30:ActualOffenceStartDate>
+	                    <ns31:ActualOffenceEndDate xmlns:ns31="http://schemas.cjse.gov.uk/datastandards/2006-10">
+	                        <ns31:EndDate>2008-02-04</ns31:EndDate>
+	                    </ns31:ActualOffenceEndDate>
+	                    <ns32:LocationOfOffence xmlns:ns32="http://schemas.cjse.gov.uk/datastandards/2006-10">LocationOfOffence</ns32:LocationOfOffence>
+	                    <ns33:OffenceTitle xmlns:ns33="http://schemas.cjse.gov.uk/datastandards/2006-10">Attempt take / destroy fish (not daytime angling)</ns33:OffenceTitle>
+	                    <ns34:OffenceWelshTitle xmlns:ns34="http://schemas.cjse.gov.uk/datastandards/2006-10">OffenceWelshTitle</ns34:OffenceWelshTitle>
+	                    <ns35:ActualOffenceWording xmlns:ns35="http://schemas.cjse.gov.uk/datastandards/2006-10">ActualOffenceWording</ns35:ActualOffenceWording>
+	                    <ns36:ActualWelshOffenceWording xmlns:ns36="http://schemas.cjse.gov.uk/datastandards/2006-10">ActualWelshOffenceWording</ns36:ActualWelshOffenceWording>
+	                    <ns37:ActualIndictmentWording xmlns:ns37="http://schemas.cjse.gov.uk/datastandards/2006-10">ActualIndictmentWording</ns37:ActualIndictmentWording>
+	                    <ns38:ActualWelshIndictmentWording xmlns:ns38="http://schemas.cjse.gov.uk/datastandards/2006-10">ActualWelshIndictmentWording</ns38:ActualWelshIndictmentWording>
+	                    <ns39:ActualStatementOfFacts xmlns:ns39="http://schemas.cjse.gov.uk/datastandards/2006-10">ActualStatementOfFacts</ns39:ActualStatementOfFacts>
+	                    <ns40:ActualWelshStatementOfFacts xmlns:ns40="http://schemas.cjse.gov.uk/datastandards/2006-10">ActualWelshStatementOfFacts</ns40:ActualWelshStatementOfFacts>
+	                    <ns41:RecordableOnPNCindicator Literal="Yes" xmlns:ns41="http://schemas.cjse.gov.uk/datastandards/2006-10">Y</ns41:RecordableOnPNCindicator>
+	                    <ns42:NotifiableToHOindicator Literal="No" xmlns:ns42="http://schemas.cjse.gov.uk/datastandards/2006-10">N</ns42:NotifiableToHOindicator>
+	                    <ns43:HomeOfficeClassification xmlns:ns43="http://schemas.cjse.gov.uk/datastandards/2006-10">161/11</ns43:HomeOfficeClassification>
+	                    <ns44:AlcoholLevel xmlns:ns44="http://schemas.cjse.gov.uk/datastandards/2006-10">
+	                        <ns44:Amount>10</ns44:Amount>
+	                        <ns44:Method Literal="Blood">A</ns44:Method>
+	                    </ns44:AlcoholLevel>
+	                    <ns45:VehicleCode xmlns:ns45="http://schemas.cjse.gov.uk/datastandards/2006-10">L</ns45:VehicleCode>
+	                    <ns46:VehicleRegistrationMark xmlns:ns46="http://schemas.cjse.gov.uk/datastandards/2006-10">123456789AB</ns46:VehicleRegistrationMark>
+	                    <ns47:OffenceTime xmlns:ns47="http://schemas.cjse.gov.uk/datastandards/2006-10">11:00</ns47:OffenceTime>
+	                    <ns48:OffenceEndTime xmlns:ns48="http://schemas.cjse.gov.uk/datastandards/2006-10">11:00</ns48:OffenceEndTime>
+	                    <ns49:ConvictionDate xmlns:ns49="http://schemas.cjse.gov.uk/datastandards/2006-10">2008-02-04</ns49:ConvictionDate>
+	                    <ns50:ResultHalfLifeHours xmlns:ns50="http://schemas.cjse.gov.uk/datastandards/2006-10">1</ns50:ResultHalfLifeHours>
+	                    <CommittedOnBail Literal="No">N</CommittedOnBail>
+	                    <CourtOffenceSequenceNumber>001</CourtOffenceSequenceNumber>
+	                    <Result hasError="false" SchemaVersion="2.0">
+	                        <ns51:CJSresultCode xmlns:ns51="http://schemas.cjse.gov.uk/datastandards/2006-10">1101</ns51:CJSresultCode>
+	                        <ns52:ResultApplicableQualifierCode xmlns:ns52="http://schemas.cjse.gov.uk/datastandards/2006-10">AV</ns52:ResultApplicableQualifierCode>
+	                        <ns53:OffenceRemandStatus Literal="Conditional Bail" xmlns:ns53="http://schemas.cjse.gov.uk/datastandards/2006-10">CB</ns53:OffenceRemandStatus>
+	                        <ns54:SourceOrganisation SchemaVersion="2.0" xmlns:ns54="http://schemas.cjse.gov.uk/datastandards/2006-10">
+	                            <ns54:TopLevelCode>B</ns54:TopLevelCode>
+	                            <ns54:SecondLevelCode>46</ns54:SecondLevelCode>
+	                            <ns54:ThirdLevelCode>IR</ns54:ThirdLevelCode>
+	                            <ns54:BottomLevelCode>00</ns54:BottomLevelCode>
+	                            <ns54:OrganisationUnitCode>B46IR00</ns54:OrganisationUnitCode>
+	                        </ns54:SourceOrganisation>
+	                        <ns55:CourtType xmlns:ns55="http://schemas.cjse.gov.uk/datastandards/2006-10">MCA</ns55:CourtType>
+	                        <ns56:ResultHearingType Literal="Appeal Against Conviction" xmlns:ns56="http://schemas.cjse.gov.uk/datastandards/2006-10">AAC</ns56:ResultHearingType>
+	                        <ns57:ResultHearingDate xmlns:ns57="http://schemas.cjse.gov.uk/datastandards/2006-10">2008-02-04</ns57:ResultHearingDate>
+	                        <ns58:BailCondition xmlns:ns58="http://schemas.cjse.gov.uk/datastandards/2006-10">BailCondition</ns58:BailCondition>
+	                        <ns59:Duration xmlns:ns59="http://schemas.cjse.gov.uk/datastandards/2006-10">
+	                            <ns59:DurationType>Community Punishment</ns59:DurationType>
+	                            <ns59:DurationUnit>H</ns59:DurationUnit>
+	                            <ns59:DurationLength>20</ns59:DurationLength>
+	                        </ns59:Duration>
+	                        <ns60:DateSpecifiedInResult Sequence="1" xmlns:ns60="http://schemas.cjse.gov.uk/datastandards/2006-10">2008-02-04</ns60:DateSpecifiedInResult>
+	                        <ns61:TimeSpecifiedInResult Sequence="1" xmlns:ns61="http://schemas.cjse.gov.uk/datastandards/2006-10">11:00</ns61:TimeSpecifiedInResult>
+	                        <ns62:AmountSpecifiedInResult Type="Costs" xmlns:ns62="http://schemas.cjse.gov.uk/datastandards/2006-10">20.50</ns62:AmountSpecifiedInResult>
+	                        <ns63:NumberSpecifiedInResult Type="C" xmlns:ns63="http://schemas.cjse.gov.uk/datastandards/2006-10">20</ns63:NumberSpecifiedInResult>
+	                        <ns64:NextResultSourceOrganisation SchemaVersion="2.0" xmlns:ns64="http://schemas.cjse.gov.uk/datastandards/2006-10">
+	                            <ns64:TopLevelCode>B</ns64:TopLevelCode>
+	                            <ns64:SecondLevelCode>46</ns64:SecondLevelCode>
+	                            <ns64:ThirdLevelCode>IR</ns64:ThirdLevelCode>
+	                            <ns64:BottomLevelCode>00</ns64:BottomLevelCode>
+	                            <ns64:OrganisationUnitCode>B46IR00</ns64:OrganisationUnitCode>
+	                        </ns64:NextResultSourceOrganisation>
+	                        <ns65:NextCourtType xmlns:ns65="http://schemas.cjse.gov.uk/datastandards/2006-10">MCA</ns65:NextCourtType>
+	                        <ns66:NextHearingType Literal="Other" xmlns:ns66="http://schemas.cjse.gov.uk/datastandards/2006-10">OTHER</ns66:NextHearingType>
+	                        <ns67:NextHearingDate xmlns:ns67="http://schemas.cjse.gov.uk/datastandards/2006-10">2008-02-04</ns67:NextHearingDate>
+	                        <ns68:NextHearingTime xmlns:ns68="http://schemas.cjse.gov.uk/datastandards/2006-10">11:59</ns68:NextHearingTime>
+	                        <ns69:PleaStatus Literal="Not Guilty" xmlns:ns69="http://schemas.cjse.gov.uk/datastandards/2006-10">NG</ns69:PleaStatus>
+	                        <ns70:Verdict Literal="No Conviction" xmlns:ns70="http://schemas.cjse.gov.uk/datastandards/2006-10">NC</ns70:Verdict>
+	                        <ns71:ModeOfTrialReason Literal="Court Directs Trial by Jury" xmlns:ns71="http://schemas.cjse.gov.uk/datastandards/2006-10">CDTJ</ns71:ModeOfTrialReason>
+	                        <ns72:ResultVariableText xmlns:ns72="http://schemas.cjse.gov.uk/datastandards/2006-10">ResultVariableText</ns72:ResultVariableText>
+	                        <ns73:TargetCourtType xmlns:ns73="http://schemas.cjse.gov.uk/datastandards/2006-10">Magistrates Court</ns73:TargetCourtType>
+	                        <ns74:WarrantIssueDate xmlns:ns74="http://schemas.cjse.gov.uk/datastandards/2006-10">2008-02-04</ns74:WarrantIssueDate>
+	                        <ns75:RecordableOnPNCindicator Literal="Yes" xmlns:ns75="http://schemas.cjse.gov.uk/datastandards/2006-10">Y</ns75:RecordableOnPNCindicator>
+	                        <ns76:ResultHalfLifeHours xmlns:ns76="http://schemas.cjse.gov.uk/datastandards/2006-10">1</ns76:ResultHalfLifeHours>
+	                        <CRESTDisposalCode>CRESTDisposalCode</CRESTDisposalCode>
+	                        <PNCDisposalType>1101</PNCDisposalType>
+	                        <ResultClass>Adjournment post Judgement</ResultClass>
+	                        <Urgent>
+	                            <urgent Literal="Yes">Y</urgent>
+	                            <urgency>1</urgency>
+	                        </Urgent>
+	                        <PNCAdjudicationExists Literal="Yes">Y</PNCAdjudicationExists>
+	                        <NumberOfOffencesTIC>0</NumberOfOffencesTIC>
+	                        <ReasonForOffenceBailConditions>ReasonForOffenceBailConditions</ReasonForOffenceBailConditions>
+	                        <ResultQualifierVariable SchemaVersion="3.0">
+	                            <ns77:Code xmlns:ns77="http://schemas.cjse.gov.uk/datastandards/2006-10">AV</ns77:Code>
+	                            <ns78:Duration xmlns:ns78="http://schemas.cjse.gov.uk/datastandards/2006-10">
+	                                <ns78:DurationType>Duration</ns78:DurationType>
+	                                <ns78:DurationUnit>H</ns78:DurationUnit>
+	                                <ns78:DurationLength>20</ns78:DurationLength>
+	                            </ns78:Duration>
+	                            <ns79:DateSpecifiedInResult Sequence="1" xmlns:ns79="http://schemas.cjse.gov.uk/datastandards/2006-10">2008-02-04</ns79:DateSpecifiedInResult>
+	                            <ns80:Text xmlns:ns80="http://schemas.cjse.gov.uk/datastandards/2006-10">Text</ns80:Text>
+	                        </ResultQualifierVariable>
+	                    </Result>
+	                </Offence>
+	            </HearingDefendant>
+	        </Case>
+	    </HearingOutcome>
+	    <br7:HasError>false</br7:HasError>
+    </br7:AnnotatedHearingOutcome>	    
+</tns:PNCUpdateDataset>
