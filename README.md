@@ -104,4 +104,4 @@ ie `docker run --rm -v /path/to/your/certificates:/certs -p 80:80 -p 443:443 -e 
 This repository is developed and managed by the Made Tech team working on the Bichard7 project.
 
 Tech Lead: [Ben Pirt](mailto:ben@madetech.com)
-Delivery Manager: [Kaiser Kahn](mailto:kaiser.kahn@madetech.com)
+Delivery Manager: [Kayleigh Derricutt](mailto:Kayleigh.derricutt@madetech.com)

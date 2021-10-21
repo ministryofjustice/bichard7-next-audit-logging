@@ -5,5 +5,6 @@ type MessageFormat =
   | "DataSetPncUpdate"
   | "HearingOutcomePncUpdate"
   | "HearingOutcomeInput"
+  | "PncUpdateRequest"
 
 export default MessageFormat
