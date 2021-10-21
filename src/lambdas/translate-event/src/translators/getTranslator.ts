@@ -5,6 +5,7 @@ import GeneralEventTranslator from "./GeneralEventTranslator"
 import CourtResultInputTranslator from "./CourtResultInputTranslator"
 import HearingOutcomePncUpdateTranslator from "./HearingOutcomePncUpdateTranslator"
 import DataSetPncUpdateTranslator from "./DataSetPncUpdateTranslator"
+import HearingOutcomeInputTranslator from "./HearingOutcomeInputTranslator"
 import PncUpdateRequestTranslator from "./PncUpdateRequestTranslator"
 
 export default (messageFormat: MessageFormat): Result<Translator> => {
@@ -23,6 +24,9 @@ export default (messageFormat: MessageFormat): Result<Translator> => {
 
     case "DataSetPncUpdate":
       return DataSetPncUpdateTranslator
+
+    case "HearingOutcomeInput":
+      return HearingOutcomeInputTranslator
 
     case "PncUpdateRequest":
       return PncUpdateRequestTranslator

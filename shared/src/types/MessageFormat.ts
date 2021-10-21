@@ -4,6 +4,7 @@ type MessageFormat =
   | "CourtResultInput"
   | "DataSetPncUpdate"
   | "HearingOutcomePncUpdate"
+  | "HearingOutcomeInput"
   | "PncUpdateRequest"
 
 export default MessageFormat

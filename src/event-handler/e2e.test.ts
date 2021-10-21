@@ -41,6 +41,7 @@ test.each<string>([
   "court-result-input",
   "data-set-pnc-update",
   "hearing-outcome-pnc-update",
+  "hearing-outcome-input",
   "pnc-update-request"
 ])(
   "given the event, the step function is invoked with 3 duplicate events across 2 messages",
