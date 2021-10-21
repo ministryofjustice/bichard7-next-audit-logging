@@ -11,18 +11,18 @@ const HearingOutcomeInputTranslator: Translator = async (
   input: TranslateEventInput
 ): PromiseResult<TranslationResult> => {
   const { messageData, s3Path, eventSourceArn, eventSourceQueueName } = input
-  // Court Result Inputs are in base64 encoded XML
+  // Hearing Outcome Inputs are in base64 encoded XML
   const xml = decodeBase64(messageData)
   const inputItem = await parseXml<HearingOutcomeInput>(xml)
 
   if (!inputItem) {
-    return new Error("Failed to parse the Court Result Input")
+    return new Error("Failed to parse the Hearing Outcome Input")
   }
 
   const logItem: EventDetails = {
     systemID: "Audit Logging Event Handler",
     componentID: "Translate Event",
-    eventType: "Court Result Input Queue Failure",
+    eventType: "Hearing Outcome Input Queue Failure",
     eventCategory: "error",
     correlationID: inputItem.AnnotatedHearingOutcome.HearingOutcome.Hearing.SourceReference.UniqueID,
     eventDateTime: new Date().toISOString()
