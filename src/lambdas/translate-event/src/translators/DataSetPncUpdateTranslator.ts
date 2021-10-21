@@ -14,7 +14,7 @@ const DataSetPncUpdateTranslator: Translator = async (input: TranslateEventInput
   const inputItem = await parseXml<DataSetPncUpdate>(xml)
 
   if (!inputItem) {
-    return new Error("Failed to parse the Data Set PNC Update Input")
+    return new Error("Failed to parse the Data Set PNC Update")
   }
 
   const logItem: EventDetails = {
