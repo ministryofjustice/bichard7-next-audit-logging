@@ -2,8 +2,8 @@ import "@bichard/testing-jest"
 import fs from "fs"
 import { encodeBase64 } from "shared"
 import type TranslateEventInput from "src/TranslateEventInput"
+import PncUpdateRequestTranslator from "./PncUpdateRequestTranslator"
 import type TranslationResult from "./TranslationResult"
-import DataSetPncUpdateTranslator from "./DataSetPncUpdateTranslator"
 
 test("parses the message data and returns an AuditLogEvent", async () => {
   const eventData = fs.readFileSync("../../../events/pnc-update-request.xml")
@@ -12,11 +12,11 @@ test("parses the message data and returns an AuditLogEvent", async () => {
     messageData,
     s3Path: "DummyPath",
     eventSourceArn: "DummyArn",
-    messageFormat: "DataSetPncUpdate",
+    messageFormat: "PncUpdateRequest",
     eventSourceQueueName: "DummyQueueName"
   }
   const beforeDate = new Date()
-  const result = await DataSetPncUpdateTranslator(eventInput)
+  const result = await PncUpdateRequestTranslator(eventInput)
   expect(result).toNotBeError()
   const afterDate = new Date()
 
@@ -24,7 +24,7 @@ test("parses the message data and returns an AuditLogEvent", async () => {
   expect(messageId).toBe("{MESSAGE_ID}")
   expect(event.category).toBe("error")
   expect(event.eventSource).toBe("Translate Event")
-  expect(event.eventType).toBe("Data Set PNC Update Queue Failure")
+  expect(event.eventType).toBe("PNC Update Request Queue Failure")
 
   const eventTimestamp = new Date(event.timestamp)
   expect(eventTimestamp).toBeBetween(beforeDate, afterDate)
