@@ -27,6 +27,10 @@ npm start
 
 This will spin up the local AWS-simulated infrastructure (provided via LocalStack) if it isn't already up and running. It will then deploy any common infrastructure, as well as the API-specific components. Finally, it will build the project so that the Lambda(s) can be accessed.
 
+## Documentation
+
+If you are making changes to the API endpoints, you should also make sure that you update the Postman project file in `documentation` folder.
+
 ## Testing
 
 There are a number of different testing commands that can be run:
