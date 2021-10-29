@@ -1,6 +1,8 @@
 import { v4 as uuid } from "uuid"
 import type AuditLogEvent from "./AuditLogEvent"
 import AuditLogStatus from "./AuditLogStatus"
+import type AutomationReport from "./AutomationReport"
+import type TopExceptionsReport from "./TopExceptionsReport"
 
 export default class AuditLog {
   public readonly messageId: string
@@ -10,6 +12,10 @@ export default class AuditLog {
   public caseId: string
 
   public events: AuditLogEvent[] = []
+
+  public automationReport: AutomationReport = { events: [] }
+
+  public topExceptionsReport: TopExceptionsReport = { events: [] }
 
   public status = AuditLogStatus.processing
 
