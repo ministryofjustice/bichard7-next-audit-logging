@@ -42,11 +42,11 @@ describe("createEvent()", () => {
   })
 
   it("should pass through the api key as a header", async () => {
-    const mock = jest.spyOn(axios, "post").mockResolvedValue({ status: 201 })
+    const mockPost = jest.spyOn(axios, "post").mockResolvedValue({ status: 201 })
 
     const result = await apiClient.createEvent(message.messageId, event)
 
     expect(result).toNotBeError()
-    expect(mock.calls[0][2].headers["X-API-Key"]).toEqual("dummy")
+    expect(mockPost.mock.calls[0][2].headers["X-API-Key"]).toEqual("dummy")
   })
 })
