@@ -47,6 +47,6 @@ describe("createEvent()", () => {
     const result = await apiClient.createEvent(message.messageId, event)
 
     expect(result).toNotBeError()
-    expect(mockPost.mock.calls[0][2].headers["X-API-Key"]).toEqual("dummy")
+    expect(mockPost.mock?.calls?.[0]?.[2]?.headers?.["X-API-Key"]).toEqual("dummy")
   })
 })
