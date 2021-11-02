@@ -6,7 +6,7 @@ export default async (request: NextApiRequest, response: NextApiResponse<GetMess
   const { messageId } = request.query
   const url = `${config.apiUrl}/messages/${messageId}/events`
 
-  const fetchResponse = await fetch(url)
+  const fetchResponse = await fetch(url, { headers: { "X-API-Key": config.apiKey } })
 
   if (fetchResponse.status !== 200) {
     response.status(404).end()
