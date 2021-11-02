@@ -158,7 +158,8 @@ function update_env_vars_file {
     "S3_REGION": "us-east-1",
     "AUDIT_LOG_EVENTS_BUCKET": "audit-log-events",
     "AUDIT_LOG_TABLE_NAME": "audit-log",
-    "API_URL": "$api_url"
+    "API_URL": "$api_url",
+    "API_KEY": "dummy"
   }
 }
 EOM

@@ -53,7 +53,8 @@ function update_env_vars_file {
     "AWS_REGION": "us-east-1",
     "INCOMING_MESSAGE_BUCKET_NAME": "incoming-messages",
     "S3_FORCE_PATH_STYLE": "true",
-    "API_URL": "$api_url"
+    "API_URL": "$api_url",
+    "API_KEY": "dummy"
   }
 }
 EOM

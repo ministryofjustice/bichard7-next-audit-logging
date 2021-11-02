@@ -5,6 +5,7 @@ set -e
 
 API_MODE=$1
 API_URL=http://localhost/restapis/dummy_api_id/dummy_stage/_user_request_
+API_KEY=dummy
 
 if [[ -z $API_MODE ]] || [[ $API_MODE != "mocked" ]]; then
   API_URL=$(get_audit_log_api_url)
