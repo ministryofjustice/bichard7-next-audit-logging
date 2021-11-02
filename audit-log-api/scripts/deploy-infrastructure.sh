@@ -8,7 +8,7 @@ source $SCRIPTS_PATH/../../environment/audit-log-api-url.sh
 
 REGION=us-east-1
 STAGE=dev
-$API_KEY=dummydummydummydummy
+API_KEY="dummydummydummydummy"
 
 function create_lambda {
   LAMBDA_NAME=$1
