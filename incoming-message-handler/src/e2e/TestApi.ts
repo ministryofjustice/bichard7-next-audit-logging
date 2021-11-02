@@ -21,7 +21,7 @@ export default class TestApi {
 
   getMessages(): Promise<AuditLog[]> {
     return axios
-      .get(`${this.getApiUrl()}/messages`)
+      .get(`${this.getApiUrl()}/messages`, { headers: { "X-API-KEY": "dummydummydummydummy" } })
       .then((response) => response.data)
       .catch((error) => <AxiosError>error)
   }

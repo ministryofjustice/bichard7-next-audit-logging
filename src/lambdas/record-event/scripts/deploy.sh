@@ -6,7 +6,7 @@ source "$PWD/../../../environment/create-lambda.sh"
 source "$PWD/../../../environment/audit-log-api-url.sh"
 
 API_URL=$(get_audit_log_api_url "localstack_main")
-API_KEY=dummy
+API_KEY=dummydummydummydummy
 ENV_VARS=/tmp/env-vars.json
 
 # Process the template env-vars file with the API URL

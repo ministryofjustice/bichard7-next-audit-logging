@@ -6,7 +6,7 @@ import PersistMessageUseCase from "./PersistMessageUseCase"
 const message = new AuditLog("id", new Date(), "XML")
 message.caseId = "123"
 
-const useCase = new PersistMessageUseCase("http://localhost", "dummy")
+const useCase = new PersistMessageUseCase("http://localhost", "dummydummydummydummy")
 
 describe("persistMessage", () => {
   it("should return true when server responds with 201 status code", async () => {

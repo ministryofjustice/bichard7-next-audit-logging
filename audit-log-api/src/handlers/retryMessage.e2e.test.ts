@@ -11,6 +11,7 @@ import axios from "axios"
 
 const environmentVariables = JSON.parse(fs.readFileSync(`./scripts/env-vars.json`).toString())
 const apiUrl = String(environmentVariables.Variables.API_URL).replace("localstack_main", "localhost")
+const apiKey = environmentVariables.Variables.API_KEY
 
 setEnvironmentVariables({
   AUDIT_LOG_TABLE_NAME: "audit-log",
@@ -47,7 +48,7 @@ describe("retryMessage", () => {
     await testDynamoGateway.insertOne(dynamoDbConfig.AUDIT_LOG_TABLE_NAME, message, "messageId")
 
     const response = await axios.post(`${apiUrl}/messages/${message.messageId}/retry`, null, {
-      headers: { "X-API-KEY": "dummy" }
+      headers: { "X-API-KEY": apiKey }
     })
 
     expect(response.status).toBe(HttpStatusCode.ok)

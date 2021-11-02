@@ -54,7 +54,7 @@ function update_env_vars_file {
     "INCOMING_MESSAGE_BUCKET_NAME": "incoming-messages",
     "S3_FORCE_PATH_STYLE": "true",
     "API_URL": "$api_url",
-    "API_KEY": "dummy"
+    "API_KEY": "dummydummydummydummy"
   }
 }
 EOM
