@@ -12,7 +12,12 @@ if (!apiUrl) {
   throw new Error("API_URL environment variable is not set")
 }
 
-const api = new AuditLogApiGateway(apiUrl)
+const apiKey = process.env.API_KEY
+if (!apiKey) {
+  throw new Error("API_KEY environment variable is not set")
+}
+
+const api = new AuditLogApiGateway(apiUrl, apiKey)
 
 export default async (input: RecordEventInput): Promise<void> => {
   const result = await api.createAuditLogEvent(input.messageId, input.event)
