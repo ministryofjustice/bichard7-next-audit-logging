@@ -4,7 +4,7 @@ import { AuditLog, isError } from "shared"
 import CreateSentToBichardEventUseCase from "./CreateSentToBichardEventUseCase"
 
 const message = new AuditLog("b5edf595-16a9-450f-a52b-40628cd58c29", new Date(), "<XML></XML>")
-const useCase = new CreateSentToBichardEventUseCase("http://localhost")
+const useCase = new CreateSentToBichardEventUseCase("http://localhost", "dummy")
 
 describe("createSentToBichardEvent()", () => {
   it("should return Created http status code when message exists", async () => {
