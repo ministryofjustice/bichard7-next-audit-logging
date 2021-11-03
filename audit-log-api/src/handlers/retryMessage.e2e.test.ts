@@ -56,7 +56,9 @@ describe("retryMessage", () => {
   })
 
   it("should return error response when there is an error while retrying message", async () => {
-    const response = await axios.post(`${apiUrl}/messages/INVALID_MESSAGE_ID/retry`).catch((error) => error)
+    const response = await axios
+      .post(`${apiUrl}/messages/INVALID_MESSAGE_ID/retry`, null, { headers: { "X-API-KEY": apiKey } })
+      .catch((error) => error)
 
     expect(response.response).toBeDefined()
 
