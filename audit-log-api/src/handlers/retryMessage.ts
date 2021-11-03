@@ -13,6 +13,7 @@ import RetrieveEventXmlFromS3UseCase from "src/use-cases/RetrieveEventXmlFromS3U
 import CreateRetryingEventUseCase from "src/use-cases/CreateRetryingEventUseCase"
 import SendMessageToQueueUseCase from "src/use-cases/SendMessageToQueueUseCase"
 import createS3Config from "src/createS3Config"
+import getApiKey from "src/getApiKey"
 
 const auditLogGatewayConfig = createDynamoDbConfig()
 const auditLogGateway = new AwsAuditLogDynamoGateway(auditLogGatewayConfig, auditLogGatewayConfig.AUDIT_LOG_TABLE_NAME)
@@ -24,7 +25,7 @@ const sendMessageToQueueUseCase = new SendMessageToQueueUseCase(mqGateway)
 const awsS3Gateway = new AwsS3Gateway(createS3Config())
 const retrieveEventXmlFromS3UseCase = new RetrieveEventXmlFromS3UseCase(awsS3Gateway)
 
-const apiClient = new AuditLogApiClient(getApiUrl())
+const apiClient = new AuditLogApiClient(getApiUrl(), getApiKey())
 const getLastEventUseCase = new GetLastEventUseCase(auditLogGateway)
 const createRetryingEventUseCase = new CreateRetryingEventUseCase(apiClient)
 

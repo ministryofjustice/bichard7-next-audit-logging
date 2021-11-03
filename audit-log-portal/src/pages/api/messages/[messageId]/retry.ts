@@ -5,7 +5,7 @@ export default async (request: NextApiRequest, response: NextApiResponse<string>
   const { messageId } = request.query
   const url = `${config.apiUrl}/messages/${messageId}/retry`
 
-  const fetchResponse = await fetch(url, { method: "POST" })
+  const fetchResponse = await fetch(url, { method: "POST", headers: { "X-API-Key": config.apiKey } })
 
   response.status(fetchResponse.status)
 
