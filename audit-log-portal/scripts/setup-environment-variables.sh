@@ -25,4 +25,5 @@ ENV_PATH=.env.local
 # See: https://nextjs.org/docs/basic-features/environment-variables
 cat > $ENV_PATH <<- EOM
 API_URL=$API_URL
+API_KEY=$API_KEY
 EOM
