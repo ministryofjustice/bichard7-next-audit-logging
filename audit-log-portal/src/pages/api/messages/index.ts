@@ -12,7 +12,7 @@ export default async (
   const baseUrl = `${config.apiUrl}/messages`
   const url = combineUrlAndQueryString(baseUrl, params.toString())
 
-  const fetchResponse = await fetch(url)
+  const fetchResponse = await fetch(url, { headers: { "X-API-Key": config.apiKey } })
 
   if (fetchResponse.status !== 200) {
     const errorMessage = await fetchResponse.text()

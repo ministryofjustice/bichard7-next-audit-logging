@@ -10,12 +10,15 @@ const httpsAgent = new https.Agent({
 })
 
 export default class AuditLogApiClient implements ApiClient {
-  constructor(private readonly apiUrl: string) {}
+  constructor(private readonly apiUrl: string, private readonly apiKey: string) {}
 
   createEvent(messageId: string, event: AuditLogEvent): PromiseResult<void> {
     return axios
       .post(`${this.apiUrl}/messages/${messageId}/events`, event, {
-        httpsAgent
+        httpsAgent,
+        headers: {
+          "X-API-Key": this.apiKey
+        }
       })
       .then((result) => {
         switch (result.status) {

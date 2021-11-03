@@ -11,6 +11,7 @@ import axios from "axios"
 
 const environmentVariables = JSON.parse(fs.readFileSync(`./scripts/env-vars.json`).toString())
 const apiUrl = String(environmentVariables.Variables.API_URL).replace("localstack_main", "localhost")
+const apiKey = environmentVariables.Variables.API_KEY
 
 setEnvironmentVariables({
   AUDIT_LOG_TABLE_NAME: "audit-log",
@@ -46,19 +47,43 @@ describe("retryMessage", () => {
 
     await testDynamoGateway.insertOne(dynamoDbConfig.AUDIT_LOG_TABLE_NAME, message, "messageId")
 
-    const response = await axios.post(`${apiUrl}/messages/${message.messageId}/retry`)
+    const response = await axios.post(`${apiUrl}/messages/${message.messageId}/retry`, null, {
+      headers: { "X-API-KEY": apiKey }
+    })
 
     expect(response.status).toBe(HttpStatusCode.ok)
     expect(response.data).toEqual("")
   })
 
   it("should return error response when there is an error while retrying message", async () => {
-    const response = await axios.post(`${apiUrl}/messages/INVALID_MESSAGE_ID/retry`).catch((error) => error)
+    const response = await axios
+      .post(`${apiUrl}/messages/INVALID_MESSAGE_ID/retry`, null, { headers: { "X-API-KEY": apiKey } })
+      .catch((error) => error)
 
     expect(response.response).toBeDefined()
 
     const { response: actualResponse } = response
     expect(actualResponse.status).toBe(HttpStatusCode.internalServerError)
     expect(actualResponse.data).toEqual("Error: Couldn't get events for message 'INVALID_MESSAGE_ID'.")
+  })
+
+  it("should return forbidden response code when API key is not present", async () => {
+    const response = await axios.post(`${apiUrl}/messages/MESSAGE_ID/retry`).catch((error) => error)
+
+    expect(response.response).toBeDefined()
+
+    const { response: actualResponse } = response
+    expect(actualResponse.status).toBe(HttpStatusCode.forbidden)
+  })
+
+  it("should return forbidden response code when API key is invalid", async () => {
+    const response = await axios
+      .post(`${apiUrl}/messages/MESSAGE_ID/retry`, null, { headers: { "X-API-KEY": "Invalid API key" } })
+      .catch((error) => error)
+
+    expect(response.response).toBeDefined()
+
+    const { response: actualResponse } = response
+    expect(actualResponse.status).toBe(HttpStatusCode.forbidden)
   })
 })

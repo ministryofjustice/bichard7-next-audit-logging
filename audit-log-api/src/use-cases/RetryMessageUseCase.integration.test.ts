@@ -18,9 +18,11 @@ import CreateRetryingEventUseCase from "./CreateRetryingEventUseCase"
 
 const environmentVariables = JSON.parse(fs.readFileSync(`./scripts/env-vars.json`).toString())
 const apiUrl = String(environmentVariables.Variables.API_URL).replace("localstack_main", "localhost")
+const apiKey = environmentVariables.Variables.API_KEY
 
 setEnvironmentVariables({
   API_URL: apiUrl,
+  API_KEY: apiKey,
   AUDIT_LOG_TABLE_NAME: "audit-log",
   AUDIT_LOG_EVENTS_BUCKET: "audit-log-events"
 })
@@ -38,7 +40,7 @@ const sendMessageToQueueUseCase = new SendMessageToQueueUseCase(mqGateway)
 const s3Gateway = new TestAwsS3Gateway(createS3Config())
 const retrieveEventXmlFromS3UseCase = new RetrieveEventXmlFromS3UseCase(s3Gateway)
 
-const apiClient = new AuditLogApiClient(apiUrl)
+const apiClient = new AuditLogApiClient(apiUrl, apiKey)
 const createRetryingEventUseCase = new CreateRetryingEventUseCase(apiClient)
 
 const useCase = new RetryMessageUseCase(

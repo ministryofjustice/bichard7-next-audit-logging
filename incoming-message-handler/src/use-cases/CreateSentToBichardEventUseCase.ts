@@ -9,7 +9,7 @@ const httpsAgent = new https.Agent({
 })
 
 export default class CreateSentToBichardEventUseCase {
-  constructor(private readonly apiUrl: string) {}
+  constructor(private readonly apiUrl: string, private readonly apiKey: string) {}
 
   create(message: AuditLog): PromiseResult<void> {
     const event = new AuditLogEvent({
@@ -21,7 +21,8 @@ export default class CreateSentToBichardEventUseCase {
 
     return axios
       .post(`${this.apiUrl}/messages/${message.messageId}/events`, event, {
-        httpsAgent
+        httpsAgent,
+        headers: { "X-API-KEY": this.apiKey }
       })
       .then((result) => {
         switch (result.status) {

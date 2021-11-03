@@ -8,6 +8,7 @@ source $SCRIPTS_PATH/../../environment/audit-log-api-url.sh
 
 REGION=us-east-1
 STAGE=dev
+API_KEY="dummydummydummydummy"
 
 function create_lambda {
   LAMBDA_NAME=$1
@@ -33,9 +34,13 @@ function create_rest_api {
   API_NAME=$1
 
   if ! awslocal apigateway get-rest-apis | grep -q "$API_NAME"; then
-    awslocal apigateway create-rest-api \
+    local rest_api_id=$(awslocal apigateway create-rest-api \
         --name "$API_NAME" \
-        --region "$REGION"
+        --region "$REGION" | jq -r '.id')
+    
+    local api_key_id=$(awslocal apigateway create-api-key --name AuditLogApiKey --value $API_KEY | jq -r '.id')
+    local usage_plan_id=$(awslocal apigateway create-usage-plan --name AuditLogApiUsagePlan --api-stages apiId=$rest_api_id,stage=dev | jq -r '.id')
+    awslocal apigateway create-usage-plan-key --key-id $api_key_id --key-type API_KEY --usage-plan-id $usage_plan_id
   fi
 }
 
@@ -110,7 +115,8 @@ function create_rest_endpoint {
       --rest-api-id "$API_ID" \
       --resource-id "$RESOURCE_ID" \
       --http-method "$HTTP_METHOD" \
-      --authorization-type "NONE"
+      --authorization-type "NONE" \
+      --api-key-required
 
   awslocal apigateway put-integration \
       --region "$REGION" \
@@ -158,7 +164,8 @@ function update_env_vars_file {
     "S3_REGION": "us-east-1",
     "AUDIT_LOG_EVENTS_BUCKET": "audit-log-events",
     "AUDIT_LOG_TABLE_NAME": "audit-log",
-    "API_URL": "$api_url"
+    "API_URL": "$api_url",
+    "API_KEY": "$API_KEY"
   }
 }
 EOM
