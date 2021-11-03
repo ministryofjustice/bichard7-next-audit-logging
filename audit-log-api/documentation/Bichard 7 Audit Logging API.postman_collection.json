@@ -12,6 +12,21 @@
 				"disableBodyPruning": true
 			},
 			"request": {
+				"auth": {
+					"type": "apikey",
+					"apikey": [
+						{
+							"key": "value",
+							"value": "{{api_key}}",
+							"type": "string"
+						},
+						{
+							"key": "key",
+							"value": "X-API-KEY",
+							"type": "string"
+						}
+					]
+				},
 				"method": "GET",
 				"header": [],
 				"body": {
@@ -103,6 +118,21 @@
 		{
 			"name": "Get messages by status",
 			"request": {
+				"auth": {
+					"type": "apikey",
+					"apikey": [
+						{
+							"key": "value",
+							"value": "{{api_key}}",
+							"type": "string"
+						},
+						{
+							"key": "key",
+							"value": "X-API-KEY",
+							"type": "string"
+						}
+					]
+				},
 				"method": "GET",
 				"header": [],
 				"url": {
@@ -197,6 +227,21 @@
 		{
 			"name": "Get message by ID",
 			"request": {
+				"auth": {
+					"type": "apikey",
+					"apikey": [
+						{
+							"key": "value",
+							"value": "{{api_key}}",
+							"type": "string"
+						},
+						{
+							"key": "key",
+							"value": "X-API-KEY",
+							"type": "string"
+						}
+					]
+				},
 				"method": "GET",
 				"header": [],
 				"url": {
@@ -242,6 +287,21 @@
 		{
 			"name": "Get message by external correlation ID",
 			"request": {
+				"auth": {
+					"type": "apikey",
+					"apikey": [
+						{
+							"key": "value",
+							"value": "{{api_key}}",
+							"type": "string"
+						},
+						{
+							"key": "key",
+							"value": "X-API-KEY",
+							"type": "string"
+						}
+					]
+				},
 				"method": "GET",
 				"header": [],
 				"url": {
@@ -298,6 +358,21 @@
 		{
 			"name": "Create message",
 			"request": {
+				"auth": {
+					"type": "apikey",
+					"apikey": [
+						{
+							"key": "value",
+							"value": "{{api_key}}",
+							"type": "string"
+						},
+						{
+							"key": "key",
+							"value": "X-API-KEY",
+							"type": "string"
+						}
+					]
+				},
 				"method": "POST",
 				"header": [],
 				"body": {
@@ -359,6 +434,21 @@
 		{
 			"name": "Get events",
 			"request": {
+				"auth": {
+					"type": "apikey",
+					"apikey": [
+						{
+							"key": "value",
+							"value": "{{api_key}}",
+							"type": "string"
+						},
+						{
+							"key": "key",
+							"value": "X-API-KEY",
+							"type": "string"
+						}
+					]
+				},
 				"method": "GET",
 				"header": [],
 				"url": {
@@ -406,6 +496,21 @@
 		{
 			"name": "Create event",
 			"request": {
+				"auth": {
+					"type": "apikey",
+					"apikey": [
+						{
+							"key": "value",
+							"value": "{{api_key}}",
+							"type": "string"
+						},
+						{
+							"key": "key",
+							"value": "X-API-KEY",
+							"type": "string"
+						}
+					]
+				},
 				"method": "POST",
 				"header": [],
 				"body": {
@@ -478,6 +583,21 @@
 		{
 			"name": "Retry failed message",
 			"request": {
+				"auth": {
+					"type": "apikey",
+					"apikey": [
+						{
+							"key": "value",
+							"value": "{{api_key}}",
+							"type": "string"
+						},
+						{
+							"key": "key",
+							"value": "X-API-KEY",
+							"type": "string"
+						}
+					]
+				},
 				"method": "POST",
 				"header": [],
 				"url": {
@@ -563,6 +683,10 @@
 		{
 			"key": "external_correlation_id",
 			"value": "EXTERNAL_CORRELATION_ID"
+		},
+		{
+			"key": "api_key",
+			"value": "API_KEY_VALUE"
 		}
 	]
 }
