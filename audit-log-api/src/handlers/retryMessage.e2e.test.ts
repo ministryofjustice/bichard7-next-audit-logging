@@ -66,4 +66,24 @@ describe("retryMessage", () => {
     expect(actualResponse.status).toBe(HttpStatusCode.internalServerError)
     expect(actualResponse.data).toEqual("Error: Couldn't get events for message 'INVALID_MESSAGE_ID'.")
   })
+
+  it("should return forbidden response code when API key is not present", async () => {
+    const response = await axios.post(`${apiUrl}/messages/MESSAGE_ID/retry`).catch((error) => error)
+
+    expect(response.response).toBeDefined()
+
+    const { response: actualResponse } = response
+    expect(actualResponse.status).toBe(HttpStatusCode.forbidden)
+  })
+
+  it("should return forbidden response code when API key is invalid", async () => {
+    const response = await axios
+      .post(`${apiUrl}/messages/MESSAGE_ID/retry`, null, { headers: { "X-API-KEY": "Invalid API key" } })
+      .catch((error) => error)
+
+    expect(response.response).toBeDefined()
+
+    const { response: actualResponse } = response
+    expect(actualResponse.status).toBe(HttpStatusCode.forbidden)
+  })
 })
