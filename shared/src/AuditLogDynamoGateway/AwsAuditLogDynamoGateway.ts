@@ -4,6 +4,9 @@ import type { AuditLog, AuditLogEvent, KeyValuePair, PromiseResult } from "../ty
 import { isError } from "../types"
 import getMessageStatus from "./getMessageStatus"
 import type AuditLogDynamoGateway from "./AuditLogDynamoGateway"
+import shouldLogForTopExceptionsReport from "./shouldLogForTopExceptionsReport"
+import shouldLogForAutomationReport from "./shouldLogForAutomationReport"
+import getForceOwnerForAutomationReport from "./getForceOwnerForAutomationReport"
 
 export default class AwsAuditLogDynamoGateway extends DynamoGateway implements AuditLogDynamoGateway {
   private readonly tableKey: string = "messageId"
@@ -118,6 +121,7 @@ export default class AwsAuditLogDynamoGateway extends DynamoGateway implements A
 
   async addEvent(messageId: string, messageVersion: number, event: AuditLogEvent): PromiseResult<void> {
     const status = getMessageStatus(event)
+
     const expressionAttributeNames: KeyValuePair<string, string> = {
       "#lastEventType": "lastEventType"
     }
@@ -130,6 +134,20 @@ export default class AwsAuditLogDynamoGateway extends DynamoGateway implements A
       set events = list_append(if_not_exists(events, :empty_list), :event),
       #lastEventType = :lastEventType
     `
+
+    const forceOwnerForAutomationReport = getForceOwnerForAutomationReport(event)
+    if (forceOwnerForAutomationReport) {
+      updateExpressionValues[":forceOwner"] = forceOwnerForAutomationReport
+      updateExpression = `${updateExpression}, automationReport.forceOwner = :forceOwner`
+    }
+
+    if (shouldLogForTopExceptionsReport(event)) {
+      updateExpression = `${updateExpression}, topExceptionsReport.events = list_append(if_not_exists(topExceptionsReport.events, :empty_list), :event)`
+    }
+
+    if (shouldLogForAutomationReport(event)) {
+      updateExpression = `${updateExpression}, automationReport.events = list_append(if_not_exists(automationReport.events, :empty_list), :event)`
+    }
 
     if (status) {
       expressionAttributeNames["#status"] = "status"

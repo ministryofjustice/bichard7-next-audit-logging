@@ -192,6 +192,165 @@ describe("AuditLogDynamoGateway", () => {
 
       expect(isError(resultOne)).toBe(true)
     })
+
+    it("should log the event for top exceptions report", async () => {
+      const expectedEvent = createAuditLogEvent("information", new Date(), "Event for top exceptions report")
+
+      expectedEvent.addAttribute("Message Type", "SPIResults")
+      expectedEvent.addAttribute("Error 2 Details", "Dummy")
+
+      const message = new AuditLog("one", new Date(), "XML1")
+
+      await gateway.create(message)
+
+      const result = await gateway.addEvent(message.messageId, message.version, expectedEvent)
+
+      expect(isError(result)).toBe(false)
+
+      const getManyOptions = {
+        sortKey,
+        pagination: { limit: 2 }
+      }
+      const actualRecords = <DocumentClient.ScanOutput>(
+        await gateway.getMany(config.AUDIT_LOG_TABLE_NAME, getManyOptions)
+      )
+
+      const actualMessage = actualRecords.Items?.find((r) => r.messageId === message.messageId) as AuditLog & {
+        topExceptionsReportEvents: AuditLogEvent[]
+      }
+      expect(actualMessage).toBeDefined()
+      expect(actualMessage.events).toBeDefined()
+      expect(actualMessage.events).toHaveLength(1)
+      expect(actualMessage.topExceptionsReport).toBeDefined()
+      expect(actualMessage.topExceptionsReport.events).toBeDefined()
+      expect(actualMessage.topExceptionsReport.events).toHaveLength(1)
+
+      const actualEvent = actualMessage.events[0]
+      expect(actualEvent.eventSource).toBe(expectedEvent.eventSource)
+      expect(actualEvent.category).toBe(expectedEvent.category)
+      expect(actualEvent.timestamp).toBe(expectedEvent.timestamp)
+      expect(actualEvent.eventType).toBe(expectedEvent.eventType)
+
+      const actualEventAttributes = actualEvent.attributes
+      expect(actualEventAttributes).toBeDefined()
+      expect(actualEventAttributes["Message Type"]).toBe("SPIResults")
+      expect(actualEventAttributes["Error 2 Details"]).toBe("Dummy")
+
+      const actualTopExceptionReportEvent = actualMessage.topExceptionsReport.events[0]
+      expect(actualTopExceptionReportEvent.eventSource).toBe(expectedEvent.eventSource)
+      expect(actualTopExceptionReportEvent.category).toBe(expectedEvent.category)
+      expect(actualTopExceptionReportEvent.timestamp).toBe(expectedEvent.timestamp)
+      expect(actualTopExceptionReportEvent.eventType).toBe(expectedEvent.eventType)
+
+      const actualTopExceptionReportEventAttribute = actualTopExceptionReportEvent.attributes
+      expect(actualTopExceptionReportEventAttribute).toBeDefined()
+      expect(actualTopExceptionReportEventAttribute["Message Type"]).toBe("SPIResults")
+      expect(actualTopExceptionReportEventAttribute["Error 2 Details"]).toBe("Dummy")
+    })
+
+    it("should log the event for automation report", async () => {
+      const expectedEvent = createAuditLogEvent("information", new Date(), "Hearing Outcome passed to Error List")
+
+      const message = new AuditLog("one", new Date(), "XML1")
+
+      await gateway.create(message)
+
+      const result = await gateway.addEvent(message.messageId, message.version, expectedEvent)
+
+      expect(isError(result)).toBe(false)
+
+      const getManyOptions = {
+        sortKey,
+        pagination: { limit: 2 }
+      }
+      const actualRecords = <DocumentClient.ScanOutput>(
+        await gateway.getMany(config.AUDIT_LOG_TABLE_NAME, getManyOptions)
+      )
+
+      const actualMessage = actualRecords.Items?.find((r) => r.messageId === message.messageId) as AuditLog & {
+        automationReportEvents: AuditLogEvent[]
+      }
+      expect(actualMessage).toBeDefined()
+      expect(actualMessage.events).toBeDefined()
+      expect(actualMessage.events).toHaveLength(1)
+      expect(actualMessage.automationReport).toBeDefined()
+      expect(actualMessage.automationReport.events).toBeDefined()
+      expect(actualMessage.automationReport.events).toHaveLength(1)
+
+      const actualEvent = actualMessage.events[0]
+      expect(actualEvent.eventSource).toBe(expectedEvent.eventSource)
+      expect(actualEvent.category).toBe(expectedEvent.category)
+      expect(actualEvent.timestamp).toBe(expectedEvent.timestamp)
+      expect(actualEvent.eventType).toBe(expectedEvent.eventType)
+
+      const actualAutomationReportEvent = actualMessage.automationReport.events[0]
+      expect(actualAutomationReportEvent.eventSource).toBe(expectedEvent.eventSource)
+      expect(actualAutomationReportEvent.category).toBe(expectedEvent.category)
+      expect(actualAutomationReportEvent.timestamp).toBe(expectedEvent.timestamp)
+      expect(actualAutomationReportEvent.eventType).toBe(expectedEvent.eventType)
+    })
+
+    it("should log the force owner for the automated report", async () => {
+      const expectedEvent = createAuditLogEvent("information", new Date(), "Input message received")
+      expectedEvent.addAttribute("Force Owner", "DummyForceOwner")
+
+      const message = new AuditLog("one", new Date(), "XML1")
+
+      await gateway.create(message)
+
+      const result = await gateway.addEvent(message.messageId, message.version, expectedEvent)
+
+      expect(isError(result)).toBe(false)
+
+      const getManyOptions = {
+        sortKey,
+        pagination: { limit: 2 }
+      }
+      const actualRecords = <DocumentClient.ScanOutput>(
+        await gateway.getMany(config.AUDIT_LOG_TABLE_NAME, getManyOptions)
+      )
+
+      const actualMessage = actualRecords.Items?.find((r) => r.messageId === message.messageId) as AuditLog & {
+        automationReportEvents: AuditLogEvent[]
+      }
+      expect(actualMessage).toBeDefined()
+      expect(actualMessage.events).toBeDefined()
+      expect(actualMessage.events).toHaveLength(1)
+      expect(actualMessage.automationReport).toBeDefined()
+      expect(actualMessage.automationReport.forceOwner).toBe("DummyForceOwner")
+    })
+
+    it("should not log the event for report", async () => {
+      const expectedEvent = createAuditLogEvent("information", new Date(), "Dummy event type")
+
+      const message = new AuditLog("one", new Date(), "XML1")
+
+      await gateway.create(message)
+
+      const result = await gateway.addEvent(message.messageId, message.version, expectedEvent)
+
+      expect(isError(result)).toBe(false)
+
+      const getManyOptions = {
+        sortKey,
+        pagination: { limit: 2 }
+      }
+      const actualRecords = <DocumentClient.ScanOutput>(
+        await gateway.getMany(config.AUDIT_LOG_TABLE_NAME, getManyOptions)
+      )
+
+      const actualMessage = actualRecords.Items?.find((r) => r.messageId === message.messageId) as AuditLog & {
+        topExceptionsReportEvents: AuditLogEvent[]
+        automationReportEvents: AuditLogEvent[]
+      }
+      expect(actualMessage).toBeDefined()
+      expect(actualMessage.events).toBeDefined()
+      expect(actualMessage.events).toHaveLength(1)
+      expect(actualMessage.topExceptionsReport).toBeDefined()
+      expect(actualMessage.topExceptionsReport.events).toHaveLength(0)
+      expect(actualMessage.automationReport).toBeDefined()
+      expect(actualMessage.automationReport.events).toHaveLength(0)
+    })
   })
 
   describe("fetchOne", () => {
