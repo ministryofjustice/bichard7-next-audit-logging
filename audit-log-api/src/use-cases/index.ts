@@ -8,3 +8,4 @@ export { default as parseCreateAuditLogRequest } from "./parseCreateAuditLogRequ
 export { default as parseCreateAuditLogEventRequest } from "./parseCreateAuditLogEventRequest"
 export { default as parseRetryMessageRequest } from "./parseRetryMessageRequest"
 export { default as validateCreateAuditLog } from "./validateCreateAuditLog"
+export { default as validateCreateAuditLogEvent } from "./validateCreateAuditLogEvent"
