@@ -41,6 +41,32 @@ it("should be valid and set attributes when it is undefined", () => {
   expect(auditLogEvent.attributes).toEqual({})
 })
 
+it("should remove arbitrary keys from the audit log event", () => {
+  let event = new AuditLogEvent({
+    category: "information",
+    eventSource: "Event source",
+    eventType: "Event type",
+    timestamp: new Date("2021-10-05T15:12:13.000Z")
+  })
+  event = ({ ...event, customKey1: "Value", myKey: { anotherKey: 5 } } as unknown) as AuditLogEvent
+
+  const { isValid, errors, auditLogEvent } = validateCreateAuditLogEvent(event)
+
+  expect(isValid).toBe(true)
+  expect(errors).toHaveLength(0)
+  expect(auditLogEvent).toBeDefined()
+
+  expect(auditLogEvent.category).toBe(event.category)
+  expect(auditLogEvent.eventSource).toBe(event.eventSource)
+  expect(auditLogEvent.eventType).toBe(event.eventType)
+  expect(auditLogEvent.timestamp).toBe(event.timestamp)
+  expect(auditLogEvent.attributes).toEqual({})
+
+  const keys = Object.keys(auditLogEvent)
+  expect(keys).not.toContain("customKey1")
+  expect(keys).not.toContain("myKey")
+})
+
 it("should be invalid when audit log event is missing all fields", () => {
   const event = {} as AuditLogEvent
 

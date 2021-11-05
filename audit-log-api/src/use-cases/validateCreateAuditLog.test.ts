@@ -51,6 +51,31 @@ it("should be valid and override the value of fields that should be set internal
   expect(auditLog.topExceptionsReport?.events).toHaveLength(0)
 })
 
+it("should remove arbitrary keys from the audit log", () => {
+  let item = new AuditLog("ECID", new Date(), "XML")
+  item.caseId = "CID"
+  item = { ...item, randomKey1: "RandomValue", key2: 5 } as AuditLog
+  const { errors, isValid, auditLog } = validateCreateAuditLog(item)
+
+  expect(isValid).toBe(true)
+  expect(errors).toHaveLength(0)
+
+  expect(auditLog.messageId).toBe(item.messageId)
+  expect(auditLog.externalCorrelationId).toBe(item.externalCorrelationId)
+  expect(auditLog.caseId).toBe(item.caseId)
+  expect(auditLog.receivedDate).toBe(item.receivedDate)
+  expect(auditLog.messageXml).toBe(item.messageXml)
+  expect(auditLog.status).toBe(item.status)
+  expect(auditLog.version).toBe(item.version)
+  expect(auditLog.automationReport?.events).toHaveLength(0)
+  expect(auditLog.topExceptionsReport?.events).toHaveLength(0)
+  expect(auditLog.events).toHaveLength(0)
+
+  const keys = Object.keys(auditLog)
+  expect(keys).not.toContain("randomKey")
+  expect(keys).not.toContain("key2")
+})
+
 it("should be invalid when mandatory fields do not have value", () => {
   const item = ({} as unknown) as AuditLog
   const { errors, isValid } = validateCreateAuditLog(item)
