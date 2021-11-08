@@ -4,13 +4,15 @@ import { AuditLogEvent, HttpStatusCode } from "shared"
 import { CreateAuditLogEventUseCase } from "src/use-cases"
 import createAuditLogEvent from "./createAuditLogEvent"
 
-const createHandlerEvent = (): APIGatewayProxyEvent => {
-  const event = new AuditLogEvent({
-    category: "information",
-    timestamp: new Date(),
-    eventType: "Test event",
-    eventSource: "Test"
-  })
+const createHandlerEvent = (auditLogEvent?: AuditLogEvent): APIGatewayProxyEvent => {
+  const event =
+    auditLogEvent ||
+    new AuditLogEvent({
+      category: "information",
+      timestamp: new Date(),
+      eventType: "Test event",
+      eventSource: "Test"
+    })
 
   return <APIGatewayProxyEvent>{
     body: JSON.stringify(event),
@@ -33,6 +35,16 @@ describe("createAuditLogEvent()", () => {
 
     expect(actualResponse.statusCode).toBe(HttpStatusCode.created)
     expect(actualResponse.body).toBe("Created")
+  })
+
+  it("should return Bad request status when audit log event is not valid", async () => {
+    const event = createHandlerEvent({} as AuditLogEvent)
+    const actualResponse = await createAuditLogEvent(event)
+
+    expect(actualResponse.statusCode).toBe(HttpStatusCode.badRequest)
+    expect(actualResponse.body).toBe(
+      "Category is mandatory, Event source is mandatory, Event type is mandatory, Timestamp is mandatory"
+    )
   })
 
   it("should respond with an Not Found status when message id does not exist", async () => {
