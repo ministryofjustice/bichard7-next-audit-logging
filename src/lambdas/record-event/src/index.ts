@@ -1,6 +1,7 @@
+import { AuditLogApiClient } from "@bichard/api-client"
 import type { AuditLogEvent } from "shared"
 import { isError } from "shared"
-import AuditLogApiGateway from "./AuditLogApiGateway"
+import CreateEventUseCase from "./CreateEventUseCase"
 
 export interface RecordEventInput {
   messageId: string
@@ -17,10 +18,11 @@ if (!apiKey) {
   throw new Error("API_KEY environment variable is not set")
 }
 
-const api = new AuditLogApiGateway(apiUrl, apiKey)
+const api = new AuditLogApiClient(apiUrl, apiKey)
+const useCase = new CreateEventUseCase(api)
 
 export default async (input: RecordEventInput): Promise<void> => {
-  const result = await api.createAuditLogEvent(input.messageId, input.event)
+  const result = await useCase.execute(input.messageId, input.event)
   if (isError(result)) {
     throw result
   }
