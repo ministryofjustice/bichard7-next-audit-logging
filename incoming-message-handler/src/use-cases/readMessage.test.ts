@@ -47,12 +47,13 @@ describe("handleMessage", () => {
     message.messageXml = expectedMessage
 
     const result = (await readMessage(message)) as AuditLog
-    const { messageId, externalCorrelationId, caseId, messageXml } = result
+    const { messageId, externalCorrelationId, caseId, createdBy, messageXml } = result
 
     expect(messageId).toBeDefined()
     expect(externalCorrelationId).toBe(expectedExternalCorrelationId)
     expect(messageXml).toBe(expectedMessage)
     expect(caseId).toEqual(expectedCaseId)
+    expect(createdBy).toEqual("Incoming message handler")
   })
 
   it("should handle invalid xml", async () => {
