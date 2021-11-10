@@ -89,6 +89,7 @@ describe("e2e tests", () => {
     const persistedMessage = persistedMessages[0]
     expect(persistedMessage.externalCorrelationId).toBe(expectedExternalCorrelationId)
     expect(persistedMessage.caseId).toBe(expectedCaseId)
+    expect(persistedMessage.createdBy).toBe("Incoming message handler")
 
     // Received date will be a string as we currently pull it straight from the database without parsing
     expect(persistedMessage.receivedDate).toBe(expectedReceivedDate.toISOString())

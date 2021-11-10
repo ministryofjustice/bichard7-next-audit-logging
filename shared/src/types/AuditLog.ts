@@ -21,6 +21,8 @@ export default class AuditLog {
 
   public lastEventType: string
 
+  public createdBy: string
+
   public readonly version = 0
 
   constructor(public readonly externalCorrelationId: string, receivedDate: Date, public readonly messageXml: string) {

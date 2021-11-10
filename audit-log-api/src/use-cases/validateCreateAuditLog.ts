@@ -10,7 +10,7 @@ interface ValidationResult {
 
 export default (auditLog: AuditLog): ValidationResult => {
   const errors: string[] = []
-  const { caseId, externalCorrelationId, messageId, messageXml, receivedDate } = auditLog
+  const { caseId, externalCorrelationId, messageId, messageXml, receivedDate, createdBy } = auditLog
 
   if (!caseId) {
     errors.push("Case ID is mandatory")
@@ -42,12 +42,19 @@ export default (auditLog: AuditLog): ValidationResult => {
     errors.push("Received date must be ISO format")
   }
 
+  if (!createdBy) {
+    errors.push("Created by is mandatory")
+  } else if (typeof createdBy !== "string") {
+    errors.push("Created by must be string")
+  }
+
   const validatedAuditLog: AuditLog = {
     messageId,
     caseId,
     externalCorrelationId,
     messageXml,
     receivedDate,
+    createdBy,
     status: AuditLogStatus.processing,
     lastEventType: "",
     version: 0,
