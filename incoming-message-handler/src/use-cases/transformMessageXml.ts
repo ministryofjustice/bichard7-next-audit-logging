@@ -1,12 +1,11 @@
 import type { AuditLog } from "shared"
+import getXmlElementContent from "src/utils/getXmlElementContent"
 
 const transformMessageXml = (auditlog: AuditLog): string => {
   const { messageXml } = auditlog
-  const organizationalUnitId =
-    messageXml.match(/<OrganizationalUnitID[\s\S]*?>([\s\S]*)<\/OrganizationalUnitID>/)?.[1]?.trim() ?? ""
-  const messageType = messageXml.match(/<DataStreamType[\s\S]*?>([\s\S]*)<\/DataStreamType>/)?.[1]?.trim() ?? ""
-  const messageContent =
-    messageXml.match(/<DataStreamContent[\s\S]*?>([\s\S]*)<\/DataStreamContent>/)?.[1]?.trim() ?? ""
+  const organizationalUnitId = getXmlElementContent(messageXml, "OrganizationalUnitID") ?? ""
+  const messageType = getXmlElementContent(messageXml, "DataStreamType") ?? ""
+  const messageContent = getXmlElementContent(messageXml, "DataStreamContent") ?? ""
 
   const transformedMessage = `<?xml version="1.0" encoding="UTF-8"?>
   <DeliverRequest xmlns="http://schemas.cjse.gov.uk/messages/deliver/2006-05" xmlns:ex="http://schemas.cjse.gov.uk/messages/exception/2006-06" xmlns:mf="http://schemas.cjse.gov.uk/messages/format/2006-05" xmlns:mm="http://schemas.cjse.gov.uk/messages/metadata/2006-05" xmlns:msg="http://schemas.cjse.gov.uk/messages/messaging/2006-05" xmlns:xmime="http://www.w3.org/2005/05/xmlmime" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://schemas.cjse.gov.uk/messages/deliver/2006-05 C:ClearCasekel-masri_BR7_0_1_intgBR7XML_ConverterSourceClassGenerationschemasReceiveDeliverServiceDeliverService-v1-0.xsd">
