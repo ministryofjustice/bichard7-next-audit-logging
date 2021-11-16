@@ -13,12 +13,15 @@ export default function parseCreateAuditLogEventRequest(
   const { body } = event
 
   try {
-    if (!messageId) {
-      return Error("Message Id must be provided in the URL.")
-    }
-
     if (!body) {
       return Error("Body cannot be empty.")
+    }
+
+    if (!messageId) {
+      return {
+        messageId: "",
+        auditLogEvent: <AuditLogEvent>JSON.parse(body)
+      }
     }
 
     return {

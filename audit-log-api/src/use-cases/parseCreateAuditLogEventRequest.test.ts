@@ -57,13 +57,10 @@ test("should return error when request body is not valid", () => {
   expect(error.message).toBe("Unexpected token I in JSON at position 0")
 })
 
-test("should return error when messageId is not in path", () => {
+test("should not return error when messageId is not in path", () => {
   const result = parseCreateAuditLogEventRequest(<APIGatewayProxyEvent>{
     body: JSON.stringify(expectedAuditLogEvent)
   })
 
-  expect(isError(result)).toBe(true)
-
-  const error = <Error>result
-  expect(error.message).toBe("Message Id must be provided in the URL.")
+  expect(isError(result)).toBe(false)
 })

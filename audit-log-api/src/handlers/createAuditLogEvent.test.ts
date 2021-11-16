@@ -22,6 +22,22 @@ const createHandlerEvent = (auditLogEvent?: AuditLogEvent): APIGatewayProxyEvent
   }
 }
 
+const createHandlerEventWithNoMessageId = (auditLogEvent?: AuditLogEvent): APIGatewayProxyEvent => {
+  const event =
+    auditLogEvent ||
+    new AuditLogEvent({
+      category: "information",
+      timestamp: new Date(),
+      eventType: "Test event",
+      eventSource: "Test"
+    })
+
+  return <APIGatewayProxyEvent>{
+    body: JSON.stringify(event),
+    pathParameters: <unknown>{}
+  }
+}
+
 describe("createAuditLogEvent()", () => {
   it("should return Created status when event is added to the audit log in the database", async () => {
     jest.spyOn(CreateAuditLogEventUseCase.prototype, "create").mockReturnValue(
@@ -77,5 +93,19 @@ describe("createAuditLogEvent()", () => {
 
     expect(actualResponse.statusCode).toBe(HttpStatusCode.internalServerError)
     expect(actualResponse.body).toBe(expectedMessage)
+  })
+
+  it("should not return error when receiving message with no message Id", async () => {
+    jest.spyOn(CreateAuditLogEventUseCase.prototype, "create").mockReturnValue(
+      Promise.resolve({
+        resultType: "success"
+      })
+    )
+
+    const event = createHandlerEventWithNoMessageId()
+    const actualResponse = await createAuditLogEvent(event)
+
+    expect(actualResponse.statusCode).toBe(HttpStatusCode.ok)
+    expect(actualResponse.body).toBe("Processed")
   })
 })
