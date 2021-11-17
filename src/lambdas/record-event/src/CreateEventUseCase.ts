@@ -6,6 +6,11 @@ export default class {
   constructor(private readonly api: ApiClient) {}
 
   async execute(messageId: string, event: AuditLogEvent): PromiseResult<void> {
+    if (!messageId) {
+      console.log(event)
+      return undefined
+    }
+
     let message = await this.api.getMessage(messageId)
 
     if (isError(message)) {

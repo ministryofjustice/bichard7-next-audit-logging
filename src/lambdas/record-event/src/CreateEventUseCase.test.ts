@@ -16,6 +16,15 @@ describe("execute", () => {
     expect(result).toBeUndefined()
   })
 
+  it("should be successful when event does not have messageId", async () => {
+    const useCase = new CreateEventUseCase(fakeApiClient)
+
+    fakeApiClient.reset()
+    const result = await useCase.execute("", {} as AuditLogEvent)
+
+    expect(result).toBeUndefined()
+  })
+
   it("should fail when audit log API fails to get message", async () => {
     const expectedError = new Error("Get message failed")
     const useCase = new CreateEventUseCase(fakeApiClient)
