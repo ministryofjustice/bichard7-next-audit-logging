@@ -18,14 +18,6 @@ export default async function createAuditLogEvent(event: APIGatewayProxyEvent): 
     })
   }
 
-  if (request.messageId === "") {
-    console.log(request.auditLogEvent)
-    return createJsonApiResult({
-      statusCode: HttpStatusCode.ok,
-      body: "Processed"
-    })
-  }
-
   const { isValid, errors, auditLogEvent } = validateCreateAuditLogEvent(request.auditLogEvent)
 
   if (!isValid) {
