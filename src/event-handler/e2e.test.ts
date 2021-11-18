@@ -108,3 +108,25 @@ test.each<string>([
     }
   }
 )
+
+test("Event with no MesageId should not fail to be processed by the audit logger", async () => {
+  const rawMessage = fs.readFileSync(`../../events/report-run-event.xml`).toString()
+
+  const event: AmazonMqEventSourceRecordEvent = {
+    eventSource: "general-event",
+    eventSourceArn: "general-event",
+    messages: [
+      {
+        messageID: "",
+        messageType: "messageType",
+        data: rawMessage,
+        destination: {
+          physicalName: ""
+        }
+      }
+    ]
+  }
+
+  const result = await invokeFunction(`general-event-receiver`, event)
+  expect(result).toNotBeError()
+})
