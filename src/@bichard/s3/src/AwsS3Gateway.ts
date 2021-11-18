@@ -55,4 +55,43 @@ export default class AwsS3Gateway implements S3Gateway {
       .then(() => undefined)
       .catch((error) => <Error>error)
   }
+
+  list(): PromiseResult<S3.ObjectList> {
+    const params: S3.Types.ListObjectsV2Request = {
+      Bucket: this.bucketName
+    }
+
+    return this.client
+      .listObjectsV2(params)
+      .promise()
+      .then((result) => result.Contents || [])
+      .catch((error) => <Error>error)
+  }
+
+  copyItemTo(key: string, destinationBucketName: string): PromiseResult<void> {
+    const params: S3.Types.CopyObjectRequest = {
+      CopySource: `${this.bucketName}/${key}`,
+      Bucket: destinationBucketName,
+      Key: key
+    }
+
+    return this.client
+      .copyObject(params)
+      .promise()
+      .then(() => undefined)
+      .catch((error) => <Error>error)
+  }
+
+  deleteItem(key: string): PromiseResult<void> {
+    const params: S3.Types.DeleteObjectRequest = {
+      Bucket: this.bucketName,
+      Key: key
+    }
+
+    return this.client
+      .deleteObject(params)
+      .promise()
+      .then(() => undefined)
+      .catch((error) => <Error>error)
+  }
 }
