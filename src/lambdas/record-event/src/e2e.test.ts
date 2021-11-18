@@ -95,4 +95,32 @@ describe("Record Event end-to-end", () => {
     expect(actualEvent.eventSourceArn).toBe(event.eventSourceArn)
     expect(actualEvent.s3Path).toBe(event.s3Path)
   })
+
+  test("given message is not stored in the API if no message Id is provided", async () => {
+    const event = new BichardAuditLogEvent({
+      category: "information",
+      eventSource: "Record Event e2e test",
+      eventType: "Test Event",
+      timestamp: new Date(),
+      eventSourceArn: "DummyArn",
+      s3Path: "DummyPath",
+      eventSourceQueueName: "DummyQueue"
+    })
+
+    const input: RecordEventInput = {
+      messageId: "",
+      event
+    }
+
+    const result = await invokeFunction("record-event", input)
+    expect(result).toNotBeError()
+
+    const actualAuditLog = <AuditLog>await gateway.fetchOne("")
+    expect(actualAuditLog).toBeDefined()
+
+    const { messageId, externalCorrelationId, events } = actualAuditLog
+    expect(messageId).toBeUndefined()
+    expect(externalCorrelationId).toBeUndefined()
+    expect(events).toBeUndefined()
+  })
 })
