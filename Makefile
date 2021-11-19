@@ -141,3 +141,7 @@ send-pnc-update-request-failure-event:
 .PHONY: upload-message-to-s3
 upload-message-to-s3:
 	incoming-message-handler/scripts/upload-message-to-s3.sh
+
+.PHONY: transfer-messages
+transfer-messages:
+	scripts/transfer-messages.sh

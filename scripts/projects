@@ -13,6 +13,7 @@ src/lambdas/store-in-s3
 src/lambdas/translate-event
 src/lambdas/record-event
 src/lambdas/message-receiver
+src/lambdas/transfer-messages
 src/event-handler
 incoming-message-handler
 audit-log-api

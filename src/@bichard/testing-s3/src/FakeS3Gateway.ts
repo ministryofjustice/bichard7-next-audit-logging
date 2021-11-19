@@ -1,3 +1,4 @@
+import type { S3 } from "aws-sdk"
 import type { S3Gateway } from "@bichard/s3"
 import type { KeyValuePair, PromiseResult } from "shared"
 
@@ -22,6 +23,23 @@ export default class FakeS3Gateway implements S3Gateway {
   // @ts-ignore
   // eslint-disable-next-line @typescript-eslint/no-unused-vars, class-methods-use-this
   upload<T>(fileName: string, content: T): PromiseResult<void> {
+    throw new Error("Method not implemented.")
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars, class-methods-use-this
+  list(): PromiseResult<S3.ObjectList> {
+    throw new Error("Method not implemented.")
+  }
+
+  // @ts-ignore
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars, class-methods-use-this
+  copyItemTo(key: string, destinationBucketName: string): PromiseResult<void> {
+    throw new Error("Method not implemented.")
+  }
+
+  // @ts-ignore
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars, class-methods-use-this
+  deleteItem(key: string): PromiseResult<void> {
     throw new Error("Method not implemented.")
   }
 
