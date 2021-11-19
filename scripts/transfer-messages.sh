@@ -14,8 +14,7 @@ then
   exit 1
 fi
 
-aws lambda list-functions --query "Functions[?contains(FunctionName, 'transfer-messages')].FunctionName" --output text
-FUNCTION_NAME="bichard-7-${WORKSPACE}-transfer-messages"
+FUNCTION_NAME=$(aws lambda list-functions --query "Functions[?contains(FunctionName, 'transfer-messages') && contains(FunctionName, '-${WORKSPACE}-')].FunctionName" --output text)
 PAYLOAD=$(cat <<- EOF
 {
   "numberOfObjectsToTransfer": "${NUMBER_OF_MESSAGES}"
