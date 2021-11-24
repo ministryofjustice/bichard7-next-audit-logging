@@ -1,6 +1,11 @@
 ---
 
 version: 0.2
+
+env:
+  exported-variables:
+    - AUDIT_LOGGING_HASH
+
 phases:
   build:
     commands:
