@@ -70,5 +70,6 @@ if [ "${IS_CD}" = "true" ]; then
 EOF
 
   aws s3 cp /tmp/audit-logging.json s3://${ARTIFACT_BUCKET}/semaphores/audit-logging.json
-  expprt AUDIT_LOGGING_HASH="${IMAGE_SHA_HASH}"
+  export AUDIT_LOGGING_HASH="${IMAGE_SHA_HASH}"
+
 fi
