@@ -12,7 +12,7 @@ function upload_to_s3 {
   fi
 
   aws s3 cp "$sourceFilename" \
-    "s3://$S3_BUCKET/audit-logging/$destinationFilename" \
+    "s3://$ARTIFACT_BUCKET/audit-logging/$destinationFilename" \
     --content-type "$contentType" \
     --acl bucket-owner-full-control
 }
@@ -57,7 +57,7 @@ cd -
 # Upload all artifacts to the S3 bucket
 aws s3 cp \
   ./incoming-message-handler/build/ \
-  s3://$S3_BUCKET/audit-logging/ \
+  s3://$ARTIFACT_BUCKET/audit-logging/ \
   --recursive \
   --exclude "*" \
   --include "*.zip" \
@@ -83,7 +83,7 @@ cd -
 # Upload all artifacts to the S3 bucket
 aws s3 cp \
   ./audit-log-api/build/ \
-  s3://$S3_BUCKET/audit-logging/ \
+  s3://$ARTIFACT_BUCKET/audit-logging/ \
   --recursive \
   --exclude "*" \
   --include "*.zip" \
