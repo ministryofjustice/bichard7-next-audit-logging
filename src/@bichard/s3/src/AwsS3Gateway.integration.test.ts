@@ -118,7 +118,7 @@ describe("AwsS3Gateway", () => {
       expect(isError(result)).toBe(true)
 
       const actualError = result as Error
-      expect(actualError.name).toBe("NotFound")
+      expect(actualError.name).toBe("NoSuchKey")
     })
   })
 })
