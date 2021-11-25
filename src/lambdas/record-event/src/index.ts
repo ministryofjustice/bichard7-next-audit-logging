@@ -22,7 +22,7 @@ const api = new AuditLogApiClient(apiUrl, apiKey)
 const useCase = new CreateEventUseCase(api)
 
 export default async ({ messageId, event }: RecordEventInput): Promise<void> => {
-  const result = await useCase.retryExecute(messageId, event)
+  const result = await useCase.execute(messageId, event)
 
   if (isError(result)) {
     throw result
