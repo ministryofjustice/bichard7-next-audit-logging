@@ -1,9 +1,0 @@
-{
-  "Comment": "Dummy state machine used for testing",
-  "StartAt": "Success",
-  "States": {
-    "Success": {
-      "Type": "Succeed"
-    }
-  }
-}
