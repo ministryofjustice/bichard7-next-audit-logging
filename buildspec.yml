@@ -17,5 +17,5 @@ phases:
     commands:
       - scripts/install-all.sh
       - scripts/build-all.sh
-      - source scripts/codebuild-artifacts.sh
+      - . scripts/codebuild-artifacts.sh
 ...
