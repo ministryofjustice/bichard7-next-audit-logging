@@ -101,5 +101,5 @@ upload_to_s3 "src/event-handler/scripts/state-machine.json.tpl" "event-handler-s
 ############################################
 
 # Build the Portal Docker Image
-make codebuild-portal-image
+. ./scripts/build-portal-codebuild-image.sh
 
