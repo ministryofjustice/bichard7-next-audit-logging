@@ -10,5 +10,5 @@ phases:
   build:
     commands:
       - set -ev
-      - /bin/bash ./scripts/build-portal-codebuild-image.sh
+      - /bin/bash source ./scripts/build-portal-codebuild-image.sh
 ...
