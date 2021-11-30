@@ -31,6 +31,6 @@ export default class StoreInS3UseCase {
     const hour = now.getHours()
     const minute = now.getMinutes()
 
-    return `${year}/${month}/${day}/${hour}/${minute}/${messageFormat}-${uuid()}.xml`
+    return `${year}/${month}/${day}/${hour}/${minute}/${messageFormat}-${uuid()}.json`
   }
 }
