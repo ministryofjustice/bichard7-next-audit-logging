@@ -18,9 +18,9 @@ const configB: S3Config = {
 }
 
 const gatewayA = new AwsS3Gateway(configA)
-const transferMessages = new TransferMessagesUseCase(gatewayA, configB.bucketName)
 const testGatewayA = new TestAwsS3Gateway(configA)
 const testGatewayB = new TestAwsS3Gateway(configB)
+const transferMessages = new TransferMessagesUseCase(gatewayA, testGatewayB.getBucketName())
 
 describe("TransferMessagesUseCase", () => {
   beforeAll(async () => {
