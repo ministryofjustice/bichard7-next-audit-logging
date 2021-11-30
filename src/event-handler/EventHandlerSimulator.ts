@@ -15,7 +15,7 @@ export default class {
   }
 
   async start(s3ObjectKey: string): Promise<void> {
-    const executionName = s3ObjectKey.replace(/\//g, "_")
+    const executionName = s3ObjectKey.replace(/\//g, "_").slice(-80)
     await this.stateMachine
       .startExecution({
         stateMachineArn: "arn:aws:states:us-east-1:000000000000:stateMachine:BichardEventHandler",
