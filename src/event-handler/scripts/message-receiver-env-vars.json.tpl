@@ -1,8 +1,8 @@
 {
   "Variables": {
-    "AWS_URL": "http://localstack_main:4566",
-    "AWS_REGION": "us-east-1",
-    "STEP_FUNCTION_ARN": "{STEP_FUNCTION_ARN}",
+    "S3_URL": "http://localstack_main:4566",
+    "S3_REGION": "us-east-1",
+    "EVENTS_BUCKET_NAME": "{EVENTS_BUCKET_NAME}",
     "MESSAGE_FORMAT": "{MESSAGE_FORMAT}"
   }
 }

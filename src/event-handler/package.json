@@ -14,7 +14,11 @@
   },
   "author": "",
   "license": "ISC",
+  "dependencies": {
+    "aws-sdk": "^2.942.0"
+  },
   "devDependencies": {
+    "@bichard/s3": "file:../@bichard/s3",
     "@bichard/testing-jest": "file:../@bichard/testing-jest",
     "@bichard/testing-lambda": "file:../@bichard/testing-lambda",
     "@types/jest": "^26.0.24",

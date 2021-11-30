@@ -13,7 +13,7 @@ cd ../../environment
 cd -
 
 # Deploy all lambdas
-cd ../lambdas/store-in-s3
+cd ../lambdas/retrieve-event-from-s3
 npm run setup:env
 cd -
 

@@ -6,6 +6,10 @@ import type { AmazonMqEventSourceRecordEvent, DynamoDbConfig, AuditLogEvent } fr
 import { encodeBase64, AuditLog, AwsAuditLogDynamoGateway, Poller, PollOptions } from "shared"
 import TestDynamoGateway from "shared/dist/DynamoGateway/TestDynamoGateway"
 import { invokeFunction } from "@bichard/testing-lambda"
+import type { S3Config } from "@bichard/s3"
+import { TestAwsS3Gateway } from "@bichard/s3"
+import type { S3 } from "aws-sdk"
+import EventHandlerSimulator from "./EventHandlerSimulator"
 
 const config: DynamoDbConfig = {
   DYNAMO_URL: "http://localhost:4566",
@@ -15,6 +19,13 @@ const config: DynamoDbConfig = {
 
 const gateway = new AwsAuditLogDynamoGateway(config, config.AUDIT_LOG_TABLE_NAME)
 const testGateway = new TestDynamoGateway(config)
+const s3Config: S3Config = {
+  url: "http://localhost:4566",
+  region: "us-east-1",
+  bucketName: "audit-log-events"
+}
+const s3Gateway = new TestAwsS3Gateway(s3Config)
+const eventHandlerSimulator = new EventHandlerSimulator("http://localhost:4566")
 
 type PollResult = {
   actualEvents1: AuditLogEvent[]
@@ -33,6 +44,7 @@ const getEvents = async (messageId1: string, messageId2: string): Promise<PollRe
 
 beforeEach(async () => {
   await testGateway.deleteAll(config.AUDIT_LOG_TABLE_NAME, "messageId")
+  await s3Gateway.deleteAll()
 })
 
 test.each<string>([
@@ -90,14 +102,31 @@ test.each<string>([
     const result = await invokeFunction(`${eventFilename}-receiver`, event)
     expect(result).toNotBeError()
 
-    const poller = new Poller(() => getEvents(auditLog1.messageId, auditLog2.messageId))
+    // Waiting until events are uploaded to S3 bucket
+    const s3Poller = new Poller(() => s3Gateway.getAll())
 
-    const options = new PollOptions<PollResult>(40000)
-    options.delay = 300
-    options.condition = ({ actualEvents1, actualEvents2 }) => actualEvents1.length === 2 && actualEvents2.length === 1
+    const s3PollerOptions = new PollOptions<S3.ObjectList | undefined>(40000)
+    s3PollerOptions.delay = 1000
+    s3PollerOptions.condition = (s3Objects) => (s3Objects?.length || 0) === 3
+
+    const s3PollerResult = await s3Poller.poll(s3PollerOptions).catch((error) => error)
+
+    expect(s3Poller).toNotBeError()
+
+    // Simulating EventBridge rule for triggering state machine for the uploaded object to S3 bucket
+    const s3Objects = s3PollerResult as S3.ObjectList
+    const objectKeys = s3Objects.map((s3Object) => s3Object.Key)
+    await Promise.allSettled(objectKeys.map((key) => eventHandlerSimulator.start(key!)))
+
+    const dynamoDbPoller = new Poller(() => getEvents(auditLog1.messageId, auditLog2.messageId))
+
+    const dynamoDbPollerOptions = new PollOptions<PollResult>(50000)
+    dynamoDbPollerOptions.delay = 1000
+    dynamoDbPollerOptions.condition = ({ actualEvents1, actualEvents2 }) =>
+      actualEvents1.length === 2 && actualEvents2.length === 1
 
     try {
-      await poller.poll(options)
+      await dynamoDbPoller.poll(dynamoDbPollerOptions)
     } catch (error) {
       console.error(`Event Handler e2e (${eventFilename}) failed when polling for events`)
 
