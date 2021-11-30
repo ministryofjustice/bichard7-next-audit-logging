@@ -1,4 +1,4 @@
-jest.setTimeout(90000)
+jest.setTimeout(250000)
 
 import "@bichard/testing-jest"
 import fs from "fs"
@@ -107,7 +107,7 @@ test.each<string>([
 
     const s3PollerOptions = new PollOptions<S3.ObjectList | undefined>(40000)
     s3PollerOptions.delay = 1000
-    s3PollerOptions.condition = (s3Objects) => (s3Objects?.length || 0) === 3
+    s3PollerOptions.condition = (s3Objects) => (s3Objects?.length || 0) === event.messages.length
 
     const s3PollerResult = await s3Poller.poll(s3PollerOptions).catch((error) => error)
 
@@ -116,11 +116,11 @@ test.each<string>([
     // Simulating EventBridge rule for triggering state machine for the uploaded object to S3 bucket
     const s3Objects = s3PollerResult as S3.ObjectList
     const objectKeys = s3Objects.map((s3Object) => s3Object.Key)
-    await Promise.allSettled(objectKeys.map((key) => eventHandlerSimulator.start(key!)))
+    await Promise.all(objectKeys.map((key) => eventHandlerSimulator.start(key!)))
 
     const dynamoDbPoller = new Poller(() => getEvents(auditLog1.messageId, auditLog2.messageId))
 
-    const dynamoDbPollerOptions = new PollOptions<PollResult>(50000)
+    const dynamoDbPollerOptions = new PollOptions<PollResult>(100000)
     dynamoDbPollerOptions.delay = 1000
     dynamoDbPollerOptions.condition = ({ actualEvents1, actualEvents2 }) =>
       actualEvents1.length === 2 && actualEvents2.length === 1
