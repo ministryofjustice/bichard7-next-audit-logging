@@ -118,6 +118,8 @@ test.each<string>([
     const objectKeys = s3Objects.map((s3Object) => s3Object.Key)
     await Promise.all(objectKeys.map((key) => eventHandlerSimulator.start(key!)))
 
+    await new Promise((resolve) => setTimeout(resolve, 10000))
+
     const dynamoDbPoller = new Poller(() => getEvents(auditLog1.messageId, auditLog2.messageId))
 
     const dynamoDbPollerOptions = new PollOptions<PollResult>(100000)
