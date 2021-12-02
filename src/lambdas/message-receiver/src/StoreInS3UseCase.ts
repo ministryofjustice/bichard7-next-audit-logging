@@ -26,7 +26,7 @@ export default class StoreInS3UseCase {
   private static getMessageFilename(messageFormat: MessageFormat): string {
     const now = new Date()
     const year = now.getFullYear()
-    const month = now.getMonth()
+    const month = now.getMonth() + 1
     const day = now.getDay()
     const hour = now.getHours()
     const minute = now.getMinutes()
