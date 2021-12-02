@@ -33,7 +33,6 @@ describe("StoreInS3UseCase", () => {
     const useCase = new StoreInS3UseCase(gateway)
     const result = await useCase.execute(message)
 
-    console.log("==================", result)
     expect(isError(result)).toBe(false)
 
     const { s3Path } = <StoreInS3Result>result
