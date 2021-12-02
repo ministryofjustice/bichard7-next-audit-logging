@@ -47,6 +47,8 @@ beforeEach(async () => {
   await s3Gateway.deleteAll()
 })
 
+const wait = (seconds: number) => new Promise((resolve) => setTimeout(resolve, seconds * 1000))
+
 test.each<string>([
   "audit-event",
   "general-event",
@@ -116,9 +118,18 @@ test.each<string>([
     // Simulating EventBridge rule for triggering state machine for the uploaded object to S3 bucket
     const s3Objects = s3PollerResult as S3.ObjectList
     const objectKeys = s3Objects.map((s3Object) => s3Object.Key)
-    await Promise.all(objectKeys.map((key) => eventHandlerSimulator.start(key!)))
+    const executions: Promise<void>[] = []
+    objectKeys.forEach((key, index) => {
+      const promise = async () => {
+        await wait(index * 5)
+        await eventHandlerSimulator.start(key!)
+      }
+      executions.push(promise())
+    })
 
-    await new Promise((resolve) => setTimeout(resolve, 10000))
+    await Promise.all(executions)
+
+    await wait(5)
 
     const dynamoDbPoller = new Poller(() => getEvents(auditLog1.messageId, auditLog2.messageId))
 
