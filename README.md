@@ -40,8 +40,8 @@ This repository currently contains multiple projects to support easy local refer
    1. [S3](src/@bichard/testing-s3/)
 1. [Lambdas](src/lambdas/) - A collection of Lambda projects stored individually for reuse in other components.
    1. [Message Receiver](src/lambdas/message-receiver/) - Receives messages from subscribed queues, embellishes with the source and format, and forwards onto the [Event Handler](src/event-handler/) Step Function.
+   1. [Retrieve Event from S3](src/lambdas/retrieve-event-from-s3/) - Retrieve the event content from S3 to use for processing, retrying or viewing where required.
    1. [Record Event](src/lambdas/record-event/) - Logs events against the parent AuditLog record in Dynamo.
-   1. [Store in S3](src/lambdas/store-in-s3/) - Stores the event content (usually XML) as a file in S3 to use for retrying or viewing where required.
    1. [Translate Event](src/lambdas/translate-event/) - Uses a factory pattern to determine the translation logic to apply to the message, based on it's known contextual format, in order to create an event to attach to a parent AuditLog record in the database.
 1. [API](audit-log-api/) - API exposing Audit Log records and attached events
 1. [Incoming Message Handler](incoming-message-handler/) - AWS Step Functions and Lambdas for intercepting and processing messages coming into the Bichard system
