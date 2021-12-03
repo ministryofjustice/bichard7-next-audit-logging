@@ -1,6 +1,12 @@
-# Bichard7 Next: Services
+# Bichard7 Next: Audit Logging
 
-A collection of service components to be hosted within AWS that will run as new parts of the Bichard7 architecture.
+A collection of service components to be hosted within AWS that will run as new parts of the Bichard7 architecture. Below, is a high-level diagram of the solution architecture of Audit Logging.
+
+![Bichard7 Audit Logging](/docs/infrastructure.png?raw=true "Infrastructure")
+
+#### Quick access to other diagrams:
+- [Incoming message handler](/incoming-message-handler)
+- [Event handler](/src/event-handler)
 
 ## Prerequisites
 
