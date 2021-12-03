@@ -26,7 +26,7 @@ test("returns all messages with message format attached", () => {
     messages: [expectedMessage1, expectedMessage2]
   }
 
-  const { messages } = embellishMessages(event, "AuditEvent")
+  const messages = embellishMessages(event, "AuditEvent")
   expect(messages).toHaveLength(2)
 
   const actualMessage1 = messages[0]
@@ -58,7 +58,7 @@ test("returns corrected queue name when message is from failure queue", () => {
     messages: [expectedMessage]
   }
 
-  const { messages } = embellishMessages(event, "AuditEvent")
+  const messages = embellishMessages(event, "AuditEvent")
   expect(messages).toHaveLength(1)
 
   const actualMessage = messages[0]

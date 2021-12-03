@@ -7,6 +7,17 @@ export default class FakeS3Gateway implements S3Gateway {
 
   private error?: Error
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars, class-methods-use-this
+  getBucketName(): string {
+    throw new Error("Method not implemented.")
+  }
+
+  // @ts-ignore
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars, class-methods-use-this
+  forBucket(bucketName: string): S3Gateway {
+    throw new Error("Method not implemented.")
+  }
+
   getItem(key: string): PromiseResult<string> {
     if (this.error) {
       return Promise.resolve(this.error)

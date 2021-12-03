@@ -8,19 +8,32 @@ export default class TestAwsS3Gateway extends AwsS3Gateway {
   }
 
   async createBucket(skipIfExists = true): Promise<S3.CreateBucketOutput | undefined> {
-    if (skipIfExists && (await this.bucketExists(this.bucketName))) {
+    if (skipIfExists && (await this.bucketExists(this.getBucketName()))) {
       return undefined
     }
 
     return this.client
       .createBucket({
-        Bucket: this.bucketName
+        Bucket: this.getBucketName()
       })
       .promise()
   }
 
+  getBucketName(): string {
+    if (!this.bucketName) {
+      throw new Error("Bucket name does not have value.")
+    }
+
+    return this.bucketName
+  }
+
+  forBucket(bucketName: string): AwsS3Gateway {
+    this.bucketName = bucketName
+    return this
+  }
+
   async getAll(): Promise<S3.ObjectList | undefined> {
-    const { Contents } = await this.client.listObjects({ Bucket: this.bucketName }).promise()
+    const { Contents } = await this.client.listObjects({ Bucket: this.getBucketName() }).promise()
     return Contents
   }
 
@@ -30,7 +43,7 @@ export default class TestAwsS3Gateway extends AwsS3Gateway {
     if (contents && contents.length > 0) {
       const obj = <S3.Types.ObjectIdentifierList>contents.map(({ Key }) => ({ Key }))
       const params: S3.Types.DeleteObjectsRequest = {
-        Bucket: this.bucketName,
+        Bucket: this.getBucketName(),
         Delete: {
           Objects: obj
         }
@@ -46,7 +59,7 @@ export default class TestAwsS3Gateway extends AwsS3Gateway {
   }
 
   async getContent(key: string): Promise<string> {
-    const params: S3.Types.GetObjectRequest = { Bucket: this.bucketName, Key: key }
+    const params: S3.Types.GetObjectRequest = { Bucket: this.getBucketName(), Key: key }
     const content = await this.client.getObject(params).promise()
     return String(content.Body)
   }

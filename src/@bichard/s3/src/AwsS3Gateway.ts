@@ -7,16 +7,14 @@ import type S3Gateway from "./S3Gateway"
 export default class AwsS3Gateway implements S3Gateway {
   private readonly s3: S3
 
-  protected readonly bucketName: string
+  protected bucketName?: string
 
   constructor(config: S3Config) {
     const { url, region, bucketName } = config
 
-    if (!bucketName) {
-      throw Error("bucketName must have value.")
+    if (bucketName) {
+      this.bucketName = bucketName
     }
-
-    this.bucketName = bucketName
 
     this.s3 = new S3({
       endpoint: url,
@@ -29,9 +27,22 @@ export default class AwsS3Gateway implements S3Gateway {
     return this.s3
   }
 
+  getBucketName(): string {
+    if (!this.bucketName) {
+      throw new Error("Bucket name does not have value")
+    }
+
+    return this.bucketName
+  }
+
+  forBucket(bucketName: string): S3Gateway {
+    this.bucketName = bucketName
+    return this
+  }
+
   getItem(key: string): PromiseResult<string> {
     const params: S3.GetObjectRequest = {
-      Bucket: this.bucketName,
+      Bucket: this.getBucketName(),
       Key: key
     }
 
@@ -44,7 +55,7 @@ export default class AwsS3Gateway implements S3Gateway {
 
   upload<T>(fileName: string, content: T): PromiseResult<void> {
     const params: S3.Types.PutObjectRequest = {
-      Bucket: this.bucketName,
+      Bucket: this.getBucketName(),
       Key: fileName,
       Body: content
     }
@@ -58,7 +69,7 @@ export default class AwsS3Gateway implements S3Gateway {
 
   list(): PromiseResult<S3.ObjectList> {
     const params: S3.Types.ListObjectsV2Request = {
-      Bucket: this.bucketName
+      Bucket: this.getBucketName()
     }
 
     return this.client
@@ -84,7 +95,7 @@ export default class AwsS3Gateway implements S3Gateway {
 
   deleteItem(key: string): PromiseResult<void> {
     const params: S3.Types.DeleteObjectRequest = {
-      Bucket: this.bucketName,
+      Bucket: this.getBucketName(),
       Key: key
     }
 

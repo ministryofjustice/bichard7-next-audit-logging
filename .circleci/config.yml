@@ -23,7 +23,7 @@ jobs:
             - v1-npm-deps-{{ checksum "src/@bichard/testing-lambda/package-lock.json" }}
             - v1-npm-deps-{{ checksum "src/@bichard/testing-dynamodb/package-lock.json" }}
             - v1-npm-deps-{{ checksum "src/@bichard/testing-api-client/package-lock.json" }}
-            - v1-npm-deps-{{ checksum "src/lambdas/store-in-s3/package-lock.json" }}
+            - v1-npm-deps-{{ checksum "src/lambdas/retrieve-event-from-s3/package-lock.json" }}
             - v1-npm-deps-{{ checksum "src/lambdas/translate-event/package-lock.json" }}
             - v1-npm-deps-{{ checksum "src/lambdas/record-event/package-lock.json" }}
             - v1-npm-deps-{{ checksum "src/lambdas/message-receiver/package-lock.json" }}
@@ -92,8 +92,8 @@ jobs:
           paths: src/@bichard/testing-api-client/node_modules
 
       - save_cache:
-          key: v1-npm-deps-{{ checksum "src/lambdas/store-in-s3/package-lock.json" }}
-          paths: src/lambdas/store-in-s3/node_modules
+          key: v1-npm-deps-{{ checksum "src/lambdas/retrieve-event-from-s3/package-lock.json" }}
+          paths: src/lambdas/retrieve-event-from-s3/node_modules
 
       - save_cache:
           key: v1-npm-deps-{{ checksum "src/lambdas/translate-event/package-lock.json" }}
@@ -146,7 +146,7 @@ jobs:
             - src/@bichard/testing-lambda/dist
             - src/@bichard/testing-dynamodb/dist
             - src/@bichard/testing-api-client/dist
-            - src/lambdas/store-in-s3/build
+            - src/lambdas/retrieve-event-from-s3/build
             - src/lambdas/translate-event/build
             - src/lambdas/record-event/build
             - src/lambdas/message-receiver/build
@@ -203,7 +203,7 @@ jobs:
           key: v1-npm-deps-{{ checksum "src/@bichard/testing-api-client/package-lock.json" }}
 
       - restore_cache:
-          key: v1-npm-deps-{{ checksum "src/lambdas/store-in-s3/package-lock.json" }}
+          key: v1-npm-deps-{{ checksum "src/lambdas/retrieve-event-from-s3/package-lock.json" }}
 
       - restore_cache:
           key: v1-npm-deps-{{ checksum "src/lambdas/translate-event/package-lock.json" }}
@@ -275,7 +275,7 @@ jobs:
       - store_test_results:
           path: ./src/@bichard/testing-api-client/test-results/jest/
       - store_test_results:
-          path: ./src/lambdas/store-in-s3/test-results/jest/
+          path: ./src/lambdas/retrieve-event-from-s3/test-results/jest/
       - store_test_results:
           path: ./src/lambdas/translate-event/test-results/jest/
       - store_test_results:

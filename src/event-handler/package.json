@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "setup:env": "scripts/environment.sh && scripts/deploy.sh",
-    "build": "tsc -p tsconfig.json",
+    "build": "echo \"Nothing to build\"",
     "test": "npm run setup:env && ../../scripts/test.sh",
     "test:ci": "npm run setup:env && ../../scripts/test.sh ci",
     "test:unit": "../../scripts/test.sh unit",
@@ -14,10 +14,16 @@
   },
   "author": "",
   "license": "ISC",
+  "dependencies": {
+    "aws-sdk": "^2.942.0",
+    "uuid": "^3.3.2"
+  },
   "devDependencies": {
+    "@bichard/s3": "file:../@bichard/s3",
     "@bichard/testing-jest": "file:../@bichard/testing-jest",
     "@bichard/testing-lambda": "file:../@bichard/testing-lambda",
     "@types/jest": "^26.0.24",
+    "@types/uuid": "^8.3.1",
     "jest": "^27.0.6",
     "jest-junit": "^12.2.0",
     "message-receiver": "file:../lambdas/message-receiver",
