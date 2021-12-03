@@ -2,13 +2,6 @@
 
 set -e
 
-ARTIFACT_BUCKET_NAME="${ARTIFACT_BUCKET}"
-
-if [[ -z "${ARTIFACT_BUCKET_NAME}" ]]
-then
-  ARTIFACT_BUCKET_NAME="${S3_BUCKET}"
-fi
-
 function upload_to_s3 {
   local sourceFilename=$1
   local destinationFilename=$2
@@ -19,7 +12,7 @@ function upload_to_s3 {
   fi
 
   aws s3 cp "$sourceFilename" \
-    "s3://$ARTIFACT_BUCKET_NAME/audit-logging/$destinationFilename" \
+    "s3://$ARTIFACT_BUCKET/audit-logging/$destinationFilename" \
     --content-type "$contentType" \
     --acl bucket-owner-full-control
 }
@@ -64,7 +57,7 @@ cd -
 # Upload all artifacts to the S3 bucket
 aws s3 cp \
   ./incoming-message-handler/build/ \
-  s3://$ARTIFACT_BUCKET_NAME/audit-logging/ \
+  s3://$ARTIFACT_BUCKET/audit-logging/ \
   --recursive \
   --exclude "*" \
   --include "*.zip" \
@@ -90,7 +83,7 @@ cd -
 # Upload all artifacts to the S3 bucket
 aws s3 cp \
   ./audit-log-api/build/ \
-  s3://$ARTIFACT_BUCKET_NAME/audit-logging/ \
+  s3://$ARTIFACT_BUCKET/audit-logging/ \
   --recursive \
   --exclude "*" \
   --include "*.zip" \
