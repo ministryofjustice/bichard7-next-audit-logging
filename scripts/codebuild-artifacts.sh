@@ -56,11 +56,11 @@ zip recordSentToBichardEvent.zip recordSentToBichardEvent.js
 
 # Upload all artifacts to the S3 bucket
 upload_to_s3 formatMessage.zip formatMessage.zip
-upload_to_s3 logMessageReceipt.zip logMessageReceipt.js
-upload_to_s3 parseMessage.zip parseMessage.js
-upload_to_s3 retrieveFromS3.zip retrieveFromS3.js
-upload_to_s3 sendToBichard.zip sendToBichard.js
-upload_to_s3 recordSentToBichardEvent.zip recordSentToBichardEvent.js
+upload_to_s3 logMessageReceipt.zip logMessageReceipt.zip
+upload_to_s3 parseMessage.zip parseMessage.zip
+upload_to_s3 retrieveFromS3.zip retrieveFromS3.zip
+upload_to_s3 sendToBichard.zip sendToBichard.zip
+upload_to_s3 recordSentToBichardEvent.zip recordSentToBichardEvent.zip
 
 cd -
 
@@ -79,11 +79,11 @@ zip createAuditLogEvent.zip createAuditLogEvent.js
 zip getEvents.zip getEvents.js
 zip retryMessage.zip retryMessage.js
 
-upload_to_s3 getMessages.zip getMessages.js
-upload_to_s3 createAuditLog.zip createAuditLog.js
-upload_to_s3 createAuditLogEvent.zip createAuditLogEvent.js
-upload_to_s3 getEvents.zip getEvents.js
-upload_to_s3 retryMessage.zip retryMessage.js
+upload_to_s3 getMessages.zip getMessages.zip
+upload_to_s3 createAuditLog.zip createAuditLog.zip
+upload_to_s3 createAuditLogEvent.zip createAuditLogEvent.zip
+upload_to_s3 getEvents.zip getEvents.zip
+upload_to_s3 retryMessage.zip retryMessage.zip
 
 cd -
 
