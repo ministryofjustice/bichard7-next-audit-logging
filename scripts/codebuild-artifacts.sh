@@ -11,10 +11,12 @@ function upload_to_s3 {
     contentType="application/octet-stream"
   fi
 
+  sourceHash=$(openssl dgst -binary -sha256 "$sourceFilename" | openssl base64)
   aws s3 cp "$sourceFilename" \
     "s3://$ARTIFACT_BUCKET/audit-logging/$destinationFilename" \
     --content-type "$contentType" \
-    --acl bucket-owner-full-control
+    --acl bucket-owner-full-control \
+    --metadata hash="$sourceHash"
 }
 
 ############################################
@@ -52,16 +54,15 @@ zip retrieveFromS3.zip retrieveFromS3.js
 zip sendToBichard.zip sendToBichard.js
 zip recordSentToBichardEvent.zip recordSentToBichardEvent.js
 
-cd -
-
 # Upload all artifacts to the S3 bucket
-aws s3 cp \
-  ./incoming-message-handler/build/ \
-  s3://$ARTIFACT_BUCKET/audit-logging/ \
-  --recursive \
-  --exclude "*" \
-  --include "*.zip" \
-  --acl bucket-owner-full-control
+upload_to_s3 formatMessage.zip formatMessage.zip
+upload_to_s3 logMessageReceipt.zip logMessageReceipt.zip
+upload_to_s3 parseMessage.zip parseMessage.zip
+upload_to_s3 retrieveFromS3.zip retrieveFromS3.zip
+upload_to_s3 sendToBichard.zip sendToBichard.zip
+upload_to_s3 recordSentToBichardEvent.zip recordSentToBichardEvent.zip
+
+cd -
 
 upload_to_s3 "./incoming-message-handler/scripts/state-machine.json.tpl" "incoming-message-handler-state-machine.json.tpl" "application/json"
 
@@ -78,16 +79,13 @@ zip createAuditLogEvent.zip createAuditLogEvent.js
 zip getEvents.zip getEvents.js
 zip retryMessage.zip retryMessage.js
 
-cd -
+upload_to_s3 getMessages.zip getMessages.zip
+upload_to_s3 createAuditLog.zip createAuditLog.zip
+upload_to_s3 createAuditLogEvent.zip createAuditLogEvent.zip
+upload_to_s3 getEvents.zip getEvents.zip
+upload_to_s3 retryMessage.zip retryMessage.zip
 
-# Upload all artifacts to the S3 bucket
-aws s3 cp \
-  ./audit-log-api/build/ \
-  s3://$ARTIFACT_BUCKET/audit-logging/ \
-  --recursive \
-  --exclude "*" \
-  --include "*.zip" \
-  --acl bucket-owner-full-control
+cd -
 
 ############################################
 # Event Handler
@@ -102,4 +100,3 @@ upload_to_s3 "src/event-handler/scripts/state-machine.json.tpl" "event-handler-s
 
 # Build the Portal Docker Image
 make codebuild-portal-image
-
