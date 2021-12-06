@@ -15,7 +15,7 @@ function upload_to_s3 {
   aws s3 cp "$sourceFilename" \
     "s3://$ARTIFACT_BUCKET/audit-logging/$destinationFilename" \
     --content-type "$contentType" \
-    --acl bucket-owner-full-control
+    --acl bucket-owner-full-control \
     --metadata hash="$sourceHash"
 }
 
