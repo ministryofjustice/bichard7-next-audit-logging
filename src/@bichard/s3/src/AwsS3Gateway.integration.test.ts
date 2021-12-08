@@ -29,6 +29,25 @@ describe("AwsS3Gateway", () => {
   beforeEach(async () => {
     await testGateway.deleteAll()
     await secondTestGateway.deleteAll()
+    gateway.forBucket(config.bucketName!)
+  })
+
+  describe("forBucket()", () => {
+    it("should change the bucket used in the gateway to the specified bucket name", () => {
+      gateway.forBucket("BucketA")
+      expect(gateway.getBucketName()).toBe("BucketA")
+
+      gateway.forBucket("BucketB")
+      expect(gateway.getBucketName()).toBe("BucketB")
+    })
+  })
+
+  describe("getBucketName()", () => {
+    it("should throw exception when bucket name is not set", () => {
+      gateway.forBucket("")
+      const getBucketName = () => gateway.getBucketName()
+      expect(getBucketName).toThrow("Bucket name does not have value")
+    })
   })
 
   describe("getItem()", () => {
@@ -95,7 +114,7 @@ describe("AwsS3Gateway", () => {
     it("should copy object to another bucket", async () => {
       await gateway.upload(fileName, "Message to be saved")
 
-      const result = await gateway.copyItemTo(fileName, secondTestGatewayConfig.bucketName)
+      const result = await gateway.copyItemTo(fileName, secondTestGateway.getBucketName())
 
       expect(result).toNotBeError()
 
@@ -113,12 +132,12 @@ describe("AwsS3Gateway", () => {
     })
 
     it("should return error if object doesn't exist", async () => {
-      const result = await gateway.copyItemTo(fileName, secondTestGatewayConfig.bucketName)
+      const result = await gateway.copyItemTo(fileName, secondTestGateway.getBucketName())
 
       expect(isError(result)).toBe(true)
 
       const actualError = result as Error
-      expect(actualError.name).toBe("NoSuchKey")
+      expect(actualError.name).toMatch(/(NoSuchKey)|(NotFound)/)
     })
   })
 })

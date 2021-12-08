@@ -1,6 +1,7 @@
+import type { S3PutObjectEvent } from "shared"
 import { isError, S3Gateway } from "shared"
 import { createS3Config } from "src/configs"
-import type { S3PutObjectEvent, ReceivedMessage } from "src/entities"
+import type { ReceivedMessage } from "src/entities"
 import type { ValidateS3KeyResult } from "src/use-cases/validateS3Key"
 import validateS3Key from "src/use-cases/validateS3Key"
 import readReceivedDateFromS3ObjectKey from "src/utils/readReceivedDateFromS3ObjectKey"

@@ -1,20 +1,21 @@
-import type { EventMessage, S3Config } from "shared"
+import type { EventMessage } from "shared"
 import { isError } from "shared"
-import TestS3Gateway from "shared/dist/S3Gateway/TestS3Gateway"
+import type { S3Config } from "@bichard/s3"
+import { TestAwsS3Gateway } from "@bichard/s3"
 import type { StoreInS3Result } from "./StoreInS3UseCase"
 import StoreInS3UseCase from "./StoreInS3UseCase"
 
 const config: S3Config = {
   url: "http://localhost:4566",
   region: "eu-west-1",
-  bucketName: "store-in-s3"
+  bucketName: "audit-log-events"
 }
 
-const gateway = new TestS3Gateway(config)
+const gateway = new TestAwsS3Gateway(config)
 
 describe("StoreInS3UseCase", () => {
   beforeAll(async () => {
-    await gateway.createBucket(config.bucketName!, true)
+    await gateway.createBucket(true)
   })
 
   beforeEach(async () => {
@@ -37,7 +38,8 @@ describe("StoreInS3UseCase", () => {
     const { s3Path } = <StoreInS3Result>result
     expect(s3Path).toContain(message.messageFormat)
 
-    const actualMessageData = await gateway.getItem(config.bucketName!, s3Path)
-    expect(actualMessageData).toBe(message.messageData)
+    const actualMessage = await gateway.getItem(s3Path)
+    const actualJsonMessage = JSON.parse(actualMessage as string)
+    expect(actualJsonMessage).toEqual(message)
   })
 })

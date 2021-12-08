@@ -2,7 +2,6 @@
 
 set -evx
 
-
 yum install -y jq
 
 readonly REPOSITORY_NAME="audit-log-portal"
@@ -28,32 +27,59 @@ echo "Building from ${DOCKER_IMAGE_HASH}"
 
 docker build --build-arg "NODE_IMAGE=${DOCKER_IMAGE_HASH}" -t ${REPOSITORY_NAME} .
 
-## Install goss/trivy
-curl -L https://github.com/aelsabbahy/goss/releases/latest/download/goss-linux-amd64 -o /usr/local/bin/goss
-chmod +rx /usr/local/bin/goss
-curl -L https://github.com/aelsabbahy/goss/releases/latest/download/dgoss -o /usr/local/bin/dgoss
-chmod +rx /usr/local/bin/dgoss
-
-export GOSS_PATH="/usr/local/bin/goss"
-
-get_latest_release() {
-  curl --silent "https://api.github.com/repos/$1/releases/latest" | # Get latest release from GitHub api
-    grep '"tag_name":' |                                            # Get tag line
-    sed -E 's/.*"([^"]+)".*/\1/'                                    # Pluck JSON value
-}
-
 install_trivy() {
+  echo "Pulling trivy binary from s3"
+  aws s3 cp \
+    s3://"${ARTIFACT_BUCKET}"/trivy/binary/trivy_latest_Linux-64bit.rpm \
+    .
+
   echo "Installing trivy binary"
-  TRIVY_VERSION=$(get_latest_release "aquasecurity/trivy" | sed 's/v//')
-  yum install -y https://github.com/aquasecurity/trivy/releases/download/v${TRIVY_VERSION}/trivy_${TRIVY_VERSION}_Linux-64bit.rpm
+  rpm -ivh trivy_latest_Linux-64bit.rpm
 }
 
+pull_trivy_db() {
+  echo "Pulling trivy db from s3..."
+  aws s3 cp \
+    s3://"${ARTIFACT_BUCKET}"/trivy/db/trivy-offline.db.tgz \
+    trivy/db/
+
+  echo "Extracting trivy db to `pwd`/trivy/db/"
+  tar -xvf trivy/db/trivy-offline.db.tgz -C trivy/db/
+}
+
+pull_goss_binary() {
+  echo "Pulling goss binary"
+  aws s3 cp \
+    s3://"${ARTIFACT_BUCKET}"/goss/goss \
+    /usr/local/bin/goss
+
+  chmod +rx /usr/local/bin/goss
+}
+
+pull_dgoss_binary() {
+  echo "Pulling dgoss binary"
+  aws s3 cp \
+    s3://"${ARTIFACT_BUCKET}"/dgoss/dgoss \
+    /usr/local/bin/dgoss
+
+  chmod +rx /usr/local/bin/dgoss
+}
+
+mkdir -p trivy/db
 install_trivy
+pull_trivy_db
+pull_goss_binary
+export GOSS_PATH="/usr/local/bin/goss"
+pull_dgoss_binary
 
 ## Run goss tests
 GOSS_SLEEP=15 dgoss run -e API_URL=xxx "${REPOSITORY_NAME}:latest"
+
 ## Run Trivy scan
-trivy image "${REPOSITORY_NAME}:latest"
+TRIVY_CACHE_DIR=trivy trivy image \
+  --exit-code 1 \
+  --severity "CRITICAL" \
+  --skip-update "${REPOSITORY_NAME}:latest" # we have the most recent db pulled locally
 
 docker tag "${REPOSITORY_NAME}:latest" ${DOCKER_IMAGE_PREFIX}:${CODEBUILD_RESOLVED_SOURCE_VERSION}-${CODEBUILD_START_TIME}
 echo "Push Docker image on `date`"
