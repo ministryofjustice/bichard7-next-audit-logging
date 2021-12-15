@@ -14,6 +14,7 @@ jest.setTimeout(60000)
 const formatXml = (xml: string): string => format(xml, { indentation: "  " })
 
 const expectedExternalCorrelationId = uuid()
+const externalId = uuid()
 const expectedCaseId = "41BP0510007"
 const originalXml = formatXml(`
   <?xml version="1.0" encoding="UTF-8"?>
@@ -76,10 +77,11 @@ describe("e2e tests", () => {
   })
 
   it("should receive a message on the target queue when the message is sent to the S3 bucket", async () => {
-    const fileName = `2021/03/15/12/28/${expectedExternalCorrelationId}.xml`
+    const fileName = `2021/03/15/12/28/${externalId}.xml`
     const expectedReceivedDate = new Date(2021, 2 /* March */, 15, 12, 28)
+    const executionId = uuid()
 
-    await simulator.start(fileName, originalXml)
+    await simulator.start(fileName, originalXml, executionId)
 
     // Get messages from the API
     const api = new TestApi()
@@ -90,6 +92,9 @@ describe("e2e tests", () => {
     expect(persistedMessage.externalCorrelationId).toBe(expectedExternalCorrelationId)
     expect(persistedMessage.caseId).toBe(expectedCaseId)
     expect(persistedMessage.createdBy).toBe("Incoming message handler")
+    expect(persistedMessage.stepExecutionId).toBe(executionId)
+    expect(persistedMessage.externalId).toBe(externalId)
+    expect(persistedMessage.s3Path).toBe(fileName)
 
     // Received date will be a string as we currently pull it straight from the database without parsing
     expect(persistedMessage.receivedDate).toBe(expectedReceivedDate.toISOString())

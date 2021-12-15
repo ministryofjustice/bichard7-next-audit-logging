@@ -51,6 +51,9 @@ const readMessage = async (message: ReceivedMessage): PromiseResult<AuditLog> =>
   const auditLog = new AuditLog(externalCorrelationId, new Date(message.receivedDate), message.messageXml)
   auditLog.caseId = caseId
   auditLog.createdBy = "Incoming message handler"
+  auditLog.s3Path = message.s3Path
+  auditLog.externalId = message.externalId
+  auditLog.stepExecutionId = message.stepExecutionId
 
   return auditLog
 }
