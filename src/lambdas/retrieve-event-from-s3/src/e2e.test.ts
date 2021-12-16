@@ -36,6 +36,7 @@ describe("Retrieve event from S3 end-to-end", () => {
     await gateway.upload(s3ObjectKey, S3ObjectContent)
 
     const payload = {
+      id: "step-execution-unique-id",
       detail: {
         requestParameters: {
           key: s3ObjectKey,

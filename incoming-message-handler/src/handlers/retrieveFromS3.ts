@@ -5,6 +5,7 @@ import type { ReceivedMessage } from "src/entities"
 import type { ValidateS3KeyResult } from "src/use-cases/validateS3Key"
 import validateS3Key from "src/use-cases/validateS3Key"
 import readReceivedDateFromS3ObjectKey from "src/utils/readReceivedDateFromS3ObjectKey"
+import path from "path"
 
 interface ValidationResult {
   validationResult: ValidateS3KeyResult
@@ -14,6 +15,8 @@ const s3Gateway = new S3Gateway(createS3Config())
 
 export default async function retrieveFromS3(event: S3PutObjectEvent): Promise<ReceivedMessage | ValidationResult> {
   const { bucketName, key } = event.detail.requestParameters
+
+  const externalId = path.basename(key).replace(".xml", "")
 
   const validationResult = validateS3Key(key)
   if (!validationResult.isValid) {
@@ -29,6 +32,9 @@ export default async function retrieveFromS3(event: S3PutObjectEvent): Promise<R
   const receivedDate = readReceivedDateFromS3ObjectKey(key)
 
   return {
+    s3Path: key,
+    externalId,
+    stepExecutionId: event.id,
     receivedDate: receivedDate.toISOString(),
     messageXml
   }

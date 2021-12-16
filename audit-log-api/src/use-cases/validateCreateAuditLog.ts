@@ -10,7 +10,17 @@ interface ValidationResult {
 
 export default (auditLog: AuditLog): ValidationResult => {
   const errors: string[] = []
-  const { caseId, externalCorrelationId, messageId, messageXml, receivedDate, createdBy } = auditLog
+  const {
+    caseId,
+    externalCorrelationId,
+    messageId,
+    messageXml,
+    receivedDate,
+    createdBy,
+    s3Path,
+    stepExecutionId,
+    externalId
+  } = auditLog
 
   if (!caseId) {
     errors.push("Case ID is mandatory")
@@ -48,9 +58,31 @@ export default (auditLog: AuditLog): ValidationResult => {
     errors.push("Created by must be string")
   }
 
+  // Don't validate these for now so we don't break during a deploy
+  // if (!s3Path) {
+  //   errors.push("s3Path is mandatory")
+  // } else if (typeof createdBy !== "string") {
+  //   errors.push("s3Path must be string")
+  // }
+
+  // if (!externalId) {
+  //   errors.push("externalId is mandatory")
+  // } else if (typeof createdBy !== "string") {
+  //   errors.push("externalId must be string")
+  // }
+
+  // if (!stepExecutionId) {
+  //   errors.push("stepExecutionId is mandatory")
+  // } else if (typeof createdBy !== "string") {
+  //   errors.push("stepExecutionId must be string")
+  // }
+
   const validatedAuditLog: AuditLog = {
     messageId,
     caseId,
+    s3Path,
+    externalId,
+    stepExecutionId,
     externalCorrelationId,
     messageXml,
     receivedDate,

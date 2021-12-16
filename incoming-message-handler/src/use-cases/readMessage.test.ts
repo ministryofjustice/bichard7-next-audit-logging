@@ -38,6 +38,9 @@ const expectedMessage = formatXml(`
 `)
 
 const message: ReceivedMessage = {
+  s3Path: "path",
+  externalId: "extId",
+  stepExecutionId: "stepId",
   receivedDate: new Date().toISOString(),
   messageXml: ""
 }

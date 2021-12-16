@@ -23,6 +23,12 @@ export default class AuditLog {
 
   public createdBy: string
 
+  public s3Path: string
+
+  public externalId: string
+
+  public stepExecutionId: string
+
   public readonly version = 0
 
   constructor(public readonly externalCorrelationId: string, receivedDate: Date, public readonly messageXml: string) {

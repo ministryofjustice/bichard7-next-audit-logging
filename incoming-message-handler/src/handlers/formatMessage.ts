@@ -13,6 +13,9 @@ export default async function formatMessage(event: ReceivedMessage): Promise<Rec
   }
 
   return {
+    s3Path: event.s3Path,
+    externalId: event.externalId,
+    stepExecutionId: event.stepExecutionId,
     receivedDate: event.receivedDate,
     messageXml: formattedMessage
   }

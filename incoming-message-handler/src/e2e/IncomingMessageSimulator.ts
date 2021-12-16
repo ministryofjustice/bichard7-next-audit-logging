@@ -23,7 +23,7 @@ export default class IncomingMessageSimulator {
     })
   }
 
-  async start(fileName: string, message: string): Promise<void> {
+  async start(fileName: string, message: string, executionId: string): Promise<void> {
     const result = await this.s3Gateway.upload(fileName, message)
 
     if (isError(result)) {
@@ -35,6 +35,7 @@ export default class IncomingMessageSimulator {
       .startExecution({
         stateMachineArn: "arn:aws:states:us-east-1:000000000000:stateMachine:IncomingMessageHandler",
         input: `{
+          "id": "${executionId}",
           "detail": {
             "requestParameters": {
               "bucketName": "incoming-messages",

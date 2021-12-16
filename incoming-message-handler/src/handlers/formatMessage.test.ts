@@ -50,6 +50,9 @@ describe("formatMessage()", () => {
 
   it("should not format the message when it is already formatted", async () => {
     const expectedMessage: ReceivedMessage = {
+      s3Path: "path",
+      externalId: "extId",
+      stepExecutionId: "stepId",
       receivedDate: new Date().toISOString(),
       messageXml: formattedMessageWithRouteData
     }
@@ -62,6 +65,9 @@ describe("formatMessage()", () => {
 
   it("should format the message when it is not already formatted", async () => {
     const expectedMessage: ReceivedMessage = {
+      s3Path: "path",
+      externalId: "extId",
+      stepExecutionId: "stepId",
       receivedDate: new Date().toISOString(),
       messageXml: unformattedMessageWithoutRouteData
     }
