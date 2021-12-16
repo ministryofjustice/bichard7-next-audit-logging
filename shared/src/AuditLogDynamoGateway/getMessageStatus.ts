@@ -16,6 +16,8 @@ const getMessageStatus = (event: AuditLogEvent): string | null => {
     case "Message Sent to Bichard":
     case "Hearing Outcome passed to Error List":
       return AuditLogStatus.processing
+    case "Record archived":
+      return AuditLogStatus.archived
     default:
       return null
   }

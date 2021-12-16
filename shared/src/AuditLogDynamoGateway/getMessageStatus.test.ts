@@ -29,6 +29,7 @@ test.each<TestInput>([
     category: "information",
     expectedStatus: AuditLogStatus.processing
   },
+  { eventType: "Record archived", category: "information", expectedStatus: AuditLogStatus.archived },
   { eventType: "Other event types", category: "information", expectedStatus: null }
 ])("returns <$expected/> when eventType is $eventType", ({ eventType, category, expectedStatus }) => {
   const auditLogEvent = new AuditLogEvent({
