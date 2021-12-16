@@ -84,7 +84,11 @@ describe("AuditLogDynamoGateway", () => {
 
   describe("addEvent()", () => {
     it("should only add an event to and update the status of the specified audit log", async () => {
-      const expectedEvent = createAuditLogEvent("information", new Date(), "PNC Response received")
+      const expectedEvent = createAuditLogEvent(
+        "information",
+        new Date(),
+        "Hearing Outcome ignored as it contains no offences"
+      )
 
       expectedEvent.addAttribute("Attribute one", "Some value")
       expectedEvent.addAttribute("Attribute two", 2)
