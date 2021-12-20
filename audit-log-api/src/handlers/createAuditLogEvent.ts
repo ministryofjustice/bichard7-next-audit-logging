@@ -37,6 +37,7 @@ export default async function createAuditLogEvent(event: APIGatewayProxyEvent): 
   }
 
   if (result.resultType === "error") {
+    console.error("Error creating audit log", result.resultDescription)
     return createJsonApiResult({
       statusCode: HttpStatusCode.internalServerError,
       body: result.resultDescription

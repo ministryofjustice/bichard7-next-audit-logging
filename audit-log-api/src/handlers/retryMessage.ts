@@ -49,6 +49,7 @@ export default async function retryMessage(event: APIGatewayProxyEvent): Promise
   const retryMessageResult = await retryMessageUseCase.retry(messageId)
 
   if (isError(retryMessageResult)) {
+    console.error("Error retrying message", retryMessageResult.message)
     return createJsonApiResult({
       statusCode: HttpStatusCode.internalServerError,
       body: String(retryMessageResult)

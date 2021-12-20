@@ -19,6 +19,7 @@ export default async function getMessages(event: APIGatewayProxyEvent): PromiseR
   const messageFetcherResult = await messageFetcher.fetch()
 
   if (isError(messageFetcherResult)) {
+    console.log("Error fetching messages", messageFetcherResult.message)
     return createJsonApiResult({
       statusCode: HttpStatusCode.badRequest,
       body: String(messageFetcherResult)

@@ -22,6 +22,7 @@ export default async function getEvents(event: APIGatewayProxyEvent): PromiseRes
   const result = await fetchEvents.get(messageId)
 
   if (isError(result)) {
+    console.error("Error creating audit log", result.message)
     return createJsonApiResult({
       statusCode: HttpStatusCode.internalServerError,
       body: String(result)
