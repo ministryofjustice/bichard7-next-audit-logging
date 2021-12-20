@@ -17,7 +17,10 @@ export default class AuditLogApiClient implements ApiClient {
       .get(`${this.apiUrl}/messages/${messageId}`, { headers: { "X-API-Key": this.apiKey } })
       .then((response) => response.data)
       .then((result) => result[0])
-      .catch((error: AxiosError) => error)
+      .catch((error: AxiosError) => {
+        console.error("Error getting message", error.response?.data)
+        return error
+      })
   }
 
   createAuditLog(auditLog: AuditLog): PromiseResult<void> {
@@ -36,7 +39,10 @@ export default class AuditLogApiClient implements ApiClient {
             return Error(`Error ${result.status}: ${result.data}`)
         }
       })
-      .catch((error: AxiosError) => error)
+      .catch((error: AxiosError) => {
+        console.error("Error creating audit log", error.response?.data)
+        return error
+      })
   }
 
   createEvent(messageId: string, event: AuditLogEvent): PromiseResult<void> {
@@ -57,6 +63,9 @@ export default class AuditLogApiClient implements ApiClient {
             return Error(`Error ${result.status}: Could not create audit log event.`)
         }
       })
-      .catch((error: AxiosError) => error)
+      .catch((error: AxiosError) => {
+        console.error("Error creating event", error.response?.data)
+        return error
+      })
   }
 }
