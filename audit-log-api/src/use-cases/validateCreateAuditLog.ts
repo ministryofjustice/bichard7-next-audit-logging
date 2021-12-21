@@ -52,6 +52,8 @@ export default (auditLog: AuditLog): ValidationResult => {
     errors.push("Received date must be ISO format")
   }
 
+  const validatedReceivedDate = new Date(receivedDate).toISOString()
+
   if (!createdBy) {
     errors.push("Created by is mandatory")
   } else if (typeof createdBy !== "string") {
@@ -85,7 +87,7 @@ export default (auditLog: AuditLog): ValidationResult => {
     stepExecutionId,
     externalCorrelationId,
     messageXml,
-    receivedDate,
+    receivedDate: validatedReceivedDate,
     createdBy,
     status: AuditLogStatus.processing,
     lastEventType: "",
