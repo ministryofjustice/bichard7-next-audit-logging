@@ -10,7 +10,7 @@ interface ValidationResult {
 
 export default (auditLog: AuditLog): ValidationResult => {
   const errors: string[] = []
-  let formattedReceivedDate: string
+  let formattedReceivedDate = ""
   const {
     caseId,
     externalCorrelationId,
