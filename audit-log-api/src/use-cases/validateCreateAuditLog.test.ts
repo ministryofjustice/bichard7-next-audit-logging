@@ -114,3 +114,16 @@ it("should be invalid when fields have incorrect format", () => {
   expect(errors).toContain("Received date must be ISO format")
   expect(errors).toContain("Created by must be string")
 })
+
+it("should enforce a length of 24 characters for the recieved date", () => {
+  const item = new AuditLog("ECID", new Date("2021-12-21T09:32:35.716101961Z"), "XML")
+  item.caseId = "CID"
+  item.createdBy = "Test"
+  const { errors, isValid, auditLog } = validateCreateAuditLog(item)
+
+  expect(isValid).toBe(true)
+  expect(errors).toHaveLength(0)
+
+  expect(auditLog.receivedDate).toBe("2021-12-21T09:32:35.716Z")
+  expect(auditLog.receivedDate).toHaveLength(24)
+})

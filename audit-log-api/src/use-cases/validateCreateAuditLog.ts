@@ -10,6 +10,7 @@ interface ValidationResult {
 
 export default (auditLog: AuditLog): ValidationResult => {
   const errors: string[] = []
+  let formattedReceivedDate = ""
   const {
     caseId,
     externalCorrelationId,
@@ -50,6 +51,8 @@ export default (auditLog: AuditLog): ValidationResult => {
     errors.push("Received date is mandatory")
   } else if (!isIsoDate(receivedDate)) {
     errors.push("Received date must be ISO format")
+  } else {
+    formattedReceivedDate = new Date(receivedDate).toISOString()
   }
 
   if (!createdBy) {
@@ -85,7 +88,7 @@ export default (auditLog: AuditLog): ValidationResult => {
     stepExecutionId,
     externalCorrelationId,
     messageXml,
-    receivedDate,
+    receivedDate: formattedReceivedDate || receivedDate,
     createdBy,
     status: AuditLogStatus.processing,
     lastEventType: "",
