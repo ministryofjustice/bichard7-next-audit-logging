@@ -1,0 +1,8 @@
+paths:
+  - mq-listener
+paths-ignore:
+  - ./shared/src/*/*.integration.test.ts
+  - ./shared/src/*/*.test.ts
+  - helpers
+  - utils
+  - steps
