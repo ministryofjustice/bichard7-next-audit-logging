@@ -15,8 +15,8 @@
     "test:e2e": "npm run setup:env && ../scripts/test.sh e2e"
   },
   "dependencies": {
-    "aws-sdk": "^2.804.0",
-    "axios": "^0.21.1",
+    "aws-sdk": "^2.1050.0",
+    "axios": "^0.24.0",
     "dateformat": "^4.5.1",
     "https": "^1.0.0",
     "shared": "file:../shared",

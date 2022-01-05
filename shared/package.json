@@ -20,8 +20,8 @@
     "typescript": "^4.1.2"
   },
   "dependencies": {
-    "aws-sdk": "^2.870.0",
-    "uuid": "^3.3.2",
+    "aws-sdk": "^2.1050.0",
+    "uuid": "^8.3.2",
     "xml2js": "^0.4.23"
   },
   "scripts": {

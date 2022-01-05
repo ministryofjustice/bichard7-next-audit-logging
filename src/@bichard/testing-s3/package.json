@@ -16,7 +16,7 @@
   },
   "dependencies": {
     "@bichard/s3": "file:../s3",
-    "aws-sdk": "^2.943.0",
+    "aws-sdk": "^2.1050.0",
     "shared": "file:../../../shared"
   },
   "scripts": {
