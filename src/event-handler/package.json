@@ -15,8 +15,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "aws-sdk": "^2.942.0",
-    "uuid": "^3.3.2"
+    "aws-sdk": "^2.1050.0",
+    "uuid": "^8.3.2"
   },
   "devDependencies": {
     "@bichard/s3": "file:../@bichard/s3",

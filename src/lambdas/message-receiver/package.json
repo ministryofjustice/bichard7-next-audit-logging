@@ -37,6 +37,6 @@
   "dependencies": {
     "@bichard/s3": "file:../../@bichard/s3",
     "shared": "file:../../../shared",
-    "uuid": "^3.3.2"
+    "uuid": "^8.3.2"
   }
 }
