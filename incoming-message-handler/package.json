@@ -17,7 +17,6 @@
   "dependencies": {
     "aws-sdk": "^2.1051.0",
     "axios": "^0.24.0",
-    "dateformat": "^5.0.2",
     "https": "^1.0.0",
     "shared": "file:../shared",
     "stompit": "^1.0.0",
