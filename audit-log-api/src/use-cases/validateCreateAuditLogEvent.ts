@@ -9,16 +9,8 @@ interface ValidationResult {
 
 export default (auditLogEvent: AuditLogEvent): ValidationResult => {
   const errors: string[] = []
-  const {
-    attributes,
-    category,
-    eventSource,
-    eventSourceArn,
-    eventSourceQueueName,
-    eventType,
-    s3Path,
-    timestamp
-  } = auditLogEvent as BichardAuditLogEvent
+  const { attributes, category, eventSource, eventSourceArn, eventSourceQueueName, eventType, s3Path, timestamp } =
+    auditLogEvent as BichardAuditLogEvent
 
   if (attributes && (typeof attributes !== "object" || Array.isArray(attributes))) {
     errors.push("Attributes must be key/value object")

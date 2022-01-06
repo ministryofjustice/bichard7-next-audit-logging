@@ -44,7 +44,7 @@ describe("getMessage()", () => {
     const result = await apiClient.getMessage(message.messageId)
 
     expect(result).toNotBeError()
-    expect(mockGet.mock?.calls?.[0]?.[1]?.headers?.["X-API-Key"]).toEqual("dummy")
+    expect(mockGet.mock?.calls?.[0]?.[1]?.headers?.["X-API-Key"]).toBe("dummy")
   })
 })
 
@@ -82,7 +82,7 @@ describe("createAuditLog()", () => {
     const result = await apiClient.createAuditLog(message)
 
     expect(result).toNotBeError()
-    expect(mockPost.mock?.calls?.[0]?.[2]?.headers?.["X-API-Key"]).toEqual("dummy")
+    expect(mockPost.mock?.calls?.[0]?.[2]?.headers?.["X-API-Key"]).toBe("dummy")
   })
 })
 
@@ -120,6 +120,6 @@ describe("createEvent()", () => {
     const result = await apiClient.createEvent(message.messageId, event)
 
     expect(result).toNotBeError()
-    expect(mockPost.mock?.calls?.[0]?.[2]?.headers?.["X-API-Key"]).toEqual("dummy")
+    expect(mockPost.mock?.calls?.[0]?.[2]?.headers?.["X-API-Key"]).toBe("dummy")
   })
 })

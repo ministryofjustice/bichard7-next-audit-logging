@@ -52,7 +52,7 @@ describe("retryMessage", () => {
     })
 
     expect(response.status).toBe(HttpStatusCode.ok)
-    expect(response.data).toEqual("")
+    expect(response.data).toBe("")
   })
 
   it("should return error response when there is an error while retrying message", async () => {
@@ -64,7 +64,7 @@ describe("retryMessage", () => {
 
     const { response: actualResponse } = response
     expect(actualResponse.status).toBe(HttpStatusCode.internalServerError)
-    expect(actualResponse.data).toEqual("Error: Couldn't get events for message 'INVALID_MESSAGE_ID'.")
+    expect(actualResponse.data).toBe("Error: Couldn't get events for message 'INVALID_MESSAGE_ID'.")
   })
 
   it("should return forbidden response code when API key is not present", async () => {

@@ -19,7 +19,7 @@ describe("xml", () => {
       const personXml = "<name>Bob</name>"
       const xml = await parseXml<Person>(personXml)
 
-      expect(xml.name).toEqual("Bob")
+      expect(xml.name).toBe("Bob")
     })
   })
 
@@ -28,21 +28,21 @@ describe("xml", () => {
       const personXml = "<person><name>Bob</name></person>"
       const hasElement = await hasRootElement(personXml, "person")
 
-      expect(hasElement).toEqual(true)
+      expect(hasElement).toBe(true)
     })
 
     it("should return false if the xml does not contain the element", async () => {
       const personXml = "<person><name>Bob</name></person>"
       const hasElement = await hasRootElement(personXml, "employee")
 
-      expect(hasElement).toEqual(false)
+      expect(hasElement).toBe(false)
     })
 
     it("should return false if the xml contains the element but is not the root element", async () => {
       const personXml = "<person><name>Bob</name></person>"
       const hasElement = await hasRootElement(personXml, "name")
 
-      expect(hasElement).toEqual(false)
+      expect(hasElement).toBe(false)
     })
   })
 })
