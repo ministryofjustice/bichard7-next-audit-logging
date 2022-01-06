@@ -50,7 +50,6 @@ const MessageSearch = ({ onSearch, disabled = false }: Props) => {
         onChange={(e) => onExternalCorrelationIdChange(e.target.value || "")}
         disabled={disabled}
         fullWidth
-        autoFocus
       />
 
       <IconButton
