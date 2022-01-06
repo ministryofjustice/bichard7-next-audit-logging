@@ -1,7 +1,7 @@
 jest.setTimeout(15000)
 
 import fs from "fs"
-import { AuditLog, BichardAuditLogEvent, HttpStatusCode } from "shared"
+import { AuditLog, BichardAuditLogEvent, encodeBase64, HttpStatusCode } from "shared"
 import TestDynamoGateway from "shared/dist/DynamoGateway/TestDynamoGateway"
 import { setEnvironmentVariables } from "@bichard/testing-config"
 import createDynamoDbConfig from "src/createDynamoDbConfig"
@@ -30,8 +30,16 @@ describe("retryMessage", () => {
   })
 
   it("should return Ok status when message has been retried successfully", async () => {
+    const event = {
+      messageData: encodeBase64("<Xml></Xml>"),
+      messageFormat: "Dummy Event Source",
+      eventSourceArn: "Dummy Event Arn",
+      eventSourceQueueName: "DUMMY_QUEUE"
+    }
+
     const s3Path = "event.xml"
-    await s3Gateway.upload(s3Path, "<Xml></Xml>")
+    await s3Gateway.upload(s3Path, JSON.stringify(event))
+
     const message = new AuditLog("External Correlation ID", new Date(), "Xml")
     message.events.push(
       new BichardAuditLogEvent({

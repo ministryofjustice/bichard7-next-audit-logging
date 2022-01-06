@@ -65,7 +65,14 @@ describe("RetryMessageUseCase", () => {
   })
 
   it("should retry message when last event is error", async () => {
-    await s3Gateway.upload(eventXmlFileName, encodeBase64(eventXml))
+    const event = {
+      messageData: encodeBase64(eventXml),
+      messageFormat: "Dummy Event Source",
+      eventSourceArn: "Dummy Event Arn",
+      eventSourceQueueName: queueName
+    }
+
+    await s3Gateway.upload(eventXmlFileName, JSON.stringify(event))
 
     const message = new AuditLog("External Correlation ID", new Date(), "Xml")
     message.events.push(

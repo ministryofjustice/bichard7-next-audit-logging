@@ -507,7 +507,7 @@ describe("AuditLogDynamoGateway", () => {
   })
 
   describe("fetchEvents", () => {
-    it("should return AuditLogEvents ordered by timestamp when message id exists in the table", async () => {
+    it("should return AuditLogEvents when message id exists in the table", async () => {
       const auditLog = new AuditLog(`External correlation id 1`, new Date(), "XML")
       auditLog.events = [
         createAuditLogEvent("information", new Date("2021-06-10T10:12:13"), "Event 1"),
@@ -523,9 +523,9 @@ describe("AuditLogDynamoGateway", () => {
 
       const events = <AuditLogEvent[]>result
       expect(events).toHaveLength(3)
-      expect(events[0].eventType).toBe("Event 2")
-      expect(events[1].eventType).toBe("Event 3")
-      expect(events[2].eventType).toBe("Event 1")
+      expect(events[0].eventType).toBe("Event 1")
+      expect(events[1].eventType).toBe("Event 2")
+      expect(events[2].eventType).toBe("Event 3")
     })
 
     it("should return an empty array when message does not have events", async () => {
