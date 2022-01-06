@@ -17,8 +17,7 @@
   "devDependencies": {
     "@babel/preset-env": "^7.16.7",
     "@babel/preset-typescript": "^7.16.7",
-    "@bichard/testing-jest": "file:../../@bichard/testing-jest",
-    "@bichard/testing-lambda": "file:../../@bichard/testing-lambda",
+    "shared-testing": "file:../../../shared-testing",
     "@types/jest": "^27.4.0",
     "@types/uuid": "^8.3.4",
     "aws-sdk": "^2.1051.0",

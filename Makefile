@@ -6,7 +6,7 @@ SHELL := /bin/bash
 
 .PHONY: build
 build:
-	scripts/install-all.sh && scripts/build-all.sh
+	scripts/install-all-ci.sh && scripts/build-all.sh
 
 .PHONY: test
 test:

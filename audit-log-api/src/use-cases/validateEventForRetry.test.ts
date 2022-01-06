@@ -1,4 +1,4 @@
-import "@bichard/testing-jest"
+import "shared-testing"
 import type { EventCategory } from "shared"
 import { BichardAuditLogEvent } from "shared"
 import validateEventForRetry from "./validateEventForRetry"

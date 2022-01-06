@@ -1,6 +1,6 @@
 {
-  "name": "@bichard/testing-api-client",
-  "description": "Provides fake implementation of ApiClient for testing",
+  "name": "shared-testing",
+  "description": "Provides libraries used for testing",
   "version": "1.0.0",
   "author": "",
   "license": "ISC",
@@ -16,8 +16,11 @@
     "test": "jest"
   },
   "dependencies": {
-    "@bichard/api-client": "file:../api-client",
-    "shared": "file:../../../shared"
+    "@bichard/api-client": "file:../src/@bichard/api-client",
+    "@bichard/mq": "file:../src/@bichard/mq",
+    "@bichard/s3": "file:../src/@bichard/s3",
+    "shared": "file:../shared",
+    "aws-sdk": "^2.1051.0"
   },
   "devDependencies": {
     "@types/jest": "^27.4.0",

@@ -1,5 +1,5 @@
 import { AuditLogStatus, AuditLog, isError } from "shared"
-import { FakeAuditLogDynamoGateway } from "@bichard/testing-dynamodb"
+import { FakeAuditLogDynamoGateway } from "shared-testing"
 import FetchByStatus from "./FetchByStatus"
 
 const gateway = new FakeAuditLogDynamoGateway()

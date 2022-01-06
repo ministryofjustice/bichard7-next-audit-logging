@@ -1,8 +1,7 @@
 jest.setTimeout(15000)
 
-import "@bichard/testing-jest"
 import fs from "fs"
-import { setEnvironmentVariables } from "@bichard/testing-config"
+import { setEnvironmentVariables } from "shared-testing"
 import { AuditLog, BichardAuditLogEvent, AwsAuditLogDynamoGateway, encodeBase64 } from "shared"
 import TestDynamoGateway from "shared/dist/DynamoGateway/TestDynamoGateway"
 import { AuditLogApiClient } from "@bichard/api-client"

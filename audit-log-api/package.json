@@ -36,12 +36,7 @@
   "devDependencies": {
     "@babel/preset-env": "^7.16.7",
     "@babel/preset-typescript": "^7.16.7",
-    "@bichard/testing-api-client": "file:../src/@bichard/testing-api-client",
-    "@bichard/testing-config": "file:../src/@bichard/testing-config",
-    "@bichard/testing-dynamodb": "file:../src/@bichard/testing-dynamodb",
-    "@bichard/testing-jest": "file:../src/@bichard/testing-jest",
-    "@bichard/testing-mq": "file:../src/@bichard/testing-mq",
-    "@bichard/testing-s3": "file:../src/@bichard/testing-s3",
+    "shared-testing": "file:../shared-testing",
     "@types/aws-lambda": "^8.10.89",
     "@types/jest": "^27.4.0",
     "babel-loader": "^8.2.3",
