@@ -1,6 +1,7 @@
 import type { PromiseResult } from "shared"
-import { isError } from "shared"
-import type GetLastEventUseCase from "./GetLastEventUseCase"
+import { decodeBase64, isError } from "shared"
+
+import type GetLastFailedMessageEventUseCase from "./GetLastEventUseCase"
 import type RetrieveEventXmlFromS3 from "./RetrieveEventXmlFromS3UseCase"
 import type CreateRetryingEventUseCase from "./CreateRetryingEventUseCase"
 import type SendMessageToQueueUseCase from "./SendMessageToQueueUseCase"
@@ -8,14 +9,15 @@ import validateEventForRetry from "./validateEventForRetry"
 
 export default class RetryMessageUseCase {
   constructor(
-    private readonly getLastEventUseCase: GetLastEventUseCase,
+    private readonly getLastFailedMessageEventUseCase: GetLastFailedMessageEventUseCase,
     private readonly sendMessageToQueueUseCase: SendMessageToQueueUseCase,
     private readonly retrieveEventXmlFromS3UseCase: RetrieveEventXmlFromS3,
     private readonly createRetryingEventUseCase: CreateRetryingEventUseCase
   ) {}
 
   async retry(messageId: string): PromiseResult<void> {
-    const event = await this.getLastEventUseCase.get(messageId)
+    console.log(`Retrying message ${messageId}`)
+    const event = await this.getLastFailedMessageEventUseCase.get(messageId)
 
     if (isError(event)) {
       return event
@@ -27,23 +29,38 @@ export default class RetryMessageUseCase {
       return eventValidationResult
     }
 
-    const eventXmlContent = await this.retrieveEventXmlFromS3UseCase.retrieve(event.s3Path)
+    const eventContent = await this.retrieveEventXmlFromS3UseCase.retrieve(event.s3Path)
 
-    if (isError(eventXmlContent)) {
-      return eventXmlContent
+    if (isError(eventContent)) {
+      return eventContent
     }
 
-    const sendMessageToQueueResult = await this.sendMessageToQueueUseCase.send(
-      event.eventSourceQueueName,
-      eventXmlContent
-    )
+    let eventJsonContent
+
+    try {
+      eventJsonContent = JSON.parse(eventContent)
+    } catch (err) {
+      return isError(err) ? err : Error("Error parsing JSON from S3 object")
+    }
+
+    if (!eventJsonContent.messageData) {
+      return Error(`Event JSON does not have required 'messageData' key`)
+    }
+
+    const eventMessage = decodeBase64(eventJsonContent.messageData)
+
+    if (!eventMessage) {
+      return Error(`Could not base64 decode event message`)
+    }
+
+    const sendMessageToQueueResult = await this.sendMessageToQueueUseCase.send(event.eventSourceQueueName, eventMessage)
 
     if (isError(sendMessageToQueueResult)) {
       return sendMessageToQueueResult
     }
 
-    const createRetryingEventResult = await this.createRetryingEventUseCase.create(messageId)
+    console.log("Message successfully sent to queue")
 
-    return createRetryingEventResult
+    return this.createRetryingEventUseCase.create(messageId)
   }
 }

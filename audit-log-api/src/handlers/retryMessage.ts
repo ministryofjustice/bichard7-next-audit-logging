@@ -5,7 +5,7 @@ import createDynamoDbConfig from "src/createDynamoDbConfig"
 import { parseRetryMessageRequest, RetryMessageUseCase } from "src/use-cases"
 import { createJsonApiResult } from "src/utils"
 import { StompitMqGateway, createMqConfig } from "@bichard/mq"
-import GetLastEventUseCase from "src/use-cases/GetLastEventUseCase"
+import GetLastFailedMessageEventUseCase from "src/use-cases/GetLastEventUseCase"
 import { AuditLogApiClient } from "@bichard/api-client"
 import { AwsS3Gateway } from "@bichard/s3"
 import getApiUrl from "src/getApiUrl"
@@ -26,7 +26,7 @@ const awsS3Gateway = new AwsS3Gateway(createS3Config())
 const retrieveEventXmlFromS3UseCase = new RetrieveEventXmlFromS3UseCase(awsS3Gateway)
 
 const apiClient = new AuditLogApiClient(getApiUrl(), getApiKey())
-const getLastEventUseCase = new GetLastEventUseCase(auditLogGateway)
+const getLastEventUseCase = new GetLastFailedMessageEventUseCase(auditLogGateway)
 const createRetryingEventUseCase = new CreateRetryingEventUseCase(apiClient)
 
 const retryMessageUseCase = new RetryMessageUseCase(

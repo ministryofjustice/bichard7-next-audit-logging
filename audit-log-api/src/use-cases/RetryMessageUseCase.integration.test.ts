@@ -11,7 +11,7 @@ import createS3Config from "src/createS3Config"
 import { createMqConfig, TestStompitMqGateway } from "@bichard/mq"
 import { TestAwsS3Gateway } from "@bichard/s3"
 import RetryMessageUseCase from "./RetryMessageUseCase"
-import GetLastEventUseCase from "./GetLastEventUseCase"
+import GetLastFailedMessageEventUseCase from "./GetLastEventUseCase"
 import SendMessageToQueueUseCase from "./SendMessageToQueueUseCase"
 import RetrieveEventXmlFromS3UseCase from "./RetrieveEventXmlFromS3UseCase"
 import CreateRetryingEventUseCase from "./CreateRetryingEventUseCase"
@@ -30,7 +30,7 @@ setEnvironmentVariables({
 const dynamoDbConfig = createDynamoDbConfig()
 const testDynamoGateway = new TestDynamoGateway(dynamoDbConfig)
 const auditLogDynamoGateway = new AwsAuditLogDynamoGateway(dynamoDbConfig, dynamoDbConfig.AUDIT_LOG_TABLE_NAME)
-const getLastEventUseCase = new GetLastEventUseCase(auditLogDynamoGateway)
+const getLastEventUseCase = new GetLastFailedMessageEventUseCase(auditLogDynamoGateway)
 
 const queueName = "retry-event-integration-testing"
 const mqConfig = createMqConfig()
