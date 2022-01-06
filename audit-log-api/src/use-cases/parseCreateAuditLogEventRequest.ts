@@ -1,5 +1,5 @@
 import type { APIGatewayProxyEvent } from "aws-lambda"
-import type { AuditLogEvent, Result } from "shared"
+import { AuditLogEvent, isError, Result } from "shared"
 
 export interface ParseCreateAuditLogEventRequestResult {
   messageId: string
@@ -26,6 +26,6 @@ export default function parseCreateAuditLogEventRequest(
       auditLogEvent: <AuditLogEvent>JSON.parse(body)
     }
   } catch (error) {
-    return error
+    return isError(error) ? error : Error("Error parsing JSON")
   }
 }

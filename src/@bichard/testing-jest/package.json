@@ -19,9 +19,10 @@
     "shared": "file:../../../shared"
   },
   "devDependencies": {
-    "@types/jest": "^26.0.24",
-    "jest": "^27.0.6",
+    "@types/jest": "^27.4.0",
+    "jest": "^27.4.7",
     "rimraf": "^3.0.2",
-    "ts-jest": "^27.0.3"
+    "ts-jest": "^27.1.2",
+    "typescript": "^4.5.4"
   }
 }

@@ -8,7 +8,8 @@ for p in ${packages}; do
   folder=$(dirname $p)
   echo "Updating $folder"
   pushd $folder
-  npx npm-check-updates --dep prod -u
-  npm audit --production fix
+  npx npm-check-updates -u
+  npm i
+  npm audit fix
   popd
 done

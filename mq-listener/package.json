@@ -9,11 +9,11 @@
     "logs": "pm2 logs mq-listener --lines 500"
   },
   "dependencies": {
-    "aws-sdk": "^2.1050.0",
+    "aws-sdk": "^2.1051.0",
     "stompit": "^1.0.0"
   },
   "devDependencies": {
-    "pm2": "^4.5.6"
+    "pm2": "^5.1.2"
   },
   "author": "",
   "license": "ISC"
