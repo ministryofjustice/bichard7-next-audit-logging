@@ -3,16 +3,16 @@
 exports[`matches snapshot 1`] = `
 <div>
   <div
-    class="MuiPaper-root MuiCard-root Message__Container-sc-12ihk2z-0 jpkXTb MuiPaper-elevation1 MuiPaper-rounded"
+    class="MuiPaper-root MuiCard-root Message__Container-sc-12ihk2z-0 jCoPiM MuiPaper-elevation1 MuiPaper-rounded"
   >
     <div
-      class="MuiCardContent-root Message__InnerContainer-sc-12ihk2z-1 hDBlMZ"
+      class="MuiCardContent-root Message__InnerContainer-sc-12ihk2z-1 kFTIMa"
     >
       <div
-        class="Message__Content-sc-12ihk2z-2 gVhdpe"
+        class="Message__Content-sc-12ihk2z-2 kIKsiJ"
       >
         <div
-          class="Message__Block-sc-12ihk2z-3 Message__StatusBlock-sc-12ihk2z-4 fSjLmO cscEys"
+          class="Message__Block-sc-12ihk2z-3 Message__StatusBlock-sc-12ihk2z-4 dncGYJ ipLlpv"
         >
           <div
             class=""
@@ -43,7 +43,7 @@ exports[`matches snapshot 1`] = `
           </i>
         </div>
         <div
-          class="Message__Block-sc-12ihk2z-3 fSjLmO"
+          class="Message__Block-sc-12ihk2z-3 dncGYJ"
         >
           <h6
             class="MuiTypography-root MuiTypography-h6 MuiTypography-noWrap"
@@ -51,7 +51,7 @@ exports[`matches snapshot 1`] = `
             ExternalCorrelationId
           </h6>
           <span
-            class="MuiTypography-root Message__ReceivedDate-sc-12ihk2z-5 fQFTgq MuiTypography-caption MuiTypography-noWrap"
+            class="MuiTypography-root Message__ReceivedDate-sc-12ihk2z-5 fqafoZ MuiTypography-caption MuiTypography-noWrap"
           >
             Received: 
             <time
@@ -62,12 +62,12 @@ exports[`matches snapshot 1`] = `
           </span>
         </div>
         <h6
-          class="MuiTypography-root Message__DaysAgo-sc-12ihk2z-6 bCdcHG MuiTypography-h6"
+          class="MuiTypography-root Message__DaysAgo-sc-12ihk2z-6 ijFoKN MuiTypography-h6"
         >
           23 days old
         </h6>
         <div
-          class="Message__Actions-sc-12ihk2z-7 fXpzZx"
+          class="Message__Actions-sc-12ihk2z-7 dTgDfS"
         >
           <span
             class="MuiBadge-root"

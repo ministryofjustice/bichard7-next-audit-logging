@@ -8,7 +8,7 @@ exports[`matches the snapshot when status is Completed 1`] = `
   >
     <svg
       aria-hidden="true"
-      class="svg-inline--fa fa-check-circle fa-w-16 SuccessIcon__ColoredIcon-j6z8ag-0 jyZfvZ"
+      class="svg-inline--fa fa-check-circle fa-w-16 SuccessIcon__ColoredIcon-sc-j6z8ag-0 bxpNyP"
       data-icon="check-circle"
       data-prefix="fas"
       focusable="false"
@@ -33,7 +33,7 @@ exports[`matches the snapshot when status is Error 1`] = `
   >
     <svg
       aria-hidden="true"
-      class="svg-inline--fa fa-exclamation-circle fa-w-16 ErrorIcon__ColoredIcon-sc-1n9o5bs-0 jMrgmb"
+      class="svg-inline--fa fa-exclamation-circle fa-w-16 ErrorIcon__ColoredIcon-sc-1n9o5bs-0 dsJgQQ"
       data-icon="exclamation-circle"
       data-prefix="fas"
       focusable="false"
