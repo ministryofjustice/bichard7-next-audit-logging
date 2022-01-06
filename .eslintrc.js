@@ -1,35 +1,33 @@
-{
-  "root": true,
-  "env": {
-    "es6": true
+module.exports = {
+  root: true,
+  env: {
+    es6: true
   },
-  "rules": {
-    "semi": [2, "never"],
-    "quotes": [2, "double", { "avoidEscape": true }],
+  rules: {
+    semi: [2, "never"],
+    quotes: [
+      2,
+      "double",
+      {
+        avoidEscape: true
+      }
+    ],
     "comma-dangle": "off"
   },
-  "overrides": [
+  overrides: [
     {
-      "files": ["**/*.js"],
-      "extends": [
-        "airbnb",
-        "prettier",
-        "plugin:prettier/recommended"
-      ],
-      "rules": {
+      files: ["**/*.js"],
+      extends: ["airbnb", "prettier", "plugin:prettier/recommended"],
+      rules: {
         "@typescript-eslint/no-var-requires": "off",
-        "curly": [2, "all"]
+        curly: [2, "all"]
       }
     },
     {
-      "files": ["**/*.ts", "**/*.tsx"],
-      "parser": "@typescript-eslint/parser",
-      "plugins": [
-        "@typescript-eslint",
-        "jsx-a11y",
-        "jest"
-      ],
-      "extends": [
+      files: ["**/*.ts", "**/*.tsx"],
+      parser: "@typescript-eslint/parser",
+      plugins: ["@typescript-eslint", "jsx-a11y", "jest"],
+      extends: [
         "airbnb-typescript",
         "plugin:@typescript-eslint/recommended",
         "plugin:jsx-a11y/recommended",
@@ -38,12 +36,13 @@
         "prettier/@typescript-eslint",
         "plugin:prettier/recommended"
       ],
-      "parserOptions": {
-        "ecmaVersion": 2020,
-        "sourceType": "module",
-        "project": "tsconfig.eslint.json"
+      parserOptions: {
+        ecmaVersion: 2020,
+        sourceType: "module",
+        project: "tsconfig.eslint.json",
+        tsconfigRootDir: __dirname
       },
-      "rules": {
+      rules: {
         "prettier/prettier": ["error"],
         "@typescript-eslint/ban-ts-comment": "off",
         "@typescript-eslint/consistent-type-imports": ["error"],
@@ -52,19 +51,19 @@
         "react/react-in-jsx-scope": "off",
         "react/jsx-curly-brace-presence": ["off"],
         "react/require-default-props": ["off"],
-        "curly": [2, "all"],
+        curly: [2, "all"],
         "require-await": "error"
       }
     },
     {
-      "files": ["**/*.tsx"],
-      "rules": {
+      files: ["**/*.tsx"],
+      rules: {
         "@typescript-eslint/explicit-module-boundary-types": ["off"]
       }
     },
     {
-      "files": ["*.test.ts", "*.test.tsx", "**/testing/*.tsx"],
-      "rules": {
+      files: ["*.test.ts", "*.test.tsx", "**/testing/*.tsx"],
+      rules: {
         "@typescript-eslint/no-var-requires": "off",
         "import/first": "off",
         "import/no-extraneous-dependencies": "off",
@@ -72,8 +71,8 @@
       }
     },
     {
-      "files": ["*.stories.tsx"],
-      "rules": {
+      files: ["*.stories.tsx"],
+      rules: {
         "import/no-extraneous-dependencies": "off"
       }
     }
