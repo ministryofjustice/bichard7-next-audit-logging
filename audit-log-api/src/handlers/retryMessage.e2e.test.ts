@@ -3,7 +3,7 @@ jest.setTimeout(15000)
 import fs from "fs"
 import { AuditLog, BichardAuditLogEvent, encodeBase64, HttpStatusCode } from "shared"
 import TestDynamoGateway from "shared/dist/DynamoGateway/TestDynamoGateway"
-import { setEnvironmentVariables } from "@bichard/testing-config"
+import { setEnvironmentVariables } from "shared-testing"
 import createDynamoDbConfig from "src/createDynamoDbConfig"
 import createS3Config from "src/createS3Config"
 import { TestAwsS3Gateway } from "@bichard/s3"

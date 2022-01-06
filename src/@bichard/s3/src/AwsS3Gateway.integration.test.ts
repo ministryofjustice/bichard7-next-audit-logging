@@ -1,4 +1,4 @@
-import "@bichard/testing-jest"
+import "shared-testing"
 import type { S3 } from "aws-sdk"
 import { isError } from "shared"
 import AwsS3Gateway from "./AwsS3Gateway"

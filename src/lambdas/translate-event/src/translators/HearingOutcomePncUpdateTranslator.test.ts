@@ -1,4 +1,4 @@
-import "@bichard/testing-jest"
+import "shared-testing"
 import fs from "fs"
 import { encodeBase64 } from "shared"
 import type TranslateEventInput from "src/TranslateEventInput"

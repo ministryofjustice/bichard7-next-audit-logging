@@ -1,7 +1,7 @@
 jest.setTimeout(30000)
 
-import "@bichard/testing-jest"
-import { invokeFunction } from "@bichard/testing-lambda"
+import "shared-testing"
+import { invokeFunction } from "shared-testing"
 import type { AmazonMqEventSourceRecordEvent } from "shared"
 import { TestAwsS3Gateway } from "@bichard/s3"
 import createS3Config from "./createS3Config"

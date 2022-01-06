@@ -1,10 +1,10 @@
 jest.setTimeout(30000)
 
-import "@bichard/testing-jest"
+import "shared-testing"
 import fs from "fs"
 import { encodeBase64 } from "shared"
 import type { MessageFormat, EventCategory } from "shared"
-import { invokeFunction } from "@bichard/testing-lambda"
+import { invokeFunction } from "shared-testing"
 import type TranslateEventInput from "./TranslateEventInput"
 import type TranslationResult from "./translators/TranslationResult"
 

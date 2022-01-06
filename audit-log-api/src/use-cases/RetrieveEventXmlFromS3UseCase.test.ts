@@ -1,5 +1,4 @@
-import "@bichard/testing-jest"
-import { FakeS3Gateway } from "@bichard/testing-s3"
+import { FakeS3Gateway } from "shared-testing"
 import { isError } from "shared"
 import RetrieveEventXmlFromS3UseCase from "./RetrieveEventXmlFromS3UseCase"
 

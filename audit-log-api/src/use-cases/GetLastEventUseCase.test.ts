@@ -1,5 +1,4 @@
-import "@bichard/testing-jest"
-import { FakeAuditLogDynamoGateway } from "@bichard/testing-dynamodb"
+import { FakeAuditLogDynamoGateway } from "shared-testing"
 import type { EventCategory, BichardAuditLogEvent } from "shared"
 import { AuditLog, AuditLogEvent } from "shared"
 import GetLastFailedMessageEventUseCase from "./GetLastEventUseCase"

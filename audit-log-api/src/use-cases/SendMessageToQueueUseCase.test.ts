@@ -1,5 +1,5 @@
-import "@bichard/testing-jest"
-import { FakeMqGateway } from "@bichard/testing-mq"
+import "shared-testing"
+import { FakeMqGateway } from "shared-testing"
 import SendMessageToQueueUseCase from "./SendMessageToQueueUseCase"
 
 const gateway = new FakeMqGateway()

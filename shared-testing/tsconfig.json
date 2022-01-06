@@ -1,16 +1,23 @@
 {
-  "extends": "../../../.config/tsconfig.json",
+  "extends": "../.config/tsconfig.json",
   "compilerOptions": {
     "outDir": "dist",
-    "types": ["node", "jest"],
+    "types": [
+      "node",
+      "jest"
+    ],
     "sourceMap": false,
     "baseUrl": ".",
     "preserveSymlinks": false,
     "declaration": true,
     "paths": {
-      "src/*": ["src/*"]
+      "src/*": [
+        "src/*"
+      ]
     }
   },
   "compileOnSave": true,
-  "include": ["src/**/*.ts"]
+  "include": [
+    "src/**/*.ts"
+  ]
 }

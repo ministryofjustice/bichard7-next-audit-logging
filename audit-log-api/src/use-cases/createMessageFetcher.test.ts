@@ -1,5 +1,5 @@
 import type { APIGatewayProxyEvent } from "aws-lambda"
-import { FakeAuditLogDynamoGateway } from "@bichard/testing-dynamodb"
+import { FakeAuditLogDynamoGateway } from "shared-testing"
 import FetchAll from "./FetchAll"
 import FetchById from "./FetchById"
 import FetchByExternalCorrelationId from "./FetchByExternalCorrelationId"

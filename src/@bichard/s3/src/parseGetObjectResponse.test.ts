@@ -1,4 +1,4 @@
-import "@bichard/testing-jest"
+import "shared-testing"
 import type { AWSError, S3 } from "aws-sdk"
 import type { PromiseResult } from "aws-sdk/lib/request"
 import { isError } from "shared"

@@ -1,4 +1,4 @@
-import "@bichard/testing-jest"
+import "shared-testing"
 import type { S3 } from "aws-sdk"
 import type { S3Config } from "@bichard/s3"
 import { AwsS3Gateway, TestAwsS3Gateway } from "@bichard/s3"
