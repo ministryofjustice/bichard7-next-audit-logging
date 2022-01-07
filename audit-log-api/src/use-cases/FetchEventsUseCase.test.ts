@@ -1,5 +1,5 @@
-import type { EventCategory } from "shared"
-import { isError, AuditLogEvent, AuditLog } from "shared"
+import type { EventCategory } from "shared-types"
+import { isError, AuditLogEvent, AuditLog } from "shared-types"
 import { FakeAuditLogDynamoGateway } from "shared-testing"
 import FetchEventsUseCase from "./FetchEventsUseCase"
 

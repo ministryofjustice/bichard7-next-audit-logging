@@ -1,5 +1,5 @@
-import { isError } from "shared"
-import { AwsS3Gateway } from "@bichard/s3"
+import { isError } from "shared-types"
+import { AwsS3Gateway } from "shared"
 import createS3Config from "./createS3Config"
 import TransferMessagesUseCase from "./TransferMessagesUseCase"
 import type { TransferMessagesInput, TransferMessagesOptions, TransferMessagesResult } from "./types"

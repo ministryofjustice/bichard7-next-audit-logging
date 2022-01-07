@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable class-methods-use-this */
-import type { AuditLog, AuditLogDynamoGateway, AuditLogEvent, PromiseResult } from "shared"
+import type { AuditLog, AuditLogDynamoGateway, AuditLogEvent, PromiseResult } from "shared-types"
 
 export default class FakeAuditLogDynamoGateway implements AuditLogDynamoGateway {
   private messages: AuditLog[] = []

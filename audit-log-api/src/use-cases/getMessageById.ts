@@ -1,5 +1,5 @@
-import { isError } from "shared"
-import type { AuditLog, AuditLogDynamoGateway, PromiseResult } from "shared"
+import { isError } from "shared-types"
+import type { AuditLog, AuditLogDynamoGateway, PromiseResult } from "shared-types"
 
 const getMessageById = async (
   gateway: AuditLogDynamoGateway,

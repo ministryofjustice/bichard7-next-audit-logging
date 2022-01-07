@@ -1,14 +1,14 @@
 import { v4 as uuid } from "uuid"
-import type { EventMessage, PromiseResult, MessageFormat } from "shared"
-import type { S3Gateway } from "@bichard/s3"
-import { isError } from "shared"
+import type { EventMessage, PromiseResult, MessageFormat } from "shared-types"
+import type { S3GatewayInterface } from "shared-types"
+import { isError } from "shared-types"
 
 export type StoreInS3Result = {
   s3Path: string
 }
 
 export default class StoreInS3UseCase {
-  constructor(private readonly gateway: S3Gateway) {}
+  constructor(private readonly gateway: S3GatewayInterface) {}
 
   async execute(message: EventMessage): PromiseResult<StoreInS3Result> {
     const filename = StoreInS3UseCase.getMessageFilename(message.messageFormat)

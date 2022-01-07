@@ -1,4 +1,4 @@
-import type { KeyValuePair } from "shared"
+import type { KeyValuePair } from "shared-types"
 
 export default (additionalVariables?: KeyValuePair<string, string>): void => {
   process.env.AWS_URL = "http://localhost:4566"

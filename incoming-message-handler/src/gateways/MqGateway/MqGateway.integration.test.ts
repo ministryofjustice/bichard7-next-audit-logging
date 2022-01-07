@@ -1,4 +1,4 @@
-import { isError } from "shared"
+import { isError } from "shared-types"
 import type { MqConfig } from "src/configs"
 import MqGateway from "./MqGateway"
 import TestMqGateway from "./TestMqGateway"

@@ -1,5 +1,5 @@
 import { FakeAuditLogDynamoGateway } from "shared-testing"
-import { AuditLog, isError } from "shared"
+import { AuditLog, isError } from "shared-types"
 import getMessageById from "./getMessageById"
 
 const gateway = new FakeAuditLogDynamoGateway()

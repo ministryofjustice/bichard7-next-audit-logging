@@ -1,7 +1,7 @@
 import type { Client, connect } from "stompit"
 import { ConnectFailover } from "stompit"
-import type { PromiseResult } from "shared"
-import { isError } from "shared"
+import type { PromiseResult } from "shared-types"
+import { isError } from "shared-types"
 import type { MqConfig } from "src/configs"
 import deconstructServers from "./deconstructServers"
 

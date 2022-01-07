@@ -1,4 +1,4 @@
-import { AuditLogStatus, AuditLog, isError } from "shared"
+import { AuditLogStatus, AuditLog, isError } from "shared-types"
 import { FakeAuditLogDynamoGateway } from "shared-testing"
 import FetchByStatus from "./FetchByStatus"
 

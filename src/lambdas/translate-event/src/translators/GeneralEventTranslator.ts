@@ -1,4 +1,4 @@
-import type { PromiseResult } from "shared"
+import type { PromiseResult } from "shared-types"
 import { decodeBase64, parseXml } from "shared"
 import type GeneralEventLogItem from "src/types/GeneralEventLogItem"
 import type TranslateEventInput from "src/TranslateEventInput"

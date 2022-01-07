@@ -1,5 +1,5 @@
-import type { BichardAuditLogEvent, EventCategory } from "shared"
-import { AuditLogEvent } from "shared"
+import type { BichardAuditLogEvent, EventCategory } from "shared-types"
+import { AuditLogEvent } from "shared-types"
 import validateCreateAuditLogEvent from "./validateCreateAuditLogEvent"
 
 it("should be valid when audit log event is valid", () => {

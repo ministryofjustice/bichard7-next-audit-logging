@@ -1,6 +1,5 @@
 import { S3 } from "aws-sdk"
-import type { PromiseResult } from "../types"
-import type S3Config from "./S3Config"
+import type { PromiseResult, S3Config } from "shared-types"
 
 export default class S3Gateway {
   private readonly s3: S3

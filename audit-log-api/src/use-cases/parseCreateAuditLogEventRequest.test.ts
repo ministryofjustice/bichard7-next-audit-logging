@@ -1,5 +1,5 @@
 import type { APIGatewayProxyEvent } from "aws-lambda"
-import { AuditLogEvent, isError } from "shared"
+import { AuditLogEvent, isError } from "shared-types"
 import type { ParseCreateAuditLogEventRequestResult } from "./parseCreateAuditLogEventRequest"
 import parseCreateAuditLogEventRequest from "./parseCreateAuditLogEventRequest"
 

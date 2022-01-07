@@ -1,5 +1,6 @@
-import type { PromiseResult } from "shared"
-import { decodeBase64, isError } from "shared"
+import type { PromiseResult } from "shared-types"
+import { decodeBase64 } from "shared"
+import { isError } from "shared-types"
 
 import type GetLastFailedMessageEventUseCase from "./GetLastEventUseCase"
 import type RetrieveEventXmlFromS3 from "./RetrieveEventXmlFromS3UseCase"

@@ -2,8 +2,8 @@ jest.setTimeout(30000)
 
 import "shared-testing"
 import type { S3 } from "aws-sdk"
-import type { S3Config } from "@bichard/s3"
-import { TestAwsS3Gateway } from "@bichard/s3"
+import type { S3Config } from "shared-types"
+import { TestAwsS3Gateway } from "shared"
 import { invokeFunction } from "shared-testing"
 import type { TransferMessagesInput, TransferMessagesResult } from "./types"
 

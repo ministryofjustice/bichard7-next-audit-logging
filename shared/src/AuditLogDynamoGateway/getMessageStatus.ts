@@ -1,5 +1,5 @@
-import type { AuditLogEvent } from "../types"
-import { AuditLogStatus } from "../types"
+import type { AuditLogEvent } from "shared-types"
+import { AuditLogStatus } from "shared-types"
 
 const getMessageStatus = (event: AuditLogEvent): string | null => {
   if (event.category === "error") {

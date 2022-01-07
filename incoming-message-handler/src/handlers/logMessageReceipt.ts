@@ -1,5 +1,5 @@
-import type { AuditLog } from "shared"
-import { isError } from "shared"
+import type { AuditLog } from "shared-types"
+import { isError } from "shared-types"
 import { getApiKey, getApiUrl } from "src/configs"
 import PersistMessageUseCase from "src/use-cases/PersistMessageUseCase"
 

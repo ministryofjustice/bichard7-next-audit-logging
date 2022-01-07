@@ -1,5 +1,6 @@
-import type { PromiseResult, Result } from "shared"
-import { AuditLog, isError, parseXml } from "shared"
+import type { PromiseResult, Result } from "shared-types"
+import { AuditLog, isError } from "shared-types"
+import { parseXml } from "shared"
 import type { DeliveryMessage, ReceivedMessage } from "src/entities"
 import ApplicationError from "src/errors/ApplicationError"
 

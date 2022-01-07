@@ -15,7 +15,7 @@
     "test:e2e": "npm run setup:env && ../../../scripts/test.sh e2e"
   },
   "dependencies": {
-    "@bichard/s3": "file:../../@bichard/s3",
+    "shared-types": "file:../../../shared-types",
     "shared": "file:../../../shared",
     "uuid": "^8.3.2",
     "xml2js": "^0.4.23"

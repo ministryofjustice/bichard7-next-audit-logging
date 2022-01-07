@@ -1,4 +1,4 @@
-import { isError } from "shared"
+import { isError } from "shared-types"
 import type { APIGatewayProxyEvent } from "aws-lambda"
 import parseRetryMessageRequest from "./parseRetryMessageRequest"
 

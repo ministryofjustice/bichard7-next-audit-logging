@@ -1,4 +1,4 @@
-import { AuditLog } from "shared"
+import { AuditLog } from "shared-types"
 import validateCreateAuditLog from "./validateCreateAuditLog"
 
 it("should be valid when audit log item is valid", () => {

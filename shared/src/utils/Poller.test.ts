@@ -1,4 +1,4 @@
-import { isError } from "src/types/Result"
+import { isError } from "shared-types"
 import type PollAction from "./PollAction"
 import Poller from "./Poller"
 import PollOptions from "./PollOptions"

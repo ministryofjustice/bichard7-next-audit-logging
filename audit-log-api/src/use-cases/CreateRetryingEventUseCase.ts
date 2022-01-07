@@ -1,6 +1,5 @@
-import type { ApiClient } from "@bichard/api-client"
-import type { PromiseResult } from "shared"
-import { AuditLogEvent } from "shared"
+import type { ApiClient, PromiseResult } from "shared-types"
+import { AuditLogEvent } from "shared-types"
 
 export default class CreateRetryingEventUseCase {
   constructor(private readonly apiClient: ApiClient) {}

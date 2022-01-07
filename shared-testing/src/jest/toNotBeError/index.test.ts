@@ -1,4 +1,4 @@
-import type { Result } from "shared"
+import type { Result } from "shared-types"
 import "./index"
 
 describe(".toNotBeError()", () => {

@@ -2,9 +2,10 @@ jest.setTimeout(30000)
 
 import "shared-testing"
 import { invokeFunction } from "shared-testing"
-import type { DynamoDbConfig } from "shared"
-import { AuditLog, BichardAuditLogEvent, AwsAuditLogDynamoGateway } from "shared"
-import TestDynamoGateway from "shared/dist/DynamoGateway/TestDynamoGateway"
+import type { DynamoDbConfig } from "shared-types"
+import { AuditLog, BichardAuditLogEvent } from "shared-types"
+import { AwsAuditLogDynamoGateway } from "shared"
+import { TestDynamoGateway } from "shared"
 import type { RecordEventInput } from "./index"
 
 const config: DynamoDbConfig = {

@@ -1,5 +1,5 @@
-import { isError } from "../types"
-import type DynamoDbConfig from "./DynamoDbConfig"
+import { isError } from "shared-types"
+import type { DynamoDbConfig } from "shared-types"
 import IndexSearcher from "./IndexSearcher"
 import TestDynamoGateway from "./TestDynamoGateway"
 

@@ -1,5 +1,6 @@
 import fs from "fs"
-import { encodeBase64, isError } from "shared"
+import { encodeBase64 } from "shared"
+import { isError } from "shared-types"
 import type TranslateEventInput from "src/TranslateEventInput"
 import type TranslationResult from "./TranslationResult"
 import GeneralEventTranslator from "./GeneralEventTranslator"

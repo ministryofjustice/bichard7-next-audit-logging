@@ -1,6 +1,7 @@
-import type { DynamoDbConfig } from "shared"
-import { AuditLog, AuditLogEvent, AwsAuditLogDynamoGateway } from "shared"
-import TestDynamoGateway from "shared/dist/DynamoGateway/TestDynamoGateway"
+import type { DynamoDbConfig } from "shared-types"
+import { AuditLog, AuditLogEvent } from "shared-types"
+import { AwsAuditLogDynamoGateway } from "shared"
+import { TestDynamoGateway } from "shared"
 import CreateAuditLogEventUseCase from "./CreateAuditLogEventUseCase"
 
 const config: DynamoDbConfig = {

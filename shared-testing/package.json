@@ -16,10 +16,7 @@
     "test": "jest"
   },
   "dependencies": {
-    "@bichard/api-client": "file:../src/@bichard/api-client",
-    "@bichard/mq": "file:../src/@bichard/mq",
-    "@bichard/s3": "file:../src/@bichard/s3",
-    "shared": "file:../shared",
+    "shared-types": "file:../shared-types",
     "aws-sdk": "^2.1051.0"
   },
   "devDependencies": {

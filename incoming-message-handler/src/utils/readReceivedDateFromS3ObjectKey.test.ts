@@ -1,4 +1,4 @@
-import { isError } from "shared"
+import { isError } from "shared-types"
 import readReceivedDateFromS3ObjectKey from "./readReceivedDateFromS3ObjectKey"
 
 describe("readReceivedDateFromS3ObjectKey()", () => {

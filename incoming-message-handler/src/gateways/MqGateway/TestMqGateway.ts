@@ -1,5 +1,5 @@
-import type { PromiseResult } from "shared"
-import { isError } from "shared"
+import type { PromiseResult } from "shared-types"
+import { isError } from "shared-types"
 import type { Client } from "stompit"
 import MqGateway from "./MqGateway"
 

@@ -1,4 +1,4 @@
-import type { PromiseResult } from "shared"
+import type { PromiseResult } from "shared-types"
 import type MqGateway from "src/gateways/MqGateway"
 
 export default class SendMessageUseCase {

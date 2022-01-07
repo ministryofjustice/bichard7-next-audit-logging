@@ -1,4 +1,4 @@
-import { isError } from "shared"
+import { isError } from "shared-types"
 import getTranslator from "src/translators/getTranslator"
 import type TranslationResult from "src/translators/TranslationResult"
 import type TranslateEventInput from "./TranslateEventInput"

@@ -1,5 +1,5 @@
 import { FakeS3Gateway } from "shared-testing"
-import { isError } from "shared"
+import { isError } from "shared-types"
 import RetrieveEventXmlFromS3UseCase from "./RetrieveEventXmlFromS3UseCase"
 
 const fakeS3Gateway = new FakeS3Gateway()

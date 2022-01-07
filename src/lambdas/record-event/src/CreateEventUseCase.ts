@@ -1,6 +1,5 @@
-import type { ApiClient } from "@bichard/api-client"
-import type { PromiseResult, AuditLogEvent } from "shared"
-import { AuditLog, isError } from "shared"
+import type { PromiseResult, AuditLogEvent, ApiClient } from "shared-types"
+import { AuditLog, isError } from "shared-types"
 
 export default class {
   constructor(private readonly api: ApiClient) {}

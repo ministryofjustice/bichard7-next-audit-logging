@@ -1,5 +1,5 @@
-import type { EventCategory } from "../types"
-import { AuditLogEvent, AuditLogStatus } from "../types"
+import type { EventCategory } from "shared-types"
+import { AuditLogEvent, AuditLogStatus } from "shared-types"
 import getMessageStatus from "./getMessageStatus"
 
 interface TestInput {

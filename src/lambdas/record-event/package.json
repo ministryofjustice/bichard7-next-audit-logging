@@ -15,8 +15,7 @@
     "test:e2e": "npm run setup:env && ../../../scripts/test.sh e2e"
   },
   "dependencies": {
-    "@bichard/api-client": "file:../../@bichard/api-client",
-    "axios": "^0.24.0",
+    "shared-types": "file:../../../shared-types",
     "shared": "file:../../../shared"
   },
   "devDependencies": {

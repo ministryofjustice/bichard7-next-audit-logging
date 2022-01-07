@@ -2,7 +2,8 @@ jest.mock("src/use-cases/parseGetEventsRequest")
 
 import "src/testConfig"
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda"
-import { AuditLog, AuditLogEvent, HttpStatusCode } from "shared"
+import { AuditLog, AuditLogEvent } from "shared-types"
+import { HttpStatusCode } from "shared"
 import { FetchEventsUseCase, parseGetEventsRequest } from "src/use-cases"
 import getEvents from "./getEvents"
 

@@ -1,4 +1,4 @@
-import type { DynamoDbConfig } from "shared"
+import type { DynamoDbConfig } from "shared-types"
 
 export default function createDynamoDbConfig(): DynamoDbConfig {
   const { AWS_URL, AWS_REGION, AUDIT_LOG_TABLE_NAME } = process.env

@@ -1,8 +1,8 @@
 import type { S3 } from "aws-sdk"
-import type { S3Gateway } from "@bichard/s3"
-import type { KeyValuePair, PromiseResult } from "shared"
+import type { S3GatewayInterface } from "shared-types"
+import type { KeyValuePair, PromiseResult } from "shared-types"
 
-export default class FakeS3Gateway implements S3Gateway {
+export default class FakeS3Gateway implements S3GatewayInterface {
   private items: KeyValuePair<string, string> = {}
 
   private error?: Error
@@ -14,7 +14,7 @@ export default class FakeS3Gateway implements S3Gateway {
 
   // @ts-ignore
   // eslint-disable-next-line @typescript-eslint/no-unused-vars, class-methods-use-this
-  forBucket(bucketName: string): S3Gateway {
+  forBucket(bucketName: string): S3GatewayInterface {
     throw new Error("Method not implemented.")
   }
 

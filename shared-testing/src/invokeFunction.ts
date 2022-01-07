@@ -1,6 +1,6 @@
 import { Lambda } from "aws-sdk"
 import type { InvocationRequest, InvocationResponse } from "aws-sdk/clients/lambda"
-import type { PromiseResult } from "shared"
+import type { PromiseResult } from "shared-types"
 
 interface InvocationOptions {
   endpoint?: string

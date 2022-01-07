@@ -1,5 +1,5 @@
 import { FakeApiClient } from "shared-testing"
-import type { AuditLogEvent } from "shared"
+import type { AuditLogEvent } from "shared-types"
 import CreateEventUseCase from "./CreateEventUseCase"
 
 describe("execute", () => {

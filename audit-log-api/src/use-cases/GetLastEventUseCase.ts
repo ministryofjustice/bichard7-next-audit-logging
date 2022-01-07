@@ -1,5 +1,5 @@
-import type { AuditLogDynamoGateway, BichardAuditLogEvent, PromiseResult } from "shared"
-import { isError } from "shared"
+import type { AuditLogDynamoGateway, BichardAuditLogEvent, PromiseResult } from "shared-types"
+import { isError } from "shared-types"
 
 export default class GetLastFailedMessageEventUseCase {
   constructor(private readonly auditLogDynamoGateway: AuditLogDynamoGateway) {}

@@ -1,6 +1,6 @@
 import "testing/mockUseFetch"
 import { screen } from "@testing-library/react"
-import { AuditLog } from "shared"
+import { AuditLog } from "shared-types"
 import { render } from "testing/render"
 import Messages from "./Messages"
 

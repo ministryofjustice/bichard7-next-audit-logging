@@ -1,8 +1,6 @@
-shared
-src/@bichard/api-client
-src/@bichard/mq
-src/@bichard/s3
+shared-types
 shared-testing
+shared
 src/lambdas/retrieve-event-from-s3
 src/lambdas/translate-event
 src/lambdas/record-event

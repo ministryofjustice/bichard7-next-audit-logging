@@ -1,4 +1,4 @@
-import type { S3Config } from "@bichard/s3"
+import type { S3Config } from "shared-types"
 
 export default (): S3Config => {
   const { S3_URL, S3_REGION } = process.env

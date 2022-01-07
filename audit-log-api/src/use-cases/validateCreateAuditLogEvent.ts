@@ -1,4 +1,4 @@
-import type { AuditLogEvent, BichardAuditLogEvent } from "shared"
+import type { AuditLogEvent, BichardAuditLogEvent } from "shared-types"
 import { isIsoDate } from "src/utils"
 
 interface ValidationResult {

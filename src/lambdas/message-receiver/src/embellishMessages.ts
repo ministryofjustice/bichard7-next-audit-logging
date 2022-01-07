@@ -1,4 +1,4 @@
-import type { EventMessage, MessageFormat, AmazonMqEventSourceRecordEvent, JmsTextMessage } from "shared"
+import type { EventMessage, MessageFormat, AmazonMqEventSourceRecordEvent, JmsTextMessage } from "shared-types"
 
 const getEventSourceQueueName = (message: JmsTextMessage): string => {
   return message.destination.physicalName.replace(".FAILURE", "")

@@ -1,5 +1,4 @@
-import type { ApiClient } from "@bichard/api-client"
-import type { AuditLog, AuditLogEvent, PromiseResult } from "shared"
+import type { AuditLog, AuditLogEvent, PromiseResult, ApiClient } from "shared-types"
 
 export default class FakeApiClient implements ApiClient {
   private messages: AuditLog[] = []

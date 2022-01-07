@@ -1,4 +1,4 @@
-import type { AuditLogEvent } from "src/types"
+import type { AuditLogEvent } from "shared-types"
 
 export default (event: AuditLogEvent): string | undefined => {
   if (event.eventType === "Input message received") {

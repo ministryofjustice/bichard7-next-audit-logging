@@ -1,5 +1,4 @@
-import type { MqGateway } from "@bichard/mq"
-import type { PromiseResult } from "shared"
+import type { PromiseResult, MqGateway } from "shared-types"
 
 export default class SendMessageToQueueUseCase {
   constructor(private mqGateway: MqGateway) {}

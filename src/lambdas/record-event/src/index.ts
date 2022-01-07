@@ -1,6 +1,6 @@
-import { AuditLogApiClient } from "@bichard/api-client"
-import type { AuditLogEvent } from "shared"
-import { isError } from "shared"
+import { AuditLogApiClient } from "shared"
+import type { AuditLogEvent } from "shared-types"
+import { isError } from "shared-types"
 import CreateEventUseCase from "./CreateEventUseCase"
 
 export interface RecordEventInput {
