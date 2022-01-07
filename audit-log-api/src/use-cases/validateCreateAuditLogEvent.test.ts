@@ -31,7 +31,7 @@ it("should be valid and set attributes when it is undefined", () => {
     timestamp: new Date("2021-10-05T15:12:13.000Z")
   })
 
-  event = ({ ...event, attributes: undefined } as unknown) as AuditLogEvent
+  event = { ...event, attributes: undefined } as unknown as AuditLogEvent
 
   const { isValid, errors, auditLogEvent } = validateCreateAuditLogEvent(event)
 
@@ -48,7 +48,7 @@ it("should remove arbitrary keys from the audit log event", () => {
     eventType: "Event type",
     timestamp: new Date("2021-10-05T15:12:13.000Z")
   })
-  event = ({ ...event, customKey1: "Value", myKey: { anotherKey: 5 } } as unknown) as AuditLogEvent
+  event = { ...event, customKey1: "Value", myKey: { anotherKey: 5 } } as unknown as AuditLogEvent
 
   const { isValid, errors, auditLogEvent } = validateCreateAuditLogEvent(event)
 
@@ -81,7 +81,7 @@ it("should be invalid when audit log event is missing all fields", () => {
 })
 
 it("should be invalid when audit log event fields have incorrect format", () => {
-  const event = ({
+  const event = {
     attributes: "attributes",
     category: 1,
     eventSource: 2,
@@ -90,7 +90,7 @@ it("should be invalid when audit log event fields have incorrect format", () => 
     eventType: 5,
     s3Path: 6,
     timestamp: "2021-10-05 12:13:14"
-  } as unknown) as BichardAuditLogEvent
+  } as unknown as BichardAuditLogEvent
 
   const { isValid, errors } = validateCreateAuditLogEvent(event)
 

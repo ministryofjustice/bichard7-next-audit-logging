@@ -73,7 +73,7 @@ test("should respond with error", async () => {
   const actualResponse = <APIGatewayProxyResult>messages
 
   expect(actualResponse.statusCode).toBe(HttpStatusCode.badRequest)
-  expect(actualResponse.body).toEqual("Error: Expected Error")
+  expect(actualResponse.body).toBe("Error: Expected Error")
 })
 
 test("should return a single message when the message Id is given", async () => {

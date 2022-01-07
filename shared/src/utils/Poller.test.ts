@@ -1,10 +1,11 @@
+import { isError } from "src/types/Result"
 import type PollAction from "./PollAction"
 import Poller from "./Poller"
 import PollOptions from "./PollOptions"
 
 const expectedResult = "Hello, World!"
 
-const poll = async (
+const poll = (
   options: PollOptions<string | undefined>,
   numberOfIterations: number,
   shouldSucceed: boolean
@@ -22,7 +23,7 @@ const poll = async (
     })
 
   const poller = new Poller<string | undefined>(action)
-  return await poller.poll(options)
+  return poller.poll(options)
 }
 
 describe("Poller", () => {
@@ -47,7 +48,7 @@ describe("Poller", () => {
       const options = new PollOptions(1000)
       await poll(options, 1, false)
     } catch (error) {
-      actualError = error
+      actualError = isError(error) ? error : Error("Failed polling")
     }
 
     expect(actualError).toBeDefined()
@@ -70,7 +71,7 @@ describe("Poller", () => {
       options.condition = (result) => result === expectedResult
       await poll(options, 1, false)
     } catch (error) {
-      actualError = error
+      actualError = isError(error) ? error : Error("Failed polling")
     }
 
     expect(actualError).toBeDefined()

@@ -1,3 +1,4 @@
+import { isError } from "shared"
 import readReceivedDateFromS3ObjectKey from "./readReceivedDateFromS3ObjectKey"
 
 describe("readReceivedDateFromS3ObjectKey()", () => {
@@ -20,7 +21,7 @@ describe("readReceivedDateFromS3ObjectKey()", () => {
     try {
       readReceivedDateFromS3ObjectKey(invalidObjectKey)
     } catch (error) {
-      actualError = error
+      actualError = isError(error) ? error : Error("Error was not an error")
     }
 
     expect(actualError).toBeDefined()

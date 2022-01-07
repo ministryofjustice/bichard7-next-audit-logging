@@ -33,7 +33,7 @@ module.exports = {
         "plugin:jsx-a11y/recommended",
         "plugin:jest/recommended",
         "plugin:jest/style",
-        "prettier/@typescript-eslint",
+        "prettier",
         "plugin:prettier/recommended"
       ],
       parserOptions: {

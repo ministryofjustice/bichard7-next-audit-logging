@@ -57,7 +57,7 @@ test("should respond with bad request status when there is a validation error", 
   const actualResponse = <APIGatewayProxyResult>response
 
   expect(actualResponse.statusCode).toBe(HttpStatusCode.badRequest)
-  expect(actualResponse.body).toEqual(`Error: ${error.message}`)
+  expect(actualResponse.body).toBe(`Error: ${error.message}`)
 })
 
 test("should respond with internal server error status when there is an error with fetching events", async () => {
@@ -71,5 +71,5 @@ test("should respond with internal server error status when there is an error wi
   const actualResponse = <APIGatewayProxyResult>response
 
   expect(actualResponse.statusCode).toBe(HttpStatusCode.internalServerError)
-  expect(actualResponse.body).toEqual(`Error: ${error.message}`)
+  expect(actualResponse.body).toBe(`Error: ${error.message}`)
 })

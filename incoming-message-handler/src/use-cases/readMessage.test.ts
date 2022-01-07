@@ -56,7 +56,7 @@ describe("handleMessage", () => {
     expect(externalCorrelationId).toBe(expectedExternalCorrelationId)
     expect(messageXml).toBe(expectedMessage)
     expect(caseId).toEqual(expectedCaseId)
-    expect(createdBy).toEqual("Incoming message handler")
+    expect(createdBy).toBe("Incoming message handler")
   })
 
   it("should handle invalid xml", async () => {
@@ -66,7 +66,7 @@ describe("handleMessage", () => {
 
     const applicationError = <ApplicationError>result
     expect(isError(result)).toBe(true)
-    expect(applicationError.message).toEqual("Failed to parse XML")
+    expect(applicationError.message).toBe("Failed to parse XML")
     expect(applicationError.originalError).toBeDefined()
   })
 
@@ -76,7 +76,7 @@ describe("handleMessage", () => {
     const result = await readMessage(message)
 
     expect(isError(result)).toBe(true)
-    expect((<Error>result).message).toEqual("The External Correlation Id cannot be found")
+    expect((<Error>result).message).toBe("The External Correlation Id cannot be found")
   })
 
   it("should handle missing case id error", async () => {
@@ -85,6 +85,6 @@ describe("handleMessage", () => {
     const result = await readMessage(message)
 
     expect(isError(result)).toBe(true)
-    expect((<Error>result).message).toEqual("Case Id cannot be found")
+    expect((<Error>result).message).toBe("Case Id cannot be found")
   })
 })

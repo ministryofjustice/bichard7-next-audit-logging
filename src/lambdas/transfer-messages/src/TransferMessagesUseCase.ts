@@ -46,23 +46,21 @@ export default class TransferMessagesUseCase {
     const failedToCopy: FailedItem[] = []
     const failedToDelete: FailedItem[] = []
 
-    const transferItems = messages.map(
-      async (message: S3.Object): Promise<void> => {
-        const { failedToCopyError, failedToDeleteError } = await this.transferMessage(message)
+    const transferItems = messages.map(async (message: S3.Object): Promise<void> => {
+      const { failedToCopyError, failedToDeleteError } = await this.transferMessage(message)
 
-        if (failedToCopyError) {
-          failedToCopy.push({ key: message.Key!, error: failedToCopyError.message })
-        }
-
-        if (failedToDeleteError) {
-          failedToDelete.push({ key: message.Key!, error: failedToDeleteError.message })
-        }
-
-        if (!failedToCopyError && !failedToDeleteError) {
-          successful.push(message.Key!)
-        }
+      if (failedToCopyError) {
+        failedToCopy.push({ key: message.Key!, error: failedToCopyError.message })
       }
-    )
+
+      if (failedToDeleteError) {
+        failedToDelete.push({ key: message.Key!, error: failedToDeleteError.message })
+      }
+
+      if (!failedToCopyError && !failedToDeleteError) {
+        successful.push(message.Key!)
+      }
+    })
 
     await Promise.allSettled(transferItems)
 

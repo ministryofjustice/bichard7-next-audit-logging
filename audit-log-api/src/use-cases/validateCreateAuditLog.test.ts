@@ -28,14 +28,14 @@ it("should be valid and override the value of fields that should be set internal
   item.caseId = "CID"
   item.createdBy = "Test"
 
-  const itemToFix = ({
+  const itemToFix = {
     ...item,
     version: 10,
     status: "error",
     events: "dummyEvent",
     automationReport: "dummyAutomationReport",
     topExceptionsReport: "dummyTopExceptionsReport"
-  } as unknown) as AuditLog
+  } as unknown as AuditLog
 
   const { errors, isValid, auditLog } = validateCreateAuditLog(itemToFix)
 
@@ -81,7 +81,7 @@ it("should remove arbitrary keys from the audit log", () => {
 })
 
 it("should be invalid when mandatory fields do not have value", () => {
-  const item = ({} as unknown) as AuditLog
+  const item = {} as unknown as AuditLog
   const { errors, isValid } = validateCreateAuditLog(item)
 
   expect(isValid).toBe(false)
@@ -95,14 +95,14 @@ it("should be invalid when mandatory fields do not have value", () => {
 })
 
 it("should be invalid when fields have incorrect format", () => {
-  const item = ({
+  const item = {
     messageId: 1,
     caseId: 2,
     externalCorrelationId: 3,
     messageXml: 4,
     receivedDate: "2021-10-05 12:13:14",
     createdBy: 5
-  } as unknown) as AuditLog
+  } as unknown as AuditLog
   const { errors, isValid } = validateCreateAuditLog(item)
 
   expect(isValid).toBe(false)
