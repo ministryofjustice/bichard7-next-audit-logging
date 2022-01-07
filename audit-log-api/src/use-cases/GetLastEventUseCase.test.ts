@@ -2,10 +2,10 @@ import "@bichard/testing-jest"
 import { FakeAuditLogDynamoGateway } from "@bichard/testing-dynamodb"
 import type { EventCategory, BichardAuditLogEvent } from "shared"
 import { AuditLog, AuditLogEvent } from "shared"
-import GetLastEventUseCase from "./GetLastEventUseCase"
+import GetLastFailedMessageEventUseCase from "./GetLastEventUseCase"
 
 const auditLogDynamoGateway = new FakeAuditLogDynamoGateway()
-const useCase = new GetLastEventUseCase(auditLogDynamoGateway)
+const useCase = new GetLastFailedMessageEventUseCase(auditLogDynamoGateway)
 
 const createAuditLog = (): AuditLog => new AuditLog("External Correlation Id", new Date("2021-07-22T08:10:10"), "Xml")
 const createEvent = (date: string, category: EventCategory): AuditLogEvent => {

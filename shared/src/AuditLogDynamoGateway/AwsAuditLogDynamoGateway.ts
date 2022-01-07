@@ -114,9 +114,7 @@ export default class AwsAuditLogDynamoGateway extends DynamoGateway implements A
       return []
     }
 
-    const sortedEvents = result.events.sort((eventA, eventB) => (eventA.timestamp > eventB.timestamp ? -1 : 1))
-
-    return sortedEvents
+    return result.events
   }
 
   async addEvent(messageId: string, messageVersion: number, event: AuditLogEvent): PromiseResult<void> {

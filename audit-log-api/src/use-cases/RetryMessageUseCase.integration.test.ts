@@ -11,7 +11,7 @@ import createS3Config from "src/createS3Config"
 import { createMqConfig, TestStompitMqGateway } from "@bichard/mq"
 import { TestAwsS3Gateway } from "@bichard/s3"
 import RetryMessageUseCase from "./RetryMessageUseCase"
-import GetLastEventUseCase from "./GetLastEventUseCase"
+import GetLastFailedMessageEventUseCase from "./GetLastEventUseCase"
 import SendMessageToQueueUseCase from "./SendMessageToQueueUseCase"
 import RetrieveEventXmlFromS3UseCase from "./RetrieveEventXmlFromS3UseCase"
 import CreateRetryingEventUseCase from "./CreateRetryingEventUseCase"
@@ -30,7 +30,7 @@ setEnvironmentVariables({
 const dynamoDbConfig = createDynamoDbConfig()
 const testDynamoGateway = new TestDynamoGateway(dynamoDbConfig)
 const auditLogDynamoGateway = new AwsAuditLogDynamoGateway(dynamoDbConfig, dynamoDbConfig.AUDIT_LOG_TABLE_NAME)
-const getLastEventUseCase = new GetLastEventUseCase(auditLogDynamoGateway)
+const getLastEventUseCase = new GetLastFailedMessageEventUseCase(auditLogDynamoGateway)
 
 const queueName = "retry-event-integration-testing"
 const mqConfig = createMqConfig()
@@ -65,7 +65,14 @@ describe("RetryMessageUseCase", () => {
   })
 
   it("should retry message when last event is error", async () => {
-    await s3Gateway.upload(eventXmlFileName, encodeBase64(eventXml))
+    const event = {
+      messageData: encodeBase64(eventXml),
+      messageFormat: "Dummy Event Source",
+      eventSourceArn: "Dummy Event Arn",
+      eventSourceQueueName: queueName
+    }
+
+    await s3Gateway.upload(eventXmlFileName, JSON.stringify(event))
 
     const message = new AuditLog("External Correlation ID", new Date(), "Xml")
     message.events.push(
