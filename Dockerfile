@@ -10,8 +10,8 @@ COPY ./shared /src/shared
 
 WORKDIR /src/shared
 
-RUN npm i
-RUN npm run build
+RUN npm i && \
+    npm run build
 
 #########################################
 # Portal: Build
@@ -22,8 +22,8 @@ WORKDIR /src/audit-log-portal
 
 COPY audit-log-portal/ ./
 
-RUN npm i
-RUN npm run build
+RUN npm i && \
+    npm run build
 
 #########################################
 # Portal: Dependencies (prod)
