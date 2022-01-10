@@ -38,7 +38,7 @@ audit-log-api: audit-log-api/build
 audit-log-portal: audit-log-portal/.next
 
 define get_source_files
-	$(shell find $(1) -type f ! -path dist ! -path build ! -path .next ! -path .storybook ! -path *node_modules*)
+	$(shell find $(1) -type f ! -path dist ! -path build ! -path .next ! -path .storybook ! ! -path documentation -path *node_modules*)
 endef
 
 # Source files for each package
@@ -58,37 +58,37 @@ AUDIT_LOG_PORTAL_SOURCE := $(call get_source_files,audit-log-portal)
 shared-types/dist: $(SHARED_TYPES_SOURCE)
 	cd shared-types && npm run build
 
-shared-testing/dist: $(SHARED_TYPES_SOURCE) $(SHARED_TESTING_SOURCE)
+shared-testing/dist: shared-types/dist $(SHARED_TESTING_SOURCE)
 	cd shared-testing && npm run build
 
-shared/dist: $(SHARED_TYPES_SOURCE) $(SHARED_TESTING_SOURCE) $(SHARED_SOURCE)
+shared/dist: shared-types/dist shared-testing/dist $(SHARED_SOURCE)
 	cd shared && npm run build
 
-src/lambdas/retrieve-event-from-s3/build: $(SHARED_TYPES_SOURCE) $(SHARED_TESTING_SOURCE) $(SHARED_SOURCE) $(RETRIEVE_EVENT_FROM_S3_SOURCE)
+src/lambdas/retrieve-event-from-s3/build: shared-types/dist shared-testing/dist shared/dist $(RETRIEVE_EVENT_FROM_S3_SOURCE)
 	cd src/lambdas/retrieve-event-from-s3 && npm run build
 
-src/lambdas/translate-event/build: $(SHARED_TYPES_SOURCE) $(SHARED_TESTING_SOURCE) $(SHARED_SOURCE) $(TRANSLATE_EVENT_SOURCE)
+src/lambdas/translate-event/build: shared-types/dist shared-testing/dist shared/dist $(TRANSLATE_EVENT_SOURCE)
 	cd src/lambdas/translate-event && npm run build
 
-src/lambdas/record-event/build: $(SHARED_TYPES_SOURCE) $(SHARED_TESTING_SOURCE) $(SHARED_SOURCE) $(RECORD_EVENT_SOURCE)
+src/lambdas/record-event/build: shared-types/dist shared-testing/dist shared/dist $(RECORD_EVENT_SOURCE)
 	cd src/lambdas/record-event && npm run build
 
-src/lambdas/message-receiver/build: $(SHARED_TYPES_SOURCE) $(SHARED_TESTING_SOURCE) $(SHARED_SOURCE) $(MESSAGE_RECEIVER_SOURCE)
+src/lambdas/message-receiver/build: shared-types/dist shared-testing/dist shared/dist $(MESSAGE_RECEIVER_SOURCE)
 	cd src/lambdas/message-receiver && npm run build
 
-src/lambdas/transfer-messages/build: $(SHARED_TYPES_SOURCE) $(SHARED_TESTING_SOURCE) $(SHARED_SOURCE) $(TRANSFER_MESSAGES_SOURCE)
+src/lambdas/transfer-messages/build: shared-types/dist shared-testing/dist shared/dist $(TRANSFER_MESSAGES_SOURCE)
 	cd src/lambdas/transfer-messages && npm run build
 
 .PHONY: event-handler
-event-handler: $(SHARED_TYPES_SOURCE) $(SHARED_TESTING_SOURCE) $(SHARED_SOURCE)
+event-handler: shared-types/dist shared-testing/dist shared/dist
 
-incoming-message-handler/build: $(SHARED_TYPES_SOURCE) $(SHARED_TESTING_SOURCE) $(SHARED_SOURCE) $(INCOMING_MESSAGE_HANDLER_SOURCE)
+incoming-message-handler/build: shared-types/dist shared-testing/dist shared/dist $(INCOMING_MESSAGE_HANDLER_SOURCE)
 	cd incoming-message-handler && npm run build
 
-audit-log-api/build: $(SHARED_TYPES_SOURCE) $(SHARED_TESTING_SOURCE) $(SHARED_SOURCE) $(AUDIT_LOG_API_SOURCE)
+audit-log-api/build: shared-types/dist shared-testing/dist shared/dist $(AUDIT_LOG_API_SOURCE)
 	cd audit-log-api && npm run build
 
-audit-log-portal/.next: $(SHARED_TYPES_SOURCE) $(SHARED_SOURCE) $(AUDIT_LOG_PORTAL_SOURCE)
+audit-log-portal/.next: shared-types/dist shared/dist $(AUDIT_LOG_PORTAL_SOURCE)
 	cd audit-log-portal && npm run build
 
 # Clean
