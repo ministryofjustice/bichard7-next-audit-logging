@@ -4,9 +4,13 @@ SHELL := /bin/bash
 # Install, Build, Test Commands
 ########################################
 
+.PHONY: install
+install:
+	scripts/install-all-ci.sh
+
 .PHONY: build
-build:
-	scripts/install-all-ci.sh && scripts/build-all.sh
+build: install
+	scripts/build-all.sh
 
 .PHONY: test
 test:
@@ -15,6 +19,88 @@ test:
 .PHONY: validate
 validate:
 	npm i && NODE_OPTIONS=--max_old_space_size=4096 npm run lint
+
+########################################
+# Build Commands
+########################################
+
+# Aliases
+shared-types: shared-types/dist
+shared-testing: shared-testing/dist
+shared: shared/dist
+retrieve-event-from-s3: src/lambdas/retrieve-event-from-s3/build
+translate-event: src/lambdas/translate-event/build
+record-event: src/lambdas/record-event/build
+message-receiver: src/lambdas/message-receiver/build
+transfer-messages: src/lambdas/transfer-messages/build
+incoming-message-handler: incoming-message-handler/build
+audit-log-api: audit-log-api/build
+audit-log-portal: audit-log-portal/.next
+
+# Source files for each target
+SHARED_TYPES_SOURCE := $(shell find shared-types -type f ! -path dist ! -path *node_modules*)
+SHARED_TESTING_SOURCE := $(shell find shared-testing -type f ! -path dist ! -path *node_modules*)
+SHARED_SOURCE := $(shell find shared -type f ! -path dist ! -path *node_modules*)
+RETRIEVE_EVENT_FROM_S3_SOURCE := $(shell find src/lambdas/retrieve-event-from-s3 -type f ! -path build ! -path *node_modules*)
+TRANSLATE_EVENT_SOURCE := $(shell find src/lambdas/translate-event -type f ! -path build ! -path *node_modules*)
+RECORD_EVENT_SOURCE := $(shell find src/lambdas/record-event -type f ! -path build ! -path *node_modules*)
+MESSAGE_RECEIVER_SOURCE := $(shell find src/lambdas/message-receiver -type f ! -path build ! -path *node_modules*)
+TRANSFER_MESSAGES_SOURCE := $(shell find src/lambdas/transfer-messages -type f ! -path build ! -path *node_modules*)
+INCOMING_MESSAGE_HANDLER_SOURCE := $(shell find incoming-message-handler -type f ! -path build ! -path *node_modules*)
+AUDIT_LOG_API_SOURCE := $(shell find audit-log-api -type f ! -path build ! -path *node_modules*)
+AUDIT_LOG_PORTAL_SOURCE := $(shell find audit-log-portal -type f ! -path .next ! -path *node_modules* ! -path .storybook)
+
+shared-types/dist: $(SHARED_TYPES_SOURCE)
+	cd shared-types && npm run build
+
+shared-testing/dist: $(SHARED_TYPES_SOURCE) $(SHARED_TESTING_SOURCE)
+	cd shared-testing && npm run build
+
+shared/dist: $(SHARED_TYPES_SOURCE) $(SHARED_TESTING_SOURCE) $(SHARED_SOURCE)
+	cd shared && npm run build
+
+src/lambdas/retrieve-event-from-s3/build: $(SHARED_TYPES_SOURCE) $(SHARED_TESTING_SOURCE) $(SHARED_SOURCE) $(RETRIEVE_EVENT_FROM_S3_SOURCE)
+	cd src/lambdas/retrieve-event-from-s3 && npm run build
+
+src/lambdas/translate-event/build: $(SHARED_TYPES_SOURCE) $(SHARED_TESTING_SOURCE) $(SHARED_SOURCE) $(TRANSLATE_EVENT_SOURCE)
+	cd src/lambdas/translate-event && npm run build
+
+src/lambdas/record-event/build: $(SHARED_TYPES_SOURCE) $(SHARED_TESTING_SOURCE) $(SHARED_SOURCE) $(RECORD_EVENT_SOURCE)
+	cd src/lambdas/record-event && npm run build
+
+src/lambdas/message-receiver/build: $(SHARED_TYPES_SOURCE) $(SHARED_TESTING_SOURCE) $(SHARED_SOURCE) $(MESSAGE_RECEIVER_SOURCE)
+	cd src/lambdas/message-receiver && npm run build
+
+src/lambdas/transfer-messages/build: $(SHARED_TYPES_SOURCE) $(SHARED_TESTING_SOURCE) $(SHARED_SOURCE) $(TRANSFER_MESSAGES_SOURCE)
+	cd src/lambdas/transfer-messages && npm run build
+
+.PHONY: event-handler
+event-handler: $(SHARED_TYPES_SOURCE) $(SHARED_TESTING_SOURCE) $(SHARED_SOURCE)
+
+incoming-message-handler/build: $(SHARED_TYPES_SOURCE) $(SHARED_TESTING_SOURCE) $(SHARED_SOURCE) $(INCOMING_MESSAGE_HANDLER_SOURCE)
+	cd incoming-message-handler && npm run build
+
+audit-log-api/build: $(SHARED_TYPES_SOURCE) $(SHARED_TESTING_SOURCE) $(SHARED_SOURCE) $(AUDIT_LOG_API_SOURCE)
+	cd audit-log-api && npm run build
+
+audit-log-portal/.next: $(SHARED_TYPES_SOURCE) $(SHARED_SOURCE) $(AUDIT_LOG_PORTAL_SOURCE)
+	cd audit-log-portal && npm run build
+
+# CLEAN
+.PHONY: clean
+clean:
+	rm -rf \
+		shared-types/dist \
+		shared-testing/dist \
+		shared/dist \
+		src/lambdas/retrieve-event-from-s3/build \
+		src/lambdas/translate-event/build \
+		src/lambdas/record-event/build \
+		src/lambdas/message-receiver/build \
+		src/lambdas/transfer-messages/build \
+		incoming-message-handler/build \
+		audit-log-api/build \
+		audit-log-portal/.next
 
 ########################################
 # Run Commands
@@ -58,7 +144,7 @@ run-infra: run-all-without-portal run-portal
 run-all: run-all-without-portal run-portal run-mq-listener
 
 .PHONY: run-all-e2e
-run-all-e2e: 
+run-all-e2e:
 	./scripts/run-all-e2e.sh
 
 ########################################
@@ -142,6 +228,6 @@ send-pnc-update-request-failure-event:
 upload-message-to-s3:
 	incoming-message-handler/scripts/upload-message-to-s3.sh
 
-.PHONY: transfer-messages
-transfer-messages:
+.PHONY: run-transfer-messages
+run-transfer-messages:
 	scripts/transfer-messages.sh
