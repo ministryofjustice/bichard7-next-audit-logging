@@ -24,7 +24,7 @@ validate:
 # Build Commands
 ########################################
 
-# Aliases
+# Package => build output aliases
 shared-types: shared-types/dist
 shared-testing: shared-testing/dist
 shared: shared/dist
@@ -37,19 +37,24 @@ incoming-message-handler: incoming-message-handler/build
 audit-log-api: audit-log-api/build
 audit-log-portal: audit-log-portal/.next
 
-# Source files for each target
-SHARED_TYPES_SOURCE := $(shell find shared-types -type f ! -path dist ! -path *node_modules*)
-SHARED_TESTING_SOURCE := $(shell find shared-testing -type f ! -path dist ! -path *node_modules*)
-SHARED_SOURCE := $(shell find shared -type f ! -path dist ! -path *node_modules*)
-RETRIEVE_EVENT_FROM_S3_SOURCE := $(shell find src/lambdas/retrieve-event-from-s3 -type f ! -path build ! -path *node_modules*)
-TRANSLATE_EVENT_SOURCE := $(shell find src/lambdas/translate-event -type f ! -path build ! -path *node_modules*)
-RECORD_EVENT_SOURCE := $(shell find src/lambdas/record-event -type f ! -path build ! -path *node_modules*)
-MESSAGE_RECEIVER_SOURCE := $(shell find src/lambdas/message-receiver -type f ! -path build ! -path *node_modules*)
-TRANSFER_MESSAGES_SOURCE := $(shell find src/lambdas/transfer-messages -type f ! -path build ! -path *node_modules*)
-INCOMING_MESSAGE_HANDLER_SOURCE := $(shell find incoming-message-handler -type f ! -path build ! -path *node_modules*)
-AUDIT_LOG_API_SOURCE := $(shell find audit-log-api -type f ! -path build ! -path *node_modules*)
-AUDIT_LOG_PORTAL_SOURCE := $(shell find audit-log-portal -type f ! -path .next ! -path *node_modules* ! -path .storybook)
+define get_source_files
+	$(shell find $(1) -type f ! -path dist ! -path build ! -path .next ! -path .storybook ! -path *node_modules*)
+endef
 
+# Source files for each package
+SHARED_TYPES_SOURCE := $(call get_source_files,shared-types)
+SHARED_TESTING_SOURCE := $(call get_source_files,shared-testing)
+SHARED_SOURCE := $(call get_source_files,shared)
+RETRIEVE_EVENT_FROM_S3_SOURCE := $(call get_source_files,src/lambdas/retrieve-event-from-s3)
+TRANSLATE_EVENT_SOURCE := $(call get_source_files,src/lambdas/translate-event)
+RECORD_EVENT_SOURCE := $(call get_source_files,src/lambdas/record-event)
+MESSAGE_RECEIVER_SOURCE := $(call get_source_files,src/lambdas/message-receiver)
+TRANSFER_MESSAGES_SOURCE := $(call get_source_files,src/lambdas/transfer-messages)
+INCOMING_MESSAGE_HANDLER_SOURCE := $(call get_source_files,incoming-message-handler)
+AUDIT_LOG_API_SOURCE := $(call get_source_files,audit-log-api)
+AUDIT_LOG_PORTAL_SOURCE := $(call get_source_files,audit-log-portal)
+
+# How to build each package
 shared-types/dist: $(SHARED_TYPES_SOURCE)
 	cd shared-types && npm run build
 
@@ -86,7 +91,7 @@ audit-log-api/build: $(SHARED_TYPES_SOURCE) $(SHARED_TESTING_SOURCE) $(SHARED_SO
 audit-log-portal/.next: $(SHARED_TYPES_SOURCE) $(SHARED_SOURCE) $(AUDIT_LOG_PORTAL_SOURCE)
 	cd audit-log-portal && npm run build
 
-# CLEAN
+# Clean
 .PHONY: clean
 clean:
 	rm -rf \
