@@ -1,11 +1,14 @@
 import type { S3 } from "aws-sdk"
-import type { PromiseResult } from "shared"
-import { isError } from "shared"
-import type { S3Gateway } from "@bichard/s3"
+import type { PromiseResult } from "shared-types"
+import { isError } from "shared-types"
+import type { S3GatewayInterface } from "shared-types"
 import type { FailedItem, TransferMessageResult, TransferMessagesOptions, TransferMessagesResult } from "./types"
 
 export default class TransferMessagesUseCase {
-  constructor(private readonly externalBucketGateway: S3Gateway, private readonly internalS3BucketName: string) {}
+  constructor(
+    private readonly externalBucketGateway: S3GatewayInterface,
+    private readonly internalS3BucketName: string
+  ) {}
 
   async getMessages(numberOfMessagesToReturn?: number): PromiseResult<S3.Object[]> {
     const messages = await this.externalBucketGateway.list()

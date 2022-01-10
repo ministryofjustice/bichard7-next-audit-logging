@@ -1,4 +1,4 @@
-import type { AuditLogEvent } from "../types"
+import type { AuditLogEvent } from "shared-types"
 import shouldLogForTopExceptionsReport from "./shouldLogForTopExceptionsReport"
 
 it("should return true when event has correct message type and error details attribute", () => {

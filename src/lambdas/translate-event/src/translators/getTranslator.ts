@@ -1,4 +1,4 @@
-import type { MessageFormat, Result } from "shared"
+import type { MessageFormat, Result } from "shared-types"
 import type Translator from "./Translator"
 import AuditEventTranslator from "./AuditEventTranslator"
 import GeneralEventTranslator from "./GeneralEventTranslator"

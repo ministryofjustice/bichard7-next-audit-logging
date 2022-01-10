@@ -1,5 +1,5 @@
-import { FakeAuditLogDynamoGateway } from "@bichard/testing-dynamodb"
-import { AuditLog, isError } from "../../../shared/dist"
+import { FakeAuditLogDynamoGateway } from "shared-testing"
+import { AuditLog, isError } from "shared-types"
 import getMessageById from "./getMessageById"
 
 const gateway = new FakeAuditLogDynamoGateway()

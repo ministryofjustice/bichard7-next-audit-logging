@@ -1,6 +1,6 @@
 import { action } from "@storybook/addon-actions"
 import type { Meta } from "@storybook/react"
-import { AuditLog, AuditLogStatus } from "shared"
+import { AuditLog, AuditLogStatus } from "shared-types"
 import Message from "./Message"
 
 export default {

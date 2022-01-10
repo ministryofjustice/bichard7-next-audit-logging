@@ -1,4 +1,5 @@
-import { isError, S3Gateway } from "shared"
+import { S3Gateway } from "shared"
+import { isError } from "shared-types"
 import { StepFunctions } from "aws-sdk"
 
 export default class IncomingMessageSimulator {

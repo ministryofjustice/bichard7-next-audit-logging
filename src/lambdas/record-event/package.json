@@ -15,16 +15,13 @@
     "test:e2e": "npm run setup:env && ../../../scripts/test.sh e2e"
   },
   "dependencies": {
-    "@bichard/api-client": "file:../../@bichard/api-client",
-    "axios": "^0.24.0",
+    "shared-types": "file:../../../shared-types",
     "shared": "file:../../../shared"
   },
   "devDependencies": {
     "@babel/preset-env": "^7.16.7",
     "@babel/preset-typescript": "^7.16.7",
-    "@bichard/testing-api-client": "file:../../@bichard/testing-api-client",
-    "@bichard/testing-jest": "file:../../@bichard/testing-jest",
-    "@bichard/testing-lambda": "file:../../@bichard/testing-lambda",
+    "shared-testing": "file:../../../shared-testing",
     "@types/jest": "^27.4.0",
     "aws-sdk": "^2.1051.0",
     "babel-loader": "^8.2.3",

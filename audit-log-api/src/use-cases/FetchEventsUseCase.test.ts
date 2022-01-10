@@ -1,6 +1,6 @@
-import type { EventCategory } from "shared"
-import { isError, AuditLogEvent, AuditLog } from "shared"
-import { FakeAuditLogDynamoGateway } from "@bichard/testing-dynamodb"
+import type { EventCategory } from "shared-types"
+import { isError, AuditLogEvent, AuditLog } from "shared-types"
+import { FakeAuditLogDynamoGateway } from "shared-testing"
 import FetchEventsUseCase from "./FetchEventsUseCase"
 
 const gateway = new FakeAuditLogDynamoGateway()

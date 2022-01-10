@@ -1,5 +1,5 @@
 import type { APIGatewayProxyEvent } from "aws-lambda"
-import type { Result } from "shared"
+import type { Result } from "shared-types"
 
 const parseGetEventsRequest = (event: APIGatewayProxyEvent): Result<string> => {
   const messageId = event.pathParameters?.messageId

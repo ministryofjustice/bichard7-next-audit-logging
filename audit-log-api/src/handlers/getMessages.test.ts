@@ -7,8 +7,9 @@ import type {
   APIGatewayProxyEventQueryStringParameters,
   APIGatewayProxyResult
 } from "aws-lambda"
-import type { Result } from "shared"
-import { AuditLog, HttpStatusCode } from "shared"
+import type { Result } from "shared-types"
+import { AuditLog } from "shared-types"
+import { HttpStatusCode } from "shared"
 import { createMessageFetcher } from "src/use-cases"
 import type MessageFetcher from "src/use-cases/MessageFetcher"
 import getMessages from "./getMessages"

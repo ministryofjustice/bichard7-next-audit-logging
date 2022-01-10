@@ -2,7 +2,7 @@ import type { ComponentType } from "react"
 import ErrorIcon from "icons/ErrorIcon"
 import SuccessIcon from "icons/SuccessIcon"
 import ProcessingIcon from "icons/ProcessingIcon"
-import AuditLogStatus from "shared/dist/types/AuditLogStatus"
+import { AuditLogStatus } from "shared-types"
 
 export default function getStatusIcon(status: string): ComponentType {
   switch (status) {

@@ -1,4 +1,4 @@
-import { AuditLog } from "shared"
+import { AuditLog } from "shared-types"
 import transformMessageXml from "./transformMessageXml"
 
 const createAuditLog = (xml: string) => ({

@@ -1,4 +1,4 @@
-import type { BichardAuditLogEvent } from "shared"
+import type { BichardAuditLogEvent } from "shared-types"
 
 export default interface TranslationResult {
   messageId: string

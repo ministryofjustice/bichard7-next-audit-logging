@@ -1,0 +1,7 @@
+coverage
+dist
+node_modules
+test-results
+.dockerignore
+jest.config.js
+README.md

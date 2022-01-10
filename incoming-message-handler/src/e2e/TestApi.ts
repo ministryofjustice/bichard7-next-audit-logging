@@ -1,7 +1,7 @@
 import type { AxiosError } from "axios"
 import axios from "axios"
 import { readFileSync } from "fs"
-import type { AuditLog } from "shared"
+import type { AuditLog } from "shared-types"
 import { Poller, PollOptions } from "shared"
 
 export default class TestApi {

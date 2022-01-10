@@ -1,7 +1,6 @@
 import { DynamoDB } from "aws-sdk"
 import { DocumentClient } from "aws-sdk/clients/dynamodb"
-import type { PromiseResult } from "../types"
-import type DynamoDbConfig from "./DynamoDbConfig"
+import type { PromiseResult, DynamoDbConfig } from "shared-types"
 import type FetchByIndexOptions from "./FetchByIndexOptions"
 import type UpdateOptions from "./UpdateOptions"
 import type GetManyOptions from "./GetManyOptions"

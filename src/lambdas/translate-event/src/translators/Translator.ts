@@ -1,4 +1,4 @@
-import type { PromiseResult } from "shared"
+import type { PromiseResult } from "shared-types"
 import type TranslateEventInput from "src/TranslateEventInput"
 import type TranslationResult from "./TranslationResult"
 

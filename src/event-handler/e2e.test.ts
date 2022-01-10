@@ -1,13 +1,14 @@
 jest.setTimeout(250000)
 
-import "@bichard/testing-jest"
+import "shared-testing"
 import fs from "fs"
-import type { AmazonMqEventSourceRecordEvent, DynamoDbConfig, AuditLogEvent } from "shared"
-import { encodeBase64, AuditLog, AwsAuditLogDynamoGateway, Poller, PollOptions } from "shared"
-import TestDynamoGateway from "shared/dist/DynamoGateway/TestDynamoGateway"
-import { invokeFunction } from "@bichard/testing-lambda"
-import type { S3Config } from "@bichard/s3"
-import { TestAwsS3Gateway } from "@bichard/s3"
+import { AuditLog } from "shared-types"
+import type { AmazonMqEventSourceRecordEvent, DynamoDbConfig, AuditLogEvent } from "shared-types"
+import { encodeBase64, AwsAuditLogDynamoGateway, Poller, PollOptions } from "shared"
+import { TestDynamoGateway } from "shared"
+import { invokeFunction } from "shared-testing"
+import type { S3Config } from "shared-types"
+import { TestAwsS3Gateway } from "shared"
 import type { S3 } from "aws-sdk"
 import EventHandlerSimulator from "./EventHandlerSimulator"
 

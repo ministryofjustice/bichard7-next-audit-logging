@@ -1,6 +1,5 @@
-import "@bichard/testing-jest"
-import { FakeS3Gateway } from "@bichard/testing-s3"
-import { isError } from "shared"
+import { FakeS3Gateway } from "shared-testing"
+import { isError } from "shared-types"
 import RetrieveEventXmlFromS3UseCase from "./RetrieveEventXmlFromS3UseCase"
 
 const fakeS3Gateway = new FakeS3Gateway()

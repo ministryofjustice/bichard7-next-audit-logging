@@ -1,7 +1,7 @@
-import "@bichard/testing-jest"
+import "shared-testing"
 import type { S3 } from "aws-sdk"
-import type { S3Config } from "@bichard/s3"
-import { AwsS3Gateway, TestAwsS3Gateway } from "@bichard/s3"
+import type { S3Config } from "shared-types"
+import { AwsS3Gateway, TestAwsS3Gateway } from "shared"
 
 import TransferMessagesUseCase from "./TransferMessagesUseCase"
 import type { TransferMessagesResult } from "./types"

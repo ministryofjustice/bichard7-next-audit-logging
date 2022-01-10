@@ -1,4 +1,4 @@
-import type { S3Config } from "@bichard/s3"
+import type { S3Config } from "shared-types"
 
 export default function createS3Config(): S3Config {
   const { AUDIT_LOG_EVENTS_BUCKET } = process.env

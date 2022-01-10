@@ -1,4 +1,4 @@
-import type { BichardAuditLogEvent, Result } from "shared"
+import type { BichardAuditLogEvent, Result } from "shared-types"
 
 export default (event: BichardAuditLogEvent): Result<void> => {
   if (event.category !== "error") {

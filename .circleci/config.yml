@@ -10,29 +10,46 @@ jobs:
 
       # Load dependencies from the cache if they exist and haven't changed
       - restore_cache:
-          keys:
-            - v1-npm-deps-{{ checksum "package-lock.json" }}
-            - v1-npm-deps-{{ checksum "shared/package-lock.json" }}
-            - v1-npm-deps-{{ checksum "src/@bichard/api-client/package-lock.json" }}
-            - v1-npm-deps-{{ checksum "src/@bichard/mq/package-lock.json" }}
-            - v1-npm-deps-{{ checksum "src/@bichard/s3/package-lock.json" }}
-            - v1-npm-deps-{{ checksum "src/@bichard/testing-jest/package-lock.json" }}
-            - v1-npm-deps-{{ checksum "src/@bichard/testing-config/package-lock.json" }}
-            - v1-npm-deps-{{ checksum "src/@bichard/testing-mq/package-lock.json" }}
-            - v1-npm-deps-{{ checksum "src/@bichard/testing-s3/package-lock.json" }}
-            - v1-npm-deps-{{ checksum "src/@bichard/testing-lambda/package-lock.json" }}
-            - v1-npm-deps-{{ checksum "src/@bichard/testing-dynamodb/package-lock.json" }}
-            - v1-npm-deps-{{ checksum "src/@bichard/testing-api-client/package-lock.json" }}
-            - v1-npm-deps-{{ checksum "src/lambdas/retrieve-event-from-s3/package-lock.json" }}
-            - v1-npm-deps-{{ checksum "src/lambdas/translate-event/package-lock.json" }}
-            - v1-npm-deps-{{ checksum "src/lambdas/record-event/package-lock.json" }}
-            - v1-npm-deps-{{ checksum "src/lambdas/message-receiver/package-lock.json" }}
-            - v1-npm-deps-{{ checksum "src/lambdas/transfer-messages/package-lock.json" }}
-            - v1-npm-deps-{{ checksum "src/event-handler/package-lock.json" }}
-            - v1-npm-deps-{{ checksum "incoming-message-handler/package-lock.json" }}
-            - v1-npm-deps-{{ checksum "audit-log-api/package-lock.json" }}
-            - v1-npm-deps-{{ checksum "audit-log-portal/package-lock.json" }}
-            - v1-npm-deps-{{ checksum "mq-listener/package-lock.json" }}
+          key: v1-npm-deps-{{ checksum "package-lock.json" }}
+
+      - restore_cache:
+          key: v1-npm-deps-{{ checksum "shared/package-lock.json" }}
+
+      - restore_cache:
+          key: v1-npm-deps-{{ checksum "shared-types/package-lock.json" }}
+
+      - restore_cache:
+          key: v1-npm-deps-{{ checksum "shared-testing/package-lock.json" }}
+
+      - restore_cache:
+          key: v1-npm-deps-{{ checksum "src/lambdas/retrieve-event-from-s3/package-lock.json" }}
+
+      - restore_cache:
+          key: v1-npm-deps-{{ checksum "src/lambdas/translate-event/package-lock.json" }}
+
+      - restore_cache:
+          key: v1-npm-deps-{{ checksum "src/lambdas/record-event/package-lock.json" }}
+
+      - restore_cache:
+          key: v1-npm-deps-{{ checksum "src/lambdas/message-receiver/package-lock.json" }}
+
+      - restore_cache:
+          key: v1-npm-deps-{{ checksum "src/lambdas/transfer-messages/package-lock.json" }}
+
+      - restore_cache:
+          key: v1-npm-deps-{{ checksum "src/event-handler/package-lock.json" }}
+
+      - restore_cache:
+          key: v1-npm-deps-{{ checksum "incoming-message-handler/package-lock.json" }}
+
+      - restore_cache:
+          key: v1-npm-deps-{{ checksum "audit-log-api/package-lock.json" }}
+
+      - restore_cache:
+          key: v1-npm-deps-{{ checksum "audit-log-portal/package-lock.json" }}
+
+      - restore_cache:
+          key: v1-npm-deps-{{ checksum "mq-listener/package-lock.json" }}
 
       - run: make build
 
@@ -52,44 +69,12 @@ jobs:
           paths: shared/node_modules
 
       - save_cache:
-          key: v1-npm-deps-{{ checksum "src/@bichard/api-client/package-lock.json" }}
-          paths: src/@bichard/api-client/node_modules
+          key: v1-npm-deps-{{ checksum "shared-types/package-lock.json" }}
+          paths: shared/node_modules
 
       - save_cache:
-          key: v1-npm-deps-{{ checksum "src/@bichard/mq/package-lock.json" }}
-          paths: src/@bichard/mq/node_modules
-
-      - save_cache:
-          key: v1-npm-deps-{{ checksum "src/@bichard/s3/package-lock.json" }}
-          paths: src/@bichard/s3/node_modules
-
-      - save_cache:
-          key: v1-npm-deps-{{ checksum "src/@bichard/testing-jest/package-lock.json" }}
+          key: v1-npm-deps-{{ checksum "shared-testing/package-lock.json" }}
           paths: src/@bichard/testing-jest/node_modules
-
-      - save_cache:
-          key: v1-npm-deps-{{ checksum "src/@bichard/testing-config/package-lock.json" }}
-          paths: src/@bichard/testing-config/node_modules
-
-      - save_cache:
-          key: v1-npm-deps-{{ checksum "src/@bichard/testing-mq/package-lock.json" }}
-          paths: src/@bichard/testing-mq/node_modules
-
-      - save_cache:
-          key: v1-npm-deps-{{ checksum "src/@bichard/testing-s3/package-lock.json" }}
-          paths: src/@bichard/testing-s3/node_modules
-
-      - save_cache:
-          key: v1-npm-deps-{{ checksum "src/@bichard/testing-lambda/package-lock.json" }}
-          paths: src/@bichard/testing-lambda/node_modules
-
-      - save_cache:
-          key: v1-npm-deps-{{ checksum "src/@bichard/testing-dynamodb/package-lock.json" }}
-          paths: src/@bichard/testing-dynamodb/node_modules
-
-      - save_cache:
-          key: v1-npm-deps-{{ checksum "src/@bichard/testing-api-client/package-lock.json" }}
-          paths: src/@bichard/testing-api-client/node_modules
 
       - save_cache:
           key: v1-npm-deps-{{ checksum "src/lambdas/retrieve-event-from-s3/package-lock.json" }}
@@ -136,16 +121,8 @@ jobs:
           root: .
           paths:
             - shared/dist
-            - src/@bichard/api-client/dist
-            - src/@bichard/mq/dist
-            - src/@bichard/s3/dist
-            - src/@bichard/testing-jest/dist
-            - src/@bichard/testing-config/dist
-            - src/@bichard/testing-mq/dist
-            - src/@bichard/testing-s3/dist
-            - src/@bichard/testing-lambda/dist
-            - src/@bichard/testing-dynamodb/dist
-            - src/@bichard/testing-api-client/dist
+            - shared-types/dist
+            - shared-testing/dist
             - src/lambdas/retrieve-event-from-s3/build
             - src/lambdas/translate-event/build
             - src/lambdas/record-event/build
@@ -165,6 +142,9 @@ jobs:
     steps:
       - checkout
 
+      - attach_workspace:
+          at: .
+
       # Restore any cached dependencies for the projects to reduce install time
       - restore_cache:
           key: v1-npm-deps-{{ checksum "package-lock.json" }}
@@ -173,34 +153,10 @@ jobs:
           key: v1-npm-deps-{{ checksum "shared/package-lock.json" }}
 
       - restore_cache:
-          key: v1-npm-deps-{{ checksum "src/@bichard/api-client/package-lock.json" }}
+          key: v1-npm-deps-{{ checksum "shared-types/package-lock.json" }}
 
       - restore_cache:
-          key: v1-npm-deps-{{ checksum "src/@bichard/mq/package-lock.json" }}
-
-      - restore_cache:
-          key: v1-npm-deps-{{ checksum "src/@bichard/s3/package-lock.json" }}
-
-      - restore_cache:
-          key: v1-npm-deps-{{ checksum "src/@bichard/testing-jest/package-lock.json" }}
-
-      - restore_cache:
-          key: v1-npm-deps-{{ checksum "src/@bichard/testing-config/package-lock.json" }}
-
-      - restore_cache:
-          key: v1-npm-deps-{{ checksum "src/@bichard/testing-mq/package-lock.json" }}
-
-      - restore_cache:
-          key: v1-npm-deps-{{ checksum "src/@bichard/testing-s3/package-lock.json" }}
-
-      - restore_cache:
-          key: v1-npm-deps-{{ checksum "src/@bichard/testing-lambda/package-lock.json" }}
-
-      - restore_cache:
-          key: v1-npm-deps-{{ checksum "src/@bichard/testing-dynamodb/package-lock.json" }}
-
-      - restore_cache:
-          key: v1-npm-deps-{{ checksum "src/@bichard/testing-api-client/package-lock.json" }}
+          key: v1-npm-deps-{{ checksum "shared-testing/package-lock.json" }}
 
       - restore_cache:
           key: v1-npm-deps-{{ checksum "src/lambdas/retrieve-event-from-s3/package-lock.json" }}
@@ -242,7 +198,7 @@ jobs:
 
       - run:
           name: Installing all
-          command: ./scripts/install-all.sh
+          command: nvm use && ./scripts/install-all-ci.sh
 
       # Attach the workspace to retrieve the dist/build folders so we don't have to rebuild
       - attach_workspace:
@@ -250,7 +206,7 @@ jobs:
 
       - run:
           name: Running unit, integration, and end-to-end tests
-          command: make test
+          command: nvm use && make test
 
       - store_test_results:
           path: ./shared/test-results/jest/
@@ -261,19 +217,7 @@ jobs:
       - store_test_results:
           path: ./src/@bichard/s3/test-results/jest/
       - store_test_results:
-          path: ./src/@bichard/testing-jest/test-results/jest/
-      - store_test_results:
-          path: ./src/@bichard/testing-config/test-results/jest/
-      - store_test_results:
-          path: ./src/@bichard/testing-mq/test-results/jest/
-      - store_test_results:
-          path: ./src/@bichard/testing-s3/test-results/jest/
-      - store_test_results:
-          path: ./src/@bichard/testing-lambda/test-results/jest/
-      - store_test_results:
-          path: ./src/@bichard/testing-dynamodb/test-results/jest/
-      - store_test_results:
-          path: ./src/@bichard/testing-api-client/test-results/jest/
+          path: ./shared-testing/test-results/jest/
       - store_test_results:
           path: ./src/lambdas/retrieve-event-from-s3/test-results/jest/
       - store_test_results:

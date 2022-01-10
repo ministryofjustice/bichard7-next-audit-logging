@@ -1,4 +1,4 @@
-import type { S3Config } from "shared"
+import type { S3Config } from "shared-types"
 
 export default function createS3Config(): S3Config {
   return {

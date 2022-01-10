@@ -1,4 +1,4 @@
-import type { AuditLogEvent } from "../types"
+import type { AuditLogEvent } from "shared-types"
 
 const automationReportEventTypes = [
   "Hearing Outcome passed to Error List",

@@ -1,6 +1,6 @@
 import type { EventDetails } from "src/types"
-import type { EventCategory } from "shared"
-import { BichardAuditLogEvent } from "shared"
+import type { EventCategory } from "shared-types"
+import { BichardAuditLogEvent } from "shared-types"
 
 const mapEventCategory = (category: string): EventCategory => {
   switch (category) {

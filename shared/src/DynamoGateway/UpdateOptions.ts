@@ -3,7 +3,7 @@ import type {
   ExpressionAttributeValueMap,
   UpdateExpression
 } from "aws-sdk/clients/dynamodb"
-import type { KeyValuePair } from "../types"
+import type { KeyValuePair } from "shared-types"
 
 export default interface UpdateOptions {
   keyName: string

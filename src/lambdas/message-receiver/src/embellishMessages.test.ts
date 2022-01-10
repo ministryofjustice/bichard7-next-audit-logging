@@ -1,4 +1,4 @@
-import type { AmazonMqEventSourceRecordEvent, JmsTextMessage } from "shared"
+import type { AmazonMqEventSourceRecordEvent, JmsTextMessage } from "shared-types"
 import embellishMessages from "./embellishMessages"
 
 test("returns all messages with message format attached", () => {

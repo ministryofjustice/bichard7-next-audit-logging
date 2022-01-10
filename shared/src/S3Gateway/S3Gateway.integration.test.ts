@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { isError } from "../types"
-import type S3Config from "./S3Config"
+import { isError } from "shared-types"
+import type { S3Config } from "shared-types"
 import TestS3Gateway from "./TestS3Gateway"
 
 const config: S3Config = {

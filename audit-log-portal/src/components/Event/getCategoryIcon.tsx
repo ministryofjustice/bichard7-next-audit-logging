@@ -1,5 +1,5 @@
 import type { ComponentType } from "react"
-import type { EventCategory } from "shared"
+import type { EventCategory } from "shared-types"
 import InformationIcon from "icons/InformationIcon"
 import WarningIcon from "icons/WarningIcon"
 import ErrorIcon from "icons/ErrorIcon"

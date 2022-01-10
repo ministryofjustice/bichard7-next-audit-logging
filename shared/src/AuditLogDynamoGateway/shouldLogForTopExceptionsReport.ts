@@ -1,4 +1,4 @@
-import type { AuditLogEvent } from "../types"
+import type { AuditLogEvent } from "shared-types"
 
 export default (event: AuditLogEvent): boolean => {
   const { attributes } = event

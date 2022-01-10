@@ -1,7 +1,6 @@
-import type { EventMessage } from "shared"
-import { isError } from "shared"
-import type { S3Config } from "@bichard/s3"
-import { TestAwsS3Gateway } from "@bichard/s3"
+import type { EventMessage, S3Config } from "shared-types"
+import { isError } from "shared-types"
+import { TestAwsS3Gateway } from "shared"
 import type { StoreInS3Result } from "./StoreInS3UseCase"
 import StoreInS3UseCase from "./StoreInS3UseCase"
 

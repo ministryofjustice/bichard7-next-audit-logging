@@ -1,7 +1,7 @@
 import type { AxiosError } from "axios"
 import axios from "axios"
 import * as https from "https"
-import type { PromiseResult } from "shared"
+import type { PromiseResult } from "shared-types"
 
 const defaultHeaders = {
   "ibm-mq-rest-csrf-token": "blank",

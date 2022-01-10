@@ -1,7 +1,7 @@
 import type { DocumentClient } from "aws-sdk/clients/dynamodb"
-import type { EventCategory } from "../types"
-import { isError, AuditLog, AuditLogEvent, AuditLogStatus } from "../types"
-import type { DynamoDbConfig } from "../DynamoGateway"
+import type { EventCategory } from "shared-types"
+import { isError, AuditLog, AuditLogEvent, AuditLogStatus } from "shared-types"
+import type { DynamoDbConfig } from "shared-types"
 import TestDynamoGateway from "../DynamoGateway/TestDynamoGateway"
 import AwsAuditLogDynamoGateway from "./AwsAuditLogDynamoGateway"
 

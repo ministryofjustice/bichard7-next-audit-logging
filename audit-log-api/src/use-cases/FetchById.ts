@@ -1,4 +1,4 @@
-import type { PromiseResult, AuditLog, AuditLogDynamoGateway } from "shared"
+import type { PromiseResult, AuditLog, AuditLogDynamoGateway } from "shared-types"
 import type MessageFetcher from "./MessageFetcher"
 
 export default class FetchById implements MessageFetcher {

@@ -1,5 +1,5 @@
-import type { PromiseResult, AuditLog, AuditLogDynamoGateway } from "shared"
-import { isError } from "shared"
+import type { PromiseResult, AuditLog, AuditLogDynamoGateway } from "shared-types"
+import { isError } from "shared-types"
 import getMessageById from "./getMessageById"
 import type MessageFetcher from "./MessageFetcher"
 

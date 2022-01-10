@@ -1,6 +1,5 @@
-import "@bichard/testing-jest"
-import { FakeApiClient } from "@bichard/testing-api-client"
-import type { AuditLogEvent } from "shared"
+import { FakeApiClient } from "shared-testing"
+import type { AuditLogEvent } from "shared-types"
 import CreateEventUseCase from "./CreateEventUseCase"
 
 describe("execute", () => {

@@ -1,7 +1,7 @@
 /* eslint-disable no-prototype-builtins */
 import type { DocumentClient } from "aws-sdk/clients/dynamodb"
-import type { KeyValuePair, PromiseResult, Result } from "../types"
-import { isError } from "../types"
+import type { KeyValuePair, PromiseResult, Result } from "shared-types"
+import { isError } from "shared-types"
 import type DynamoGateway from "./DynamoGateway"
 import type FetchByIndexOptions from "./FetchByIndexOptions"
 import type Pagination from "./Pagination"

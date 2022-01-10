@@ -1,4 +1,4 @@
-import type { AuditLogEvent } from "src/types"
+import type { AuditLogEvent } from "shared-types"
 import getForceOwnerForAutomationReport from "./getForceOwnerForAutomationReport"
 
 it("should return the force owner when message type is correct", () => {

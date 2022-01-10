@@ -1,4 +1,4 @@
-import type { AuditLogEvent } from "../types"
+import type { AuditLogEvent } from "shared-types"
 import shouldLogForAutomationReport, { automationReportEventTypes } from "./shouldLogForAutomationReport"
 
 const automationReportEvents = automationReportEventTypes.map((eventType) => ({ eventType } as AuditLogEvent))

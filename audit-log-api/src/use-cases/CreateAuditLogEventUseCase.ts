@@ -1,5 +1,5 @@
-import type { AuditLogEvent, AuditLogDynamoGateway } from "shared"
-import { isError } from "shared"
+import type { AuditLogEvent, AuditLogDynamoGateway } from "shared-types"
+import { isError } from "shared-types"
 import { isConditionalExpressionViolationError } from "src/utils"
 
 interface CreateAuditLogEventResult {

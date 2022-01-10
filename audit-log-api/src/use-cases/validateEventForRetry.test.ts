@@ -1,6 +1,6 @@
-import "@bichard/testing-jest"
-import type { EventCategory } from "shared"
-import { BichardAuditLogEvent } from "shared"
+import "shared-testing"
+import type { EventCategory } from "shared-types"
+import { BichardAuditLogEvent } from "shared-types"
 import validateEventForRetry from "./validateEventForRetry"
 
 const createAuditLogEvent = (category: EventCategory, s3Path?: string, eventSourceQueueName?: string) => {
