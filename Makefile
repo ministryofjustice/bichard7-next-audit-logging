@@ -38,7 +38,23 @@ audit-log-api: audit-log-api/build
 audit-log-portal: audit-log-portal/.next
 
 define get_source_files
-	$(shell find $(1) -type f ! -path dist ! -path build ! -path .next ! -path .storybook ! ! -path documentation -path *node_modules*)
+	$(shell find $(1) \
+		\( \
+			-name node_modules -o \
+			-name .next -o \
+			-name build -o \
+			-name dist \
+		\) -prune -o \
+		-type f \( \
+			-iname '*.js' -o \
+			-iname '*.json' -o \
+			-iname '*.jsx' -o \
+			-iname '*.sh' -o \
+			-iname '*.snap' -o \
+			-iname '*.ts' -o \
+			-iname '*.tsx'
+		\) -print \
+	)
 endef
 
 # Source files for each package
