@@ -1,66 +1,81 @@
 # Bichard7 Next: Audit Logging
 
-A collection of service components to be hosted within AWS that will run as new parts of the Bichard7 architecture. Below, is a high-level diagram of the solution architecture.
+A collection of components that are hosted within AWS that form parts of the new Bichard7 architecture.
 
 ![Bichard7 Audit Logging](/docs/infrastructure.png?raw=true "Infrastructure")
 
-#### Quick access to other diagrams:
+Other diagrams:
+
 - [Incoming message handler](/incoming-message-handler)
 - [Event handler](/src/event-handler)
 
-## Prerequisites
+## Components
 
-The following requirements must be installed to develop on and run the projects in this repository.
+This repository contains multiple distinct components that together form the audit logging service within Bichard7. Each component is wrapped up in a separate node package.
 
-- [NodeJS and npm](https://nodejs.org/en/download/)
-- [Python3 and pip](https://www.python.org/downloads/)
-- [Docker](https://docs.docker.com/get-docker/)
-- [Docker Compose](https://docs.docker.com/compose/install/)
-- [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2.html)
-- [AWS CLI Local](https://github.com/localstack/awscli-local)
-- [jq JSON processor](https://stedolan.github.io/jq/)
-- GNU Make ([Linux](https://www.gnu.org/software/make/), [Mac](https://formulae.brew.sh/formula/make))
+* [**Audit Log API** (`audit-log-api`)](audit-log-api/) - API exposing Audit Log records and attached events
+* [**Audit Log Portal** (`audit-log-portal`)](audit-log-portal/) - Web-based portal allowing access to view and explore all Audit Log records and their events
+* [**Incoming Message Handler** (`incoming-message-handler`)](incoming-message-handler/) - AWS Step Functions and Lambdas for intercepting and processing messages coming into the Bichard system
+* [**Event Handler** (`src/event-handler`)](src/event-handler/) - A component that handles messages received from queues and translates them into Audit Log events.
 
-## Projects
+Lambdas:
 
-This repository currently contains multiple projects to support easy local referencing and development. The future vision is to move some/all of the individual projects out into their own repositories/packages. For more information on what the purpose of each project is, take a look at the README file for each.
+* [**Message Receiver** (`src/lambdas/message-receiver`)](src/lambdas/message-receiver/) - Receives messages from subscribed queues, embellishes with the source and format, and forwards onto the [Event Handler](event-handler/) Step Function.
+* [**Retrieve Event from S3** (`src/lambdas/retrieve-event-from-s3`)](src/lambdas/retrieve-event-from-s3/) - Retrieve the event content from S3 to use for processing, retrying or viewing where required.
+* [**Record Event** (`src/lambdas/record-event`)](src/lambdas/record-event/) - Logs events against the parent AuditLog record in Dynamo.
+* [**Translate Event** (`src/lambdas/translate-event`)](src/lambdas/translate-event) - Uses a factory pattern to determine the translation logic to apply to the message, based on it's known contextual format, in order to create an event to attach to a parent AuditLog record in the database.
+* [**Transfer Messages** (`src/lambdas/transfer-messages`)](src/lambdas/transfer-messages) - Transfers incoming messages from the external incoming messages S3 bucket to the internal one.
 
-1. [Shared](shared/) - Library of components common to multiple projects in this repository. It is a work in progress to break this out into separate libraries under the `src/@bichard/` folder.
-1. [Libraries](src/@bichard/) - A collection of shared libraries, separated into specific modules.
-   1. [API Client](src/@bichard/api-client/)
-   1. [MQ](src/@bichard/mq/)
-   1. [S3](src/@bichard/s3/)
-1. Testing Libraries - A collection of extensions for other shared libraries to support testing scenarios.
-   1. [API Client](src/@bichard/testing-api-client/)
-   1. [Config](src/@bichard/testing-config/)
-   1. [DynamoDB](src/@bichard/testing-dynamodb/)
-   1. [Jest](src/@bichard/testing-jest/)
-   1. [Lambda](src/@bichard/testing-lambda/)
-   1. [MQ](src/@bichard/testing-mq/)
-   1. [S3](src/@bichard/testing-s3/)
-1. [Lambdas](src/lambdas/) - A collection of Lambda projects stored individually for reuse in other components.
-   1. [Message Receiver](src/lambdas/message-receiver/) - Receives messages from subscribed queues, embellishes with the source and format, and forwards onto the [Event Handler](src/event-handler/) Step Function.
-   1. [Retrieve Event from S3](src/lambdas/retrieve-event-from-s3/) - Retrieve the event content from S3 to use for processing, retrying or viewing where required.
-   1. [Record Event](src/lambdas/record-event/) - Logs events against the parent AuditLog record in Dynamo.
-   1. [Translate Event](src/lambdas/translate-event/) - Uses a factory pattern to determine the translation logic to apply to the message, based on it's known contextual format, in order to create an event to attach to a parent AuditLog record in the database.
-1. [API](audit-log-api/) - API exposing Audit Log records and attached events
-1. [Incoming Message Handler](incoming-message-handler/) - AWS Step Functions and Lambdas for intercepting and processing messages coming into the Bichard system
-1. [Event Handler](src/event-handler/) - A component that handles messages received from queues and translates them into Audit Log events.
-1. [Portal](audit-log-portal/) - Web-based portal allowing access to view and explore all Audit Log records and their events
+Code shared between multiple components:
 
-## Quickstart
+* [**Shared code** (`shared`)](shared/) - Library of code that is common to multiple components.
+* [**Shared types** (`shared-types`)](shared-types/) - Library of typescript type/interface definitions that are used in multiple components.
+* [**Shared testing** (`shared-testing`)](shared-testing/) - Library of shared code that is used for testing multiple components.
 
-Once all prerequisites are installed, you can do the followings:
+## Quick start
 
-- Run `make run-all` to deploy and run all components. After running this command, you should be able to access to the portal at [http://localhost:3000](http://localhost:3000)
-  > Note: If you want to develop against the portal, you will need to instead run `make run-all-without-portal` and then launch the Portal from the `audit-log-portal/` folder with the command `npm run dev`.
-- Run `make destroy` to destroy the local infrastructure.
+The majority of code in this repository is written in Typescript. In order to ensure you're using the right version of Node and npm, you should:
+
+1. Install [`nvm`](https://github.com/nvm-sh/nvm)
+2. In the root of this repository, run:
+    ```shell
+    $ nvm install
+    $ nvm use
+    ```
+
+This will use the version specified in the [`.nvmrc`](.nvmrc) file.
+
+You can then use the Makefile to get started:
+
+```shell
+# Build all components
+$ make build-all
+
+# Build a specific component, and any other components it depends on
+$ make audit-log-api
+
+# Run all components
+$ make run-all
+
+# Run all components except the portal
+# (Useful if you want to run the portal separately with `npm run dev`)
+$ make run-all-without-portal
+
+# Stop running all components
+$ make destroy
+
+# Clear the build folders for all components
+$ make clean
+
+# Lint all of the code
+$ make validate
+```
 
 ## Development
 
 ### Build Order
 
-Since we use shared local modules in these projects, there are some dependencies that denote a build order for dependent projects. The easiest way is to using the preset scripts to build:
+Since we use shared local modules in these projects, there are some dependencies that denote a build order for dependent projects. The easiest way is to use the preset scripts to build:
 
 ```shell
 $ make build
@@ -76,7 +91,7 @@ The easiest way to run all tests is with the Make command:
 $ make test
 ```
 
-Where applicable, each project has tests that are run by Jest. To run these, simply run `npm test` from within the relevant project folder. Projects may also have different test scripts that you can run with the following commands:
+Where applicable, each component has tests that are run by Jest. To run these, simply run `npm test` from within the relevant project folder. Projects may also have different test scripts that you can run with the following commands:
 
 - Run all tests - `npm test`
 - Unit tests - `npm run test:unit`
