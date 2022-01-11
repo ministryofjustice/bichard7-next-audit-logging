@@ -1,10 +1,10 @@
-jest.mock("src/use-cases/parseGetEventsRequest")
+jest.mock("../use-cases/parseGetEventsRequest")
 
-import "src/testConfig"
+import "../testConfig"
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda"
 import { AuditLog, AuditLogEvent } from "shared-types"
 import { HttpStatusCode } from "shared"
-import { FetchEventsUseCase, parseGetEventsRequest } from "src/use-cases"
+import { FetchEventsUseCase, parseGetEventsRequest } from "../use-cases"
 import getEvents from "./getEvents"
 
 const createProxyEvent = (messageId?: string): APIGatewayProxyEvent => {

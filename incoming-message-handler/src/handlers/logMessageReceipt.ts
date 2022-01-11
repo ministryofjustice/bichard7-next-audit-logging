@@ -1,7 +1,7 @@
 import type { AuditLog } from "shared-types"
 import { isError } from "shared-types"
-import { getApiKey, getApiUrl } from "src/configs"
-import PersistMessageUseCase from "src/use-cases/PersistMessageUseCase"
+import { getApiKey, getApiUrl } from "../configs"
+import PersistMessageUseCase from "../use-cases/PersistMessageUseCase"
 
 const persistMessageUseCase = new PersistMessageUseCase(getApiUrl(), getApiKey())
 

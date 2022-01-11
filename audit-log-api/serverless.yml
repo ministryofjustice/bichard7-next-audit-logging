@@ -1,0 +1,148 @@
+service: audit-log-api
+frameworkVersion: '2'
+
+provider:
+  name: aws
+  runtime: nodejs14.x
+  lambdaHashingVersion: 20201221
+  environment:
+    AWS_URL: http://localhost:8000
+    DYNAMO_REGION: eu-west-2
+    AUDIT_LOG_TABLE_NAME: auditLogTable
+    MQ_USER: admin
+    MQ_PASSWORD: admin
+    MQ_URL: failover:(stomp://localhost:51613)
+    AUDIT_LOG_EVENTS_BUCKET: auditLogEventsBucket
+    S3_URL: http://localhost:4569
+    S3_REGION: eu-west-2
+    API_URL: http://localhost:3000
+    API_KEY: dummy
+    AWS_ACCESS_KEY_ID: S3RVER
+    AWS_SECRET_ACCESS_KEY: S3RVER
+	
+plugins:
+  - serverless-offline
+  - serverless-hooks
+  - serverless-plugin-typescript
+  - serverless-dynamodb-local
+  - serverless-s3-local
+
+custom:
+  dynamodb:
+    stages:
+      - dev
+    start:
+      port: 8000
+      inMemory: true
+      heapInitial: 200m
+      heapMax: 1g
+      migrate: true
+      seed: true
+      convertEmptyValues: true
+  s3:
+    host: 0.0.0.0
+    directory: /tmp
+  serverless-hooks:
+    hookPrefix: hook
+    runAllOptions:
+      stderr: true
+      stdout: true
+      stdin: true
+
+resources:
+  Resources:
+    auditLogEventsBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: auditLogEventsBucket
+    usersTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: auditLogTable
+        AttributeDefinitions:
+          - AttributeName: messageId
+            AttributeType: S
+          - AttributeName: _
+            AttributeType: S
+          - AttributeName: receivedDate
+            AttributeType: S
+          - AttributeName: externalCorrelationId
+            AttributeType: S
+          - AttributeName: status
+            AttributeType: S
+        KeySchema:
+          - AttributeName: messageId
+            KeyType: HASH
+        GlobalSecondaryIndexes:
+          - IndexName: receivedDateIndex
+            KeySchema:
+              - AttributeName: _
+                KeyType: HASH
+              - AttributeName: receivedDate
+                KeyType: RANGE
+            Projection:
+              ProjectionType: 'ALL'
+            ProvisionedThroughput:
+              ReadCapacityUnits: 1
+              WriteCapacityUnits: 1
+          - IndexName: externalCorrelationIdIndex
+            KeySchema:
+              - AttributeName: externalCorrelationId
+                KeyType: HASH
+            Projection:
+              ProjectionType: 'ALL'
+            ProvisionedThroughput:
+              ReadCapacityUnits: 1
+              WriteCapacityUnits: 1
+          - IndexName: statusIndex
+            KeySchema:
+              - AttributeName: status
+                KeyType: HASH
+              - AttributeName: receivedDate
+                KeyType: RANGE
+            Projection:
+              ProjectionType: 'ALL'
+            ProvisionedThroughput:
+              ReadCapacityUnits: 1
+              WriteCapacityUnits: 1
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+
+functions:
+  getMessages:
+    handler: src/handlers/getMessages.default
+    events:
+     - httpApi:
+         path: /messages
+         method: get
+  getMessage:
+    handler: src/handlers/getMessages.default
+    events:
+     - httpApi:
+         path: /messages/{messageId}
+         method: get
+  createAuditLog:
+    handler: src/handlers/createAuditLog.default
+    events:
+     - httpApi:
+         path: /messages
+         method: post
+  getEvents:
+    handler: src/handlers/getEvents.default
+    events:
+     - httpApi:
+         path: /messages/{messageId}/events
+         method: get
+  createAuditLogEvent:
+    handler: src/handlers/createAuditLogEvent.default
+    events:
+     - httpApi:
+         path: /messages/{messageId}/events
+         method: post
+  retryMessage:
+    handler: src/handlers/retryMessage.default
+    events:
+     - httpApi:
+         path: /messages/{messageId}/retry
+         method: post

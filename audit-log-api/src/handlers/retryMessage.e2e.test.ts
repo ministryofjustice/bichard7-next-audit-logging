@@ -1,40 +1,48 @@
 jest.setTimeout(15000)
 
-import fs from "fs"
-import { AuditLog, BichardAuditLogEvent } from "shared-types"
-import { encodeBase64, HttpStatusCode } from "shared"
-import { TestDynamoGateway } from "shared"
-import { setEnvironmentVariables } from "shared-testing"
-import createDynamoDbConfig from "src/createDynamoDbConfig"
-import createS3Config from "src/createS3Config"
-import { TestAwsS3Gateway } from "shared"
+import { AuditLog, BichardAuditLogEvent, DynamoDbConfig, MqConfig, S3Config } from "shared-types"
+import { encodeBase64, HttpStatusCode, TestDynamoGateway, TestAwsS3Gateway, TestStompitMqGateway } from "shared"
 import axios from "axios"
+import { v4 as uuid } from "uuid"
 
-const environmentVariables = JSON.parse(fs.readFileSync(`./scripts/env-vars.json`).toString())
-const apiUrl = String(environmentVariables.Variables.API_URL).replace("localstack_main", "localhost")
-const apiKey = environmentVariables.Variables.API_KEY
+const dynamoConfig: DynamoDbConfig = {
+  DYNAMO_URL: 'http://localhost:8000',
+  DYNAMO_REGION: 'eu-west-2',
+  AUDIT_LOG_TABLE_NAME: 'auditLogTable',
+  AWS_ACCESS_KEY_ID: 'DUMMY',
+  AWS_SECRET_ACCESS_KEY: 'DUMMY'
+}
 
-setEnvironmentVariables({
-  AUDIT_LOG_TABLE_NAME: "audit-log",
-  AUDIT_LOG_EVENTS_BUCKET: "audit-log-events"
-})
+const s3Config: S3Config = {
+  url: 'http://localhost:4569',
+  region: 'eu-west-2',
+  bucketName: 'auditLogEventsBucket',
+  accessKeyId: 'S3RVER',
+  secretAccessKey: 'S3RVER'
+}
 
-const dynamoDbConfig = createDynamoDbConfig()
-const testDynamoGateway = new TestDynamoGateway(dynamoDbConfig)
-const s3Gateway = new TestAwsS3Gateway(createS3Config())
+const mqConfig: MqConfig = {
+  url: 'stomp://localhost:51613',
+  username: 'admin',
+  password: 'admin'
+}
+
+const testDynamoGateway = new TestDynamoGateway(dynamoConfig)
+const s3Gateway = new TestAwsS3Gateway(s3Config)
+const testMqGateway = new TestStompitMqGateway(mqConfig)
 
 describe("retryMessage", () => {
   beforeEach(async () => {
-    await testDynamoGateway.deleteAll(dynamoDbConfig.AUDIT_LOG_TABLE_NAME, "messageId")
-    await s3Gateway.createBucket(true)
+    await testDynamoGateway.deleteAll(dynamoConfig.AUDIT_LOG_TABLE_NAME, "messageId")
     await s3Gateway.deleteAll()
   })
 
   it("should return Ok status when message has been retried successfully", async () => {
+    const messageXml = `<Xml>${uuid()}< /Xml>`
     const event = {
-      messageData: encodeBase64("<Xml></Xml>"),
+      messageData: encodeBase64(messageXml),
       messageFormat: "Dummy Event Source",
-      eventSourceArn: "Dummy Event Arn",
+      eventSourceArn: uuid(),
       eventSourceQueueName: "DUMMY_QUEUE"
     }
 
@@ -54,45 +62,16 @@ describe("retryMessage", () => {
       })
     )
 
-    await testDynamoGateway.insertOne(dynamoDbConfig.AUDIT_LOG_TABLE_NAME, message, "messageId")
+    await testDynamoGateway.insertOne(dynamoConfig.AUDIT_LOG_TABLE_NAME, message, "messageId")
 
-    const response = await axios.post(`${apiUrl}/messages/${message.messageId}/retry`, null, {
-      headers: { "X-API-KEY": apiKey }
-    })
+    const response = await axios.post(`http://localhost:3000/messages/${message.messageId}/retry`, null)
 
-    expect(response.status).toBe(HttpStatusCode.ok)
+    expect(response.status).toBe(HttpStatusCode.noContent)
     expect(response.data).toBe("")
+
+    const msg = await testMqGateway.getMessage("DUMMY_QUEUE")
+    testMqGateway.dispose()
+    expect(msg).toEqual(messageXml)
   })
 
-  it("should return error response when there is an error while retrying message", async () => {
-    const response = await axios
-      .post(`${apiUrl}/messages/INVALID_MESSAGE_ID/retry`, null, { headers: { "X-API-KEY": apiKey } })
-      .catch((error) => error)
-
-    expect(response.response).toBeDefined()
-
-    const { response: actualResponse } = response
-    expect(actualResponse.status).toBe(HttpStatusCode.internalServerError)
-    expect(actualResponse.data).toBe("Error: Couldn't get events for message 'INVALID_MESSAGE_ID'.")
-  })
-
-  it("should return forbidden response code when API key is not present", async () => {
-    const response = await axios.post(`${apiUrl}/messages/MESSAGE_ID/retry`).catch((error) => error)
-
-    expect(response.response).toBeDefined()
-
-    const { response: actualResponse } = response
-    expect(actualResponse.status).toBe(HttpStatusCode.forbidden)
-  })
-
-  it("should return forbidden response code when API key is invalid", async () => {
-    const response = await axios
-      .post(`${apiUrl}/messages/MESSAGE_ID/retry`, null, { headers: { "X-API-KEY": "Invalid API key" } })
-      .catch((error) => error)
-
-    expect(response.response).toBeDefined()
-
-    const { response: actualResponse } = response
-    expect(actualResponse.status).toBe(HttpStatusCode.forbidden)
-  })
 })

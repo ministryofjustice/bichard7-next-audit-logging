@@ -1,26 +1,35 @@
-import fs from "fs"
 import axios from "axios"
+import { AuditLog } from "shared-types"
 import { HttpStatusCode } from "shared"
+import { mockAuditLog } from '../test-helpers/mocks'
 
-const environmentVariables = JSON.parse(fs.readFileSync(`./scripts/env-vars.json`).toString())
-const apiUrl = String(environmentVariables.Variables.API_URL).replace("localstack_main", "localhost")
 
-it("should return forbidden response code when API key is not present", async () => {
-  const response = await axios.get(`${apiUrl}/messages`).catch((error) => error)
+describe("Getting Audit Logs", () => {
+  it("should return the audit log records", async () => {
+    const auditLog = mockAuditLog()
 
-  expect(response.response).toBeDefined()
+    const result = await axios.post('http://localhost:3000/messages', auditLog)
+    expect(result.status).toEqual(HttpStatusCode.created)
 
-  const { response: actualResponse } = response
-  expect(actualResponse.status).toBe(HttpStatusCode.forbidden)
-})
+    const result2 = await axios.get<AuditLog[]>(`http://localhost:3000/messages`)
+    expect(result2.status).toEqual(HttpStatusCode.ok)
 
-it("should return forbidden response code when API key is invalid", async () => {
-  const response = await axios
-    .get(`${apiUrl}/messages`, { headers: { "X-API-KEY": "Invalid API key" } })
-    .catch((error) => error)
+    expect(Array.isArray(result2.data)).toBeTruthy()
+    const messageIds = result2.data.map(record => record.messageId)
+    expect(messageIds).toContain(auditLog.messageId)
+  })
 
-  expect(response.response).toBeDefined()
+  it("should return a specific audit log record", async () => {
+    const auditLog = mockAuditLog()
 
-  const { response: actualResponse } = response
-  expect(actualResponse.status).toBe(HttpStatusCode.forbidden)
+    const result = await axios.post('http://localhost:3000/messages', auditLog)
+    expect(result.status).toEqual(HttpStatusCode.created)
+
+    const result2 = await axios.get<AuditLog[]>(`http://localhost:3000/messages/${auditLog.messageId}`)
+    expect(result2.status).toEqual(HttpStatusCode.ok)
+
+    expect(Array.isArray(result2.data)).toBeTruthy()
+    const messageIds = result2.data.map(record => record.messageId)
+    expect(messageIds).toEqual([auditLog.messageId])
+  })
 })

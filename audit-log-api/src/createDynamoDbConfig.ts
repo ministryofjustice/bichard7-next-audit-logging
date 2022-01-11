@@ -18,6 +18,8 @@ export default function createDynamoDbConfig(): DynamoDbConfig {
   return {
     DYNAMO_URL: AWS_URL,
     DYNAMO_REGION: AWS_REGION,
-    AUDIT_LOG_TABLE_NAME
+    AUDIT_LOG_TABLE_NAME,
+    AWS_ACCESS_KEY_ID: process.env.AWS_ACCESS_KEY_ID,
+    AWS_SECRET_ACCESS_KEY: process.env.AWS_SECRET_ACCESS_KEY
   }
 }

@@ -1,26 +1,22 @@
-import fs from "fs"
 import axios from "axios"
+import { AuditLogEvent } from "shared-types"
 import { HttpStatusCode } from "shared"
+import { mockAuditLog, mockAuditLogEvent } from '../test-helpers/mocks'
 
-const environmentVariables = JSON.parse(fs.readFileSync(`./scripts/env-vars.json`).toString())
-const apiUrl = String(environmentVariables.Variables.API_URL).replace("localstack_main", "localhost")
 
-it("should return forbidden response code when API key is not present", async () => {
-  const response = await axios.get(`${apiUrl}/messages/MESSAGE_ID/events`).catch((error) => error)
+describe("Getting Audit Log events", () => {
+  it("should return the audit log events for an existing audit log record", async () => {
+    const auditLog = mockAuditLog()
+    const result1 = await axios.post('http://localhost:3000/messages', auditLog)
+    expect(result1.status).toEqual(HttpStatusCode.created)
 
-  expect(response.response).toBeDefined()
+    const event = mockAuditLogEvent()
+    const result2 = await axios.post(`http://localhost:3000/messages/${auditLog.messageId}/events`, event)
+    expect(result2.status).toEqual(HttpStatusCode.created)
 
-  const { response: actualResponse } = response
-  expect(actualResponse.status).toBe(HttpStatusCode.forbidden)
-})
+    const result3 = await axios.get<AuditLogEvent[]>(`http://localhost:3000/messages/${auditLog.messageId}/events`)
+    expect(result3.status).toEqual(HttpStatusCode.ok)
 
-it("should return forbidden response code when API key is invalid", async () => {
-  const response = await axios
-    .get(`${apiUrl}/messages/MESSAGE_ID/events`, { headers: { "X-API-KEY": "Invalid API key" } })
-    .catch((error) => error)
-
-  expect(response.response).toBeDefined()
-
-  const { response: actualResponse } = response
-  expect(actualResponse.status).toBe(HttpStatusCode.forbidden)
+    expect(result3.data).toEqual([event])
+  })
 })

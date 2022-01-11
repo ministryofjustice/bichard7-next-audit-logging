@@ -1,6 +1,6 @@
 import { clean, hasRootElement } from "shared"
-import type { ReceivedMessage } from "src/entities"
-import formatMessageXml from "src/use-cases/formatMessageXml"
+import type { ReceivedMessage } from "../entities"
+import formatMessageXml from "../use-cases/formatMessageXml"
 
 export default async function formatMessage(event: ReceivedMessage): Promise<ReceivedMessage> {
   let formattedMessage = event.messageXml

@@ -1,6 +1,6 @@
 jest.mock("uuid")
 import { hasRootElement } from "shared"
-import type { ReceivedMessage } from "src/entities"
+import type { ReceivedMessage } from "../entities"
 import { v4 } from "uuid"
 import formatMessage from "./formatMessage"
 

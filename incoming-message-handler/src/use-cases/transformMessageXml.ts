@@ -1,5 +1,5 @@
 import type { AuditLog } from "shared-types"
-import getXmlElementContent from "src/utils/getXmlElementContent"
+import getXmlElementContent from "../utils/getXmlElementContent"
 
 const unescape = (input: string) =>
   input

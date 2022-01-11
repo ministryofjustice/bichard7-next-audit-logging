@@ -1,5 +1,5 @@
 import type { ConnectionOptions as TlsConnectionOptions } from "tls"
-import type { MqConfig } from "src/configs"
+import type { MqConfig } from "../configs"
 import deconstructServers from "./deconstructServers"
 
 const config: MqConfig = {

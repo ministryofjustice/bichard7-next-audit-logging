@@ -123,3 +123,6 @@ audit-log-api/scripts/env-vars.json
 # Storybook output
 **/storybook-static
 .idea/
+
+**/.build
+.DS_Store

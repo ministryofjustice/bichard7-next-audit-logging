@@ -161,6 +161,14 @@ run-all: run-all-without-portal run-portal run-mq-listener
 run-all-e2e:
 	./scripts/run-all-e2e.sh
 
+.PHONY: run-mq
+run-mq:
+	docker-compose -f environment/docker-compose.yml up -d mq
+
+.PHONY: stop-mq
+stop-mq:
+	docker-compose -f environment/docker-compose.yml stop mq
+
 ########################################
 # Destroy Commands
 ########################################

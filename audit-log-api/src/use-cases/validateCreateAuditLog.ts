@@ -1,6 +1,6 @@
 import type { AuditLog } from "shared-types"
 import { AuditLogStatus } from "shared-types"
-import { isIsoDate } from "src/utils"
+import { isIsoDate } from "../utils"
 
 interface ValidationResult {
   isValid: boolean

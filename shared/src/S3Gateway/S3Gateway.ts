@@ -1,4 +1,4 @@
-import { S3 } from "aws-sdk"
+import { S3, Endpoint } from "aws-sdk"
 import type { PromiseResult, S3Config } from "shared-types"
 
 export default class S3Gateway {
@@ -7,18 +7,21 @@ export default class S3Gateway {
   protected readonly bucketName: string
 
   constructor(config: S3Config) {
-    const { url, region, bucketName } = config
+    const { url, region, bucketName, accessKeyId, secretAccessKey } = config
 
-    if (!bucketName) {
-      throw Error("bucketName must have value.")
+    if (!bucketName || !url) {
+      throw Error("bucketName and url must have value.")
     }
 
     this.bucketName = bucketName
 
+    console.log(url)
     this.s3 = new S3({
-      endpoint: url,
+      endpoint: new Endpoint(url),
       region,
-      s3ForcePathStyle: true
+      s3ForcePathStyle: true,
+      accessKeyId,
+      secretAccessKey
     })
   }
 

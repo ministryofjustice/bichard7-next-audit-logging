@@ -1,7 +1,7 @@
 import type { AuditLog } from "shared-types"
 import { isError } from "shared-types"
-import { getApiUrl, getApiKey } from "src/configs"
-import CreateSentToBichardEventUseCase from "src/use-cases/CreateSentToBichardEventUseCase"
+import { getApiUrl, getApiKey } from "../configs"
+import CreateSentToBichardEventUseCase from "../use-cases/CreateSentToBichardEventUseCase"
 
 const createSentToBichardEventUseCase = new CreateSentToBichardEventUseCase(getApiUrl(), getApiKey())
 

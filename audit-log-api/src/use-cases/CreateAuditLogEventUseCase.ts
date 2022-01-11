@@ -1,6 +1,6 @@
 import type { AuditLogEvent, AuditLogDynamoGateway } from "shared-types"
 import { isError } from "shared-types"
-import { isConditionalExpressionViolationError } from "src/utils"
+import { isConditionalExpressionViolationError } from "../utils"
 
 interface CreateAuditLogEventResult {
   resultType: "success" | "notFound" | "invalidVersion" | "error"
@@ -8,7 +8,7 @@ interface CreateAuditLogEventResult {
 }
 
 export default class CreateAuditLogEventUseCase {
-  constructor(private readonly auditLogGateway: AuditLogDynamoGateway) {}
+  constructor(private readonly auditLogGateway: AuditLogDynamoGateway) { }
 
   async create(messageId: string, event: AuditLogEvent): Promise<CreateAuditLogEventResult> {
     const messageVersion = await this.auditLogGateway.fetchVersion(messageId)
