@@ -51,7 +51,9 @@ jobs:
       - restore_cache:
           key: v1-npm-deps-{{ checksum "mq-listener/package-lock.json" }}
 
-      - run: make build
+      - run: make install
+
+      - run: make build-all
 
       - run:
           name: Build Portal Stories

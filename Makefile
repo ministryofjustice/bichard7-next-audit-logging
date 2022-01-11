@@ -8,8 +8,8 @@ SHELL := /bin/bash
 install:
 	scripts/install-all-ci.sh
 
-.PHONY: build
-build: install
+.PHONY: build-all
+build-all:
 	scripts/build-all.sh
 
 .PHONY: test
@@ -36,11 +36,6 @@ transfer-messages: src/lambdas/transfer-messages/build
 incoming-message-handler: incoming-message-handler/build
 audit-log-api: audit-log-api/build
 audit-log-portal: audit-log-portal/.next
-
-all: shared-types/dist shared-testing/dist shared/dist src/lambdas/retrieve-event-from-s3/build \
-	src/lambdas/translate-event/build src/lambdas/record-event/build \
-	src/lambdas/message-receiver/build src/lambdas/transfer-messages/build \
-	incoming-message-handler/build audit-log-api/build audit-log-portal/.next
 
 define get_source_files
 	$(shell find $(1) \
