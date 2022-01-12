@@ -1,3 +1,4 @@
+jest.retryTimes(3);
 import "shared-testing"
 import type { S3 } from "aws-sdk"
 import type { S3Config } from "shared-types"
@@ -6,28 +7,28 @@ import { AwsS3Gateway, TestAwsS3Gateway } from "shared"
 import TransferMessagesUseCase from "./TransferMessagesUseCase"
 import type { TransferMessagesResult } from "./types"
 
-const configA: S3Config = {
-  url: "http://localhost:4566",
-  region: "eu-west-1",
-  bucketName: "transfer-messages-a"
-}
-const configB: S3Config = {
-  url: "http://localhost:4566",
-  region: "eu-west-1",
-  bucketName: "transfer-messages-b"
+const externalGatewayConfig: S3Config = {
+  url: 'http://localhost:4569',
+  region: 'eu-west-2',
+  bucketName: 'externalIncomingBucket',
+  accessKeyId: 'S3RVER',
+  secretAccessKey: 'S3RVER'
 }
 
-const gatewayA = new AwsS3Gateway(configA)
-const testGatewayA = new TestAwsS3Gateway(configA)
-const testGatewayB = new TestAwsS3Gateway(configB)
+const internalGatewayConfig: S3Config = {
+  url: 'http://localhost:4569',
+  region: 'eu-west-2',
+  bucketName: 'internalIncomingBucket',
+  accessKeyId: 'S3RVER',
+  secretAccessKey: 'S3RVER'
+}
+
+const gatewayA = new AwsS3Gateway(externalGatewayConfig)
+const testGatewayA = new TestAwsS3Gateway(externalGatewayConfig)
+const testGatewayB = new TestAwsS3Gateway(internalGatewayConfig)
 const transferMessages = new TransferMessagesUseCase(gatewayA, testGatewayB.getBucketName())
 
 describe("TransferMessagesUseCase", () => {
-  beforeAll(async () => {
-    await testGatewayA.createBucket(true)
-    await testGatewayB.createBucket(true)
-  })
-
   beforeEach(async () => {
     await testGatewayA.deleteAll()
     await testGatewayB.deleteAll()

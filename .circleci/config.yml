@@ -185,12 +185,8 @@ jobs:
           command: nvm install
 
       - run:
-          name: Installing and configuring awslocal
-          command: ./.circleci/scripts/install-awslocal.sh
-
-      - run:
           name: Installing all
-          command: nvm use && ./scripts/install-all-ci.sh
+          command: nvm use && ./scripts/install-all.sh
 
       # Attach the workspace to retrieve the dist/build folders so we don't have to rebuild
       - attach_workspace:
