@@ -27,11 +27,6 @@
   "scripts": {
     "clean": "rimraf dist",
     "build": "npm run clean && tsc -p tsconfig.json",
-    "setup:env": "cd ../environment && ./setup.sh && cd -",
-    "test": "npm run setup:env && ../scripts/test.sh",
-    "test:ci": "npm run setup:env && ../scripts/test.sh ci",
-    "test:unit": "../scripts/test.sh unit",
-    "test:integration": "npm run setup:env && ../scripts/test.sh integration",
-    "test:e2e": "npm run setup:env && ../scripts/test.sh e2e"
+    "test": "jest"
   }
 }

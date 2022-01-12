@@ -1,26 +1,23 @@
-jest.setTimeout(30000)
-
-import "shared-testing"
-import type { EventMessage, S3PutObjectEvent } from "shared-types"
-import { invokeFunction } from "shared-testing"
+import { setEnvironmentVariables } from "shared-testing"
+setEnvironmentVariables()
+import type { EventMessage } from "shared-types"
 import type { S3Config } from "shared-types"
 import { TestAwsS3Gateway } from "shared"
 import type { RetrieveEventFromS3Result } from "src"
+import retrieveEventFromS3 from '.'
 
-const bucketName = "audit-log-events"
+const bucketName = "auditLogEventsBucket"
 const config: S3Config = {
-  url: "http://localhost:4566",
-  region: "us-east-1",
-  bucketName
+  url: 'http://localhost:4569',
+  region: 'eu-west-2',
+  bucketName,
+  accessKeyId: 'S3RVER',
+  secretAccessKey: 'S3RVER'
 }
 
 const gateway = new TestAwsS3Gateway(config)
 
 describe("Retrieve event from S3 end-to-end", () => {
-  beforeAll(async () => {
-    await gateway.createBucket(true)
-  })
-
   beforeEach(async () => {
     await gateway.deleteAll()
   })
@@ -45,7 +42,7 @@ describe("Retrieve event from S3 end-to-end", () => {
       }
     }
 
-    const result = await invokeFunction<S3PutObjectEvent, RetrieveEventFromS3Result>("retrieve-event-from-s3", payload)
+    const result = await retrieveEventFromS3(payload)
     expect(result).toNotBeError()
 
     const { messageData, messageFormat, s3Path } = <RetrieveEventFromS3Result>result

@@ -34,4 +34,4 @@ case $STYLE in
     ;;
 esac
 
-jest "${PARAMS[@]}" --testPathPattern=$TEST_PATH_PATTERN --testPathIgnorePatterns="dist" "build" "cypress"
+npm exec jest "${PARAMS[@]}" --testPathPattern=$TEST_PATH_PATTERN --testPathIgnorePatterns="dist" "build" "cypress"

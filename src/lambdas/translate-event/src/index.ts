@@ -1,6 +1,6 @@
 import { isError } from "shared-types"
-import getTranslator from "../translators/getTranslator"
-import type TranslationResult from "../translators/TranslationResult"
+import getTranslator from "./translators/getTranslator"
+import type TranslationResult from "./translators/TranslationResult"
 import type TranslateEventInput from "./TranslateEventInput"
 
 export default async (event: TranslateEventInput): Promise<TranslationResult> => {

@@ -55,6 +55,14 @@ resources:
       Type: AWS::S3::Bucket
       Properties:
         BucketName: auditLogEventsBucket
+    externalIncomingBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: externalIncomingBucket
+    internalIncomingBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: internalIncomingBucket
     usersTable:
       Type: AWS::DynamoDB::Table
       Properties:

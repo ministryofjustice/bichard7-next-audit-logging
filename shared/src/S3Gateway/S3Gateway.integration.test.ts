@@ -4,9 +4,11 @@ import type { S3Config } from "shared-types"
 import TestS3Gateway from "./TestS3Gateway"
 
 const config: S3Config = {
-  url: "http://localhost:4566",
-  region: "eu-west-2",
-  bucketName: "test-bucket"
+  url: 'http://localhost:4569',
+  region: 'eu-west-2',
+  bucketName: 'externalIncomingBucket',
+  accessKeyId: 'S3RVER',
+  secretAccessKey: 'S3RVER'
 }
 
 const gateway = new TestS3Gateway(config)

@@ -1,14 +1,13 @@
-jest.setTimeout(30000)
-
 import "shared-testing"
-import { invokeFunction } from "shared-testing"
 import type { AmazonMqEventSourceRecordEvent } from "shared-types"
 import { TestAwsS3Gateway } from "shared"
+import { setEnvironmentVariables } from "shared-testing"
 import createS3Config from "./createS3Config"
+setEnvironmentVariables()
+process.env.MESSAGE_FORMAT = "AuditEvent"
+process.env.EVENTS_BUCKET_NAME = "auditLogEventsBucket"
+import messageReceiver from '.'
 
-process.env.S3_URL = "http://localhost:4566"
-process.env.S3_REGION = "us-east-1"
-process.env.EVENTS_BUCKET_NAME = "audit-log-events"
 const s3Config = createS3Config()
 const s3Gateway = new TestAwsS3Gateway(s3Config)
 
@@ -56,7 +55,7 @@ describe("Message receiver e2e test", () => {
       ]
     }
 
-    const result = await invokeFunction("message-receiver", event)
+    const result = await messageReceiver(event)
 
     expect(result).toNotBeError()
 

@@ -1,5 +1,5 @@
 /* eslint-disable import/no-duplicates */
-import type { CreateBucketOutput } from "aws-sdk/clients/s3"
+import type { CreateBucketOutput, ObjectIdentifierList } from "aws-sdk/clients/s3"
 import type S3 from "aws-sdk/clients/s3"
 import S3Gateway from "./S3Gateway"
 
@@ -27,26 +27,24 @@ export default class TestS3Gateway extends S3Gateway {
   }
 
   async deleteAll(): Promise<void> {
-    console.log("Deleting all")
-    throw new Error("FOO")
-    // const contents = await this.getAll()
+    const contents = await this.getAll()
 
-    // if (contents && contents.length > 0) {
-    //   const obj = <ObjectIdentifierList>contents.map(({ Key }) => ({ Key }))
-    //   const params: S3.Types.DeleteObjectsRequest = {
-    //     Bucket: this.bucketName,
-    //     Delete: {
-    //       Objects: obj
-    //     }
-    //   }
+    if (contents && contents.length > 0) {
+      const obj = <ObjectIdentifierList>contents.map(({ Key }) => ({ Key }))
+      const params: S3.Types.DeleteObjectsRequest = {
+        Bucket: this.bucketName,
+        Delete: {
+          Objects: obj
+        }
+      }
 
-    //   await this.client.deleteObjects(params).promise()
-    // }
+      await this.client.deleteObjects(params).promise()
+    }
 
-    // const remainingItems = await this.getAll()
-    // if (remainingItems && remainingItems.length > 0) {
-    //   throw new Error(`Failed to delete all items! Remaining Items: ${remainingItems?.length}`)
-    // }
+    const remainingItems = await this.getAll()
+    if (remainingItems && remainingItems.length > 0) {
+      throw new Error(`Failed to delete all items! Remaining Items: ${remainingItems?.length}`)
+    }
   }
 
   async getContent(key: string): Promise<string> {
