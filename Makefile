@@ -40,10 +40,11 @@ audit-log-portal: audit-log-portal/.next
 define get_source_files
 	$(shell find $(1) \
 		\( \
-			-name node_modules -o \
 			-name .next -o \
 			-name build -o \
-			-name dist \
+			-name dist -o \
+			-name documentation -o \
+			-name node_modules \
 		\) -prune -o \
 		-type f \( \
 			-iname '*.js' -o \
