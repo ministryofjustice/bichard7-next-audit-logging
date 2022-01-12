@@ -5,10 +5,11 @@ import { isError } from "shared-types"
 import { TestDynamoGateway, TestS3Gateway } from "shared"
 import TestMqGateway from "../gateways/MqGateway/TestMqGateway"
 import transformMessageXml from "../use-cases/transformMessageXml"
+import { setEnvironmentVariables } from "shared-testing"
+process.env.MQ_QUEUE = "INCOMING_MESSAGE_HANDLER_QUEUE"
+setEnvironmentVariables()
 import IncomingMessageSimulator from "./IncomingMessageSimulator"
 import TestApi from "./TestApi"
-
-jest.setTimeout(60000)
 
 const formatXml = (xml: string): string => format(xml, { indentation: "  " })
 
@@ -39,25 +40,26 @@ const originalXml = formatXml(`
   </RouteData>
 `)
 
-const AWS_URL = "http://localhost:4566"
-const REGION = "us-east-1"
-
 const dynamoConfig: DynamoDbConfig = {
-  DYNAMO_URL: AWS_URL,
-  DYNAMO_REGION: REGION,
-  AUDIT_LOG_TABLE_NAME: "audit-log"
+  DYNAMO_URL: 'http://localhost:8000',
+  DYNAMO_REGION: 'eu-west-2',
+  AUDIT_LOG_TABLE_NAME: 'auditLogTable',
+  AWS_ACCESS_KEY_ID: 'DUMMY',
+  AWS_SECRET_ACCESS_KEY: 'DUMMY'
 }
 const dynamoGateway = new TestDynamoGateway(dynamoConfig)
 
 const s3Gateway = new TestS3Gateway({
-  url: AWS_URL,
-  region: REGION,
-  bucketName: "incoming-messages"
+  url: 'http://localhost:4569',
+  region: 'eu-west-2',
+  bucketName: 'internalIncomingBucket',
+  accessKeyId: 'S3RVER',
+  secretAccessKey: 'S3RVER'
 })
 
-const simulator = new IncomingMessageSimulator(AWS_URL)
+const simulator = new IncomingMessageSimulator()
 
-const queueName = "INCOMING_MESSAGE_HANDLER_QUEUE"
+const queueName = process.env.MQ_QUEUE
 const testMqGateway = new TestMqGateway({
   url: "failover:(stomp://localhost:51613)",
   username: "admin",
@@ -84,7 +86,7 @@ describe("e2e tests", () => {
 
     // Get messages from the API
     const api = new TestApi()
-    const persistedMessages = await api.pollForGetMessages()
+    const persistedMessages = await api.getMessages()
     expect(persistedMessages).toHaveLength(1)
 
     const persistedMessage = persistedMessages[0]

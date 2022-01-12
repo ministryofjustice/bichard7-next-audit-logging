@@ -9,13 +9,14 @@ export default class S3Gateway {
   constructor(config: S3Config) {
     const { url, region, bucketName, accessKeyId, secretAccessKey } = config
 
-    if (!bucketName || !url) {
+    if (!url) {
       throw Error("bucketName and url must have value.")
     }
 
-    this.bucketName = bucketName
+    if (bucketName) {
+      this.bucketName = bucketName
+    }
 
-    console.log(url)
     this.s3 = new S3({
       endpoint: new Endpoint(url),
       region,

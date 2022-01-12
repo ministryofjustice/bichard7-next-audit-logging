@@ -2,7 +2,7 @@ import type { Client, connect } from "stompit"
 import { ConnectFailover } from "stompit"
 import type { PromiseResult } from "shared-types"
 import { isError } from "shared-types"
-import type { MqConfig } from "../configs"
+import type { MqConfig } from "../../configs"
 import deconstructServers from "./deconstructServers"
 
 export default class MqGateway {

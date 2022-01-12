@@ -48,9 +48,6 @@ jobs:
       - restore_cache:
           key: v1-npm-deps-{{ checksum "audit-log-portal/package-lock.json" }}
 
-      - restore_cache:
-          key: v1-npm-deps-{{ checksum "mq-listener/package-lock.json" }}
-
       - run: make install
 
       - run: make build-all
@@ -113,10 +110,6 @@ jobs:
       - save_cache:
           key: v1-npm-deps-{{ checksum "audit-log-portal/package-lock.json" }}
           paths: audit-log-portal/node_modules
-
-      - save_cache:
-          key: v1-npm-deps-{{ checksum "mq-listener/package-lock.json" }}
-          paths: mq-listener/node_modules
 
       # Persist all dist/build folders to the workspace to reduce build time later
       - persist_to_workspace:
@@ -186,9 +179,6 @@ jobs:
 
       - restore_cache:
           key: v1-npm-deps-{{ checksum "audit-log-portal/package-lock.json" }}
-
-      - restore_cache:
-          key: v1-npm-deps-{{ checksum "mq-listener/package-lock.json" }}
 
       - run:
           name: Installing Nodejs version in .nvmrc
