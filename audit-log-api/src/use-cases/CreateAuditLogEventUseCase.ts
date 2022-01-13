@@ -8,7 +8,7 @@ interface CreateAuditLogEventResult {
 }
 
 export default class CreateAuditLogEventUseCase {
-  constructor(private readonly auditLogGateway: AuditLogDynamoGateway) { }
+  constructor(private readonly auditLogGateway: AuditLogDynamoGateway) {}
 
   async create(messageId: string, event: AuditLogEvent): Promise<CreateAuditLogEventResult> {
     const messageVersion = await this.auditLogGateway.fetchVersion(messageId)

@@ -45,7 +45,8 @@ export default class TestStompitMqGateway extends StompitMqGateway {
 
     try {
       const message = await getMessage(client, queueName)
-      return await readMessage(message)
+      const messageContent = await readMessage(message)
+      return messageContent
     } catch (error) {
       return <Error>error
     }

@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/ban-types, @typescript-eslint/no-explicit-any */
+
 export default class StepFunctionSimulator {
   private steps: Function[]
 
@@ -5,13 +7,15 @@ export default class StepFunctionSimulator {
     this.steps = steps
   }
 
-  async execute(input: any, log: boolean = false): Promise<any> {
-    let inputValue = input;
+  async execute(input: any, log = false): Promise<any> {
+    let inputValue = input
 
-    for (let step of this.steps) {
-      log && console.log(step, inputValue)
+    for (const step of this.steps) {
+      if (log) {
+        console.log(step, inputValue)
+      }
       inputValue = await step(inputValue)
     }
-    return inputValue;
+    return inputValue
   }
 }

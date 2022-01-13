@@ -1,7 +1,14 @@
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda"
 import type { PromiseResult } from "shared-types"
 import { isError } from "shared-types"
-import { AwsAuditLogDynamoGateway, HttpStatusCode, StompitMqGateway, createMqConfig, AuditLogApiClient, AwsS3Gateway } from "shared"
+import {
+  AwsAuditLogDynamoGateway,
+  HttpStatusCode,
+  StompitMqGateway,
+  createMqConfig,
+  AuditLogApiClient,
+  AwsS3Gateway
+} from "shared"
 import createDynamoDbConfig from "../createDynamoDbConfig"
 import { parseRetryMessageRequest, RetryMessageUseCase } from "../use-cases"
 import { createJsonApiResult } from "../utils"

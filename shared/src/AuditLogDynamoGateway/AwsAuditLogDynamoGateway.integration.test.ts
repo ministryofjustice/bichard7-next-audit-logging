@@ -6,11 +6,11 @@ import TestDynamoGateway from "../DynamoGateway/TestDynamoGateway"
 import AwsAuditLogDynamoGateway from "./AwsAuditLogDynamoGateway"
 
 const config: DynamoDbConfig = {
-  DYNAMO_URL: 'http://localhost:8000',
-  DYNAMO_REGION: 'eu-west-2',
-  AUDIT_LOG_TABLE_NAME: 'auditLogTable',
-  AWS_ACCESS_KEY_ID: 'DUMMY',
-  AWS_SECRET_ACCESS_KEY: 'DUMMY'
+  DYNAMO_URL: "http://localhost:8000",
+  DYNAMO_REGION: "eu-west-2",
+  AUDIT_LOG_TABLE_NAME: "auditLogTable",
+  AWS_ACCESS_KEY_ID: "DUMMY",
+  AWS_SECRET_ACCESS_KEY: "DUMMY"
 }
 
 const gateway = new AwsAuditLogDynamoGateway(config, config.AUDIT_LOG_TABLE_NAME)

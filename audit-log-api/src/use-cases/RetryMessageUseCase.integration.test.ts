@@ -1,7 +1,8 @@
 jest.setTimeout(15000)
 
 import "shared-testing"
-import { AuditLog, BichardAuditLogEvent, DynamoDbConfig, MqConfig, S3Config } from "shared-types"
+import type { DynamoDbConfig, MqConfig, S3Config } from "shared-types"
+import { AuditLog, BichardAuditLogEvent } from "shared-types"
 import { AwsAuditLogDynamoGateway, encodeBase64 } from "shared"
 import { TestDynamoGateway } from "shared"
 import { AuditLogApiClient } from "shared"
@@ -14,11 +15,11 @@ import RetrieveEventXmlFromS3UseCase from "./RetrieveEventXmlFromS3UseCase"
 import CreateRetryingEventUseCase from "./CreateRetryingEventUseCase"
 
 const dynamoDbConfig: DynamoDbConfig = {
-  DYNAMO_URL: 'http://localhost:8000',
-  DYNAMO_REGION: 'eu-west-2',
-  AUDIT_LOG_TABLE_NAME: 'auditLogTable',
-  AWS_ACCESS_KEY_ID: 'DUMMY',
-  AWS_SECRET_ACCESS_KEY: 'DUMMY'
+  DYNAMO_URL: "http://localhost:8000",
+  DYNAMO_REGION: "eu-west-2",
+  AUDIT_LOG_TABLE_NAME: "auditLogTable",
+  AWS_ACCESS_KEY_ID: "DUMMY",
+  AWS_SECRET_ACCESS_KEY: "DUMMY"
 }
 const testDynamoGateway = new TestDynamoGateway(dynamoDbConfig)
 const auditLogDynamoGateway = new AwsAuditLogDynamoGateway(dynamoDbConfig, dynamoDbConfig.AUDIT_LOG_TABLE_NAME)
@@ -26,24 +27,24 @@ const getLastEventUseCase = new GetLastFailedMessageEventUseCase(auditLogDynamoG
 
 const queueName = "retry-event-integration-testing"
 const mqConfig: MqConfig = {
-  url: 'stomp://localhost:51613',
-  username: 'admin',
-  password: 'admin'
+  url: "stomp://localhost:51613",
+  username: "admin",
+  password: "admin"
 }
 const mqGateway = new TestStompitMqGateway(mqConfig)
 const sendMessageToQueueUseCase = new SendMessageToQueueUseCase(mqGateway)
 
 const s3Config: S3Config = {
-  url: 'http://localhost:4569',
-  region: 'eu-west-2',
-  bucketName: 'auditLogEventsBucket',
-  accessKeyId: 'S3RVER',
-  secretAccessKey: 'S3RVER'
+  url: "http://localhost:4569",
+  region: "eu-west-2",
+  bucketName: "auditLogEventsBucket",
+  accessKeyId: "S3RVER",
+  secretAccessKey: "S3RVER"
 }
 const s3Gateway = new TestAwsS3Gateway(s3Config)
 const retrieveEventXmlFromS3UseCase = new RetrieveEventXmlFromS3UseCase(s3Gateway)
 
-const apiClient = new AuditLogApiClient('http://localhost:3010', "DUMMY")
+const apiClient = new AuditLogApiClient("http://localhost:3010", "DUMMY")
 const createRetryingEventUseCase = new CreateRetryingEventUseCase(apiClient)
 
 const useCase = new RetryMessageUseCase(

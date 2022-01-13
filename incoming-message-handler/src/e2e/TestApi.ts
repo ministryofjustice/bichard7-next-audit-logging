@@ -4,7 +4,7 @@ import type { AuditLog } from "shared-types"
 import { Poller, PollOptions } from "shared"
 
 export default class TestApi {
-  private apiUrl: string = "http://localhost:3010"
+  private apiUrl = "http://localhost:3010"
 
   getMessages(): Promise<AuditLog[]> {
     return axios

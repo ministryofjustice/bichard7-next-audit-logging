@@ -8,7 +8,7 @@ interface CreateAuditLogResult {
 }
 
 export default class CreateAuditLogUseCase {
-  constructor(private readonly auditLogGateway: AuditLogDynamoGateway) { }
+  constructor(private readonly auditLogGateway: AuditLogDynamoGateway) {}
 
   async create(auditLog: AuditLog): Promise<CreateAuditLogResult> {
     const result = await this.auditLogGateway.create(auditLog)

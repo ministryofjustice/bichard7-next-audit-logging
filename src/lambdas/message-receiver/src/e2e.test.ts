@@ -6,7 +6,7 @@ import createS3Config from "./createS3Config"
 setEnvironmentVariables()
 process.env.MESSAGE_FORMAT = "AuditEvent"
 process.env.EVENTS_BUCKET_NAME = "auditLogEventsBucket"
-import messageReceiver from '.'
+import messageReceiver from "."
 
 const s3Config = createS3Config()
 const s3Gateway = new TestAwsS3Gateway(s3Config)

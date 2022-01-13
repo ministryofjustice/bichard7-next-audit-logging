@@ -1,14 +1,14 @@
 import axios from "axios"
-import { AuditLog, DynamoDbConfig } from "shared-types"
+import type { AuditLog, DynamoDbConfig } from "shared-types"
 import { HttpStatusCode, TestDynamoGateway } from "shared"
-import { mockAuditLog } from '../test-helpers/mocks'
+import { mockAuditLog } from "../test-helpers/mocks"
 
 const dynamoConfig: DynamoDbConfig = {
-  DYNAMO_URL: 'http://localhost:8000',
-  DYNAMO_REGION: 'eu-west-2',
-  AUDIT_LOG_TABLE_NAME: 'auditLogTable',
-  AWS_ACCESS_KEY_ID: 'DUMMY',
-  AWS_SECRET_ACCESS_KEY: 'DUMMY'
+  DYNAMO_URL: "http://localhost:8000",
+  DYNAMO_REGION: "eu-west-2",
+  AUDIT_LOG_TABLE_NAME: "auditLogTable",
+  AWS_ACCESS_KEY_ID: "DUMMY",
+  AWS_SECRET_ACCESS_KEY: "DUMMY"
 }
 
 describe("Creating Audit Log", () => {
@@ -17,12 +17,12 @@ describe("Creating Audit Log", () => {
 
     const auditLog = mockAuditLog()
 
-    const result = await axios.post('http://localhost:3010/messages', auditLog)
+    const result = await axios.post("http://localhost:3010/messages", auditLog)
     expect(result.status).toEqual(HttpStatusCode.created)
 
-    const record = await gateway.getOne<AuditLog>(dynamoConfig.AUDIT_LOG_TABLE_NAME, 'messageId', auditLog.messageId)
+    const record = await gateway.getOne<AuditLog>(dynamoConfig.AUDIT_LOG_TABLE_NAME, "messageId", auditLog.messageId)
 
     expect(record).not.toBeNull()
-    expect((record as any).messageId).toEqual(auditLog.messageId)
+    expect(record?.messageId).toEqual(auditLog.messageId)
   })
 })

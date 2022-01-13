@@ -7,19 +7,19 @@ import { TestAwsS3Gateway } from "shared"
 import type { TransferMessagesInput, TransferMessagesResult } from "./types"
 
 const internalGatewayConfig: S3Config = {
-  url: 'http://localhost:4569',
-  region: 'eu-west-2',
-  bucketName: 'internalIncomingBucket',
-  accessKeyId: 'S3RVER',
-  secretAccessKey: 'S3RVER'
+  url: "http://localhost:4569",
+  region: "eu-west-2",
+  bucketName: "internalIncomingBucket",
+  accessKeyId: "S3RVER",
+  secretAccessKey: "S3RVER"
 }
 
 const externalGatewayConfig: S3Config = {
-  url: 'http://localhost:4569',
-  region: 'eu-west-2',
-  bucketName: 'externalIncomingBucket',
-  accessKeyId: 'S3RVER',
-  secretAccessKey: 'S3RVER'
+  url: "http://localhost:4569",
+  region: "eu-west-2",
+  bucketName: "externalIncomingBucket",
+  accessKeyId: "S3RVER",
+  secretAccessKey: "S3RVER"
 }
 
 process.env.EXTERNAL_INCOMING_MESSAGE_BUCKET_NAME = externalGatewayConfig.bucketName
@@ -81,8 +81,8 @@ describe("Transfer Messages end-to-end", () => {
     let internalBucketObjects = (await internalGateway.list()) as S3.ObjectList
     expect(internalBucketObjects).toHaveLength(0)
 
-    const lambda = async () => await transferMessages({} as TransferMessagesInput)
-    await expect(lambda).rejects.toThrowError("Provided numberOfObjectsToTransfer is invalid")
+    const lambda = () => transferMessages({} as TransferMessagesInput)
+    await expect(lambda).rejects.toThrow("Provided numberOfObjectsToTransfer is invalid")
 
     externalBucketObjects = (await externalGateway.list()) as S3.ObjectList
     expect(externalBucketObjects).toHaveLength(1)
@@ -103,10 +103,11 @@ describe("Transfer Messages end-to-end", () => {
     let internalBucketObjects = (await internalGateway.list()) as S3.ObjectList
     expect(internalBucketObjects).toHaveLength(0)
 
-    const lambda = () => transferMessages({
-      numberOfObjectsToTransfer: "invalid value"
-    } as TransferMessagesInput)
-    await expect(lambda).rejects.toThrowError("Provided numberOfObjectsToTransfer is invalid")
+    const lambda = () =>
+      transferMessages({
+        numberOfObjectsToTransfer: "invalid value"
+      } as TransferMessagesInput)
+    await expect(lambda).rejects.toThrow("Provided numberOfObjectsToTransfer is invalid")
 
     externalBucketObjects = (await externalGateway.list()) as S3.ObjectList
     expect(externalBucketObjects).toHaveLength(1)

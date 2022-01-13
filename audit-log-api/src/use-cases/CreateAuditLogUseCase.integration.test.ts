@@ -5,11 +5,11 @@ import { TestDynamoGateway } from "shared"
 import CreateAuditLogUseCase from "./CreateAuditLogUseCase"
 
 const config: DynamoDbConfig = {
-  DYNAMO_URL: 'http://localhost:8000',
-  DYNAMO_REGION: 'eu-west-2',
-  AUDIT_LOG_TABLE_NAME: 'auditLogTable',
-  AWS_ACCESS_KEY_ID: 'DUMMY',
-  AWS_SECRET_ACCESS_KEY: 'DUMMY'
+  DYNAMO_URL: "http://localhost:8000",
+  DYNAMO_REGION: "eu-west-2",
+  AUDIT_LOG_TABLE_NAME: "auditLogTable",
+  AWS_ACCESS_KEY_ID: "DUMMY",
+  AWS_SECRET_ACCESS_KEY: "DUMMY"
 }
 
 const testDynamoGateway = new TestDynamoGateway(config)

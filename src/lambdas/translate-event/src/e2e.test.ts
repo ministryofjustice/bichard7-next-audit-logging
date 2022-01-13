@@ -6,7 +6,7 @@ import { encodeBase64 } from "shared"
 import type { MessageFormat, EventCategory } from "shared-types"
 import type TranslateEventInput from "./TranslateEventInput"
 import type TranslationResult from "./translators/TranslationResult"
-import translateEvent from '.'
+import translateEvent from "."
 
 const filenameMappings: Record<MessageFormat, string> = {
   AuditEvent: "audit-event",

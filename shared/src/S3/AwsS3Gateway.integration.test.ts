@@ -6,19 +6,19 @@ import type { S3Config } from "shared-types"
 import TestAwsS3Gateway from "./TestAwsS3Gateway"
 
 const config: S3Config = {
-  url: 'http://localhost:4569',
-  region: 'eu-west-2',
-  bucketName: 'externalIncomingBucket',
-  accessKeyId: 'S3RVER',
-  secretAccessKey: 'S3RVER'
+  url: "http://localhost:4569",
+  region: "eu-west-2",
+  bucketName: "externalIncomingBucket",
+  accessKeyId: "S3RVER",
+  secretAccessKey: "S3RVER"
 }
 
 const secondTestGatewayConfig: S3Config = {
-  url: 'http://localhost:4569',
-  region: 'eu-west-2',
-  bucketName: 'internalIncomingBucket',
-  accessKeyId: 'S3RVER',
-  secretAccessKey: 'S3RVER'
+  url: "http://localhost:4569",
+  region: "eu-west-2",
+  bucketName: "internalIncomingBucket",
+  accessKeyId: "S3RVER",
+  secretAccessKey: "S3RVER"
 }
 
 const testGateway = new TestAwsS3Gateway(config)

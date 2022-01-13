@@ -41,20 +41,20 @@ const originalXml = formatXml(`
 `)
 
 const dynamoConfig: DynamoDbConfig = {
-  DYNAMO_URL: 'http://localhost:8000',
-  DYNAMO_REGION: 'eu-west-2',
-  AUDIT_LOG_TABLE_NAME: 'auditLogTable',
-  AWS_ACCESS_KEY_ID: 'DUMMY',
-  AWS_SECRET_ACCESS_KEY: 'DUMMY'
+  DYNAMO_URL: "http://localhost:8000",
+  DYNAMO_REGION: "eu-west-2",
+  AUDIT_LOG_TABLE_NAME: "auditLogTable",
+  AWS_ACCESS_KEY_ID: "DUMMY",
+  AWS_SECRET_ACCESS_KEY: "DUMMY"
 }
 const dynamoGateway = new TestDynamoGateway(dynamoConfig)
 
 const s3Gateway = new TestS3Gateway({
-  url: 'http://localhost:4569',
-  region: 'eu-west-2',
-  bucketName: 'internalIncomingBucket',
-  accessKeyId: 'S3RVER',
-  secretAccessKey: 'S3RVER'
+  url: "http://localhost:4569",
+  region: "eu-west-2",
+  bucketName: "internalIncomingBucket",
+  accessKeyId: "S3RVER",
+  secretAccessKey: "S3RVER"
 })
 
 const simulator = new IncomingMessageSimulator()

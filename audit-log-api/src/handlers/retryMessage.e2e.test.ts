@@ -1,30 +1,31 @@
 jest.setTimeout(15000)
 
-import { AuditLog, BichardAuditLogEvent, DynamoDbConfig, MqConfig, S3Config } from "shared-types"
+import type { DynamoDbConfig, MqConfig, S3Config } from "shared-types"
+import { AuditLog, BichardAuditLogEvent } from "shared-types"
 import { encodeBase64, HttpStatusCode, TestDynamoGateway, TestAwsS3Gateway, TestStompitMqGateway } from "shared"
 import axios from "axios"
 import { v4 as uuid } from "uuid"
 
 const dynamoConfig: DynamoDbConfig = {
-  DYNAMO_URL: 'http://localhost:8000',
-  DYNAMO_REGION: 'eu-west-2',
-  AUDIT_LOG_TABLE_NAME: 'auditLogTable',
-  AWS_ACCESS_KEY_ID: 'DUMMY',
-  AWS_SECRET_ACCESS_KEY: 'DUMMY'
+  DYNAMO_URL: "http://localhost:8000",
+  DYNAMO_REGION: "eu-west-2",
+  AUDIT_LOG_TABLE_NAME: "auditLogTable",
+  AWS_ACCESS_KEY_ID: "DUMMY",
+  AWS_SECRET_ACCESS_KEY: "DUMMY"
 }
 
 const s3Config: S3Config = {
-  url: 'http://localhost:4569',
-  region: 'eu-west-2',
-  bucketName: 'auditLogEventsBucket',
-  accessKeyId: 'S3RVER',
-  secretAccessKey: 'S3RVER'
+  url: "http://localhost:4569",
+  region: "eu-west-2",
+  bucketName: "auditLogEventsBucket",
+  accessKeyId: "S3RVER",
+  secretAccessKey: "S3RVER"
 }
 
 const mqConfig: MqConfig = {
-  url: 'stomp://localhost:51613',
-  username: 'admin',
-  password: 'admin'
+  url: "stomp://localhost:51613",
+  username: "admin",
+  password: "admin"
 }
 
 const testDynamoGateway = new TestDynamoGateway(dynamoConfig)
@@ -73,5 +74,4 @@ describe("retryMessage", () => {
     testMqGateway.dispose()
     expect(msg).toEqual(messageXml)
   })
-
 })

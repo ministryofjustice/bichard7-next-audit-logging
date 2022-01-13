@@ -6,14 +6,14 @@ import { AuditLog, BichardAuditLogEvent } from "shared-types"
 import { AwsAuditLogDynamoGateway } from "shared"
 import { TestDynamoGateway } from "shared"
 import type { RecordEventInput } from "./index"
-import recordEvent from '.'
+import recordEvent from "."
 
 const config: DynamoDbConfig = {
-  DYNAMO_URL: 'http://localhost:8000',
-  DYNAMO_REGION: 'eu-west-2',
-  AUDIT_LOG_TABLE_NAME: 'auditLogTable',
-  AWS_ACCESS_KEY_ID: 'DUMMY',
-  AWS_SECRET_ACCESS_KEY: 'DUMMY'
+  DYNAMO_URL: "http://localhost:8000",
+  DYNAMO_REGION: "eu-west-2",
+  AUDIT_LOG_TABLE_NAME: "auditLogTable",
+  AWS_ACCESS_KEY_ID: "DUMMY",
+  AWS_SECRET_ACCESS_KEY: "DUMMY"
 }
 
 const testGateway = new TestDynamoGateway(config)

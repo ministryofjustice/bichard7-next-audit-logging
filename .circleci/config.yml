@@ -48,6 +48,8 @@ jobs:
       - restore_cache:
           key: v1-npm-deps-{{ checksum "audit-log-portal/package-lock.json" }}
 
+      - run: make validate
+      
       - run: make install
 
       - run: make build-all
@@ -55,8 +57,6 @@ jobs:
       - run:
           name: Build Portal Stories
           command: cd audit-log-portal && npm run build-storybook && cd -
-
-      - run: make validate
 
       # Update the cache with the latest installed dependencies to speed up future installs
       - save_cache:

@@ -1,4 +1,4 @@
-jest.retryTimes(3);
+jest.retryTimes(3)
 import "shared-testing"
 import type { S3 } from "aws-sdk"
 import type { S3Config } from "shared-types"
@@ -8,19 +8,19 @@ import TransferMessagesUseCase from "./TransferMessagesUseCase"
 import type { TransferMessagesResult } from "./types"
 
 const externalGatewayConfig: S3Config = {
-  url: 'http://localhost:4569',
-  region: 'eu-west-2',
-  bucketName: 'externalIncomingBucket',
-  accessKeyId: 'S3RVER',
-  secretAccessKey: 'S3RVER'
+  url: "http://localhost:4569",
+  region: "eu-west-2",
+  bucketName: "externalIncomingBucket",
+  accessKeyId: "S3RVER",
+  secretAccessKey: "S3RVER"
 }
 
 const internalGatewayConfig: S3Config = {
-  url: 'http://localhost:4569',
-  region: 'eu-west-2',
-  bucketName: 'internalIncomingBucket',
-  accessKeyId: 'S3RVER',
-  secretAccessKey: 'S3RVER'
+  url: "http://localhost:4569",
+  region: "eu-west-2",
+  bucketName: "internalIncomingBucket",
+  accessKeyId: "S3RVER",
+  secretAccessKey: "S3RVER"
 }
 
 const gatewayA = new AwsS3Gateway(externalGatewayConfig)

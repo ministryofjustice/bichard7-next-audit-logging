@@ -1,7 +1,7 @@
 import type { DynamoDbConfig } from "shared-types"
 
 export default function createDynamoDbConfig(): DynamoDbConfig {
-  const { AWS_URL, AWS_REGION, AUDIT_LOG_TABLE_NAME } = process.env
+  const { AWS_URL, AWS_REGION, AUDIT_LOG_TABLE_NAME, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY } = process.env
 
   if (!AWS_URL) {
     throw Error("AWS_URL environment variable must have value.")
@@ -19,7 +19,7 @@ export default function createDynamoDbConfig(): DynamoDbConfig {
     DYNAMO_URL: AWS_URL,
     DYNAMO_REGION: AWS_REGION,
     AUDIT_LOG_TABLE_NAME,
-    AWS_ACCESS_KEY_ID: process.env.AWS_ACCESS_KEY_ID,
-    AWS_SECRET_ACCESS_KEY: process.env.AWS_SECRET_ACCESS_KEY
+    AWS_ACCESS_KEY_ID: AWS_ACCESS_KEY_ID,
+    AWS_SECRET_ACCESS_KEY: AWS_SECRET_ACCESS_KEY
   }
 }

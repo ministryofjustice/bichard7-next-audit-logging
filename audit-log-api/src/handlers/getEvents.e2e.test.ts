@@ -1,13 +1,12 @@
 import axios from "axios"
-import { AuditLogEvent } from "shared-types"
+import type { AuditLogEvent } from "shared-types"
 import { HttpStatusCode } from "shared"
-import { mockAuditLog, mockAuditLogEvent } from '../test-helpers/mocks'
-
+import { mockAuditLog, mockAuditLogEvent } from "../test-helpers/mocks"
 
 describe("Getting Audit Log events", () => {
   it("should return the audit log events for an existing audit log record", async () => {
     const auditLog = mockAuditLog()
-    const result1 = await axios.post('http://localhost:3010/messages', auditLog)
+    const result1 = await axios.post("http://localhost:3010/messages", auditLog)
     expect(result1.status).toEqual(HttpStatusCode.created)
 
     const event = mockAuditLogEvent()

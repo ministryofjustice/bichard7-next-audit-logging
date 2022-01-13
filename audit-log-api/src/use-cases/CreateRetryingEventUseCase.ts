@@ -2,7 +2,7 @@ import type { ApiClient, PromiseResult } from "shared-types"
 import { AuditLogEvent } from "shared-types"
 
 export default class CreateRetryingEventUseCase {
-  constructor(private readonly apiClient: ApiClient) { }
+  constructor(private readonly apiClient: ApiClient) {}
 
   create(messageId: string): PromiseResult<void> {
     const event = new AuditLogEvent({
