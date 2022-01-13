@@ -203,6 +203,11 @@ jobs:
       - run:
           name: Start Audit Log API
           command: nvm use && make run-api
+          background: true
+
+      - run:
+          name: Wait for Audit Log API
+          command: cd audit-log-api && npm run wait-for-api
 
       - run:
           name: Running unit, integration, and end-to-end tests
