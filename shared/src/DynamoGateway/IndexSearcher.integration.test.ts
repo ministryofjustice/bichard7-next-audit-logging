@@ -1,3 +1,4 @@
+jest.retryTimes(10)
 import { isError } from "shared-types"
 import type { DynamoDbConfig } from "shared-types"
 import IndexSearcher from "./IndexSearcher"

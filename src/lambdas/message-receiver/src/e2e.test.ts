@@ -1,3 +1,4 @@
+jest.retryTimes(10)
 import "shared-testing"
 import type { AmazonMqEventSourceRecordEvent } from "shared-types"
 import { TestAwsS3Gateway } from "shared"

@@ -1,3 +1,4 @@
+jest.retryTimes(10)
 import type { DocumentClient } from "aws-sdk/clients/dynamodb"
 import type { EventCategory } from "shared-types"
 import { isError, AuditLog, AuditLogEvent, AuditLogStatus } from "shared-types"

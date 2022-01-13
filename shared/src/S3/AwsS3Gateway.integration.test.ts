@@ -1,3 +1,4 @@
+jest.retryTimes(3)
 import "shared-testing"
 import type { S3 } from "aws-sdk"
 import { isError } from "shared-types"

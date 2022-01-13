@@ -1,3 +1,4 @@
+jest.retryTimes(10)
 import "shared-testing"
 import { setEnvironmentVariables } from "shared-testing"
 setEnvironmentVariables()

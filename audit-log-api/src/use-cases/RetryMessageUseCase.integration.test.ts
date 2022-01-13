@@ -1,5 +1,4 @@
-jest.setTimeout(15000)
-
+jest.retryTimes(10)
 import "shared-testing"
 import type { DynamoDbConfig, MqConfig, S3Config } from "shared-types"
 import { AuditLog, BichardAuditLogEvent } from "shared-types"

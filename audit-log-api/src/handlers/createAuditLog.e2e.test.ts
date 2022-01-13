@@ -1,3 +1,4 @@
+jest.retryTimes(10)
 import axios from "axios"
 import type { AuditLog, DynamoDbConfig } from "shared-types"
 import { HttpStatusCode, TestDynamoGateway } from "shared"

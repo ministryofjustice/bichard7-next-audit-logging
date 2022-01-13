@@ -1,4 +1,4 @@
-jest.retryTimes(3)
+jest.retryTimes(10)
 import "shared-testing"
 import type { S3 } from "aws-sdk"
 import type { S3Config } from "shared-types"

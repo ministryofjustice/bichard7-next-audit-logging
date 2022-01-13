@@ -1,5 +1,4 @@
-jest.setTimeout(30000)
-
+jest.retryTimes(10)
 import "shared-testing"
 import fs from "fs"
 import { encodeBase64 } from "shared"

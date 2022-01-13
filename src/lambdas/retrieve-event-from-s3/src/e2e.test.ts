@@ -1,3 +1,4 @@
+jest.retryTimes(10)
 import { setEnvironmentVariables } from "shared-testing"
 setEnvironmentVariables()
 import type { EventMessage, S3Config } from "shared-types"

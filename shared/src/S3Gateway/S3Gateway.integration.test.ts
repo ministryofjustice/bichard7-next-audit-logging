@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
+jest.retryTimes(10)
 import { isError } from "shared-types"
 import type { S3Config } from "shared-types"
 import TestS3Gateway from "./TestS3Gateway"

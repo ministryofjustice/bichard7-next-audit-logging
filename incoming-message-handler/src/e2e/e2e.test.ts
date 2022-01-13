@@ -1,3 +1,4 @@
+jest.retryTimes(10)
 import { v4 as uuid } from "uuid"
 import format from "xml-formatter"
 import type { DynamoDbConfig } from "shared-types"

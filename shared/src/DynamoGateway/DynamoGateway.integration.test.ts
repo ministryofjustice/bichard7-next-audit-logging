@@ -1,3 +1,4 @@
+jest.retryTimes(10)
 import type { DocumentClient, GetItemOutput } from "aws-sdk/clients/dynamodb"
 import type UpdateOptions from "./UpdateOptions"
 import { isError } from "shared-types"

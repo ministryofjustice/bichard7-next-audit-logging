@@ -1,3 +1,4 @@
+jest.retryTimes(10)
 import type { DynamoDbConfig } from "shared-types"
 import { AuditLog } from "shared-types"
 import { AwsAuditLogDynamoGateway } from "shared"

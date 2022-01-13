@@ -1,3 +1,4 @@
+jest.retryTimes(10)
 import type { EventMessage, S3Config } from "shared-types"
 import { isError } from "shared-types"
 import { TestAwsS3Gateway } from "shared"
