@@ -59,17 +59,17 @@ define get_source_files
 endef
 
 # Source files for each package
-SHARED_TYPES_SOURCE := $(call get_source_files,shared-types)
-SHARED_TESTING_SOURCE := $(call get_source_files,shared-testing)
-SHARED_SOURCE := $(call get_source_files,shared)
+SHARED_TYPES_SOURCE := $(call get_source_files,src/shared-types)
+SHARED_TESTING_SOURCE := $(call get_source_files,src/shared-testing)
+SHARED_SOURCE := $(call get_source_files,src/shared)
 RETRIEVE_EVENT_FROM_S3_SOURCE := $(call get_source_files,src/lambdas/retrieve-event-from-s3)
 TRANSLATE_EVENT_SOURCE := $(call get_source_files,src/lambdas/translate-event)
 RECORD_EVENT_SOURCE := $(call get_source_files,src/lambdas/record-event)
 MESSAGE_RECEIVER_SOURCE := $(call get_source_files,src/lambdas/message-receiver)
 TRANSFER_MESSAGES_SOURCE := $(call get_source_files,src/lambdas/transfer-messages)
-INCOMING_MESSAGE_HANDLER_SOURCE := $(call get_source_files,incoming-message-handler)
-AUDIT_LOG_API_SOURCE := $(call get_source_files,audit-log-api)
-AUDIT_LOG_PORTAL_SOURCE := $(call get_source_files,audit-log-portal)
+INCOMING_MESSAGE_HANDLER_SOURCE := $(call get_source_files,src/incoming-message-handler)
+AUDIT_LOG_API_SOURCE := $(call get_source_files,src/audit-log-api)
+AUDIT_LOG_PORTAL_SOURCE := $(call get_source_files,src/audit-log-portal)
 
 # How to build each package
 shared-types/dist: $(SHARED_TYPES_SOURCE)
