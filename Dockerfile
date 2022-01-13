@@ -15,7 +15,7 @@ RUN npm i && npm run build
 
 WORKDIR /src/shared
 
-RUN npm i && npm run build
+RUN npm i && npm run build:prod
 
 #########################################
 # Portal: Build
