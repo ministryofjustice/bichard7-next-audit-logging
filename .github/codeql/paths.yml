@@ -1,8 +1,15 @@
 paths:
-  - mq-listener
+  - shared-types
+  - shared-testing
+  - shared
+  - src/lambdas/retrieve-event-from-s3
+  - src/lambdas/translate-event
+  - src/lambdas/record-event
+  - src/lambdas/message-receiver
+  - src/lambdas/transfer-messages
+  - src/event-handler
+  - incoming-message-handler
+  - audit-log-api
+  - audit-log-portal
 paths-ignore:
-  - ./shared/src/*/*.integration.test.ts
-  - ./shared/src/*/*.test.ts
-  - helpers
-  - utils
-  - steps
+  - "*.test.ts"
