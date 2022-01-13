@@ -25,17 +25,17 @@ validate:
 ########################################
 
 # Package => build output aliases
-shared-types: shared-types/dist
-shared-testing: shared-testing/dist
-shared: shared/dist
+shared-types: src/shared-types/dist
+shared-testing: src/shared-testing/dist
+shared: src/shared/dist
 retrieve-event-from-s3: src/lambdas/retrieve-event-from-s3/build
 translate-event: src/lambdas/translate-event/build
 record-event: src/lambdas/record-event/build
-message-receiver: src/lambdas/message-receiver/build
-transfer-messages: src/lambdas/transfer-messages/build
-incoming-message-handler: incoming-message-handler/build
-audit-log-api: audit-log-api/build
-audit-log-portal: audit-log-portal/.next
+message-receiver: src/message-receiver/build
+transfer-messages: src/transfer-messages/build
+incoming-message-handler: src/incoming-message-handler/build
+audit-log-api: src/audit-log-api/build
+audit-log-portal: src/audit-log-portal/.next
 
 define get_source_files
 	$(shell find $(1) \
@@ -72,77 +72,73 @@ AUDIT_LOG_API_SOURCE := $(call get_source_files,src/audit-log-api)
 AUDIT_LOG_PORTAL_SOURCE := $(call get_source_files,src/audit-log-portal)
 
 # How to build each package
-shared-types/dist: $(SHARED_TYPES_SOURCE)
-	cd shared-types && npm run build
+src/shared-types/dist: $(SHARED_TYPES_SOURCE)
+	cd src/shared-types && npm run build
 
-shared-testing/dist: shared-types/dist $(SHARED_TESTING_SOURCE)
-	cd shared-testing && npm run build
+src/shared-testing/dist: src/shared-types/dist $(SHARED_TESTING_SOURCE)
+	cd src/shared-testing && npm run build
 
-shared/dist: shared-types/dist shared-testing/dist $(SHARED_SOURCE)
-	cd shared && npm run build
+src/shared/dist: src/shared-types/dist src/shared-testing/dist $(SHARED_SOURCE)
+	cd src/shared && npm run build
 
-src/lambdas/retrieve-event-from-s3/build: shared-types/dist shared-testing/dist shared/dist $(RETRIEVE_EVENT_FROM_S3_SOURCE)
+src/lambdas/retrieve-event-from-s3/build: src/shared-types/dist src/shared-testing/dist src/shared/dist $(RETRIEVE_EVENT_FROM_S3_SOURCE)
 	cd src/lambdas/retrieve-event-from-s3 && npm run build
 
-src/lambdas/translate-event/build: shared-types/dist shared-testing/dist shared/dist $(TRANSLATE_EVENT_SOURCE)
+src/lambdas/translate-event/build: src/shared-types/dist src/shared-testing/dist src/shared/dist $(TRANSLATE_EVENT_SOURCE)
 	cd src/lambdas/translate-event && npm run build
 
-src/lambdas/record-event/build: shared-types/dist shared-testing/dist shared/dist $(RECORD_EVENT_SOURCE)
+src/lambdas/record-event/build: src/shared-types/dist src/shared-testing/dist src/shared/dist $(RECORD_EVENT_SOURCE)
 	cd src/lambdas/record-event && npm run build
 
-src/lambdas/message-receiver/build: shared-types/dist shared-testing/dist shared/dist $(MESSAGE_RECEIVER_SOURCE)
-	cd src/lambdas/message-receiver && npm run build
+src/message-receiver/build: src/shared-types/dist src/shared-testing/dist src/shared/dist $(MESSAGE_RECEIVER_SOURCE)
+	cd src/message-receiver && npm run build
 
-src/lambdas/transfer-messages/build: shared-types/dist shared-testing/dist shared/dist $(TRANSFER_MESSAGES_SOURCE)
-	cd src/lambdas/transfer-messages && npm run build
+src/transfer-messages/build: src/shared-types/dist src/shared-testing/dist src/shared/dist $(TRANSFER_MESSAGES_SOURCE)
+	cd src/transfer-messages && npm run build
 
-.PHONY: event-handler
-event-handler: shared-types/dist shared-testing/dist shared/dist
+.PHONY: src/event-handler
+src/event-handler: src/shared-types/dist src/shared-testing/dist src/shared/dist
 
-incoming-message-handler/build: shared-types/dist shared-testing/dist shared/dist $(INCOMING_MESSAGE_HANDLER_SOURCE)
-	cd incoming-message-handler && npm run build
+src/incoming-message-handler/build: src/shared-types/dist src/shared-testing/dist src/shared/dist $(INCOMING_MESSAGE_HANDLER_SOURCE)
+	cd src/incoming-message-handler && npm run build
 
-audit-log-api/build: shared-types/dist shared-testing/dist shared/dist $(AUDIT_LOG_API_SOURCE)
-	cd audit-log-api && npm run build
+src/audit-log-api/build: src/shared-types/dist src/shared-testing/dist src/shared/dist $(AUDIT_LOG_API_SOURCE)
+	cd src/audit-log-api && npm run build
 
-audit-log-portal/.next: shared-types/dist shared/dist $(AUDIT_LOG_PORTAL_SOURCE)
-	cd audit-log-portal && npm run build
+src/audit-log-portal/.next: src/shared-types/dist src/shared/dist $(AUDIT_LOG_PORTAL_SOURCE)
+	cd src/audit-log-portal && npm run build
 
 # Clean
 .PHONY: clean
 clean:
 	rm -rf \
-		shared-types/dist \
-		shared-testing/dist \
-		shared/dist \
+		src/shared-types/dist \
+		src/shared-testing/dist \
+		src/shared/dist \
 		src/lambdas/retrieve-event-from-s3/build \
 		src/lambdas/translate-event/build \
 		src/lambdas/record-event/build \
-		src/lambdas/message-receiver/build \
-		src/lambdas/transfer-messages/build \
-		incoming-message-handler/build \
-		audit-log-api/build \
-		audit-log-portal/.next
+		src/message-receiver/build \
+		src/transfer-messages/build \
+		src/incoming-message-handler/build \
+		src/audit-log-api/build \
+		src/audit-log-portal/.next
 
 ########################################
 # Run Commands
 ########################################
 
-.PHONY: run-mq-listener
-run-mq-listener: destroy-mq-listener
-	cd mq-listener && npm run start
-
 .PHONY: run-incoming-message-handler
 run-incoming-message-handler:
-	cd incoming-message-handler && npm run setup:env
+	cd src/incoming-message-handler && npm run setup:env
 
 .PHONY: run-api
 run-api:
-	cd audit-log-api && npm run start
+	cd src/audit-log-api && npm run start
 
 .PHONY: run-portal
 run-portal:
-	cd audit-log-portal && npm run start
+	cd src/audit-log-portal && npm run start
 
 .PHONY: run-event-handler
 run-event-handler:
@@ -173,16 +169,12 @@ stop-mq:
 # Destroy Commands
 ########################################
 
-.PHONY: destroy-mq-listener
-destroy-mq-listener:
-	cd mq-listener && npm run stop
-
 .PHONY: destroy-infra
 destroy-infra:
 	docker-compose -f ./environment/docker-compose.yml down
 
 .PHONY: destroy
-destroy: destroy-mq-listener destroy-infra
+destroy: destroy-infra
 
 ########################################
 # Action Commands
@@ -195,18 +187,6 @@ build-portal-image:
 .PHONY: codebuild-portal-image
 codebuild-portal-image:
 	scripts/build-portal-codebuild-image.sh
-
-.PHONY: get-api-url
-get-api-url:
-	\. environment/audit-log-api-url.sh && get_audit_log_api_url
-
-.PHONY: follow-logs
-follow-logs:
-	docker logs -tf localstack_main
-
-.PHONY: follow-mq-listener-logs
-follow-mq-listener-logs:
-	cd mq-listener && npm run logs
 
 .PHONY: send-message
 send-message:

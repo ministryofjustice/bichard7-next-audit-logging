@@ -47,16 +47,16 @@ jobs:
 
       - restore_cache:
           key: v1-npm-deps-{{ checksum "src/audit-log-portal/package-lock.json" }}
-
-      - run: make validate
       
       - run: make install
+
+      - run: make validate
 
       - run: make build-all
 
       - run:
           name: Build Portal Stories
-          command: cd audit-log-portal && npm run build-storybook && cd -
+          command: cd src/audit-log-portal && npm run build-storybook && cd -
 
       # Update the cache with the latest installed dependencies to speed up future installs
       - save_cache:
@@ -197,8 +197,8 @@ jobs:
           command: sudo apt-get update && sudo apt-get install openjdk-17-jre
 
       - run:
-          name: Install Dyanmo
-          command: make -C ./audit-log-api install-dynamo
+          name: Install Dynamo
+          command: make -C ./src/audit-log-api install-dynamo
 
       - run:
           name: Start Audit Log API
@@ -207,7 +207,7 @@ jobs:
 
       - run:
           name: Wait for Audit Log API
-          command: cd audit-log-api && npm run wait-for-api
+          command: cd src/audit-log-api && npm run wait-for-api
 
       - run:
           name: Running unit, integration, and end-to-end tests
