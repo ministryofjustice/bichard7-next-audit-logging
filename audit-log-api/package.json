@@ -13,7 +13,8 @@
     "test:e2e": "jest --testPathPattern=e2e",
     "start": "sls offline start --httpPort 3010",
     "start:daemon": "npm run start & wait-on tcp:3010",
-    "hook:before:offline:start:init": "make -C .. run-mq"
+    "hook:before:offline:start:init": "make -C .. run-mq",
+    "install-dynamo": "sls dynamodb install"
   },
   "repository": {
     "type": "git",

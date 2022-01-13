@@ -197,6 +197,10 @@ jobs:
           command: sudo apt-get update && sudo apt-get install openjdk-17-jre
 
       - run:
+          name: Install Dyanmo
+          command: make -C ./audit-log-api install-dynamo
+
+      - run:
           name: Start Audit Log API
           command: nvm use && make run-api
 
