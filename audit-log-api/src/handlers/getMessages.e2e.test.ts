@@ -8,10 +8,10 @@ describe("Getting Audit Logs", () => {
   it("should return the audit log records", async () => {
     const auditLog = mockAuditLog()
 
-    const result = await axios.post('http://localhost:3000/messages', auditLog)
+    const result = await axios.post('http://localhost:3010/messages', auditLog)
     expect(result.status).toEqual(HttpStatusCode.created)
 
-    const result2 = await axios.get<AuditLog[]>(`http://localhost:3000/messages`)
+    const result2 = await axios.get<AuditLog[]>(`http://localhost:3010/messages`)
     expect(result2.status).toEqual(HttpStatusCode.ok)
 
     expect(Array.isArray(result2.data)).toBeTruthy()
@@ -22,10 +22,10 @@ describe("Getting Audit Logs", () => {
   it("should return a specific audit log record", async () => {
     const auditLog = mockAuditLog()
 
-    const result = await axios.post('http://localhost:3000/messages', auditLog)
+    const result = await axios.post('http://localhost:3010/messages', auditLog)
     expect(result.status).toEqual(HttpStatusCode.created)
 
-    const result2 = await axios.get<AuditLog[]>(`http://localhost:3000/messages/${auditLog.messageId}`)
+    const result2 = await axios.get<AuditLog[]>(`http://localhost:3010/messages/${auditLog.messageId}`)
     expect(result2.status).toEqual(HttpStatusCode.ok)
 
     expect(Array.isArray(result2.data)).toBeTruthy()

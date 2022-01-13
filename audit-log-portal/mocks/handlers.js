@@ -2,7 +2,7 @@ const { rest } = require("msw")
 const { AuditLogStatus } = require("shared")
 const { messages } = require("./data/messages")
 
-const baseApiUrl = "http*://*/restapis/*"
+const baseApiUrl = "http://localhost:3000"
 
 const filterByLastMessage = (messagesToFilter, lastMessageId) => {
   if (lastMessageId) {

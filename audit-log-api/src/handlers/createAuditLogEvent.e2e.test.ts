@@ -16,11 +16,11 @@ describe("Creating Audit Log event", () => {
     const gateway = new TestDynamoGateway(dynamoConfig)
 
     const auditLog = mockAuditLog()
-    const result1 = await axios.post('http://localhost:3000/messages', auditLog)
+    const result1 = await axios.post('http://localhost:3010/messages', auditLog)
     expect(result1.status).toEqual(HttpStatusCode.created)
 
     const event = mockAuditLogEvent()
-    const result2 = await axios.post(`http://localhost:3000/messages/${auditLog.messageId}/events`, event)
+    const result2 = await axios.post(`http://localhost:3010/messages/${auditLog.messageId}/events`, event)
     expect(result2.status).toEqual(HttpStatusCode.created)
 
     const record = await gateway.getOne<AuditLog>(dynamoConfig.AUDIT_LOG_TABLE_NAME, 'messageId', auditLog.messageId)

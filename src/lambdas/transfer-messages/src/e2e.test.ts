@@ -39,7 +39,6 @@ describe("Transfer Messages end-to-end", () => {
   beforeEach(async () => {
     await internalGateway.deleteAll()
     await externalGateway.deleteAll()
-    await new Promise((resolve) => setTimeout(resolve, 1000));
   })
 
   test("given an object is stored in external S3 bucket, it should be transferred to the internal S3 bucket", async () => {

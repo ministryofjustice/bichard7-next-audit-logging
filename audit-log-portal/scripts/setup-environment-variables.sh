@@ -1,14 +1,13 @@
 #!/bin/bash
 
-source $(dirname "$0")/../../environment/audit-log-api-url.sh
 set -e
 
 API_MODE=$1
-API_URL=http://localhost/restapis/dummy_api_id/dummy_stage/_user_request_
+API_URL=http://localhost:3010
 API_KEY=dummydummydummydummy
 
 if [[ -z $API_MODE ]] || [[ $API_MODE != "mocked" ]]; then
-  API_URL=$(get_audit_log_api_url)
+  API_URL=http://localhost:3010
 fi
 
 if [[ -z $API_URL ]]; then

@@ -64,7 +64,7 @@ describe("retryMessage", () => {
 
     await testDynamoGateway.insertOne(dynamoConfig.AUDIT_LOG_TABLE_NAME, message, "messageId")
 
-    const response = await axios.post(`http://localhost:3000/messages/${message.messageId}/retry`, null)
+    const response = await axios.post(`http://localhost:3010/messages/${message.messageId}/retry`, null)
 
     expect(response.status).toBe(HttpStatusCode.noContent)
     expect(response.data).toBe("")

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Wait until application is running
-APP_URL=http://localhost:3000/audit-logging
+APP_URL=http://localhost:3020/audit-logging
 RESPONSE_CODE=404
 RETRY=7
 

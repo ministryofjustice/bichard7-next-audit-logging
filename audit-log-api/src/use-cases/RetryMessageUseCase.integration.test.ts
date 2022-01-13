@@ -43,7 +43,7 @@ const s3Config: S3Config = {
 const s3Gateway = new TestAwsS3Gateway(s3Config)
 const retrieveEventXmlFromS3UseCase = new RetrieveEventXmlFromS3UseCase(s3Gateway)
 
-const apiClient = new AuditLogApiClient('http://localhost:3000', "DUMMY")
+const apiClient = new AuditLogApiClient('http://localhost:3010', "DUMMY")
 const createRetryingEventUseCase = new CreateRetryingEventUseCase(apiClient)
 
 const useCase = new RetryMessageUseCase(

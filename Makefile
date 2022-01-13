@@ -6,7 +6,7 @@ SHELL := /bin/bash
 
 .PHONY: install
 install:
-	scripts/install-all-ci.sh
+	scripts/install-all.sh
 
 .PHONY: build-all
 build-all:
@@ -207,10 +207,6 @@ follow-logs:
 .PHONY: follow-mq-listener-logs
 follow-mq-listener-logs:
 	cd mq-listener && npm run logs
-
-.PHONY: scan-db
-scan-db:
-	awslocal dynamodb scan --table-name audit-log
 
 .PHONY: send-message
 send-message:

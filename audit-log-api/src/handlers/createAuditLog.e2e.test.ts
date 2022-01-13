@@ -17,7 +17,7 @@ describe("Creating Audit Log", () => {
 
     const auditLog = mockAuditLog()
 
-    const result = await axios.post('http://localhost:3000/messages', auditLog)
+    const result = await axios.post('http://localhost:3010/messages', auditLog)
     expect(result.status).toEqual(HttpStatusCode.created)
 
     const record = await gateway.getOne<AuditLog>(dynamoConfig.AUDIT_LOG_TABLE_NAME, 'messageId', auditLog.messageId)

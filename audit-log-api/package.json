@@ -11,7 +11,7 @@
     "test:unit:watch": "jest --watchAll --testPathIgnorePatterns='integration' 'e2e'",
     "test:integration": "jest --testPathPattern=integration",
     "test:e2e": "jest --testPathPattern=e2e",
-    "start": "sls offline start",
+    "start": "sls offline start --httpPort 3010",
     "start:daemon": "sls offline start",
     "hook:before:offline:start:init": "make -C .. run-mq"
   },
