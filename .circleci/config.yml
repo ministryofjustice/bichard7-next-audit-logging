@@ -193,6 +193,10 @@ jobs:
           at: .
 
       - run:
+          name: Start Audit Log API
+          command: nvm use && make run-api
+
+      - run:
           name: Running unit, integration, and end-to-end tests
           command: nvm use && make test
 

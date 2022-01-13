@@ -138,7 +138,7 @@ run-incoming-message-handler:
 
 .PHONY: run-api
 run-api:
-	cd audit-log-api && npm run start
+	cd audit-log-api && npm run start:daemon
 
 .PHONY: run-portal
 run-portal:
