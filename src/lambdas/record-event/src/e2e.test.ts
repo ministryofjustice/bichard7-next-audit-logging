@@ -1,17 +1,20 @@
-jest.setTimeout(30000)
-
+jest.retryTimes(10)
 import "shared-testing"
-import { invokeFunction } from "shared-testing"
+import { setEnvironmentVariables } from "shared-testing"
+setEnvironmentVariables()
 import type { DynamoDbConfig } from "shared-types"
 import { AuditLog, BichardAuditLogEvent } from "shared-types"
 import { AwsAuditLogDynamoGateway } from "shared"
 import { TestDynamoGateway } from "shared"
 import type { RecordEventInput } from "./index"
+import recordEvent from "."
 
 const config: DynamoDbConfig = {
-  DYNAMO_URL: "http://localhost:4566",
-  DYNAMO_REGION: "us-east-1",
-  AUDIT_LOG_TABLE_NAME: "audit-log"
+  DYNAMO_URL: "http://localhost:8000",
+  DYNAMO_REGION: "eu-west-2",
+  AUDIT_LOG_TABLE_NAME: "auditLogTable",
+  AWS_ACCESS_KEY_ID: "DUMMY",
+  AWS_SECRET_ACCESS_KEY: "DUMMY"
 }
 
 const testGateway = new TestDynamoGateway(config)
@@ -41,7 +44,7 @@ describe("Record Event end-to-end", () => {
       event
     }
 
-    const result = await invokeFunction("record-event", input)
+    const result = await recordEvent(input)
     expect(result).toNotBeError()
 
     const actualAuditLog = <AuditLog>await gateway.fetchOne(auditLog.messageId)
@@ -73,7 +76,7 @@ describe("Record Event end-to-end", () => {
       event
     }
 
-    const result = await invokeFunction("record-event", input)
+    const result = await recordEvent(input)
     expect(result).toNotBeError()
 
     const actualAuditLog = <AuditLog>await gateway.fetchOne(expectedMessageId)
@@ -113,7 +116,7 @@ describe("Record Event end-to-end", () => {
       event
     }
 
-    const result = await invokeFunction("record-event", input)
+    const result = await recordEvent(input)
     expect(result).toNotBeError()
 
     const actualAuditLog = <AuditLog>await gateway.fetchOne("")

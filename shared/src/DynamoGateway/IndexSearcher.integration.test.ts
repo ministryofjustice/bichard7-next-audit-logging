@@ -1,3 +1,4 @@
+jest.retryTimes(10)
 import { isError } from "shared-types"
 import type { DynamoDbConfig } from "shared-types"
 import IndexSearcher from "./IndexSearcher"
@@ -10,9 +11,11 @@ interface TestRecord {
 }
 
 const config: DynamoDbConfig = {
-  DYNAMO_URL: "http://localhost:4566",
-  DYNAMO_REGION: "us-east-1",
-  AUDIT_LOG_TABLE_NAME: "SearcherTesting"
+  DYNAMO_URL: "http://localhost:8000",
+  DYNAMO_REGION: "eu-west-2",
+  AUDIT_LOG_TABLE_NAME: "SearcherTesting",
+  AWS_ACCESS_KEY_ID: "DUMMY",
+  AWS_SECRET_ACCESS_KEY: "DUMMY"
 }
 
 const gateway = new TestDynamoGateway(config)

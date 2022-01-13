@@ -6,7 +6,7 @@ SHELL := /bin/bash
 
 .PHONY: install
 install:
-	scripts/install-all-ci.sh
+	scripts/install-all.sh
 
 .PHONY: build-all
 build-all:
@@ -161,6 +161,14 @@ run-all: run-all-without-portal run-portal run-mq-listener
 run-all-e2e:
 	./scripts/run-all-e2e.sh
 
+.PHONY: run-mq
+run-mq:
+	docker-compose -f environment/docker-compose.yml up -d mq
+
+.PHONY: stop-mq
+stop-mq:
+	docker-compose -f environment/docker-compose.yml stop mq
+
 ########################################
 # Destroy Commands
 ########################################
@@ -199,10 +207,6 @@ follow-logs:
 .PHONY: follow-mq-listener-logs
 follow-mq-listener-logs:
 	cd mq-listener && npm run logs
-
-.PHONY: scan-db
-scan-db:
-	awslocal dynamodb scan --table-name audit-log
 
 .PHONY: send-message
 send-message:

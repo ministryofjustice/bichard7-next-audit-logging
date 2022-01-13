@@ -39,7 +39,3 @@ You can also interact directly with the local infrastructure in the same way tha
 ```bash
 # Using the AWS CLI
 aws --endpoint-url http://localhost:4566 dynamodb list-tables
-
-# Using the AWS LOCAL CLI
-awslocal dynamodb list-tables
-```

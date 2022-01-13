@@ -1,23 +1,32 @@
-jest.setTimeout(30000)
-
+jest.retryTimes(10)
 import "shared-testing"
+import { setEnvironmentVariables } from "shared-testing"
+setEnvironmentVariables()
 import type { S3 } from "aws-sdk"
 import type { S3Config } from "shared-types"
 import { TestAwsS3Gateway } from "shared"
-import { invokeFunction } from "shared-testing"
 import type { TransferMessagesInput, TransferMessagesResult } from "./types"
 
 const internalGatewayConfig: S3Config = {
-  url: "http://localhost:4566",
-  region: "us-east-1",
-  bucketName: "incoming-messages"
+  url: "http://localhost:4569",
+  region: "eu-west-2",
+  bucketName: "internalIncomingBucket",
+  accessKeyId: "S3RVER",
+  secretAccessKey: "S3RVER"
 }
 
 const externalGatewayConfig: S3Config = {
-  url: "http://localhost:4566",
-  region: "us-east-1",
-  bucketName: "external-incoming-messages"
+  url: "http://localhost:4569",
+  region: "eu-west-2",
+  bucketName: "externalIncomingBucket",
+  accessKeyId: "S3RVER",
+  secretAccessKey: "S3RVER"
 }
+
+process.env.EXTERNAL_INCOMING_MESSAGE_BUCKET_NAME = externalGatewayConfig.bucketName
+process.env.INTERNAL_INCOMING_MESSAGE_BUCKET_NAME = internalGatewayConfig.bucketName
+
+import transferMessages from "."
 
 const internalGateway = new TestAwsS3Gateway(internalGatewayConfig)
 const externalGateway = new TestAwsS3Gateway(externalGatewayConfig)
@@ -44,7 +53,7 @@ describe("Transfer Messages end-to-end", () => {
     let internalBucketObjects = (await internalGateway.list()) as S3.ObjectList
     expect(internalBucketObjects).toHaveLength(0)
 
-    const result = await invokeFunction<TransferMessagesInput, TransferMessagesResult>("transfer-messages", {
+    const result = await transferMessages({
       numberOfObjectsToTransfer: "all"
     })
     expect(result).toNotBeError()
@@ -62,7 +71,7 @@ describe("Transfer Messages end-to-end", () => {
     expect(internalBucketObjects[0].Key).toBe(fileName)
   })
 
-  it("should return error when numberOfObjectsToTransfer parameter is not provided", async () => {
+  it("should throw error when numberOfObjectsToTransfer parameter is not provided", async () => {
     const fileName = "2021/11/18/12/06/123456.xml"
     await externalGateway.upload(fileName, "Dummy content")
 
@@ -73,12 +82,8 @@ describe("Transfer Messages end-to-end", () => {
     let internalBucketObjects = (await internalGateway.list()) as S3.ObjectList
     expect(internalBucketObjects).toHaveLength(0)
 
-    const result = await invokeFunction<TransferMessagesInput, TransferMessagesResult>(
-      "transfer-messages",
-      {} as TransferMessagesInput
-    )
-
-    expect(String(result)).toContain("Provided numberOfObjectsToTransfer is invalid")
+    const lambda = () => transferMessages({} as TransferMessagesInput)
+    await expect(lambda).rejects.toThrow("Provided numberOfObjectsToTransfer is invalid")
 
     externalBucketObjects = (await externalGateway.list()) as S3.ObjectList
     expect(externalBucketObjects).toHaveLength(1)
@@ -88,7 +93,7 @@ describe("Transfer Messages end-to-end", () => {
     expect(internalBucketObjects).toHaveLength(0)
   })
 
-  it("should return error when numberOfObjectsToTransfer parameter is invalid", async () => {
+  it("should throw error when numberOfObjectsToTransfer parameter is invalid", async () => {
     const fileName = "2021/11/18/12/06/123456.xml"
     await externalGateway.upload(fileName, "Dummy content")
 
@@ -99,11 +104,11 @@ describe("Transfer Messages end-to-end", () => {
     let internalBucketObjects = (await internalGateway.list()) as S3.ObjectList
     expect(internalBucketObjects).toHaveLength(0)
 
-    const result = await invokeFunction<TransferMessagesInput, TransferMessagesResult>("transfer-messages", {
-      numberOfObjectsToTransfer: "invalid value"
-    } as TransferMessagesInput)
-
-    expect(String(result)).toContain("Provided numberOfObjectsToTransfer is invalid")
+    const lambda = () =>
+      transferMessages({
+        numberOfObjectsToTransfer: "invalid value"
+      } as TransferMessagesInput)
+    await expect(lambda).rejects.toThrow("Provided numberOfObjectsToTransfer is invalid")
 
     externalBucketObjects = (await externalGateway.list()) as S3.ObjectList
     expect(externalBucketObjects).toHaveLength(1)

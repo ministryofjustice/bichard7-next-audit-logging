@@ -3,6 +3,8 @@ export default class HttpStatusCode {
 
   public static readonly created = 201
 
+  public static readonly noContent = 204
+
   public static readonly badRequest = 400
 
   public static readonly forbidden = 403

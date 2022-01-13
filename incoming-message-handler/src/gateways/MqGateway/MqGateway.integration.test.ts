@@ -1,9 +1,8 @@
+jest.retryTimes(10)
 import { isError } from "shared-types"
-import type { MqConfig } from "src/configs"
+import type { MqConfig } from "../../configs"
 import MqGateway from "./MqGateway"
 import TestMqGateway from "./TestMqGateway"
-
-jest.setTimeout(30000)
 
 const queueName = "mq-gateway-integration-testing"
 const config: MqConfig = {

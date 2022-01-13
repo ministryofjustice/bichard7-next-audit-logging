@@ -9,5 +9,4 @@ src/lambdas/transfer-messages
 src/event-handler
 incoming-message-handler
 audit-log-api
-mq-listener
 audit-log-portal

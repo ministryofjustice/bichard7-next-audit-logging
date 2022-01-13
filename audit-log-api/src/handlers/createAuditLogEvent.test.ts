@@ -1,8 +1,8 @@
-import "src/testConfig"
+import "../testConfig"
 import type { APIGatewayProxyEvent } from "aws-lambda"
 import { AuditLogEvent } from "shared-types"
 import { HttpStatusCode } from "shared"
-import { CreateAuditLogEventUseCase } from "src/use-cases"
+import { CreateAuditLogEventUseCase } from "../use-cases"
 import createAuditLogEvent from "./createAuditLogEvent"
 
 const createHandlerEvent = (auditLogEvent?: AuditLogEvent): APIGatewayProxyEvent => {

@@ -1,3 +1,4 @@
+jest.retryTimes(10)
 import "shared-testing"
 import type { MqConfig } from "shared-types"
 import StompitMqGateway from "./StompitMqGateway"

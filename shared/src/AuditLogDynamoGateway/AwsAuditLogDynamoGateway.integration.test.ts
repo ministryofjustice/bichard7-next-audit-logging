@@ -1,3 +1,4 @@
+jest.retryTimes(10)
 import type { DocumentClient } from "aws-sdk/clients/dynamodb"
 import type { EventCategory } from "shared-types"
 import { isError, AuditLog, AuditLogEvent, AuditLogStatus } from "shared-types"
@@ -6,9 +7,11 @@ import TestDynamoGateway from "../DynamoGateway/TestDynamoGateway"
 import AwsAuditLogDynamoGateway from "./AwsAuditLogDynamoGateway"
 
 const config: DynamoDbConfig = {
-  DYNAMO_URL: "http://localhost:4566",
-  DYNAMO_REGION: "us-east-1",
-  AUDIT_LOG_TABLE_NAME: "TestAuditLog"
+  DYNAMO_URL: "http://localhost:8000",
+  DYNAMO_REGION: "eu-west-2",
+  AUDIT_LOG_TABLE_NAME: "auditLogTable",
+  AWS_ACCESS_KEY_ID: "DUMMY",
+  AWS_SECRET_ACCESS_KEY: "DUMMY"
 }
 
 const gateway = new AwsAuditLogDynamoGateway(config, config.AUDIT_LOG_TABLE_NAME)

@@ -1,3 +1,4 @@
+jest.retryTimes(3)
 import "shared-testing"
 import type { S3 } from "aws-sdk"
 import { isError } from "shared-types"
@@ -6,15 +7,21 @@ import type { S3Config } from "shared-types"
 import TestAwsS3Gateway from "./TestAwsS3Gateway"
 
 const config: S3Config = {
-  url: "http://localhost:4566",
+  url: "http://localhost:4569",
   region: "eu-west-2",
-  bucketName: "test-bucket"
+  bucketName: "externalIncomingBucket",
+  accessKeyId: "S3RVER",
+  secretAccessKey: "S3RVER"
 }
+
 const secondTestGatewayConfig: S3Config = {
-  url: "http://localhost:4566",
+  url: "http://localhost:4569",
   region: "eu-west-2",
-  bucketName: "second-test-bucket"
+  bucketName: "internalIncomingBucket",
+  accessKeyId: "S3RVER",
+  secretAccessKey: "S3RVER"
 }
+
 const testGateway = new TestAwsS3Gateway(config)
 const gateway = new AwsS3Gateway(config)
 const secondTestGateway = new TestAwsS3Gateway(secondTestGatewayConfig)

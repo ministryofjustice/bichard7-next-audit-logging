@@ -1,6 +1,6 @@
-jest.mock("src/use-cases/createMessageFetcher")
+jest.mock("../use-cases/createMessageFetcher")
 
-import "src/testConfig"
+import "../testConfig"
 import type {
   APIGatewayProxyEvent,
   APIGatewayProxyEventPathParameters,
@@ -10,8 +10,8 @@ import type {
 import type { Result } from "shared-types"
 import { AuditLog } from "shared-types"
 import { HttpStatusCode } from "shared"
-import { createMessageFetcher } from "src/use-cases"
-import type MessageFetcher from "src/use-cases/MessageFetcher"
+import { createMessageFetcher } from "../use-cases"
+import type MessageFetcher from "../use-cases/MessageFetcher"
 import getMessages from "./getMessages"
 
 const mockCreateMessageFetcher = createMessageFetcher as jest.MockedFunction<typeof createMessageFetcher>

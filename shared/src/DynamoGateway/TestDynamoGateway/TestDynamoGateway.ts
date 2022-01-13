@@ -89,7 +89,7 @@ export default class TestDynamoGateway extends DynamoGateway {
     return <T>result.Item
   }
 
-  async deleteAll(tableName: string, keyName: string): Promise<void> {
+  async deleteAll(tableName: string, keyName: string, attempts = 5): Promise<void> {
     const items = await this.getAll(tableName)
 
     const promises =
@@ -108,7 +108,12 @@ export default class TestDynamoGateway extends DynamoGateway {
 
     const remainingItems = await this.getAll(tableName)
     if (remainingItems.Count && remainingItems.Count > 0) {
-      throw new Error(`Failed to delete all items! Remaining Items: ${remainingItems.Count}`)
+      await new Promise((resolve) => setTimeout(resolve, 1000))
+      if (attempts > 0) {
+        await this.deleteAll(tableName, keyName, attempts - 1)
+      } else {
+        throw new Error("Could not delete items from Dynamo table")
+      }
     }
   }
 }

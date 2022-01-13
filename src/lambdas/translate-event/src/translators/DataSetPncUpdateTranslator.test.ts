@@ -1,7 +1,7 @@
 import "shared-testing"
 import fs from "fs"
 import { encodeBase64 } from "shared"
-import type TranslateEventInput from "src/TranslateEventInput"
+import type TranslateEventInput from "../TranslateEventInput"
 import type TranslationResult from "./TranslationResult"
 import DataSetPncUpdateTranslator from "./DataSetPncUpdateTranslator"
 

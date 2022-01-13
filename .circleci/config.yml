@@ -48,9 +48,8 @@ jobs:
       - restore_cache:
           key: v1-npm-deps-{{ checksum "audit-log-portal/package-lock.json" }}
 
-      - restore_cache:
-          key: v1-npm-deps-{{ checksum "mq-listener/package-lock.json" }}
-
+      - run: make validate
+      
       - run: make install
 
       - run: make build-all
@@ -58,8 +57,6 @@ jobs:
       - run:
           name: Build Portal Stories
           command: cd audit-log-portal && npm run build-storybook && cd -
-
-      - run: make validate
 
       # Update the cache with the latest installed dependencies to speed up future installs
       - save_cache:
@@ -113,10 +110,6 @@ jobs:
       - save_cache:
           key: v1-npm-deps-{{ checksum "audit-log-portal/package-lock.json" }}
           paths: audit-log-portal/node_modules
-
-      - save_cache:
-          key: v1-npm-deps-{{ checksum "mq-listener/package-lock.json" }}
-          paths: mq-listener/node_modules
 
       # Persist all dist/build folders to the workspace to reduce build time later
       - persist_to_workspace:
@@ -187,24 +180,34 @@ jobs:
       - restore_cache:
           key: v1-npm-deps-{{ checksum "audit-log-portal/package-lock.json" }}
 
-      - restore_cache:
-          key: v1-npm-deps-{{ checksum "mq-listener/package-lock.json" }}
-
       - run:
           name: Installing Nodejs version in .nvmrc
           command: nvm install
 
       - run:
-          name: Installing and configuring awslocal
-          command: ./.circleci/scripts/install-awslocal.sh
-
-      - run:
           name: Installing all
-          command: nvm use && ./scripts/install-all-ci.sh
+          command: nvm use && ./scripts/install-all.sh
 
       # Attach the workspace to retrieve the dist/build folders so we don't have to rebuild
       - attach_workspace:
           at: .
+
+      - run:
+          name: Install Java
+          command: sudo apt-get update && sudo apt-get install openjdk-17-jre
+
+      - run:
+          name: Install Dyanmo
+          command: make -C ./audit-log-api install-dynamo
+
+      - run:
+          name: Start Audit Log API
+          command: nvm use && make run-api
+          background: true
+
+      - run:
+          name: Wait for Audit Log API
+          command: cd audit-log-api && npm run wait-for-api
 
       - run:
           name: Running unit, integration, and end-to-end tests

@@ -7,12 +7,8 @@
     "clean": "rimraf build",
     "build": "npm run clean && webpack --config ./.webpack/webpack.prod.js",
     "build:dev": "npm run clean && webpack --config ./.webpack/webpack.dev.js",
-    "setup:env": "cd ../../../environment && ./setup.sh && cd - && ./scripts/deploy.sh",
-    "test": "npm run setup:env && ../../../scripts/test.sh",
-    "test:ci": "npm run setup:env && ../../../scripts/test.sh ci",
-    "test:unit": "../../../scripts/test.sh unit",
-    "test:integration": "npm run setup:env && ../../../scripts/test.sh integration",
-    "test:e2e": "npm run setup:env && ../../../scripts/test.sh e2e"
+    "test": "jest",
+    "test:e2e": "jest --testPathPattern=e2e"
   },
   "dependencies": {
     "shared-types": "file:../../../shared-types",

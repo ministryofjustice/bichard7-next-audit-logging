@@ -1,20 +1,24 @@
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda"
 import type { PromiseResult } from "shared-types"
 import { isError } from "shared-types"
-import { AwsAuditLogDynamoGateway, HttpStatusCode } from "shared"
-import createDynamoDbConfig from "src/createDynamoDbConfig"
-import { parseRetryMessageRequest, RetryMessageUseCase } from "src/use-cases"
-import { createJsonApiResult } from "src/utils"
-import { StompitMqGateway, createMqConfig } from "shared"
-import GetLastFailedMessageEventUseCase from "src/use-cases/GetLastEventUseCase"
-import { AuditLogApiClient } from "shared"
-import { AwsS3Gateway } from "shared"
-import getApiUrl from "src/getApiUrl"
-import RetrieveEventXmlFromS3UseCase from "src/use-cases/RetrieveEventXmlFromS3UseCase"
-import CreateRetryingEventUseCase from "src/use-cases/CreateRetryingEventUseCase"
-import SendMessageToQueueUseCase from "src/use-cases/SendMessageToQueueUseCase"
-import createS3Config from "src/createS3Config"
-import getApiKey from "src/getApiKey"
+import {
+  AwsAuditLogDynamoGateway,
+  HttpStatusCode,
+  StompitMqGateway,
+  createMqConfig,
+  AuditLogApiClient,
+  AwsS3Gateway
+} from "shared"
+import createDynamoDbConfig from "../createDynamoDbConfig"
+import { parseRetryMessageRequest, RetryMessageUseCase } from "../use-cases"
+import { createJsonApiResult } from "../utils"
+import GetLastFailedMessageEventUseCase from "../use-cases/GetLastEventUseCase"
+import getApiUrl from "../getApiUrl"
+import RetrieveEventXmlFromS3UseCase from "../use-cases/RetrieveEventXmlFromS3UseCase"
+import CreateRetryingEventUseCase from "../use-cases/CreateRetryingEventUseCase"
+import SendMessageToQueueUseCase from "../use-cases/SendMessageToQueueUseCase"
+import createS3Config from "../createS3Config"
+import getApiKey from "../getApiKey"
 
 const auditLogGatewayConfig = createDynamoDbConfig()
 const auditLogGateway = new AwsAuditLogDynamoGateway(auditLogGatewayConfig, auditLogGatewayConfig.AUDIT_LOG_TABLE_NAME)
@@ -58,7 +62,7 @@ export default async function retryMessage(event: APIGatewayProxyEvent): Promise
   }
 
   return createJsonApiResult({
-    statusCode: HttpStatusCode.ok,
+    statusCode: HttpStatusCode.noContent,
     body: ""
   })
 }

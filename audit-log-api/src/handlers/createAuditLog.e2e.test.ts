@@ -1,26 +1,29 @@
-import fs from "fs"
+jest.retryTimes(10)
 import axios from "axios"
-import { HttpStatusCode } from "shared"
+import type { AuditLog, DynamoDbConfig } from "shared-types"
+import { HttpStatusCode, TestDynamoGateway } from "shared"
+import { mockAuditLog } from "../test-helpers/mocks"
 
-const environmentVariables = JSON.parse(fs.readFileSync(`./scripts/env-vars.json`).toString())
-const apiUrl = String(environmentVariables.Variables.API_URL).replace("localstack_main", "localhost")
+const dynamoConfig: DynamoDbConfig = {
+  DYNAMO_URL: "http://localhost:8000",
+  DYNAMO_REGION: "eu-west-2",
+  AUDIT_LOG_TABLE_NAME: "auditLogTable",
+  AWS_ACCESS_KEY_ID: "DUMMY",
+  AWS_SECRET_ACCESS_KEY: "DUMMY"
+}
 
-it("should return forbidden response code when API key is not present", async () => {
-  const response = await axios.post(`${apiUrl}/messages`).catch((error) => error)
+describe("Creating Audit Log", () => {
+  it("should create a new audit log record", async () => {
+    const gateway = new TestDynamoGateway(dynamoConfig)
 
-  expect(response.response).toBeDefined()
+    const auditLog = mockAuditLog()
 
-  const { response: actualResponse } = response
-  expect(actualResponse.status).toBe(HttpStatusCode.forbidden)
-})
+    const result = await axios.post("http://localhost:3010/messages", auditLog)
+    expect(result.status).toEqual(HttpStatusCode.created)
 
-it("should return forbidden response code when API key is invalid", async () => {
-  const response = await axios
-    .post(`${apiUrl}/messages`, null, { headers: { "X-API-KEY": "Invalid API key" } })
-    .catch((error) => error)
+    const record = await gateway.getOne<AuditLog>(dynamoConfig.AUDIT_LOG_TABLE_NAME, "messageId", auditLog.messageId)
 
-  expect(response.response).toBeDefined()
-
-  const { response: actualResponse } = response
-  expect(actualResponse.status).toBe(HttpStatusCode.forbidden)
+    expect(record).not.toBeNull()
+    expect(record?.messageId).toEqual(auditLog.messageId)
+  })
 })

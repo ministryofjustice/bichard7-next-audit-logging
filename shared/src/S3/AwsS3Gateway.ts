@@ -1,4 +1,4 @@
-import { S3 } from "aws-sdk"
+import { S3, Endpoint } from "aws-sdk"
 import type { PromiseResult } from "shared-types"
 import parseGetObjectResponse from "./parseGetObjectResponse"
 import type { S3Config } from "shared-types"
@@ -10,16 +10,22 @@ export default class AwsS3Gateway implements S3GatewayInterface {
   protected bucketName?: string
 
   constructor(config: S3Config) {
-    const { url, region, bucketName } = config
+    const { url, region, bucketName, accessKeyId, secretAccessKey } = config
+
+    if (!url) {
+      throw Error("url must have value.")
+    }
 
     if (bucketName) {
       this.bucketName = bucketName
     }
 
     this.s3 = new S3({
-      endpoint: url,
+      endpoint: new Endpoint(url),
       region,
-      s3ForcePathStyle: true
+      s3ForcePathStyle: true,
+      accessKeyId,
+      secretAccessKey
     })
   }
 

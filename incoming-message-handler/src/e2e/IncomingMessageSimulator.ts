@@ -1,27 +1,35 @@
 import { S3Gateway } from "shared"
+import { StepFunctionSimulator } from "shared-testing"
 import { isError } from "shared-types"
-import { StepFunctions } from "aws-sdk"
+import retrieveFromS3 from "../handlers/retrieveFromS3"
+import formatMessage from "../handlers/formatMessage"
+import logMessageReceipt from "../handlers/logMessageReceipt"
+import parseMessage from "../handlers/parseMessage"
+import recordSentToBichardEvent from "../handlers/recordSentToBichardEvent"
+import sendToBichard from "../handlers/sendToBichard"
 
 export default class IncomingMessageSimulator {
   private readonly s3Gateway: S3Gateway
 
-  private readonly stateMachine: StepFunctions
+  private readonly stateMachine: StepFunctionSimulator
 
-  constructor(awsUrl: string) {
+  constructor() {
     this.s3Gateway = new S3Gateway({
-      url: awsUrl,
-      region: "us-east-1",
-      bucketName: "incoming-messages"
+      url: "http://localhost:4569",
+      region: "eu-west-2",
+      bucketName: "internalIncomingBucket",
+      accessKeyId: "S3RVER",
+      secretAccessKey: "S3RVER"
     })
 
-    this.stateMachine = new StepFunctions({
-      endpoint: awsUrl,
-      region: "us-east-1",
-      credentials: {
-        accessKeyId: "test",
-        secretAccessKey: "test"
-      }
-    })
+    this.stateMachine = new StepFunctionSimulator([
+      retrieveFromS3,
+      formatMessage,
+      parseMessage,
+      logMessageReceipt,
+      sendToBichard,
+      recordSentToBichardEvent
+    ])
   }
 
   async start(fileName: string, message: string, executionId: string): Promise<void> {
@@ -31,21 +39,14 @@ export default class IncomingMessageSimulator {
       throw result
     }
 
-    const executionName = fileName.replace(/\//g, "_")
-    await this.stateMachine
-      .startExecution({
-        stateMachineArn: "arn:aws:states:us-east-1:000000000000:stateMachine:IncomingMessageHandler",
-        input: `{
-          "id": "${executionId}",
-          "detail": {
-            "requestParameters": {
-              "bucketName": "incoming-messages",
-              "key": "${fileName}"
-            }
-          }
-        }`,
-        name: executionName
-      })
-      .promise()
+    await this.stateMachine.execute({
+      id: executionId,
+      detail: {
+        requestParameters: {
+          bucketName: "internalIncomingBucket",
+          key: fileName
+        }
+      }
+    })
   }
 }

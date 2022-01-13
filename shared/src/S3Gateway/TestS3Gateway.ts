@@ -26,7 +26,7 @@ export default class TestS3Gateway extends S3Gateway {
     return Contents
   }
 
-  async deleteAll(): Promise<void> {
+  async deleteAll(attempts = 5): Promise<void> {
     const contents = await this.getAll()
 
     if (contents && contents.length > 0) {
@@ -43,7 +43,12 @@ export default class TestS3Gateway extends S3Gateway {
 
     const remainingItems = await this.getAll()
     if (remainingItems && remainingItems.length > 0) {
-      throw new Error(`Failed to delete all items! Remaining Items: ${remainingItems?.length}`)
+      await new Promise((resolve) => setTimeout(resolve, 1000))
+      if (attempts > 0) {
+        await this.deleteAll(attempts - 1)
+      } else {
+        throw new Error("Could not delete items from S3 bucket")
+      }
     }
   }
 

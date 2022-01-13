@@ -7,25 +7,24 @@
   "scripts": {
     "build": "rimraf build && webpack --config ./.webpack/webpack.prod.js",
     "build:dev": "rimraf build && webpack --config ./.webpack/webpack.dev.js",
-    "setup:env": "cd ../environment && ./setup.sh && cd - && ./scripts/deploy-infrastructure.sh",
-    "test": "npm run setup:env && ../scripts/test.sh",
-    "test:ci": "npm run setup:env && ../scripts/test.sh ci",
-    "test:unit": "../scripts/test.sh unit",
-    "test:integration": "npm run setup:env && ../scripts/test.sh integration",
-    "test:e2e": "npm run setup:env && ../scripts/test.sh e2e"
+    "test": "jest",
+    "test:unit": "jest --testPathIgnorePatterns='integration' 'e2e'",
+    "test:unit:watch": "jest --watchAll --testPathIgnorePatterns='integration' 'e2e'",
+    "test:integration": "jest --testPathPattern=integration",
+    "test:e2e": "jest --testPathPattern=e2e"
   },
   "dependencies": {
-    "shared-types": "file:../shared-types",
     "aws-sdk": "^2.1051.0",
     "axios": "^0.24.0",
     "https": "^1.0.0",
+    "shared-types": "file:../shared-types",
     "shared": "file:../shared",
+    "shared-testing": "file:../shared-testing",
     "stompit": "^1.0.0",
     "uuid": "^8.3.2",
     "xml2js": "^0.4.23"
   },
   "devDependencies": {
-    "shared-testing": "file:../shared-testing",
     "@babel/core": "^7.16.7",
     "@babel/plugin-bugfix-v8-spread-parameters-in-optional-chaining": "^7.16.7",
     "@babel/preset-env": "^7.16.7",

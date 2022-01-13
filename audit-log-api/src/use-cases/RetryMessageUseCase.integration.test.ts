@@ -1,14 +1,11 @@
-jest.setTimeout(15000)
-
-import fs from "fs"
-import { setEnvironmentVariables } from "shared-testing"
+jest.retryTimes(10)
+import "shared-testing"
+import type { DynamoDbConfig, MqConfig, S3Config } from "shared-types"
 import { AuditLog, BichardAuditLogEvent } from "shared-types"
 import { AwsAuditLogDynamoGateway, encodeBase64 } from "shared"
 import { TestDynamoGateway } from "shared"
 import { AuditLogApiClient } from "shared"
-import createDynamoDbConfig from "src/createDynamoDbConfig"
-import createS3Config from "src/createS3Config"
-import { createMqConfig, TestStompitMqGateway } from "shared"
+import { TestStompitMqGateway } from "shared"
 import { TestAwsS3Gateway } from "shared"
 import RetryMessageUseCase from "./RetryMessageUseCase"
 import GetLastFailedMessageEventUseCase from "./GetLastEventUseCase"
@@ -16,31 +13,37 @@ import SendMessageToQueueUseCase from "./SendMessageToQueueUseCase"
 import RetrieveEventXmlFromS3UseCase from "./RetrieveEventXmlFromS3UseCase"
 import CreateRetryingEventUseCase from "./CreateRetryingEventUseCase"
 
-const environmentVariables = JSON.parse(fs.readFileSync(`./scripts/env-vars.json`).toString())
-const apiUrl = String(environmentVariables.Variables.API_URL).replace("localstack_main", "localhost")
-const apiKey = environmentVariables.Variables.API_KEY
-
-setEnvironmentVariables({
-  API_URL: apiUrl,
-  API_KEY: apiKey,
-  AUDIT_LOG_TABLE_NAME: "audit-log",
-  AUDIT_LOG_EVENTS_BUCKET: "audit-log-events"
-})
-
-const dynamoDbConfig = createDynamoDbConfig()
+const dynamoDbConfig: DynamoDbConfig = {
+  DYNAMO_URL: "http://localhost:8000",
+  DYNAMO_REGION: "eu-west-2",
+  AUDIT_LOG_TABLE_NAME: "auditLogTable",
+  AWS_ACCESS_KEY_ID: "DUMMY",
+  AWS_SECRET_ACCESS_KEY: "DUMMY"
+}
 const testDynamoGateway = new TestDynamoGateway(dynamoDbConfig)
 const auditLogDynamoGateway = new AwsAuditLogDynamoGateway(dynamoDbConfig, dynamoDbConfig.AUDIT_LOG_TABLE_NAME)
 const getLastEventUseCase = new GetLastFailedMessageEventUseCase(auditLogDynamoGateway)
 
 const queueName = "retry-event-integration-testing"
-const mqConfig = createMqConfig()
+const mqConfig: MqConfig = {
+  url: "stomp://localhost:51613",
+  username: "admin",
+  password: "admin"
+}
 const mqGateway = new TestStompitMqGateway(mqConfig)
 const sendMessageToQueueUseCase = new SendMessageToQueueUseCase(mqGateway)
 
-const s3Gateway = new TestAwsS3Gateway(createS3Config())
+const s3Config: S3Config = {
+  url: "http://localhost:4569",
+  region: "eu-west-2",
+  bucketName: "auditLogEventsBucket",
+  accessKeyId: "S3RVER",
+  secretAccessKey: "S3RVER"
+}
+const s3Gateway = new TestAwsS3Gateway(s3Config)
 const retrieveEventXmlFromS3UseCase = new RetrieveEventXmlFromS3UseCase(s3Gateway)
 
-const apiClient = new AuditLogApiClient(apiUrl, apiKey)
+const apiClient = new AuditLogApiClient("http://localhost:3010", "DUMMY")
 const createRetryingEventUseCase = new CreateRetryingEventUseCase(apiClient)
 
 const useCase = new RetryMessageUseCase(
@@ -94,7 +97,7 @@ describe("RetryMessageUseCase", () => {
     expect(result).toNotBeError()
 
     const mqMessage = await mqGateway.getMessage(queueName)
-
+    mqGateway.dispose()
     expect(mqMessage).toBe(eventXml)
 
     const actualAuditLogRecordResult = await auditLogDynamoGateway.fetchOne(message.messageId)

@@ -1,5 +1,4 @@
-jest.setTimeout(250000)
-
+jest.retryTimes(10)
 import "shared-testing"
 import fs from "fs"
 import { AuditLog } from "shared-types"

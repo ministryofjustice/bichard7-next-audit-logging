@@ -1,12 +1,15 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
+jest.retryTimes(10)
 import { isError } from "shared-types"
 import type { S3Config } from "shared-types"
 import TestS3Gateway from "./TestS3Gateway"
 
 const config: S3Config = {
-  url: "http://localhost:4566",
+  url: "http://localhost:4569",
   region: "eu-west-2",
-  bucketName: "test-bucket"
+  bucketName: "externalIncomingBucket",
+  accessKeyId: "S3RVER",
+  secretAccessKey: "S3RVER"
 }
 
 const gateway = new TestS3Gateway(config)

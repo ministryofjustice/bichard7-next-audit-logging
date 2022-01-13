@@ -1,6 +1,6 @@
 import { isError } from "shared-types"
-import type { MqConfig } from "src/configs"
-import MqGateway from "src/gateways/MqGateway"
+import type { MqConfig } from "../configs"
+import MqGateway from "../gateways/MqGateway"
 import SendMessageUseCase from "./SendMessageUseCase"
 
 const config: MqConfig = {

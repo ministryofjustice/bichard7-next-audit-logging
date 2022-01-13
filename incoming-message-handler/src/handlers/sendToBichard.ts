@@ -1,9 +1,9 @@
 import type { AuditLog } from "shared-types"
 import { isError } from "shared-types"
-import { createMqConfig } from "src/configs"
-import MqGateway from "src/gateways/MqGateway"
-import SendMessageUseCase from "src/use-cases/SendMessageUseCase"
-import transformMessageXml from "src/use-cases/transformMessageXml"
+import { createMqConfig } from "../configs"
+import MqGateway from "../gateways/MqGateway"
+import SendMessageUseCase from "../use-cases/SendMessageUseCase"
+import transformMessageXml from "../use-cases/transformMessageXml"
 
 const config = createMqConfig()
 const gateway = new MqGateway(config)

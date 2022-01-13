@@ -1,27 +1,14 @@
 import type { AxiosError } from "axios"
 import axios from "axios"
-import { readFileSync } from "fs"
 import type { AuditLog } from "shared-types"
 import { Poller, PollOptions } from "shared"
 
 export default class TestApi {
-  private apiUrl: string
-
-  private getApiUrl(): string {
-    if (this.apiUrl) {
-      return this.apiUrl
-    }
-
-    const environmentVariablesFilePath = `${process.cwd()}/scripts/env-vars.json`
-    const environmentVariables = JSON.parse(readFileSync(environmentVariablesFilePath, "utf-8")).Variables
-    this.apiUrl = environmentVariables.API_URL.replace("localstack_main", "localhost")
-
-    return this.apiUrl
-  }
+  private apiUrl = "http://localhost:3010"
 
   getMessages(): Promise<AuditLog[]> {
     return axios
-      .get(`${this.getApiUrl()}/messages`, { headers: { "X-API-KEY": "dummydummydummydummy" } })
+      .get(`${this.apiUrl}/messages`, { headers: { "X-API-KEY": "dummydummydummydummy" } })
       .then((response) => response.data)
       .catch((error) => <AxiosError>error)
   }

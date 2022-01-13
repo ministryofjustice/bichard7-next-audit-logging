@@ -10,6 +10,8 @@ export default function createS3Config(): S3Config {
   return {
     url: process.env.S3_URL,
     region: process.env.S3_REGION,
-    bucketName: AUDIT_LOG_EVENTS_BUCKET
+    bucketName: AUDIT_LOG_EVENTS_BUCKET,
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
   }
 }

@@ -1,3 +1,4 @@
+jest.retryTimes(10)
 import type { EventMessage, S3Config } from "shared-types"
 import { isError } from "shared-types"
 import { TestAwsS3Gateway } from "shared"
@@ -5,9 +6,11 @@ import type { StoreInS3Result } from "./StoreInS3UseCase"
 import StoreInS3UseCase from "./StoreInS3UseCase"
 
 const config: S3Config = {
-  url: "http://localhost:4566",
-  region: "eu-west-1",
-  bucketName: "audit-log-events"
+  url: "http://localhost:4569",
+  region: "eu-west-2",
+  bucketName: "auditLogEventsBucket",
+  accessKeyId: "S3RVER",
+  secretAccessKey: "S3RVER"
 }
 
 const gateway = new TestAwsS3Gateway(config)

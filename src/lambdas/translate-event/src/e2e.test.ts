@@ -1,12 +1,11 @@
-jest.setTimeout(30000)
-
+jest.retryTimes(10)
 import "shared-testing"
 import fs from "fs"
 import { encodeBase64 } from "shared"
 import type { MessageFormat, EventCategory } from "shared-types"
-import { invokeFunction } from "shared-testing"
 import type TranslateEventInput from "./TranslateEventInput"
 import type TranslationResult from "./translators/TranslationResult"
+import translateEvent from "."
 
 const filenameMappings: Record<MessageFormat, string> = {
   AuditEvent: "audit-event",
@@ -93,7 +92,7 @@ test.each<TestInput>([
 ])("$messageFormat is translated to AuditLogEvent type", async (input: TestInput) => {
   const payload = createPayload(input.messageFormat)
 
-  const result = await invokeFunction<TranslateEventInput, TranslationResult>("translate-event", payload)
+  const result = await translateEvent(payload)
   expect(result).toNotBeError()
 
   const { messageId, event } = <TranslationResult>result
