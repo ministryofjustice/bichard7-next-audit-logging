@@ -49,14 +49,18 @@ cd src/message-receiver/build
 zip messageReceiver.zip messageReceiver.js
 upload_to_s3 messageReceiver.zip messageReceiver.zip
 
+cd -
+
 ############################################
 # Transfer Messages
 ############################################
 
-cd src/message-receiver/build
+cd src/transfer-messsages/build
 
 zip transferMessages.zip transferMessages.js
 upload_to_s3 transferMessages.zip transferMessages.zip
+
+cd -
 
 ############################################
 # Incoming Message Handler
@@ -81,7 +85,7 @@ upload_to_s3 recordSentToBichardEvent.zip recordSentToBichardEvent.zip
 
 cd -
 
-upload_to_s3 "./incoming-message-handler/scripts/state-machine.json.tpl" "incoming-message-handler-state-machine.json.tpl" "application/json"
+upload_to_s3 "./src/incoming-message-handler/scripts/state-machine.json.tpl" "incoming-message-handler-state-machine.json.tpl" "application/json"
 
 ############################################
 # Audit Log API
