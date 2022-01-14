@@ -4,13 +4,13 @@
   "version": "1.0.0",
   "author": "",
   "license": "ISC",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "main": "build/index.js",
+  "types": "build/index.d.ts",
   "files": [
-    "dist/**/*"
+    "build/**/*"
   ],
   "scripts": {
-    "clean": "rimraf dist",
+    "clean": "rimraf build",
     "build:dev": "npm run clean && tsc -p tsconfig.json",
     "build": "npm run clean && tsc -p tsconfig.prod.json",
     "test": "jest",

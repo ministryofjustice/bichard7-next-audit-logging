@@ -3,10 +3,10 @@
   "description": "Common types",
   "version": "0.0.1",
   "private": true,
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "main": "build/index.js",
+  "types": "build/index.d.ts",
   "files": [
-    "dist/**/*"
+    "build/**/*"
   ],
   "devDependencies": {
     "@swc/cli": "^0.1.55",
@@ -27,7 +27,7 @@
     "uuid": "^8.3.2"
   },
   "scripts": {
-    "clean": "rimraf dist",
+    "clean": "rimraf build",
     "build": "npm run clean && tsc -p tsconfig.json",
     "test": "jest"
   }

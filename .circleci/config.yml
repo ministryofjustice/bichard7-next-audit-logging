@@ -111,13 +111,13 @@ jobs:
           key: v1-npm-deps-{{ checksum "src/audit-log-portal/package-lock.json" }}
           paths: src/audit-log-portal/node_modules
 
-      # Persist all dist/build folders to the workspace to reduce build time later
+      # Persist all build folders to the workspace to reduce build time later
       - persist_to_workspace:
           root: .
           paths:
-            - src/shared/dist
-            - src/shared-types/dist
-            - src/shared-testing/dist
+            - src/shared/build
+            - src/shared-types/build
+            - src/shared-testing/build
             - src/lambdas/retrieve-event-from-s3/build
             - src/lambdas/translate-event/build
             - src/lambdas/record-event/build
@@ -126,7 +126,7 @@ jobs:
             - src/event-handler/build
             - src/incoming-message-handler/build
             - src/audit-log-api/build
-            - src/audit-log-portal/.next
+            - src/audit-log-portal/build
 
   test:
     machine:
@@ -188,7 +188,7 @@ jobs:
           name: Installing all
           command: nvm use && ./scripts/install-all.sh
 
-      # Attach the workspace to retrieve the dist/build folders so we don't have to rebuild
+      # Attach the workspace to retrieve the build folders so we don't have to rebuild
       - attach_workspace:
           at: .
 
