@@ -1,7 +1,7 @@
 import type { S3Config } from "shared-types"
 
 export default (bucketEnvVar: string | null = null): S3Config => {
-  const { S3_URL, S3_REGION, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY } = process.env
+  const { S3_URL, S3_REGION, S3_AWS_ACCESS_KEY_ID, S3_AWS_SECRET_ACCESS_KEY } = process.env
 
   if (!S3_URL) {
     throw new Error("S3_URL environment variable must have a value")
@@ -24,11 +24,11 @@ export default (bucketEnvVar: string | null = null): S3Config => {
     config.bucketName = bucketName
   }
 
-  if (AWS_ACCESS_KEY_ID) {
-    config.accessKeyId = AWS_ACCESS_KEY_ID
+  if (S3_AWS_ACCESS_KEY_ID) {
+    config.accessKeyId = S3_AWS_ACCESS_KEY_ID
   }
-  if (AWS_SECRET_ACCESS_KEY) {
-    config.secretAccessKey = AWS_SECRET_ACCESS_KEY
+  if (S3_AWS_SECRET_ACCESS_KEY) {
+    config.secretAccessKey = S3_AWS_SECRET_ACCESS_KEY
   }
 
   return config
