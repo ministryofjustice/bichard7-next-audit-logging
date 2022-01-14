@@ -8,9 +8,14 @@ SHELL := /bin/bash
 install:
 	scripts/install-all.sh
 
+.PHONY: build
+build:
+	make -j 4 build-all
+
 .PHONY: build-all
-build-all:
-	scripts/build-all.sh
+build-all: shared-types shared-testing shared retrieve-event-from-s3 translate-event \
+	   record-event message-receiver transfer-messages incoming-message-handler \
+	   audit-log-api audit-log-portal 
 
 .PHONY: test
 test:
@@ -109,7 +114,7 @@ src/audit-log-portal/build: src/shared-types/build src/shared/build $(AUDIT_LOG_
 # Clean
 .PHONY: clean
 clean:
-	rm -rf src/*/build
+	rm -rf src/*/build src/lambda/*/build
 
 ########################################
 # Run Commands

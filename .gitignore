@@ -125,3 +125,5 @@ audit-log-api/scripts/env-vars.json
 
 **/.build
 .DS_Store
+
+*package-lock.json.md5
