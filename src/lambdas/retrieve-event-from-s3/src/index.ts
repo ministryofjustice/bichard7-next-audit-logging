@@ -1,7 +1,6 @@
 import { isError } from "shared-types"
 import type { S3PutObjectEvent, EventMessage } from "shared-types"
-import { AwsS3Gateway } from "shared"
-import createS3Config from "./createS3Config"
+import { AwsS3Gateway, createS3Config } from "shared"
 
 export interface RetrieveEventFromS3Result extends EventMessage {
   s3Path: string

@@ -15,11 +15,18 @@ export default function createDynamoDbConfig(): DynamoDbConfig {
     throw Error("AUDIT_LOG_TABLE_NAME environment variable must have value.")
   }
 
-  return {
+  const config: DynamoDbConfig = {
     DYNAMO_URL: AWS_URL,
     DYNAMO_REGION: AWS_REGION,
-    AUDIT_LOG_TABLE_NAME,
-    AWS_ACCESS_KEY_ID: AWS_ACCESS_KEY_ID,
-    AWS_SECRET_ACCESS_KEY: AWS_SECRET_ACCESS_KEY
+    AUDIT_LOG_TABLE_NAME
   }
+
+  if (AWS_ACCESS_KEY_ID) {
+    config.AWS_ACCESS_KEY_ID = AWS_ACCESS_KEY_ID
+  }
+
+  if (AWS_SECRET_ACCESS_KEY) {
+    config.AWS_SECRET_ACCESS_KEY = AWS_SECRET_ACCESS_KEY
+  }
+  return config
 }
