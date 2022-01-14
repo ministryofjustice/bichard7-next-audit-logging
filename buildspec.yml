@@ -11,6 +11,6 @@ phases:
   build:
     commands:
       - scripts/install-all.sh
-      - make build
+      - make build-all
       - scripts/codebuild-artifacts.sh
 ...
