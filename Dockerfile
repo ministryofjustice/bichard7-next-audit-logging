@@ -1,17 +1,21 @@
 ARG NODE_IMAGE="nginx-nodejs-supervisord"
 
 #########################################
-# Shared Module: Build
+# Shared Modules: Build
 #########################################
 FROM ${NODE_IMAGE} as base
 
-COPY ./.config /src/.config
-COPY ./shared /src/shared
+COPY ./.config /.config
+COPY ./src/shared /src/shared
+COPY ./src/shared-types /src/shared-types
+
+WORKDIR /src/shared-types
+
+RUN npm i && npm run build
 
 WORKDIR /src/shared
 
-RUN npm i && \
-    npm run build
+RUN npm i && npm run build:prod
 
 #########################################
 # Portal: Build
@@ -20,7 +24,7 @@ FROM base as builder
 
 WORKDIR /src/audit-log-portal
 
-COPY audit-log-portal/ ./
+COPY src/audit-log-portal/ ./
 
 RUN npm i && \
     npm run build
@@ -32,7 +36,7 @@ FROM base as prod_deps
 
 WORKDIR /src/audit-log-portal
 
-COPY audit-log-portal/package.json audit-log-portal/package-lock.json ./
+COPY src/audit-log-portal/package.json src/audit-log-portal/package-lock.json ./
 
 RUN npm i --production
 

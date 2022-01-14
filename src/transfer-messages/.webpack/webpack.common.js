@@ -3,10 +3,10 @@ const ForkTsCheckerWebpackPlugin = require("fork-ts-checker-webpack-plugin")
 
 module.exports = {
   entry: {
-    retrieveEventFromS3: "./src/index.ts"
+    transferMessages: "./src/index.ts"
   },
   resolve: {
-    modules: [path.resolve("./node_modules"), path.resolve("."), path.resolve("../../shared/node_modules")],
+    modules: [path.resolve("./node_modules"), path.resolve("."), path.resolve("../shared/node_modules")],
     extensions: [".js", ".json", ".ts"]
   },
   output: {

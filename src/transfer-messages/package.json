@@ -1,5 +1,5 @@
 {
-  "name": "record-event",
+  "name": "transfer-messages",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -9,17 +9,18 @@
     "build:dev": "npm run clean && webpack --config ./.webpack/webpack.dev.js",
     "test": "jest",
     "test:unit": "jest --testPathIgnorePatterns='integration' 'e2e'",
-    "test:unit:watch": "jest --watchAll --testPathIgnorePatterns=e2e",
+    "test:unit:watch": "jest --watchAll --testPathIgnorePatterns='integration' 'e2e'",
+    "test:integration": "jest --testPathPattern=integration",
     "test:e2e": "jest --testPathPattern=e2e"
   },
   "dependencies": {
-    "shared-types": "file:../../shared-types",
-    "shared": "file:../../shared"
+    "shared-types": "file:../shared-types",
+    "shared": "file:../shared"
   },
   "devDependencies": {
     "@babel/preset-env": "^7.16.7",
     "@babel/preset-typescript": "^7.16.7",
-    "shared-testing": "file:../../shared-testing",
+    "shared-testing": "file:../shared-testing",
     "@types/jest": "^27.4.0",
     "aws-sdk": "^2.1051.0",
     "babel-loader": "^8.2.3",

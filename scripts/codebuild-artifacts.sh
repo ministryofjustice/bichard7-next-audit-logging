@@ -41,11 +41,28 @@ for lambda in ${LAMBDAS}; do
 done
 
 ############################################
+# Message Receiver
+############################################
+
+cd src/message-receiver/build
+
+zip messageReceiver.zip messageReceiver.js
+upload_to_s3 messageReceiver.zip messageReceiver.zip
+
+############################################
+# Transfer Messages
+############################################
+
+cd src/message-receiver/build
+
+zip transferMessages.zip transferMessages.js
+upload_to_s3 transferMessages.zip transferMessages.zip
+
+############################################
 # Incoming Message Handler
 ############################################
 
-# Zip each lambda file individually
-cd incoming-message-handler/build
+cd src/incoming-message-handler/build
 
 zip formatMessage.zip formatMessage.js
 zip logMessageReceipt.zip logMessageReceipt.js
@@ -71,7 +88,7 @@ upload_to_s3 "./incoming-message-handler/scripts/state-machine.json.tpl" "incomi
 ############################################
 
 # Zip each lambda file individually
-cd audit-log-api/build
+cd src/audit-log-api/build
 
 zip getMessages.zip getMessages.js
 zip createAuditLog.zip createAuditLog.js

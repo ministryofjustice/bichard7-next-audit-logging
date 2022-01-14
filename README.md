@@ -6,31 +6,33 @@ A collection of components that are hosted within AWS that form parts of the new
 
 Other diagrams:
 
-- [Incoming message handler](/incoming-message-handler)
+- [Incoming message handler](/src/incoming-message-handler)
 - [Event handler](/src/event-handler)
 
 ## Components
 
 This repository contains multiple distinct components that together form the audit logging service within Bichard7. Each component is wrapped up in a separate node package.
 
-* [**Audit Log API** (`audit-log-api`)](audit-log-api/) - API exposing Audit Log records and attached events
-* [**Audit Log Portal** (`audit-log-portal`)](audit-log-portal/) - Web-based portal allowing access to view and explore all Audit Log records and their events
-* [**Incoming Message Handler** (`incoming-message-handler`)](incoming-message-handler/) - AWS Step Functions and Lambdas for intercepting and processing messages coming into the Bichard system
+* [**Audit Log API** (`audit-log-api`)](src/audit-log-api/) - API exposing Audit Log records and attached events
+* [**Audit Log Portal** (`audit-log-portal`)](src/audit-log-portal/) - Web-based portal allowing access to view and explore all Audit Log records and their events
+* [**Incoming Message Handler** (`incoming-message-handler`)](src/incoming-message-handler/) - AWS Step Functions and Lambdas for intercepting and processing messages coming into the Bichard system
 * [**Event Handler** (`src/event-handler`)](src/event-handler/) - A component that handles messages received from queues and translates them into Audit Log events.
 
 Lambdas:
 
-* [**Message Receiver** (`src/lambdas/message-receiver`)](src/lambdas/message-receiver/) - Receives messages from subscribed queues, embellishes with the source and format, and forwards onto the [Event Handler](event-handler/) Step Function.
-* [**Retrieve Event from S3** (`src/lambdas/retrieve-event-from-s3`)](src/lambdas/retrieve-event-from-s3/) - Retrieve the event content from S3 to use for processing, retrying or viewing where required.
+* [**Message Receiver** (`src/lambdas/message-receiver`)](src/message-receiver/) - Receives messages from subscribed queues, embellishes with the source and format, and forwards onto the [Event Handler](event-handler/) Step Function.
+* [**Retrieve Event from S3** (`src/lambdas/retrieve-event-from-s3`)](src/retrieve-event-from-s3/) - Retrieve the event content from S3 to use for processing, retrying or viewing where required.
+
+Event Handler Lambdas:
 * [**Record Event** (`src/lambdas/record-event`)](src/lambdas/record-event/) - Logs events against the parent AuditLog record in Dynamo.
 * [**Translate Event** (`src/lambdas/translate-event`)](src/lambdas/translate-event) - Uses a factory pattern to determine the translation logic to apply to the message, based on it's known contextual format, in order to create an event to attach to a parent AuditLog record in the database.
 * [**Transfer Messages** (`src/lambdas/transfer-messages`)](src/lambdas/transfer-messages) - Transfers incoming messages from the external incoming messages S3 bucket to the internal one.
 
 Code shared between multiple components:
 
-* [**Shared code** (`shared`)](shared/) - Library of code that is common to multiple components.
-* [**Shared types** (`shared-types`)](shared-types/) - Library of typescript type/interface definitions that are used in multiple components.
-* [**Shared testing** (`shared-testing`)](shared-testing/) - Library of shared code that is used for testing multiple components.
+* [**Shared code** (`shared`)](src/shared/) - Library of code that is common to multiple components.
+* [**Shared types** (`shared-types`)](src/shared-types/) - Library of typescript type/interface definitions that are used in multiple components.
+* [**Shared testing** (`shared-testing`)](src/shared-testing/) - Library of shared code that is used for testing multiple components.
 
 ## Quick start
 
