@@ -84,6 +84,7 @@ commands:
                 root: .
                 paths:
                     - src/*/build
+                    - src/lambda/*/build
 
     store_results:
         description: "Store the test output"
@@ -117,13 +118,14 @@ jobs:
   build:
     docker:
       - image: cimg/node:16.13.1
+    resource_class: xlarge
     working_directory: ~
     steps:
       - checkout
       - restore_all_caches
       - run: make install
       - run: make validate
-      - run: make build-all
+      - run: make build
       - run:
           name: Build Portal Stories
           command: cd src/audit-log-portal && npm run build-storybook && cd -
