@@ -1,5 +1,118 @@
 version: 2.1
 
+commands:
+    restore_all_caches:
+        description: Restore all of the node_modules directories
+        steps:
+            - run:
+                name: Hash package locks
+                command: bash ./scripts/hash-package-locks.sh
+            - restore_cache:
+                key: v1-npm-deps-{{ checksum "package-lock.json.md5" }}
+            - restore_cache:
+                key: v1-npm-deps-{{ checksum "src/shared/package-lock.json.md5" }}
+            - restore_cache:
+                key: v1-npm-deps-{{ checksum "src/shared-types/package-lock.json.md5" }}
+            - restore_cache:
+                key: v1-npm-deps-{{ checksum "src/shared-testing/package-lock.json.md5" }}
+            - restore_cache:
+                key: v1-npm-deps-{{ checksum "src/lambdas/retrieve-event-from-s3/package-lock.json.md5" }}
+            - restore_cache:
+                key: v1-npm-deps-{{ checksum "src/lambdas/translate-event/package-lock.json.md5" }}
+            - restore_cache:
+                key: v1-npm-deps-{{ checksum "src/lambdas/record-event/package-lock.json.md5" }}
+            - restore_cache:
+                key: v1-npm-deps-{{ checksum "src/message-receiver/package-lock.json.md5" }}
+            - restore_cache:
+                key: v1-npm-deps-{{ checksum "src/transfer-messages/package-lock.json.md5" }}
+            - restore_cache:
+                key: v1-npm-deps-{{ checksum "src/event-handler/package-lock.json.md5" }}
+            - restore_cache:
+                key: v1-npm-deps-{{ checksum "src/incoming-message-handler/package-lock.json.md5" }}
+            - restore_cache:
+                key: v1-npm-deps-{{ checksum "src/audit-log-api/package-lock.json.md5" }}
+            - restore_cache:
+                key: v1-npm-deps-{{ checksum "src/audit-log-portal/package-lock.json.md5" }}
+
+    save_all_caches:
+        description: Save all of the node_modules directories
+        steps:
+            - save_cache:
+                key: v1-npm-deps-{{ checksum "package-lock.json.md5" }}
+                paths: node_modules
+            - save_cache:
+                key: v1-npm-deps-{{ checksum "src/shared/package-lock.json.md5" }}
+                paths: src/shared/node_modules
+            - save_cache:
+                key: v1-npm-deps-{{ checksum "src/shared-types/package-lock.json.md5" }}
+                paths: src/shared-types/node_modules
+            - save_cache:
+                key: v1-npm-deps-{{ checksum "src/shared-testing/package-lock.json.md5" }}
+                paths: src/shared-testing/node_modules
+            - save_cache:
+                key: v1-npm-deps-{{ checksum "src/lambdas/retrieve-event-from-s3/package-lock.json.md5" }}
+                paths: src/lambdas/retrieve-event-from-s3/node_modules
+            - save_cache:
+                key: v1-npm-deps-{{ checksum "src/lambdas/translate-event/package-lock.json.md5" }}
+                paths: src/lambdas/translate-event/node_modules
+            - save_cache:
+                key: v1-npm-deps-{{ checksum "src/lambdas/record-event/package-lock.json.md5" }}
+                paths: src/lambdas/record-event/node_modules
+            - save_cache:
+                key: v1-npm-deps-{{ checksum "src/message-receiver/package-lock.json.md5" }}
+                paths: src/message-receiver/node_modules
+            - save_cache:
+                key: v1-npm-deps-{{ checksum "src/transfer-messages/package-lock.json.md5" }}
+                paths: src/transfer-messages/node_modules
+            - save_cache:
+                key: v1-npm-deps-{{ checksum "src/event-handler/package-lock.json.md5" }}
+                paths: src/event-handler/node_modules
+            - save_cache:
+                key: v1-npm-deps-{{ checksum "src/incoming-message-handler/package-lock.json.md5" }}
+                paths: src/incoming-message-handler/node_modules
+            - save_cache:
+                key: v1-npm-deps-{{ checksum "src/audit-log-api/package-lock.json.md5" }}
+                paths: src/audit-log-api/node_modules
+            - save_cache:
+                key: v1-npm-deps-{{ checksum "src/audit-log-portal/package-lock.json.md5" }}
+                paths: src/audit-log-portal/node_modules
+
+    persist_build_dirs:
+        description: Save all of the build directories
+        steps:
+            - persist_to_workspace:
+                root: .
+                paths:
+                    - src/*/build
+
+    store_results:
+        description: "Store the test output"
+        steps:
+            - store_test_results:
+                path: ./src/shared-types/test-results/jest/
+            - store_test_results:
+                path: ./src/shared/test-results/jest/
+            - store_test_results:
+                path: ./src/shared-testing/test-results/jest/
+            - store_test_results:
+                path: ./src/lambdas/retrieve-event-from-s3/test-results/jest/
+            - store_test_results:
+                path: ./src/lambdas/translate-event/test-results/jest/
+            - store_test_results:
+                path: ./src/lambdas/record-event/test-results/jest/
+            - store_test_results:
+                path: ./src/message-receiver/test-results/jest/
+            - store_test_results:
+                path: ./src/transfer-messages/test-results/jest/
+            - store_test_results:
+                path: ./src/event-handler/test-results/jest/
+            - store_test_results:
+                path: ./src/incoming-message-handler/test-results/jest/
+            - store_test_results:
+                path: ./src/audit-log-api/test-results/jest/
+            - store_test_results:
+                path: ./src/audit-log-portal/test-results/jest/
+
 jobs:
   build:
     docker:
@@ -7,126 +120,15 @@ jobs:
     working_directory: ~
     steps:
       - checkout
-
-      # Load dependencies from the cache if they exist and haven't changed
-      - restore_cache:
-          key: v1-npm-deps-{{ checksum "package-lock.json" }}
-
-      - restore_cache:
-          key: v1-npm-deps-{{ checksum "src/shared/package-lock.json" }}
-
-      - restore_cache:
-          key: v1-npm-deps-{{ checksum "src/shared-types/package-lock.json" }}
-
-      - restore_cache:
-          key: v1-npm-deps-{{ checksum "src/shared-testing/package-lock.json" }}
-
-      - restore_cache:
-          key: v1-npm-deps-{{ checksum "src/lambdas/retrieve-event-from-s3/package-lock.json" }}
-
-      - restore_cache:
-          key: v1-npm-deps-{{ checksum "src/lambdas/translate-event/package-lock.json" }}
-
-      - restore_cache:
-          key: v1-npm-deps-{{ checksum "src/lambdas/record-event/package-lock.json" }}
-
-      - restore_cache:
-          key: v1-npm-deps-{{ checksum "src/message-receiver/package-lock.json" }}
-
-      - restore_cache:
-          key: v1-npm-deps-{{ checksum "src/transfer-messages/package-lock.json" }}
-
-      - restore_cache:
-          key: v1-npm-deps-{{ checksum "src/event-handler/package-lock.json" }}
-
-      - restore_cache:
-          key: v1-npm-deps-{{ checksum "src/incoming-message-handler/package-lock.json" }}
-
-      - restore_cache:
-          key: v1-npm-deps-{{ checksum "src/audit-log-api/package-lock.json" }}
-
-      - restore_cache:
-          key: v1-npm-deps-{{ checksum "src/audit-log-portal/package-lock.json" }}
-      
+      - restore_all_caches
       - run: make install
-
       - run: make validate
-
       - run: make build-all
-
       - run:
           name: Build Portal Stories
           command: cd src/audit-log-portal && npm run build-storybook && cd -
-
-      # Update the cache with the latest installed dependencies to speed up future installs
-      - save_cache:
-          key: v1-npm-deps-{{ checksum "package-lock.json" }}
-          paths: node_modules
-
-      - save_cache:
-          key: v1-npm-deps-{{ checksum "src/shared/package-lock.json" }}
-          paths: src/shared/node_modules
-
-      - save_cache:
-          key: v1-npm-deps-{{ checksum "src/shared-types/package-lock.json" }}
-          paths: src/shared/node_modules
-
-      - save_cache:
-          key: v1-npm-deps-{{ checksum "src/shared-testing/package-lock.json" }}
-          paths: src/shared-testing/node_modules
-
-      - save_cache:
-          key: v1-npm-deps-{{ checksum "src/lambdas/retrieve-event-from-s3/package-lock.json" }}
-          paths: src/lambdas/retrieve-event-from-s3/node_modules
-
-      - save_cache:
-          key: v1-npm-deps-{{ checksum "src/lambdas/translate-event/package-lock.json" }}
-          paths: src/lambdas/translate-event/node_modules
-
-      - save_cache:
-          key: v1-npm-deps-{{ checksum "src/lambdas/record-event/package-lock.json" }}
-          paths: src/lambdas/record-event/node_modules
-
-      - save_cache:
-          key: v1-npm-deps-{{ checksum "src/message-receiver/package-lock.json" }}
-          paths: src/message-receiver/node_modules
-
-      - save_cache:
-          key: v1-npm-deps-{{ checksum "src/transfer-messages/package-lock.json" }}
-          paths: src/transfer-messages/node_modules
-
-      - save_cache:
-          key: v1-npm-deps-{{ checksum "src/event-handler/package-lock.json" }}
-          paths: src/event-handler/node_modules
-
-      - save_cache:
-          key: v1-npm-deps-{{ checksum "src/incoming-message-handler/package-lock.json" }}
-          paths: src/incoming-message-handler/node_modules
-
-      - save_cache:
-          key: v1-npm-deps-{{ checksum "src/audit-log-api/package-lock.json" }}
-          paths: src/audit-log-api/node_modules
-
-      - save_cache:
-          key: v1-npm-deps-{{ checksum "src/audit-log-portal/package-lock.json" }}
-          paths: src/audit-log-portal/node_modules
-
-      # Persist all build folders to the workspace to reduce build time later
-      - persist_to_workspace:
-          root: .
-          paths:
-            - src/shared/build
-            - src/shared-types/build
-            - src/shared-testing/build
-            - src/lambdas/retrieve-event-from-s3/build
-            - src/lambdas/translate-event/build
-            - src/lambdas/record-event/build
-            - src/message-receiver/build
-            - src/transfer-messages/build
-            - src/event-handler/build
-            - src/incoming-message-handler/build
-            - src/audit-log-api/build
-            - src/audit-log-portal/build
+      - save_all_caches
+      - persist_build_dirs
 
   test:
     machine:
@@ -136,116 +138,57 @@ jobs:
     working_directory: ~
     steps:
       - checkout
-
       - attach_workspace:
           at: .
-
-      # Restore any cached dependencies for the projects to reduce install time
-      - restore_cache:
-          key: v1-npm-deps-{{ checksum "package-lock.json" }}
-
-      - restore_cache:
-          key: v1-npm-deps-{{ checksum "src/shared/package-lock.json" }}
-
-      - restore_cache:
-          key: v1-npm-deps-{{ checksum "src/shared-types/package-lock.json" }}
-
-      - restore_cache:
-          key: v1-npm-deps-{{ checksum "src/shared-testing/package-lock.json" }}
-
-      - restore_cache:
-          key: v1-npm-deps-{{ checksum "src/lambdas/retrieve-event-from-s3/package-lock.json" }}
-
-      - restore_cache:
-          key: v1-npm-deps-{{ checksum "src/lambdas/translate-event/package-lock.json" }}
-
-      - restore_cache:
-          key: v1-npm-deps-{{ checksum "src/lambdas/record-event/package-lock.json" }}
-
-      - restore_cache:
-          key: v1-npm-deps-{{ checksum "src/message-receiver/package-lock.json" }}
-
-      - restore_cache:
-          key: v1-npm-deps-{{ checksum "src/transfer-messages/package-lock.json" }}
-
-      - restore_cache:
-          key: v1-npm-deps-{{ checksum "src/event-handler/package-lock.json" }}
-
-      - restore_cache:
-          key: v1-npm-deps-{{ checksum "src/incoming-message-handler/package-lock.json" }}
-
-      - restore_cache:
-          key: v1-npm-deps-{{ checksum "src/audit-log-api/package-lock.json" }}
-
-      - restore_cache:
-          key: v1-npm-deps-{{ checksum "src/audit-log-portal/package-lock.json" }}
-
+      - restore_all_caches
       - run:
-          name: Installing Nodejs version in .nvmrc
+          name: Install Nodejs version in .nvmrc
           command: nvm install
-
       - run:
-          name: Installing all
+          name: Install all
           command: nvm use && ./scripts/install-all.sh
-
-      # Attach the workspace to retrieve the build folders so we don't have to rebuild
-      - attach_workspace:
-          at: .
-
       - run:
           name: Install Java
           command: sudo apt-get update && sudo apt-get install openjdk-17-jre
-
       - run:
           name: Install Dynamo
           command: make -C ./src/audit-log-api install-dynamo
-
       - run:
           name: Start Audit Log API
           command: nvm use && make run-api
           background: true
-
       - run:
           name: Wait for Audit Log API
           command: cd src/audit-log-api && npm run wait-for-api
-
       - run:
           name: Running unit, integration, and end-to-end tests
           command: nvm use && make test
+      - store_results
 
-      - store_test_results:
-          path: ./src/shared-types/test-results/jest/
-      - store_test_results:
-          path: ./src/shared/test-results/jest/
-      - store_test_results:
-          path: ./src/shared-testing/test-results/jest/
-      - store_test_results:
-          path: ./src/lambdas/retrieve-event-from-s3/test-results/jest/
-      - store_test_results:
-          path: ./src/lambdas/translate-event/test-results/jest/
-      - store_test_results:
-          path: ./src/lambdas/record-event/test-results/jest/
-      - store_test_results:
-          path: ./src/message-receiver/test-results/jest/
-      - store_test_results:
-          path: ./src/transfer-messages/test-results/jest/
-      - store_test_results:
-          path: ./src/event-handler/test-results/jest/
-      - store_test_results:
-          path: ./src/incoming-message-handler/test-results/jest/
-      - store_test_results:
-          path: ./src/audit-log-api/test-results/jest/
-      - store_test_results:
-          path: ./src/audit-log-portal/test-results/jest/
 
+  cypress-test:
+    machine:
+      image: ubuntu-2004:202104-01
+      docker_layer_caching: true
+    resource_class: large
+    working_directory: ~
+    steps:
+      - checkout
+      - attach_workspace:
+          at: .
+      - restore_all_caches
       - run:
-          name: Installing Cypress
+          name: Install Nodejs version in .nvmrc
+          command: nvm install
+      - run:
+          name: Install all
+          command: nvm use && ./scripts/install-all.sh
+      - run:
+          name: Install Cypress
           command: ./.circleci/scripts/install-cypress.sh
-
       - run:
-          name: Running UI tests
+          name: Run UI tests
           command: cd ./src/audit-log-portal && npm run test:ui
-
       - store_artifacts:
           path: ./src/audit-log-portal/cypress/videos
       - store_artifacts:
@@ -257,5 +200,8 @@ workflows:
     jobs:
       - build
       - test:
+          requires:
+            - build
+      - cypress-test:
           requires:
             - build
