@@ -1,5 +1,6 @@
 module.exports = {
   basePath: "/audit-logging",
+  distDir: "build",
   future: {
     webpack5: true
   },

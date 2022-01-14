@@ -15,7 +15,7 @@ if (!process.env.NEXT_PUBLIC_API_URL) {
 // Setup the server and which files to host
 const nextRequesthost = app.getRequestHandler()
 
-server.use(files(path.join(__dirname, ".next")))
+server.use(files(path.join(__dirname, "build")))
 server.use(files(path.join(__dirname, "public")))
 
 server.all("/api/*", nextRequesthost)

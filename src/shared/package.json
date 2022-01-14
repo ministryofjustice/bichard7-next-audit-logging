@@ -3,10 +3,10 @@
   "description": "Hosts common types and services",
   "version": "0.0.1",
   "private": true,
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "main": "build/index.js",
+  "types": "build/index.d.ts",
   "files": [
-    "dist/**/*"
+    "build/**/*"
   ],
   "devDependencies": {
     "@types/jest": "^27.4.0",
@@ -32,7 +32,7 @@
     "xml2js": "^0.4.23"
   },
   "scripts": {
-    "clean": "rimraf dist",
+    "clean": "rimraf build",
     "build": "npm run clean && tsc -p tsconfig.json",
     "build:prod": "npm run clean && tsc -p tsconfig.prod.json",
     "test": "jest",

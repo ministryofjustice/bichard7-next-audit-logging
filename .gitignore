@@ -53,7 +53,6 @@ typings/
 
 # build directory
 build
-dist
 .aws-sam
 
 # Optional eslint cache
@@ -81,8 +80,8 @@ dist
 # parcel-bundler cache (https://parceljs.org/)
 .cache
 
-# Next.js build output
-.next
+#build output
+*/build
 
 # Nuxt.js build / generate output
 .nuxt

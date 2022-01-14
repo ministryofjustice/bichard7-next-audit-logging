@@ -25,9 +25,9 @@ validate:
 ########################################
 
 # Package => build output aliases
-shared-types: src/shared-types/dist
-shared-testing: src/shared-testing/dist
-shared: src/shared/dist
+shared-types: src/shared-types/build
+shared-testing: src/shared-testing/build
+shared: src/shared/build
 retrieve-event-from-s3: src/lambdas/retrieve-event-from-s3/build
 translate-event: src/lambdas/translate-event/build
 record-event: src/lambdas/record-event/build
@@ -35,14 +35,12 @@ message-receiver: src/message-receiver/build
 transfer-messages: src/transfer-messages/build
 incoming-message-handler: src/incoming-message-handler/build
 audit-log-api: src/audit-log-api/build
-audit-log-portal: src/audit-log-portal/.next
+audit-log-portal: src/audit-log-portal/build
 
 define get_source_files
 	$(shell find $(1) \
 		\( \
-			-name .next -o \
 			-name build -o \
-			-name dist -o \
 			-name documentation -o \
 			-name node_modules \
 		\) -prune -o \
@@ -72,57 +70,46 @@ AUDIT_LOG_API_SOURCE := $(call get_source_files,src/audit-log-api)
 AUDIT_LOG_PORTAL_SOURCE := $(call get_source_files,src/audit-log-portal)
 
 # How to build each package
-src/shared-types/dist: $(SHARED_TYPES_SOURCE)
+src/shared-types/build: $(SHARED_TYPES_SOURCE)
 	cd src/shared-types && npm run build
 
-src/shared-testing/dist: src/shared-types/dist $(SHARED_TESTING_SOURCE)
+src/shared-testing/build: src/shared-types/build $(SHARED_TESTING_SOURCE)
 	cd src/shared-testing && npm run build
 
-src/shared/dist: src/shared-types/dist src/shared-testing/dist $(SHARED_SOURCE)
+src/shared/build: src/shared-types/build src/shared-testing/build $(SHARED_SOURCE)
 	cd src/shared && npm run build
 
-src/lambdas/retrieve-event-from-s3/build: src/shared-types/dist src/shared-testing/dist src/shared/dist $(RETRIEVE_EVENT_FROM_S3_SOURCE)
+src/lambdas/retrieve-event-from-s3/build: src/shared-types/build src/shared-testing/build src/shared/build $(RETRIEVE_EVENT_FROM_S3_SOURCE)
 	cd src/lambdas/retrieve-event-from-s3 && npm run build
 
-src/lambdas/translate-event/build: src/shared-types/dist src/shared-testing/dist src/shared/dist $(TRANSLATE_EVENT_SOURCE)
+src/lambdas/translate-event/build: src/shared-types/build src/shared-testing/build src/shared/build $(TRANSLATE_EVENT_SOURCE)
 	cd src/lambdas/translate-event && npm run build
 
-src/lambdas/record-event/build: src/shared-types/dist src/shared-testing/dist src/shared/dist $(RECORD_EVENT_SOURCE)
+src/lambdas/record-event/build: src/shared-types/build src/shared-testing/build src/shared/build $(RECORD_EVENT_SOURCE)
 	cd src/lambdas/record-event && npm run build
 
-src/message-receiver/build: src/shared-types/dist src/shared-testing/dist src/shared/dist $(MESSAGE_RECEIVER_SOURCE)
+src/message-receiver/build: src/shared-types/build src/shared-testing/build src/shared/build $(MESSAGE_RECEIVER_SOURCE)
 	cd src/message-receiver && npm run build
 
-src/transfer-messages/build: src/shared-types/dist src/shared-testing/dist src/shared/dist $(TRANSFER_MESSAGES_SOURCE)
+src/transfer-messages/build: src/shared-types/build src/shared-testing/build src/shared/build $(TRANSFER_MESSAGES_SOURCE)
 	cd src/transfer-messages && npm run build
 
 .PHONY: src/event-handler
-src/event-handler: src/shared-types/dist src/shared-testing/dist src/shared/dist
+src/event-handler: src/shared-types/build src/shared-testing/build src/shared/build
 
-src/incoming-message-handler/build: src/shared-types/dist src/shared-testing/dist src/shared/dist $(INCOMING_MESSAGE_HANDLER_SOURCE)
+src/incoming-message-handler/build: src/shared-types/build src/shared-testing/build src/shared/build $(INCOMING_MESSAGE_HANDLER_SOURCE)
 	cd src/incoming-message-handler && npm run build
 
-src/audit-log-api/build: src/shared-types/dist src/shared-testing/dist src/shared/dist $(AUDIT_LOG_API_SOURCE)
+src/audit-log-api/build: src/shared-types/build src/shared-testing/build src/shared/build $(AUDIT_LOG_API_SOURCE)
 	cd src/audit-log-api && npm run build
 
-src/audit-log-portal/.next: src/shared-types/dist src/shared/dist $(AUDIT_LOG_PORTAL_SOURCE)
+src/audit-log-portal/build: src/shared-types/build src/shared/build $(AUDIT_LOG_PORTAL_SOURCE)
 	cd src/audit-log-portal && npm run build
 
 # Clean
 .PHONY: clean
 clean:
-	rm -rf \
-		src/shared-types/dist \
-		src/shared-testing/dist \
-		src/shared/dist \
-		src/lambdas/retrieve-event-from-s3/build \
-		src/lambdas/translate-event/build \
-		src/lambdas/record-event/build \
-		src/message-receiver/build \
-		src/transfer-messages/build \
-		src/incoming-message-handler/build \
-		src/audit-log-api/build \
-		src/audit-log-portal/.next
+	rm -rf src/*/build
 
 ########################################
 # Run Commands
