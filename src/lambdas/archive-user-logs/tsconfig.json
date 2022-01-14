@@ -1,0 +1,13 @@
+{
+  "extends": "../../../.config/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "build",
+    "types": ["node", "jest"],
+    "sourceMap": true,
+    "baseUrl": ".",
+    "preserveSymlinks": false,
+    "paths": {}
+  },
+  "compileOnSave": true,
+  "include": ["src/**/*.ts"]
+}
