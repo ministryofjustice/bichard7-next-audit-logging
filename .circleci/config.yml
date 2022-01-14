@@ -244,7 +244,7 @@ jobs:
 
       - run:
           name: Running UI tests
-          command: cd ./audit-log-portal && npm run test:ui && cd -
+          command: cd ./src/audit-log-portal && npm run test:ui
 
       - store_artifacts:
           path: ./src/audit-log-portal/cypress/videos
