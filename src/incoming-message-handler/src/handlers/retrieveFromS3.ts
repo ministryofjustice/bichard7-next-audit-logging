@@ -1,7 +1,6 @@
 import type { S3PutObjectEvent } from "shared-types"
-import { S3Gateway } from "shared"
+import { S3Gateway, createS3Config } from "shared"
 import { isError } from "shared-types"
-import { createS3Config } from "../configs"
 import type { ReceivedMessage } from "../entities"
 import type { ValidateS3KeyResult } from "../use-cases/validateS3Key"
 import validateS3Key from "../use-cases/validateS3Key"
@@ -12,7 +11,7 @@ interface ValidationResult {
   validationResult: ValidateS3KeyResult
 }
 
-const s3Gateway = new S3Gateway(createS3Config())
+const s3Gateway = new S3Gateway(createS3Config("INCOMING_MESSAGE_BUCKET_NAME"))
 
 export default async function retrieveFromS3(event: S3PutObjectEvent): Promise<ReceivedMessage | ValidationResult> {
   const { bucketName, key } = event.detail.requestParameters

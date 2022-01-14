@@ -1,10 +1,9 @@
 import { isError } from "shared-types"
-import { AwsS3Gateway } from "shared"
-import createS3Config from "./createS3Config"
+import { AwsS3Gateway, createS3Config } from "shared"
 import TransferMessagesUseCase from "./TransferMessagesUseCase"
 import type { TransferMessagesInput, TransferMessagesOptions, TransferMessagesResult } from "./types"
 
-const externalBucketGateway = new AwsS3Gateway(createS3Config())
+const externalBucketGateway = new AwsS3Gateway(createS3Config("EXTERNAL_INCOMING_MESSAGE_BUCKET_NAME"))
 const internalS3BucketName = process.env.INTERNAL_INCOMING_MESSAGE_BUCKET_NAME
 
 if (!internalS3BucketName) {

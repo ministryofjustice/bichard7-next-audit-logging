@@ -8,6 +8,7 @@ import TestMqGateway from "../gateways/MqGateway/TestMqGateway"
 import transformMessageXml from "../use-cases/transformMessageXml"
 import { setEnvironmentVariables } from "shared-testing"
 process.env.MQ_QUEUE = "INCOMING_MESSAGE_HANDLER_QUEUE"
+process.env.INCOMING_MESSAGE_BUCKET_NAME = "internalIncomingBucket"
 setEnvironmentVariables()
 import IncomingMessageSimulator from "./IncomingMessageSimulator"
 import TestApi from "./TestApi"
