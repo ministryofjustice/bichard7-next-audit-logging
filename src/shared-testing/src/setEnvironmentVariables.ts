@@ -10,8 +10,10 @@ export default (additionalVariables?: KeyValuePair<string, string>): void => {
   process.env.MQ_URL = "failover:(stomp://localhost:51613)"
   process.env.API_URL = "http://localhost:3010"
   process.env.API_KEY = "DUMMY"
-  process.env.AWS_ACCESS_KEY_ID = "S3RVER"
-  process.env.AWS_SECRET_ACCESS_KEY = "S3RVER"
+  process.env.S3_AWS_ACCESS_KEY_ID = "S3RVER"
+  process.env.S3_AWS_SECRET_ACCESS_KEY = "S3RVER"
+  process.env.DYNAMO_AWS_ACCESS_KEY_ID = "S3RVER"
+  process.env.DYNAMO_AWS_SECRET_ACCESS_KEY = "S3RVER"
 
   if (additionalVariables) {
     Object.keys(additionalVariables).forEach((key) => {
