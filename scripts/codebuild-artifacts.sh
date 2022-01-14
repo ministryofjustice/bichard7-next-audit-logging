@@ -55,7 +55,7 @@ cd -
 # Transfer Messages
 ############################################
 
-cd src/transfer-messsages/build
+cd src/transfer-messages/build
 
 zip transferMessages.zip transferMessages.js
 upload_to_s3 transferMessages.zip transferMessages.zip
