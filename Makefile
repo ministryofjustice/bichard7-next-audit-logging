@@ -101,6 +101,9 @@ src/message-receiver/build: src/shared-types/build src/shared-testing/build src/
 src/transfer-messages/build: src/shared-types/build src/shared-testing/build src/shared/build $(TRANSFER_MESSAGES_SOURCE)
 	cd src/transfer-messages && npm run build
 
+src/event-handler/build: src/shared-types/build src/shared-testing/build src/shared/build src/message-receiver/build $(EVENT_HANDLER_SOURCE)
+	cd src/event-handler && npm run build
+
 .PHONY: src/event-handler
 src/event-handler: src/shared-types/build src/shared-testing/build src/shared/build src/message-receiver/build
 
