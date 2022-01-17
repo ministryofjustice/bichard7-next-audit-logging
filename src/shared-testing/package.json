@@ -18,8 +18,8 @@
     "test:unit:watch": "jest --watch"
   },
   "dependencies": {
-    "shared-types": "file:../shared-types",
-    "aws-sdk": "^2.1051.0"
+    "aws-sdk": "^2.1051.0",
+    "shared-types": "file:../shared-types"
   },
   "devDependencies": {
     "@types/jest": "^27.4.0",
