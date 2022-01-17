@@ -2,7 +2,6 @@ import { isError } from "shared-types"
 import type { S3PutObjectEvent } from "shared-types"
 import { AuditLogApiClient, AwsS3Gateway, createS3Config } from "shared"
 import translateEvent from "src/use-cases/translateEvent"
-import type { TranslateEventInput } from "../types"
 import CreateEventUseCase from "src/use-cases/CreateEventUseCase"
 import RetrieveEventFromS3UseCase from "src/use-cases/RetrieveEventFromS3UseCase"
 
@@ -28,7 +27,7 @@ export default async function storeEvent(event: S3PutObjectEvent): Promise<void>
     throw retrieveEventFromS3Result
   }
 
-  const translateEventResult = await translateEvent(retrieveEventFromS3Result as unknown as TranslateEventInput)
+  const translateEventResult = await translateEvent(retrieveEventFromS3Result)
 
   if (isError(translateEventResult)) {
     throw translateEventResult

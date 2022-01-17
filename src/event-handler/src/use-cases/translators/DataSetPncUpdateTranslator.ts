@@ -1,11 +1,11 @@
 import type { PromiseResult } from "shared-types"
 import { decodeBase64, parseXml } from "shared"
-import type { TranslateEventInput, EventDetails, DataSetPncUpdate } from "../../types"
+import type { EventInput, EventDetails, DataSetPncUpdate } from "../../types"
 import type TranslationResult from "./TranslationResult"
 import type Translator from "./Translator"
 import transformEventDetails from "./transformEventDetails"
 
-const DataSetPncUpdateTranslator: Translator = async (input: TranslateEventInput): PromiseResult<TranslationResult> => {
+const DataSetPncUpdateTranslator: Translator = async (input: EventInput): PromiseResult<TranslationResult> => {
   const { messageData, s3Path, eventSourceArn, eventSourceQueueName } = input
   // Data Set PNC Update Inputs are in base64 encoded XML
   const xml = decodeBase64(messageData)

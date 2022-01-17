@@ -4,7 +4,7 @@ import "shared-testing"
 import fs from "fs"
 import { encodeBase64 } from "shared"
 import type { MessageFormat, EventCategory } from "shared-types"
-import type { TranslateEventInput } from "../types"
+import type { EventInput } from "../types"
 import type TranslationResult from "./translators/TranslationResult"
 import translateEvent from "./translateEvent"
 
@@ -18,7 +18,7 @@ const filenameMappings: Record<MessageFormat, string> = {
   PncUpdateRequest: "pnc-update-request"
 }
 
-const createPayload = (messageFormat: MessageFormat): TranslateEventInput => {
+const createPayload = (messageFormat: MessageFormat): EventInput => {
   const filename = filenameMappings[messageFormat]
   const path = `../../events/${filename}.xml`
   const content = fs.readFileSync(path).toString()

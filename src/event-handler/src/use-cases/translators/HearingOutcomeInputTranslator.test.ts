@@ -1,14 +1,14 @@
 import "shared-testing"
 import fs from "fs"
 import { encodeBase64 } from "shared"
-import type { TranslateEventInput } from "../../types"
+import type { EventInput } from "../../types"
 import type TranslationResult from "./TranslationResult"
 import HearingOutcomeInputTranslator from "./HearingOutcomeInputTranslator"
 
 test("parses the message data and returns an AuditLogEvent", async () => {
   const eventData = fs.readFileSync("../../events/hearing-outcome-input.xml")
   const messageData = encodeBase64(eventData.toString())
-  const eventInput: TranslateEventInput = {
+  const eventInput: EventInput = {
     messageData,
     s3Path: "DummyPath",
     eventSourceArn: "DummyArn",

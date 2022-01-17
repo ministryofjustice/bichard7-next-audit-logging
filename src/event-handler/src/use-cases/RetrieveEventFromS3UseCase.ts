@@ -1,15 +1,12 @@
 import { isError } from "shared-types"
-import type { S3PutObjectEvent, EventMessage, PromiseResult } from "shared-types"
+import type { S3PutObjectEvent, PromiseResult } from "shared-types"
 import type { AwsS3Gateway } from "shared"
-
-export interface RetrieveEventFromS3Result extends EventMessage {
-  s3Path: string
-}
+import type { EventInput } from "src/types"
 
 export default class RetrieveEventFromS3UseCase {
   constructor(private s3Gateway: AwsS3Gateway) {}
 
-  async execute(event: S3PutObjectEvent): PromiseResult<RetrieveEventFromS3Result> {
+  async execute(event: S3PutObjectEvent): PromiseResult<EventInput> {
     const { bucketName, key } = event.detail.requestParameters
 
     const messageData = await this.s3Gateway.forBucket(bucketName).getItem(key)

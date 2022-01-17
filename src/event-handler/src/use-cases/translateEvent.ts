@@ -1,9 +1,9 @@
 import { isError } from "shared-types"
+import type { EventInput } from "src/types"
 import getTranslator from "./translators/getTranslator"
 import type TranslationResult from "./translators/TranslationResult"
-import type TranslateEventInput from "../types/TranslateEventInput"
 
-export default async (event: TranslateEventInput): Promise<TranslationResult> => {
+export default async (event: EventInput): Promise<TranslationResult> => {
   const translator = getTranslator(event.messageFormat)
   if (isError(translator)) {
     throw translator

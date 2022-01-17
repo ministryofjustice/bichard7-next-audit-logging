@@ -1,5 +1,5 @@
 import type { EventMessage } from "shared-types"
 
-export default interface TranslateEventInput extends EventMessage {
+export default interface EventInput extends EventMessage {
   s3Path: string
 }

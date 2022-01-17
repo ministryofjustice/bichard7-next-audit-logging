@@ -1,13 +1,11 @@
 import type { PromiseResult } from "shared-types"
 import { decodeBase64, parseXml } from "shared"
-import type { TranslateEventInput, EventDetails, HearingOutcomeInput } from "../../types"
+import type { EventInput, EventDetails, HearingOutcomeInput } from "../../types"
 import type TranslationResult from "./TranslationResult"
 import type Translator from "./Translator"
 import transformEventDetails from "./transformEventDetails"
 
-const HearingOutcomeInputTranslator: Translator = async (
-  input: TranslateEventInput
-): PromiseResult<TranslationResult> => {
+const HearingOutcomeInputTranslator: Translator = async (input: EventInput): PromiseResult<TranslationResult> => {
   const { messageData, s3Path, eventSourceArn, eventSourceQueueName } = input
   // Hearing Outcome Inputs are in base64 encoded XML
   const xml = decodeBase64(messageData)

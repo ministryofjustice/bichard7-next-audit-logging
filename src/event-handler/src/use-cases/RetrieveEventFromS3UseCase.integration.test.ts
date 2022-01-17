@@ -2,7 +2,7 @@ import { setEnvironmentVariables } from "shared-testing"
 setEnvironmentVariables()
 import type { EventMessage, S3Config } from "shared-types"
 import { TestAwsS3Gateway } from "shared"
-import type { RetrieveEventFromS3Result } from "./RetrieveEventFromS3UseCase"
+import type { EventInput } from "../types"
 import RetrieveEventFromS3UseCase from "./RetrieveEventFromS3UseCase"
 
 const bucketName = "auditLogEventsBucket"
@@ -45,7 +45,7 @@ describe("Retrieve event from S3 end-to-end", () => {
     const result = await useCase.execute(payload)
     expect(result).toNotBeError()
 
-    const { messageData, messageFormat, s3Path } = <RetrieveEventFromS3Result>result
+    const { messageData, messageFormat, s3Path } = <EventInput>result
     expect(messageData).toBe(messageData)
     expect(messageFormat).toBe(messageFormat)
     expect(s3Path).toBe(s3ObjectKey)

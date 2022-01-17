@@ -1,14 +1,14 @@
 import "shared-testing"
 import fs from "fs"
 import { encodeBase64 } from "shared"
-import type { TranslateEventInput } from "../../types"
+import type { EventInput } from "../../types"
 import PncUpdateRequestTranslator from "./PncUpdateRequestTranslator"
 import type TranslationResult from "./TranslationResult"
 
 test("parses the message data and returns an AuditLogEvent", async () => {
   const eventData = fs.readFileSync("../../events/pnc-update-request.xml")
   const messageData = encodeBase64(eventData.toString())
-  const eventInput: TranslateEventInput = {
+  const eventInput: EventInput = {
     messageData,
     s3Path: "DummyPath",
     eventSourceArn: "DummyArn",
