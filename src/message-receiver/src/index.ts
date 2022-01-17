@@ -5,8 +5,7 @@ import embellishMessages from "./embellishMessages"
 import StoreInS3UseCase from "./StoreInS3UseCase"
 import createS3Config from "./createS3Config"
 
-const messageFormat = process.env.MESSAGE_FORMAT as MessageFormat
-if (!messageFormat) {
+if (!process.env.MESSAGE_FORMAT) {
   throw new Error("MESSAGE_FORMAT is either unset or an unsupported value")
 }
 
@@ -18,6 +17,7 @@ export default async (event: AmazonMqEventSourceRecordEvent): Promise<void> => {
     throw new Error("No messages were found in the event")
   }
 
+  const messageFormat = process.env.MESSAGE_FORMAT as MessageFormat
   const messages = embellishMessages(event, messageFormat)
 
   await Promise.all(
