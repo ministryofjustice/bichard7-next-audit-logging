@@ -7,7 +7,8 @@ import {
   StompitMqGateway,
   createMqConfig,
   AuditLogApiClient,
-  AwsS3Gateway
+  AwsS3Gateway,
+  createS3Config
 } from "shared"
 import createDynamoDbConfig from "../createDynamoDbConfig"
 import { parseRetryMessageRequest, RetryMessageUseCase } from "../use-cases"
@@ -17,7 +18,6 @@ import getApiUrl from "../getApiUrl"
 import RetrieveEventXmlFromS3UseCase from "../use-cases/RetrieveEventXmlFromS3UseCase"
 import CreateRetryingEventUseCase from "../use-cases/CreateRetryingEventUseCase"
 import SendMessageToQueueUseCase from "../use-cases/SendMessageToQueueUseCase"
-import createS3Config from "../createS3Config"
 import getApiKey from "../getApiKey"
 
 const auditLogGatewayConfig = createDynamoDbConfig()
@@ -27,7 +27,7 @@ const mqGatewayConfig = createMqConfig()
 const mqGateway = new StompitMqGateway(mqGatewayConfig)
 const sendMessageToQueueUseCase = new SendMessageToQueueUseCase(mqGateway)
 
-const awsS3Gateway = new AwsS3Gateway(createS3Config())
+const awsS3Gateway = new AwsS3Gateway(createS3Config("AUDIT_LOG_EVENTS_BUCKET"))
 const retrieveEventXmlFromS3UseCase = new RetrieveEventXmlFromS3UseCase(awsS3Gateway)
 
 const apiClient = new AuditLogApiClient(getApiUrl(), getApiKey())

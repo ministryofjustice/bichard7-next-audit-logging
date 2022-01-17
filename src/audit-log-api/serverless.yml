@@ -17,8 +17,10 @@ provider:
     S3_REGION: eu-west-2
     API_URL: http://localhost:3010
     API_KEY: dummy
-    AWS_ACCESS_KEY_ID: S3RVER
-    AWS_SECRET_ACCESS_KEY: S3RVER
+    S3_AWS_ACCESS_KEY_ID: S3RVER
+    S3_AWS_SECRET_ACCESS_KEY: S3RVER
+    DYNAMO_AWS_ACCESS_KEY_ID: S3RVER
+    DYNAMO_AWS_SECRET_ACCESS_KEY: S3RVER
 	
 plugins:
   - serverless-offline
