@@ -38,7 +38,6 @@
     "fork-ts-checker-webpack-plugin": "^6.5.0",
     "jest": "^27.4.7",
     "jest-junit": "^13.0.0",
-    "message-receiver": "file:../message-receiver",
     "rimraf": "^3.0.2",
     "shared-testing": "file:../shared-testing",
     "ts-jest": "^27.1.2",
