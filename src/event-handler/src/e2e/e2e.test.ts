@@ -13,6 +13,7 @@ import { v4 as uuid } from "uuid"
 
 process.env.MESSAGE_FORMAT = "DUMMY"
 process.env.EVENTS_BUCKET_NAME = "auditLogEventsBucket"
+// eslint-disable-next-line import/extensions
 const { default: messageReceiver } = require("../../../message-receiver/build/messageReceiver")
 
 const s3Gateway = new TestS3Gateway({
