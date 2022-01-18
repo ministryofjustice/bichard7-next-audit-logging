@@ -1,7 +1,8 @@
+jest.retryTimes(10)
 import axios from "axios"
 import type { AuditLogEvent } from "shared-types"
 import { HttpStatusCode } from "shared"
-import { mockAuditLog, mockAuditLogEvent } from "../test-helpers/mocks"
+import { mockAuditLog, mockAuditLogEvent } from "shared-testing"
 
 describe("Getting Audit Log events", () => {
   it("should return the audit log events for an existing audit log record", async () => {

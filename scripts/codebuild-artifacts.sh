@@ -135,6 +135,17 @@ cd -
 upload_to_s3 "src/event-handler/scripts/state-machine.json.tpl" "event-handler-state-machine.json.tpl" "application/json"
 
 ############################################
+# Retry Failed Messages
+############################################
+
+cd src/retry-failed-messages/build
+
+zip retryFailedMessages.zip retryFailedMessages.js
+upload_to_s3 retryFailedMessages.zip retryFailedMessages.zip
+
+cd -
+
+############################################
 # Audit Log Portal
 ############################################
 

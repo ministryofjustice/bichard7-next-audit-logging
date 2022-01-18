@@ -2,7 +2,7 @@ jest.retryTimes(10)
 import axios from "axios"
 import type { AuditLog, DynamoDbConfig } from "shared-types"
 import { HttpStatusCode, TestDynamoGateway } from "shared"
-import { mockAuditLog } from "../test-helpers/mocks"
+import { mockAuditLog } from "shared-testing"
 
 const dynamoConfig: DynamoDbConfig = {
   DYNAMO_URL: "http://localhost:8000",

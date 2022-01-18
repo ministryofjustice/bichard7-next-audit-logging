@@ -12,5 +12,7 @@ export { default as FakeMqGateway } from "./FakeMqGateway"
 export { default as FakeS3Gateway } from "./FakeS3Gateway"
 // eslint-disable-next-line import/prefer-default-export
 export { default as StepFunctionSimulator } from "./StepFunctionSimulator"
+export * from "./createMockAuditLogs"
+export * from "./mockAuditLogs"
 
 import "./jest"

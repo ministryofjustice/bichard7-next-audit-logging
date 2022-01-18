@@ -358,6 +358,24 @@ describe("AuditLogDynamoGateway", () => {
       expect(actualMessage.automationReport).toBeDefined()
       expect(actualMessage.automationReport.events).toHaveLength(0)
     })
+
+    it("should increment the retry count for retry message", async () => {
+      const expectedEvent = createAuditLogEvent("information", new Date(), "Retrying failed message")
+
+      const message = new AuditLog("one", new Date(), "XML1")
+
+      await gateway.create(message)
+
+      await gateway.addEvent(message.messageId, message.version, expectedEvent)
+
+      const actualMessage = await gateway.fetchOne(message.messageId)
+
+      if (isError(actualMessage)) {
+        throw new Error("Error fetching record")
+      }
+      expect(actualMessage).toBeDefined()
+      expect(actualMessage.retryCount).toBe(1)
+    })
   })
 
   describe("fetchOne", () => {

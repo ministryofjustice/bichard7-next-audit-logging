@@ -153,6 +153,12 @@ export default class AwsAuditLogDynamoGateway extends DynamoGateway implements A
       updateExpression += ",#status = :status"
     }
 
+    if (event.eventType === "Retrying failed message") {
+      updateExpression = `${updateExpression}, retryCount = if_not_exists(retryCounter, :zero) + :one`
+      updateExpressionValues[":zero"] = 0
+      updateExpressionValues[":one"] = 1
+    }
+
     const options: UpdateOptions = {
       keyName: this.tableKey,
       keyValue: messageId,
