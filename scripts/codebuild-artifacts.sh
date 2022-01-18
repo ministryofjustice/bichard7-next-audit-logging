@@ -112,7 +112,15 @@ cd -
 # Event Handler
 ############################################
 
-# Zip any lambdas from the General Event Handler
+cd src/event-handler/build
+
+zip storeEvent.zip storeEvent.js
+
+# Upload all artifacts to the S3 bucket
+upload_to_s3 storeEvent.zip storeEvent.zip
+
+cd -
+
 upload_to_s3 "src/event-handler/scripts/state-machine.json.tpl" "event-handler-state-machine.json.tpl" "application/json"
 
 ############################################

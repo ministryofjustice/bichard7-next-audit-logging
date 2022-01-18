@@ -14,7 +14,7 @@ build:
 
 .PHONY: build-all
 build-all: shared-types shared-testing shared retrieve-event-from-s3 translate-event \
-	   record-event message-receiver transfer-messages incoming-message-handler \
+	   record-event message-receiver transfer-messages incoming-message-handler event-handler \
 	   audit-log-api audit-log-portal 
 
 .PHONY: test
@@ -39,6 +39,7 @@ record-event: src/lambdas/record-event/build
 message-receiver: src/message-receiver/build
 transfer-messages: src/transfer-messages/build
 incoming-message-handler: src/incoming-message-handler/build
+event-handler: src/event-handler/build
 audit-log-api: src/audit-log-api/build
 audit-log-portal: src/audit-log-portal/build
 
@@ -71,6 +72,7 @@ RECORD_EVENT_SOURCE := $(call get_source_files,src/lambdas/record-event)
 MESSAGE_RECEIVER_SOURCE := $(call get_source_files,src/message-receiver)
 TRANSFER_MESSAGES_SOURCE := $(call get_source_files,src/transfer-messages)
 INCOMING_MESSAGE_HANDLER_SOURCE := $(call get_source_files,src/incoming-message-handler)
+EVENT_HANDLER_SOURCE := $(call get_source_files,src/event-handler)
 AUDIT_LOG_API_SOURCE := $(call get_source_files,src/audit-log-api)
 AUDIT_LOG_PORTAL_SOURCE := $(call get_source_files,src/audit-log-portal)
 
@@ -99,8 +101,11 @@ src/message-receiver/build: src/shared-types/build src/shared-testing/build src/
 src/transfer-messages/build: src/shared-types/build src/shared-testing/build src/shared/build $(TRANSFER_MESSAGES_SOURCE)
 	cd src/transfer-messages && npm run build
 
+src/event-handler/build: src/shared-types/build src/shared-testing/build src/shared/build src/message-receiver/build $(EVENT_HANDLER_SOURCE)
+	cd src/event-handler && npm run build
+
 .PHONY: src/event-handler
-src/event-handler: src/shared-types/build src/shared-testing/build src/shared/build
+src/event-handler: src/shared-types/build src/shared-testing/build src/shared/build src/message-receiver/build
 
 src/incoming-message-handler/build: src/shared-types/build src/shared-testing/build src/shared/build $(INCOMING_MESSAGE_HANDLER_SOURCE)
 	cd src/incoming-message-handler && npm run build
