@@ -12,16 +12,12 @@ export default class AwsS3Gateway implements S3GatewayInterface {
   constructor(config: S3Config) {
     const { url, region, bucketName, accessKeyId, secretAccessKey } = config
 
-    if (!url) {
-      throw Error("url must have value.")
-    }
-
     if (bucketName) {
       this.bucketName = bucketName
     }
 
     this.s3 = new S3({
-      endpoint: new Endpoint(url),
+      ...(url ? { endpoint: new Endpoint(url) } : {}),
       region,
       s3ForcePathStyle: true,
       accessKeyId,

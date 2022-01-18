@@ -63,6 +63,17 @@ upload_to_s3 transferMessages.zip transferMessages.zip
 cd -
 
 ############################################
+# Archive User Logs
+############################################
+
+cd src/archive-user-logs/build
+
+zip archiveUserLogs.zip archiveUserLogs.js
+upload_to_s3 archiveUserLogs.zip archiveUserLogs.zip
+
+cd -
+
+############################################
 # Incoming Message Handler
 ############################################
 

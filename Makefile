@@ -15,7 +15,7 @@ build:
 .PHONY: build-all
 build-all: shared-types shared-testing shared retrieve-event-from-s3 translate-event \
 	   record-event message-receiver transfer-messages incoming-message-handler event-handler \
-	   audit-log-api audit-log-portal 
+	   audit-log-api audit-log-portal archive-user-logs
 
 .PHONY: test
 test:
@@ -42,6 +42,7 @@ incoming-message-handler: src/incoming-message-handler/build
 event-handler: src/event-handler/build
 audit-log-api: src/audit-log-api/build
 audit-log-portal: src/audit-log-portal/build
+archive-user-logs: src/archive-user-logs/build
 
 define get_source_files
 	$(shell find $(1) \
@@ -75,6 +76,7 @@ INCOMING_MESSAGE_HANDLER_SOURCE := $(call get_source_files,src/incoming-message-
 EVENT_HANDLER_SOURCE := $(call get_source_files,src/event-handler)
 AUDIT_LOG_API_SOURCE := $(call get_source_files,src/audit-log-api)
 AUDIT_LOG_PORTAL_SOURCE := $(call get_source_files,src/audit-log-portal)
+ARCHIVE_USER_LOGS := $(call get_source_files,src/archive-user-logs)
 
 # How to build each package
 src/shared-types/build: $(SHARED_TYPES_SOURCE)
@@ -115,6 +117,9 @@ src/audit-log-api/build: src/shared-types/build src/shared-testing/build src/sha
 
 src/audit-log-portal/build: src/shared-types/build src/shared/build $(AUDIT_LOG_PORTAL_SOURCE)
 	cd src/audit-log-portal && npm run build
+
+src/archive-user-logs/build: src/shared-types/build src/shared-testing/build src/shared/build $(ARCHIVE_USER_LOGS)
+	cd src/archive-user-logs && npm run build
 
 # Clean
 .PHONY: clean
