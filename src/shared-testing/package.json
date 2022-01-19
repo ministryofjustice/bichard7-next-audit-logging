@@ -13,7 +13,7 @@
     "clean": "rimraf build",
     "build:dev": "npm run clean && tsc -p tsconfig.json",
     "build": "npm run clean && tsc -p tsconfig.prod.json",
-    "test": "jest",
+    "test": "jest --runInBand",
     "test:unit": "jest",
     "test:unit:watch": "jest --watch"
   },

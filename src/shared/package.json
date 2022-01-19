@@ -35,7 +35,7 @@
     "clean": "rimraf build",
     "build": "npm run clean && tsc -p tsconfig.json",
     "build:prod": "npm run clean && tsc -p tsconfig.prod.json",
-    "test": "jest",
+    "test": "jest --runInBand",
     "test:unit": "jest --testPathIgnorePatterns='integration'",
     "test:unit:watch": "jest --watchAll --testPathIgnorePatterns='integration'",
     "test:integration": "jest --testPathPattern=integration"

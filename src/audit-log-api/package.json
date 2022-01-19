@@ -6,7 +6,7 @@
   "scripts": {
     "build": "rimraf build && webpack --config ./.webpack/webpack.prod.js",
     "build:dev": "rimraf build && webpack --config ./.webpack/webpack.dev.js",
-    "test": "jest",
+    "test": "jest --runInBand",
     "test:unit": "jest --testPathIgnorePatterns='integration' 'e2e'",
     "test:unit:watch": "jest --watchAll --testPathIgnorePatterns='integration' 'e2e'",
     "test:integration": "jest --testPathPattern=integration",
