@@ -10,3 +10,4 @@ src/event-handler
 src/incoming-message-handler
 src/audit-log-api
 src/audit-log-portal
+src/archive-user-logs
