@@ -93,6 +93,7 @@ export default (auditLog: AuditLog): ValidationResult => {
     status: AuditLogStatus.processing,
     lastEventType: "",
     version: 0,
+    retryCount: 0,
     events: [],
     automationReport: { events: [] },
     topExceptionsReport: { events: [] }

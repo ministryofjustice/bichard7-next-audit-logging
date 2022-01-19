@@ -29,6 +29,6 @@
   "scripts": {
     "clean": "rimraf build",
     "build": "npm run clean && tsc -p tsconfig.json",
-    "test": "jest"
+    "test": "jest --runInBand"
   }
 }

@@ -13,16 +13,19 @@
     "clean": "rimraf build",
     "build:dev": "npm run clean && tsc -p tsconfig.json",
     "build": "npm run clean && tsc -p tsconfig.prod.json",
-    "test": "jest",
+    "test": "jest --runInBand",
     "test:unit": "jest",
     "test:unit:watch": "jest --watch"
   },
   "dependencies": {
     "aws-sdk": "^2.1051.0",
-    "shared-types": "file:../shared-types"
+    "axios": "^0.25.0",
+    "shared-types": "file:../shared-types",
+    "uuid": "^3.3.2"
   },
   "devDependencies": {
     "@types/jest": "^27.4.0",
+    "@types/uuid": "^8.3.4",
     "jest": "^27.4.7",
     "rimraf": "^3.0.2",
     "ts-jest": "^27.1.2",

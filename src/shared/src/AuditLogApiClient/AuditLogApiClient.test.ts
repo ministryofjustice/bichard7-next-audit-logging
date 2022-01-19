@@ -6,11 +6,67 @@ import AuditLogApiClient from "./AuditLogApiClient"
 
 const apiClient = new AuditLogApiClient("http://localhost", "dummy")
 const message = new AuditLog("b5edf595-16a9-450f-a52b-40628cd58c29", new Date(), "<XML></XML>")
+const message2 = new AuditLog("b5edf595-16a9-450f-a52b-40628cd58c28", new Date(), "<XML></XML>")
 const event = new AuditLogEvent({
   category: "information",
   timestamp: new Date(),
   eventType: "Dummy Event Type",
   eventSource: "Dummy Event Source"
+})
+
+describe("getMessages()", () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+  })
+
+  it("should return the messages if successful", async () => {
+    jest.spyOn(axios, "get").mockResolvedValue({ status: 200, data: [message, message2] })
+
+    const result = await apiClient.getMessages()
+
+    expect(result).toNotBeError()
+    expect(result).toEqual([message, message2])
+  })
+
+  it("should fail when the error is unknown", async () => {
+    const expectedError = <AxiosError>new Error("An unknown error")
+    jest.spyOn(axios, "get").mockRejectedValue(expectedError)
+
+    const result = await apiClient.getMessages()
+
+    expect(isError(result)).toBe(true)
+    expect(<Error>result).toBe(expectedError)
+  })
+
+  it("should filter by status", async () => {
+    const getRequest = jest.spyOn(axios, "get").mockResolvedValue({ status: 200, data: [message, message2] })
+
+    const result = await apiClient.getMessages({ status: "Error" })
+
+    expect(result).toNotBeError()
+    expect(result).toEqual([message, message2])
+    expect(getRequest.mock.calls[0][0]).toBe(`http://localhost/messages?status=Error`)
+  })
+
+  it("should filter by lastMessageId", async () => {
+    const getRequest = jest.spyOn(axios, "get").mockResolvedValue({ status: 200, data: [message, message2] })
+
+    const result = await apiClient.getMessages({ lastMessageId: "12345" })
+
+    expect(result).toNotBeError()
+    expect(result).toEqual([message, message2])
+    expect(getRequest.mock.calls[0][0]).toBe(`http://localhost/messages?lastMessageId=12345`)
+  })
+
+  it("should filter by status and lastMessageId", async () => {
+    const getRequest = jest.spyOn(axios, "get").mockResolvedValue({ status: 200, data: [message, message2] })
+
+    const result = await apiClient.getMessages({ status: "Error", lastMessageId: "12345" })
+
+    expect(result).toNotBeError()
+    expect(result).toEqual([message, message2])
+    expect(getRequest.mock.calls[0][0]).toBe(`http://localhost/messages?lastMessageId=12345&status=Error`)
+  })
 })
 
 describe("getMessage()", () => {
@@ -121,5 +177,43 @@ describe("createEvent()", () => {
 
     expect(result).toNotBeError()
     expect(mockPost.mock?.calls?.[0]?.[2]?.headers?.["X-API-Key"]).toBe("dummy")
+  })
+
+  describe("retryEvent()", () => {
+    it("should succeed when the message exists", async () => {
+      jest.spyOn(axios, "post").mockResolvedValue({ status: 204 })
+
+      const result = await apiClient.retryEvent(message.messageId)
+
+      expect(result).toNotBeError()
+    })
+
+    it("should fail when message does not exist", async () => {
+      jest.spyOn(axios, "post").mockResolvedValue({ status: 404 })
+
+      const result = await apiClient.retryEvent(message.messageId)
+
+      expect(isError(result)).toBe(true)
+      expect((<Error>result).message).toBe(`The message with Id ${message.messageId} does not exist.`)
+    })
+
+    it("should fail when the error is unknown", async () => {
+      const expectedError = <AxiosError>new Error("An unknown error")
+      jest.spyOn(axios, "post").mockRejectedValue(expectedError)
+
+      const result = await apiClient.retryEvent(message.messageId)
+
+      expect(isError(result)).toBe(true)
+      expect(<Error>result).toBe(expectedError)
+    })
+
+    it("should pass through the api key as a header", async () => {
+      const mockPost = jest.spyOn(axios, "post").mockResolvedValue({ status: 204 })
+
+      const result = await apiClient.retryEvent(message.messageId)
+
+      expect(result).toNotBeError()
+      expect(mockPost.mock?.calls?.[0]?.[2]?.headers?.["X-API-Key"]).toBe("dummy")
+    })
   })
 })
