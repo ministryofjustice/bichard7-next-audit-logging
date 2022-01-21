@@ -8,7 +8,7 @@ import { uploadToS3 } from "./utils/uploadToS3"
 
 const s3Gateway = new AwsS3Gateway(createS3Config())
 
-export const handler = async (input: unknown): Promise<void> => {
+export default async (input: unknown): Promise<void> => {
   const parsedInput = ValidInput.safeParse(input)
   if (!parsedInput.success) {
     throw parsedInput.error
