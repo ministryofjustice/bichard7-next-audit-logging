@@ -2,7 +2,7 @@
 import { setEnvironmentVariables } from "shared-testing"
 setEnvironmentVariables()
 import { uploadToS3 } from "./utils/uploadToS3"
-import { handler } from "."
+import { default as handler } from "."
 import { ZodError } from "zod"
 
 jest.mock("./utils/uploadToS3")
