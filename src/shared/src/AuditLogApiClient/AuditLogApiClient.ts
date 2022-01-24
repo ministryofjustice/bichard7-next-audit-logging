@@ -98,12 +98,16 @@ export default class AuditLogApiClient implements ApiClient {
 
   retryEvent(messageId: string): PromiseResult<void> {
     return axios
-      .post(`${this.apiUrl}/messages/${messageId}/retry`, {
-        httpsAgent,
-        headers: {
-          "X-API-Key": this.apiKey
+      .post(
+        `${this.apiUrl}/messages/${messageId}/retry`,
+        {},
+        {
+          httpsAgent,
+          headers: {
+            "X-API-Key": this.apiKey
+          }
         }
-      })
+      )
       .then((result) => {
         switch (result.status) {
           case HttpStatusCode.noContent:
