@@ -68,7 +68,7 @@ port:
     listening: true
     ip:
       - 0.0.0.0
-  user:
+user:
   dbus:
     exists: true
     uid: 81
