@@ -122,7 +122,7 @@ src/audit-log-portal/build: src/shared-types/build src/shared/build $(AUDIT_LOG_
 
 src/archive-user-logs/build: src/shared-types/build src/shared-testing/build src/shared/build $(ARCHIVE_USER_LOGS)
 	cd src/archive-user-logs && npm run build
-	
+
 src/retry-failed-messages/build: src/shared-types/build src/shared/build $(RETRY_FAILED_MESSAGES_SOURCE)
 	cd src/retry-failed-messages && npm run build
 
@@ -234,3 +234,7 @@ upload-message-to-s3:
 .PHONY: run-transfer-messages
 run-transfer-messages:
 	scripts/transfer-messages.sh
+
+.PHONY: retry-execution
+retry-execution:
+	scripts/retry-execution.sh "${EXECUTION_ID}"
