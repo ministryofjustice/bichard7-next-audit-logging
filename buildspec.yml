@@ -5,6 +5,7 @@ version: 0.2
 phases:
   install:
     commands:
+      - yum install -y jq
       - yum install -y zip
       - amazon-linux-extras install docker -y
       - dockerd &> dockerd-logfile &
