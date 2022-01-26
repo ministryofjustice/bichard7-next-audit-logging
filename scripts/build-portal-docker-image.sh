@@ -27,13 +27,8 @@ aws ecr get-login-password --region "$AWS_REGION" | docker login \
 echo "Building Audit Log Portal Docker Image on $(date)"
 
 # Get our latest staged nodejs image
-IMAGE_HASH=$(aws ecr describe-images \
-    --repository-name nginx-nodejs-supervisord \
-    --query 'to_string(sort_by(imageDetails,& imagePushedAt)[-1].imageDigest)' |
-    head -n 1
-)
+IMAGE_HASH=$(aws ecr describe-images --repository-name nginx-nodejs-supervisord | jq '.imageDetails|sort_by(.imagePushedAt)[-1].imageDigest' | tr -d '"')
 
-IMAGE_HASH=$(echo $IMAGE_HASH | tr -d '"')
 DOCKER_IMAGE_HASH="$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/nodejs@$IMAGE_HASH"
 
 docker build --build-arg "NODE_IMAGE=$DOCKER_IMAGE_HASH" -t audit-log-portal:latest .

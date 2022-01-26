@@ -16,12 +16,8 @@ aws ecr get-login-password --region eu-west-2 | docker login \
   --username AWS \
   --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.eu-west-2.amazonaws.com
 
-IMAGE_HASH=$(aws ecr describe-images \
-  --repository-name ${SOURCE_REPOSITORY_NAME}\
-  --query 'to_string(sort_by(imageDetails,& imagePushedAt)[-1].imageDigest)'
-)
+IMAGE_HASH=$(aws ecr describe-images --repository-name ${SOURCE_REPOSITORY_NAME} | jq '.imageDetails|sort_by(.imagePushedAt)[-1].imageDigest' | tr -d '"')
 
-IMAGE_HASH=$(echo $IMAGE_HASH | tr -d '"')
 DOCKER_IMAGE_HASH="${SOURCE_IMAGE_PREFIX}@${IMAGE_HASH}"
 echo "Building from ${DOCKER_IMAGE_HASH}"
 
