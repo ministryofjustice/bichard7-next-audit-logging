@@ -78,7 +78,8 @@ export default class AuditLogApiClient implements ApiClient {
         httpsAgent,
         headers: {
           "X-API-Key": this.apiKey
-        }
+        },
+        timeout: 5_000
       })
       .then((result) => {
         switch (result.status) {
@@ -86,6 +87,8 @@ export default class AuditLogApiClient implements ApiClient {
             return undefined
           case HttpStatusCode.notFound:
             return Error(`The message with Id ${messageId} does not exist.`)
+          case HttpStatusCode.gatewayTimeout:
+            return Error(`Timed out creating event for message with Id ${messageId}.`)
           default:
             return Error(`Error ${result.status}: Could not create audit log event.`)
         }

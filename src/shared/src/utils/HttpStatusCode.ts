@@ -14,4 +14,6 @@ export default class HttpStatusCode {
   public static readonly conflict = 409
 
   public static readonly internalServerError = 500
+
+  public static readonly gatewayTimeout = 504
 }
