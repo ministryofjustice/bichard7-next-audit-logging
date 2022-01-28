@@ -36,7 +36,6 @@ export default class {
       return createAuditLogResult
     }
 
-    const result = await this.api.createEvent(messageId, event)
-    return result
+    return this.api.createEvent(messageId, event)
   }
 }
