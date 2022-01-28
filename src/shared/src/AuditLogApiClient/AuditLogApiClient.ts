@@ -101,8 +101,13 @@ export default class AuditLogApiClient implements ApiClient {
         }
       })
       .catch((error: AxiosError) => {
-        console.error("Error creating event", error.response?.data)
-        return error
+        switch (error.code) {
+          case "ECONNABORTED":
+            return Error(`Timed out creating event for message with Id ${messageId}.`)
+          default:
+            console.error("Error creating event", error.response?.data)
+            return error
+        }
       })
   }
 

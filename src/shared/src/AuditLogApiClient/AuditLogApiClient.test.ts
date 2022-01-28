@@ -179,6 +179,17 @@ describe("createEvent()", () => {
     expect(mockPost.mock?.calls?.[0]?.[2]?.headers?.["X-API-Key"]).toBe("dummy")
   })
 
+  it("should fail when the api request times out", async () => {
+    const timedOutResponse = <AxiosError>{ code: "ECONNABORTED" }
+    const expectedErrorMsg = `Timed out creating event for message with Id ${message.messageId}.`
+    jest.spyOn(axios, "post").mockRejectedValue(timedOutResponse)
+
+    const result = await apiClient.createEvent(message.messageId, event)
+
+    expect(isError(result)).toBe(true)
+    expect((<Error>result).message).toBe(expectedErrorMsg)
+  })
+
   describe("retryEvent()", () => {
     it("should succeed when the message exists", async () => {
       jest.spyOn(axios, "post").mockResolvedValue({ status: 204 })
