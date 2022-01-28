@@ -17,7 +17,7 @@ if (!apiKey) {
 
 const s3Gateway = new AwsS3Gateway(createS3Config())
 const retrieveEventFromS3UseCase = new RetrieveEventFromS3UseCase(s3Gateway)
-const api = new AuditLogApiClient(apiUrl, apiKey)
+const api = new AuditLogApiClient(apiUrl, apiKey, 5_000)
 const createEventUseCase = new CreateEventUseCase(api)
 
 export default async function storeEvent(event: S3PutObjectEvent): Promise<void> {
