@@ -50,6 +50,9 @@ This will use the version specified in the [`.nvmrc`](.nvmrc) file.
 You can then use the Makefile to get started:
 
 ```shell
+# Build dependencies
+$ make install
+
 # Build all components
 $ make build-all
 

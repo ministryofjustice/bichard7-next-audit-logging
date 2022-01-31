@@ -2,7 +2,7 @@ import { FakeApiClient } from "shared-testing"
 import type { AuditLogEvent } from "shared-types"
 import CreateEventUseCase from "./CreateEventUseCase"
 
-describe("execute", () => {
+describe("CreateEventUseCase tests", () => {
   const fakeApiClient = new FakeApiClient()
 
   it("should be successful when event is created successfully", async () => {
@@ -42,6 +42,52 @@ describe("execute", () => {
     fakeApiClient.shouldReturnError(expectedError, ["createEvent"])
     const result = await useCase.execute("DummyMessageId", {} as AuditLogEvent)
 
+    expect(result).toBeError(expectedError.message)
+  })
+
+  it("should retry to create events when the request times out", async () => {
+    const messageId = "dummy-message-id"
+    const expectedError = new Error(`Timed out creating event for message with Id ${messageId}`)
+    jest.clearAllMocks()
+    const mockedEndpoint = jest.spyOn(FakeApiClient.prototype, "createEvent").mockResolvedValue(expectedError)
+    const useCase = new CreateEventUseCase(fakeApiClient)
+
+    const result = await useCase.execute(messageId, {} as AuditLogEvent)
+
+    expect(mockedEndpoint).toHaveBeenCalledTimes(5)
+    expect(result).toBeError(expectedError.message)
+  })
+
+  it("should succeed after 2 retries and one successful request", async () => {
+    const messageId = "dummy-message-id"
+    const expectedError = new Error(`Timed out creating event for message with Id ${messageId}`)
+    let attempts = 0
+    jest.clearAllMocks()
+    jest.spyOn(FakeApiClient.prototype, "createEvent").mockImplementation(() => {
+      attempts++
+      if (attempts > 2) {
+        return Promise.resolve()
+      }
+
+      return Promise.resolve(expectedError)
+    })
+    const useCase = new CreateEventUseCase(fakeApiClient)
+
+    const result = await useCase.execute(messageId, {} as AuditLogEvent)
+
+    expect(attempts).toBe(3)
+    expect(result).toNotBeError()
+  })
+
+  it("shouldn't retry non-timeout errors", async () => {
+    const expectedError = new Error(`dummy error message not related to timeouts`)
+    jest.clearAllMocks()
+    const mockedEndpoint = jest.spyOn(FakeApiClient.prototype, "createEvent").mockResolvedValue(expectedError)
+    const useCase = new CreateEventUseCase(fakeApiClient)
+
+    const result = await useCase.execute("dummy-message-id", {} as AuditLogEvent)
+
+    expect(mockedEndpoint).toHaveBeenCalledTimes(1)
     expect(result).toBeError(expectedError.message)
   })
 })

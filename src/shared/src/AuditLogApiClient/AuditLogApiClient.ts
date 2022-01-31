@@ -15,7 +15,7 @@ const httpsAgent = new https.Agent({
 })
 
 export default class AuditLogApiClient implements ApiClient {
-  constructor(private readonly apiUrl: string, private readonly apiKey: string) {}
+  constructor(private readonly apiUrl: string, private readonly apiKey: string, private readonly timeout: number = 0) {}
 
   getMessages(options?: GetMessagesOptions): PromiseResult<AuditLog[]> {
     let queryString = ""
@@ -31,7 +31,10 @@ export default class AuditLogApiClient implements ApiClient {
     }
 
     return axios
-      .get(`${this.apiUrl}/messages${queryString}`, { headers: { "X-API-Key": this.apiKey } })
+      .get(`${this.apiUrl}/messages${queryString}`, {
+        headers: { "X-API-Key": this.apiKey },
+        timeout: this.timeout
+      })
       .then((response) => response.data)
       .catch((error: AxiosError) => {
         console.error("Error getting messages", error.response?.data)
@@ -41,7 +44,10 @@ export default class AuditLogApiClient implements ApiClient {
 
   getMessage(messageId: string): PromiseResult<AuditLog> {
     return axios
-      .get(`${this.apiUrl}/messages/${messageId}`, { headers: { "X-API-Key": this.apiKey } })
+      .get(`${this.apiUrl}/messages/${messageId}`, {
+        headers: { "X-API-Key": this.apiKey },
+        timeout: this.timeout
+      })
       .then((response) => response.data)
       .then((result) => result[0])
       .catch((error: AxiosError) => {
@@ -56,7 +62,8 @@ export default class AuditLogApiClient implements ApiClient {
         headers: {
           "Content-Type": "application/json",
           "X-API-Key": this.apiKey
-        }
+        },
+        timeout: this.timeout
       })
       .then((result) => {
         switch (result.status) {
@@ -78,7 +85,8 @@ export default class AuditLogApiClient implements ApiClient {
         httpsAgent,
         headers: {
           "X-API-Key": this.apiKey
-        }
+        },
+        timeout: this.timeout
       })
       .then((result) => {
         switch (result.status) {
@@ -86,13 +94,20 @@ export default class AuditLogApiClient implements ApiClient {
             return undefined
           case HttpStatusCode.notFound:
             return Error(`The message with Id ${messageId} does not exist.`)
+          case HttpStatusCode.gatewayTimeout:
+            return Error(`Timed out creating event for message with Id ${messageId}.`)
           default:
             return Error(`Error ${result.status}: Could not create audit log event.`)
         }
       })
       .catch((error: AxiosError) => {
-        console.error("Error creating event", error.response?.data)
-        return error
+        switch (error.code) {
+          case "ECONNABORTED":
+            return Error(`Timed out creating event for message with Id ${messageId}.`)
+          default:
+            console.error("Error creating event", error.response?.data)
+            return error
+        }
       })
   }
 
@@ -105,7 +120,8 @@ export default class AuditLogApiClient implements ApiClient {
           httpsAgent,
           headers: {
             "X-API-Key": this.apiKey
-          }
+          },
+          timeout: this.timeout
         }
       )
       .then((result) => {
