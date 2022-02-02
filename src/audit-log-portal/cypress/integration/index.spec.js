@@ -14,9 +14,9 @@ describe("Index Page", () => {
         cy.get("h4").should("contain", "Messages")
       })
 
-      it("should show 7 messages", () => {
+      it("should show 10 messages", () => {
         cy.get(".MuiPaper-root")
-          .should("have.length", 7)
+          .should("have.length", 10)
           .first()
           .should("contain", "Message1")
           .should("contain", "14/11/2021 05:10:00")
