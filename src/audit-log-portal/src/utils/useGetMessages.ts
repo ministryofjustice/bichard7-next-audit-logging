@@ -1,4 +1,4 @@
-import { useSWRInfinite } from "swr"
+import useSWRInfinite from 'swr/infinite'
 import type { KeyLoader } from "swr/dist/types"
 import type { AuditLog } from "shared-types"
 import fetcher from "./fetcher"
@@ -19,7 +19,7 @@ interface UseGetMessagesResult {
 
 const fetchLimit = 10
 
-export default function useGetMessages(url: KeyLoader<AuditLog[]>): UseGetMessagesResult {
+export default function useGetMessages(url: KeyLoader<string>): UseGetMessagesResult {
   const { data, error, size, setSize, mutate } = useSWRInfinite(url, (fetchUrl: string) =>
     fetcher<MessagesResult>(fetchUrl).then((result) => result.messages)
   )
