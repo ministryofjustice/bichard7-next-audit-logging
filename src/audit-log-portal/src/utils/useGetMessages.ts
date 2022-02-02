@@ -1,4 +1,4 @@
-import useSWRInfinite from 'swr/infinite'
+import useSWRInfinite from "swr/infinite"
 import type { KeyLoader } from "swr/dist/types"
 import type { AuditLog } from "shared-types"
 import fetcher from "./fetcher"
