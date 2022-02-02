@@ -65,6 +65,7 @@ mkdir -p trivy/db
 install_trivy
 pull_trivy_db
 pull_goss_binary
+
 export GOSS_PATH="/usr/local/bin/goss"
 pull_dgoss_binary
 
