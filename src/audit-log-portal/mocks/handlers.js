@@ -1,17 +1,18 @@
 const { rest } = require("msw")
 const { messages } = require("./data/messages")
 
-const baseApiUrl = "http://localhost:3000"
+const baseApiUrl = "http://localhost:3010"
+const maxItemsPerPage = 10
 
 const filterByLastMessage = (messagesToFilter, lastMessageId) => {
   if (lastMessageId) {
     const filterFromIndex = messagesToFilter.findIndex((x) => x.messageId === lastMessageId) + 1
-    return messagesToFilter.slice(filterFromIndex)
+    return messagesToFilter.slice(filterFromIndex, filterFromIndex + maxItemsPerPage)
   }
 
-  return messages
+  return messages.slice(0, maxItemsPerPage)
 }
-const getMessage = (messageId) => messages.filter((x) => x.messageId === messageId)
+const getMessage = (messageId) => messages.filter((x) => x.messageId === messageId).slice(0, maxItemsPerPage)
 
 const getMessageByExternalCorrelationId = (externalCorrelationId) =>
   messages.filter((x) => x.externalCorrelationId === externalCorrelationId)
