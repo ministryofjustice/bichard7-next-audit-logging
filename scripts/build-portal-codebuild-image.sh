@@ -66,8 +66,6 @@ install_trivy
 pull_trivy_db
 pull_goss_binary
 
-sed -i 's/\"Version\"\:1/"Version":2/g' trivy/db/metadata.json # very dirty hack to avoid the db schema out of date error, please check that we can remove this ASAP
-
 export GOSS_PATH="/usr/local/bin/goss"
 pull_dgoss_binary
 
