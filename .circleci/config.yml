@@ -16,12 +16,6 @@ commands:
             - restore_cache:
                 key: v1-npm-deps-{{ checksum "src/shared-testing/package-lock.json.md5" }}
             - restore_cache:
-                key: v1-npm-deps-{{ checksum "src/lambdas/retrieve-event-from-s3/package-lock.json.md5" }}
-            - restore_cache:
-                key: v1-npm-deps-{{ checksum "src/lambdas/translate-event/package-lock.json.md5" }}
-            - restore_cache:
-                key: v1-npm-deps-{{ checksum "src/lambdas/record-event/package-lock.json.md5" }}
-            - restore_cache:
                 key: v1-npm-deps-{{ checksum "src/message-receiver/package-lock.json.md5" }}
             - restore_cache:
                 key: v1-npm-deps-{{ checksum "src/transfer-messages/package-lock.json.md5" }}
@@ -49,15 +43,6 @@ commands:
             - save_cache:
                 key: v1-npm-deps-{{ checksum "src/shared-testing/package-lock.json.md5" }}
                 paths: src/shared-testing/node_modules
-            - save_cache:
-                key: v1-npm-deps-{{ checksum "src/lambdas/retrieve-event-from-s3/package-lock.json.md5" }}
-                paths: src/lambdas/retrieve-event-from-s3/node_modules
-            - save_cache:
-                key: v1-npm-deps-{{ checksum "src/lambdas/translate-event/package-lock.json.md5" }}
-                paths: src/lambdas/translate-event/node_modules
-            - save_cache:
-                key: v1-npm-deps-{{ checksum "src/lambdas/record-event/package-lock.json.md5" }}
-                paths: src/lambdas/record-event/node_modules
             - save_cache:
                 key: v1-npm-deps-{{ checksum "src/message-receiver/package-lock.json.md5" }}
                 paths: src/message-receiver/node_modules
@@ -95,12 +80,6 @@ commands:
                 path: ./src/shared/test-results/jest/
             - store_test_results:
                 path: ./src/shared-testing/test-results/jest/
-            - store_test_results:
-                path: ./src/lambdas/retrieve-event-from-s3/test-results/jest/
-            - store_test_results:
-                path: ./src/lambdas/translate-event/test-results/jest/
-            - store_test_results:
-                path: ./src/lambdas/record-event/test-results/jest/
             - store_test_results:
                 path: ./src/message-receiver/test-results/jest/
             - store_test_results:
