@@ -1,10 +1,9 @@
 service: audit-log-api
-frameworkVersion: '2'
+frameworkVersion: "3"
 
 provider:
   name: aws
   runtime: nodejs14.x
-  lambdaHashingVersion: 20201221
   environment:
     AWS_URL: http://localhost:8000
     DYNAMO_REGION: eu-west-2
@@ -21,7 +20,7 @@ provider:
     S3_AWS_SECRET_ACCESS_KEY: S3RVER
     DYNAMO_AWS_ACCESS_KEY_ID: S3RVER
     DYNAMO_AWS_SECRET_ACCESS_KEY: S3RVER
-	
+
 plugins:
   - serverless-offline
   - serverless-hooks
@@ -91,7 +90,7 @@ resources:
               - AttributeName: receivedDate
                 KeyType: RANGE
             Projection:
-              ProjectionType: 'ALL'
+              ProjectionType: "ALL"
             ProvisionedThroughput:
               ReadCapacityUnits: 1
               WriteCapacityUnits: 1
@@ -100,7 +99,7 @@ resources:
               - AttributeName: externalCorrelationId
                 KeyType: HASH
             Projection:
-              ProjectionType: 'ALL'
+              ProjectionType: "ALL"
             ProvisionedThroughput:
               ReadCapacityUnits: 1
               WriteCapacityUnits: 1
@@ -111,7 +110,7 @@ resources:
               - AttributeName: receivedDate
                 KeyType: RANGE
             Projection:
-              ProjectionType: 'ALL'
+              ProjectionType: "ALL"
             ProvisionedThroughput:
               ReadCapacityUnits: 1
               WriteCapacityUnits: 1
@@ -123,36 +122,36 @@ functions:
   getMessages:
     handler: src/handlers/getMessages.default
     events:
-     - httpApi:
-         path: /messages
-         method: get
+      - httpApi:
+          path: /messages
+          method: get
   getMessage:
     handler: src/handlers/getMessages.default
     events:
-     - httpApi:
-         path: /messages/{messageId}
-         method: get
+      - httpApi:
+          path: /messages/{messageId}
+          method: get
   createAuditLog:
     handler: src/handlers/createAuditLog.default
     events:
-     - httpApi:
-         path: /messages
-         method: post
+      - httpApi:
+          path: /messages
+          method: post
   getEvents:
     handler: src/handlers/getEvents.default
     events:
-     - httpApi:
-         path: /messages/{messageId}/events
-         method: get
+      - httpApi:
+          path: /messages/{messageId}/events
+          method: get
   createAuditLogEvent:
     handler: src/handlers/createAuditLogEvent.default
     events:
-     - httpApi:
-         path: /messages/{messageId}/events
-         method: post
+      - httpApi:
+          path: /messages/{messageId}/events
+          method: post
   retryMessage:
     handler: src/handlers/retryMessage.default
     events:
-     - httpApi:
-         path: /messages/{messageId}/retry
-         method: post
+      - httpApi:
+          path: /messages/{messageId}/retry
+          method: post
