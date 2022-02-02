@@ -1,8 +1,0 @@
-export type { default as AuditEvent } from "./AuditEvent"
-export type { default as EventDetails } from "./EventDetails"
-export type { default as GeneralEventLogItem } from "./GeneralEventLogItem"
-export type { default as DataSetPncUpdate } from "./DataSetPncUpdate"
-export type { default as CourtResultInput } from "./CourtResultInput"
-export type { default as HearingOutcomeInput } from "./HearingOutcomeInput"
-export type { default as HearingOutcomePncUpdate } from "./HearingOutcomePncUpdate"
-export type { default as PncUpdateRequest } from "./PncUpdateRequest"

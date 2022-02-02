@@ -1,9 +1,6 @@
 src/shared-types
 src/shared-testing
 src/shared
-src/lambdas/retrieve-event-from-s3
-src/lambdas/translate-event
-src/lambdas/record-event
 src/message-receiver
 src/transfer-messages
 src/event-handler

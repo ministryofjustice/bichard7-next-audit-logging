@@ -20,13 +20,9 @@ This repository contains multiple distinct components that together form the aud
 
 Lambdas:
 
-* [**Message Receiver** (`src/lambdas/message-receiver`)](src/message-receiver/) - Receives messages from subscribed queues, embellishes with the source and format, and forwards onto the [Event Handler](event-handler/) Step Function.
-* [**Retrieve Event from S3** (`src/lambdas/retrieve-event-from-s3`)](src/retrieve-event-from-s3/) - Retrieve the event content from S3 to use for processing, retrying or viewing where required.
+* [**Message Receiver** (`src/message-receiver`)](src/message-receiver/) - Receives messages from subscribed queues, embellishes with the source and format, and forwards onto the [Event Handler](event-handler/) Step Function.
 
-Event Handler Lambdas:
-* [**Record Event** (`src/lambdas/record-event`)](src/lambdas/record-event/) - Logs events against the parent AuditLog record in Dynamo.
-* [**Translate Event** (`src/lambdas/translate-event`)](src/lambdas/translate-event) - Uses a factory pattern to determine the translation logic to apply to the message, based on it's known contextual format, in order to create an event to attach to a parent AuditLog record in the database.
-* [**Transfer Messages** (`src/lambdas/transfer-messages`)](src/lambdas/transfer-messages) - Transfers incoming messages from the external incoming messages S3 bucket to the internal one.
+* [**Transfer Messages** (`src/transfer-messages`)](src/transfer-messages) - Transfers incoming messages from the external incoming messages S3 bucket to the internal one.
 
 Code shared between multiple components:
 
