@@ -7,12 +7,11 @@ interface CreateAuditLogEventResult {
   resultDescription?: string
 }
 
-const shouldDeduplicate = (event: AuditLogEvent): boolean => (
+const shouldDeduplicate = (event: AuditLogEvent): boolean =>
   event.category === "error" &&
   event.attributes &&
   event.attributes.hasOwnProperty("Exception Message") &&
   event.attributes.hasOwnProperty("Exception Stack Trace")
-)
 
 const stackTraceFirstLine = (stackTrace: string): string => stackTrace.split("\n")[0].trim()
 
@@ -22,7 +21,10 @@ const isDuplicateEvent = (event: AuditLogEvent, existingEvents: AuditLogEvent[])
   }
   const lastEvent = existingEvents[existingEvents.length - 1]
   if (lastEvent && lastEvent.attributes["Exception Message"] === event.attributes["Exception Message"]) {
-    if (typeof lastEvent.attributes["Exception Stack Trace"] === 'string' && typeof event.attributes["Exception Stack Trace"] === 'string') {
+    if (
+      typeof lastEvent.attributes["Exception Stack Trace"] === "string" &&
+      typeof event.attributes["Exception Stack Trace"] === "string"
+    ) {
       const previousStacktrace: string = lastEvent.attributes["Exception Stack Trace"] as string
       const thisStacktrace: string = event.attributes["Exception Stack Trace"] as string
 
@@ -35,7 +37,7 @@ const isDuplicateEvent = (event: AuditLogEvent, existingEvents: AuditLogEvent[])
 }
 
 export default class CreateAuditLogEventUseCase {
-  constructor(private readonly auditLogGateway: AuditLogDynamoGateway) { }
+  constructor(private readonly auditLogGateway: AuditLogDynamoGateway) {}
 
   async create(messageId: string, event: AuditLogEvent): Promise<CreateAuditLogEventResult> {
     const messageVersion = await this.auditLogGateway.fetchVersion(messageId)

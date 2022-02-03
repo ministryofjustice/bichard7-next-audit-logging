@@ -18,12 +18,13 @@ const auditLogDynamoGateway = new AwsAuditLogDynamoGateway(config, config.AUDIT_
 const createAuditLogEventUseCase = new CreateAuditLogEventUseCase(auditLogDynamoGateway)
 
 const createAuditLog = (): AuditLog => new AuditLog("CorrelationId", new Date(), "XML")
-const createAuditLogEvent = (): AuditLogEvent => new AuditLogEvent({
-  category: "information",
-  timestamp: new Date(),
-  eventType: "Create audit log event test",
-  eventSource: "Integration Test"
-})
+const createAuditLogEvent = (): AuditLogEvent =>
+  new AuditLogEvent({
+    category: "information",
+    timestamp: new Date(),
+    eventType: "Create audit log event test",
+    eventSource: "Integration Test"
+  })
 const createStacktraceAuditLogEvent = (): AuditLogEvent => {
   const event = new AuditLogEvent({
     eventSource: "CourtResultBean",
@@ -32,7 +33,10 @@ const createStacktraceAuditLogEvent = (): AuditLogEvent => {
     timestamp: new Date()
   })
   event.addAttribute("Exception Message", "The XML Converter encountered an Error during message UnMarshalling")
-  event.addAttribute("Exception Stack Trace", "uk.gov.ocjr.mtu.br7.ho.pub.choreography.exception.MessageParsingException: The XML Converter encountered an Error during message UnMarshalling\n\tat uk.gov.ocjr.mtu.br7.ho.pub.choreography.CourtResultBean.extractGenericHearingOutcome(Unknown Source)")
+  event.addAttribute(
+    "Exception Stack Trace",
+    "uk.gov.ocjr.mtu.br7.ho.pub.choreography.exception.MessageParsingException: The XML Converter encountered an Error during message UnMarshalling\n\tat uk.gov.ocjr.mtu.br7.ho.pub.choreography.CourtResultBean.extractGenericHearingOutcome(Unknown Source)"
+  )
   return event
 }
 
