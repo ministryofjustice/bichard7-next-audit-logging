@@ -97,6 +97,7 @@ describe("GIVEN Arhive User Logs Lambda", () => {
       try {
         await handler(mockInvalidDataInput)
       } catch (error) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         expect((error as any).code).toBe("Z_BUF_ERROR") // node standard library error and jest have differing globals so it's hard to expect().toBeInstanceOf(Error)
         expect((error as Error).message).toBe("unexpected end of file")
       }
