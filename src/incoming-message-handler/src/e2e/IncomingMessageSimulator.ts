@@ -1,12 +1,9 @@
 import { S3Gateway } from "shared"
 import { StepFunctionSimulator } from "shared-testing"
 import { isError } from "shared-types"
-import retrieveFromS3 from "../handlers/retrieveFromS3"
-import formatMessage from "../handlers/formatMessage"
-import logMessageReceipt from "../handlers/logMessageReceipt"
-import parseMessage from "../handlers/parseMessage"
 import recordSentToBichardEvent from "../handlers/recordSentToBichardEvent"
 import sendToBichard from "../handlers/sendToBichard"
+import storeMessage from "../handlers/storeMessage"
 
 export default class IncomingMessageSimulator {
   private readonly s3Gateway: S3Gateway
@@ -22,14 +19,7 @@ export default class IncomingMessageSimulator {
       secretAccessKey: "S3RVER"
     })
 
-    this.stateMachine = new StepFunctionSimulator([
-      retrieveFromS3,
-      formatMessage,
-      parseMessage,
-      logMessageReceipt,
-      sendToBichard,
-      recordSentToBichardEvent
-    ])
+    this.stateMachine = new StepFunctionSimulator([storeMessage, sendToBichard, recordSentToBichardEvent])
   }
 
   async start(fileName: string, message: string, executionId: string): Promise<void> {

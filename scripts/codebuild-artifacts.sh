@@ -64,6 +64,7 @@ zip parseMessage.zip parseMessage.js
 zip retrieveFromS3.zip retrieveFromS3.js
 zip sendToBichard.zip sendToBichard.js
 zip recordSentToBichardEvent.zip recordSentToBichardEvent.js
+zip storeMessage.zip storeMessage.js
 
 # Upload all artifacts to the S3 bucket
 upload_to_s3 formatMessage.zip formatMessage.zip
@@ -72,6 +73,7 @@ upload_to_s3 parseMessage.zip parseMessage.zip
 upload_to_s3 retrieveFromS3.zip retrieveFromS3.zip
 upload_to_s3 sendToBichard.zip sendToBichard.zip
 upload_to_s3 recordSentToBichardEvent.zip recordSentToBichardEvent.zip
+upload_to_s3 storeMessage.zip storeMessage.zip
 
 cd -
 

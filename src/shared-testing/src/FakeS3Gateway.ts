@@ -15,7 +15,7 @@ export default class FakeS3Gateway implements S3GatewayInterface {
   // @ts-ignore
   // eslint-disable-next-line @typescript-eslint/no-unused-vars, class-methods-use-this
   forBucket(bucketName: string): S3GatewayInterface {
-    throw new Error("Method not implemented.")
+    return this
   }
 
   getItem(key: string): PromiseResult<string> {
