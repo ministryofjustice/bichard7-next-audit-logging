@@ -44,7 +44,7 @@ describe("retryMessage", () => {
       messageData: encodeBase64(messageXml),
       messageFormat: "Dummy Event Source",
       eventSourceArn: uuid(),
-      eventSourceQueueName: "DUMMY_QUEUE"
+      eventSourceQueueName: "RETRY_DUMMY_QUEUE"
     }
 
     const s3Path = "event.xml"
@@ -55,7 +55,7 @@ describe("retryMessage", () => {
       new BichardAuditLogEvent({
         eventSource: "Dummy Event Source",
         eventSourceArn: "Dummy Event Arn",
-        eventSourceQueueName: "DUMMY_QUEUE",
+        eventSourceQueueName: "RETRY_DUMMY_QUEUE",
         eventType: "Dummy Failed Message",
         category: "error",
         timestamp: new Date(),
@@ -70,7 +70,7 @@ describe("retryMessage", () => {
     expect(response.status).toBe(HttpStatusCode.noContent)
     expect(response.data).toBe("")
 
-    const msg = await testMqGateway.getMessage("DUMMY_QUEUE")
+    const msg = await testMqGateway.getMessage("RETRY_DUMMY_QUEUE")
     testMqGateway.dispose()
     expect(msg).toEqual(messageXml)
   })
