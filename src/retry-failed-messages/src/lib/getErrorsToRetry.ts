@@ -13,6 +13,9 @@ export default async function (apiClient: AuditLogApiClient, errorCount: number)
     if (isError(errorBatch)) {
       return errorBatch
     }
+    if (errorBatch.length === 0) {
+      return errors
+    }
 
     const errorsToRetry = errorBatch.filter((e) => shouldRetry(e))
 
@@ -21,10 +24,7 @@ export default async function (apiClient: AuditLogApiClient, errorCount: number)
       errors = errors.slice(0, errorCount)
       return errors
     }
-    if (errorBatch.length < 10) {
-      return errors
-    }
-    lastMessageId = errorBatch[9].messageId
+    lastMessageId = errorBatch[errorBatch.length - 1].messageId
   }
   return errors
 }
