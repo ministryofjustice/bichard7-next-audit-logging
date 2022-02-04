@@ -33,7 +33,6 @@ const originalXml = `
     </DataStream>
   </RouteData>
 `
-// const formattedXml = formatMessageXml(clean(originalXml))
 
 const s3Gateway = new FakeS3Gateway()
 
