@@ -17,7 +17,7 @@ export default async function storeMessage(event: S3PutObjectEvent): Promise<Aud
   }
 
   if ("validationResult" in receivedMessage) {
-    return { validationResult: receivedMessage.validationResult }
+    return receivedMessage
   }
 
   const auditLog = await readMessage(receivedMessage)
