@@ -20,7 +20,7 @@ export default class {
 
   async executeOnce(messageId: string, event: AuditLogEvent): PromiseResult<void> {
     if (!messageId) {
-      logger.info(`No messageId: ${event}`)
+      logger.info(`No messageId: ${JSON.stringify(event)}`)
       return undefined
     }
 

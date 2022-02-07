@@ -2,12 +2,20 @@ import type { NextApiRequest, NextApiResponse } from "next"
 import config from "config"
 import { logger } from "shared"
 
+interface JWT {
+  username: string
+}
+
+const parseJwt = (jwtPayload: string): JWT => {
+  const base64Decode = Buffer.from(jwtPayload, "base64")
+  return JSON.parse(base64Decode.toString())
+}
+
 export default async (request: NextApiRequest, response: NextApiResponse<string>): Promise<void> => {
   const { messageId } = request.query
   const url = `${config.apiUrl}/messages/${messageId}/retry`
   try {
-    const base64Decode = Buffer.from(request.cookies[".AUTH"].split(".")[1], "base64")
-    const tokenPayload = JSON.parse(base64Decode.toString())
+    const tokenPayload = parseJwt(request.cookies[".AUTH"].split(".")[1])
     logger.info({
       user: tokenPayload.username,
       ip: request.socket?.remoteAddress,
