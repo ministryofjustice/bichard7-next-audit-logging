@@ -1,6 +1,6 @@
 {
   "Comment": "Simulates a state machine to manage the workflow of receiving Libra/ExISS messages into the system",
-  "StartAt": "Retrieve from S3",
+  "StartAt": "Store Message",
   "States": {
     "Store Message": {
       "Type": "Task",
