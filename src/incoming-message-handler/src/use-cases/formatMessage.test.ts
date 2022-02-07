@@ -1,3 +1,5 @@
+jest.mock("uuid")
+import { v4 } from "uuid"
 import "shared-testing"
 import type { ReceivedMessage } from "../entities"
 import formatMessage from "./formatMessage"
@@ -22,6 +24,8 @@ it("should format the message XML when the message XML is correct", async () => 
     stepExecutionId: "DUMMY_EXECUTION_ID",
     messageXml: message
   } as ReceivedMessage
+  const mockedUuidV4 = v4 as jest.MockedFunction<typeof v4>
+  mockedUuidV4.mockReturnValue("MESSAGE_ID")
   const result = await formatMessage(receivedMessage)
 
   expect(result).toNotBeError()
