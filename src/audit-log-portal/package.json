@@ -3,10 +3,11 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "setup:env": "cd ../audit-log-api && npm run start && cd - && ./scripts/setup-environment-variables.sh",
-    "dev": "npm run setup:env && next dev",
+    "init:audit-log-api": "cd ../audit-log-api && npm run install-dynamo && npm run start",
+    "setup:env": "./scripts/setup-environment-variables.sh",
+    "dev": "npm run setup:env && next dev -p 3020",
     "dev:mocked": "./scripts/setup-environment-variables.sh mocked && NODE_OPTIONS='--require \"./mocks/index\"' next dev -p 3020",
-    "dev:skip-env": "./scripts/setup-environment-variables.sh && next dev",
+    "dev:skip-env": "./scripts/setup-environment-variables.sh && next dev -p 3020",
     "build": "next build",
     "start": "next start",
     "start:mocked": "./scripts/setup-environment-variables.sh mocked && NODE_OPTIONS='--require \"./mocks/index\"' next start -p 3020",
@@ -14,7 +15,7 @@
     "test:unit": "jest --testPathIgnorePatterns=cypress",
     "host": "npm run build && nodemon scripts/host/start.mjs",
     "cypress:open": "cypress open",
-    "test:ui": "concurrently --kill-others --success first \"npm run start:mocked\" \"./scripts/run-ui-tests.sh\"",
+    "test:integration": "concurrently --kill-others --success first \"npm run dev:mocked\" \"./scripts/run-integration-tests.sh\"",
     "storybook": "start-storybook -p 6006",
     "build-storybook": "build-storybook"
   },

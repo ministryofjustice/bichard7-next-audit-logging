@@ -8,7 +8,8 @@ import {
   createMqConfig,
   AuditLogApiClient,
   AwsS3Gateway,
-  createS3Config
+  createS3Config,
+  logger
 } from "shared"
 import createDynamoDbConfig from "../createDynamoDbConfig"
 import { parseRetryMessageRequest, RetryMessageUseCase } from "../use-cases"
@@ -54,7 +55,7 @@ export default async function retryMessage(event: APIGatewayProxyEvent): Promise
   const retryMessageResult = await retryMessageUseCase.retry(messageId)
 
   if (isError(retryMessageResult)) {
-    console.error("Error retrying message", retryMessageResult.message)
+    logger.error(`Error fetching messages: ${retryMessageResult.message}`)
     return createJsonApiResult({
       statusCode: HttpStatusCode.internalServerError,
       body: String(retryMessageResult)

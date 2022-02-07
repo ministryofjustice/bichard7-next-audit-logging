@@ -19,6 +19,6 @@ if [ $RETRY -eq 0 ]; then
   exit 1
 fi
 
-# Run Cypress UI tests
-echo "Running UI tests"
+# Run Cypress Integration tests
+echo "Running Integration tests"
 npx cypress run

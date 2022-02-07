@@ -26,6 +26,7 @@
   "dependencies": {
     "aws-sdk": "^2.1066.0",
     "axios": "^0.25.0",
+    "pino": "^7.6.5",
     "shared-types": "file:../shared-types",
     "stompit": "^1.0.0",
     "uuid": "^8.3.2",

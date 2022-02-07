@@ -24,6 +24,8 @@ Lambdas:
 
 * [**Transfer Messages** (`src/transfer-messages`)](src/transfer-messages) - Transfers incoming messages from the external incoming messages S3 bucket to the internal one.
 
+* [**Archive User Logs** (`src/archive-user-logs`)](src/archive-user-logs/) - Subscribe to logs output by the User Service and the Store Event Lambda which match a subscription filter and then store them in s3 cold storage.
+
 Code shared between multiple components:
 
 * [**Shared code** (`shared`)](src/shared/) - Library of code that is common to multiple components.

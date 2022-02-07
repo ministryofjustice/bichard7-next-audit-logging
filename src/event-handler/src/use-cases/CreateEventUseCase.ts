@@ -1,5 +1,6 @@
 import type { PromiseResult, Result, AuditLogEvent, ApiClient } from "shared-types"
 import { AuditLog, isError } from "shared-types"
+import { logger } from "shared"
 
 export default class {
   constructor(private readonly api: ApiClient) {}
@@ -19,7 +20,7 @@ export default class {
 
   async executeOnce(messageId: string, event: AuditLogEvent): PromiseResult<void> {
     if (!messageId) {
-      console.log(event)
+      logger.info(`No messageId: ${event}`)
       return undefined
     }
 
