@@ -1,12 +1,9 @@
 import path from "path"
-import { hasRootElement } from "shared"
-import { clean } from "shared"
 import type { S3PutObjectEvent, PromiseResult, S3GatewayInterface } from "shared-types"
 import { isError } from "shared-types"
-import type { ReceivedMessage } from "src/entities"
-import ApplicationError from "src/errors/ApplicationError"
-import readReceivedDateFromS3ObjectKey from "src/utils/readReceivedDateFromS3ObjectKey"
-import formatMessageXml from "./formatMessageXml"
+import type { ReceivedMessage } from "../entities"
+import ApplicationError from "../errors/ApplicationError"
+import readReceivedDateFromS3ObjectKey from "../utils/readReceivedDateFromS3ObjectKey"
 import type { ValidateS3KeyResult } from "./validateS3Key"
 import validateS3Key from "./validateS3Key"
 
@@ -27,20 +24,13 @@ export default async (
     return { validationResult }
   }
 
-  let messageXml = await s3Gateway.forBucket(bucketName).getItem(key)
+  const messageXml = await s3Gateway.forBucket(bucketName).getItem(key)
 
   if (isError(messageXml)) {
     return new ApplicationError("Error while getting the message from S3", messageXml)
   }
 
   try {
-    messageXml = clean(messageXml)
-    const hasRouteDataElement = await hasRootElement(messageXml, "RouteData")
-
-    if (!hasRouteDataElement) {
-      messageXml = formatMessageXml(messageXml)
-    }
-
     const receivedDate = readReceivedDateFromS3ObjectKey(key)
 
     return {
@@ -51,6 +41,6 @@ export default async (
       messageXml
     }
   } catch (error) {
-    return new ApplicationError("Error while formatting the message", error as Error)
+    return new Error("Error while reading the message received date")
   }
 }

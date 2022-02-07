@@ -1,0 +1,45 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`should format the message XML 1`] = `
+"<?xml version=\\"1.0\\" encoding=\\"UTF-8\\"?>
+  <RouteData xmlns=\\"http://schemas.cjse.gov.uk/common/operations\\" xmlns:cjseEntity=\\"http://schemas.cjse.gov.uk/common/businessentities\\" xmlns:cjseType=\\"http://schemas.cjse.gov.uk/common/businesstypes\\" xmlns:xsi=\\"http://www.w3.org/2001/XMLSchema-instance\\" VersionNumber=\\"1.0\\" RequestResponse=\\"Request\\">
+    <RequestFromSystem VersionNumber=\\"1.0\\">
+      <CorrelationID>2a0d2aed-c26d-41c5-8bef-1e60c657c182</CorrelationID>
+    </RequestFromSystem>
+    <DataStream VersionNumber=\\"1.0\\">
+      <DataStreamContent>
+<DC:ResultedCaseMessage xmlns:DC=\\"http://www.dca.gov.uk/xmlschemas/libra\\" Flow='ResultedCasesForThePolice' Interface='LibraStandardProsecutorPolice' SchemaVersion='0.6g'>
+	<DC:Session>
+		<DC:Case>
+			<DC:PTIURN>
+        123456789
+      </DC:PTIURN>
+		</DC:Case>
+	</DC:Session>
+</DC:ResultedCaseMessage>
+</DataStreamContent>
+    </DataStream>
+  </RouteData>"
+`;
+
+exports[`should format the message XML when the message XML is correct 1`] = `
+"<?xml version=\\"1.0\\" encoding=\\"UTF-8\\"?>
+  <RouteData xmlns=\\"http://schemas.cjse.gov.uk/common/operations\\" xmlns:cjseEntity=\\"http://schemas.cjse.gov.uk/common/businessentities\\" xmlns:cjseType=\\"http://schemas.cjse.gov.uk/common/businesstypes\\" xmlns:xsi=\\"http://www.w3.org/2001/XMLSchema-instance\\" VersionNumber=\\"1.0\\" RequestResponse=\\"Request\\">
+    <RequestFromSystem VersionNumber=\\"1.0\\">
+      <CorrelationID>d97733bb-0acc-4f98-a07e-6f413e5b39c2</CorrelationID>
+    </RequestFromSystem>
+    <DataStream VersionNumber=\\"1.0\\">
+      <DataStreamContent>
+<DC:ResultedCaseMessage xmlns:DC=\\"http://www.dca.gov.uk/xmlschemas/libra\\" Flow='ResultedCasesForThePolice' Interface='LibraStandardProsecutorPolice' SchemaVersion='0.6g'>
+	<DC:Session>
+		<DC:Case>
+			<DC:PTIURN>
+        123456789
+      </DC:PTIURN>
+		</DC:Case>
+	</DC:Session>
+</DC:ResultedCaseMessage>
+</DataStreamContent>
+    </DataStream>
+  </RouteData>"
+`;
