@@ -1,9 +1,8 @@
 import axios from "axios"
 import type { AxiosError } from "axios"
 import * as https from "https"
-import type { AuditLog, AuditLogEvent, PromiseResult } from "shared-types"
-import { HttpStatusCode } from "../utils"
-import type { ApiClient } from "shared-types"
+import type { ApiClient, AuditLog, AuditLogEvent, PromiseResult } from "shared-types"
+import { HttpStatusCode, logger } from "../utils"
 
 export type GetMessagesOptions = {
   status?: string
@@ -37,7 +36,7 @@ export default class AuditLogApiClient implements ApiClient {
       })
       .then((response) => response.data)
       .catch((error: AxiosError) => {
-        console.error("Error getting messages", error.response?.data)
+        logger.error(`Error getting messages: ${error.response?.data}`)
         return error
       })
   }
@@ -51,7 +50,7 @@ export default class AuditLogApiClient implements ApiClient {
       .then((response) => response.data)
       .then((result) => result[0])
       .catch((error: AxiosError) => {
-        console.error("Error getting message", error.response?.data)
+        logger.error(`Error getting messages: ${error.response?.data}`)
         return error
       })
   }
@@ -74,7 +73,7 @@ export default class AuditLogApiClient implements ApiClient {
         }
       })
       .catch((error: AxiosError) => {
-        console.error("Error creating audit log", error.response?.data)
+        logger.error(`Error creating audit log: ${error.response?.data}`)
         return error
       })
   }
@@ -105,7 +104,7 @@ export default class AuditLogApiClient implements ApiClient {
           case "ECONNABORTED":
             return Error(`Timed out creating event for message with Id ${messageId}.`)
           default:
-            console.error("Error creating event", error.response?.data)
+            logger.error(`Error creating event", ${error.response?.data}`)
             return error
         }
       })
@@ -135,7 +134,7 @@ export default class AuditLogApiClient implements ApiClient {
         }
       })
       .catch((error: AxiosError) => {
-        console.error("Error retrying event", error.response?.data)
+        logger.error(`Error retrying event: ${error.response?.data}`)
         return error
       })
   }

@@ -12,7 +12,7 @@ module.exports = {
     storeMessage: "./src/handlers/storeMessage.ts"
   },
   resolve: {
-    modules: [path.resolve("./node_modules"), path.resolve(".")],
+    modules: [path.resolve("./node_modules"), path.resolve("."), path.resolve("."), path.resolve("../shared/node_modules")],
     extensions: [".js", ".json", ".ts"]
   },
   output: {

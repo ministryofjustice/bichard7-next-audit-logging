@@ -1,6 +1,6 @@
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda"
 import { isError } from "shared-types"
-import { AwsAuditLogDynamoGateway, HttpStatusCode } from "shared"
+import { AwsAuditLogDynamoGateway, HttpStatusCode, logger } from "shared"
 import { createJsonApiResult } from "../utils"
 import createDynamoDbConfig from "../createDynamoDbConfig"
 import { CreateAuditLogEventUseCase, parseCreateAuditLogEventRequest, validateCreateAuditLogEvent } from "../use-cases"
@@ -38,7 +38,7 @@ export default async function createAuditLogEvent(event: APIGatewayProxyEvent): 
   }
 
   if (result.resultType === "error") {
-    console.error("Error creating audit log", result.resultDescription)
+    logger.error(`Error creating audit log: ${result.resultDescription}`)
     return createJsonApiResult({
       statusCode: HttpStatusCode.internalServerError,
       body: result.resultDescription

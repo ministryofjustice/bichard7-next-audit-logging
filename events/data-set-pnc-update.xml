@@ -202,5 +202,5 @@
 	        </Case>
 	    </HearingOutcome>
 	    <br7:HasError>false</br7:HasError>
-    </br7:AnnotatedHearingOutcome>	    
+    </br7:AnnotatedHearingOutcome>
 </tns:PNCUpdateDataset>

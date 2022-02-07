@@ -1,7 +1,7 @@
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda"
 import type { PromiseResult, AuditLog } from "shared-types"
 import { isError } from "shared-types"
-import { AwsAuditLogDynamoGateway, HttpStatusCode } from "shared"
+import { AwsAuditLogDynamoGateway, HttpStatusCode, logger } from "shared"
 import createDynamoDbConfig from "../createDynamoDbConfig"
 import createMessageFetcher from "../use-cases/createMessageFetcher"
 import { createJsonApiResult } from "../utils"
@@ -20,7 +20,7 @@ export default async function getMessages(event: APIGatewayProxyEvent): PromiseR
   const messageFetcherResult = await messageFetcher.fetch()
 
   if (isError(messageFetcherResult)) {
-    console.log("Error fetching messages", messageFetcherResult.message)
+    logger.error(`Error fetching messages: ${messageFetcherResult.message}`)
     return createJsonApiResult({
       statusCode: HttpStatusCode.badRequest,
       body: String(messageFetcherResult)

@@ -1,7 +1,7 @@
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda"
 import type { PromiseResult, AuditLogEvent } from "shared-types"
 import { isError } from "shared-types"
-import { AwsAuditLogDynamoGateway, HttpStatusCode } from "shared"
+import { AwsAuditLogDynamoGateway, HttpStatusCode, logger } from "shared"
 import createDynamoDbConfig from "../createDynamoDbConfig"
 import { FetchEventsUseCase, parseGetEventsRequest } from "../use-cases"
 import { createJsonApiResult } from "../utils"
@@ -23,7 +23,7 @@ export default async function getEvents(event: APIGatewayProxyEvent): PromiseRes
   const result = await fetchEvents.get(messageId)
 
   if (isError(result)) {
-    console.error("Error creating audit log", result.message)
+    logger.error("Error creating audit log", result.message)
     return createJsonApiResult({
       statusCode: HttpStatusCode.internalServerError,
       body: String(result)
