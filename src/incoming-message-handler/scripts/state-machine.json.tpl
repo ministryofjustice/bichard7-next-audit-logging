@@ -2,12 +2,12 @@
   "Comment": "Simulates a state machine to manage the workflow of receiving Libra/ExISS messages into the system",
   "StartAt": "Retrieve from S3",
   "States": {
-    "Retrieve from S3": {
+    "Store Message": {
       "Type": "Task",
-      "Resource": "${RETRIEVE_FROM_S3_LAMBDA_ARN}",
-      "Next": "Validate retrieve from S3 result"
+      "Resource": "${STORE_MESSAGE_LAMBDA_ARN}",
+      "Next": "Validate Store Message result"
     },
-    "Validate retrieve from S3 result": {
+    "Validate Store Message result": {
       "Type": "Choice",
       "Choices": [
         {
@@ -17,7 +17,7 @@
               "IsPresent": true
             },
             {
-              "Variable": "$.validationResult.isValid",
+              "Variable": "$.validationResult.isValidS3KeyProvided",
               "BooleanEquals": false
             }
           ],
@@ -26,28 +26,13 @@
         {
           "Variable": "$.validationResult",
           "IsPresent": false,
-          "Next": "Format Message"
+          "Next": "Send to Bichard"
         }
       ]
     },
     "Invalid S3 Key": {
       "Type": "Pass",
       "End": true
-    },
-    "Format Message": {
-      "Type": "Task",
-      "Resource": "${FORMAT_MESSAGE_LAMBDA_ARN}",
-      "Next": "Parse Message"
-    },
-    "Parse Message": {
-      "Type": "Task",
-      "Resource": "${PARSE_MESSAGE_LAMBDA_ARN}",
-      "Next": "Log Message Receipt"
-    },
-    "Log Message Receipt": {
-      "Type": "Task",
-      "Resource": "${LOG_MESSAGE_RECEIPT_LAMBDA_ARN}",
-      "Next": "Send to Bichard"
     },
     "Send to Bichard": {
       "Type": "Task",
