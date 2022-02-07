@@ -17,7 +17,7 @@
               "IsPresent": true
             },
             {
-              "Variable": "$.validationResult.isValidS3KeyProvided",
+              "Variable": "$.validationResult.isValid",
               "BooleanEquals": false
             }
           ],
