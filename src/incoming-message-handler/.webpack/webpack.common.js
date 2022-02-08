@@ -20,6 +20,7 @@ module.exports = {
     path: path.join(__dirname, "..", "build"),
     filename: "[name].js"
   },
+  externals: ['pino-pretty'],
   target: "node",
   module: {
     rules: [

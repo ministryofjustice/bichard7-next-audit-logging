@@ -15,7 +15,7 @@
     "test:unit": "jest --testPathIgnorePatterns=cypress",
     "host": "npm run build && nodemon scripts/host/start.mjs",
     "cypress:open": "cypress open",
-    "test:integration": "concurrently --kill-others --success first \"npm run dev:mocked\" \"./scripts/run-integration-tests.sh\"",
+    "test:integration": "concurrently --kill-others --success first \"npm run start:mocked\" \"./scripts/run-integration-tests.sh\"",
     "storybook": "start-storybook -p 6006",
     "build-storybook": "build-storybook"
   },
