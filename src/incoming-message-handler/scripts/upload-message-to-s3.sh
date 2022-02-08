@@ -21,7 +21,7 @@ function store_file_in_s3 {
   fi
 
   TMP_MSG=./message.tmp.xml
-  
+
   cat $MESSAGE_PATH | \
     sed "s/{MESSAGE_ID}/$MESSAGE_ID/g" | \
     sed "s/EXTERNAL_CORRELATION_ID/$MESSAGE_ID/g" > $TMP_MSG

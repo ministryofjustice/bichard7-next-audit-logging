@@ -1,5 +1,5 @@
 import type { PromiseResult } from "shared-types"
-import { decodeBase64 } from "shared"
+import { decodeBase64, logger } from "shared"
 import { isError } from "shared-types"
 
 import type GetLastFailedMessageEventUseCase from "./GetLastEventUseCase"
@@ -17,7 +17,7 @@ export default class RetryMessageUseCase {
   ) {}
 
   async retry(messageId: string): PromiseResult<void> {
-    console.log(`Retrying message ${messageId}`)
+    logger.info(`Retrying message ${messageId}`)
     const event = await this.getLastFailedMessageEventUseCase.get(messageId)
 
     if (isError(event)) {
@@ -60,7 +60,7 @@ export default class RetryMessageUseCase {
       return sendMessageToQueueResult
     }
 
-    console.log("Message successfully sent to queue")
+    logger.info("Message successfully sent to queue")
 
     return this.createRetryingEventUseCase.create(messageId)
   }
