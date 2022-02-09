@@ -30,7 +30,7 @@ npm i
 npm run dev
 ```
 
-The portal should now be running on port localhost:3020/audit-logging
+The portal should now be running on [http://localhost:3020/audit-logging](http://localhost:3020/audit-logging)
 
 > Note: Running the dev command will create a local `.env.local` file dynamically with the API endpoint.
 
