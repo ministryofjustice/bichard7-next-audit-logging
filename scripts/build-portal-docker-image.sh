@@ -2,10 +2,10 @@
 
 set -e
 
-readonly DOCKER_REFERENCE="nginx-nodejs-supervisord:*"
+readonly DOCKER_REFERENCE="nginx-nodejs-supervisord"
 
 function has_local_image() {
-  IMAGES=$(docker images --filter=reference="nginx-nodejs-supervisord:*" -q | wc -l)
+  IMAGES=$(docker images --filter=reference="${DOCKER_REFERENCE}:*" -q | wc -l)
   echo "${IMAGES}"
 }
 
@@ -36,9 +36,9 @@ function pull_and_build_from_aws() {
   echo "Building Audit Log Portal Docker Image on $(date)"
 
   # Get our latest staged nodejs image
-  IMAGE_HASH=$(aws ecr describe-images --repository-name nginx-nodejs-supervisord | jq '.imageDetails|sort_by(.imagePushedAt)[-1].imageDigest' | tr -d '"')
+  IMAGE_HASH=$(aws ecr describe-images --repository-name ${DOCKER_REFERENCE} | jq '.imageDetails|sort_by(.imagePushedAt)[-1].imageDigest' | tr -d '"')
 
-  DOCKER_IMAGE_HASH="$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/nginx-nodejs-supervisord@$IMAGE_HASH"
+  DOCKER_IMAGE_HASH="$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/${DOCKER_REFERENCE}@$IMAGE_HASH"
 
   docker build --build-arg "NODE_IMAGE=$DOCKER_IMAGE_HASH" -t audit-log-portal:latest .
 }
