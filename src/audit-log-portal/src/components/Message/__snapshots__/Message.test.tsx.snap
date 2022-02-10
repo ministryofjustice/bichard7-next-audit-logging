@@ -72,12 +72,13 @@ exports[`matches snapshot 1`] = `
           <span
             class="MuiBadge-root"
           >
-            <button
+            <a
+              aria-disabled="false"
               aria-label="view"
               class="MuiButtonBase-root MuiIconButton-root"
+              href="/messages/test-uuid"
               tabindex="0"
               title="View events"
-              type="button"
             >
               <span
                 class="MuiIconButton-label"
@@ -102,7 +103,7 @@ exports[`matches snapshot 1`] = `
               <span
                 class="MuiTouchRipple-root"
               />
-            </button>
+            </a>
             <span
               class="MuiBadge-badge MuiBadge-anchorOriginTopRightRectangle MuiBadge-colorSecondary MuiBadge-invisible"
             >
