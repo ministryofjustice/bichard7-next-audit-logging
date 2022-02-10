@@ -2,6 +2,7 @@ type DeliveryMessage = {
   RouteData: {
     RequestFromSystem: {
       CorrelationID: string
+      SystemID: string
     }
     DataStream: {
       DataStreamContent: {
