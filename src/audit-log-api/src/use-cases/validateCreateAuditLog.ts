@@ -13,6 +13,7 @@ export default (auditLog: AuditLog): ValidationResult => {
   let formattedReceivedDate = ""
   const {
     caseId,
+    systemId,
     externalCorrelationId,
     messageId,
     messageXml,
@@ -27,6 +28,10 @@ export default (auditLog: AuditLog): ValidationResult => {
     errors.push("Case ID is mandatory")
   } else if (typeof caseId !== "string") {
     errors.push("Case ID must be string")
+  }
+
+  if (systemId && typeof systemId !== "string") {
+    errors.push("System ID must be string")
   }
 
   if (!externalCorrelationId) {
@@ -83,6 +88,7 @@ export default (auditLog: AuditLog): ValidationResult => {
   const validatedAuditLog: AuditLog = {
     messageId,
     caseId,
+    systemId,
     s3Path,
     externalId,
     stepExecutionId,
