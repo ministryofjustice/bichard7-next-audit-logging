@@ -1,5 +1,5 @@
 import { isError } from "shared-types"
-import { AwsS3Gateway, createS3Config } from "shared"
+import { AwsS3Gateway, createS3Config, logger } from "shared"
 import TransferMessagesUseCase from "./TransferMessagesUseCase"
 import type { TransferMessagesInput, TransferMessagesOptions, TransferMessagesResult } from "./types"
 
@@ -32,7 +32,7 @@ export default async ({ numberOfObjectsToTransfer }: TransferMessagesInput): Pro
     throw result
   }
 
-  // eslint-disable-next-line no-console
-  console.log(result)
+  logger.info(result)
+
   return result
 }

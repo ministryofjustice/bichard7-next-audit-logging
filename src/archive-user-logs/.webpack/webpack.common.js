@@ -6,7 +6,7 @@ module.exports = {
     archiveUserLogs: "./src/index.ts"
   },
   resolve: {
-    modules: [path.resolve("./node_modules"), path.resolve("."), path.resolve("../../shared/node_modules")],
+    modules: [path.resolve("./node_modules"), path.resolve("."), path.resolve("../shared/node_modules")],
     extensions: [".js", ".json", ".ts"]
   },
   output: {
@@ -14,6 +14,7 @@ module.exports = {
     path: path.join(__dirname, "..", "build"),
     filename: "[name].js"
   },
+  externals: ['pino-pretty'],
   target: "node",
   module: {
     rules: [

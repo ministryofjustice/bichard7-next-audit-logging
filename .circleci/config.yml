@@ -1,3 +1,5 @@
+---
+
 version: 2.1
 
 commands:
@@ -169,7 +171,7 @@ jobs:
           command: ./.circleci/scripts/install-cypress.sh
       - run:
           name: Run UI tests
-          command: cd ./src/audit-log-portal && npm run test:ui
+          command: cd ./src/audit-log-portal && npm run test:integration
       - store_artifacts:
           path: ./src/audit-log-portal/cypress/videos
       - store_artifacts:

@@ -9,7 +9,7 @@ interface Props {
 
 const ViewEventsButton = ({ message }: Props) => (
   <Badge badgeContent={(message.events || []).length} color="secondary">
-    <Link href={`/messages/${message.messageId}`}>
+    <Link href={`/messages/${message.messageId}`} passHref={true}>
       <Tooltip title="View events" aria-label="view">
         <IconButton>
           <EventIcon />

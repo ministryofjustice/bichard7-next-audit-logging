@@ -4,14 +4,33 @@ This is a Next.js project. The purpose of which is to grant an admin a view of t
 
 ## Development
 
-In order to develop against this project locally, you will need to install the dependencies and then run the dev command.
+In order to develop against this project locally, you have 2 options which you should choose based on your use case.
 
-> Note: Before running this command, you will need to ensure that the [Audit Log API](../audit-log-api#README.md) is running first.
+If you are making an aesthetic change then you can mock the `audit-log-api` and get up and running quickly with this command:
 
-```shell
+```sh
+npm run dev:mocked
+```
+
+This should bring up the portal with some mocked data present.
+
+If you need to test or make a change to the integration between the portal and api, it's important that you spin up the api first, use the following command to achieve this. In a new shell run:
+
+```sh
+npm run init:audit-log-api
+
+```
+
+This will run as a long running task running on port 3010
+
+> Now the api is set up you can start the portal. In a new shell run:
+
+```sh
 npm i
 npm run dev
 ```
+
+The portal should now be running on [http://localhost:3020/audit-logging](http://localhost:3020/audit-logging)
 
 > Note: Running the dev command will create a local `.env.local` file dynamically with the API endpoint.
 
@@ -21,23 +40,19 @@ npm run dev
 
 In order to run unit tests, you need to run the following command:
 
-```bash
+```sh
 npm run test
 ```
 
-### UI Tests
+### Integration Tests
 
-Before running UI tests, you need to run the application using the following command. This will run the application and mock the API:
+Integration tests are built on cypress. Before running Integration tests, you need to run the application using the following command. This will run the application and mock the API:
 
-```bash
-npm run start:mocked
+```sh
+npm run test:integration
 ```
 
-Once the application is running, you can run UI tests by running the command below:
-
-```bash
-npm run test:ui
-```
+To add more intergration tests see the [cypress dir](./cypress)
 
 ## Testing the host
 
@@ -46,7 +61,7 @@ The portal is hosted on AWS via ECS using a custom Docker Image. Follow these st
 1. You will first need to make sure you have logged into the container registry in the AWS parent account. You will need
 to make use of the AWS Vault for this, using the following command:
 
-```shell
+```sh
 aws-vault exec <account_name> -- make build-portal-image
 ```
 
