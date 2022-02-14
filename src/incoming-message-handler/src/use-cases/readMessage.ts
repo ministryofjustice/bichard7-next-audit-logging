@@ -32,12 +32,6 @@ const getExternalCorrelationId = (xml: DeliveryMessage): Result<string> => {
   return externalCorrelationId.trim()
 }
 
-const getSystemId = (xml: DeliveryMessage): string => {
-  const systemId = xml.RouteData && xml.RouteData.RequestFromSystem && xml.RouteData.RequestFromSystem.SystemID
-
-  return systemId?.trim()
-}
-
 const readMessage = async (message: ReceivedMessage): PromiseResult<AuditLog> => {
   const xml = await parseXml<DeliveryMessage>(message.messageXml).catch((error: Error) => error)
 
@@ -57,7 +51,7 @@ const readMessage = async (message: ReceivedMessage): PromiseResult<AuditLog> =>
 
   const auditLog = new AuditLog(externalCorrelationId, new Date(message.receivedDate), message.messageXml)
   auditLog.caseId = caseId
-  auditLog.systemId = getSystemId(xml)
+  auditLog.systemId = xml.RouteData?.RequestFromSystem?.SystemID?.trim()
   auditLog.createdBy = "Incoming message handler"
   auditLog.s3Path = message.s3Path
   auditLog.externalId = message.externalId
