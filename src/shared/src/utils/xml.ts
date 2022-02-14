@@ -12,7 +12,8 @@ export const parseXml = <T>(xml: string): Promise<T> => {
       {
         tagNameProcessors: [stripNamespaces],
         explicitArray: false,
-        trim: true
+        trim: true,
+        ignoreAttrs: true
       },
       (error, result) => {
         if (error) {
