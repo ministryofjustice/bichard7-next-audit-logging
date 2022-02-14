@@ -21,6 +21,14 @@ describe("xml", () => {
 
       expect(xml.name).toBe("Bob")
     })
+
+    it("should parse the xml into an object and ignore attributes", async () => {
+      type Person = { name: string }
+      const personXml = `<name attr="value">Bob</name>`
+      const xml = await parseXml<Person>(personXml)
+
+      expect(xml.name).toBe("Bob")
+    })
   })
 
   describe("hasRootElement", () => {
