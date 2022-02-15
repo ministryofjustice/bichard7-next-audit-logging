@@ -15,6 +15,10 @@ const ExternalCorrelationIdField = styled(TextField)`
   flex-grow: 1;
 `
 
+const InternalMessageIdField = styled(TextField)`
+  flex-grow: 1;
+`
+
 interface Props {
   onSearch: (model: MessageSearchModel) => void
   disabled?: boolean
@@ -22,16 +26,22 @@ interface Props {
 
 const MessageSearch = ({ onSearch, disabled = false }: Props) => {
   const [externalCorrelationId, setExternalCorrelationId] = useState("")
+  const [internalMessageId, setInternalMessageId] = useState("")
   const [status, setStatus] = useState("")
 
-  const triggerSearch = () => onSearch({ externalCorrelationId, status })
+  const triggerSearch = () => onSearch({ externalCorrelationId, internalMessageId, status })
   const onStatusChange = (value: string) => {
     setStatus(value)
     setExternalCorrelationId("")
+    setInternalMessageId("")
   }
   const onExternalCorrelationIdChange = (value: string) => {
     setStatus("")
     setExternalCorrelationId(value)
+  }
+  const onInternalMessageIdChange = (value: string) => {
+    setStatus("")
+    setInternalMessageId(value)
   }
 
   return (
@@ -45,11 +55,18 @@ const MessageSearch = ({ onSearch, disabled = false }: Props) => {
 
       <ExternalCorrelationIdField
         variant="outlined"
-        label="Search by External Correlation Id"
+        label="Search by External Correlation ID"
         value={externalCorrelationId}
         onChange={(e) => onExternalCorrelationIdChange(e.target.value || "")}
         disabled={disabled}
-        fullWidth
+      />
+
+      <InternalMessageIdField
+        variant="outlined"
+        label="Search by Internal Message ID"
+        value={internalMessageId}
+        onChange={(e) => onInternalMessageIdChange(e.target.value || "")}
+        disabled={disabled}
       />
 
       <IconButton

@@ -10,7 +10,9 @@ import convertObjectToURLSearchParams from "utils/convertObjectToURLSearchParams
 import combineUrlAndQueryString from "utils/combineUrlAndQueryString"
 import InfiniteScroll from "react-infinite-scroll-component"
 import useGetMessages from "utils/useGetMessages"
+import useGetMessage from "utils/useGetMessageById"
 import If from "components/If"
+import Message from "components/Message"
 
 const resolveApiUrl = (searchModel: MessageSearchModel, lastMessageId?: string): string => {
   const params = convertObjectToURLSearchParams(searchModel)
@@ -22,6 +24,25 @@ const resolveApiUrl = (searchModel: MessageSearchModel, lastMessageId?: string):
 
 const Index = () => {
   const [searchModel, setSearchModel] = useState<MessageSearchModel>({})
+
+  if (!!searchModel.internalMessageId) {
+    const { message, error, reload } = useGetMessage(
+      "/audit-logging/api/messages/".concat(searchModel.internalMessageId)
+    )
+
+    return (
+      <Layout pageTitle="Messages">
+        <Header text="Messages" />
+        <MessageSearch onSearch={(model) => setSearchModel(model)} disabled={!message && !error} />
+
+        <Error message={error?.message} visibleIf={!!error} />
+
+        <If condition={!!message && !error}>
+          <Message message={message} reloadMessages={() => {}} />
+        </If>
+      </Layout>
+    )
+  }
 
   const { messages, error, loadMore, isLoadingInitialData, isLoadingMore, isReachingEnd, reload } = useGetMessages(
     (_, previousMessages) => {
