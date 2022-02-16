@@ -11,6 +11,8 @@ export default class AuditLog {
 
   public caseId: string
 
+  public systemId: string
+
   public events: AuditLogEvent[] = []
 
   public automationReport: AutomationReport = { events: [] }
