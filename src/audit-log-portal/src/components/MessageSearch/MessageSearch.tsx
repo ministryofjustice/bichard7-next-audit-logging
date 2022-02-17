@@ -37,10 +37,12 @@ const MessageSearch = ({ onSearch, disabled = false }: Props) => {
   }
   const onExternalCorrelationIdChange = (value: string) => {
     setStatus("")
+    setInternalMessageId("")
     setExternalCorrelationId(value)
   }
   const onInternalMessageIdChange = (value: string) => {
     setStatus("")
+    setExternalCorrelationId("")
     setInternalMessageId(value)
   }
 

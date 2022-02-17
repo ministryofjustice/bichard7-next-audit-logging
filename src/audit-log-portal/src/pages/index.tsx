@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Error from "components/Error"
 import Header from "components/Header"
 import Layout from "components/Layout"
@@ -34,23 +34,31 @@ const Index = () => {
     isReachingEnd: boolean,
     reload: () => Promise<AuditLog[][]>
 
-  if (!!searchModel.internalMessageId) {
-    let message
-    // eslint-disable-next-line prettier/prettier
-    ({ message, error, reload } = useGetMessageById(
-      "/audit-logging/api/messages".concat(searchModel.internalMessageId)
-    ))
-    messages = [message]
-  } else {
-    // eslint-disable-next-line prettier/prettier
-    ({ messages, error, loadMore, isLoadingInitialData, isLoadingMore, isReachingEnd, reload } = useGetMessages(
-      (_, previousMessages) => {
-        //@ts-ignore
-        const lastMessageId = previousMessages?.slice(-1)?.[0].messageId
-        return resolveApiUrl(searchModel, lastMessageId)
+  messages = []
+
+    useEffect(() => {
+      if (!!searchModel.internalMessageId) {
+        // let message
+        // // eslint-disable-next-line prettier/prettier
+        // ({ message, error, reload } = useGetMessageById(
+        //   "/audit-logging/api/messages".concat(searchModel.internalMessageId)
+        // ))
+        // messages = [message]
+        messages = []
+        error = null
+        reload = () => Promise.resolve([[]])
+      } else {
+        // eslint-disable-next-line prettier/prettier
+        ({ messages, error, loadMore, isLoadingInitialData, isLoadingMore, isReachingEnd, reload } = useGetMessages(
+          (_, previousMessages) => {
+            //@ts-ignore
+            const lastMessageId = previousMessages?.slice(-1)?.[0].messageId
+            return resolveApiUrl(searchModel, lastMessageId)
+          }
+        ))
       }
-    ))
-  }
+      console.log(messages)
+    })
 
   return (
     <Layout pageTitle="Messages">
@@ -59,7 +67,7 @@ const Index = () => {
 
       <Error message={error?.message} visibleIf={!!error} />
 
-      <If condition={!!messages && !error}>
+      <If condition={messages !== undefined && !error}>
         <If condition={!!searchModel.internalMessageId}>
           <Message message={messages[0]} reloadMessages={reload}></Message>
         </If>
