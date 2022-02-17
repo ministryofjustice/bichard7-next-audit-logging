@@ -1,17 +1,18 @@
-import type { AuditLog } from "shared-types";
+import type { AuditLog } from "shared-types"
+import useSWR from "swr"
 import fetcher from "./fetcher"
+
+interface UseGetMessageResult {
+  message: AuditLog
+  error: Error
+  reload: () => Promise<AuditLog[][]>
+}
 
 interface MessageResult {
   message: AuditLog
 }
 
-interface UseGetMessageResult {
-  message: AuditLog
-  error: Error
-  isError: boolean
-  reload: Promise<AuditLog>
-}
-
-export default function useGetMessage(url: string): UseGetMessageResult {
-  return { message: null, error: Error("no :)"), isError: true, reload: Promise.resolve(null) }
+export default function useGetMessageById(url: string): UseGetMessageResult {
+  // const { data, error } = useSWR(url, fetcher)
+  return { message: null, error: Error("no :)"), reload: () => Promise.resolve(null) }
 }

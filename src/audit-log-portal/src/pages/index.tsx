@@ -10,9 +10,10 @@ import convertObjectToURLSearchParams from "utils/convertObjectToURLSearchParams
 import combineUrlAndQueryString from "utils/combineUrlAndQueryString"
 import InfiniteScroll from "react-infinite-scroll-component"
 import useGetMessages from "utils/useGetMessages"
-import useGetMessage from "utils/useGetMessageById"
+import useGetMessageById from "utils/useGetMessageById"
 import If from "components/If"
 import Message from "components/Message"
+import type { AuditLog } from "shared-types"
 
 const resolveApiUrl = (searchModel: MessageSearchModel, lastMessageId?: string): string => {
   const params = convertObjectToURLSearchParams(searchModel)
@@ -25,32 +26,31 @@ const resolveApiUrl = (searchModel: MessageSearchModel, lastMessageId?: string):
 const Index = () => {
   const [searchModel, setSearchModel] = useState<MessageSearchModel>({})
 
+  let messages: AuditLog[],
+    error: Error,
+    loadMore: () => Promise<AuditLog[][]>,
+    isLoadingInitialData: boolean,
+    isLoadingMore: boolean,
+    isReachingEnd: boolean,
+    reload: () => Promise<AuditLog[][]>
+
   if (!!searchModel.internalMessageId) {
-    const { message, error, reload } = useGetMessage(
-      "/audit-logging/api/messages/".concat(searchModel.internalMessageId)
-    )
-
-    return (
-      <Layout pageTitle="Messages">
-        <Header text="Messages" />
-        <MessageSearch onSearch={(model) => setSearchModel(model)} disabled={!message && !error} />
-
-        <Error message={error?.message} visibleIf={!!error} />
-
-        <If condition={!!message && !error}>
-          <Message message={message} reloadMessages={() => {}} />
-        </If>
-      </Layout>
-    )
+    let message
+    // eslint-disable-next-line prettier/prettier
+    ({ message, error, reload } = useGetMessageById(
+      "/audit-logging/api/messages".concat(searchModel.internalMessageId)
+    ))
+    messages = [message]
+  } else {
+    // eslint-disable-next-line prettier/prettier
+    ({ messages, error, loadMore, isLoadingInitialData, isLoadingMore, isReachingEnd, reload } = useGetMessages(
+      (_, previousMessages) => {
+        //@ts-ignore
+        const lastMessageId = previousMessages?.slice(-1)?.[0].messageId
+        return resolveApiUrl(searchModel, lastMessageId)
+      }
+    ))
   }
-
-  const { messages, error, loadMore, isLoadingInitialData, isLoadingMore, isReachingEnd, reload } = useGetMessages(
-    (_, previousMessages) => {
-      //@ts-ignore
-      const lastMessageId = previousMessages?.slice(-1)?.[0].messageId
-      return resolveApiUrl(searchModel, lastMessageId)
-    }
-  )
 
   return (
     <Layout pageTitle="Messages">
@@ -60,9 +60,14 @@ const Index = () => {
       <Error message={error?.message} visibleIf={!!error} />
 
       <If condition={!!messages && !error}>
-        <InfiniteScroll next={loadMore} hasMore={!isReachingEnd} dataLength={messages.length} loader>
-          <Messages messages={messages || []} reloadMessages={reload} />
-        </InfiniteScroll>
+        <If condition={!!searchModel.internalMessageId}>
+          <Message message={messages[0]} reloadMessages={reload}></Message>
+        </If>
+        <If condition={!searchModel.internalMessageId}>
+          <InfiniteScroll next={loadMore} hasMore={!isReachingEnd} dataLength={messages.length} loader>
+            <Messages messages={messages || []} reloadMessages={reload} />
+          </InfiniteScroll>
+        </If>
       </If>
 
       <Loading isLoading={isLoadingMore} blockScreen={isLoadingInitialData} />
