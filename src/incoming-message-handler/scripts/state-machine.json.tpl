@@ -5,7 +5,13 @@
     "Store Message": {
       "Type": "Task",
       "Resource": "${STORE_MESSAGE_LAMBDA_ARN}",
-      "Next": "Validate Store Message result"
+      "Next": "Validate Store Message result",
+      "Retry": [{
+         "ErrorEquals": ["States.ALL"],
+         "IntervalSeconds": 180,
+         "MaxAttempts": 99999999,
+         "BackoffRate": 1.1
+      }]
     },
     "Validate Store Message result": {
       "Type": "Choice",
@@ -37,12 +43,24 @@
     "Send to Bichard": {
       "Type": "Task",
       "Resource": "${SEND_TO_BICHARD_ARN}",
-      "Next": "Record Sent to Bichard Event"
+      "Next": "Record Sent to Bichard Event",
+      "Retry": [{
+         "ErrorEquals": ["States.ALL"],
+         "IntervalSeconds": 180,
+         "MaxAttempts": 99999999,
+         "BackoffRate": 1.1
+      }]
     },
     "Record Sent to Bichard Event": {
       "Type": "Task",
       "Resource": "${RECORD_SENT_TO_BICHARD_EVENT_ARN}",
-      "End": true
+      "End": true,
+      "Retry": [{
+         "ErrorEquals": ["States.ALL"],
+         "IntervalSeconds": 180,
+         "MaxAttempts": 99999999,
+         "BackoffRate": 1.1
+      }]
     }
   }
 }
