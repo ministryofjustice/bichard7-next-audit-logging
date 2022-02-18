@@ -26,24 +26,24 @@ interface Props {
 
 const MessageSearch = ({ onSearch, disabled = false }: Props) => {
   const [externalCorrelationId, setExternalCorrelationId] = useState("")
-  const [internalMessageId, setInternalMessageId] = useState("")
+  const [messageId, setMessageId] = useState("")
   const [status, setStatus] = useState("")
 
-  const triggerSearch = () => onSearch({ externalCorrelationId, internalMessageId, status })
+  const triggerSearch = () => onSearch({ externalCorrelationId, messageId, status })
   const onStatusChange = (value: string) => {
     setStatus(value)
     setExternalCorrelationId("")
-    setInternalMessageId("")
+    setMessageId("")
   }
   const onExternalCorrelationIdChange = (value: string) => {
     setStatus("")
-    setInternalMessageId("")
     setExternalCorrelationId(value)
+    setMessageId("")
   }
   const onInternalMessageIdChange = (value: string) => {
     setStatus("")
     setExternalCorrelationId("")
-    setInternalMessageId(value)
+    setMessageId(value)
   }
 
   return (
@@ -66,7 +66,7 @@ const MessageSearch = ({ onSearch, disabled = false }: Props) => {
       <InternalMessageIdField
         variant="outlined"
         label="Search by Internal Message ID"
-        value={internalMessageId}
+        value={messageId}
         onChange={(e) => onInternalMessageIdChange(e.target.value || "")}
         disabled={disabled}
       />
