@@ -14,7 +14,7 @@ export default {
 } as Meta
 
 const createMessage = (status: string) => {
-  const message = new AuditLog("LIBRA-EXISS-0001", new Date(), "XML")
+  const message = new AuditLog("LIBRA-EXISS-0001", new Date())
   message.status = status
 
   return message
