@@ -5,14 +5,13 @@ import parseCreateAuditLogRequest from "./parseCreateAuditLogRequest"
 test("should return audit log when request body has value", () => {
   const expectedDate = new Date()
   const result = parseCreateAuditLogRequest(<APIGatewayProxyEvent>{
-    body: JSON.stringify(new AuditLog("123", expectedDate, "Xml"))
+    body: JSON.stringify(new AuditLog("123", expectedDate))
   })
 
   expect(isError(result)).toBe(false)
 
   const auditLog = <AuditLog>result
   expect(auditLog.externalCorrelationId).toBe("123")
-  expect(auditLog.messageXml).toBe("Xml")
   expect(auditLog.receivedDate).toBe(expectedDate.toISOString())
 })
 
