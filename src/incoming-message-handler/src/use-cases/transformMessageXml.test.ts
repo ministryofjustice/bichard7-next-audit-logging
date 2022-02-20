@@ -1,8 +1,8 @@
 import { AuditLog } from "shared-types"
 import transformMessageXml from "./transformMessageXml"
 
-const createAuditLog = (xml: string) => ({
-  ...new AuditLog("EXTERNAL_CORRELATION_ID", new Date("2021-10-13T10:12:13"), xml),
+const createAuditLog = () => ({
+  ...new AuditLog("EXTERNAL_CORRELATION_ID", new Date("2021-10-13T10:12:13")),
   messageId: "MESSAGE_ID"
 })
 
@@ -31,7 +31,7 @@ describe("formatMessageXml()", () => {
     </RouteData>
 `
   it("should format the message", () => {
-    const formattedMessage = transformMessageXml(createAuditLog(messageXml))
+    const formattedMessage = transformMessageXml(createAuditLog(), messageXml)
 
     expect(formattedMessage).toMatchSnapshot()
   })
@@ -60,7 +60,7 @@ describe("formatMessageXml()", () => {
   </cjseOps:RouteData>
 `
   it("should format the message with namespaced xml", () => {
-    const formattedMessage = transformMessageXml(createAuditLog(namespacedMessageXml))
+    const formattedMessage = transformMessageXml(createAuditLog(), namespacedMessageXml)
 
     expect(formattedMessage).toMatchSnapshot()
   })
@@ -90,7 +90,7 @@ describe("formatMessageXml()", () => {
 `
 
   it("should format the message with escaped xml", () => {
-    const formattedMessage = transformMessageXml(createAuditLog(escapedMessageXml))
+    const formattedMessage = transformMessageXml(createAuditLog(), escapedMessageXml)
 
     expect(formattedMessage).toMatchSnapshot()
   })
@@ -121,7 +121,7 @@ describe("formatMessageXml()", () => {
 `
 
   it("should format the message with escaped xml with a prolog", () => {
-    const formattedMessage = transformMessageXml(createAuditLog(escapedPrologMessageXml))
+    const formattedMessage = transformMessageXml(createAuditLog(), escapedPrologMessageXml)
 
     expect(formattedMessage).toMatchSnapshot()
   })

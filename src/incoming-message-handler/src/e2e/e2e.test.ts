@@ -1,11 +1,10 @@
 jest.retryTimes(10)
+import "shared-testing"
 import { v4 as uuid } from "uuid"
 import format from "xml-formatter"
 import type { DynamoDbConfig } from "shared-types"
-import { isError } from "shared-types"
 import { TestDynamoGateway, TestS3Gateway } from "shared"
 import TestMqGateway from "../gateways/MqGateway/TestMqGateway"
-import transformMessageXml from "../use-cases/transformMessageXml"
 import { setEnvironmentVariables } from "shared-testing"
 process.env.MQ_QUEUE = "INCOMING_MESSAGE_HANDLER_QUEUE"
 process.env.INCOMING_MESSAGE_BUCKET_NAME = "internalIncomingBucket"
@@ -111,9 +110,6 @@ describe("e2e tests", () => {
     expect(persistedEvent.eventSource).toBe("Incoming Message Handler")
 
     const actualMessage = await testMqGateway.getMessage(queueName)
-    expect(isError(actualMessage)).toBe(false)
-
-    const expectedXml = formatXml(transformMessageXml(persistedMessage))
-    expect(formatXml(<string>actualMessage)).toBe(expectedXml)
+    expect(actualMessage).toNotBeError()
   })
 })

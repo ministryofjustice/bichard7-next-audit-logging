@@ -49,7 +49,7 @@ const readMessage = async (message: ReceivedMessage): PromiseResult<AuditLog> =>
     return caseId
   }
 
-  const auditLog = new AuditLog(externalCorrelationId, new Date(message.receivedDate), message.messageXml)
+  const auditLog = new AuditLog(externalCorrelationId, new Date(message.receivedDate))
   auditLog.caseId = caseId
   auditLog.systemId = xml.RouteData?.RequestFromSystem?.SystemID?.trim()
   auditLog.createdBy = "Incoming message handler"

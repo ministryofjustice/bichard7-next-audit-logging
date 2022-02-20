@@ -11,8 +11,7 @@ const unescape = (input: string) =>
 
 const removeProlog = (input: string) => input.replace(/<\?xml[^?]*\?>/g, "")
 
-const transformMessageXml = (auditlog: AuditLog): string => {
-  const { messageXml } = auditlog
+const transformMessageXml = (auditlog: AuditLog, messageXml: string): string => {
   const organizationalUnitId = getXmlElementContent(messageXml, "OrganizationalUnitID") ?? ""
   const messageType = getXmlElementContent(messageXml, "DataStreamType") ?? ""
   const messageContent = removeProlog(unescape(getXmlElementContent(messageXml, "DataStreamContent") ?? ""))

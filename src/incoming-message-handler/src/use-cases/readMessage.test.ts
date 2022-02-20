@@ -78,11 +78,10 @@ describe("handleMessage", () => {
     message.messageXml = expectedMessage
 
     const result = (await readMessage(message)) as AuditLog
-    const { messageId, externalCorrelationId, caseId, systemId, createdBy, messageXml } = result
+    const { messageId, externalCorrelationId, caseId, systemId, createdBy } = result
 
     expect(messageId).toBeDefined()
     expect(externalCorrelationId).toBe(expectedExternalCorrelationId)
-    expect(messageXml).toBe(expectedMessage)
     expect(caseId).toEqual(expectedCaseId)
     expect(systemId).toEqual(expectedSystemId)
     expect(createdBy).toBe("Incoming message handler")
@@ -92,11 +91,10 @@ describe("handleMessage", () => {
     message.messageXml = expectedMessageWithoutSystemId
 
     const result = (await readMessage(message)) as AuditLog
-    const { messageId, externalCorrelationId, caseId, systemId, createdBy, messageXml } = result
+    const { messageId, externalCorrelationId, caseId, systemId, createdBy } = result
 
     expect(messageId).toBeDefined()
     expect(externalCorrelationId).toBe(expectedExternalCorrelationId)
-    expect(messageXml).toBe(expectedMessageWithoutSystemId)
     expect(caseId).toEqual(expectedCaseId)
     expect(systemId).toBeUndefined()
     expect(createdBy).toBe("Incoming message handler")
