@@ -27,7 +27,7 @@ export default class {
     // Create a message if message ID doesn't exist in the database
     // If message ID already exists, the API returns 409 error
     const message = {
-      ...new AuditLog(messageId, new Date("1970-01-01T00:00:00.000Z"), "Unknown"),
+      ...new AuditLog(messageId, new Date("1970-01-01T00:00:00.000Z")),
       messageId,
       caseId: "Unknown",
       createdBy: "Event handler"

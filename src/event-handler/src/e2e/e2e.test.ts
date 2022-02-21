@@ -73,8 +73,8 @@ test.each<TestInput>([
 ])(
   "given the event, the step function is invoked with 3 duplicate events across 2 messages",
   async ({ eventFilename, messageFormat }: TestInput) => {
-    const auditLog1 = new AuditLog("CorrelationId1", new Date(), "XML")
-    const auditLog2 = new AuditLog("CorrelationId2", new Date(), "XML")
+    const auditLog1 = new AuditLog("CorrelationId1", new Date())
+    const auditLog2 = new AuditLog("CorrelationId2", new Date())
 
     await dynamoGateway.create(auditLog1)
     await dynamoGateway.create(auditLog2)

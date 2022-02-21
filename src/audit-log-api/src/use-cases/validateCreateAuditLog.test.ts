@@ -2,7 +2,7 @@ import { AuditLog } from "shared-types"
 import validateCreateAuditLog from "./validateCreateAuditLog"
 
 it("should be valid when audit log item is valid", () => {
-  const item = new AuditLog("ECID", new Date(), "XML")
+  const item = new AuditLog("ECID", new Date())
   item.caseId = "CID"
   item.systemId = "DummySystemID"
   item.createdBy = "Test"
@@ -16,7 +16,6 @@ it("should be valid when audit log item is valid", () => {
   expect(auditLog.caseId).toBe(item.caseId)
   expect(auditLog.systemId).toBe(item.systemId)
   expect(auditLog.receivedDate).toBe(item.receivedDate)
-  expect(auditLog.messageXml).toBe(item.messageXml)
   expect(auditLog.createdBy).toBe(item.createdBy)
   expect(auditLog.status).toBe(item.status)
   expect(auditLog.version).toBe(item.version)
@@ -26,7 +25,7 @@ it("should be valid when audit log item is valid", () => {
 })
 
 it("should be valid and override the value of fields that should be set internally", () => {
-  const item = new AuditLog("ECID", new Date("2021-10-15T10:12:13.000Z"), "XML")
+  const item = new AuditLog("ECID", new Date("2021-10-15T10:12:13.000Z"))
   item.caseId = "CID"
   item.systemId = "DummySystemID"
   item.createdBy = "Test"
@@ -49,7 +48,6 @@ it("should be valid and override the value of fields that should be set internal
   expect(auditLog.caseId).toBe(item.caseId)
   expect(auditLog.systemId).toBe(item.systemId)
   expect(auditLog.externalCorrelationId).toBe(item.externalCorrelationId)
-  expect(auditLog.messageXml).toBe(item.messageXml)
   expect(auditLog.receivedDate).toEqual(item.receivedDate)
   expect(auditLog.status).toBe("Processing")
   expect(auditLog.version).toBe(0)
@@ -59,7 +57,7 @@ it("should be valid and override the value of fields that should be set internal
 })
 
 it("should remove arbitrary keys from the audit log", () => {
-  let item = new AuditLog("ECID", new Date(), "XML")
+  let item = new AuditLog("ECID", new Date())
   item.caseId = "CID"
   item.systemId = "DummySystemID"
   item.createdBy = "Test"
@@ -74,7 +72,6 @@ it("should remove arbitrary keys from the audit log", () => {
   expect(auditLog.caseId).toBe(item.caseId)
   expect(auditLog.systemId).toBe(item.systemId)
   expect(auditLog.receivedDate).toBe(item.receivedDate)
-  expect(auditLog.messageXml).toBe(item.messageXml)
   expect(auditLog.status).toBe(item.status)
   expect(auditLog.version).toBe(item.version)
   expect(auditLog.automationReport?.events).toHaveLength(0)
@@ -91,11 +88,10 @@ it("should be invalid when mandatory fields do not have value", () => {
   const { errors, isValid } = validateCreateAuditLog(item)
 
   expect(isValid).toBe(false)
-  expect(errors).toHaveLength(6)
+  expect(errors).toHaveLength(5)
   expect(errors).toContain("Case ID is mandatory")
   expect(errors).toContain("External Correlation ID is mandatory")
   expect(errors).toContain("Message ID is mandatory")
-  expect(errors).toContain("Message XML is mandatory")
   expect(errors).toContain("Received date is mandatory")
   expect(errors).toContain("Created by is mandatory")
 })
@@ -106,25 +102,23 @@ it("should be invalid when fields have incorrect format", () => {
     caseId: 2,
     systemId: 3,
     externalCorrelationId: 3,
-    messageXml: 4,
     receivedDate: "2021-10-05 12:13:14",
     createdBy: 5
   } as unknown as AuditLog
   const { errors, isValid } = validateCreateAuditLog(item)
 
   expect(isValid).toBe(false)
-  expect(errors).toHaveLength(7)
+  expect(errors).toHaveLength(6)
   expect(errors).toContain("Case ID must be string")
   expect(errors).toContain("System ID must be string")
   expect(errors).toContain("External Correlation ID must be string")
   expect(errors).toContain("Message ID must be string")
-  expect(errors).toContain("Message XML must be string")
   expect(errors).toContain("Received date must be ISO format")
   expect(errors).toContain("Created by must be string")
 })
 
 it("should enforce a length of 24 characters for the recieved date", () => {
-  const item = new AuditLog("ECID", new Date("2021-12-21T09:32:35.716101961Z"), "XML")
+  const item = new AuditLog("ECID", new Date("2021-12-21T09:32:35.716101961Z"))
   item.caseId = "CID"
   item.createdBy = "Test"
   const { errors, isValid, auditLog } = validateCreateAuditLog(item)

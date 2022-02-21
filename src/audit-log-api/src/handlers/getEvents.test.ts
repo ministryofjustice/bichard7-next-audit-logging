@@ -25,7 +25,7 @@ const createAuditLogEvent = (timestamp: Date, eventType: string): AuditLogEvent 
     eventSource: "Test"
   })
 
-const log = new AuditLog("1", new Date(2021, 10, 12), "XML")
+const log = new AuditLog("1", new Date(2021, 10, 12))
 log.events = [
   createAuditLogEvent(new Date("2021-06-20T10:12:13"), "Event 1"),
   createAuditLogEvent(new Date("2021-06-15T10:12:13"), "Event 2"),

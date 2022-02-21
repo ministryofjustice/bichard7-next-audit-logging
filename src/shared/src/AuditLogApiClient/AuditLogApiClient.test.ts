@@ -5,8 +5,8 @@ import { AuditLog, AuditLogEvent, isError } from "shared-types"
 import AuditLogApiClient from "./AuditLogApiClient"
 
 const apiClient = new AuditLogApiClient("http://localhost", "dummy")
-const message = new AuditLog("b5edf595-16a9-450f-a52b-40628cd58c29", new Date(), "<XML></XML>")
-const message2 = new AuditLog("b5edf595-16a9-450f-a52b-40628cd58c28", new Date(), "<XML></XML>")
+const message = new AuditLog("b5edf595-16a9-450f-a52b-40628cd58c29", new Date())
+const message2 = new AuditLog("b5edf595-16a9-450f-a52b-40628cd58c28", new Date())
 const event = new AuditLogEvent({
   category: "information",
   timestamp: new Date(),
@@ -81,7 +81,6 @@ describe("getMessage()", () => {
     expect(actualMessage.messageId).toBe(message.messageId)
     expect(actualMessage.externalCorrelationId).toBe(message.externalCorrelationId)
     expect(actualMessage.receivedDate).toBe(message.receivedDate)
-    expect(actualMessage.messageXml).toBe(message.messageXml)
   })
 
   it("should fail when the error is unknown", async () => {

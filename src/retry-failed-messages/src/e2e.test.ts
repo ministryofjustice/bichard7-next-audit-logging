@@ -47,7 +47,7 @@ describe("Retry Failed Messages", () => {
     const s3Path = "event.xml"
     await s3Gateway.upload(s3Path, JSON.stringify(event))
 
-    const message = new AuditLog("External Correlation ID", new Date(Date.now() - 3_600_000), "Xml")
+    const message = new AuditLog("External Correlation ID", new Date(Date.now() - 3_600_000))
     message.status = "Error"
     message.events.push(
       new BichardAuditLogEvent({
@@ -69,7 +69,7 @@ describe("Retry Failed Messages", () => {
   })
 
   it("should handle errors retrying messages", async () => {
-    const message = new AuditLog("External Correlation ID", new Date(Date.now() - 3_600_000), "Xml")
+    const message = new AuditLog("External Correlation ID", new Date(Date.now() - 3_600_000))
     message.status = "Error"
     message.events.push(
       new BichardAuditLogEvent({

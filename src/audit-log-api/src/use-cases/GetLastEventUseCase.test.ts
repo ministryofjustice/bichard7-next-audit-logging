@@ -6,7 +6,7 @@ import GetLastFailedMessageEventUseCase from "./GetLastEventUseCase"
 const auditLogDynamoGateway = new FakeAuditLogDynamoGateway()
 const useCase = new GetLastFailedMessageEventUseCase(auditLogDynamoGateway)
 
-const createAuditLog = (): AuditLog => new AuditLog("External Correlation Id", new Date("2021-07-22T08:10:10"), "Xml")
+const createAuditLog = (): AuditLog => new AuditLog("External Correlation Id", new Date("2021-07-22T08:10:10"))
 const createEvent = (date: string, category: EventCategory): AuditLogEvent => {
   return new AuditLogEvent({
     category,

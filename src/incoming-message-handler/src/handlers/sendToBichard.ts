@@ -5,17 +5,22 @@ import MqGateway from "../gateways/MqGateway"
 import SendMessageUseCase from "../use-cases/SendMessageUseCase"
 import transformMessageXml from "../use-cases/transformMessageXml"
 
+interface SendToBichardInput {
+  auditLog: AuditLog
+  messageXml: string
+}
+
 const config = createMqConfig()
 const gateway = new MqGateway(config)
 const sendMessageUseCase = new SendMessageUseCase(gateway)
 
-export default async function sendToBichard(event: AuditLog): Promise<AuditLog> {
-  const transformedXml = transformMessageXml(event)
+export default async function sendToBichard({ auditLog, messageXml }: SendToBichardInput): Promise<AuditLog> {
+  const transformedXml = transformMessageXml(auditLog, messageXml)
   const result = await sendMessageUseCase.send(transformedXml)
 
   if (isError(result)) {
     throw result
   }
 
-  return event
+  return auditLog
 }

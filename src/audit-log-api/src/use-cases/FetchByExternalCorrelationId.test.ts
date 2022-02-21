@@ -5,7 +5,7 @@ import FetchByExternalCorrelationId from "./FetchByExternalCorrelationId"
 const gateway = new FakeAuditLogDynamoGateway()
 
 it("should return one message when externalCorrelationId exists", async () => {
-  const expectedMessage = new AuditLog("1", new Date(), "Xml")
+  const expectedMessage = new AuditLog("1", new Date())
   gateway.reset([expectedMessage])
 
   const messageFetcher = new FetchByExternalCorrelationId(gateway, expectedMessage.externalCorrelationId)

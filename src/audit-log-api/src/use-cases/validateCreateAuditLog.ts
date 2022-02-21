@@ -16,7 +16,6 @@ export default (auditLog: AuditLog): ValidationResult => {
     systemId,
     externalCorrelationId,
     messageId,
-    messageXml,
     receivedDate,
     createdBy,
     s3Path,
@@ -44,12 +43,6 @@ export default (auditLog: AuditLog): ValidationResult => {
     errors.push("Message ID is mandatory")
   } else if (typeof messageId !== "string") {
     errors.push("Message ID must be string")
-  }
-
-  if (!messageXml) {
-    errors.push("Message XML is mandatory")
-  } else if (typeof messageXml !== "string") {
-    errors.push("Message XML must be string")
   }
 
   if (!receivedDate) {
@@ -93,7 +86,6 @@ export default (auditLog: AuditLog): ValidationResult => {
     externalId,
     stepExecutionId,
     externalCorrelationId,
-    messageXml,
     receivedDate: formattedReceivedDate || receivedDate,
     createdBy,
     status: AuditLogStatus.processing,

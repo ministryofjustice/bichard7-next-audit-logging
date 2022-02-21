@@ -7,10 +7,15 @@ import type { ValidationResult } from "../use-cases/retrieveMessageFromS3"
 import retrieveMessageFromS3 from "../use-cases/retrieveMessageFromS3"
 import formatMessage from "../use-cases/formatMessage"
 
+interface StoreMessageResult {
+  auditLog: AuditLog
+  messageXml: string
+}
+
 const s3Gateway = new AwsS3Gateway(createS3Config())
 const apiClient = new AuditLogApiClient(getApiUrl(), getApiKey())
 
-export default async function storeMessage(event: S3PutObjectEvent): Promise<AuditLog | ValidationResult> {
+export default async function storeMessage(event: S3PutObjectEvent): Promise<StoreMessageResult | ValidationResult> {
   const receivedMessage = await retrieveMessageFromS3(event, s3Gateway)
 
   if (isError(receivedMessage)) {
@@ -39,5 +44,5 @@ export default async function storeMessage(event: S3PutObjectEvent): Promise<Aud
     throw createAuditLogResult
   }
 
-  return auditLog
+  return { auditLog, messageXml: formattedMessage.messageXml }
 }

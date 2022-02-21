@@ -17,7 +17,7 @@ const testDynamoGateway = new TestDynamoGateway(config)
 const auditLogDynamoGateway = new AwsAuditLogDynamoGateway(config, config.AUDIT_LOG_TABLE_NAME)
 const createAuditLogUseCase = new CreateAuditLogUseCase(auditLogDynamoGateway)
 
-const createAuditLog = (): AuditLog => new AuditLog("CorrelationId", new Date(), "XML")
+const createAuditLog = (): AuditLog => new AuditLog("CorrelationId", new Date())
 
 const getAuditLog = (messageId: string): Promise<AuditLog | null> =>
   testDynamoGateway.getOne(config.AUDIT_LOG_TABLE_NAME, "messageId", messageId)
@@ -65,6 +65,5 @@ describe("CreateAuditLogUseCase", () => {
     expect(actualAuditLog?.externalCorrelationId).toBe(expectedAuditLog.externalCorrelationId)
     expect(actualAuditLog?.caseId).toBe(expectedAuditLog.caseId)
     expect(actualAuditLog?.receivedDate).toBe(expectedAuditLog.receivedDate)
-    expect(actualAuditLog?.messageXml).toBe(expectedAuditLog.messageXml)
   })
 })

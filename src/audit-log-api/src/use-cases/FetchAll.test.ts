@@ -5,11 +5,7 @@ import FetchAll from "./FetchAll"
 const gateway = new FakeAuditLogDynamoGateway()
 
 it("should return all messages", async () => {
-  const expectedMessages = [
-    new AuditLog("1", new Date(), "Xml"),
-    new AuditLog("2", new Date(), "Xml"),
-    new AuditLog("3", new Date(), "Xml")
-  ]
+  const expectedMessages = [new AuditLog("1", new Date()), new AuditLog("2", new Date()), new AuditLog("3", new Date())]
   gateway.reset(expectedMessages)
 
   const messageFetcher = new FetchAll(gateway)
