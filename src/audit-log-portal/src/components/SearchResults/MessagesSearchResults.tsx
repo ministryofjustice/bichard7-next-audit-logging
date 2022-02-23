@@ -11,7 +11,13 @@ import Error from "components/Error"
 import type { Props } from "./SearchResults"
 
 const resolveMessagesApiUrl = (searchModel: MessageSearchModel, lastMessageId?: string): string => {
-  const params = convertObjectToURLSearchParams(searchModel)
+  // map MessageSearchModel fields to messages endpoint query parameters
+  const searchParams = {
+    status: searchModel.status ?? "",
+    externalCorrelationId: searchModel.searchId ?? ""
+  }
+
+  const params = convertObjectToURLSearchParams(searchParams)
   if (lastMessageId) {
     params.append("lastMessageId", lastMessageId)
   }

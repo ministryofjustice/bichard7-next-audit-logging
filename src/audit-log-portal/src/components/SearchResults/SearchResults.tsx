@@ -1,5 +1,5 @@
 import type MessageSearchModel from "types/MessageSearchModel"
-import MessageSearchResults from "./MessageSearchResults"
+import GetMessageByIdResults from "./GetMessageByIdResults"
 import MessagesSearchResults from "./MessagesSearchResults"
 
 export interface Props {
@@ -7,8 +7,9 @@ export interface Props {
 }
 
 const SearchResults = ({ searchModel }: Props) => {
-  if (searchModel.messageId) {
-    return <MessageSearchResults searchModel={searchModel} />
+  const hexDigit = "\\da-fA-F"
+  if (searchModel.searchId?.match(/[\da-fA-F]{8}-[\da-fA-F]{4}-[\da-fA-F]{4}-[\da-fA-F]{4}-[\da-fA-F]{12}/)) {
+    return <GetMessageByIdResults searchModel={searchModel} />
   } else {
     return <MessagesSearchResults searchModel={searchModel} />
   }

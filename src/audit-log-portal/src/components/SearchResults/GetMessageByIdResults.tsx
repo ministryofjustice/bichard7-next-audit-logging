@@ -7,8 +7,8 @@ import Message from "../Message"
 import NoMessages from "../Messages/NoMessages"
 import type { Props } from "./SearchResults"
 
-const MessageSearchResults = ({ searchModel }: Props) => {
-  const apiUrl = `/audit-logging/api/messages/${searchModel.messageId}`
+const GetMessageByIdResults = ({ searchModel }: Props) => {
+  const apiUrl = `/audit-logging/api/messages/${searchModel.searchId}`
   const { message, error, isLoading, reload } = useGetMessage(apiUrl)
 
   return (
@@ -28,4 +28,4 @@ const MessageSearchResults = ({ searchModel }: Props) => {
   )
 }
 
-export default MessageSearchResults
+export default GetMessageByIdResults
