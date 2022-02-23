@@ -10,7 +10,6 @@ interface UseGetMessageResult {
   message: AuditLog
   error: Error
   isLoading: boolean
-  isError: boolean
   reload: () => Promise<AuditLog>
 }
 
@@ -20,10 +19,9 @@ export default function useGetMessages(url: string): UseGetMessageResult {
   )
 
   const isLoading = !error && data === undefined
-  const isError = !!error
 
-  const message = <AuditLog>(data && !isError ? data : null)
+  const message = <AuditLog>(data && !error ? data : null)
 
   // TODO: implement reload()
-  return { message, error, isLoading, isError, reload: () => Promise.resolve(null) }
+  return { message, error, isLoading, reload: () => Promise.resolve(null) }
 }

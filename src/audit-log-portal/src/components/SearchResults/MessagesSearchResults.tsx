@@ -8,13 +8,7 @@ import If from "../If"
 import Loading from "../Loading"
 import { Fragment } from "react"
 import Error from "components/Error"
-import useGetMessage from "utils/useGetMessage"
-import Message from "../Message"
-import NoMessages from "../Messages/NoMessages"
-
-interface Props {
-  searchModel: MessageSearchModel
-}
+import type { Props } from "./SearchResults"
 
 const resolveMessagesApiUrl = (searchModel: MessageSearchModel, lastMessageId?: string): string => {
   const params = convertObjectToURLSearchParams(searchModel)
@@ -22,27 +16,6 @@ const resolveMessagesApiUrl = (searchModel: MessageSearchModel, lastMessageId?: 
     params.append("lastMessageId", lastMessageId)
   }
   return combineUrlAndQueryString(`/audit-logging/api/messages`, params.toString())
-}
-
-const MessageSearchResults = ({ searchModel }: Props) => {
-  const apiUrl = `/audit-logging/api/messages/${searchModel.messageId}`
-  const { message, error, isLoading, isError, reload } = useGetMessage(apiUrl)
-
-  return (
-    <Fragment>
-      <Error message={error?.message} visibleIf={isError} />
-
-      <If condition={!!message && !isError}>
-        <Message message={message} reloadMessages={reload} />
-      </If>
-
-      <If condition={!message && !isError}>
-        <NoMessages />
-      </If>
-
-      <Loading isLoading={isLoading} blockScreen={isLoading} />
-    </Fragment>
-  )
 }
 
 const MessagesSearchResults = ({ searchModel }: Props) => {
@@ -69,12 +42,4 @@ const MessagesSearchResults = ({ searchModel }: Props) => {
   )
 }
 
-const SearchResults = ({ searchModel }: Props) => {
-  if (searchModel.messageId) {
-    return <MessageSearchResults searchModel={searchModel} />
-  } else {
-    return <MessagesSearchResults searchModel={searchModel} />
-  }
-}
-
-export default SearchResults
+export default MessagesSearchResults
