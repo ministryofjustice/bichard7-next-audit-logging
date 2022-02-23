@@ -1,1 +1,1 @@
-export { default } from "./MessageSearchResults"
+export { default } from "./SearchResults"

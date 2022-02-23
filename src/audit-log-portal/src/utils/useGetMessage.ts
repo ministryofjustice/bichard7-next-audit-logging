@@ -1,4 +1,4 @@
-import useSWR from "swr"
+import useSWR, { useSWRConfig } from "swr"
 import type { AuditLog } from "shared-types"
 import fetcher from "./fetcher"
 
@@ -10,18 +10,17 @@ interface UseGetMessageResult {
   message: AuditLog
   error: Error
   isLoading: boolean
-  reload: () => Promise<AuditLog>
+  reload: () => Promise<AuditLog[]>
 }
 
 export default function useGetMessages(url: string): UseGetMessageResult {
   const { data, error } = useSWR(url, (fetchUrl: string) =>
     fetcher<MessagesResult>(fetchUrl).then((result) => result.message)
   )
+  const { mutate } = useSWRConfig()
 
   const isLoading = !error && data === undefined
-
   const message = <AuditLog>(data && !error ? data : null)
 
-  // TODO: implement reload()
-  return { message, error, isLoading, reload: () => Promise.resolve(null) }
+  return { message, error, isLoading, reload: () => mutate(url) }
 }

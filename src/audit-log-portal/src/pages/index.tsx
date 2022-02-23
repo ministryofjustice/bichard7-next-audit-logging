@@ -4,7 +4,7 @@ import Header from "components/Header"
 import Layout from "components/Layout"
 import MessageSearch from "components/MessageSearch"
 import type MessageSearchModel from "types/MessageSearchModel"
-import SearchResults from "components/MessageSearchResults"
+import SearchResults from "components/SearchResults"
 
 const Index = () => {
   const [searchModel, setSearchModel] = useState<MessageSearchModel>({})
