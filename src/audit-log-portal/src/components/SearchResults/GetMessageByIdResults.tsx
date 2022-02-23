@@ -19,7 +19,7 @@ const GetMessageByIdResults = ({ searchModel }: Props) => {
         <Message message={message} reloadMessages={reload} />
       </If>
 
-      <If condition={!message && !error}>
+      <If condition={!message && !error && !isLoading}>
         <NoMessages />
       </If>
 
