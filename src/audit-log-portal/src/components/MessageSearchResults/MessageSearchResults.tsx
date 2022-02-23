@@ -1,15 +1,16 @@
 import type MessageSearchModel from "types/MessageSearchModel"
 import useGetMessages from "utils/useGetMessages"
-import Messages from "./Messages"
+import Messages from "../Messages"
 import convertObjectToURLSearchParams from "utils/convertObjectToURLSearchParams"
 import combineUrlAndQueryString from "utils/combineUrlAndQueryString"
 import InfiniteScroll from "react-infinite-scroll-component"
-import If from "./If"
-import Loading from "./Loading"
+import If from "../If"
+import Loading from "../Loading"
 import { Fragment } from "react"
 import Error from "components/Error"
 import useGetMessage from "utils/useGetMessage"
-import Message from "./Message"
+import Message from "../Message"
+import NoMessages from "../Messages/NoMessages"
 
 interface Props {
   searchModel: MessageSearchModel
@@ -29,10 +30,14 @@ const MessageSearchResults = ({ searchModel }: Props) => {
 
   return (
     <Fragment>
-      <Error message={error?.message} visibleIf={!!error} />
+      <Error message={error?.message} visibleIf={isError} />
 
-      <If condition={!!message && !error}>
+      <If condition={!!message && !isError}>
         <Message message={message} reloadMessages={reload} />
+      </If>
+
+      <If condition={!message && !isError}>
+        <NoMessages />
       </If>
 
       <Loading isLoading={isLoading} blockScreen={isLoading} />

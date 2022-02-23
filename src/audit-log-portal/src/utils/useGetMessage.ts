@@ -19,10 +19,10 @@ export default function useGetMessages(url: string): UseGetMessageResult {
     fetcher<MessagesResult>(fetchUrl).then((result) => result.message)
   )
 
-  const isLoading = !error && !data
+  const isLoading = !error && data === undefined
   const isError = !!error
 
-  const message = <AuditLog>(data && !error ? data : null)
+  const message = <AuditLog>(data && !isError ? data : null)
 
   // TODO: implement reload()
   return { message, error, isLoading, isError, reload: () => Promise.resolve(null) }
