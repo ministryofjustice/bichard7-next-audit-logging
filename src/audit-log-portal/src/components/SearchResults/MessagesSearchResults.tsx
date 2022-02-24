@@ -27,7 +27,6 @@ const resolveMessagesApiUrl = (searchModel: MessageSearchModel, lastMessageId?: 
 const MessagesSearchResults = ({ searchModel }: Props) => {
   const { messages, error, loadMore, isLoadingInitialData, isLoadingMore, isReachingEnd, reload } = useGetMessages(
     (_, previousMessages) => {
-      //@ts-ignore
       const lastMessageId = previousMessages?.slice(-1)?.[0].messageId
       return resolveMessagesApiUrl(searchModel, lastMessageId)
     }
