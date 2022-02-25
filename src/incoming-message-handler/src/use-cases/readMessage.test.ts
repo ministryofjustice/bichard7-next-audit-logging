@@ -21,11 +21,11 @@ const expectedMessage = formatXml(`
     <CorrelationID>
       ${expectedExternalCorrelationId}
     </CorrelationID>
-    <SystemID>
-      ${expectedSystemId}
-    </SystemID>
   </RequestFromSystem>
 	<DataStream>
+    <System>
+      ${expectedSystemId}
+    </System>
     <DataStreamContent>
       <DC:ResultedCaseMessage xmlns:DC="http://www.dca.gov.uk/xmlschemas/libra" Flow='ResultedCasesForThePolice' Interface='LibraStandardProsecutorPolice' SchemaVersion='0.6g'>
         <DC:Session>
