@@ -11,7 +11,7 @@ const Container = styled.form`
   gap: 0 0.5rem;
 `
 
-const ExternalCorrelationIdField = styled(TextField)`
+const SearchIdField = styled(TextField)`
   flex-grow: 1;
 `
 
@@ -21,17 +21,17 @@ interface Props {
 }
 
 const MessageSearch = ({ onSearch, disabled = false }: Props) => {
-  const [externalCorrelationId, setExternalCorrelationId] = useState("")
+  const [searchId, setSearchId] = useState("")
   const [status, setStatus] = useState("")
 
-  const triggerSearch = () => onSearch({ externalCorrelationId, status })
+  const triggerSearch = () => onSearch({ searchId, status })
   const onStatusChange = (value: string) => {
     setStatus(value)
-    setExternalCorrelationId("")
+    setSearchId("")
   }
-  const onExternalCorrelationIdChange = (value: string) => {
+  const onSearchIdChange = (value: string) => {
     setStatus("")
-    setExternalCorrelationId(value)
+    setSearchId(value)
   }
 
   return (
@@ -43,13 +43,12 @@ const MessageSearch = ({ onSearch, disabled = false }: Props) => {
     >
       <StatusField value={status} onChange={onStatusChange} />
 
-      <ExternalCorrelationIdField
+      <SearchIdField
         variant="outlined"
-        label="Search by External Correlation Id"
-        value={externalCorrelationId}
-        onChange={(e) => onExternalCorrelationIdChange(e.target.value || "")}
+        label="Search by ID (External Correlation ID or Internal Message ID)"
+        value={searchId}
+        onChange={(e) => onSearchIdChange(e.target.value || "")}
         disabled={disabled}
-        fullWidth
       />
 
       <IconButton

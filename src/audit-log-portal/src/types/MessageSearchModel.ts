@@ -1,4 +1,5 @@
 export default interface MessageSearchModel {
-  externalCorrelationId?: string
   status?: string
+  // searchId can be either an external correlation ID or message ID
+  searchId?: string
 }

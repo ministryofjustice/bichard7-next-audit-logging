@@ -22,5 +22,31 @@ describe("Index Page", () => {
           .should("contain", "14/11/2021 05:10:00")
       })
     })
+
+    describe("When you search by external correlation ID", () => {
+      it("Should show the associated message", () => {
+        cy.visit("/")
+        cy.get("input[type=text]").type("Message3")
+        cy.get("button[type=submit]").click()
+        cy.get(".MuiPaper-root")
+          .should("have.length", 1)
+          .first()
+          .should("contain", "Message3")
+          .should("contain", "13/11/2021 23:00:00")
+      })
+    })
+
+    describe("When you search by message UUID", () => {
+      it("Should show the associated message", () => {
+        cy.visit("/")
+        cy.get("input[type=text]").type("3079c4ff-d24a-45fc-92ec-852316940e40")
+        cy.get("button[type=submit]").click()
+        cy.get(".MuiPaper-root")
+          .should("have.length", 1)
+          .first()
+          .should("contain", "Message6")
+          .should("contain", "13/11/2021 17:12:00")
+      })
+    })
   })
 })

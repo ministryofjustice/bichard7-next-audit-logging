@@ -2,17 +2,12 @@ import type { ReactNode } from "react"
 import type { AuditLog } from "shared-types"
 import Message from "components/Message"
 import If from "components/If"
+import NoMessages from "./NoMessages"
 
 interface Props {
   messages: AuditLog[]
   reloadMessages: () => void
 }
-
-const NoMessages = () => (
-  <p aria-label="No Messages">
-    <i>{`No messages`}</i>
-  </p>
-)
 
 const MessagesContainer = ({ children }: { children: ReactNode }) => <div aria-label="Messages">{children}</div>
 
