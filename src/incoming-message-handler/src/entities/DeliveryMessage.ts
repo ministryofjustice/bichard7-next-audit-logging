@@ -5,6 +5,7 @@ type DeliveryMessage = {
       SystemID: string
     }
     DataStream: {
+      System: string
       DataStreamContent: {
         ResultedCaseMessage: {
           Session: {
