@@ -33,6 +33,8 @@ export default class AuditLog {
 
   public retryCount?: number
 
+  public hash: string
+
   public readonly version = 0
 
   constructor(public readonly externalCorrelationId: string, receivedDate: Date) {
