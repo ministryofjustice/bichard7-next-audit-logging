@@ -11,6 +11,7 @@ const createHandlerEvent = (item?: AuditLog): APIGatewayProxyEvent => {
     auditLog = new AuditLog("1", new Date())
     auditLog.caseId = "Case ID"
     auditLog.createdBy = "Create audit log test"
+    auditLog.hash = "Dummy Hash"
   }
 
   return <APIGatewayProxyEvent>{
@@ -39,7 +40,7 @@ describe("createAuditlog()", () => {
 
     expect(actualResponse.statusCode).toBe(HttpStatusCode.badRequest)
     expect(actualResponse.body).toBe(
-      "Case ID is mandatory, External Correlation ID is mandatory, Message ID is mandatory, Received date is mandatory, Created by is mandatory"
+      "Case ID is mandatory, External Correlation ID is mandatory, Message ID is mandatory, Received date is mandatory, Created by is mandatory, Hash is mandatory"
     )
   })
 

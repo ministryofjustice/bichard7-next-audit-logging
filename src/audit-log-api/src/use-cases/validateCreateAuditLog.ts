@@ -20,7 +20,8 @@ export default (auditLog: AuditLog): ValidationResult => {
     createdBy,
     s3Path,
     stepExecutionId,
-    externalId
+    externalId,
+    hash
   } = auditLog
 
   if (!caseId) {
@@ -59,6 +60,12 @@ export default (auditLog: AuditLog): ValidationResult => {
     errors.push("Created by must be string")
   }
 
+  if (!hash) {
+    errors.push("Hash is mandatory")
+  } else if (typeof hash !== "string") {
+    errors.push("Hash must be string")
+  }
+
   // Don't validate these for now so we don't break during a deploy
   // if (!s3Path) {
   //   errors.push("s3Path is mandatory")
@@ -94,7 +101,8 @@ export default (auditLog: AuditLog): ValidationResult => {
     retryCount: 0,
     events: [],
     automationReport: { events: [] },
-    topExceptionsReport: { events: [] }
+    topExceptionsReport: { events: [] },
+    hash
   }
 
   return {

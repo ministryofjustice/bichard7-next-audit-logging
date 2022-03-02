@@ -6,6 +6,7 @@ it("should be valid when audit log item is valid", () => {
   item.caseId = "CID"
   item.systemId = "DummySystemID"
   item.createdBy = "Test"
+  item.hash = "DummyHash"
   const { errors, isValid, auditLog } = validateCreateAuditLog(item)
 
   expect(isValid).toBe(true)
@@ -22,6 +23,7 @@ it("should be valid when audit log item is valid", () => {
   expect(auditLog.automationReport?.events).toHaveLength(0)
   expect(auditLog.topExceptionsReport?.events).toHaveLength(0)
   expect(auditLog.events).toHaveLength(0)
+  expect(auditLog.hash).toBe(item.hash)
 })
 
 it("should be valid and override the value of fields that should be set internally", () => {
@@ -29,6 +31,7 @@ it("should be valid and override the value of fields that should be set internal
   item.caseId = "CID"
   item.systemId = "DummySystemID"
   item.createdBy = "Test"
+  item.hash = "DummyHash"
 
   const itemToFix = {
     ...item,
@@ -61,6 +64,7 @@ it("should remove arbitrary keys from the audit log", () => {
   item.caseId = "CID"
   item.systemId = "DummySystemID"
   item.createdBy = "Test"
+  item.hash = "DummyHash"
   item = { ...item, randomKey1: "RandomValue", key2: 5 } as AuditLog
   const { errors, isValid, auditLog } = validateCreateAuditLog(item)
 
@@ -77,6 +81,7 @@ it("should remove arbitrary keys from the audit log", () => {
   expect(auditLog.automationReport?.events).toHaveLength(0)
   expect(auditLog.topExceptionsReport?.events).toHaveLength(0)
   expect(auditLog.events).toHaveLength(0)
+  expect(auditLog.hash).toBe(item.hash)
 
   const keys = Object.keys(auditLog)
   expect(keys).not.toContain("randomKey")
@@ -88,12 +93,13 @@ it("should be invalid when mandatory fields do not have value", () => {
   const { errors, isValid } = validateCreateAuditLog(item)
 
   expect(isValid).toBe(false)
-  expect(errors).toHaveLength(5)
+  expect(errors).toHaveLength(6)
   expect(errors).toContain("Case ID is mandatory")
   expect(errors).toContain("External Correlation ID is mandatory")
   expect(errors).toContain("Message ID is mandatory")
   expect(errors).toContain("Received date is mandatory")
   expect(errors).toContain("Created by is mandatory")
+  expect(errors).toContain("Hash is mandatory")
 })
 
 it("should be invalid when fields have incorrect format", () => {
@@ -103,24 +109,27 @@ it("should be invalid when fields have incorrect format", () => {
     systemId: 3,
     externalCorrelationId: 3,
     receivedDate: "2021-10-05 12:13:14",
-    createdBy: 5
+    createdBy: 5,
+    hash: 6
   } as unknown as AuditLog
   const { errors, isValid } = validateCreateAuditLog(item)
 
   expect(isValid).toBe(false)
-  expect(errors).toHaveLength(6)
+  expect(errors).toHaveLength(7)
   expect(errors).toContain("Case ID must be string")
   expect(errors).toContain("System ID must be string")
   expect(errors).toContain("External Correlation ID must be string")
   expect(errors).toContain("Message ID must be string")
   expect(errors).toContain("Received date must be ISO format")
   expect(errors).toContain("Created by must be string")
+  expect(errors).toContain("Hash must be string")
 })
 
 it("should enforce a length of 24 characters for the recieved date", () => {
   const item = new AuditLog("ECID", new Date("2021-12-21T09:32:35.716101961Z"))
   item.caseId = "CID"
   item.createdBy = "Test"
+  item.hash = "DummyHash"
   const { errors, isValid, auditLog } = validateCreateAuditLog(item)
 
   expect(isValid).toBe(true)
