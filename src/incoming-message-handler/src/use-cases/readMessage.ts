@@ -56,6 +56,9 @@ const readMessage = async (message: ReceivedMessage): PromiseResult<AuditLog> =>
   auditLog.s3Path = message.s3Path
   auditLog.externalId = message.externalId
   auditLog.stepExecutionId = message.stepExecutionId
+  if (message.hash) {
+    auditLog.hash = message.hash
+  }
 
   return auditLog
 }
