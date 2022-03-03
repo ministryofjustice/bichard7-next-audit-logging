@@ -57,7 +57,7 @@ const readMessage = async (message: ReceivedMessage): PromiseResult<AuditLog> =>
   auditLog.externalId = message.externalId
   auditLog.stepExecutionId = message.stepExecutionId
   if (message.hash) {
-    auditLog.hash = message.hash
+    auditLog.messageHash = message.hash
   }
 
   return auditLog
