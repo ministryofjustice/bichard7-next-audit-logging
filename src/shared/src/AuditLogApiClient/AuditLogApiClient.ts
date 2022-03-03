@@ -14,7 +14,7 @@ const httpsAgent = new https.Agent({
 })
 
 export default class AuditLogApiClient implements ApiClient {
-  constructor(private readonly apiUrl: string, private readonly apiKey: string, private readonly timeout: number = 0) {}
+  constructor(private readonly apiUrl: string, private readonly apiKey: string, private readonly timeout: number = 0) { }
 
   getMessages(options?: GetMessagesOptions): PromiseResult<AuditLog[]> {
     let queryString = ""
@@ -51,6 +51,20 @@ export default class AuditLogApiClient implements ApiClient {
       .then((result) => result[0])
       .catch((error: AxiosError) => {
         logger.error(`Error getting messages: ${error.response?.data}`)
+        return error
+      })
+  }
+
+  getMessageByHash(hash: string): PromiseResult<AuditLog> {
+    return axios
+      .get(`${this.apiUrl}/messages?hash=${hash}`, {
+        headers: { "X-API-Key": this.apiKey },
+        timeout: this.timeout
+      })
+      .then((response) => response.data)
+      .then((result) => result[0])
+      .catch((error: AxiosError) => {
+        logger.error(`Error getting message by hash: ${error.response?.data}`)
         return error
       })
   }

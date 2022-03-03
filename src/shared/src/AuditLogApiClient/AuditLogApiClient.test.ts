@@ -6,7 +6,9 @@ import AuditLogApiClient from "./AuditLogApiClient"
 
 const apiClient = new AuditLogApiClient("http://localhost", "dummy")
 const message = new AuditLog("b5edf595-16a9-450f-a52b-40628cd58c29", new Date())
+message.messageHash = "hash-1"
 const message2 = new AuditLog("b5edf595-16a9-450f-a52b-40628cd58c28", new Date())
+message2.messageHash = "hash-2"
 const event = new AuditLogEvent({
   category: "information",
   timestamp: new Date(),
@@ -97,6 +99,41 @@ describe("getMessage()", () => {
     const mockGet = jest.spyOn(axios, "get").mockResolvedValue({ status: 200, data: [] })
 
     const result = await apiClient.getMessage(message.messageId)
+
+    expect(result).toNotBeError()
+    expect(mockGet.mock?.calls?.[0]?.[1]?.headers?.["X-API-Key"]).toBe("dummy")
+  })
+})
+
+describe("getMessageByHash()", () => {
+  it("should return the message when message hash exists", async () => {
+    jest.spyOn(axios, "get").mockResolvedValue({ status: 200, data: [message] })
+
+    const result = await apiClient.getMessageByHash(message.messageHash)
+
+    expect(result).toNotBeError()
+
+    const actualMessage = <AuditLog>result
+    expect(actualMessage.messageId).toBe(message.messageId)
+    expect(actualMessage.messageHash).toBe(message.messageHash)
+    expect(actualMessage.externalCorrelationId).toBe(message.externalCorrelationId)
+    expect(actualMessage.receivedDate).toBe(message.receivedDate)
+  })
+
+  it("should fail when the error is unknown", async () => {
+    const expectedError = <AxiosError>new Error("An unknown error")
+    jest.spyOn(axios, "get").mockRejectedValue(expectedError)
+
+    const result = await apiClient.getMessageByHash(message.messageHash)
+
+    expect(isError(result)).toBe(true)
+    expect(<Error>result).toBe(expectedError)
+  })
+
+  it("should pass through the api key as a header", async () => {
+    const mockGet = jest.spyOn(axios, "get").mockResolvedValue({ status: 200, data: [] })
+
+    const result = await apiClient.getMessageByHash(message.messageHash)
 
     expect(result).toNotBeError()
     expect(mockGet.mock?.calls?.[0]?.[1]?.headers?.["X-API-Key"]).toBe("dummy")
