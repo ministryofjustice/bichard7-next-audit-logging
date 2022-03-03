@@ -1,24 +1,11 @@
-import type { PromiseResult, Result, AuditLogEvent, ApiClient } from "shared-types"
+import type { PromiseResult, AuditLogEvent, ApiClient } from "shared-types"
 import { AuditLog, isError } from "shared-types"
 import { logger } from "shared"
 
 export default class {
   constructor(private readonly api: ApiClient) {}
 
-  // Retry up to retryLimit times
   async execute(messageId: string, event: AuditLogEvent): PromiseResult<void> {
-    const retryLimit = 5
-    let result: Result<void> = Error(`Failed to create event with message id ${messageId}`)
-    for (let i = 0; i < retryLimit; i++) {
-      result = await this.executeOnce(messageId, event)
-      if (!isError(result) || !result.message.startsWith("Timed out creating event for message with Id")) {
-        return result
-      }
-    }
-    return result
-  }
-
-  async executeOnce(messageId: string, event: AuditLogEvent): PromiseResult<void> {
     if (!messageId) {
       logger.info(`No messageId: ${JSON.stringify(event)}`)
       return undefined
@@ -31,7 +18,7 @@ export default class {
       messageId,
       caseId: "Unknown",
       createdBy: "Event handler",
-      hash: messageId // We don't have the message XML to compute hash
+      messageHash: messageId // We don't have the message XML to compute hash
     }
     const createAuditLogResult = await this.api.createAuditLog(message)
     if (isError(createAuditLogResult) && createAuditLogResult.message !== "Request failed with status code 409") {
