@@ -33,7 +33,7 @@ export default class AuditLog {
 
   public retryCount?: number
 
-  public hash: string
+  public messageHash: string
 
   public readonly version = 0
 

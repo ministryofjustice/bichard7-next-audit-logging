@@ -10,6 +10,7 @@ export function mockAuditLog(date?: Date): AuditLog {
   auditLog.stepExecutionId = uuid()
   auditLog.externalId = uuid()
   auditLog.s3Path = "2022/01/18/09/01/message.xml"
+  auditLog.messageHash = uuid()
   return auditLog
 }
 
