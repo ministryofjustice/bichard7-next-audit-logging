@@ -63,6 +63,28 @@ export default class AwsAuditLogDynamoGateway extends DynamoGateway implements A
     return items[0]
   }
 
+  async fetchByHash(hash: string): PromiseResult<AuditLog | null> {
+    const options: FetchByIndexOptions = {
+      indexName: "messageHashIndex",
+      attributeName: "messageHash",
+      attributeValue: hash,
+      pagination: { limit: 1 }
+    }
+
+    const result = await this.fetchByIndex(this.tableName, options)
+
+    if (isError(result)) {
+      return result
+    }
+
+    if (result.Count === 0) {
+      return null
+    }
+
+    const items = <AuditLog[]>result?.Items
+    return items[0]
+  }
+
   async fetchByStatus(status: string, limit = 10, lastMessage?: AuditLog): PromiseResult<AuditLog[]> {
     const result = await new IndexSearcher<AuditLog[]>(this, this.tableName, this.tableKey)
       .useIndex("statusIndex")

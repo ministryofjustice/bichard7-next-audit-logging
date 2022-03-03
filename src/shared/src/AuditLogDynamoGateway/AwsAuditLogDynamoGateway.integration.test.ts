@@ -500,6 +500,44 @@ describe("AuditLogDynamoGateway", () => {
     })
   })
 
+  describe("fetchByHash", () => {
+    it("should return one AuditLog when hash exists in the table", async () => {
+      await Promise.allSettled(
+        [...Array(3).keys()].map(async (i: number) => {
+          const auditLog = new AuditLog(`External correlation id ${i}`, new Date())
+          auditLog.messageHash = `hash-${i}`
+          await gateway.create(auditLog)
+        })
+      )
+
+      const hash = "hash-2"
+      const result = await gateway.fetchByHash(hash)
+
+      console.log(result)
+      expect(isError(result)).toBe(false)
+      expect(result).toBeDefined()
+
+      const item = <AuditLog>result
+      expect(item.messageHash).toBe(hash)
+    })
+
+    it("should throw error when hash does not exist in the table", async () => {
+      await Promise.allSettled(
+        [...Array(3).keys()].map(async (i: number) => {
+          const auditLog = new AuditLog(`External correlation id ${i}`, new Date())
+          auditLog.messageHash = `hash-${i}`
+          await gateway.create(auditLog)
+        })
+      )
+
+      const hash = "Hash does not exist"
+      const result = await gateway.fetchByHash(hash)
+
+      expect(isError(result)).toBe(false)
+      expect(<AuditLog>result).toBeNull()
+    })
+  })
+
   describe("fetchByStatus", () => {
     it("should return one AuditLog when there is a record with Completed status", async () => {
       await Promise.allSettled(
