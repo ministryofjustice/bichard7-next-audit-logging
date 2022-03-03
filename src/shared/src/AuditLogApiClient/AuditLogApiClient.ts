@@ -14,7 +14,7 @@ const httpsAgent = new https.Agent({
 })
 
 export default class AuditLogApiClient implements ApiClient {
-  constructor(private readonly apiUrl: string, private readonly apiKey: string, private readonly timeout: number = 0) { }
+  constructor(private readonly apiUrl: string, private readonly apiKey: string, private readonly timeout: number = 0) {}
 
   getMessages(options?: GetMessagesOptions): PromiseResult<AuditLog[]> {
     let queryString = ""
