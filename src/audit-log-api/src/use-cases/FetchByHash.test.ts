@@ -14,7 +14,7 @@ it("should return one message when hash exists", async () => {
   expect(isError(result)).toBe(false)
 
   const actualMessage = <AuditLog>result
-  expect(actualMessage.messageHash).toBe("dummy-hash")
+  expect(actualMessage.messageHash).toBe("Dummy hash")
 })
 
 it("should return an error when fetchByHash fails", async () => {
