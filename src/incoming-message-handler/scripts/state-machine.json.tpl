@@ -19,19 +19,40 @@
         {
           "And": [
             {
-              "Variable": "$.validationResult",
+              "Variable": "$.s3ValidationResult",
               "IsPresent": true
             },
             {
-              "Variable": "$.validationResult.isValid",
+              "Variable": "$.s3ValidationResult.isValid",
               "BooleanEquals": false
             }
           ],
           "Next": "Invalid S3 Key"
         },
         {
-          "Variable": "$.validationResult",
-          "IsPresent": false,
+          "And": [
+            {
+              "Variable": "$.messageHashValidationResult",
+              "IsPresent": true
+            },
+            {
+              "Variable": "$.messageHashValidationResult.isValid",
+              "BooleanEquals": false
+            }
+          ],
+          "Next": "Duplicate message"
+        },
+        {
+          "And": [
+            {
+              "Variable": "$.s3ValidationResult",
+              "IsPresent": false
+            },
+            {
+              "Variable": "$.messageHashValidationResult",
+              "IsPresent": false
+            }
+          ],
           "Next": "Send to Bichard"
         }
       ]
@@ -39,6 +60,11 @@
     "Invalid S3 Key": {
       "Type": "Pass",
       "End": true
+    },
+    "Duplicate message": {
+      "Type": "Fail",
+      "Cause": "Duplicate message hash",
+      "Error": "$.messageHashValidationResult.message"
     },
     "Send to Bichard": {
       "Type": "Task",
