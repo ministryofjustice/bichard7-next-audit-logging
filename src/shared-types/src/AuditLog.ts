@@ -33,11 +33,9 @@ export default class AuditLog {
 
   public retryCount?: number
 
-  public messageHash: string
-
   public readonly version = 0
 
-  constructor(public readonly externalCorrelationId: string, receivedDate: Date) {
+  constructor(public readonly externalCorrelationId: string, receivedDate: Date, public readonly messageHash: string) {
     this.messageId = uuid()
     this.receivedDate = receivedDate.toISOString()
   }

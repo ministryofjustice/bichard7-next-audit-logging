@@ -2,11 +2,10 @@ import { AuditLog } from "shared-types"
 import validateCreateAuditLog from "./validateCreateAuditLog"
 
 it("should be valid when audit log item is valid", () => {
-  const item = new AuditLog("ECID", new Date())
+  const item = new AuditLog("ECID", new Date(), "DummyHash")
   item.caseId = "CID"
   item.systemId = "DummySystemID"
   item.createdBy = "Test"
-  item.messageHash = "DummyHash"
   const { errors, isValid, auditLog } = validateCreateAuditLog(item)
 
   expect(isValid).toBe(true)
@@ -27,11 +26,10 @@ it("should be valid when audit log item is valid", () => {
 })
 
 it("should be valid and override the value of fields that should be set internally", () => {
-  const item = new AuditLog("ECID", new Date("2021-10-15T10:12:13.000Z"))
+  const item = new AuditLog("ECID", new Date("2021-10-15T10:12:13.000Z"), "DummyHash")
   item.caseId = "CID"
   item.systemId = "DummySystemID"
   item.createdBy = "Test"
-  item.messageHash = "DummyHash"
 
   const itemToFix = {
     ...item,
@@ -60,11 +58,10 @@ it("should be valid and override the value of fields that should be set internal
 })
 
 it("should remove arbitrary keys from the audit log", () => {
-  let item = new AuditLog("ECID", new Date())
+  let item = new AuditLog("ECID", new Date(), "DummyHash")
   item.caseId = "CID"
   item.systemId = "DummySystemID"
   item.createdBy = "Test"
-  item.messageHash = "DummyHash"
   item = { ...item, randomKey1: "RandomValue", key2: 5 } as AuditLog
   const { errors, isValid, auditLog } = validateCreateAuditLog(item)
 
@@ -126,10 +123,9 @@ it("should be invalid when fields have incorrect format", () => {
 })
 
 it("should enforce a length of 24 characters for the recieved date", () => {
-  const item = new AuditLog("ECID", new Date("2021-12-21T09:32:35.716101961Z"))
+  const item = new AuditLog("ECID", new Date("2021-12-21T09:32:35.716101961Z"), "DummyHash")
   item.caseId = "CID"
   item.createdBy = "Test"
-  item.messageHash = "DummyHash"
   const { errors, isValid, auditLog } = validateCreateAuditLog(item)
 
   expect(isValid).toBe(true)

@@ -14,11 +14,10 @@ export default class {
     // Create a message if message ID doesn't exist in the database
     // If message ID already exists, the API returns 409 error
     const message = {
-      ...new AuditLog(messageId, new Date("1970-01-01T00:00:00.000Z")),
+      ...new AuditLog(messageId, new Date("1970-01-01T00:00:00.000Z"), messageId), // We don't have the message XML to compute the message hash
       messageId,
       caseId: "Unknown",
-      createdBy: "Event handler",
-      messageHash: messageId // We don't have the message XML to compute hash
+      createdBy: "Event handler"
     }
     const createAuditLogResult = await this.api.createAuditLog(message)
     if (isError(createAuditLogResult) && createAuditLogResult.message !== "Request failed with status code 409") {

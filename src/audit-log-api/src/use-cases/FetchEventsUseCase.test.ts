@@ -21,7 +21,7 @@ describe("FetchEventsUseCase", () => {
       createAuditLogEvent("information", new Date("2021-06-15T10:12:13"), "Event 2"),
       createAuditLogEvent("information", new Date("2021-06-10T10:12:13"), "Event 3")
     ]
-    const message = new AuditLog("External correlation id", new Date())
+    const message = new AuditLog("External correlation id", new Date(), "Dummy hash")
     message.events = expectedEvents
 
     gateway.reset([message])

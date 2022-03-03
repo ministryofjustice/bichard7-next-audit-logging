@@ -33,6 +33,10 @@ const getExternalCorrelationId = (xml: DeliveryMessage): Result<string> => {
 }
 
 const readMessage = async (message: ReceivedMessage): PromiseResult<AuditLog> => {
+  if (!message.hash) {
+    return Error("Message hash is mandatory.")
+  }
+
   const xml = await parseXml<DeliveryMessage>(message.messageXml).catch((error: Error) => error)
 
   if (isError(xml)) {
@@ -49,16 +53,13 @@ const readMessage = async (message: ReceivedMessage): PromiseResult<AuditLog> =>
     return caseId
   }
 
-  const auditLog = new AuditLog(externalCorrelationId, new Date(message.receivedDate))
+  const auditLog = new AuditLog(externalCorrelationId, new Date(message.receivedDate), message.hash)
   auditLog.caseId = caseId
   auditLog.systemId = xml.RouteData?.DataStream?.System?.trim()
   auditLog.createdBy = "Incoming message handler"
   auditLog.s3Path = message.s3Path
   auditLog.externalId = message.externalId
   auditLog.stepExecutionId = message.stepExecutionId
-  if (message.hash) {
-    auditLog.messageHash = message.hash
-  }
 
   return auditLog
 }

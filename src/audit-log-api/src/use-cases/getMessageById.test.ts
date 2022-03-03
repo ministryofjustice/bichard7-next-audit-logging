@@ -16,7 +16,7 @@ it("returns undefined when messageId does not have value", async () => {
 })
 
 it("returns the message when messageId exists in the database", async () => {
-  const expectedMessage = new AuditLog("External correlation id", new Date())
+  const expectedMessage = new AuditLog("External correlation id", new Date(), "Dummy hash")
   gateway.reset([expectedMessage])
   const result = await getMessageById(gateway, expectedMessage.messageId)
 

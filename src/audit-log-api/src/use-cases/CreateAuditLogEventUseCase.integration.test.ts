@@ -17,7 +17,7 @@ const testDynamoGateway = new TestDynamoGateway(config)
 const auditLogDynamoGateway = new AwsAuditLogDynamoGateway(config, config.AUDIT_LOG_TABLE_NAME)
 const createAuditLogEventUseCase = new CreateAuditLogEventUseCase(auditLogDynamoGateway)
 
-const createAuditLog = (): AuditLog => new AuditLog("CorrelationId", new Date())
+const createAuditLog = (): AuditLog => new AuditLog("CorrelationId", new Date(), "Dummy hash")
 const createAuditLogEvent = (): AuditLogEvent =>
   new AuditLogEvent({
     category: "information",

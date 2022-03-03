@@ -2,7 +2,7 @@ import { AuditLog } from "shared-types"
 import transformMessageXml from "./transformMessageXml"
 
 const createAuditLog = () => ({
-  ...new AuditLog("EXTERNAL_CORRELATION_ID", new Date("2021-10-13T10:12:13")),
+  ...new AuditLog("EXTERNAL_CORRELATION_ID", new Date("2021-10-13T10:12:13"), "duplicate hash"),
   messageId: "MESSAGE_ID"
 })
 

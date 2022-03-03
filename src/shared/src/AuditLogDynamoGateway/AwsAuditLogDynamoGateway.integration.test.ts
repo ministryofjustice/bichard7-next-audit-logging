@@ -60,7 +60,7 @@ describe("AuditLogDynamoGateway", () => {
 
   describe("create()", () => {
     it("should insert the given message", async () => {
-      const expectedMessage = new AuditLog("ExpectedMessage", new Date())
+      const expectedMessage = new AuditLog("ExpectedMessage", new Date(), "dummy hash")
 
       const result = await gateway.create(expectedMessage)
 
@@ -72,7 +72,7 @@ describe("AuditLogDynamoGateway", () => {
     })
 
     it("should return an error when the given message already exists", async () => {
-      const message = new AuditLog("one", new Date())
+      const message = new AuditLog("one", new Date(), "dummy hash")
       await gateway.create(message)
 
       const result = await gateway.create(message)
@@ -95,8 +95,8 @@ describe("AuditLogDynamoGateway", () => {
       expectedEvent.addAttribute("Attribute one", "Some value")
       expectedEvent.addAttribute("Attribute two", 2)
 
-      const message = new AuditLog("one", new Date())
-      const otherMessage = new AuditLog("two", new Date())
+      const message = new AuditLog("one", new Date(), "dummy hash")
+      const otherMessage = new AuditLog("two", new Date(), "dummy hash")
 
       await gateway.create(message)
       await gateway.create(otherMessage)
@@ -144,7 +144,7 @@ describe("AuditLogDynamoGateway", () => {
       const expectedEventTwo = createAuditLogEvent("error", new Date(), "PNC Response not received", "Event source two")
       expectedEventTwo.addAttribute("EventTwoAttribute", "Event two attribute")
 
-      let message = new AuditLog("one", new Date())
+      let message = new AuditLog("one", new Date(), "dummy hash")
       await gateway.create(message)
 
       const resultOne = await gateway.addEvent(message.messageId, message.version, expectedEventOne)
@@ -192,7 +192,7 @@ describe("AuditLogDynamoGateway", () => {
 
     it("should return error when audit log does not exist", async () => {
       const event = createAuditLogEvent("information", new Date(), "Test event one")
-      const { messageId, version } = new AuditLog("External correlation id", new Date())
+      const { messageId, version } = new AuditLog("External correlation id", new Date(), "dummy hash")
 
       const resultOne = await gateway.addEvent(messageId, version, event)
 
@@ -205,7 +205,7 @@ describe("AuditLogDynamoGateway", () => {
       expectedEvent.addAttribute("Message Type", "SPIResults")
       expectedEvent.addAttribute("Error 2 Details", "Dummy")
 
-      const message = new AuditLog("one", new Date())
+      const message = new AuditLog("one", new Date(), "dummy hash")
 
       await gateway.create(message)
 
@@ -257,7 +257,7 @@ describe("AuditLogDynamoGateway", () => {
     it("should log the event for automation report", async () => {
       const expectedEvent = createAuditLogEvent("information", new Date(), "Hearing Outcome passed to Error List")
 
-      const message = new AuditLog("one", new Date())
+      const message = new AuditLog("one", new Date(), "dummy hash")
 
       await gateway.create(message)
 
@@ -300,7 +300,7 @@ describe("AuditLogDynamoGateway", () => {
       const expectedEvent = createAuditLogEvent("information", new Date(), "Input message received")
       expectedEvent.addAttribute("Force Owner", "DummyForceOwner")
 
-      const message = new AuditLog("one", new Date())
+      const message = new AuditLog("one", new Date(), "dummy hash")
 
       await gateway.create(message)
 
@@ -329,7 +329,7 @@ describe("AuditLogDynamoGateway", () => {
     it("should not log the event for report", async () => {
       const expectedEvent = createAuditLogEvent("information", new Date(), "Dummy event type")
 
-      const message = new AuditLog("one", new Date())
+      const message = new AuditLog("one", new Date(), "dummy hash")
 
       await gateway.create(message)
 
@@ -361,7 +361,7 @@ describe("AuditLogDynamoGateway", () => {
     it("should increment the retry count for retry message", async () => {
       const expectedEvent = createAuditLogEvent("information", new Date(), "Retrying failed message")
 
-      const message = new AuditLog("one", new Date())
+      const message = new AuditLog("one", new Date(), `dummy hash`)
 
       await gateway.create(message)
 
@@ -379,7 +379,7 @@ describe("AuditLogDynamoGateway", () => {
 
   describe("fetchOne", () => {
     it("should return the matching AuditLog", async () => {
-      const expectedAuditLog = new AuditLog("ExternalCorrelationId", new Date())
+      const expectedAuditLog = new AuditLog("ExternalCorrelationId", new Date(), `dummy hash`)
       await gateway.create(expectedAuditLog)
 
       const result = await gateway.fetchOne(expectedAuditLog.messageId)
@@ -404,7 +404,7 @@ describe("AuditLogDynamoGateway", () => {
 
   describe("fetchVersion", () => {
     it("should return the version of the matching AuditLog", async () => {
-      const expectedAuditLog = new AuditLog("ExternalCorrelationId", new Date())
+      const expectedAuditLog = new AuditLog("ExternalCorrelationId", new Date(), `dummy hash`)
       await gateway.create(expectedAuditLog)
 
       const result = await gateway.fetchVersion(expectedAuditLog.messageId)
@@ -426,7 +426,7 @@ describe("AuditLogDynamoGateway", () => {
     it("should return limited amount of AuditLogs", async () => {
       await Promise.allSettled(
         [...Array(3).keys()].map(async (i: number) => {
-          const auditLog = new AuditLog(`External correlation id ${i}`, new Date())
+          const auditLog = new AuditLog(`External correlation id ${i}`, new Date(), `hash-${i}`)
           await gateway.create(auditLog)
         })
       )
@@ -446,7 +446,7 @@ describe("AuditLogDynamoGateway", () => {
 
       await Promise.allSettled(
         receivedDates.map(async (dateString: string, i: number) => {
-          const auditLog = new AuditLog(`External correlation id ${i}`, new Date(dateString))
+          const auditLog = new AuditLog(`External correlation id ${i}`, new Date(dateString), `hash-${i}`)
           await gateway.create(auditLog)
         })
       )
@@ -469,7 +469,7 @@ describe("AuditLogDynamoGateway", () => {
     it("should return one AuditLog when external correlation id exists in the table", async () => {
       await Promise.allSettled(
         [...Array(3).keys()].map(async (i: number) => {
-          const auditLog = new AuditLog(`External correlation id ${i}`, new Date())
+          const auditLog = new AuditLog(`External correlation id ${i}`, new Date(), `hash-${i}`)
           await gateway.create(auditLog)
         })
       )
@@ -487,7 +487,7 @@ describe("AuditLogDynamoGateway", () => {
     it("should throw error when external correlation id does not exist in the table", async () => {
       await Promise.allSettled(
         [...Array(3).keys()].map(async (i: number) => {
-          const auditLog = new AuditLog(`External correlation id ${i}`, new Date())
+          const auditLog = new AuditLog(`External correlation id ${i}`, new Date(), `hash-${i}`)
           await gateway.create(auditLog)
         })
       )
@@ -504,8 +504,7 @@ describe("AuditLogDynamoGateway", () => {
     it("should return one AuditLog when hash exists in the table", async () => {
       await Promise.allSettled(
         [...Array(3).keys()].map(async (i: number) => {
-          const auditLog = new AuditLog(`External correlation id ${i}`, new Date())
-          auditLog.messageHash = `hash-${i}`
+          const auditLog = new AuditLog(`External correlation id ${i}`, new Date(), `hash-${i}`)
           await gateway.create(auditLog)
         })
       )
@@ -524,8 +523,7 @@ describe("AuditLogDynamoGateway", () => {
     it("should throw error when hash does not exist in the table", async () => {
       await Promise.allSettled(
         [...Array(3).keys()].map(async (i: number) => {
-          const auditLog = new AuditLog(`External correlation id ${i}`, new Date())
-          auditLog.messageHash = `hash-${i}`
+          const auditLog = new AuditLog(`External correlation id ${i}`, new Date(), `hash-${i}`)
           await gateway.create(auditLog)
         })
       )
@@ -542,11 +540,11 @@ describe("AuditLogDynamoGateway", () => {
     it("should return one AuditLog when there is a record with Completed status", async () => {
       await Promise.allSettled(
         [...Array(3).keys()].map(async (i: number) => {
-          const auditLog = new AuditLog(`External correlation id ${i}`, new Date())
+          const auditLog = new AuditLog(`External correlation id ${i}`, new Date(), "dummy hash")
           await gateway.create(auditLog)
         })
       )
-      const expectedAuditLog = new AuditLog(`External correlation id`, new Date())
+      const expectedAuditLog = new AuditLog(`External correlation id`, new Date(), "dummy hash")
       expectedAuditLog.status = AuditLogStatus.completed
       await gateway.create(expectedAuditLog)
 
@@ -565,7 +563,7 @@ describe("AuditLogDynamoGateway", () => {
 
   describe("fetchEvents", () => {
     it("should return AuditLogEvents when message id exists in the table", async () => {
-      const auditLog = new AuditLog(`External correlation id 1`, new Date())
+      const auditLog = new AuditLog(`External correlation id 1`, new Date(), "dummy hash")
       auditLog.events = [
         createAuditLogEvent("information", new Date("2021-06-10T10:12:13"), "Event 1"),
         createAuditLogEvent("information", new Date("2021-06-15T10:12:13"), "Event 2"),
@@ -586,7 +584,7 @@ describe("AuditLogDynamoGateway", () => {
     })
 
     it("should return an empty array when message does not have events", async () => {
-      const auditLog = new AuditLog(`External correlation id 1`, new Date())
+      const auditLog = new AuditLog(`External correlation id 1`, new Date(), "dummy hash")
       await gateway.create(auditLog)
 
       const result = await gateway.fetchEvents(auditLog.messageId)

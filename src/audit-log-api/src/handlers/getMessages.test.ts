@@ -32,10 +32,10 @@ const createEvent = (
   )
 }
 
-const log1 = new AuditLog("1", new Date(2021, 10, 12))
+const log1 = new AuditLog("1", new Date(2021, 10, 12), "Dummy hash 1")
 log1.caseId = "123"
 
-const log2 = new AuditLog("2", new Date(2021, 10, 13))
+const log2 = new AuditLog("2", new Date(2021, 10, 13), "Dummy hash 2")
 log2.caseId = "456"
 
 test("should respond with a list of messages", async () => {

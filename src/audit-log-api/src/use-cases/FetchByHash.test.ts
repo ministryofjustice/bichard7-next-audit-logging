@@ -5,8 +5,7 @@ import FetchByHash from "./FetchByHash"
 const gateway = new FakeAuditLogDynamoGateway()
 
 it("should return one message when hash exists", async () => {
-  const expectedMessage = new AuditLog("1", new Date())
-  expectedMessage.messageHash = "dummy-hash"
+  const expectedMessage = new AuditLog("1", new Date(), "Dummy hash")
   gateway.reset([expectedMessage])
 
   const messageFetcher = new FetchByHash(gateway, expectedMessage.messageHash)

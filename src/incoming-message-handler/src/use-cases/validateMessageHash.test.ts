@@ -6,8 +6,7 @@ const apiClient = new FakeApiClient()
 
 describe("validateMessageHash", () => {
   it("should return undefined when hash does not exist in the database", async () => {
-    const auditLog = new AuditLog("ID-1", new Date())
-    auditLog.messageHash = "dummy hash"
+    const auditLog = new AuditLog("ID-1", new Date(), "dummy hash")
     apiClient.reset([auditLog])
 
     const result = await validateMessageHash("non-existent hash", apiClient)
@@ -16,8 +15,7 @@ describe("validateMessageHash", () => {
   })
 
   it("should return invalid result when hash exists in the database", async () => {
-    const auditLog = new AuditLog("ID-1", new Date())
-    auditLog.messageHash = "duplicate hash"
+    const auditLog = new AuditLog("ID-1", new Date(), "duplicate hash")
     apiClient.reset([auditLog])
 
     const result = await validateMessageHash("duplicate hash", apiClient)

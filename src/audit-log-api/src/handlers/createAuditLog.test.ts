@@ -8,10 +8,9 @@ import createAuditLog from "./createAuditLog"
 const createHandlerEvent = (item?: AuditLog): APIGatewayProxyEvent => {
   let auditLog = item
   if (!auditLog) {
-    auditLog = new AuditLog("1", new Date())
+    auditLog = new AuditLog("1", new Date(), "Dummy hash")
     auditLog.caseId = "Case ID"
     auditLog.createdBy = "Create audit log test"
-    auditLog.messageHash = "Dummy Hash"
   }
 
   return <APIGatewayProxyEvent>{

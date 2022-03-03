@@ -4,13 +4,12 @@ import { v4 as uuid } from "uuid"
 
 export function mockAuditLog(date?: Date): AuditLog {
   const logDate = date || new Date()
-  const auditLog = new AuditLog(uuid(), logDate)
+  const auditLog = new AuditLog(uuid(), logDate, uuid())
   auditLog.caseId = "Case ID"
   auditLog.createdBy = "Create audit log test"
   auditLog.stepExecutionId = uuid()
   auditLog.externalId = uuid()
   auditLog.s3Path = "2022/01/18/09/01/message.xml"
-  auditLog.messageHash = uuid()
   return auditLog
 }
 
