@@ -1,7 +1,7 @@
 import "shared-testing"
 import { FakeS3Gateway } from "shared-testing"
 import type { S3PutObjectEvent } from "shared-types"
-import type { ValidationResult } from "./retrieveMessageFromS3"
+import type { RetrieveFromS3ValidationResult } from "./retrieveMessageFromS3"
 import retrieveMessageFromS3 from "./retrieveMessageFromS3"
 import { v4 as uuid } from "uuid"
 import type { ReceivedMessage } from "../entities"
@@ -90,8 +90,8 @@ it("should return error when S3 key is invalid", async () => {
   expect(receivedMessage).toNotBeError()
 
   const {
-    validationResult: { isValid, message: validationMessage }
-  } = receivedMessage as ValidationResult
+    s3ValidationResult: { isValid, message: validationMessage }
+  } = receivedMessage as RetrieveFromS3ValidationResult
   expect(isValid).toBe(false)
   expect(validationMessage).toBe("Key path has non-numerical parts.")
 })
