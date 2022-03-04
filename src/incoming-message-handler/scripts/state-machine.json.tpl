@@ -64,7 +64,7 @@
     "Duplicate message": {
       "Type": "Fail",
       "Cause": "Duplicate message hash",
-      "Error": "$.messageHashValidationResult.message"
+      "Error": "There is a record with the same hash in the database."
     },
     "Send to Bichard": {
       "Type": "Task",
