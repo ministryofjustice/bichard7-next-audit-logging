@@ -1,4 +1,5 @@
 jest.retryTimes(10)
+import "shared-testing"
 import type { DocumentClient } from "aws-sdk/clients/dynamodb"
 import type { EventCategory } from "shared-types"
 import { isError, AuditLog, AuditLogEvent, AuditLogStatus } from "shared-types"
@@ -369,11 +370,11 @@ describe("AuditLogDynamoGateway", () => {
 
       const actualMessage = await gateway.fetchOne(message.messageId)
 
-      if (isError(actualMessage)) {
-        throw new Error("Error fetching record")
-      }
       expect(actualMessage).toBeDefined()
-      expect(actualMessage.retryCount).toBe(1)
+      expect(actualMessage).toNotBeError()
+
+      const actualAuditLog = actualMessage as AuditLog
+      expect(actualAuditLog.retryCount).toBe(1)
     })
   })
 
