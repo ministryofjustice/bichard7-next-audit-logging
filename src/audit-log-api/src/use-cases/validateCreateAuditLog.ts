@@ -1,6 +1,7 @@
 import type { AuditLog, AuditLogDynamoGateway } from "shared-types"
 import { isError } from "shared-types"
 import { AuditLogStatus } from "shared-types"
+import { logger } from "shared"
 import { isIsoDate } from "../utils"
 
 interface ValidationResult {
@@ -67,7 +68,11 @@ export default async (auditLog: AuditLog, dynamoGateway: AuditLogDynamoGateway):
     errors.push("Message hash must be string")
   } else {
     const fetchByHashResult = await dynamoGateway.fetchByHash(messageHash)
-    if (fetchByHashResult && !isError(fetchByHashResult)) {
+
+    if (isError(fetchByHashResult)) {
+      logger.error("Error validating message hash", fetchByHashResult)
+      errors.push("Couldn't validate message hash")
+    } else if (fetchByHashResult) {
       errors.push("Message hash already exists")
     }
   }

@@ -178,6 +178,9 @@ describe("validateCreateAuditLog", () => {
     item.caseId = "CID-2"
     item.systemId = "DummySystemID-2"
     item.createdBy = "Test-2"
+    item.s3Path = "Dummy S3 path-2"
+    item.externalId = "Dummy external ID-2"
+    item.stepExecutionId = "Dummy step execution ID-2"
 
     dynamoGateway.reset([duplicateItem])
     const { errors, isValid } = await validateCreateAuditLog(item, dynamoGateway)
@@ -185,5 +188,24 @@ describe("validateCreateAuditLog", () => {
     expect(isValid).toBe(false)
     expect(errors).toHaveLength(1)
     expect(errors).toContain("Message hash already exists")
+  })
+
+  it("should be invalid if couldn't validate message hash", async () => {
+    const item = new AuditLog("ECID", new Date(), "DuplicateHash")
+    item.caseId = "CID"
+    item.systemId = "DummySystemID"
+    item.createdBy = "Test"
+    item.s3Path = "Dummy S3 path"
+    item.externalId = "Dummy external ID"
+    item.stepExecutionId = "Dummy step execution ID"
+
+    const expectedError = new Error("Unknown error")
+    dynamoGateway.reset()
+    dynamoGateway.shouldReturnError(expectedError)
+    const { errors, isValid } = await validateCreateAuditLog(item, dynamoGateway)
+
+    expect(isValid).toBe(false)
+    expect(errors).toHaveLength(1)
+    expect(errors).toContain("Couldn't validate message hash")
   })
 })
