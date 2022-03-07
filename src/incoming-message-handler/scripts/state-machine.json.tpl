@@ -19,52 +19,26 @@
         {
           "And": [
             {
-              "Variable": "$.s3ValidationResult",
+              "Variable": "$.validationResult",
               "IsPresent": true
             },
             {
-              "Variable": "$.s3ValidationResult.isValid",
+              "Variable": "$.validationResult.isValid",
               "BooleanEquals": false
             }
           ],
-          "Next": "Invalid S3 Key"
+          "Next": "Message validation failed"
         },
         {
-          "And": [
-            {
-              "Variable": "$.messageHashValidationResult",
-              "IsPresent": true
-            },
-            {
-              "Variable": "$.messageHashValidationResult.isValid",
-              "BooleanEquals": false
-            }
-          ],
-          "Next": "Duplicate message"
-        },
-        {
-          "And": [
-            {
-              "Variable": "$.s3ValidationResult",
-              "IsPresent": false
-            },
-            {
-              "Variable": "$.messageHashValidationResult",
-              "IsPresent": false
-            }
-          ],
+          "Variable": "$.validationResult",
+          "IsPresent": false,
           "Next": "Send to Bichard"
         }
       ]
     },
-    "Invalid S3 Key": {
+    "Message validation failed": {
       "Type": "Pass",
       "End": true
-    },
-    "Duplicate message": {
-      "Type": "Fail",
-      "Cause": "Duplicate message hash",
-      "Error": "There is a record with the same hash in the database."
     },
     "Send to Bichard": {
       "Type": "Task",

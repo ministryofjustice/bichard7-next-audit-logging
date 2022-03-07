@@ -2,7 +2,7 @@ import type { PromiseResult, Result } from "shared-types"
 import { AuditLog, isError } from "shared-types"
 import { parseXml } from "shared"
 import type { DeliveryMessage, ReceivedMessage } from "../entities"
-import ApplicationError from "../errors/ApplicationError"
+import { ApplicationError } from "shared-types"
 
 const getCaseId = (xml: DeliveryMessage): Result<string> => {
   const caseId =

@@ -2,7 +2,7 @@ import { v4 as uuid } from "uuid"
 import format from "xml-formatter"
 import type { AuditLog } from "shared-types"
 import { isError } from "shared-types"
-import type ApplicationError from "../errors/ApplicationError"
+import type { ApplicationError } from "shared-types"
 import type { ReceivedMessage } from "../entities"
 import readMessage from "./readMessage"
 

@@ -1,11 +1,11 @@
 import type { AuditLog, S3PutObjectEvent } from "shared-types"
-import { AuditLogApiClient, AwsS3Gateway, createS3Config } from "shared"
+import { AuditLogApiClient, AwsS3Gateway, createS3Config, logger } from "shared"
 import { isError } from "shared-types"
 import readMessage from "../use-cases/readMessage"
 import { getApiKey, getApiUrl } from "../configs"
 import retrieveMessageFromS3 from "../use-cases/retrieveMessageFromS3"
 import formatMessage from "../use-cases/formatMessage"
-import validateMessageHash from "src/use-cases/validateMessageHash"
+import CreateAuditLogUseCase from "src/use-cases/CreateAuditLogUseCase"
 
 interface StoreMessageResult {
   auditLog: AuditLog
@@ -18,12 +18,12 @@ export interface ValidationResult {
 }
 
 interface StoreMessageValidationResult {
-  s3ValidationResult?: ValidationResult
-  messageHashValidationResult?: ValidationResult
+  validationResult: ValidationResult
 }
 
 const s3Gateway = new AwsS3Gateway(createS3Config())
 const apiClient = new AuditLogApiClient(getApiUrl(), getApiKey())
+const createAuditLogUseCase = new CreateAuditLogUseCase(apiClient)
 
 export default async function storeMessage(
   event: S3PutObjectEvent
@@ -34,8 +34,9 @@ export default async function storeMessage(
     throw receivedMessage
   }
 
-  if ("s3ValidationResult" in receivedMessage) {
-    return receivedMessage
+  if ("isValid" in receivedMessage) {
+    logger.info(JSON.stringify(receivedMessage))
+    return { validationResult: receivedMessage }
   }
 
   const formattedMessage = await formatMessage(receivedMessage)
@@ -50,16 +51,15 @@ export default async function storeMessage(
     throw auditLog
   }
 
-  const messageHashValidationResult = await validateMessageHash(auditLog.messageHash, apiClient)
-
-  if (messageHashValidationResult && "messageHashValidationResult" in messageHashValidationResult) {
-    return messageHashValidationResult
-  }
-
-  const createAuditLogResult = await apiClient.createAuditLog(auditLog)
+  const createAuditLogResult = await createAuditLogUseCase.execute(auditLog)
 
   if (isError(createAuditLogResult)) {
     throw createAuditLogResult
+  }
+
+  if (!createAuditLogResult.isValid) {
+    logger.info(JSON.stringify(createAuditLogResult))
+    return { validationResult: createAuditLogResult }
   }
 
   return { auditLog, messageXml: formattedMessage.messageXml }
