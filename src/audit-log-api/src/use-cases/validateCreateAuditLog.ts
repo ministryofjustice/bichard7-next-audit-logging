@@ -72,7 +72,6 @@ export default async (auditLog: AuditLog, dynamoGateway: AuditLogDynamoGateway):
     }
   }
 
-  Don't validate these for now so we don't break during a deploy
   if (!s3Path) {
     errors.push("s3Path is mandatory")
   } else if (typeof createdBy !== "string") {
