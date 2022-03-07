@@ -14,6 +14,9 @@ describe("validateCreateAuditLog", () => {
     item.caseId = "CID"
     item.systemId = "DummySystemID"
     item.createdBy = "Test"
+    item.s3Path = "Dummy S3 path"
+    item.externalId = "Dummy external ID"
+    item.stepExecutionId = "Dummy step execution ID"
     const { errors, isValid, auditLog } = await validateCreateAuditLog(item, dynamoGateway)
 
     expect(isValid).toBe(true)
@@ -31,6 +34,9 @@ describe("validateCreateAuditLog", () => {
     expect(auditLog.topExceptionsReport?.events).toHaveLength(0)
     expect(auditLog.events).toHaveLength(0)
     expect(auditLog.messageHash).toBe(item.messageHash)
+    expect(auditLog.s3Path).toBe(item.s3Path)
+    expect(auditLog.externalId).toBe(item.externalId)
+    expect(auditLog.stepExecutionId).toBe(item.stepExecutionId)
   })
 
   it("should be valid and override the value of fields that should be set internally", async () => {
@@ -38,6 +44,9 @@ describe("validateCreateAuditLog", () => {
     item.caseId = "CID"
     item.systemId = "DummySystemID"
     item.createdBy = "Test"
+    item.s3Path = "Dummy S3 path"
+    item.externalId = "Dummy external ID"
+    item.stepExecutionId = "Dummy step execution ID"
 
     const itemToFix = {
       ...item,
@@ -70,6 +79,9 @@ describe("validateCreateAuditLog", () => {
     item.caseId = "CID"
     item.systemId = "DummySystemID"
     item.createdBy = "Test"
+    item.s3Path = "Dummy S3 path"
+    item.externalId = "Dummy external ID"
+    item.stepExecutionId = "Dummy step execution ID"
     item = { ...item, randomKey1: "RandomValue", key2: 5 } as AuditLog
     const { errors, isValid, auditLog } = await validateCreateAuditLog(item, dynamoGateway)
 
@@ -115,12 +127,15 @@ describe("validateCreateAuditLog", () => {
       externalCorrelationId: 3,
       receivedDate: "2021-10-05 12:13:14",
       createdBy: 5,
-      messageHash: 6
+      messageHash: 6,
+      s3Path: 7,
+      externalId: 8,
+      stepExecutionId: 9
     } as unknown as AuditLog
     const { errors, isValid } = await validateCreateAuditLog(item, dynamoGateway)
 
     expect(isValid).toBe(false)
-    expect(errors).toHaveLength(7)
+    expect(errors).toHaveLength(10)
     expect(errors).toContain("Case ID must be string")
     expect(errors).toContain("System ID must be string")
     expect(errors).toContain("External Correlation ID must be string")
@@ -128,12 +143,18 @@ describe("validateCreateAuditLog", () => {
     expect(errors).toContain("Received date must be ISO format")
     expect(errors).toContain("Created by must be string")
     expect(errors).toContain("Message hash must be string")
+    expect(errors).toContain("S3 path must be string")
+    expect(errors).toContain("External ID must be string")
+    expect(errors).toContain("Step execution ID must be string")
   })
 
   it("should enforce a length of 24 characters for the recieved date", async () => {
     const item = new AuditLog("ECID", new Date("2021-12-21T09:32:35.716101961Z"), "DummyHash")
     item.caseId = "CID"
     item.createdBy = "Test"
+    item.s3Path = "Dummy S3 path"
+    item.externalId = "Dummy external ID"
+    item.stepExecutionId = "Dummy step execution ID"
     const { errors, isValid, auditLog } = await validateCreateAuditLog(item, dynamoGateway)
 
     expect(errors).toStrictEqual([])
@@ -149,6 +170,9 @@ describe("validateCreateAuditLog", () => {
     item.caseId = "CID"
     item.systemId = "DummySystemID"
     item.createdBy = "Test"
+    item.s3Path = "Dummy S3 path"
+    item.externalId = "Dummy external ID"
+    item.stepExecutionId = "Dummy step execution ID"
 
     const duplicateItem = new AuditLog("ECID-2", new Date(), "DuplicateHash")
     item.caseId = "CID-2"

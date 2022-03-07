@@ -72,22 +72,16 @@ export default async (auditLog: AuditLog, dynamoGateway: AuditLogDynamoGateway):
     }
   }
 
-  if (!s3Path) {
-    errors.push("s3Path is mandatory")
-  } else if (typeof createdBy !== "string") {
-    errors.push("s3Path must be string")
+  if (s3Path && typeof s3Path !== "string") {
+    errors.push("S3 path must be string")
   }
 
-  if (!externalId) {
-    errors.push("externalId is mandatory")
-  } else if (typeof createdBy !== "string") {
-    errors.push("externalId must be string")
+  if (externalId && typeof externalId !== "string") {
+    errors.push("External ID must be string")
   }
 
-  if (!stepExecutionId) {
-    errors.push("stepExecutionId is mandatory")
-  } else if (typeof createdBy !== "string") {
-    errors.push("stepExecutionId must be string")
+  if (stepExecutionId && typeof stepExecutionId !== "string") {
+    errors.push("Step execution ID must be string")
   }
 
   const validatedAuditLog: AuditLog = {
