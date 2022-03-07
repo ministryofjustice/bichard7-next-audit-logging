@@ -15,10 +15,10 @@ const event = new AuditLogEvent({
 })
 
 const createErrorResponse = (errorCode: number, errorMessage: string): AxiosError =>
-({
-  message: `Axios error: ${errorMessage}`,
-  response: { status: errorCode, data: errorMessage }
-} as unknown as AxiosError)
+  ({
+    message: `Axios error: ${errorMessage}`,
+    response: { status: errorCode, data: errorMessage }
+  } as unknown as AxiosError)
 
 describe("getMessages()", () => {
   beforeEach(() => {

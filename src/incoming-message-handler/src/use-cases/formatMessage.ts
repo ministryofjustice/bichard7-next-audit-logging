@@ -1,7 +1,7 @@
 import { clean, hasRootElement } from "shared"
 import type { PromiseResult } from "shared-types"
 import type { ReceivedMessage } from "../entities"
-import { ApplicationError}  from "shared-types"
+import { ApplicationError } from "shared-types"
 import formatMessageXml from "./formatMessageXml"
 import crypto from "crypto"
 
