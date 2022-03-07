@@ -20,7 +20,11 @@ export default class {
       createdBy: "Event handler"
     }
     const createAuditLogResult = await this.api.createAuditLog(message)
-    if (isError(createAuditLogResult) && createAuditLogResult.message !== "Request failed with status code 409") {
+
+    if (
+      isError(createAuditLogResult) &&
+      /A message with Id .+ already exists/i.test(createAuditLogResult.message) === false
+    ) {
       return createAuditLogResult
     }
 
