@@ -1,7 +1,7 @@
 import "shared-testing"
 import type { AxiosError } from "axios"
 import axios from "axios"
-import { AuditLog, AuditLogEvent, isError } from "shared-types"
+import { AuditLog, AuditLogEvent } from "shared-types"
 import AuditLogApiClient from "./AuditLogApiClient"
 
 const apiClient = new AuditLogApiClient("http://localhost", "dummy")
@@ -13,6 +13,12 @@ const event = new AuditLogEvent({
   eventType: "Dummy Event Type",
   eventSource: "Dummy Event Source"
 })
+
+const createErrorResponse = (errorCode: number, errorMessage: string): AxiosError =>
+({
+  message: `Axios error: ${errorMessage}`,
+  response: { status: errorCode, data: errorMessage }
+} as unknown as AxiosError)
 
 describe("getMessages()", () => {
   beforeEach(() => {
@@ -34,8 +40,7 @@ describe("getMessages()", () => {
 
     const result = await apiClient.getMessages()
 
-    expect(isError(result)).toBe(true)
-    expect(<Error>result).toBe(expectedError)
+    expect(result).toBeError(`Error getting messages: ${expectedError.message}`)
   })
 
   it("should filter by status", async () => {
@@ -89,49 +94,13 @@ describe("getMessage()", () => {
 
     const result = await apiClient.getMessage(message.messageId)
 
-    expect(isError(result)).toBe(true)
-    expect(<Error>result).toBe(expectedError)
+    expect(result).toBeError(`Error getting messages: ${expectedError.message}`)
   })
 
   it("should pass through the api key as a header", async () => {
     const mockGet = jest.spyOn(axios, "get").mockResolvedValue({ status: 200, data: [] })
 
     const result = await apiClient.getMessage(message.messageId)
-
-    expect(result).toNotBeError()
-    expect(mockGet.mock?.calls?.[0]?.[1]?.headers?.["X-API-Key"]).toBe("dummy")
-  })
-})
-
-describe("getMessageByHash()", () => {
-  it("should return the message when message hash exists", async () => {
-    jest.spyOn(axios, "get").mockResolvedValue({ status: 200, data: [message] })
-
-    const result = await apiClient.getMessageByHash(message.messageHash)
-
-    expect(result).toNotBeError()
-
-    const actualMessage = <AuditLog>result
-    expect(actualMessage.messageId).toBe(message.messageId)
-    expect(actualMessage.messageHash).toBe(message.messageHash)
-    expect(actualMessage.externalCorrelationId).toBe(message.externalCorrelationId)
-    expect(actualMessage.receivedDate).toBe(message.receivedDate)
-  })
-
-  it("should fail when the error is unknown", async () => {
-    const expectedError = <AxiosError>new Error("An unknown error")
-    jest.spyOn(axios, "get").mockRejectedValue(expectedError)
-
-    const result = await apiClient.getMessageByHash(message.messageHash)
-
-    expect(isError(result)).toBe(true)
-    expect(<Error>result).toBe(expectedError)
-  })
-
-  it("should pass through the api key as a header", async () => {
-    const mockGet = jest.spyOn(axios, "get").mockResolvedValue({ status: 200, data: [] })
-
-    const result = await apiClient.getMessageByHash(message.messageHash)
 
     expect(result).toNotBeError()
     expect(mockGet.mock?.calls?.[0]?.[1]?.headers?.["X-API-Key"]).toBe("dummy")
@@ -148,12 +117,12 @@ describe("createAuditLog()", () => {
   })
 
   it("should fail when message validation fails", async () => {
-    jest.spyOn(axios, "post").mockResolvedValue({ status: 400, data: "Message ID is mandatory" })
+    const expectedError = createErrorResponse(400, "Message ID is mandatory")
+    jest.spyOn(axios, "post").mockRejectedValue(expectedError)
 
     const result = await apiClient.createAuditLog(message)
 
-    expect(isError(result)).toBe(true)
-    expect((<Error>result).message).toBe("Error 400: Message ID is mandatory")
+    expect(result).toBeError("Error creating audit log: Message ID is mandatory")
   })
 
   it("should fail when the error is unknown", async () => {
@@ -162,8 +131,7 @@ describe("createAuditLog()", () => {
 
     const result = await apiClient.createAuditLog(message)
 
-    expect(isError(result)).toBe(true)
-    expect(<Error>result).toBe(expectedError)
+    expect(result).toBeError(`Error creating audit log: ${expectedError.message}`)
   })
 
   it("should pass through the api key as a header", async () => {
@@ -190,8 +158,7 @@ describe("createEvent()", () => {
 
     const result = await apiClient.createEvent(message.messageId, event)
 
-    expect(isError(result)).toBe(true)
-    expect((<Error>result).message).toBe(`The message with Id ${message.messageId} does not exist.`)
+    expect(result).toBeError(`The message with Id ${message.messageId} does not exist.`)
   })
 
   it("should fail when the error is unknown", async () => {
@@ -200,8 +167,7 @@ describe("createEvent()", () => {
 
     const result = await apiClient.createEvent(message.messageId, event)
 
-    expect(isError(result)).toBe(true)
-    expect(<Error>result).toBe(expectedError)
+    expect(result).toBeError(`Error creating event: ${expectedError.message}`)
   })
 
   it("should pass through the api key as a header", async () => {
@@ -220,8 +186,7 @@ describe("createEvent()", () => {
 
     const result = await apiClient.createEvent(message.messageId, event)
 
-    expect(isError(result)).toBe(true)
-    expect((<Error>result).message).toBe(expectedErrorMsg)
+    expect(result).toBeError(expectedErrorMsg)
   })
 
   describe("retryEvent()", () => {
@@ -238,8 +203,7 @@ describe("createEvent()", () => {
 
       const result = await apiClient.retryEvent(message.messageId)
 
-      expect(isError(result)).toBe(true)
-      expect((<Error>result).message).toBe(`The message with Id ${message.messageId} does not exist.`)
+      expect(result).toBeError(`The message with Id ${message.messageId} does not exist.`)
     })
 
     it("should fail when the error is unknown", async () => {
@@ -248,8 +212,7 @@ describe("createEvent()", () => {
 
       const result = await apiClient.retryEvent(message.messageId)
 
-      expect(isError(result)).toBe(true)
-      expect(<Error>result).toBe(expectedError)
+      expect(result).toBeError(`Error retrying event: ${expectedError.message}`)
     })
 
     it("should pass through the api key as a header", async () => {

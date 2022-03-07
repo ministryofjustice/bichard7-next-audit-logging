@@ -20,15 +20,6 @@ export default class FakeApiClient implements ApiClient {
     return Promise.resolve(message)
   }
 
-  getMessageByHash(hash: string): PromiseResult<AuditLog> {
-    if (this.shouldFunctionReturnError("getMessageByHash")) {
-      return Promise.resolve(this.error!)
-    }
-
-    const message = this.messages.filter((x) => x.messageHash === hash)[0]
-    return Promise.resolve(message)
-  }
-
   // @ts-ignore
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   createAuditLog(auditLog: AuditLog): PromiseResult<void> {
