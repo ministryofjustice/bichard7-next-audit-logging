@@ -73,23 +73,4 @@ describe("Getting Audit Logs", () => {
     const messageIds = result.data.map((record) => record.messageId)
     expect(messageIds).toEqual([auditLog2.messageId])
   })
-
-  it("should get message by hash", async () => {
-    const auditLog = await createMockAuditLog()
-    if (isError(auditLog)) {
-      throw new Error("Unexpected error")
-    }
-
-    const auditLog2 = await createMockError()
-    if (isError(auditLog2)) {
-      throw new Error("Unexpected error")
-    }
-
-    const result = await axios.get<AuditLog[]>(`http://localhost:3010/messages?hash=${auditLog2.messageHash}`)
-    expect(result.status).toEqual(HttpStatusCode.ok)
-
-    expect(Array.isArray(result.data)).toBeTruthy()
-    const messageIds = result.data.map((record) => record.messageId)
-    expect(messageIds).toEqual([auditLog2.messageId])
-  })
 })

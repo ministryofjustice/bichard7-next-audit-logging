@@ -1,4 +1,5 @@
-import type { AuditLog } from "shared-types"
+import type { AuditLog, AuditLogDynamoGateway } from "shared-types"
+import { isError } from "shared-types"
 import { AuditLogStatus } from "shared-types"
 import { isIsoDate } from "../utils"
 
@@ -8,7 +9,7 @@ interface ValidationResult {
   auditLog: AuditLog
 }
 
-export default (auditLog: AuditLog): ValidationResult => {
+export default async (auditLog: AuditLog, dynamoGateway: AuditLogDynamoGateway): Promise<ValidationResult> => {
   const errors: string[] = []
   let formattedReceivedDate = ""
   const {
@@ -64,26 +65,31 @@ export default (auditLog: AuditLog): ValidationResult => {
     errors.push("Message hash is mandatory")
   } else if (typeof messageHash !== "string") {
     errors.push("Message hash must be string")
+  } else {
+    const fetchByHashResult = await dynamoGateway.fetchByHash(messageHash)
+    if (fetchByHashResult && !isError(fetchByHashResult)) {
+      errors.push("Message hash already exists")
+    }
   }
 
-  // Don't validate these for now so we don't break during a deploy
-  // if (!s3Path) {
-  //   errors.push("s3Path is mandatory")
-  // } else if (typeof createdBy !== "string") {
-  //   errors.push("s3Path must be string")
-  // }
+  Don't validate these for now so we don't break during a deploy
+  if (!s3Path) {
+    errors.push("s3Path is mandatory")
+  } else if (typeof createdBy !== "string") {
+    errors.push("s3Path must be string")
+  }
 
-  // if (!externalId) {
-  //   errors.push("externalId is mandatory")
-  // } else if (typeof createdBy !== "string") {
-  //   errors.push("externalId must be string")
-  // }
+  if (!externalId) {
+    errors.push("externalId is mandatory")
+  } else if (typeof createdBy !== "string") {
+    errors.push("externalId must be string")
+  }
 
-  // if (!stepExecutionId) {
-  //   errors.push("stepExecutionId is mandatory")
-  // } else if (typeof createdBy !== "string") {
-  //   errors.push("stepExecutionId must be string")
-  // }
+  if (!stepExecutionId) {
+    errors.push("stepExecutionId is mandatory")
+  } else if (typeof createdBy !== "string") {
+    errors.push("stepExecutionId must be string")
+  }
 
   const validatedAuditLog: AuditLog = {
     messageId,
