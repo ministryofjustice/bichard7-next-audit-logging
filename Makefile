@@ -115,7 +115,7 @@ src/retry-failed-messages/build: src/shared-types/build src/shared/build $(RETRY
 	cd src/retry-failed-messages && npm run build
 
 src/record-error-archival/build: src/record-error-archival/build src/shared/build $(RECORD_MESSAGE_ARCHIVAL_SOURCE)
-  cd src/record-error-archival && npm run build
+	cd src/record-error-archival && npm run build
 
 # Clean
 .PHONY: clean
