@@ -15,7 +15,8 @@ build:
 .PHONY: build-all
 build-all: shared-types shared-testing shared \
 	   message-receiver transfer-messages incoming-message-handler event-handler \
-	   audit-log-api audit-log-portal archive-user-logs retry-failed-messages
+	   audit-log-api audit-log-portal archive-user-logs retry-failed-messages \
+		 record-error-archival
 
 .PHONY: test
 test:
@@ -41,6 +42,7 @@ audit-log-api: src/audit-log-api/build
 audit-log-portal: src/audit-log-portal/build
 archive-user-logs: src/archive-user-logs/build
 retry-failed-messages: src/retry-failed-messages/build
+record-error-archival: src/record-error-archival/build
 
 define get_source_files
 	$(shell find $(1) \
@@ -73,6 +75,7 @@ AUDIT_LOG_API_SOURCE := $(call get_source_files,src/audit-log-api)
 AUDIT_LOG_PORTAL_SOURCE := $(call get_source_files,src/audit-log-portal)
 ARCHIVE_USER_LOGS := $(call get_source_files,src/archive-user-logs)
 RETRY_FAILED_MESSAGES_SOURCE := $(call get_source_files,src/retry-failed-messages)
+RECORD_MESSAGE_ARCHIVAL_SOURCE := $(call get_source_files,src/record-error-archival)
 
 # How to build each package
 src/shared-types/build: $(SHARED_TYPES_SOURCE)
@@ -110,6 +113,9 @@ src/archive-user-logs/build: src/shared-types/build src/shared-testing/build src
 
 src/retry-failed-messages/build: src/shared-types/build src/shared/build $(RETRY_FAILED_MESSAGES_SOURCE)
 	cd src/retry-failed-messages && npm run build
+
+src/record-error-archival/build: src/record-error-archival/build src/shared/build $(RECORD_MESSAGE_ARCHIVAL_SOURCE)
+  cd src/record-error-archival && npm run build
 
 # Clean
 .PHONY: clean
