@@ -44,7 +44,7 @@ it("should format the message XML when the message XML is correct", async () => 
   expect(stepExecutionId).toBe(receivedMessage.stepExecutionId)
   expect(externalId).toBe(receivedMessage.externalId)
   expect(receivedDate).toBe(receivedMessage.receivedDate)
-  expect(hash).toBe("5713ae8127105eb22a9516dba9cc49576d6758bd50e1bec391357375ca64900f")
+  expect(hash).toBe("44596f3b496f4aa616db7ede7055fab81138ea043e255c25071b3948a66345a2")
   expect(messageXml).toMatchSnapshot()
 })
 

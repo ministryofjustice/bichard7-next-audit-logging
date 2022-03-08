@@ -4,12 +4,9 @@ import type { ReceivedMessage } from "../entities"
 import { ApplicationError } from "shared-types"
 import formatMessageXml from "./formatMessageXml"
 import crypto from "crypto"
+import getDataStreamContent from "./getDataStreamContent"
 
 const generateHash = (text: string) => crypto.createHash("sha256").update(text, "utf-8").digest("hex")
-
-const getInnerMessage = (xml: string) =>
-  xml.match(/<(?:[\S]*:)?DataStreamContent>(?<innerMessage>[\s\S]*)<\/(?:[\S]*:)?DataStreamContent>/)?.groups
-    ?.innerMessage
 
 export default async (receivedMessage: ReceivedMessage): PromiseResult<ReceivedMessage> => {
   try {
@@ -19,11 +16,11 @@ export default async (receivedMessage: ReceivedMessage): PromiseResult<ReceivedM
 
     let hash: string
     if (!hasRouteDataElement) {
-      hash = generateHash(messageXml)
+      hash = generateHash(messageXml.trim())
       messageXml = formatMessageXml(messageXml)
     } else {
-      const innerXml = getInnerMessage(messageXml)
-      hash = generateHash(innerXml ?? messageXml)
+      const innerXml = getDataStreamContent(messageXml)
+      hash = generateHash(innerXml ?? messageXml.trim())
     }
 
     return {
