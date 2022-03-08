@@ -513,7 +513,6 @@ describe("AuditLogDynamoGateway", () => {
       const hash = "hash-2"
       const result = await gateway.fetchByHash(hash)
 
-      console.log(result)
       expect(isError(result)).toBe(false)
       expect(result).toBeDefined()
 
