@@ -1,4 +1,3 @@
-jest.mock("src/use-cases/validateCreateAuditLog")
 import "../testConfig"
 import type { APIGatewayProxyEvent } from "aws-lambda"
 import { AuditLog } from "shared-types"
@@ -6,6 +5,8 @@ import { HttpStatusCode } from "shared"
 import CreateAuditLogUseCase from "../use-cases/CreateAuditLogUseCase"
 import createAuditLog from "./createAuditLog"
 import { validateCreateAuditLog } from "src/use-cases"
+
+jest.mock("src/use-cases/validateCreateAuditLog")
 
 const mockedValidateCreateAuditLog = validateCreateAuditLog as jest.MockedFunction<typeof validateCreateAuditLog>
 
