@@ -1,16 +1,13 @@
-export interface ValidateS3KeyResult {
-  isValid: boolean
-  message?: string
-}
+import type { ValidationResult } from "../handlers/storeMessage"
 
-const createInvalidResult = (message: string): ValidateS3KeyResult => {
+const createInvalidResult = (message: string): ValidationResult => {
   return {
     isValid: false,
     message
   }
 }
 
-const validateS3Key = (key: string): ValidateS3KeyResult => {
+const validateS3Key = (key: string): ValidationResult => {
   if (!key) {
     return createInvalidResult("Key is empty.")
   }

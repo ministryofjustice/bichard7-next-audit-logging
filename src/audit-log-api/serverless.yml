@@ -77,6 +77,8 @@ resources:
             AttributeType: S
           - AttributeName: externalCorrelationId
             AttributeType: S
+          - AttributeName: messageHash
+            AttributeType: S
           - AttributeName: status
             AttributeType: S
         KeySchema:
@@ -97,6 +99,15 @@ resources:
           - IndexName: externalCorrelationIdIndex
             KeySchema:
               - AttributeName: externalCorrelationId
+                KeyType: HASH
+            Projection:
+              ProjectionType: "ALL"
+            ProvisionedThroughput:
+              ReadCapacityUnits: 1
+              WriteCapacityUnits: 1
+          - IndexName: messageHashIndex
+            KeySchema:
+              - AttributeName: messageHash
                 KeyType: HASH
             Projection:
               ProjectionType: "ALL"

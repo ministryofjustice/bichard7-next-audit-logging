@@ -6,7 +6,7 @@ const gateway = new FakeAuditLogDynamoGateway()
 
 it("should return one message when there is a message with the specified status", async () => {
   const expectedStatus = AuditLogStatus.error
-  const expectedMessage = new AuditLog("1", new Date())
+  const expectedMessage = new AuditLog("1", new Date(), "Dummy hash")
   expectedMessage.status = expectedStatus
   gateway.reset([expectedMessage])
 

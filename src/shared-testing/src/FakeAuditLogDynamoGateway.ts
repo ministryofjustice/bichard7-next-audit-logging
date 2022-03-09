@@ -30,6 +30,16 @@ export default class FakeAuditLogDynamoGateway implements AuditLogDynamoGateway 
     return Promise.resolve(message ?? null)
   }
 
+  fetchByHash(hash: string): PromiseResult<AuditLog | null> {
+    if (this.error) {
+      return Promise.resolve(this.error)
+    }
+
+    const message = this.messages.find((x) => x.messageHash === hash)
+
+    return Promise.resolve(message ?? null)
+  }
+
   // @ts-ignore
   fetchByStatus(status: string, limit?: number, lastMessage?: AuditLog): PromiseResult<AuditLog[]> {
     if (this.error) {

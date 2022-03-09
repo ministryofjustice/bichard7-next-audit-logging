@@ -50,7 +50,7 @@ describe("retryMessage", () => {
     const s3Path = "event.xml"
     await s3Gateway.upload(s3Path, JSON.stringify(event))
 
-    const message = new AuditLog("External Correlation ID", new Date())
+    const message = new AuditLog("External Correlation ID", new Date(), "Dummy hash")
     message.events.push(
       new BichardAuditLogEvent({
         eventSource: "Dummy Event Source",

@@ -2,14 +2,10 @@ import path from "path"
 import type { S3PutObjectEvent, PromiseResult, S3GatewayInterface } from "shared-types"
 import { isError } from "shared-types"
 import type { ReceivedMessage } from "../entities"
-import ApplicationError from "../errors/ApplicationError"
+import { ApplicationError } from "shared-types"
+import type { ValidationResult } from "../handlers/storeMessage"
 import readReceivedDateFromS3ObjectKey from "../utils/readReceivedDateFromS3ObjectKey"
-import type { ValidateS3KeyResult } from "./validateS3Key"
 import validateS3Key from "./validateS3Key"
-
-export interface ValidationResult {
-  validationResult: ValidateS3KeyResult
-}
 
 export default async (
   event: S3PutObjectEvent,
@@ -21,7 +17,7 @@ export default async (
 
   const validationResult = validateS3Key(key)
   if (!validationResult.isValid) {
-    return { validationResult }
+    return validationResult
   }
 
   const messageXml = await s3Gateway.forBucket(bucketName).getItem(key)

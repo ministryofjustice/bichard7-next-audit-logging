@@ -1,5 +1,7 @@
-import type { AuditLog } from "shared-types"
+import type { AuditLog, AuditLogDynamoGateway } from "shared-types"
+import { isError } from "shared-types"
 import { AuditLogStatus } from "shared-types"
+import { logger } from "shared"
 import { isIsoDate } from "../utils"
 
 interface ValidationResult {
@@ -8,7 +10,7 @@ interface ValidationResult {
   auditLog: AuditLog
 }
 
-export default (auditLog: AuditLog): ValidationResult => {
+export default async (auditLog: AuditLog, dynamoGateway: AuditLogDynamoGateway): Promise<ValidationResult> => {
   const errors: string[] = []
   let formattedReceivedDate = ""
   const {
@@ -20,7 +22,8 @@ export default (auditLog: AuditLog): ValidationResult => {
     createdBy,
     s3Path,
     stepExecutionId,
-    externalId
+    externalId,
+    messageHash
   } = auditLog
 
   if (!caseId) {
@@ -59,24 +62,32 @@ export default (auditLog: AuditLog): ValidationResult => {
     errors.push("Created by must be string")
   }
 
-  // Don't validate these for now so we don't break during a deploy
-  // if (!s3Path) {
-  //   errors.push("s3Path is mandatory")
-  // } else if (typeof createdBy !== "string") {
-  //   errors.push("s3Path must be string")
-  // }
+  if (!messageHash) {
+    errors.push("Message hash is mandatory")
+  } else if (typeof messageHash !== "string") {
+    errors.push("Message hash must be string")
+  } else {
+    const fetchByHashResult = await dynamoGateway.fetchByHash(messageHash)
 
-  // if (!externalId) {
-  //   errors.push("externalId is mandatory")
-  // } else if (typeof createdBy !== "string") {
-  //   errors.push("externalId must be string")
-  // }
+    if (isError(fetchByHashResult)) {
+      logger.error("Error validating message hash", fetchByHashResult)
+      errors.push("Couldn't validate message hash")
+    } else if (fetchByHashResult) {
+      errors.push("Message hash already exists")
+    }
+  }
 
-  // if (!stepExecutionId) {
-  //   errors.push("stepExecutionId is mandatory")
-  // } else if (typeof createdBy !== "string") {
-  //   errors.push("stepExecutionId must be string")
-  // }
+  if (s3Path && typeof s3Path !== "string") {
+    errors.push("S3 path must be string")
+  }
+
+  if (externalId && typeof externalId !== "string") {
+    errors.push("External ID must be string")
+  }
+
+  if (stepExecutionId && typeof stepExecutionId !== "string") {
+    errors.push("Step execution ID must be string")
+  }
 
   const validatedAuditLog: AuditLog = {
     messageId,
@@ -94,7 +105,8 @@ export default (auditLog: AuditLog): ValidationResult => {
     retryCount: 0,
     events: [],
     automationReport: { events: [] },
-    topExceptionsReport: { events: [] }
+    topExceptionsReport: { events: [] },
+    messageHash
   }
 
   return {

@@ -19,7 +19,7 @@ export default async function createAuditLog(event: APIGatewayProxyEvent): Promi
     })
   }
 
-  const { isValid, errors, auditLog } = validateCreateAuditLog(request)
+  const { isValid, errors, auditLog } = await validateCreateAuditLog(request, auditLogGateway)
 
   if (!isValid) {
     return createJsonApiResult({

@@ -27,7 +27,7 @@
               "BooleanEquals": false
             }
           ],
-          "Next": "Invalid S3 Key"
+          "Next": "Message validation failed"
         },
         {
           "Variable": "$.validationResult",
@@ -36,7 +36,7 @@
         }
       ]
     },
-    "Invalid S3 Key": {
+    "Message validation failed": {
       "Type": "Pass",
       "End": true
     },

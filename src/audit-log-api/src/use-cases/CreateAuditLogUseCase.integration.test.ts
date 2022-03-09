@@ -17,7 +17,7 @@ const testDynamoGateway = new TestDynamoGateway(config)
 const auditLogDynamoGateway = new AwsAuditLogDynamoGateway(config, config.AUDIT_LOG_TABLE_NAME)
 const createAuditLogUseCase = new CreateAuditLogUseCase(auditLogDynamoGateway)
 
-const createAuditLog = (): AuditLog => new AuditLog("CorrelationId", new Date())
+const createAuditLog = (): AuditLog => new AuditLog("CorrelationId", new Date(), "Dummy hash")
 
 const getAuditLog = (messageId: string): Promise<AuditLog | null> =>
   testDynamoGateway.getOne(config.AUDIT_LOG_TABLE_NAME, "messageId", messageId)

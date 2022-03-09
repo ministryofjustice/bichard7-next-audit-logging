@@ -4,4 +4,5 @@ export default interface ReceivedMessage {
   stepExecutionId: string
   receivedDate: string
   messageXml: string
+  hash?: string
 }

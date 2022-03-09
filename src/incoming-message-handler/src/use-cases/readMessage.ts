@@ -2,7 +2,7 @@ import type { PromiseResult, Result } from "shared-types"
 import { AuditLog, isError } from "shared-types"
 import { parseXml } from "shared"
 import type { DeliveryMessage, ReceivedMessage } from "../entities"
-import ApplicationError from "../errors/ApplicationError"
+import { ApplicationError } from "shared-types"
 
 const getCaseId = (xml: DeliveryMessage): Result<string> => {
   const caseId =
@@ -33,6 +33,10 @@ const getExternalCorrelationId = (xml: DeliveryMessage): Result<string> => {
 }
 
 const readMessage = async (message: ReceivedMessage): PromiseResult<AuditLog> => {
+  if (!message.hash) {
+    return Error("Message hash is mandatory.")
+  }
+
   const xml = await parseXml<DeliveryMessage>(message.messageXml).catch((error: Error) => error)
 
   if (isError(xml)) {
@@ -49,7 +53,7 @@ const readMessage = async (message: ReceivedMessage): PromiseResult<AuditLog> =>
     return caseId
   }
 
-  const auditLog = new AuditLog(externalCorrelationId, new Date(message.receivedDate))
+  const auditLog = new AuditLog(externalCorrelationId, new Date(message.receivedDate), message.hash)
   auditLog.caseId = caseId
   auditLog.systemId = xml.RouteData?.DataStream?.System?.trim()
   auditLog.createdBy = "Incoming message handler"

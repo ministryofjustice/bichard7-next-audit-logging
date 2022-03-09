@@ -5,7 +5,7 @@ import FetchById from "./FetchById"
 const gateway = new FakeAuditLogDynamoGateway()
 
 it("should return one message when messageId exists", async () => {
-  const expectedMessage = new AuditLog("1", new Date())
+  const expectedMessage = new AuditLog("1", new Date(), "Dummy hash")
   gateway.reset([expectedMessage])
 
   const messageFetcher = new FetchById(gateway, expectedMessage.messageId)
