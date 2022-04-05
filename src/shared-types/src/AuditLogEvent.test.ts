@@ -15,8 +15,8 @@ describe("AuditLogEvent", () => {
       const log = new AuditLogEvent(defaultOptions)
       log.addAttribute("test", value)
       const attrValue: string = log.attributes.test as string
-      expect(attrValue).toHaveLength(1000)
-      expect(attrValue.endsWith("xxx...[truncated]")).toBeTruthy()
+      expect(attrValue).toHaveLength(27)
+      expect(attrValue).toBe("See original log file in S3")
     })
 
     it("should not truncate the attribute if the text is not too long", () => {

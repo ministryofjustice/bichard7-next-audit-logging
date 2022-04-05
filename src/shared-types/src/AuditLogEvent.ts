@@ -23,11 +23,7 @@ export default class AuditLogEvent {
 
   addAttribute(name: string, value: unknown): void {
     const maxStringLength = 1000
-    const truncateString = "...[truncated]"
-    let valueToAdd = value
-    if (typeof valueToAdd === "string" && valueToAdd.length > maxStringLength) {
-      valueToAdd = valueToAdd.substring(0, maxStringLength - truncateString.length) + truncateString
-    }
-    this.attributes[name] = valueToAdd
+    this.attributes[name] =
+      typeof value === "string" && value.length > maxStringLength ? "See original log file in S3" : value
   }
 }
