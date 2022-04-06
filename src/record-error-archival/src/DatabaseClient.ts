@@ -9,17 +9,17 @@ export type ArchivedErrorRecord = {
 }
 
 export default class DatabaseClient {
-  host: string
+  private host: string
 
-  user: string
+  private user: string
 
-  password: string
+  private password: string
 
-  database: string
+  private database: string
 
-  schema: string
+  private schema: string
 
-  postgres: Client
+  private postgres: Client
 
   constructor(host: string, user: string, password: string, database: string, schema: string) {
     this.host = host
@@ -58,7 +58,7 @@ export default class DatabaseClient {
             <ArchivedErrorRecord>{
               messageId: row.message_id,
               errorId: row.error_id,
-              archivedAt: row.archived_at,
+              archivedAt: new Date(row.archived_at),
               archivedBy: row.archived_by,
               archiveLogId: row.archive_log_id
             }
