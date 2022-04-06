@@ -2,11 +2,11 @@ import type { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda"
 import { isError } from "shared-types"
 import { AwsAuditLogDynamoGateway, HttpStatusCode, logger } from "shared"
 import { createJsonApiResult } from "../utils"
-import createDynamoDbConfig from "../createDynamoDbConfig"
+import createAuditLogDynamoDbConfig from "../createAuditLogDynamoDbConfig"
 import { CreateAuditLogEventUseCase, parseCreateAuditLogEventRequest, validateCreateAuditLogEvent } from "../use-cases"
 
-const config = createDynamoDbConfig()
-const auditLogGateway = new AwsAuditLogDynamoGateway(config, config.AUDIT_LOG_TABLE_NAME)
+const config = createAuditLogDynamoDbConfig()
+const auditLogGateway = new AwsAuditLogDynamoGateway(config, config.TABLE_NAME)
 const createAuditLogEventUseCase = new CreateAuditLogEventUseCase(auditLogGateway)
 
 export default async function createAuditLogEvent(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {

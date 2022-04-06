@@ -19,7 +19,7 @@ const apiClient = new AuditLogApiClient("http://localhost:3010", "DUMMY")
 const dynamoConfig: DynamoDbConfig = {
   DYNAMO_URL: "http://localhost:8000",
   DYNAMO_REGION: "eu-west-2",
-  AUDIT_LOG_TABLE_NAME: "auditLogTable",
+  TABLE_NAME: "auditLogTable",
   AWS_ACCESS_KEY_ID: "DUMMY",
   AWS_SECRET_ACCESS_KEY: "DUMMY"
 }
@@ -27,7 +27,7 @@ const testDynamoGateway = new TestDynamoGateway(dynamoConfig)
 
 describe("getErrorsToRetry", () => {
   beforeEach(async () => {
-    await testDynamoGateway.deleteAll(dynamoConfig.AUDIT_LOG_TABLE_NAME, "messageId")
+    await testDynamoGateway.deleteAll(dynamoConfig.TABLE_NAME, "messageId")
   })
 
   it("should get all errors, paginating where necessary", async () => {

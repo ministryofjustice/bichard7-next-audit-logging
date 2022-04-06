@@ -1,6 +1,6 @@
 import type { DynamoDbConfig } from "shared-types"
 
-export default function createDynamoDbConfig(): DynamoDbConfig {
+export default function createAdutiLogDynamoDbConfig(): DynamoDbConfig {
   const { AWS_URL, AWS_REGION, AUDIT_LOG_TABLE_NAME, DYNAMO_AWS_ACCESS_KEY_ID, DYNAMO_AWS_SECRET_ACCESS_KEY } =
     process.env
 
@@ -19,7 +19,7 @@ export default function createDynamoDbConfig(): DynamoDbConfig {
   const config: DynamoDbConfig = {
     DYNAMO_URL: AWS_URL,
     DYNAMO_REGION: AWS_REGION,
-    AUDIT_LOG_TABLE_NAME
+    TABLE_NAME: AUDIT_LOG_TABLE_NAME
   }
 
   if (DYNAMO_AWS_ACCESS_KEY_ID) {

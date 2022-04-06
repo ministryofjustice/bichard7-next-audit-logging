@@ -10,7 +10,7 @@ import type FetchByIndexOptions from "./FetchByIndexOptions"
 const config: DynamoDbConfig = {
   DYNAMO_URL: "http://localhost:8000",
   DYNAMO_REGION: "eu-west-2",
-  AUDIT_LOG_TABLE_NAME: "DynamoTesting",
+  TABLE_NAME: "DynamoTesting",
   AWS_ACCESS_KEY_ID: "DUMMY",
   AWS_SECRET_ACCESS_KEY: "DUMMY"
 }
@@ -32,11 +32,11 @@ describe("DynamoGateway", () => {
       skipIfExists: true
     }
 
-    await gateway.createTable(config.AUDIT_LOG_TABLE_NAME, options)
+    await gateway.createTable(config.TABLE_NAME, options)
   })
 
   beforeEach(async () => {
-    await gateway.deleteAll(config.AUDIT_LOG_TABLE_NAME, "id")
+    await gateway.deleteAll(config.TABLE_NAME, "id")
   })
 
   describe("insertOne()", () => {
@@ -46,11 +46,11 @@ describe("DynamoGateway", () => {
         someOtherValue: "SomeOtherValue"
       }
 
-      const result = await gateway.insertOne(config.AUDIT_LOG_TABLE_NAME, expectedRecord, "id")
+      const result = await gateway.insertOne(config.TABLE_NAME, expectedRecord, "id")
 
       expect(result).toBeUndefined()
 
-      const actualRecords = await gateway.getAll(config.AUDIT_LOG_TABLE_NAME)
+      const actualRecords = await gateway.getAll(config.TABLE_NAME)
       expect(actualRecords.Count).toBe(1)
 
       const actualRecord = actualRecords.Items?.[0]
@@ -64,13 +64,13 @@ describe("DynamoGateway", () => {
         someOtherValue: "Id should be a number"
       }
 
-      const result = await gateway.insertOne(config.AUDIT_LOG_TABLE_NAME, record, "id")
+      const result = await gateway.insertOne(config.TABLE_NAME, record, "id")
 
       expect(result).toBeTruthy()
       expect(isError(result)).toBe(true)
       expect((<Error>result).message).toBe("One or more parameter values were invalid: Type mismatch for key")
 
-      const actualRecords = await gateway.getAll(config.AUDIT_LOG_TABLE_NAME)
+      const actualRecords = await gateway.getAll(config.TABLE_NAME)
       expect(actualRecords.Count).toBe(0)
     })
   })
@@ -84,7 +84,7 @@ describe("DynamoGateway", () => {
             someOtherValue: `Value ${i}`
           }
 
-          await gateway.insertOne(config.AUDIT_LOG_TABLE_NAME, record, "id")
+          await gateway.insertOne(config.TABLE_NAME, record, "id")
         })
       )
     })
@@ -94,7 +94,7 @@ describe("DynamoGateway", () => {
         sortKey,
         pagination: { limit: 1 }
       }
-      const actualRecords = await gateway.getMany(config.AUDIT_LOG_TABLE_NAME, options)
+      const actualRecords = await gateway.getMany(config.TABLE_NAME, options)
       const results = <DocumentClient.ScanOutput>actualRecords
       expect(results.Count).toBe(1)
     })
@@ -104,7 +104,7 @@ describe("DynamoGateway", () => {
         sortKey,
         pagination: { limit: 3 }
       }
-      const actualRecords = await gateway.getMany(config.AUDIT_LOG_TABLE_NAME, options)
+      const actualRecords = await gateway.getMany(config.TABLE_NAME, options)
       const results = <DocumentClient.ScanOutput>actualRecords
       expect(results.Count).toBe(3)
 
@@ -123,7 +123,7 @@ describe("DynamoGateway", () => {
           lastItemKey
         }
       }
-      const actualRecords = await gateway.getMany(config.AUDIT_LOG_TABLE_NAME, options)
+      const actualRecords = await gateway.getMany(config.TABLE_NAME, options)
       const results = <DocumentClient.ScanOutput>actualRecords
       expect(results.Count).toBe(1)
 
@@ -142,7 +142,7 @@ describe("DynamoGateway", () => {
             someOtherValue: `Value ${i}`
           }
 
-          await gateway.insertOne(config.AUDIT_LOG_TABLE_NAME, record, "id")
+          await gateway.insertOne(config.TABLE_NAME, record, "id")
         })
       )
     })
@@ -155,7 +155,7 @@ describe("DynamoGateway", () => {
         pagination: { limit: 10 }
       }
 
-      const actualRecords = await gateway.fetchByIndex(config.AUDIT_LOG_TABLE_NAME, options)
+      const actualRecords = await gateway.fetchByIndex(config.TABLE_NAME, options)
 
       expect(isError(actualRecords)).toBe(false)
 
@@ -175,7 +175,7 @@ describe("DynamoGateway", () => {
         pagination: { limit: 10 }
       }
 
-      const actualRecords = await gateway.fetchByIndex(config.AUDIT_LOG_TABLE_NAME, options)
+      const actualRecords = await gateway.fetchByIndex(config.TABLE_NAME, options)
 
       expect(isError(actualRecords)).toBe(false)
 
@@ -191,10 +191,10 @@ describe("DynamoGateway", () => {
         someOtherValue: "Value 1"
       }
 
-      await gateway.insertOne(config.AUDIT_LOG_TABLE_NAME, expectedRecord, "id")
+      await gateway.insertOne(config.TABLE_NAME, expectedRecord, "id")
 
       const actualRecord = await gateway.getOne<{ id: string; someOtherValue: string }>(
-        config.AUDIT_LOG_TABLE_NAME,
+        config.TABLE_NAME,
         "id",
         "Record1"
       )
@@ -205,7 +205,7 @@ describe("DynamoGateway", () => {
     })
 
     it("should return null when no item has a matching key", async () => {
-      const result = await gateway.getOne(config.AUDIT_LOG_TABLE_NAME, "id", "InvalidKey")
+      const result = await gateway.getOne(config.TABLE_NAME, "id", "InvalidKey")
 
       expect(isError(result)).toBe(false)
       expect(result).toBeNull()
@@ -220,9 +220,9 @@ describe("DynamoGateway", () => {
         version: 1
       }
 
-      await gateway.insertOne(config.AUDIT_LOG_TABLE_NAME, expectedRecord, "id")
+      await gateway.insertOne(config.TABLE_NAME, expectedRecord, "id")
 
-      const result = await gateway.getRecordVersion(config.AUDIT_LOG_TABLE_NAME, "id", "Record1")
+      const result = await gateway.getRecordVersion(config.TABLE_NAME, "id", "Record1")
 
       expect(result).toBeDefined()
       expect(isError(result)).toBe(false)
@@ -237,7 +237,7 @@ describe("DynamoGateway", () => {
     })
 
     it("should return null when no item has a matching key", async () => {
-      const result = await gateway.getRecordVersion(config.AUDIT_LOG_TABLE_NAME, "id", "InvalidKey")
+      const result = await gateway.getRecordVersion(config.TABLE_NAME, "id", "InvalidKey")
 
       expect(isError(result)).toBe(false)
       expect(result).toBeDefined()
@@ -256,7 +256,7 @@ describe("DynamoGateway", () => {
             someOtherValue: `Value ${i}`,
             version: 0
           }
-          await gateway.insertOne(config.AUDIT_LOG_TABLE_NAME, record, "messageId")
+          await gateway.insertOne(config.TABLE_NAME, record, "messageId")
         })
       )
     })
@@ -276,7 +276,7 @@ describe("DynamoGateway", () => {
         },
         currentVersion: 0
       }
-      const result = await gateway.updateEntry(config.AUDIT_LOG_TABLE_NAME, options)
+      const result = await gateway.updateEntry(config.TABLE_NAME, options)
 
       expect(isError(result)).toBe(false)
 
@@ -284,9 +284,7 @@ describe("DynamoGateway", () => {
         sortKey,
         pagination: { limit: 3 }
       }
-      const actualRecords = <DocumentClient.ScanOutput>(
-        await gateway.getMany(config.AUDIT_LOG_TABLE_NAME, getManyOptions)
-      )
+      const actualRecords = <DocumentClient.ScanOutput>await gateway.getMany(config.TABLE_NAME, getManyOptions)
       expect(isError(actualRecords)).toBeFalsy()
 
       const filteredRecords = actualRecords.Items?.filter((r) => r.id === recordId)
@@ -305,7 +303,7 @@ describe("DynamoGateway", () => {
         },
         currentVersion: 0
       }
-      const result = await gateway.updateEntry(config.AUDIT_LOG_TABLE_NAME, options)
+      const result = await gateway.updateEntry(config.TABLE_NAME, options)
 
       expect(isError(result)).toBe(true)
     })
@@ -321,7 +319,7 @@ describe("DynamoGateway", () => {
         },
         currentVersion: 1
       }
-      const result = await gateway.updateEntry(config.AUDIT_LOG_TABLE_NAME, options)
+      const result = await gateway.updateEntry(config.TABLE_NAME, options)
 
       expect(isError(result)).toBe(true)
     })

@@ -8,13 +8,13 @@ import CreateAuditLogEventUseCase from "./CreateAuditLogEventUseCase"
 const config: DynamoDbConfig = {
   DYNAMO_URL: "http://localhost:8000",
   DYNAMO_REGION: "eu-west-2",
-  AUDIT_LOG_TABLE_NAME: "auditLogTable",
+  TABLE_NAME: "auditLogTable",
   AWS_ACCESS_KEY_ID: "DUMMY",
   AWS_SECRET_ACCESS_KEY: "DUMMY"
 }
 
 const testDynamoGateway = new TestDynamoGateway(config)
-const auditLogDynamoGateway = new AwsAuditLogDynamoGateway(config, config.AUDIT_LOG_TABLE_NAME)
+const auditLogDynamoGateway = new AwsAuditLogDynamoGateway(config, config.TABLE_NAME)
 const createAuditLogEventUseCase = new CreateAuditLogEventUseCase(auditLogDynamoGateway)
 
 const createAuditLog = (): AuditLog => new AuditLog("CorrelationId", new Date(), "Dummy hash")
@@ -41,11 +41,11 @@ const createStacktraceAuditLogEvent = (): AuditLogEvent => {
 }
 
 const getAuditLog = (messageId: string): Promise<AuditLog | null> =>
-  testDynamoGateway.getOne(config.AUDIT_LOG_TABLE_NAME, "messageId", messageId)
+  testDynamoGateway.getOne(config.TABLE_NAME, "messageId", messageId)
 
 describe("CreateAuditLogUseCase", () => {
   beforeEach(async () => {
-    await testDynamoGateway.deleteAll(config.AUDIT_LOG_TABLE_NAME, "messageId")
+    await testDynamoGateway.deleteAll(config.TABLE_NAME, "messageId")
   })
 
   it("should return success result when event is added to the audit log", async () => {

@@ -16,12 +16,12 @@ import CreateRetryingEventUseCase from "./CreateRetryingEventUseCase"
 const dynamoDbConfig: DynamoDbConfig = {
   DYNAMO_URL: "http://localhost:8000",
   DYNAMO_REGION: "eu-west-2",
-  AUDIT_LOG_TABLE_NAME: "auditLogTable",
+  TABLE_NAME: "auditLogTable",
   AWS_ACCESS_KEY_ID: "DUMMY",
   AWS_SECRET_ACCESS_KEY: "DUMMY"
 }
 const testDynamoGateway = new TestDynamoGateway(dynamoDbConfig)
-const auditLogDynamoGateway = new AwsAuditLogDynamoGateway(dynamoDbConfig, dynamoDbConfig.AUDIT_LOG_TABLE_NAME)
+const auditLogDynamoGateway = new AwsAuditLogDynamoGateway(dynamoDbConfig, dynamoDbConfig.TABLE_NAME)
 const getLastEventUseCase = new GetLastFailedMessageEventUseCase(auditLogDynamoGateway)
 
 const queueName = "retry-event-integration-testing"
@@ -58,7 +58,7 @@ const eventXmlFileName = "test-file.xml"
 
 describe("RetryMessageUseCase", () => {
   beforeEach(async () => {
-    await testDynamoGateway.deleteAll(dynamoDbConfig.AUDIT_LOG_TABLE_NAME, "messageId")
+    await testDynamoGateway.deleteAll(dynamoDbConfig.TABLE_NAME, "messageId")
     await s3Gateway.createBucket(true)
     await s3Gateway.deleteAll()
   })
@@ -90,7 +90,7 @@ describe("RetryMessageUseCase", () => {
       })
     )
 
-    await testDynamoGateway.insertOne(dynamoDbConfig.AUDIT_LOG_TABLE_NAME, message, "messageId")
+    await testDynamoGateway.insertOne(dynamoDbConfig.TABLE_NAME, message, "messageId")
 
     const result = await useCase.retry(message.messageId)
 

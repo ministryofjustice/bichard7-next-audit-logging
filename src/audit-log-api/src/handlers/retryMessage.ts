@@ -11,7 +11,7 @@ import {
   createS3Config,
   logger
 } from "shared"
-import createDynamoDbConfig from "../createDynamoDbConfig"
+import createAuditLogDynamoDbConfig from "../createAuditLogDynamoDbConfig"
 import { parseRetryMessageRequest, RetryMessageUseCase } from "../use-cases"
 import { createJsonApiResult } from "../utils"
 import GetLastFailedMessageEventUseCase from "../use-cases/GetLastEventUseCase"
@@ -21,8 +21,8 @@ import CreateRetryingEventUseCase from "../use-cases/CreateRetryingEventUseCase"
 import SendMessageToQueueUseCase from "../use-cases/SendMessageToQueueUseCase"
 import getApiKey from "../getApiKey"
 
-const auditLogGatewayConfig = createDynamoDbConfig()
-const auditLogGateway = new AwsAuditLogDynamoGateway(auditLogGatewayConfig, auditLogGatewayConfig.AUDIT_LOG_TABLE_NAME)
+const auditLogGatewayConfig = createAuditLogDynamoDbConfig()
+const auditLogGateway = new AwsAuditLogDynamoGateway(auditLogGatewayConfig, auditLogGatewayConfig.TABLE_NAME)
 
 const mqGatewayConfig = createMqConfig()
 const mqGateway = new StompitMqGateway(mqGatewayConfig)

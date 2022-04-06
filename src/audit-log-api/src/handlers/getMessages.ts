@@ -2,12 +2,12 @@ import type { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda"
 import type { PromiseResult, AuditLog } from "shared-types"
 import { isError } from "shared-types"
 import { AwsAuditLogDynamoGateway, HttpStatusCode, logger } from "shared"
-import createDynamoDbConfig from "../createDynamoDbConfig"
+import createAuditLogDynamoDbConfig from "../createAuditLogDynamoDbConfig"
 import createMessageFetcher from "../use-cases/createMessageFetcher"
 import { createJsonApiResult } from "../utils"
 
-const config = createDynamoDbConfig()
-const auditLogGateway = new AwsAuditLogDynamoGateway(config, config.AUDIT_LOG_TABLE_NAME)
+const config = createAuditLogDynamoDbConfig()
+const auditLogGateway = new AwsAuditLogDynamoGateway(config, config.TABLE_NAME)
 
 const createOkResult = (messages: AuditLog[]): APIGatewayProxyResult =>
   createJsonApiResult({

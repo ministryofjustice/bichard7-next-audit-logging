@@ -13,7 +13,7 @@ interface TestRecord {
 const config: DynamoDbConfig = {
   DYNAMO_URL: "http://localhost:8000",
   DYNAMO_REGION: "eu-west-2",
-  AUDIT_LOG_TABLE_NAME: "SearcherTesting",
+  TABLE_NAME: "SearcherTesting",
   AWS_ACCESS_KEY_ID: "DUMMY",
   AWS_SECRET_ACCESS_KEY: "DUMMY"
 }
@@ -39,9 +39,9 @@ beforeAll(async () => {
     skipIfExists: true
   }
 
-  await gateway.createTable(config.AUDIT_LOG_TABLE_NAME, options)
+  await gateway.createTable(config.TABLE_NAME, options)
 
-  await gateway.deleteAll(config.AUDIT_LOG_TABLE_NAME, "id")
+  await gateway.deleteAll(config.TABLE_NAME, "id")
 
   await Promise.allSettled(
     [...Array(15).keys()].map(async (i: number) => {
@@ -52,13 +52,13 @@ beforeAll(async () => {
         someOtherValue2: `Value ${index}`
       }
 
-      await gateway.insertOne(config.AUDIT_LOG_TABLE_NAME, record, "id")
+      await gateway.insertOne(config.TABLE_NAME, record, "id")
     })
   )
 })
 
 it("should return first 5 records when last record is not provided in the pagination", async () => {
-  const result = await new IndexSearcher<TestRecord[]>(gateway, config.AUDIT_LOG_TABLE_NAME, partitionKey)
+  const result = await new IndexSearcher<TestRecord[]>(gateway, config.TABLE_NAME, partitionKey)
     .useIndex(indexName)
     .setIndexKeys(hashKey, hashKeyValue, rangeKey)
     .paginate(5)
@@ -81,7 +81,7 @@ it("should return last 4 records when last record is provided in the pagination"
     someOtherValue2: `Value 14`
   }
 
-  const result = await new IndexSearcher<TestRecord[]>(gateway, config.AUDIT_LOG_TABLE_NAME, partitionKey)
+  const result = await new IndexSearcher<TestRecord[]>(gateway, config.TABLE_NAME, partitionKey)
     .useIndex(indexName)
     .setIndexKeys(hashKey, hashKeyValue, rangeKey)
     .paginate(10, lastRecord)
@@ -97,7 +97,7 @@ it("should return last 4 records when last record is provided in the pagination"
 })
 
 it("should return records in ascending order when pagination is set to order ascending", async () => {
-  const result = await new IndexSearcher<TestRecord[]>(gateway, config.AUDIT_LOG_TABLE_NAME, partitionKey)
+  const result = await new IndexSearcher<TestRecord[]>(gateway, config.TABLE_NAME, partitionKey)
     .useIndex(indexName)
     .setIndexKeys(hashKey, hashKeyValue, rangeKey)
     .paginate(3, null, true)
@@ -117,7 +117,7 @@ it("should return error when provided last item for pagination does not contain 
     someOtherValue2: `Value 13`
   }
 
-  const result = await new IndexSearcher<TestRecord[]>(gateway, config.AUDIT_LOG_TABLE_NAME, partitionKey)
+  const result = await new IndexSearcher<TestRecord[]>(gateway, config.TABLE_NAME, partitionKey)
     .useIndex(indexName)
     .setIndexKeys(hashKey, hashKeyValue, rangeKey)
     .paginate(3, lastRecord, true)
@@ -135,7 +135,7 @@ it("should return error when provided last item for pagination does not contain 
     someOtherValue2: `Value 13`
   }
 
-  const result = await new IndexSearcher<TestRecord[]>(gateway, config.AUDIT_LOG_TABLE_NAME, partitionKey)
+  const result = await new IndexSearcher<TestRecord[]>(gateway, config.TABLE_NAME, partitionKey)
     .useIndex(indexName)
     .setIndexKeys(hashKey, hashKeyValue, rangeKey)
     .paginate(3, lastRecord, true)
@@ -153,7 +153,7 @@ it("should return error when provided last item for pagination does not contain 
     someOtherValue: hashKeyValue
   }
 
-  const result = await new IndexSearcher<TestRecord[]>(gateway, config.AUDIT_LOG_TABLE_NAME, partitionKey)
+  const result = await new IndexSearcher<TestRecord[]>(gateway, config.TABLE_NAME, partitionKey)
     .useIndex(indexName)
     .setIndexKeys(hashKey, hashKeyValue, rangeKey)
     .paginate(3, lastRecord, true)
