@@ -1,6 +1,12 @@
 import { recordErrorArchival } from "./recordErrorArchival"
+import config from "./config"
+import DatabaseClient from "./DatabaseClient"
+import { AuditLogApiClient } from "shared"
 
-recordErrorArchival()
+const db = new DatabaseClient(config.dbHost, config.dbUser, config.dbPassword, config.dbName, config.dbSchema)
+const auditLogApi = new AuditLogApiClient(config.apiUrl, config.apiKey)
+
+recordErrorArchival(db, auditLogApi)
   .catch((err) => {
     console.error(`Failed to record archival of errors: ${err}`)
   })

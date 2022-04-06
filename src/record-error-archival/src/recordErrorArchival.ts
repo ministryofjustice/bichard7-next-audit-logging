@@ -1,15 +1,10 @@
-import { AuditLogApiClient } from "shared"
+import type { ApiClient } from "shared-types"
 import { AuditLogEvent, isError, isSuccess } from "shared-types"
-import config from "./config"
 import type { ArchivedErrorRecord } from "./DatabaseClient"
-import DatabaseClient from "./DatabaseClient"
+import type DatabaseClient from "./DatabaseClient"
 
-export const recordErrorArchival = async () => {
-  const db = new DatabaseClient(config.dbHost, config.dbUser, config.dbPassword, config.dbName, config.dbSchema)
+export const recordErrorArchival = async (db: DatabaseClient, api: ApiClient) => {
   await db.connect()
-
-  const auditLogApi = new AuditLogApiClient(config.apiUrl, config.apiKey)
-
   const errorRecords = await db.fetchUnloggedArchivedErrors()
 
   const results: { success: boolean; reason?: string; errorRecord: ArchivedErrorRecord }[] = []
@@ -26,7 +21,7 @@ export const recordErrorArchival = async () => {
       timestamp: errorRecord.archivedAt
     })
     auditLogEvent.addAttribute("Error ID", errorRecord.errorId)
-    const response = await auditLogApi.createEvent(errorRecord.messageId, auditLogEvent)
+    const response = await api.createEvent(errorRecord.messageId, auditLogEvent)
 
     results.push({
       success: isSuccess(response),
