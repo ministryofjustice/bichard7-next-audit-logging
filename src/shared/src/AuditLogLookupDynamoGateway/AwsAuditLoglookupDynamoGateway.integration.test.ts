@@ -23,8 +23,8 @@ describe("AuditLogDynamoGateway", () => {
       keyName: primaryKey,
       secondaryIndexes: [
         {
-          name: "externalCorrelationIdIndex",
-          hashKey: "externalCorrelationId"
+          name: "messageIdIndex",
+          hashKey: "messageId"
         }
       ],
       skipIfExists: true

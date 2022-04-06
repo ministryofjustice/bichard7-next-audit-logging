@@ -9,14 +9,14 @@ export default class AwsAuditLogLookupDynamoGateway extends DynamoGateway implem
     super(config)
   }
 
-  async create(message: AuditLogLookup): PromiseResult<AuditLogLookup> {
-    const result = await this.insertOne(this.tableName, message, "id")
+  async create(lookupItem: AuditLogLookup): PromiseResult<AuditLogLookup> {
+    const result = await this.insertOne(this.tableName, lookupItem, "id")
 
     if (isError(result)) {
       return result
     }
 
-    return message
+    return lookupItem
   }
 
   async fetchById(id: string): PromiseResult<AuditLogLookup> {
