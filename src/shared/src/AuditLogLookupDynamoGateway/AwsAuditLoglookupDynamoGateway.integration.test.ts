@@ -39,7 +39,7 @@ describe("AuditLogDynamoGateway", () => {
 
   describe("create()", () => {
     it("should insert the given lookup item", async () => {
-      const expectedLookupItem = new AuditLogLookup("Expected value", "Dummy correlation ID")
+      const expectedLookupItem = new AuditLogLookup("Expected value", "Dummy message ID")
 
       const result = await gateway.create(expectedLookupItem)
 
@@ -48,7 +48,7 @@ describe("AuditLogDynamoGateway", () => {
       const actualLookupItem = <AuditLogLookup>result
       expect(actualLookupItem.id).toBe(expectedLookupItem.id)
       expect(actualLookupItem.value).toBe(expectedLookupItem.value)
-      expect(actualLookupItem.externalCorrelationId).toBe(expectedLookupItem.externalCorrelationId)
+      expect(actualLookupItem.messageId).toBe(expectedLookupItem.messageId)
     })
 
     it("should return an error when the given lookup item already exists", async () => {
@@ -66,7 +66,7 @@ describe("AuditLogDynamoGateway", () => {
 
   describe("fetchById", () => {
     it("should return the matching lookup item", async () => {
-      const expectedLookupItem = new AuditLogLookup("Value 1", "ExternalCorrelationId")
+      const expectedLookupItem = new AuditLogLookup("Value 1", "MessageID")
       await gateway.create(expectedLookupItem)
 
       const result = await gateway.fetchById(expectedLookupItem.id)
@@ -76,7 +76,7 @@ describe("AuditLogDynamoGateway", () => {
       const actualLookupItem = <AuditLogLookup>result
       expect(actualLookupItem.id).toBe(expectedLookupItem.id)
       expect(actualLookupItem.value).toBe(expectedLookupItem.value)
-      expect(actualLookupItem.externalCorrelationId).toBe(expectedLookupItem.externalCorrelationId)
+      expect(actualLookupItem.messageId).toBe(expectedLookupItem.messageId)
     })
 
     it("should return null when no lookup item matches the given id", async () => {
