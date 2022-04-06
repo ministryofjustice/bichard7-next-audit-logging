@@ -12,7 +12,17 @@ module.exports = {
         avoidEscape: true
       }
     ],
-    "comma-dangle": "off"
+    "comma-dangle": "off",
+    "import/extensions": [
+      "error",
+      "ignorePackages",
+      {
+        js: "never",
+        jsx: "never",
+        ts: "never",
+        tsx: "never"
+      }
+    ]
   },
   overrides: [
     {
