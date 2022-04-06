@@ -64,7 +64,7 @@ resources:
       Type: AWS::S3::Bucket
       Properties:
         BucketName: internalIncomingBucket
-    usersTable:
+    auditLogTable:
       Type: AWS::DynamoDB::Table
       Properties:
         TableName: auditLogTable
@@ -120,6 +120,31 @@ resources:
                 KeyType: HASH
               - AttributeName: receivedDate
                 KeyType: RANGE
+            Projection:
+              ProjectionType: "ALL"
+            ProvisionedThroughput:
+              ReadCapacityUnits: 1
+              WriteCapacityUnits: 1
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+    auditLogLookupTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: auditLogLookupTable
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+          - AttributeName: externalCorrelationId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        GlobalSecondaryIndexes:
+          - IndexName: externalCorrelationIdIndex
+            KeySchema:
+              - AttributeName: externalCorrelationId
+                KeyType: HASH
             Projection:
               ProjectionType: "ALL"
             ProvisionedThroughput:
