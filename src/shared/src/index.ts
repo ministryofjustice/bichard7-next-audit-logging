@@ -1,4 +1,5 @@
 export * from "./AuditLogDynamoGateway"
+export * from "./AuditLogLookupDynamoGateway"
 export * from "./DynamoGateway"
 export * from "./S3Gateway"
 export * from "./utils"
