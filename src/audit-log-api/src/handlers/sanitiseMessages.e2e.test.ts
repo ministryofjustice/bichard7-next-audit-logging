@@ -38,8 +38,8 @@ describe("sanitiseMessage", () => {
       new BichardAuditLogEvent({
         eventSource: "Dummy Event Source",
         eventSourceArn: "Dummy Event Arn",
-        eventSourceQueueName: "RETRY_DUMMY_QUEUE",
-        eventType: "Dummy Failed Message",
+        eventSourceQueueName: "SANITISE_DUMMY_QUEUE",
+        eventType: "Dummy Message",
         category: "error",
         timestamp: new Date(),
         s3Path
@@ -48,7 +48,7 @@ describe("sanitiseMessage", () => {
 
     const response = await axios.post(`http://localhost:3010/messages/${message.messageId}/sanitise`, null)
 
-    expect(response.status).toBe(HttpStatusCode.ok)
+    expect(response.status).toBe(HttpStatusCode.noContent)
     expect(response.data).toBe("")
   })
 })

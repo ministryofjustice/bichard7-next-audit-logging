@@ -4,7 +4,7 @@ import type { PromiseResult } from "shared-types"
 import { createJsonApiResult } from "../utils"
 
 /* eslint-disable require-await */
-export default async function sanitiseMessage(event: APIGatewayProxyEvent): PromiseResult<APIGatewayProxyResult> {
+export default async function sanitiseMessage(_event: APIGatewayProxyEvent): PromiseResult<APIGatewayProxyResult> {
   return createJsonApiResult({
     statusCode: HttpStatusCode.noContent,
     body: ""
