@@ -2,6 +2,7 @@ import type { ApiClient } from "shared-types"
 import { AuditLogEvent, isError, isSuccess } from "shared-types"
 import type { ArchivedErrorRecord } from "./DatabaseClient"
 import type DatabaseClient from "./DatabaseClient"
+import groupBy from "lodash.groupby"
 
 export const recordErrorArchival = async (db: DatabaseClient, api: ApiClient) => {
   await db.connect()
@@ -21,6 +22,7 @@ export const recordErrorArchival = async (db: DatabaseClient, api: ApiClient) =>
       timestamp: errorRecord.archivedAt
     })
     auditLogEvent.addAttribute("Error ID", errorRecord.errorId)
+
     const response = await api.createEvent(errorRecord.messageId, auditLogEvent)
 
     results.push({
@@ -30,7 +32,14 @@ export const recordErrorArchival = async (db: DatabaseClient, api: ApiClient) =>
     })
   }
 
-  // TODO mark archive log as audit logged when all have succeeded
+  const groupedResults = groupBy(results, (result) => result.errorRecord.archiveLogId)
+
+  // Mark groups with no failed updates as complete
+  for (const [archiveLogGroup, groupResults] of Object.entries(groupedResults)) {
+    if (groupResults.filter((result) => !result.success).length > 0) {
+      await db.markArchiveGroupAuditLogged(BigInt(archiveLogGroup))
+    }
+  }
 
   await db.disconnect()
   return results

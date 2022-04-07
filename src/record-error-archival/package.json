@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "@types/pg": "^8.6.5",
+    "lodash.groupby": "^4.6.0",
     "pg": "^8.7.3",
     "shared": "file:../shared",
     "shared-types": "file:../shared-types"
@@ -23,6 +24,7 @@
     "@babel/preset-env": "^7.16.11",
     "@babel/preset-typescript": "^7.16.7",
     "@types/jest": "^27.4.0",
+    "@types/lodash.groupby": "^4.6.6",
     "aws-sdk": "^2.1069.0",
     "babel-loader": "^8.2.3",
     "fork-ts-checker-webpack-plugin": "^7.1.1",
