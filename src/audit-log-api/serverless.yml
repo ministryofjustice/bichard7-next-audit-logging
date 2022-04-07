@@ -203,3 +203,9 @@ functions:
       - httpApi:
           path: /messages/{messageId}/retry
           method: post
+  sanitiseMessage:
+    handler: src/handlers/sanitiseMessage.default
+    events:
+      - httpApi:
+          path: /messages/{messageId}/sanitise
+          method: post
