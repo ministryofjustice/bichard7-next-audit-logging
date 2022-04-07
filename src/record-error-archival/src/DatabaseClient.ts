@@ -68,12 +68,14 @@ export default class DatabaseClient {
     return errors
   }
 
-  async markArchiveAuditLogged(archiveLogId: bigint) {
+  async markArchiveGroupAuditLogged(archiveLogGroupId: bigint) {
+    console.log(`Marking log group ${archiveLogGroupId} as audit logged`)
+
     await this.postgres.query(
       `UPDATE ${this.schema}.archive_log
        SET audit_logged_at = NOW()
        WHERE log_id = $1`,
-      [archiveLogId]
+      [archiveLogGroupId]
     )
   }
 }

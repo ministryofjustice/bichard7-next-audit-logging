@@ -17,7 +17,7 @@ const createStubDbWithRecords = (records: ArchivedErrorRecord[]): DatabaseClient
   } as unknown as DatabaseClient
 }
 
-describe("Record Error Archival end-to-end", () => {
+describe("Record Error Archival integration", () => {
   beforeEach(() => {
     jest.resetModules() // reset the cache of all required modules
     jest.clearAllMocks()
