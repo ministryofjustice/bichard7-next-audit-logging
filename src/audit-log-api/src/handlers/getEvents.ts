@@ -5,8 +5,8 @@ import { AwsAuditLogDynamoGateway, AwsAuditLogLookupDynamoGateway, HttpStatusCod
 import createAuditLogDynamoDbConfig from "../createAuditLogDynamoDbConfig"
 import { FetchEventsUseCase, parseGetEventsRequest } from "../use-cases"
 import { createJsonApiResult } from "../utils"
-import createAuditLogLookupDynamoDbConfig from "src/createAuditLogLookupDynamoDbConfig"
-import LookupEventValuesUseCase from "src/use-cases/LookupEventValuesUseCase"
+import createAuditLogLookupDynamoDbConfig from "../createAuditLogLookupDynamoDbConfig"
+import LookupEventValuesUseCase from "../use-cases/LookupEventValuesUseCase"
 
 const auditLogConfig = createAuditLogDynamoDbConfig()
 const auditLogLookupConfig = createAuditLogLookupDynamoDbConfig()
