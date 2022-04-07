@@ -137,7 +137,7 @@ run-event-handler:
 	cd src/event-handler && npm run setup:env
 
 .PHONY: run-all-without-portal
-run-all-without-portal: run-api run-incoming-message-handler run-event-handler
+run-all-without-portal: run-api
 
 .PHONY: run-infra
 run-infra: run-all-without-portal run-portal
