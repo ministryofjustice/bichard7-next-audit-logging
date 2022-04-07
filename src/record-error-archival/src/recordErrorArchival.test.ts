@@ -8,6 +8,14 @@ import { Client } from "pg"
 
 setEnvironmentVariables()
 
+type DbReturnType = {
+  error_id: string
+  message_id: string
+  archived_at: string
+  archived_by: string
+  archive_log_id: string
+}
+
 const originalEnv = process.env
 
 const createStubDbWithRecords = (records: ArchivedErrorRecord[]): DatabaseClient => {
@@ -22,48 +30,46 @@ const createStubDbWithRecords = (records: ArchivedErrorRecord[]): DatabaseClient
 jest.mock("pg", () => {
   const mClient = {
     connect: jest.fn().mockReturnValue(Promise.resolve()),
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    query: jest.fn((_query, _args) => {
-      return Promise.resolve({
-        rows: [
-          {
-            error_id: BigInt(Math.floor(Math.random() * 10_000)),
-            message_id: "Message" + Math.floor(Math.random() * 10_000),
-            archived_at: new Date(Date.now() - Math.random() * 10 * 24 * 60 * 60 * 1000),
-            archived_by: "Error archiver process 1",
-            archive_log_id: 1n
-          },
-          {
-            error_id: BigInt(Math.floor(Math.random() * 10_000)),
-            message_id: "Message" + Math.floor(Math.random() * 10_000),
-            archived_at: new Date(Date.now() - Math.random() * 10 * 24 * 60 * 60 * 1000),
-            archived_by: "Error archiver process 1",
-            archive_log_id: 1n
-          },
-          {
-            error_id: BigInt(Math.floor(Math.random() * 10_000)),
-            message_id: "Message" + Math.floor(Math.random() * 10_000),
-            archived_at: new Date(Date.now() - Math.random() * 10 * 24 * 60 * 60 * 1000),
-            archived_by: "Error archiver process 1",
-            archive_log_id: 1n
-          },
-          {
-            error_id: BigInt(Math.floor(Math.random() * 10_000)),
-            message_id: "Message" + Math.floor(Math.random() * 10_000),
-            archived_at: new Date(Date.now() - Math.random() * 10 * 24 * 60 * 60 * 1000),
-            archived_by: "Error archiver process 1",
-            archive_log_id: 1n
-          }
-        ]
-      })
-    }),
     end: jest.fn().mockReturnValue(Promise.resolve())
   }
   return { Client: jest.fn(() => mClient) }
 })
 
+const dbResult: { rows: DbReturnType[] } = {
+  rows: [
+    {
+      error_id: "1",
+      message_id: "Message1",
+      archived_at: new Date(Date.now() - Math.random() * 10 * 24 * 60 * 60 * 1000).toISOString(),
+      archived_by: "Error archiver process 1",
+      archive_log_id: "1"
+    },
+    {
+      error_id: "2",
+      message_id: "Message2",
+      archived_at: new Date(Date.now() - Math.random() * 10 * 24 * 60 * 60 * 1000).toISOString(),
+      archived_by: "Error archiver process 1",
+      archive_log_id: "1"
+    },
+    {
+      error_id: "3",
+      message_id: "Message3",
+      archived_at: new Date(Date.now() - Math.random() * 10 * 24 * 60 * 60 * 1000).toISOString(),
+      archived_by: "Error archiver process 1",
+      archive_log_id: "1"
+    },
+    {
+      error_id: "4",
+      message_id: "Message4",
+      archived_at: new Date(Date.now() - Math.random() * 10 * 24 * 60 * 60 * 1000).toISOString(),
+      archived_by: "Error archiver process 1",
+      archive_log_id: "1"
+    }
+  ]
+}
+
 describe("Record Error Archival integration", () => {
-  let client: Client
+  let client: jest.Mocked<Client>
 
   beforeEach(() => {
     jest.resetModules() // reset the cache of all required modules
@@ -172,7 +178,11 @@ describe("Record Error Archival integration", () => {
   it("Should mark achive groups as audit logged when all succeed", async () => {
     const db = new DatabaseClient("", "", "", "", "schema")
     const api = new FakeApiClient()
-    const pgMock = jest.spyOn(client, "query")
+    client.query = jest.fn((_query, _args) => {
+      return dbResult
+    })
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const pgMock = jest.spyOn(client, "query").mockImplementation()
 
     await recordErrorArchival(db, api)
 
