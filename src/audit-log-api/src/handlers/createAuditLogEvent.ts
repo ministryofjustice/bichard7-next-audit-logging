@@ -1,13 +1,18 @@
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda"
 import { isError } from "shared-types"
-import { AwsAuditLogDynamoGateway, HttpStatusCode, logger } from "shared"
+import { AwsAuditLogDynamoGateway, AwsAuditLogLookupDynamoGateway, HttpStatusCode, logger } from "shared"
 import { createJsonApiResult } from "../utils"
 import createAuditLogDynamoDbConfig from "../createAuditLogDynamoDbConfig"
 import { CreateAuditLogEventUseCase, parseCreateAuditLogEventRequest, validateCreateAuditLogEvent } from "../use-cases"
+import createAuditLogLookupDynamoDbConfig from "src/createAuditLogLookupDynamoDbConfig"
+import StoreValuesInLookupTableUseCase from "src/use-cases/StoreValuesInLookupTableUseCase"
 
-const config = createAuditLogDynamoDbConfig()
-const auditLogGateway = new AwsAuditLogDynamoGateway(config, config.TABLE_NAME)
-const createAuditLogEventUseCase = new CreateAuditLogEventUseCase(auditLogGateway)
+const auditLogConfig = createAuditLogDynamoDbConfig()
+const auditLogLookupConfig = createAuditLogLookupDynamoDbConfig()
+const auditLogGateway = new AwsAuditLogDynamoGateway(auditLogConfig, auditLogConfig.TABLE_NAME)
+const auditLogLookupGateway = new AwsAuditLogLookupDynamoGateway(auditLogLookupConfig, auditLogLookupConfig.TABLE_NAME)
+const storeValuesInLookupTableUseCase = new StoreValuesInLookupTableUseCase(auditLogLookupGateway)
+const createAuditLogEventUseCase = new CreateAuditLogEventUseCase(auditLogGateway, storeValuesInLookupTableUseCase)
 
 export default async function createAuditLogEvent(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
   const request = parseCreateAuditLogEventRequest(event)

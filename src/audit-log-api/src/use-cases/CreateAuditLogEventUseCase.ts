@@ -1,6 +1,7 @@
 import type { AuditLogEvent, AuditLogDynamoGateway } from "shared-types"
 import { isError } from "shared-types"
 import { isConditionalExpressionViolationError } from "../utils"
+import type StoreValuesInLookupTableUseCase from "./StoreValuesInLookupTableUseCase"
 
 interface CreateAuditLogEventResult {
   resultType: "success" | "notFound" | "invalidVersion" | "error"
@@ -37,9 +38,12 @@ const isDuplicateEvent = (event: AuditLogEvent, existingEvents: AuditLogEvent[])
 }
 
 export default class CreateAuditLogEventUseCase {
-  constructor(private readonly auditLogGateway: AuditLogDynamoGateway) {}
+  constructor(
+    private readonly auditLogGateway: AuditLogDynamoGateway,
+    private readonly storeValuesInLookupTableUseCase: StoreValuesInLookupTableUseCase
+  ) {}
 
-  async create(messageId: string, event: AuditLogEvent): Promise<CreateAuditLogEventResult> {
+  async create(messageId: string, originalEvent: AuditLogEvent): Promise<CreateAuditLogEventResult> {
     const messageVersion = await this.auditLogGateway.fetchVersion(messageId)
 
     if (isError(messageVersion)) {
@@ -56,7 +60,7 @@ export default class CreateAuditLogEventUseCase {
       }
     }
 
-    if (shouldDeduplicate(event)) {
+    if (shouldDeduplicate(originalEvent)) {
       const message = await this.auditLogGateway.fetchOne(messageId)
 
       if (isError(message)) {
@@ -66,10 +70,18 @@ export default class CreateAuditLogEventUseCase {
         }
       }
 
-      if (isDuplicateEvent(event, message.events)) {
+      if (isDuplicateEvent(originalEvent, message.events)) {
         return {
           resultType: "success"
         }
+      }
+    }
+
+    const event = await this.storeValuesInLookupTableUseCase.execute(originalEvent, messageId)
+    if (isError(event)) {
+      return {
+        resultType: "error",
+        resultDescription: `Couldn't save attribute value in lookup table. ${event.message}`
       }
     }
 
