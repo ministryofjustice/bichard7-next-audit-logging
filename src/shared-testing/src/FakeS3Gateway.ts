@@ -48,10 +48,16 @@ export default class FakeS3Gateway implements S3GatewayInterface {
     throw new Error("Method not implemented.")
   }
 
-  // @ts-ignore
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars, class-methods-use-this
   deleteItem(key: string): PromiseResult<void> {
-    throw new Error("Method not implemented.")
+    if (this.error) {
+      return Promise.resolve(this.error)
+    }
+
+    if (!this.items.hasOwnProperty(key)) {
+      return Promise.resolve(new Error(`No item with key '${key}' found in the S3 bucket.`))
+    }
+
+    return Promise.resolve(undefined)
   }
 
   shouldReturnError(error: Error): void {
