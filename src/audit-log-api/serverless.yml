@@ -8,6 +8,7 @@ provider:
     AWS_URL: http://localhost:8000
     DYNAMO_REGION: eu-west-2
     AUDIT_LOG_TABLE_NAME: auditLogTable
+    AUDIT_LOG_LOOKUP_TABLE_NAME: auditLogLookupTable
     MQ_USER: admin
     MQ_PASSWORD: admin
     MQ_URL: failover:(stomp://localhost:51613)

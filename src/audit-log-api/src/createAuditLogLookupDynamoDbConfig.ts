@@ -13,7 +13,7 @@ export default function createAdutiLogDynamoDbConfig(): DynamoDbConfig {
   }
 
   if (!AUDIT_LOG_LOOKUP_TABLE_NAME) {
-    throw Error("AUDIT_LOG_TABLE_NAME environment variable must have value.")
+    throw Error("AUDIT_LOG_LOOKUP_TABLE_NAME environment variable must have value.")
   }
 
   const config: DynamoDbConfig = {
