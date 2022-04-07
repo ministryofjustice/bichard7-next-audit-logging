@@ -1,10 +1,18 @@
 jest.setTimeout(15000)
 
-import type { S3Config } from "shared-types"
+import type { DynamoDbConfig, S3Config } from "shared-types"
 import { AuditLog, BichardAuditLogEvent } from "shared-types"
-import { encodeBase64, HttpStatusCode, TestAwsS3Gateway } from "shared"
+import { encodeBase64, HttpStatusCode, TestAwsS3Gateway, TestDynamoGateway } from "shared"
 import axios from "axios"
 import { v4 as uuid } from "uuid"
+
+const dynamoConfig: DynamoDbConfig = {
+  DYNAMO_URL: "http://localhost:8000",
+  DYNAMO_REGION: "eu-west-2",
+  AUDIT_LOG_TABLE_NAME: "auditLogTable",
+  AWS_ACCESS_KEY_ID: "DUMMY",
+  AWS_SECRET_ACCESS_KEY: "DUMMY"
+}
 
 const s3Config: S3Config = {
   url: "http://localhost:4569",
@@ -15,6 +23,7 @@ const s3Config: S3Config = {
 }
 
 const s3Gateway = new TestAwsS3Gateway(s3Config)
+const testDynamoGateway = new TestDynamoGateway(dynamoConfig)
 
 describe("sanitiseMessage", () => {
   beforeEach(async () => {
@@ -46,9 +55,13 @@ describe("sanitiseMessage", () => {
       })
     )
 
+    await testDynamoGateway.insertOne(dynamoConfig.AUDIT_LOG_TABLE_NAME, message, "messageId")
+
     const response = await axios.post(`http://localhost:3010/messages/${message.messageId}/sanitise`, null)
 
     expect(response.status).toBe(HttpStatusCode.noContent)
     expect(response.data).toBe("")
+
+    expect(await s3Gateway.getAll()).toEqual([])
   })
 })
