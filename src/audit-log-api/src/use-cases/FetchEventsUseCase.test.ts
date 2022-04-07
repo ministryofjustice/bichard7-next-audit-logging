@@ -1,10 +1,14 @@
 import type { EventCategory } from "shared-types"
+import { AuditLogLookup } from "shared-types"
 import { isError, AuditLogEvent, AuditLog } from "shared-types"
-import { FakeAuditLogDynamoGateway } from "shared-testing"
+import { FakeAuditLogDynamoGateway, FakeAuditLogLookupDynamoGateway } from "shared-testing"
 import FetchEventsUseCase from "./FetchEventsUseCase"
+import LookupEventValuesUseCase from "./LookupEventValuesUseCase"
 
-const gateway = new FakeAuditLogDynamoGateway()
-const useCase = new FetchEventsUseCase(gateway)
+const auditLogGateway = new FakeAuditLogDynamoGateway()
+const auditLogLookupGateway = new FakeAuditLogLookupDynamoGateway()
+const lookupEventValuesUseCase = new LookupEventValuesUseCase(auditLogLookupGateway)
+const useCase = new FetchEventsUseCase(auditLogGateway, lookupEventValuesUseCase)
 
 const createAuditLogEvent = (category: EventCategory, timestamp: Date, eventType: string): AuditLogEvent =>
   new AuditLogEvent({
@@ -24,7 +28,7 @@ describe("FetchEventsUseCase", () => {
     const message = new AuditLog("External correlation id", new Date(), "Dummy hash")
     message.events = expectedEvents
 
-    gateway.reset([message])
+    auditLogGateway.reset([message])
 
     const result = await useCase.get(message.messageId)
 
@@ -38,13 +42,63 @@ describe("FetchEventsUseCase", () => {
     expect(actualEvents[2].eventType).toBe("Event 3")
   })
 
+  it("should lookup the events values", async () => {
+    const message = new AuditLog("External correlation id", new Date(), "Dummy hash")
+    const lookupItem = new AuditLogLookup("long value ".repeat(500), message.messageId)
+    const eventWithLongAttributeValue = createAuditLogEvent("information", new Date("2021-06-15T10:12:13"), "Event 2")
+    eventWithLongAttributeValue.addAttribute("attr1", "short value")
+    eventWithLongAttributeValue.addAttribute("attr2", { valueLookup: lookupItem.id })
+
+    const expectedEvents = [
+      createAuditLogEvent("information", new Date("2021-06-20T10:12:13"), "Event 1"),
+      eventWithLongAttributeValue,
+      createAuditLogEvent("information", new Date("2021-06-10T10:12:13"), "Event 3")
+    ]
+    message.events = expectedEvents
+
+    auditLogGateway.reset([message])
+    auditLogLookupGateway.reset([lookupItem])
+
+    const result = await useCase.get(message.messageId)
+
+    expect(isError(result)).toBe(false)
+
+    const actualEvents = <AuditLogEvent[]>result
+
+    expect(actualEvents).toHaveLength(3)
+    expect(actualEvents[0].eventType).toBe("Event 1")
+    expect(actualEvents[1].eventType).toBe("Event 2")
+    expect(actualEvents[2].eventType).toBe("Event 3")
+
+    const event2Attributes = actualEvents[1].attributes
+    expect(event2Attributes).toStrictEqual({
+      attr1: "short value",
+      attr2: lookupItem.value
+    })
+  })
+
+  it("should return an error when lookup fails", async () => {
+    const eventWithLongAttributeValue = createAuditLogEvent("information", new Date("2021-06-15T10:12:13"), "Event 2")
+    eventWithLongAttributeValue.addAttribute("attr1", "short value")
+    eventWithLongAttributeValue.addAttribute("attr2", { valueLookup: "dummy lookup ID" })
+    const message = new AuditLog("External correlation id", new Date(), "Dummy hash")
+    message.events = [eventWithLongAttributeValue]
+    auditLogGateway.reset([message])
+
+    const expectedError = new Error(`Couldn't lookup for events with message ID '${message.messageId}'`)
+    auditLogLookupGateway.shouldReturnError(expectedError)
+
+    const result = await useCase.get(message.messageId)
+
+    expect(result).toBeError(expectedError.message)
+  })
+
   it("should return an error when fetchEvents fails", async () => {
     const expectedError = new Error(`Couldn't fetch events for message '1'`)
-    gateway.shouldReturnError(expectedError)
+    auditLogGateway.shouldReturnError(expectedError)
 
     const result = await useCase.get("1")
 
-    expect(isError(result)).toBe(true)
-    expect(result).toBe(expectedError)
+    expect(result).toBeError(expectedError.message)
   })
 })
