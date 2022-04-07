@@ -1,1 +1,1 @@
-export { default } from "./AwsAuditLogLookupDynamoGateway"
+export { default as AwsAuditLogLookupDynamoGateway } from "./AwsAuditLogLookupDynamoGateway"
