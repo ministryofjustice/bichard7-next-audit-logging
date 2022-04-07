@@ -1,9 +1,10 @@
 import "shared-testing"
 import { FakeApiClient, setEnvironmentVariables } from "shared-testing"
 import { recordErrorArchival } from "./recordErrorArchival"
-import type DatabaseClient from "./DatabaseClient"
+import DatabaseClient from "./DatabaseClient"
 import type { ArchivedErrorRecord } from "./DatabaseClient"
 import "jest-extended"
+import { Client } from "pg"
 
 setEnvironmentVariables()
 
@@ -13,11 +14,57 @@ const createStubDbWithRecords = (records: ArchivedErrorRecord[]): DatabaseClient
   return {
     fetchUnloggedArchivedErrors: jest.fn(() => records),
     connect: jest.fn(),
-    disconnect: jest.fn()
+    disconnect: jest.fn(),
+    markArchiveGroupAuditLogged: jest.fn()
   } as unknown as DatabaseClient
 }
 
+jest.mock("pg", () => {
+  const mClient = {
+    connect: jest.fn().mockReturnValue(Promise.resolve()),
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    query: jest.fn((_query, _args) => {
+      return Promise.resolve({
+        rows: [
+          {
+            error_id: BigInt(Math.floor(Math.random() * 10_000)),
+            message_id: "Message" + Math.floor(Math.random() * 10_000),
+            archived_at: new Date(Date.now() - Math.random() * 10 * 24 * 60 * 60 * 1000),
+            archived_by: "Error archiver process 1",
+            archive_log_id: 1n
+          },
+          {
+            error_id: BigInt(Math.floor(Math.random() * 10_000)),
+            message_id: "Message" + Math.floor(Math.random() * 10_000),
+            archived_at: new Date(Date.now() - Math.random() * 10 * 24 * 60 * 60 * 1000),
+            archived_by: "Error archiver process 1",
+            archive_log_id: 1n
+          },
+          {
+            error_id: BigInt(Math.floor(Math.random() * 10_000)),
+            message_id: "Message" + Math.floor(Math.random() * 10_000),
+            archived_at: new Date(Date.now() - Math.random() * 10 * 24 * 60 * 60 * 1000),
+            archived_by: "Error archiver process 1",
+            archive_log_id: 1n
+          },
+          {
+            error_id: BigInt(Math.floor(Math.random() * 10_000)),
+            message_id: "Message" + Math.floor(Math.random() * 10_000),
+            archived_at: new Date(Date.now() - Math.random() * 10 * 24 * 60 * 60 * 1000),
+            archived_by: "Error archiver process 1",
+            archive_log_id: 1n
+          }
+        ]
+      })
+    }),
+    end: jest.fn().mockReturnValue(Promise.resolve())
+  }
+  return { Client: jest.fn(() => mClient) }
+})
+
 describe("Record Error Archival integration", () => {
+  let client: Client
+
   beforeEach(() => {
     jest.resetModules() // reset the cache of all required modules
     jest.clearAllMocks()
@@ -31,10 +78,12 @@ describe("Record Error Archival integration", () => {
       DB_USER: "bichard",
       DB_SCHEMA: "br7own"
     }
+    client = new Client()
   })
 
   afterEach(() => {
     process.env = originalEnv // reset env vars
+    jest.clearAllMocks()
   })
 
   it("Should create an audit log event when a single error record is archived", async () => {
@@ -118,5 +167,19 @@ describe("Record Error Archival integration", () => {
         })
       )
     }
+  })
+
+  it("Should mark achive groups as audit logged when all succeed", async () => {
+    const db = new DatabaseClient("", "", "", "", "schema")
+    const api = new FakeApiClient()
+    const pgMock = jest.spyOn(client, "query")
+
+    await recordErrorArchival(db, api)
+
+    expect(client.query).toHaveBeenCalledTimes(2)
+    expect(pgMock.mock.calls[1][0].replace(/\s/g, "")).toBe(
+      "UPDATE schema.archive_log SET audit_logged_at = NOW() WHERE log_id = $1".replace(/\s/g, "")
+    )
+    expect(pgMock.mock.calls[1][1]).toStrictEqual([1n])
   })
 })

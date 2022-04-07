@@ -36,7 +36,7 @@ export const recordErrorArchival = async (db: DatabaseClient, api: ApiClient) =>
 
   // Mark groups with no failed updates as complete
   for (const [archiveLogGroup, groupResults] of Object.entries(groupedResults)) {
-    if (groupResults.filter((result) => !result.success).length > 0) {
+    if (groupResults.filter((result) => !result.success).length < 1) {
       await db.markArchiveGroupAuditLogged(BigInt(archiveLogGroup))
     }
   }
