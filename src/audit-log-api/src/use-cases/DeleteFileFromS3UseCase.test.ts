@@ -1,9 +1,9 @@
 import { FakeS3Gateway } from "shared-testing"
 import { isError } from "shared-types"
-import DeleteEventXmlFromS3UseCase from "./DeleteEventXmlFromS3UseCase"
+import DeleteFileFromS3UseCase from "./DeleteFileFromS3UseCase"
 
 const fakeS3Gateway = new FakeS3Gateway()
-const deleteEventXmlFromS3UseCase = new DeleteEventXmlFromS3UseCase(fakeS3Gateway)
+const deleteFileFromS3UseCase = new DeleteFileFromS3UseCase(fakeS3Gateway)
 
 it("should delete message xml from S3 when item exists in S3", async () => {
   const dummyXml = "Xml"
@@ -14,7 +14,7 @@ it("should delete message xml from S3 when item exists in S3", async () => {
     [s3Path]: dummyXml
   })
 
-  const result = await deleteEventXmlFromS3UseCase.call(s3Path)
+  const result = await deleteFileFromS3UseCase.call(s3Path)
   expect(result).toNotBeError()
   expect(s3DeleteItemSpy).toHaveBeenCalledTimes(1)
 })
@@ -23,7 +23,7 @@ it("should return error when an S3 gateway returns error", async () => {
   const expectedError = new Error("Dummy Error Message")
 
   fakeS3Gateway.shouldReturnError(expectedError)
-  const result = await deleteEventXmlFromS3UseCase.call("Dummy Path")
+  const result = await deleteFileFromS3UseCase.call("Dummy Path")
 
   expect(isError(result)).toBe(true)
 

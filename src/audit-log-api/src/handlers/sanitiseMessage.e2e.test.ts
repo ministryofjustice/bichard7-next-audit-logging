@@ -1,10 +1,9 @@
 jest.setTimeout(15000)
 
 import type { DynamoDbConfig, S3Config } from "shared-types"
-import { AuditLog, BichardAuditLogEvent } from "shared-types"
-import { encodeBase64, HttpStatusCode, TestAwsS3Gateway, TestDynamoGateway } from "shared"
+import { AuditLog } from "shared-types"
+import { HttpStatusCode, TestAwsS3Gateway, TestDynamoGateway } from "shared"
 import axios from "axios"
-import { v4 as uuid } from "uuid"
 
 const dynamoConfig: DynamoDbConfig = {
   DYNAMO_URL: "http://localhost:8000",
@@ -31,37 +30,27 @@ describe("sanitiseMessage", () => {
   })
 
   it("should return Ok status when message has been sanitised successfully", async () => {
-    const messageXml = `<Xml>${uuid()}< /Xml>`
-    const event = {
-      messageData: encodeBase64(messageXml),
-      messageFormat: "Dummy Event Source",
-      eventSourceArn: uuid(),
-      eventSourceQueueName: "SANITISE_DUMMY_QUEUE"
-    }
+    const dummyMessage = "dummy"
 
-    const s3Path = "event.xml"
-    await s3Gateway.upload(s3Path, JSON.stringify(event))
+    const s3Path = "message.xml"
+    await s3Gateway.upload(s3Path, dummyMessage)
 
     const message = new AuditLog("External Correlation ID", new Date(), "Dummy hash")
-    message.events.push(
-      new BichardAuditLogEvent({
-        eventSource: "Dummy Event Source",
-        eventSourceArn: "Dummy Event Arn",
-        eventSourceQueueName: "SANITISE_DUMMY_QUEUE",
-        eventType: "Dummy Message",
-        category: "error",
-        timestamp: new Date(),
-        s3Path
-      })
-    )
+    message.s3Path = s3Path
 
     await testDynamoGateway.insertOne(dynamoConfig.AUDIT_LOG_TABLE_NAME, message, "messageId")
 
     const response = await axios.post(`http://localhost:3010/messages/${message.messageId}/sanitise`, null)
 
     expect(response.status).toBe(HttpStatusCode.noContent)
-    expect(response.data).toBe("")
-
     expect(await s3Gateway.getAll()).toEqual([])
+  })
+
+  it("should return Error when the message ID does not exist", async () => {
+    const response = await axios.post(`http://localhost:3010/messages/IdNotExist/sanitise`, null, {
+      validateStatus: undefined
+    })
+
+    expect(response.status).toBe(HttpStatusCode.notFound)
   })
 })

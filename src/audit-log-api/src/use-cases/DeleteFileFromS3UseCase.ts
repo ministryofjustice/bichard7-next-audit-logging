@@ -1,6 +1,6 @@
 import type { S3GatewayInterface, PromiseResult } from "shared-types"
 
-export default class DeleteEventXmlFromS3UseCase {
+export default class DeleteFileFromS3UseCase {
   constructor(private readonly gateway: S3GatewayInterface) {}
 
   call(s3Path: string): PromiseResult<void> {
