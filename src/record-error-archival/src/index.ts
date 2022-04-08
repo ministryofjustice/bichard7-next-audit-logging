@@ -3,7 +3,14 @@ import config from "./config"
 import DatabaseClient from "./DatabaseClient"
 import { AuditLogApiClient } from "shared"
 
-const db = new DatabaseClient(config.dbHost, config.dbUser, config.dbPassword, config.dbName, config.dbSchema)
+const db = new DatabaseClient(
+  config.dbHost,
+  config.dbUser,
+  config.dbPassword,
+  config.dbName,
+  config.dbSchema,
+  config.archiveGroupLimit
+)
 const auditLogApi = new AuditLogApiClient(config.apiUrl, config.apiKey)
 
 recordErrorArchival(db, auditLogApi)
