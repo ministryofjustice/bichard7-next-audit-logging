@@ -99,7 +99,7 @@ export default class DatabaseClient {
 
     // Produces the string "$1, $2, $3..." for as many IDs as we are updating
     const wherePlaceholder = [...Array(errorIds.length).keys()].map((x) => `$${x + 1}`).join(", ")
-    console.log(wherePlaceholder)
+
     await this.postgres.query(
       `UPDATE ${this.schema}.archive_error_list
        SET audit_logged_at = NOW()
