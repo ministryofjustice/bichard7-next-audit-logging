@@ -114,7 +114,7 @@ src/archive-user-logs/build: src/shared-types/build src/shared-testing/build src
 src/retry-failed-messages/build: src/shared-types/build src/shared/build $(RETRY_FAILED_MESSAGES_SOURCE)
 	cd src/retry-failed-messages && npm run build
 
-src/record-error-archival/build: src/record-error-archival/build src/shared/build $(RECORD_MESSAGE_ARCHIVAL_SOURCE)
+src/record-error-archival/build: src/shared-types/build src/shared-testing/build src/shared/build $(RECORD_MESSAGE_ARCHIVAL_SOURCE)
 	cd src/record-error-archival && npm run build
 
 # Clean
