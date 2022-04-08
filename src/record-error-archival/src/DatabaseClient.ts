@@ -21,12 +21,22 @@ export default class DatabaseClient {
 
   private postgres: Client
 
-  constructor(host: string, user: string, password: string, database: string, schema: string) {
+  private archiveGroupLimit: number
+
+  constructor(
+    host: string,
+    user: string,
+    password: string,
+    database: string,
+    schema: string,
+    archiveGroupLimit: number
+  ) {
     this.host = host
     this.user = user
     this.password = password
     this.database = database
     this.schema = schema
+    this.archiveGroupLimit = archiveGroupLimit
 
     this.postgres = new Client({
       database: this.database,
@@ -49,8 +59,9 @@ export default class DatabaseClient {
       .query(
         `SELECT message_id, error_id, archived_at, archived_by, archive_log_id
         FROM ${this.schema}.archive_error_list ael
-        INNER JOIN ${this.schema}.archive_log al ON (ael.archive_log_id = al.log_id)
-        WHERE audit_logged_at IS NULL`
+        INNER JOIN (SELECT * from ${this.schema}.archive_log WHERE audit_logged_at IS NULL LIMIT $1) al ON (ael.archive_log_id = al.log_id)
+        WHERE audit_logged_at IS NULL`,
+        [this.archiveGroupLimit]
       )
       .then((res) =>
         res.rows.map(

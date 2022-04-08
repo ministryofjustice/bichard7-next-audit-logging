@@ -1,4 +1,3 @@
-import "jest-extended"
 import { Client } from "pg"
 import "shared-testing"
 import { FakeApiClient, setEnvironmentVariables } from "shared-testing"
@@ -184,7 +183,7 @@ describe("Record Error Archival integration", () => {
       return Promise.resolve(dbResult)
     })
 
-    const db = new DatabaseClient("", "", "", "", "schema")
+    const db = new DatabaseClient("", "", "", "", "schema", 100)
     const api = new FakeApiClient()
 
     await recordErrorArchival(db, api)
@@ -201,7 +200,7 @@ describe("Record Error Archival integration", () => {
       return Promise.resolve(dbResult)
     })
 
-    const db = new DatabaseClient("", "", "", "", "schema")
+    const db = new DatabaseClient("", "", "", "", "schema", 100)
     const api = new FakeApiClient()
     api.shouldReturnError(new Error("API failed :("), ["createEvent"])
 
@@ -216,7 +215,7 @@ describe("Record Error Archival integration", () => {
       return Promise.resolve(dbResult)
     })
 
-    const db = new DatabaseClient("", "", "", "", "schema")
+    const db = new DatabaseClient("", "", "", "", "schema", 100)
     const api = new FakeApiClient()
     api.shouldReturnErrorAfterNCalls(new Error("API quota exceeded"), 2, ["createEvent"])
 
@@ -226,10 +225,15 @@ describe("Record Error Archival integration", () => {
     expect(client.query.mock.calls[0][0].split(" ")[0]).not.toBe("UPDATE")
   })
 
-  it("Should limit the number of audit log groups to a configured value", () => {
-    // accepted as an environment variable
-    // passed to the db query
-    expect(true).toBeTruthy()
+  it("Should limit the number of archive log groups to a configured value", async () => {
+    const db = new DatabaseClient("", "", "", "", "schema", 50)
+    const api = new FakeApiClient()
+
+    await recordErrorArchival(db, api)
+
+    expect(client.query).toHaveBeenCalledTimes(2)
+    expect(String(client.query.mock.calls[0][0]).includes("LIMIT $1")).toBeTruthy()
+    expect(client.query.mock.calls[0][1]).toStrictEqual([50])
   })
 
   it("Should mark individual errors as audit logged", () => {
