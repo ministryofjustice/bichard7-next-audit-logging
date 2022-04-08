@@ -82,6 +82,8 @@ resources:
             AttributeType: S
           - AttributeName: status
             AttributeType: S
+          - AttributeName: caseId
+            AttributeType: S
         KeySchema:
           - AttributeName: messageId
             KeyType: HASH
@@ -121,6 +123,15 @@ resources:
                 KeyType: HASH
               - AttributeName: receivedDate
                 KeyType: RANGE
+            Projection:
+              ProjectionType: "ALL"
+            ProvisionedThroughput:
+              ReadCapacityUnits: 1
+              WriteCapacityUnits: 1
+          - IndexName: caseIdIndex
+            KeySchema:
+              - AttributeName: caseId
+                KeyType: HASH
             Projection:
               ProjectionType: "ALL"
             ProvisionedThroughput:
