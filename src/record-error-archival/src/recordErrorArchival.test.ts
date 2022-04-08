@@ -1,10 +1,10 @@
-import "shared-testing"
-import { FakeApiClient, setEnvironmentVariables } from "shared-testing"
-import { recordErrorArchival } from "./recordErrorArchival"
-import DatabaseClient from "./DatabaseClient"
-import type { ArchivedErrorRecord } from "./DatabaseClient"
 import "jest-extended"
 import { Client } from "pg"
+import "shared-testing"
+import { FakeApiClient, setEnvironmentVariables } from "shared-testing"
+import type { ArchivedErrorRecord } from "./DatabaseClient"
+import DatabaseClient from "./DatabaseClient"
+import { recordErrorArchival } from "./recordErrorArchival"
 
 setEnvironmentVariables()
 
@@ -30,9 +30,12 @@ const createStubDbWithRecords = (records: ArchivedErrorRecord[]): DatabaseClient
 jest.mock("pg", () => {
   const mClient = {
     connect: jest.fn().mockReturnValue(Promise.resolve()),
-    end: jest.fn().mockReturnValue(Promise.resolve())
+    end: jest.fn().mockReturnValue(Promise.resolve()),
+    query: jest.fn()
   }
-  return { Client: jest.fn(() => mClient) }
+  return {
+    Client: jest.fn().mockImplementation(() => mClient)
+  }
 })
 
 const dbResult: { rows: DbReturnType[] } = {
@@ -69,7 +72,8 @@ const dbResult: { rows: DbReturnType[] } = {
 }
 
 describe("Record Error Archival integration", () => {
-  let client: jest.Mocked<Client>
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let client: jest.Mocked<any>
 
   beforeEach(() => {
     jest.resetModules() // reset the cache of all required modules
@@ -176,20 +180,21 @@ describe("Record Error Archival integration", () => {
   })
 
   it("Should mark achive groups as audit logged when all succeed", async () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    client.query.mockImplementation((_query: any, _args: any) => {
+      console.log(`DEBUG - ${_query} : ${_args}`)
+      return Promise.resolve(dbResult)
+    })
+
     const db = new DatabaseClient("", "", "", "", "schema")
     const api = new FakeApiClient()
-    client.query = jest.fn((_query, _args) => {
-      return dbResult
-    })
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const pgMock = jest.spyOn(client, "query").mockImplementation()
 
     await recordErrorArchival(db, api)
 
     expect(client.query).toHaveBeenCalledTimes(2)
-    expect(pgMock.mock.calls[1][0].replace(/\s/g, "")).toBe(
+    expect(client.query.mock.calls[1][0].replace(/\s/g, "")).toBe(
       "UPDATE schema.archive_log SET audit_logged_at = NOW() WHERE log_id = $1".replace(/\s/g, "")
     )
-    expect(pgMock.mock.calls[1][1]).toStrictEqual([1n])
+    expect(client.query.mock.calls[1][1]).toStrictEqual([1n])
   })
 })
