@@ -15,7 +15,8 @@ const auditLogApi = new AuditLogApiClient(config.apiUrl, config.apiKey)
 
 recordErrorArchival(db, auditLogApi)
   .catch((err) => {
-    console.error(`Failed to record archival of errors: ${err}`)
+    db.disconnect()
+    throw err
   })
   .then((statuses) => {
     console.log("Done!")
