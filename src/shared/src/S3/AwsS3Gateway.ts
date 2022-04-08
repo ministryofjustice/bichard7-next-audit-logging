@@ -1,5 +1,5 @@
 import { S3, Endpoint } from "aws-sdk"
-import type { PromiseResult } from "shared-types"
+import { isError, PromiseResult } from "shared-types"
 import parseGetObjectResponse from "./parseGetObjectResponse"
 import type { S3Config } from "shared-types"
 import type { S3GatewayInterface } from "shared-types"
@@ -95,10 +95,11 @@ export default class AwsS3Gateway implements S3GatewayInterface {
       .catch((error) => <Error>error)
   }
 
-  deleteItem(key: string): PromiseResult<void> {
+  deleteItem(key: string, version?: string): PromiseResult<void> {
     const params: S3.Types.DeleteObjectRequest = {
       Bucket: this.getBucketName(),
-      Key: key
+      Key: key,
+      ...(version ? { VersionId: version } : {})
     }
 
     return this.client
@@ -106,5 +107,29 @@ export default class AwsS3Gateway implements S3GatewayInterface {
       .promise()
       .then(() => undefined)
       .catch((error) => <Error>error)
+  }
+
+  async deleteVersionedItem(key: string): PromiseResult<void> {
+    const params: S3.Types.ListObjectVersionsRequest = {
+      Bucket: this.getBucketName(),
+      Prefix: key
+    }
+
+    const objectVersions = await this.client.listObjectVersions(params)
+    .promise()
+    .catch((error) => <Error>error)
+
+    if(isError(objectVersions)){
+      return objectVersions
+    }
+
+    const versionIds = objectVersions.Versions?.map((version) => version.VersionId) ?? []
+
+    for(const versionId of versionIds) {
+      const result = await this.deleteItem(key, versionId)
+      if(isError(result)) {
+        return result
+      }
+    }
   }
 }

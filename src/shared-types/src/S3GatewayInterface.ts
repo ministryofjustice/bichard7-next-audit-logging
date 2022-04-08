@@ -9,4 +9,5 @@ export default interface S3GatewayInterface {
   list(): PromiseResult<S3.ObjectList>
   copyItemTo(key: string, destinationBucketName: string): PromiseResult<void>
   deleteItem(key: string): PromiseResult<void>
+  deleteVersionedItem(key: string): PromiseResult<void>
 }
