@@ -7,8 +7,17 @@ export default class FakeApiClient implements ApiClient {
 
   private errorFunctions: string[] = []
 
+  private successfullCallsRemaining?: number
+
   private shouldFunctionReturnError(functionName: string): boolean {
-    return !!this.error && (this.errorFunctions.length === 0 || this.errorFunctions.includes(functionName))
+    const exceededLimit = this.successfullCallsRemaining !== undefined && this.successfullCallsRemaining < 1
+    if (this.successfullCallsRemaining !== undefined) {
+      this.successfullCallsRemaining--
+    }
+
+    return (
+      !!this.error && !exceededLimit && (this.errorFunctions.length === 0 || this.errorFunctions.includes(functionName))
+    )
   }
 
   getMessage(messageId: string): PromiseResult<AuditLog> {
@@ -43,6 +52,12 @@ export default class FakeApiClient implements ApiClient {
   shouldReturnError(error: Error, functionNames?: string[]): void {
     this.error = error
     this.errorFunctions = functionNames || []
+  }
+
+  shouldReturnErrorAfterNCalls(error: Error, calls: number, functionNames?: string[]): void {
+    this.error = error
+    this.errorFunctions = functionNames || []
+    this.successfullCallsRemaining = calls
   }
 
   reset(messages?: AuditLog[]): void {

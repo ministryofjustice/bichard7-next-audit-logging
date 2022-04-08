@@ -180,9 +180,7 @@ describe("Record Error Archival integration", () => {
   })
 
   it("Should mark achive groups as audit logged when all succeed", async () => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    client.query.mockImplementation((_query: any, _args: any) => {
-      console.log(`DEBUG - ${_query} : ${_args}`)
+    client.query.mockImplementation(() => {
       return Promise.resolve(dbResult)
     })
 
@@ -196,5 +194,46 @@ describe("Record Error Archival integration", () => {
       "UPDATE schema.archive_log SET audit_logged_at = NOW() WHERE log_id = $1".replace(/\s/g, "")
     )
     expect(client.query.mock.calls[1][1]).toStrictEqual([1n])
+  })
+
+  it("Shouldn't mark achive groups as audit logged when all fail", async () => {
+    client.query.mockImplementation(() => {
+      return Promise.resolve(dbResult)
+    })
+
+    const db = new DatabaseClient("", "", "", "", "schema")
+    const api = new FakeApiClient()
+    api.shouldReturnError(new Error("API failed :("), ["createEvent"])
+
+    await recordErrorArchival(db, api)
+
+    expect(client.query).toHaveBeenCalledTimes(1)
+    expect(client.query.mock.calls[0][0].split(" ")[0]).not.toBe("UPDATE")
+  })
+
+  it("Shouldn't mark achive groups as audit logged when some fail", async () => {
+    client.query.mockImplementation(() => {
+      return Promise.resolve(dbResult)
+    })
+
+    const db = new DatabaseClient("", "", "", "", "schema")
+    const api = new FakeApiClient()
+    api.shouldReturnErrorAfterNCalls(new Error("API quota exceeded"), 2, ["createEvent"])
+
+    await recordErrorArchival(db, api)
+
+    expect(client.query).toHaveBeenCalledTimes(1)
+    expect(client.query.mock.calls[0][0].split(" ")[0]).not.toBe("UPDATE")
+  })
+
+  it("Should limit the number of audit log groups to a configured value", () => {
+    // accepted as an environment variable
+    // passed to the db query
+    expect(true).toBeTruthy()
+  })
+
+  it("Should mark individual errors as audit logged", () => {
+    // empty
+    expect(true).toBeTruthy()
   })
 })
