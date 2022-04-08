@@ -22,7 +22,8 @@ const createStubDbWithRecords = (records: ArchivedErrorRecord[]): DatabaseClient
     fetchUnloggedArchivedErrors: jest.fn(() => records),
     connect: jest.fn(),
     disconnect: jest.fn(),
-    markArchiveGroupAuditLogged: jest.fn()
+    markArchiveGroupAuditLogged: jest.fn(),
+    markErrorsAuditLogged: jest.fn()
   } as unknown as DatabaseClient
 }
 
@@ -69,6 +70,8 @@ const dbResult: { rows: DbReturnType[] } = {
     }
   ]
 }
+
+const stripWhitespace = (string: string) => string.replace(/\s/g, "")
 
 describe("Record Error Archival integration", () => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -188,14 +191,14 @@ describe("Record Error Archival integration", () => {
 
     await recordErrorArchival(db, api)
 
-    expect(client.query).toHaveBeenCalledTimes(2)
-    expect(client.query.mock.calls[1][0].replace(/\s/g, "")).toBe(
-      "UPDATE schema.archive_log SET audit_logged_at = NOW() WHERE log_id = $1".replace(/\s/g, "")
+    expect(client.query).toHaveBeenCalledTimes(3)
+    expect(stripWhitespace(client.query.mock.calls[2][0])).toBe(
+      stripWhitespace("UPDATE schema.archive_log SET audit_logged_at = NOW() WHERE log_id = $1")
     )
-    expect(client.query.mock.calls[1][1]).toStrictEqual([1n])
+    expect(client.query.mock.calls[2][1]).toStrictEqual([1n])
   })
 
-  it("Shouldn't mark achive groups as audit logged when all fail", async () => {
+  it("Shouldn't mark errors as audit logged when all fail", async () => {
     client.query.mockImplementation(() => {
       return Promise.resolve(dbResult)
     })
@@ -207,7 +210,7 @@ describe("Record Error Archival integration", () => {
     await recordErrorArchival(db, api)
 
     expect(client.query).toHaveBeenCalledTimes(1)
-    expect(client.query.mock.calls[0][0].split(" ")[0]).not.toBe("UPDATE")
+    expect(client.query.mock.calls[0][0].split(" ")[0]).toBe("SELECT")
   })
 
   it("Shouldn't mark achive groups as audit logged when some fail", async () => {
@@ -221,8 +224,9 @@ describe("Record Error Archival integration", () => {
 
     await recordErrorArchival(db, api)
 
-    expect(client.query).toHaveBeenCalledTimes(1)
-    expect(client.query.mock.calls[0][0].split(" ")[0]).not.toBe("UPDATE")
+    expect(client.query).toHaveBeenCalledTimes(2)
+    expect(String(client.query.mock.calls[0][0]).includes("UPDATE archive_log")).toBeFalsy()
+    expect(String(client.query.mock.calls[1][0]).includes("UPDATE archive_log")).toBeFalsy()
   })
 
   it("Should limit the number of archive log groups to a configured value", async () => {
@@ -231,13 +235,29 @@ describe("Record Error Archival integration", () => {
 
     await recordErrorArchival(db, api)
 
-    expect(client.query).toHaveBeenCalledTimes(2)
+    expect(client.query).toHaveBeenCalledTimes(3)
     expect(String(client.query.mock.calls[0][0]).includes("LIMIT $1")).toBeTruthy()
     expect(client.query.mock.calls[0][1]).toStrictEqual([50])
   })
 
-  it("Should mark individual errors as audit logged", () => {
-    // empty
+  it("Should mark individual errors as audit logged", async () => {
     expect(true).toBeTruthy()
+
+    client.query.mockImplementation(() => {
+      return Promise.resolve(dbResult)
+    })
+
+    const db = new DatabaseClient("", "", "", "", "schema", 100)
+    const api = new FakeApiClient()
+
+    await recordErrorArchival(db, api)
+
+    expect(client.query).toHaveBeenCalledTimes(3)
+    expect(
+      stripWhitespace(client.query.mock.calls[1][0]).includes(
+        stripWhitespace("UPDATE schema.archive_error_list SET audit_logged_at = NOW() WHERE error_id IN")
+      )
+    ).toBeTruthy()
+    expect(client.query.mock.calls[1][1]).toStrictEqual(["1", "2", "3", "4"])
   })
 })
