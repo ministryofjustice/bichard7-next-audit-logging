@@ -100,7 +100,7 @@ commands:
             - store_test_results:
                 path: ./src/audit-log-portal/test-results/jest/
             - store_test_results:
-            path: ./src/record-error-archival/test-results/jest/
+                path: ./src/record-error-archival/test-results/jest/
 
 jobs:
   build:
