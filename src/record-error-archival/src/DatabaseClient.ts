@@ -59,7 +59,11 @@ export default class DatabaseClient {
       .query(
         `SELECT message_id, error_id, archived_at, archived_by, archive_log_id
         FROM ${this.schema}.archive_error_list ael
-        INNER JOIN (SELECT * from ${this.schema}.archive_log WHERE audit_logged_at IS NULL LIMIT $1) al ON (ael.archive_log_id = al.log_id)
+        INNER JOIN (
+            SELECT archived_at, archived_by, log_id
+            FROM ${this.schema}.archive_log
+            WHERE audit_logged_at IS NULL LIMIT $1)
+          al ON (ael.archive_log_id = al.log_id)
         WHERE audit_logged_at IS NULL`,
         [this.archiveGroupLimit]
       )
@@ -87,6 +91,20 @@ export default class DatabaseClient {
        SET audit_logged_at = NOW()
        WHERE log_id = $1`,
       [archiveLogGroupId]
+    )
+  }
+
+  async markErrorsAuditLogged(errorIds: bigint[]) {
+    console.log(`Marking errors ${errorIds} as audit logged`)
+
+    // Produces the string "$1, $2, $3..." for as many IDs as we are updating
+    const wherePlaceholder = [...Array(errorIds.length).keys()].map((x) => `$${x + 1}`).join(", ")
+    console.log(wherePlaceholder)
+    await this.postgres.query(
+      `UPDATE ${this.schema}.archive_error_list
+       SET audit_logged_at = NOW()
+       WHERE error_id IN (${wherePlaceholder})`,
+      errorIds
     )
   }
 }
