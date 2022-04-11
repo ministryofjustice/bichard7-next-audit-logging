@@ -1,4 +1,4 @@
-import { EventCategory } from "shared-types"
+import type { EventCategory } from "shared-types"
 import { AuditLog, AuditLogEvent } from "shared-types"
 import { v4 as uuid } from "uuid"
 
