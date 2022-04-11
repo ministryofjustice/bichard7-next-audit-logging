@@ -9,7 +9,7 @@ interface ValidationResult {
 
 export default (auditLogEvent: AuditLogEvent): ValidationResult => {
   const errors: string[] = []
-  const { attributes, category, eventSource, eventSourceArn, eventSourceQueueName, eventType, s3Path, timestamp } =
+  const { attributes, category, eventSource, eventSourceArn, eventSourceQueueName, eventType, eventXml, timestamp } =
     auditLogEvent as BichardAuditLogEvent
 
   if (attributes && (typeof attributes !== "object" || Array.isArray(attributes))) {
@@ -42,8 +42,8 @@ export default (auditLogEvent: AuditLogEvent): ValidationResult => {
     errors.push("Event type must be string")
   }
 
-  if (s3Path && typeof s3Path !== "string") {
-    errors.push("S3 path must be string")
+  if (eventXml && typeof eventXml !== "string") {
+    errors.push("Event XML must be string")
   }
 
   if (!timestamp) {
@@ -59,7 +59,7 @@ export default (auditLogEvent: AuditLogEvent): ValidationResult => {
     eventSourceArn,
     eventSourceQueueName,
     eventType,
-    s3Path,
+    eventXml,
     timestamp
   } as BichardAuditLogEvent
 
