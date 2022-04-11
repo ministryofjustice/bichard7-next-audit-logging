@@ -2,6 +2,7 @@ import { recordErrorArchival } from "./recordErrorArchival"
 import config from "./config"
 import DatabaseClient from "./DatabaseClient"
 import { AuditLogApiClient } from "shared"
+import { logger } from "shared"
 
 const db = new DatabaseClient(
   config.dbHost,
@@ -19,16 +20,12 @@ recordErrorArchival(db, auditLogApi)
     throw err
   })
   .then((statuses) => {
-    console.log("Done!")
-
-    console.log(`Successfully updated ${statuses?.filter((record) => record.success).length ?? "0"} records`)
+    const successfulRecords = statuses?.filter((record) => record.success).length ?? 0
+    logger.info({ message: `Successfully updated ${successfulRecords} records`, successfulRecords: successfulRecords })
 
     const failedRecords = statuses?.filter((record) => !record.success)
 
     if (failedRecords !== undefined && failedRecords.length > 0) {
-      console.log("Failed records:")
-      failedRecords.forEach((record) => {
-        console.log(record)
-      })
+      logger.error({ message: "Failed to audit log some archived errors", failedRecords: failedRecords })
     }
   })
