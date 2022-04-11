@@ -1,11 +1,12 @@
 import { Client } from "pg"
+import { logger } from "shared"
 
 export type ArchivedErrorRecord = {
   messageId: string
-  errorId: bigint
+  errorId: number
   archivedAt: Date
   archivedBy: string
-  archiveLogId: bigint
+  archiveLogId: number
 }
 
 // Produces the string "$1, $2, $3..." for the given range
@@ -58,6 +59,8 @@ export default class DatabaseClient {
   }
 
   async fetchUnloggedArchivedErrors(): Promise<ArchivedErrorRecord[]> {
+    logger.debug("Fetching unlogged archived errors")
+
     const errors: ArchivedErrorRecord[] = await this.postgres
       .query(
         `SELECT message_id, error_id, archived_at, archived_by, archive_log_id
@@ -86,8 +89,8 @@ export default class DatabaseClient {
     return errors
   }
 
-  async markArchiveGroupAuditLogged(archiveLogGroupId: bigint) {
-    console.log(`Marking log group ${archiveLogGroupId} as audit logged`)
+  async markArchiveGroupAuditLogged(archiveLogGroupId: number) {
+    logger.debug(`Marking log group ${archiveLogGroupId} as audit logged`)
 
     await this.postgres.query(
       `UPDATE ${this.schema}.archive_log
@@ -97,28 +100,24 @@ export default class DatabaseClient {
     )
   }
 
-  async markErrorsAuditLogged(errorIds: bigint[]) {
-    console.log(`Marking errors ${errorIds} as audit logged`)
-
-    const wherePlaceholder = wherePlaceholderForRange(errorIds.length)
+  async markErrorsAuditLogged(errorIds: number[]) {
+    logger.debug({ message: "Marking errors as audit logged", errorIds: errorIds })
 
     await this.postgres.query(
       `UPDATE ${this.schema}.archive_error_list
        SET audit_logged_at = NOW(), audit_log_attempts = audit_log_attempts + 1
-       WHERE error_id IN (${wherePlaceholder})`,
+       WHERE error_id IN (${wherePlaceholderForRange(errorIds.length)})`,
       errorIds
     )
   }
 
-  async markErrorsAuditLogFailed(errorIds: bigint[]) {
-    console.log(`Recording failure to audit log ${errorIds}`)
-
-    const wherePlaceholder = wherePlaceholderForRange(errorIds.length)
+  async markErrorsAuditLogFailed(errorIds: number[]) {
+    logger.debug({ message: "Recording failure to audit log errors", errorIds: errorIds })
 
     await this.postgres.query(
       `UPDATE ${this.schema}.archive_error_list
        SET audit_log_attempts = audit_log_attempts + 1
-       WHERE error_id IN (${wherePlaceholder})`,
+       WHERE error_id IN (${wherePlaceholderForRange(errorIds.length)})`,
       errorIds
     )
   }

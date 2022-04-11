@@ -1,5 +1,4 @@
 import { Client } from "pg"
-import "shared-testing"
 import { FakeApiClient, setEnvironmentVariables } from "shared-testing"
 import type { ArchivedErrorRecord } from "./DatabaseClient"
 import DatabaseClient from "./DatabaseClient"
@@ -102,11 +101,11 @@ describe("Record Error Archival integration", () => {
     const archivalDate = new Date("2022-04-06 09:45:15")
     const stubDb = createStubDbWithRecords([
       {
-        errorId: 1n,
+        errorId: 1,
         messageId: "Message01",
         archivedAt: archivalDate,
         archivedBy: "Error archiver process 1",
-        archiveLogId: 1n
+        archiveLogId: 1
       }
     ])
     const api = new FakeApiClient()
@@ -123,7 +122,7 @@ describe("Record Error Archival integration", () => {
         category: "information",
         eventType: "Error archival",
         timestamp: archivalDate.toISOString(),
-        attributes: { "Error ID": 1n }
+        attributes: { "Error ID": 1 }
       })
     )
   })
@@ -131,32 +130,32 @@ describe("Record Error Archival integration", () => {
   it("Should create audit log events with a timestamp of when the archival occured", async () => {
     const errorRecords = [
       {
-        errorId: BigInt(Math.floor(Math.random() * 10_000)),
+        errorId: Math.floor(Math.random() * 10_000),
         messageId: "Message" + Math.floor(Math.random() * 10_000),
         archivedAt: new Date(Date.now() - Math.random() * 10 * 24 * 60 * 60 * 1000),
         archivedBy: "Error archiver process 1",
-        archiveLogId: 1n
+        archiveLogId: 1
       },
       {
-        errorId: BigInt(Math.floor(Math.random() * 10_000)),
+        errorId: Math.floor(Math.random() * 10_000),
         messageId: "Message" + Math.floor(Math.random() * 10_000),
         archivedAt: new Date(Date.now() - Math.random() * 10 * 24 * 60 * 60 * 1000),
         archivedBy: "Error archiver process 1",
-        archiveLogId: 1n
+        archiveLogId: 1
       },
       {
-        errorId: BigInt(Math.floor(Math.random() * 10_000)),
+        errorId: Math.floor(Math.random() * 10_000),
         messageId: "Message" + Math.floor(Math.random() * 10_000),
         archivedAt: new Date(Date.now() - Math.random() * 10 * 24 * 60 * 60 * 1000),
         archivedBy: "Error archiver process 1",
-        archiveLogId: 1n
+        archiveLogId: 1
       },
       {
-        errorId: BigInt(Math.floor(Math.random() * 10_000)),
+        errorId: Math.floor(Math.random() * 10_000),
         messageId: "Message" + Math.floor(Math.random() * 10_000),
         archivedAt: new Date(Date.now() - Math.random() * 10 * 24 * 60 * 60 * 1000),
         archivedBy: "Error archiver process 1",
-        archiveLogId: 1n
+        archiveLogId: 1
       }
     ]
     const stubDb = createStubDbWithRecords(errorRecords)
@@ -203,7 +202,7 @@ describe("Record Error Archival integration", () => {
     expect(stripWhitespace(client.query.mock.calls[2][0])).toBe(
       stripWhitespace("UPDATE schema.archive_log SET audit_logged_at = NOW() WHERE log_id = $1")
     )
-    expect(client.query.mock.calls[2][1]).toStrictEqual([1n])
+    expect(client.query.mock.calls[2][1]).toStrictEqual([1])
   })
 
   it("Shouldn't mark archive groups as audit logged when all fail", async () => {
