@@ -1,7 +1,7 @@
 import { S3, Endpoint } from "aws-sdk"
-import { isError, PromiseResult } from "shared-types"
+import { isError } from "shared-types"
 import parseGetObjectResponse from "./parseGetObjectResponse"
-import type { S3Config } from "shared-types"
+import type { S3Config, PromiseResult } from "shared-types"
 import type { S3GatewayInterface } from "shared-types"
 
 export default class AwsS3Gateway implements S3GatewayInterface {
@@ -115,19 +115,20 @@ export default class AwsS3Gateway implements S3GatewayInterface {
       Prefix: key
     }
 
-    const objectVersions = await this.client.listObjectVersions(params)
-    .promise()
-    .catch((error) => <Error>error)
+    const objectVersions = await this.client
+      .listObjectVersions(params)
+      .promise()
+      .catch((error) => <Error>error)
 
-    if(isError(objectVersions)){
+    if (isError(objectVersions)) {
       return objectVersions
     }
 
     const versionIds = objectVersions.Versions?.map((version) => version.VersionId) ?? []
 
-    for(const versionId of versionIds) {
+    for (const versionId of versionIds) {
       const result = await this.deleteItem(key, versionId)
-      if(isError(result)) {
+      if (isError(result)) {
         return result
       }
     }

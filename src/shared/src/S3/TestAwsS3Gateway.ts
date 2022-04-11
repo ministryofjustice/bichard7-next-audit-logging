@@ -1,5 +1,5 @@
 import type * as S3 from "aws-sdk/clients/s3"
-import { PromiseResult } from "shared-types"
+import type { PromiseResult } from "shared-types"
 import AwsS3Gateway from "./AwsS3Gateway"
 
 export default class TestAwsS3Gateway extends AwsS3Gateway {
