@@ -217,8 +217,15 @@ describe("Record Error Archival integration", () => {
 
     await recordErrorArchival(db, api)
 
-    expect(client.query).toHaveBeenCalledTimes(1)
+    expect(client.query).toHaveBeenCalledTimes(2)
     expect(client.query.mock.calls[0][0].split(" ")[0]).toBe("SELECT")
+
+    expect(
+      stripWhitespace(String(client.query.mock.calls[1][0])).includes(
+        stripWhitespace("UPDATE schema.archive_error_list SET audit_log_attempts = audit_log_attempts + 1")
+      )
+    ).toBeTruthy()
+    expect(client.query.mock.calls[1][1]).toStrictEqual(["1", "2", "3", "4"])
   })
 
   it("Shouldn't mark achive groups as audit logged when some fail", async () => {
@@ -232,17 +239,25 @@ describe("Record Error Archival integration", () => {
 
     await recordErrorArchival(db, api)
 
-    expect(client.query).toHaveBeenCalledTimes(2)
+    expect(client.query).toHaveBeenCalledTimes(3)
 
     // Expect individual archive logs to be updated
     expect(stripWhitespace(client.query.mock.calls[1][0])).toContain(
       stripWhitespace("UPDATE schema.archive_error_list SET audit_logged_at = NOW()")
     )
-    expect(client.query.mock.calls[1][1]).toStrictEqual(["3", "4"])
+    expect(client.query.mock.calls[1][1]).toStrictEqual(["1", "2"])
 
     // Expect archive log group to not be updated
-    expect(String(client.query.mock.calls[0][0]).includes("UPDATE archive_log")).toBeFalsy()
-    expect(String(client.query.mock.calls[1][0]).includes("UPDATE archive_log")).toBeFalsy()
+    expect(String(client.query.mock.calls[0][0]).includes("UPDATE schema.archive_log")).toBeFalsy()
+    expect(String(client.query.mock.calls[1][0]).includes("UPDATE schema.archive_log")).toBeFalsy()
+
+    // Expect the number of archive log attempts to be incremented
+    expect(
+      stripWhitespace(String(client.query.mock.calls[2][0])).includes(
+        stripWhitespace("UPDATE schema.archive_error_list SET audit_log_attempts = audit_log_attempts + 1")
+      )
+    ).toBeTruthy()
+    expect(client.query.mock.calls[2][1]).toStrictEqual(["3", "4"])
   })
 
   it("Should limit the number of archive log groups to a configured value", async () => {
@@ -271,7 +286,9 @@ describe("Record Error Archival integration", () => {
     expect(client.query).toHaveBeenCalledTimes(3)
     expect(
       stripWhitespace(client.query.mock.calls[1][0]).includes(
-        stripWhitespace("UPDATE schema.archive_error_list SET audit_logged_at = NOW() WHERE error_id IN")
+        stripWhitespace(
+          "UPDATE schema.archive_error_list SET audit_logged_at = NOW(), audit_log_attempts = audit_log_attempts + 1 WHERE error_id IN"
+        )
       )
     ).toBeTruthy()
     expect(client.query.mock.calls[1][1]).toStrictEqual(["1", "2", "3", "4"])
