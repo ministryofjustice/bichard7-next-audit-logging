@@ -192,13 +192,21 @@ describe("Record Error Archival integration", () => {
     await recordErrorArchival(db, api)
 
     expect(client.query).toHaveBeenCalledTimes(3)
+
+    // Expect individual audit logs to be updated
+    expect(stripWhitespace(client.query.mock.calls[1][0])).toContain(
+      stripWhitespace("UPDATE schema.archive_error_list SET audit_logged_at = NOW()")
+    )
+    expect(client.query.mock.calls[1][1]).toStrictEqual(["1", "2", "3", "4"])
+
+    // Expect audit log group to be updated
     expect(stripWhitespace(client.query.mock.calls[2][0])).toBe(
       stripWhitespace("UPDATE schema.archive_log SET audit_logged_at = NOW() WHERE log_id = $1")
     )
     expect(client.query.mock.calls[2][1]).toStrictEqual([1n])
   })
 
-  it("Shouldn't mark errors as audit logged when all fail", async () => {
+  it("Shouldn't mark archive groups as audit logged when all fail", async () => {
     client.query.mockImplementation(() => {
       return Promise.resolve(dbResult)
     })
@@ -240,7 +248,7 @@ describe("Record Error Archival integration", () => {
     expect(client.query.mock.calls[0][1]).toStrictEqual([50])
   })
 
-  it("Should mark individual errors as audit logged", async () => {
+  it("Should mark individual archive logs as audit logged", async () => {
     expect(true).toBeTruthy()
 
     client.query.mockImplementation(() => {
