@@ -10,13 +10,17 @@ export default class FakeApiClient implements ApiClient {
   private successfullCallsRemaining?: number
 
   private shouldFunctionReturnError(functionName: string): boolean {
+    const isLimited = this.successfullCallsRemaining !== undefined
     const exceededLimit = this.successfullCallsRemaining !== undefined && this.successfullCallsRemaining < 1
     if (this.successfullCallsRemaining !== undefined) {
       this.successfullCallsRemaining--
     }
 
     return (
-      !!this.error && !exceededLimit && (this.errorFunctions.length === 0 || this.errorFunctions.includes(functionName))
+      (!!this.error &&
+        !isLimited &&
+        (this.errorFunctions.length === 0 || this.errorFunctions.includes(functionName))) ||
+      exceededLimit
     )
   }
 
