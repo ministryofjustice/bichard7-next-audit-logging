@@ -8,6 +8,9 @@ export type ArchivedErrorRecord = {
   archiveLogId: bigint
 }
 
+// Produces the string "$1, $2, $3..." for the given range
+const wherePlaceholderForRange = (range: number) => [...Array(range).keys()].map((x) => `$${x + 1}`).join(", ")
+
 export default class DatabaseClient {
   private host: string
 
@@ -97,12 +100,24 @@ export default class DatabaseClient {
   async markErrorsAuditLogged(errorIds: bigint[]) {
     console.log(`Marking errors ${errorIds} as audit logged`)
 
-    // Produces the string "$1, $2, $3..." for as many IDs as we are updating
-    const wherePlaceholder = [...Array(errorIds.length).keys()].map((x) => `$${x + 1}`).join(", ")
+    const wherePlaceholder = wherePlaceholderForRange(errorIds.length)
 
     await this.postgres.query(
       `UPDATE ${this.schema}.archive_error_list
-       SET audit_logged_at = NOW()
+       SET audit_logged_at = NOW(), audit_log_attempts = audit_log_attempts + 1
+       WHERE error_id IN (${wherePlaceholder})`,
+      errorIds
+    )
+  }
+
+  async markErrorsAuditLogFailed(errorIds: bigint[]) {
+    console.log(`Recording failure to audit log ${errorIds}`)
+
+    const wherePlaceholder = wherePlaceholderForRange(errorIds.length)
+
+    await this.postgres.query(
+      `UPDATE ${this.schema}.archive_error_list
+       SET audit_log_attempts = audit_log_attempts + 1
        WHERE error_id IN (${wherePlaceholder})`,
       errorIds
     )
