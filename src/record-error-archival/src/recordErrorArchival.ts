@@ -38,6 +38,12 @@ export const recordErrorArchival = async (db: DatabaseClient, api: ApiClient) =>
     await db.markErrorsAuditLogged(successful)
   }
 
+  // Record failed attempts to audit log
+  const failed = results.filter((result) => !result.success).map((result) => result.errorRecord.errorId)
+  if (failed.length > 0) {
+    await db.markErrorsAuditLogFailed(failed)
+  }
+
   // Mark groups with no failed updates as complete
   const groupedResults = groupBy(results, (result) => result.errorRecord.archiveLogId)
   for (const [archiveLogGroup, groupResults] of Object.entries(groupedResults)) {
