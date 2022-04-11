@@ -27,7 +27,16 @@ describe("Creating Audit Log event", () => {
     const record = await gateway.getOne<AuditLog>(dynamoConfig.TABLE_NAME, "messageId", auditLog.messageId)
 
     expect(record).not.toBeNull()
-    expect(record?.messageId).toEqual(auditLog.messageId)
-    expect(record?.events).toEqual([event])
+
+    const { messageId, events } = record!
+    expect(messageId).toEqual(auditLog.messageId)
+
+    expect(events).toHaveLength(1)
+
+    const actualEvent = events[0]
+    expect(actualEvent.attributes?.["Attribute 1"]).toHaveProperty("valueLookup")
+
+    actualEvent.attributes["Attribute 1"] = event.attributes["Attribute 1"]
+    expect(events).toEqual([event])
   })
 })
