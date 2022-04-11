@@ -3,7 +3,7 @@ import type { S3GatewayInterface } from "shared-types"
 import type { KeyValuePair, PromiseResult } from "shared-types"
 
 export default class FakeS3Gateway implements S3GatewayInterface {
-  private items: KeyValuePair<string, string> = {}
+  public items: KeyValuePair<string, string> = {}
 
   private error?: Error
 
@@ -56,6 +56,8 @@ export default class FakeS3Gateway implements S3GatewayInterface {
     if (!this.items.hasOwnProperty(key)) {
       return Promise.resolve(new Error(`No item with key '${key}' found in the S3 bucket.`))
     }
+
+    delete this.items[key]
 
     return Promise.resolve(undefined)
   }
