@@ -193,13 +193,13 @@ describe("Record Error Archival integration", () => {
 
     expect(client.query).toHaveBeenCalledTimes(3)
 
-    // Expect individual audit logs to be updated
+    // Expect individual archive logs to be updated
     expect(stripWhitespace(client.query.mock.calls[1][0])).toContain(
       stripWhitespace("UPDATE schema.archive_error_list SET audit_logged_at = NOW()")
     )
     expect(client.query.mock.calls[1][1]).toStrictEqual(["1", "2", "3", "4"])
 
-    // Expect audit log group to be updated
+    // Expect archive log group to be updated
     expect(stripWhitespace(client.query.mock.calls[2][0])).toBe(
       stripWhitespace("UPDATE schema.archive_log SET audit_logged_at = NOW() WHERE log_id = $1")
     )
@@ -233,6 +233,14 @@ describe("Record Error Archival integration", () => {
     await recordErrorArchival(db, api)
 
     expect(client.query).toHaveBeenCalledTimes(2)
+
+    // Expect individual archive logs to be updated
+    expect(stripWhitespace(client.query.mock.calls[1][0])).toContain(
+      stripWhitespace("UPDATE schema.archive_error_list SET audit_logged_at = NOW()")
+    )
+    expect(client.query.mock.calls[1][1]).toStrictEqual(["3", "4"])
+
+    // Expect archive log group to not be updated
     expect(String(client.query.mock.calls[0][0]).includes("UPDATE archive_log")).toBeFalsy()
     expect(String(client.query.mock.calls[1][0]).includes("UPDATE archive_log")).toBeFalsy()
   })
