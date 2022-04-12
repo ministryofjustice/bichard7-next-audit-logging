@@ -28,7 +28,7 @@ export default class AwsAuditLogDynamoGateway extends DynamoGateway implements A
   }
 
   async update(message: AuditLog): PromiseResult<AuditLog> {
-    const result = await this.updateOne(this.tableName, message, "messageId")
+    const result = await this.updateOne(this.tableName, message, "messageId", message.version)
 
     if (isError(result)) {
       return result

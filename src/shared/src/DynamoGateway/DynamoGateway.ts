@@ -39,11 +39,14 @@ export default class DynamoGateway {
       .catch((error) => <Error>error)
   }
 
-  updateOne<T>(tableName: string, record: T, keyName: string): PromiseResult<void> {
+  updateOne<T>(tableName: string, record: T, keyName: string, version: number): PromiseResult<void> {
     const params: DocumentClient.PutItemInput = {
       TableName: tableName,
       Item: { _: "_", ...record },
-      ConditionExpression: `attribute_exists(${keyName})`
+      ConditionExpression: `attribute_exists(${keyName}) and version = :version`,
+      ExpressionAttributeValues: {
+        ":version": version
+      }
     }
 
     return this.client

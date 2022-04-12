@@ -79,10 +79,11 @@ describe("DynamoGateway", () => {
     it("should return error when the record does not exist in dynamoDB", async () => {
       const record = {
         id: "InsertOneRecord",
-        someOtherValue: "SomeOtherValue"
+        someOtherValue: "SomeOtherValue",
+        version: 1
       }
 
-      const result = await gateway.updateOne(config.AUDIT_LOG_TABLE_NAME, record, "id")
+      const result = await gateway.updateOne(config.TABLE_NAME, record, "id", 1)
 
       expect(result).toBeTruthy()
       expect(isError(result)).toBe(true)
@@ -92,20 +93,22 @@ describe("DynamoGateway", () => {
     it("should return undefined when successful and have updated one record", async () => {
       const oldRecord = {
         id: "InsertOneRecord",
-        someOtherValue: "OldValue"
+        someOtherValue: "OldValue",
+        version: 1
       }
 
-      await gateway.insertOne(config.AUDIT_LOG_TABLE_NAME, oldRecord, "id")
+      await gateway.insertOne(config.TABLE_NAME, oldRecord, "id")
 
       const updatedRecord = {
         id: "InsertOneRecord",
-        someOtherValue: "NewValue"
+        someOtherValue: "NewValue",
+        version: 2
       }
-      const result = await gateway.updateOne(config.AUDIT_LOG_TABLE_NAME, updatedRecord, "id")
+      const result = await gateway.updateOne(config.TABLE_NAME, updatedRecord, "id", 1)
 
       expect(result).toBeUndefined()
 
-      const actualRecords = await gateway.getAll(config.AUDIT_LOG_TABLE_NAME)
+      const actualRecords = await gateway.getAll(config.TABLE_NAME)
       expect(actualRecords.Count).toBe(1)
 
       const actualRecord = actualRecords.Items?.[0]
@@ -113,19 +116,41 @@ describe("DynamoGateway", () => {
       expect(actualRecord?.someOtherValue).toBe(updatedRecord.someOtherValue)
     })
 
+    it("should return error if the version is different", async () => {
+      const oldRecord = {
+        id: "InsertOneRecord",
+        someOtherValue: "OldValue",
+        version: 1
+      }
+
+      await gateway.insertOne(config.TABLE_NAME, oldRecord, "id")
+
+      const updatedRecord = {
+        id: "InsertOneRecord",
+        someOtherValue: "NewValue",
+        version: 2
+      }
+      const result = await gateway.updateOne(config.TABLE_NAME, updatedRecord, "id", 2)
+
+      expect(result).toBeTruthy()
+      expect(isError(result)).toBe(true)
+      expect((<Error>result).message).toBe("The conditional request failed")
+    })
+
     it("should return an error when there is a failure and have inserted zero records", async () => {
       const record = {
         id: 1234,
-        someOtherValue: "Id should be a number"
+        someOtherValue: "Id should be a number",
+        version: 1
       }
 
-      const result = await gateway.updateOne(config.AUDIT_LOG_TABLE_NAME, record, "id")
+      const result = await gateway.updateOne(config.TABLE_NAME, record, "id", 1)
 
       expect(result).toBeTruthy()
       expect(isError(result)).toBe(true)
       expect((<Error>result).message).toBe("One or more parameter values were invalid: Type mismatch for key")
 
-      const actualRecords = await gateway.getAll(config.AUDIT_LOG_TABLE_NAME)
+      const actualRecords = await gateway.getAll(config.TABLE_NAME)
       expect(actualRecords.Count).toBe(0)
     })
   })
