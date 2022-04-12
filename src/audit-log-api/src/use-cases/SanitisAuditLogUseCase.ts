@@ -1,4 +1,5 @@
 import type { AuditLog, AuditLogDynamoGateway, PromiseResult } from "shared-types"
+import { AuditLogEvent } from "shared-types"
 
 export default class SanitiseAuditLogUseCase {
   constructor(private readonly auditLogDynamoGateway: AuditLogDynamoGateway) {}
@@ -12,6 +13,17 @@ export default class SanitiseAuditLogUseCase {
       delete auditLogEvent.attributes.OriginalPNCUpdateDataset
       delete auditLogEvent.attributes.PNCUpdateDataset
     }
+
+    auditLog.events.push(
+      new AuditLogEvent({
+        category: "information",
+        timestamp: new Date(),
+        eventType: "Sanitised message",
+        eventSource: "Audit Log Api"
+      })
+    )
+
+    auditLog.status = "Sanitised"
 
     return this.auditLogDynamoGateway.update(auditLog)
   }

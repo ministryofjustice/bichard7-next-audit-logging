@@ -1,7 +1,8 @@
 import "shared-testing"
-import { AuditLog, BichardAuditLogEvent } from "shared-types"
+import { AuditLog, AuditLogEvent, BichardAuditLogEvent } from "shared-types"
 import SanitiseAuditLogUseCase from "./SanitisAuditLogUseCase"
 import { FakeAuditLogDynamoGateway } from "shared-testing"
+import MockDate from "mockdate"
 
 const fakeAuditLogDynamoGateway = new FakeAuditLogDynamoGateway()
 const sanitiseAuditLogUseCase = new SanitiseAuditLogUseCase(fakeAuditLogDynamoGateway)
@@ -26,10 +27,14 @@ const createBichardAuditLogEvent = () => {
   return event
 }
 
-it("should remove attributes containing PII", async () => {
-  const message = new AuditLog("External Correlation ID", new Date(), "Dummy hash")
-  message.events = [createBichardAuditLogEvent()]
+const message = new AuditLog("External Correlation ID", new Date(), "Dummy hash")
+message.events = [createBichardAuditLogEvent()]
 
+afterAll(() => {
+  MockDate.reset()
+})
+
+it("should remove attributes containing PII", async () => {
   const sanitiseAuditLogResult = await sanitiseAuditLogUseCase.call(message)
 
   expect(sanitiseAuditLogResult).toNotBeError()
@@ -37,4 +42,30 @@ it("should remove attributes containing PII", async () => {
   const attributes = actualMessage?.events.find((event) => "s3Path" in event)?.attributes ?? {}
   expect(Object.keys(attributes)).toHaveLength(1)
   expect(attributes["Trigger 2 Details"]).toBe("TRPR0004")
+})
+
+it("should update the AuditLog  status to Sanitised", async () => {
+  const sanitiseAuditLogResult = await sanitiseAuditLogUseCase.call(message)
+
+  expect(sanitiseAuditLogResult).toNotBeError()
+  const actualMessage = sanitiseAuditLogResult as AuditLog
+  expect(actualMessage?.status).toBe("Sanitised")
+})
+
+it("should add a new event when the audit log successfully sanitised", async () => {
+  const currentDateTime = new Date("2022-04-12T10:11:12.000Z")
+  MockDate.set(currentDateTime)
+
+  const expectedAuditLogEvent = new AuditLogEvent({
+    category: "information",
+    timestamp: currentDateTime,
+    eventType: "Sanitised message",
+    eventSource: "Audit Log Api"
+  })
+
+  const sanitiseAuditLogResult = await sanitiseAuditLogUseCase.call(message)
+
+  expect(sanitiseAuditLogResult).toNotBeError()
+  const actualMessage = sanitiseAuditLogResult as AuditLog
+  expect(actualMessage?.events.slice(-1)[0]).toEqual(expectedAuditLogEvent)
 })

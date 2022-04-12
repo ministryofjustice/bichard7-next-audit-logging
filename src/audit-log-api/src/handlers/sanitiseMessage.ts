@@ -60,11 +60,6 @@ export default async function sanitiseMessage(event: APIGatewayProxyEvent): Prom
       body: sanitiseAuditLogResult.message
     })
   }
-  // Updating record in dynamodb
-  //  - Find and remove attributes for specific event types from events
-  //  - Add a new event to say the message has been sanitised
-  //  - Set the record status to Sanitised
-  //  - Update record
 
   return createJsonApiResult({
     statusCode: HttpStatusCode.noContent,
