@@ -1,21 +1,41 @@
 jest.retryTimes(10)
-import type { DynamoDbConfig } from "shared-types"
+import type { AuditLogLookup, DynamoDbConfig } from "shared-types"
 import { AuditLog, AuditLogEvent } from "shared-types"
 import { AwsAuditLogDynamoGateway } from "shared"
 import { TestDynamoGateway } from "shared"
 import CreateAuditLogEventUseCase from "./CreateAuditLogEventUseCase"
+import { AwsAuditLogLookupDynamoGateway } from "shared"
+import StoreValuesInLookupTableUseCase from "./StoreValuesInLookupTableUseCase"
+import type { KeyValuePair } from "shared-types"
 
-const config: DynamoDbConfig = {
+const auditLogConfig: DynamoDbConfig = {
   DYNAMO_URL: "http://localhost:8000",
   DYNAMO_REGION: "eu-west-2",
-  AUDIT_LOG_TABLE_NAME: "auditLogTable",
+  TABLE_NAME: "auditLogTable",
   AWS_ACCESS_KEY_ID: "DUMMY",
   AWS_SECRET_ACCESS_KEY: "DUMMY"
 }
 
-const testDynamoGateway = new TestDynamoGateway(config)
-const auditLogDynamoGateway = new AwsAuditLogDynamoGateway(config, config.AUDIT_LOG_TABLE_NAME)
-const createAuditLogEventUseCase = new CreateAuditLogEventUseCase(auditLogDynamoGateway)
+const auditLogLookupConfig: DynamoDbConfig = {
+  DYNAMO_URL: "http://localhost:8000",
+  DYNAMO_REGION: "eu-west-2",
+  TABLE_NAME: "auditLogLookupTable",
+  AWS_ACCESS_KEY_ID: "DUMMY",
+  AWS_SECRET_ACCESS_KEY: "DUMMY"
+}
+
+const testAuditLogDynamoGateway = new TestDynamoGateway(auditLogConfig)
+const testAuditLogLookupDynamoGateway = new TestDynamoGateway(auditLogLookupConfig)
+const auditLogDynamoGateway = new AwsAuditLogDynamoGateway(auditLogConfig, auditLogConfig.TABLE_NAME)
+const auditLogLookupDynamoGateway = new AwsAuditLogLookupDynamoGateway(
+  auditLogLookupConfig,
+  auditLogLookupConfig.TABLE_NAME
+)
+const storeValuesInLookupTableUseCase = new StoreValuesInLookupTableUseCase(auditLogLookupDynamoGateway)
+const createAuditLogEventUseCase = new CreateAuditLogEventUseCase(
+  auditLogDynamoGateway,
+  storeValuesInLookupTableUseCase
+)
 
 const createAuditLog = (): AuditLog => new AuditLog("CorrelationId", new Date(), "Dummy hash")
 const createAuditLogEvent = (): AuditLogEvent =>
@@ -41,11 +61,15 @@ const createStacktraceAuditLogEvent = (): AuditLogEvent => {
 }
 
 const getAuditLog = (messageId: string): Promise<AuditLog | null> =>
-  testDynamoGateway.getOne(config.AUDIT_LOG_TABLE_NAME, "messageId", messageId)
+  testAuditLogDynamoGateway.getOne(auditLogConfig.TABLE_NAME, "messageId", messageId)
+
+const lookupValue = (lookupId: string): Promise<AuditLogLookup | null> =>
+  testAuditLogLookupDynamoGateway.getOne(auditLogLookupConfig.TABLE_NAME, "id", lookupId)
 
 describe("CreateAuditLogUseCase", () => {
   beforeEach(async () => {
-    await testDynamoGateway.deleteAll(config.AUDIT_LOG_TABLE_NAME, "messageId")
+    await testAuditLogDynamoGateway.deleteAll(auditLogConfig.TABLE_NAME, "messageId")
+    await testAuditLogLookupDynamoGateway.deleteAll(auditLogLookupConfig.TABLE_NAME, "id")
   })
 
   it("should return success result when event is added to the audit log", async () => {
@@ -67,6 +91,42 @@ describe("CreateAuditLogUseCase", () => {
     expect(actualEvent?.timestamp).toBe(event.timestamp)
     expect(actualEvent?.eventType).toBe(event.eventType)
     expect(actualEvent?.eventSource).toBe(event.eventSource)
+  })
+
+  it("should store long attribute values in lookup table", async () => {
+    const auditLog = createAuditLog()
+    await auditLogDynamoGateway.create(auditLog)
+
+    const event = createAuditLogEvent()
+    event.addAttribute("attribute1", "test".repeat(500))
+    const result = await createAuditLogEventUseCase.create(auditLog.messageId, event)
+
+    expect(result.resultType).toBe("success")
+
+    const actualAuditLog = await getAuditLog(auditLog.messageId)
+    expect(actualAuditLog).toBeDefined()
+    expect(actualAuditLog?.events).toBeDefined()
+    expect(actualAuditLog?.events).toHaveLength(1)
+
+    const actualEvent = actualAuditLog!.events[0]
+    expect(actualEvent.category).toBe(event.category)
+    expect(actualEvent.timestamp).toBe(event.timestamp)
+    expect(actualEvent.eventType).toBe(event.eventType)
+    expect(actualEvent.eventSource).toBe(event.eventSource)
+    expect(actualEvent.attributes).toBeDefined()
+
+    const { attribute1 } = actualEvent.attributes
+    expect(attribute1).toBeDefined()
+    expect(typeof attribute1).toBe("object")
+
+    const { valueLookup } = attribute1 as KeyValuePair<string, string>
+    expect(valueLookup).toBeDefined()
+
+    const lookupResult = await lookupValue(valueLookup)
+    expect(lookupResult).toBeDefined()
+
+    const { value: attributeValue } = lookupResult as AuditLogLookup
+    expect(attributeValue).toBe(event.attributes.attribute1)
   })
 
   it("should return not found result when audit log does not exist", async () => {

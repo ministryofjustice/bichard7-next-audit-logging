@@ -27,11 +27,11 @@ const s3Gateway = new TestS3Gateway({
 const dynamoConfig: DynamoDbConfig = {
   DYNAMO_URL: "http://localhost:8000",
   DYNAMO_REGION: "eu-west-2",
-  AUDIT_LOG_TABLE_NAME: "auditLogTable",
+  TABLE_NAME: "auditLogTable",
   AWS_ACCESS_KEY_ID: "S3RVER",
   AWS_SECRET_ACCESS_KEY: "S3RVER"
 }
-const dynamoGateway = new AwsAuditLogDynamoGateway(dynamoConfig, dynamoConfig.AUDIT_LOG_TABLE_NAME)
+const dynamoGateway = new AwsAuditLogDynamoGateway(dynamoConfig, dynamoConfig.TABLE_NAME)
 const testDynamoGateway = new TestDynamoGateway(dynamoConfig)
 const eventHandlerSimulator = new EventHandlerSimulator()
 
@@ -58,7 +58,7 @@ type DynamoPollResult = {
 }
 
 beforeEach(async () => {
-  await testDynamoGateway.deleteAll(dynamoConfig.AUDIT_LOG_TABLE_NAME, "messageId")
+  await testDynamoGateway.deleteAll(dynamoConfig.TABLE_NAME, "messageId")
   await s3Gateway.deleteAll()
 })
 

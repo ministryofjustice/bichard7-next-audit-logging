@@ -14,10 +14,15 @@ export function mockAuditLog(date?: Date): AuditLog {
 }
 
 export function mockAuditLogEvent(category?: EventCategory, eventType?: string, date?: Date): AuditLogEvent {
-  return new AuditLogEvent({
+  const event = new AuditLogEvent({
     category: category ?? "information",
     timestamp: date ?? new Date(),
     eventType: eventType ?? "Test event",
     eventSource: "Test"
   })
+
+  event.addAttribute("Attribute 1", "Attribute 1 data".repeat(500))
+  event.addAttribute("Attribute 2", "Attribute 2 data")
+
+  return event
 }

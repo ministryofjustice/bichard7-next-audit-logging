@@ -3,7 +3,7 @@ import type { SecondaryIndex } from "./SecondaryIndex"
 
 const getTableAttributes = (
   partitionKey: string,
-  sortKey: string,
+  sortKey: string | undefined,
   secondaryIndexes: SecondaryIndex[]
 ): DynamoDB.AttributeDefinitions => {
   const attributesInIndexes: DynamoDB.AttributeDefinition[] = []
@@ -39,10 +39,14 @@ const getTableAttributes = (
       AttributeName: partitionKey,
       AttributeType: "S"
     },
-    {
-      AttributeName: sortKey,
-      AttributeType: "S"
-    },
+    ...(sortKey
+      ? [
+          {
+            AttributeName: sortKey,
+            AttributeType: "S"
+          }
+        ]
+      : []),
     {
       AttributeName: "_",
       AttributeType: "S"

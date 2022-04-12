@@ -8,23 +8,23 @@ import CreateAuditLogUseCase from "./CreateAuditLogUseCase"
 const config: DynamoDbConfig = {
   DYNAMO_URL: "http://localhost:8000",
   DYNAMO_REGION: "eu-west-2",
-  AUDIT_LOG_TABLE_NAME: "auditLogTable",
+  TABLE_NAME: "auditLogTable",
   AWS_ACCESS_KEY_ID: "DUMMY",
   AWS_SECRET_ACCESS_KEY: "DUMMY"
 }
 
 const testDynamoGateway = new TestDynamoGateway(config)
-const auditLogDynamoGateway = new AwsAuditLogDynamoGateway(config, config.AUDIT_LOG_TABLE_NAME)
+const auditLogDynamoGateway = new AwsAuditLogDynamoGateway(config, config.TABLE_NAME)
 const createAuditLogUseCase = new CreateAuditLogUseCase(auditLogDynamoGateway)
 
 const createAuditLog = (): AuditLog => new AuditLog("CorrelationId", new Date(), "Dummy hash")
 
 const getAuditLog = (messageId: string): Promise<AuditLog | null> =>
-  testDynamoGateway.getOne(config.AUDIT_LOG_TABLE_NAME, "messageId", messageId)
+  testDynamoGateway.getOne(config.TABLE_NAME, "messageId", messageId)
 
 describe("CreateAuditLogUseCase", () => {
   beforeEach(async () => {
-    await testDynamoGateway.deleteAll(config.AUDIT_LOG_TABLE_NAME, "messageId")
+    await testDynamoGateway.deleteAll(config.TABLE_NAME, "messageId")
   })
 
   it("should return a conflict result when an Audit Log record exists with the same messageId", async () => {

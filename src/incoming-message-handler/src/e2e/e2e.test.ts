@@ -44,7 +44,7 @@ const originalXml = formatXml(`
 const dynamoConfig: DynamoDbConfig = {
   DYNAMO_URL: "http://localhost:8000",
   DYNAMO_REGION: "eu-west-2",
-  AUDIT_LOG_TABLE_NAME: "auditLogTable",
+  TABLE_NAME: "auditLogTable",
   AWS_ACCESS_KEY_ID: "DUMMY",
   AWS_SECRET_ACCESS_KEY: "DUMMY"
 }
@@ -70,7 +70,7 @@ const testMqGateway = new TestMqGateway({
 
 describe("e2e tests", () => {
   beforeEach(async () => {
-    await dynamoGateway.deleteAll(dynamoConfig.AUDIT_LOG_TABLE_NAME, "messageId")
+    await dynamoGateway.deleteAll(dynamoConfig.TABLE_NAME, "messageId")
     await s3Gateway.deleteAll()
   })
 

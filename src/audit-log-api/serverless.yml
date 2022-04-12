@@ -8,6 +8,7 @@ provider:
     AWS_URL: http://localhost:8000
     DYNAMO_REGION: eu-west-2
     AUDIT_LOG_TABLE_NAME: auditLogTable
+    AUDIT_LOG_LOOKUP_TABLE_NAME: auditLogLookupTable
     MQ_USER: admin
     MQ_PASSWORD: admin
     MQ_URL: failover:(stomp://localhost:51613)
@@ -64,7 +65,7 @@ resources:
       Type: AWS::S3::Bucket
       Properties:
         BucketName: internalIncomingBucket
-    usersTable:
+    auditLogTable:
       Type: AWS::DynamoDB::Table
       Properties:
         TableName: auditLogTable
@@ -80,6 +81,8 @@ resources:
           - AttributeName: messageHash
             AttributeType: S
           - AttributeName: status
+            AttributeType: S
+          - AttributeName: caseId
             AttributeType: S
         KeySchema:
           - AttributeName: messageId
@@ -120,6 +123,40 @@ resources:
                 KeyType: HASH
               - AttributeName: receivedDate
                 KeyType: RANGE
+            Projection:
+              ProjectionType: "ALL"
+            ProvisionedThroughput:
+              ReadCapacityUnits: 1
+              WriteCapacityUnits: 1
+          - IndexName: caseIdIndex
+            KeySchema:
+              - AttributeName: caseId
+                KeyType: HASH
+            Projection:
+              ProjectionType: "ALL"
+            ProvisionedThroughput:
+              ReadCapacityUnits: 1
+              WriteCapacityUnits: 1
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+    auditLogLookupTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: auditLogLookupTable
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+          - AttributeName: externalCorrelationId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        GlobalSecondaryIndexes:
+          - IndexName: externalCorrelationIdIndex
+            KeySchema:
+              - AttributeName: externalCorrelationId
+                KeyType: HASH
             Projection:
               ProjectionType: "ALL"
             ProvisionedThroughput:

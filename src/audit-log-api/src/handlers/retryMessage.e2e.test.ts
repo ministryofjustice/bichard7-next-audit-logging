@@ -9,7 +9,7 @@ import { v4 as uuid } from "uuid"
 const dynamoConfig: DynamoDbConfig = {
   DYNAMO_URL: "http://localhost:8000",
   DYNAMO_REGION: "eu-west-2",
-  AUDIT_LOG_TABLE_NAME: "auditLogTable",
+  TABLE_NAME: "auditLogTable",
   AWS_ACCESS_KEY_ID: "DUMMY",
   AWS_SECRET_ACCESS_KEY: "DUMMY"
 }
@@ -34,7 +34,7 @@ const testMqGateway = new TestStompitMqGateway(mqConfig)
 
 describe("retryMessage", () => {
   beforeEach(async () => {
-    await testDynamoGateway.deleteAll(dynamoConfig.AUDIT_LOG_TABLE_NAME, "messageId")
+    await testDynamoGateway.deleteAll(dynamoConfig.TABLE_NAME, "messageId")
     await s3Gateway.deleteAll()
   })
 
@@ -63,7 +63,7 @@ describe("retryMessage", () => {
       })
     )
 
-    await testDynamoGateway.insertOne(dynamoConfig.AUDIT_LOG_TABLE_NAME, message, "messageId")
+    await testDynamoGateway.insertOne(dynamoConfig.TABLE_NAME, message, "messageId")
 
     const response = await axios.post(`http://localhost:3010/messages/${message.messageId}/retry`, null)
 

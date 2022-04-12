@@ -10,7 +10,7 @@ type KeyValue = string | number | boolean
 
 interface CreateTableOptions {
   keyName: string
-  sortKey: string
+  sortKey?: string
   secondaryIndexes: SecondaryIndex[]
   skipIfExists: boolean
 }
@@ -29,7 +29,7 @@ export default class TestDynamoGateway extends DynamoGateway {
     }
 
     const attributes = getTableAttributes(keyName, sortKey, secondaryIndexes)
-    const indexes = getTableIndexes(sortKey, secondaryIndexes)
+    const indexes = sortKey ? getTableIndexes(sortKey, secondaryIndexes) : undefined
 
     return this.service
       .createTable({

@@ -13,7 +13,7 @@ import handler from "./index"
 const dynamoConfig: DynamoDbConfig = {
   DYNAMO_URL: "http://localhost:8000",
   DYNAMO_REGION: "eu-west-2",
-  AUDIT_LOG_TABLE_NAME: "auditLogTable",
+  TABLE_NAME: "auditLogTable",
   AWS_ACCESS_KEY_ID: "DUMMY",
   AWS_SECRET_ACCESS_KEY: "DUMMY"
 }
@@ -32,7 +32,7 @@ const s3Gateway = new TestAwsS3Gateway(s3Config)
 describe("Retry Failed Messages", () => {
   beforeEach(async () => {
     await s3Gateway.deleteAll()
-    await dynamoGateway.deleteAll(dynamoConfig.AUDIT_LOG_TABLE_NAME, "messageId")
+    await dynamoGateway.deleteAll(dynamoConfig.TABLE_NAME, "messageId")
   })
 
   it("should retry the correct messages for the first time", async () => {
@@ -61,7 +61,7 @@ describe("Retry Failed Messages", () => {
       })
     )
 
-    await dynamoGateway.insertOne(dynamoConfig.AUDIT_LOG_TABLE_NAME, message, "messageId")
+    await dynamoGateway.insertOne(dynamoConfig.TABLE_NAME, message, "messageId")
 
     const result = await handler()
 
@@ -83,7 +83,7 @@ describe("Retry Failed Messages", () => {
       })
     )
 
-    await dynamoGateway.insertOne(dynamoConfig.AUDIT_LOG_TABLE_NAME, message, "messageId")
+    await dynamoGateway.insertOne(dynamoConfig.TABLE_NAME, message, "messageId")
 
     const result = await handler()
 

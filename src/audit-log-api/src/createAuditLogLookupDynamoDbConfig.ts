@@ -1,7 +1,7 @@
 import type { DynamoDbConfig } from "shared-types"
 
-export default function createDynamoDbConfig(): DynamoDbConfig {
-  const { AWS_URL, AWS_REGION, AUDIT_LOG_TABLE_NAME, DYNAMO_AWS_ACCESS_KEY_ID, DYNAMO_AWS_SECRET_ACCESS_KEY } =
+export default function createAdutiLogDynamoDbConfig(): DynamoDbConfig {
+  const { AWS_URL, AWS_REGION, AUDIT_LOG_LOOKUP_TABLE_NAME, DYNAMO_AWS_ACCESS_KEY_ID, DYNAMO_AWS_SECRET_ACCESS_KEY } =
     process.env
 
   if (!AWS_URL) {
@@ -12,14 +12,14 @@ export default function createDynamoDbConfig(): DynamoDbConfig {
     throw Error("AWS_REGION environment variable must have value.")
   }
 
-  if (!AUDIT_LOG_TABLE_NAME) {
-    throw Error("AUDIT_LOG_TABLE_NAME environment variable must have value.")
+  if (!AUDIT_LOG_LOOKUP_TABLE_NAME) {
+    throw Error("AUDIT_LOG_LOOKUP_TABLE_NAME environment variable must have value.")
   }
 
   const config: DynamoDbConfig = {
     DYNAMO_URL: AWS_URL,
     DYNAMO_REGION: AWS_REGION,
-    AUDIT_LOG_TABLE_NAME
+    TABLE_NAME: AUDIT_LOG_LOOKUP_TABLE_NAME
   }
 
   if (DYNAMO_AWS_ACCESS_KEY_ID) {
