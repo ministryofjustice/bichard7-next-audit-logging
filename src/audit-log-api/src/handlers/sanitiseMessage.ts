@@ -2,14 +2,14 @@ import type { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda"
 import { AwsAuditLogDynamoGateway, AwsS3Gateway, createS3Config, HttpStatusCode } from "shared"
 import type { AuditLog } from "shared-types"
 import { isError } from "shared-types"
-import createDynamoDbConfig from "../createDynamoDbConfig"
+import createAuditLogDynamoDbConfig from "../createAuditLogDynamoDbConfig"
 import FetchById from "../use-cases/FetchById"
 import DeleteMessageObjectsFromS3UseCase from "../use-cases/DeleteMessageObjectsFromS3UseCase"
 import { createJsonApiResult } from "../utils"
 import SanitiseAuditLogUseCase from "../use-cases/SanitisAuditLogUseCase"
 
-const config = createDynamoDbConfig()
-const auditLogGateway = new AwsAuditLogDynamoGateway(config, config.AUDIT_LOG_TABLE_NAME)
+const config = createAuditLogDynamoDbConfig()
+const auditLogGateway = new AwsAuditLogDynamoGateway(config, config.TABLE_NAME)
 const awsS3Gateway = new AwsS3Gateway(createS3Config("AUDIT_LOG_EVENTS_BUCKET"))
 const deleteMessageObjectsFromS3UseCase = new DeleteMessageObjectsFromS3UseCase(awsS3Gateway)
 const sanitiseAuditLogUseCase = new SanitiseAuditLogUseCase(auditLogGateway)

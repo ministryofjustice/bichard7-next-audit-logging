@@ -9,7 +9,7 @@ import axios from "axios"
 const dynamoConfig: DynamoDbConfig = {
   DYNAMO_URL: "http://localhost:8000",
   DYNAMO_REGION: "eu-west-2",
-  AUDIT_LOG_TABLE_NAME: "auditLogTable",
+  TABLE_NAME: "auditLogTable",
   AWS_ACCESS_KEY_ID: "DUMMY",
   AWS_SECRET_ACCESS_KEY: "DUMMY"
 }
@@ -65,7 +65,7 @@ describe("sanitiseMessage", () => {
 
     await Promise.all([message.s3Path, event1.s3Path].map((s3Path) => s3Gateway.upload(s3Path, "dummy")))
 
-    await testDynamoGateway.insertOne(dynamoConfig.AUDIT_LOG_TABLE_NAME, message, "messageId")
+    await testDynamoGateway.insertOne(dynamoConfig.TABLE_NAME, message, "messageId")
 
     const response = await axios.post(`http://localhost:3010/messages/${message.messageId}/sanitise`, null, {
       validateStatus: undefined
@@ -75,7 +75,7 @@ describe("sanitiseMessage", () => {
     expect(await s3Gateway.getAll()).toEqual([])
 
     const actualMessage = await testDynamoGateway.getOne<AuditLog>(
-      dynamoConfig.AUDIT_LOG_TABLE_NAME,
+      dynamoConfig.TABLE_NAME,
       "messageId",
       message.messageId
     )
