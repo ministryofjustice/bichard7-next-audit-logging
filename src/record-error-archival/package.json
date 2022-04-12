@@ -20,6 +20,7 @@
     "shared-types": "file:../shared-types"
   },
   "devDependencies": {
+    "@aws-sdk/client-lambda": "^3.67.0",
     "@babel/preset-env": "^7.16.11",
     "@babel/preset-typescript": "^7.16.7",
     "@types/jest": "^27.4.0",
