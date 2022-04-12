@@ -6,11 +6,13 @@ import createDynamoDbConfig from "../createDynamoDbConfig"
 import FetchById from "../use-cases/FetchById"
 import DeleteMessageObjectsFromS3UseCase from "../use-cases/DeleteMessageObjectsFromS3UseCase"
 import { createJsonApiResult } from "../utils"
+import SanitiseAuditLogUseCase from "../use-cases/SanitisAuditLogUseCase"
 
 const config = createDynamoDbConfig()
 const auditLogGateway = new AwsAuditLogDynamoGateway(config, config.AUDIT_LOG_TABLE_NAME)
 const awsS3Gateway = new AwsS3Gateway(createS3Config("AUDIT_LOG_EVENTS_BUCKET"))
 const deleteMessageObjectsFromS3UseCase = new DeleteMessageObjectsFromS3UseCase(awsS3Gateway)
+const sanitiseAuditLogUseCase = new SanitiseAuditLogUseCase(auditLogGateway)
 
 /* eslint-disable require-await */
 export default async function sanitiseMessage(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
@@ -41,6 +43,7 @@ export default async function sanitiseMessage(event: APIGatewayProxyEvent): Prom
   }
 
   const message = messageFetcherResult as AuditLog
+
   const deleteMessageObjectsFromS3Result = await deleteMessageObjectsFromS3UseCase.call(message)
   if (isError(deleteMessageObjectsFromS3Result)) {
     return createJsonApiResult({
@@ -49,6 +52,14 @@ export default async function sanitiseMessage(event: APIGatewayProxyEvent): Prom
     })
   }
 
+  const sanitiseAuditLogResult = await sanitiseAuditLogUseCase.call(message)
+
+  if (isError(sanitiseAuditLogResult)) {
+    return createJsonApiResult({
+      statusCode: HttpStatusCode.internalServerError,
+      body: sanitiseAuditLogResult.message
+    })
+  }
   // Updating record in dynamodb
   //  - Find and remove attributes for specific event types from events
   //  - Add a new event to say the message has been sanitised

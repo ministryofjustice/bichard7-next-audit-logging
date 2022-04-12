@@ -40,7 +40,6 @@ const createBichardAuditLogEvent = (eventS3Path: string) => {
   event.addAttribute("OriginalHearingOutcome", "<?xml><dummy></dummy>")
   event.addAttribute("OriginalPNCUpdateDataset", "<?xml><dummy></dummy>")
   event.addAttribute("PNCUpdateDataset", "<?xml><dummy></dummy>")
-  event.addAttribute("PNCUpdateDataset", "<?xml><dummy></dummy>")
   event.addAttribute("AmendedHearingOutcome", "<?xml><dummy></dummy>")
   event.addAttribute("AmendedPNCUpdateDataset", "<?xml><dummy></dummy>")
 

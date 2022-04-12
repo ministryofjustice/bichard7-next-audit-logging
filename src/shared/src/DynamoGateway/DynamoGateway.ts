@@ -39,6 +39,20 @@ export default class DynamoGateway {
       .catch((error) => <Error>error)
   }
 
+  updateOne<T>(tableName: string, record: T, keyName: string): PromiseResult<void> {
+    const params: DocumentClient.PutItemInput = {
+      TableName: tableName,
+      Item: { _: "_", ...record },
+      ConditionExpression: `attribute_exists(${keyName})`
+    }
+
+    return this.client
+      .put(params)
+      .promise()
+      .then(() => undefined)
+      .catch((error) => <Error>error)
+  }
+
   getMany(tableName: string, options: GetManyOptions): PromiseResult<DocumentClient.QueryOutput> {
     const { sortKey } = options
     const { limit, lastItemKey } = options.pagination

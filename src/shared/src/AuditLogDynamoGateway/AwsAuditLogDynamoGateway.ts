@@ -27,6 +27,16 @@ export default class AwsAuditLogDynamoGateway extends DynamoGateway implements A
     return message
   }
 
+  async update(message: AuditLog): PromiseResult<AuditLog> {
+    const result = await this.updateOne(this.tableName, message, "messageId")
+
+    if (isError(result)) {
+      return result
+    }
+
+    return message
+  }
+
   async fetchMany(limit = 10, lastMessage?: AuditLog): PromiseResult<AuditLog[]> {
     const result = await new IndexSearcher<AuditLog[]>(this, this.tableName, this.tableKey)
       .useIndex(`${this.sortKey}Index`)

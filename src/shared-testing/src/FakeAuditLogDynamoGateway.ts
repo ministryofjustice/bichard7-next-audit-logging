@@ -11,6 +11,14 @@ export default class FakeAuditLogDynamoGateway implements AuditLogDynamoGateway 
     throw new Error("Method not implemented.")
   }
 
+  update(message: AuditLog): PromiseResult<AuditLog> {
+    if (this.error) {
+      return Promise.resolve(this.error)
+    }
+
+    return Promise.resolve(message)
+  }
+
   // @ts-ignore
   fetchMany(limit?: number, lastMessage?: AuditLog): PromiseResult<AuditLog[]> {
     if (this.error) {

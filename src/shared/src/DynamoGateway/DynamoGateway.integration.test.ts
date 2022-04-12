@@ -75,6 +75,61 @@ describe("DynamoGateway", () => {
     })
   })
 
+  describe("updateOne()", () => {
+    it("should return error when the record does not exist in dynamoDB", async () => {
+      const record = {
+        id: "InsertOneRecord",
+        someOtherValue: "SomeOtherValue"
+      }
+
+      const result = await gateway.updateOne(config.AUDIT_LOG_TABLE_NAME, record, "id")
+
+      expect(result).toBeTruthy()
+      expect(isError(result)).toBe(true)
+      expect((<Error>result).message).toBe("The conditional request failed")
+    })
+
+    it("should return undefined when successful and have updated one record", async () => {
+      const oldRecord = {
+        id: "InsertOneRecord",
+        someOtherValue: "OldValue"
+      }
+
+      await gateway.insertOne(config.AUDIT_LOG_TABLE_NAME, oldRecord, "id")
+
+      const updatedRecord = {
+        id: "InsertOneRecord",
+        someOtherValue: "NewValue"
+      }
+      const result = await gateway.updateOne(config.AUDIT_LOG_TABLE_NAME, updatedRecord, "id")
+
+      expect(result).toBeUndefined()
+
+      const actualRecords = await gateway.getAll(config.AUDIT_LOG_TABLE_NAME)
+      expect(actualRecords.Count).toBe(1)
+
+      const actualRecord = actualRecords.Items?.[0]
+      expect(actualRecord?.id).toBe(updatedRecord.id)
+      expect(actualRecord?.someOtherValue).toBe(updatedRecord.someOtherValue)
+    })
+
+    it("should return an error when there is a failure and have inserted zero records", async () => {
+      const record = {
+        id: 1234,
+        someOtherValue: "Id should be a number"
+      }
+
+      const result = await gateway.updateOne(config.AUDIT_LOG_TABLE_NAME, record, "id")
+
+      expect(result).toBeTruthy()
+      expect(isError(result)).toBe(true)
+      expect((<Error>result).message).toBe("One or more parameter values were invalid: Type mismatch for key")
+
+      const actualRecords = await gateway.getAll(config.AUDIT_LOG_TABLE_NAME)
+      expect(actualRecords.Count).toBe(0)
+    })
+  })
+
   describe("getMany()", () => {
     beforeEach(async () => {
       await Promise.allSettled(
