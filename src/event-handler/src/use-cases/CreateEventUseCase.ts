@@ -23,7 +23,8 @@ export default class {
 
     if (
       isError(createAuditLogResult) &&
-      /A message with Id .+ already exists/i.test(createAuditLogResult.message) === false
+      /A message with Id .+ already exists/i.test(createAuditLogResult.message) === false &&
+      /Message hash already exists/i.test(createAuditLogResult.message) === false
     ) {
       return createAuditLogResult
     }
