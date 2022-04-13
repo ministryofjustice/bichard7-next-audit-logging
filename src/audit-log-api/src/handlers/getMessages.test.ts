@@ -13,6 +13,7 @@ import { HttpStatusCode } from "shared"
 import { createMessageFetcher } from "../use-cases"
 import type MessageFetcher from "../use-cases/MessageFetcher"
 import getMessages from "./getMessages"
+import LookupMessageValuesUseCase from "src/use-cases/LookupMessageValuesUseCase"
 
 const mockCreateMessageFetcher = createMessageFetcher as jest.MockedFunction<typeof createMessageFetcher>
 
@@ -63,7 +64,7 @@ test("should respond with a list of messages", async () => {
   expect(actualMessage2.receivedDate).toBe(log2.receivedDate)
 })
 
-test("should respond with error", async () => {
+test("should respond with error when message fetcher fails", async () => {
   const error = new Error("Expected Error")
   mockCreateMessageFetcher.mockReturnValue(createDummyMessageFetcher(error))
 
@@ -73,6 +74,22 @@ test("should respond with error", async () => {
 
   expect(actualResponse.statusCode).toBe(HttpStatusCode.badRequest)
   expect(actualResponse.body).toBe("Error: Expected Error")
+})
+
+test("should respond with error when lookup message values fails", async () => {
+  const error = new Error("Expected Error")
+  const lookupMessageValuesUseCaseSpy = jest
+    .spyOn(LookupMessageValuesUseCase.prototype, "execute")
+    .mockResolvedValue(error)
+  mockCreateMessageFetcher.mockReturnValue(createDummyMessageFetcher(log1))
+
+  const event = createEvent({ messageId: "SomeMessageId" })
+  const messages = await getMessages(event)
+  const actualResponse = <APIGatewayProxyResult>messages
+
+  expect(actualResponse.statusCode).toBe(HttpStatusCode.internalServerError)
+  expect(actualResponse.body).toBe("Error: Expected Error")
+  lookupMessageValuesUseCaseSpy.mockRestore()
 })
 
 test("should return a single message when the message Id is given", async () => {

@@ -12,6 +12,8 @@ export const createMockError = async (date?: Date): PromiseResult<AuditLog> => {
   if (isError(res)) {
     return res
   }
+
+  auditLog.events.push(event)
   return auditLog
 }
 
