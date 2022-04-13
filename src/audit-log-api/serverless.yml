@@ -147,15 +147,15 @@ resources:
         AttributeDefinitions:
           - AttributeName: id
             AttributeType: S
-          - AttributeName: externalCorrelationId
+          - AttributeName: messageId
             AttributeType: S
         KeySchema:
           - AttributeName: id
             KeyType: HASH
         GlobalSecondaryIndexes:
-          - IndexName: externalCorrelationIdIndex
+          - IndexName: messageIdIndex
             KeySchema:
-              - AttributeName: externalCorrelationId
+              - AttributeName: messageId
                 KeyType: HASH
             Projection:
               ProjectionType: "ALL"
