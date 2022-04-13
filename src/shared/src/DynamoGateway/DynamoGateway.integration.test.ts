@@ -408,4 +408,44 @@ describe("DynamoGateway", () => {
       expect(isError(result)).toBe(true)
     })
   })
+
+  describe("deleteMany", () => {
+    it("should delete all items when items exist in the table", async () => {
+      const ids = ["item-1", "item-2"]
+      await Promise.all(
+        ids.map((id) => {
+          const item = {
+            id,
+            someOtherValue: "OldValue"
+          }
+          return testGateway.insertOne(config.TABLE_NAME, item, "id")
+        })
+      )
+
+      const deleteResult = await gateway.deleteMany(config.TABLE_NAME, "id", ids)
+
+      expect(isError(deleteResult)).toBe(false)
+
+      const getResult = await testGateway.getAll(config.TABLE_NAME)
+
+      expect(getResult.Items).toHaveLength(0)
+    })
+
+    it("should be successful when items do not exist in the table", async () => {
+      const ids = ["item-1", "item-2"]
+      const deleteResult = await gateway.deleteMany(config.TABLE_NAME, "id", ids)
+
+      expect(isError(deleteResult)).toBe(false)
+    })
+
+    it("should return error when DynamoDB returns an error", async () => {
+      const ids = ["item-1", "item-2"]
+      const deleteResult = await gateway.deleteMany(config.TABLE_NAME, "invalid field", ids)
+
+      expect(isError(deleteResult)).toBe(true)
+
+      const actualError = deleteResult as Error
+      expect(actualError.message).toBe("One of the required keys was not given a value")
+    })
+  })
 })
