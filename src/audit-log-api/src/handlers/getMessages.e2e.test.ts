@@ -73,4 +73,26 @@ describe("Getting Audit Logs", () => {
     const messageIds = result.data.map((record) => record.messageId)
     expect(messageIds).toEqual([auditLog2.messageId])
   })
+
+  it("should get message and lookup attribute values", async () => {
+    const auditLog = await createMockError()
+    if (isError(auditLog)) {
+      throw new Error("Unexpected error")
+    }
+
+    const result = await axios.get<AuditLog[]>(
+      `http://localhost:3010/messages?externalCorrelationId=${auditLog.externalCorrelationId}`
+    )
+    expect(result.status).toEqual(HttpStatusCode.ok)
+
+    expect(Array.isArray(result.data)).toBeTruthy()
+    const actualMessage = result.data[0]
+
+    expect(actualMessage.messageId).toEqual(auditLog.messageId)
+    expect(actualMessage.events).toHaveLength(1)
+
+    const { attributes } = actualMessage.events[0]
+    expect(attributes["Attribute 1"]).toBe(auditLog.events[0].attributes["Attribute 1"])
+    expect(attributes["Attribute 2"]).toBe(auditLog.events[0].attributes["Attribute 2"])
+  })
 })
