@@ -1,5 +1,6 @@
 jest.retryTimes(10)
 import "shared-testing"
+import { v4 as uuid } from "uuid"
 import type { DynamoDbConfig } from "shared-types"
 import { isError, AuditLogLookup } from "shared-types"
 import TestDynamoGateway from "../DynamoGateway/TestDynamoGateway"
@@ -84,6 +85,62 @@ describe("AuditLogDynamoGateway", () => {
 
       expect(isError(result)).toBe(false)
       expect(result as AuditLogLookup).toBeUndefined()
+    })
+  })
+
+  describe("fetchByMessageId", () => {
+    it("should return an item for a specific message ID", async () => {
+      const expectedLookupItem = new AuditLogLookup("Expected value 1", "Expected message ID")
+      const anotherLookupItem = new AuditLogLookup("Expected value 2", "Dummy message ID")
+
+      await testGateway.insertOne(config.TABLE_NAME, expectedLookupItem, "id")
+      await testGateway.insertOne(config.TABLE_NAME, anotherLookupItem, "id")
+
+      const result = await gateway.fetchByMessageId(expectedLookupItem.messageId)
+
+      expect(isError(result)).toBe(false)
+
+      const [{ id, messageId, value }] = result as AuditLogLookup[]
+      expect(id).toStrictEqual(expectedLookupItem.id)
+      expect(messageId).toStrictEqual(expectedLookupItem.messageId)
+      expect(value).toStrictEqual(expectedLookupItem.value)
+    })
+
+    it("should return items for a specific message ID when last item is provided", async () => {
+      const expectedMessageId = uuid()
+      const items = [...Array(10).keys()].map((index) => {
+        const item = new AuditLogLookup(`Expected value ${index}`, expectedMessageId)
+        return { ...item, id: `ID-${index}` }
+      })
+
+      for (const item of items) {
+        await testGateway.insertOne(config.TABLE_NAME, item, "id")
+      }
+
+      const insertedItems = (await testGateway.getAll(config.TABLE_NAME)).Items as AuditLogLookup[]
+
+      expect(insertedItems).toHaveLength(10)
+
+      const result = await gateway.fetchByMessageId(expectedMessageId, insertedItems.at(7))
+
+      expect(isError(result)).toBe(false)
+
+      const actualItems = result as AuditLogLookup[]
+      expect(actualItems).toHaveLength(2)
+      expect(actualItems[0]).toStrictEqual(insertedItems[8])
+      expect(actualItems[1]).toStrictEqual(insertedItems[9])
+    })
+
+    it("should return error when DynamoDB returns error", async () => {
+      const expectedError = new Error("Dummy error")
+      jest.spyOn(gateway, "fetchByIndex").mockResolvedValue(expectedError)
+
+      const result = await gateway.fetchByMessageId("DummyMessageID")
+
+      expect(isError(result)).toBe(true)
+
+      const actualError = result as Error
+      expect(actualError.message).toBe(expectedError.message)
     })
   })
 })
