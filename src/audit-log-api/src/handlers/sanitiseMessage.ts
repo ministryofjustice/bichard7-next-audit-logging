@@ -14,6 +14,7 @@ import FetchById from "../use-cases/FetchById"
 import DeleteMessageObjectsFromS3UseCase from "../use-cases/DeleteMessageObjectsFromS3UseCase"
 import { createJsonApiResult } from "../utils"
 import SanitiseAuditLogUseCase from "../use-cases/SanitisAuditLogUseCase"
+import DeleteAuditLogLookupItemsUseCase from "../use-cases/DeleteAuditLogLookupItemsUseCase"
 
 const auditLogDynamoDbConfig = createAuditLogDynamoDbConfig()
 const auditLogGateway = new AwsAuditLogDynamoGateway(auditLogDynamoDbConfig, auditLogDynamoDbConfig.TABLE_NAME)
@@ -25,6 +26,7 @@ const awsAuditLogLookupDynamoGateway = new AwsAuditLogLookupDynamoGateway(
 const awsS3Gateway = new AwsS3Gateway(createS3Config("AUDIT_LOG_EVENTS_BUCKET"))
 const deleteMessageObjectsFromS3UseCase = new DeleteMessageObjectsFromS3UseCase(awsS3Gateway)
 const sanitiseAuditLogUseCase = new SanitiseAuditLogUseCase(auditLogGateway)
+const deleteAuditLogLookupItems = new DeleteAuditLogLookupItemsUseCase(awsAuditLogLookupDynamoGateway)
 /* eslint-disable require-await */
 export default async function sanitiseMessage(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
   const messageId = event.pathParameters?.messageId
@@ -72,7 +74,7 @@ export default async function sanitiseMessage(event: APIGatewayProxyEvent): Prom
     })
   }
 
-  const deleteAuditLogLookupResult = await awsAuditLogLookupDynamoGateway.deleteByMessageId(message.messageId)
+  const deleteAuditLogLookupResult = await deleteAuditLogLookupItems.call(message.messageId)
 
   if (isError(deleteAuditLogLookupResult)) {
     return createJsonApiResult({

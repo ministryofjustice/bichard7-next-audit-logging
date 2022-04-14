@@ -29,7 +29,11 @@ export default class AwsAuditLogLookupDynamoGateway extends DynamoGateway implem
     return result?.Item as AuditLogLookup
   }
 
-  async fetchByMessageId(messageId: string, lastLookupItem?: AuditLogLookup, limit = 10): PromiseResult<AuditLogLookup[]> {
+  async fetchByMessageId(
+    messageId: string,
+    lastLookupItem?: AuditLogLookup,
+    limit = 10
+  ): PromiseResult<AuditLogLookup[]> {
     const result = await new IndexSearcher<AuditLogLookup[]>(this, this.tableName, this.tableKey)
       .useIndex("messageIdIndex")
       .setIndexKeys("messageId", messageId)

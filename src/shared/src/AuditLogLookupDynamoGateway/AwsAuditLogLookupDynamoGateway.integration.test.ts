@@ -215,10 +215,10 @@ describe("AuditLogDynamoGateway", () => {
       const result = await gateway.deleteByMessageId("dummy")
 
       expect(isError(result)).toBe(false)
-      expect(result).toBeUndefined
+      expect(result).toBeUndefined()
     })
 
-    it("should return error when DynamoDB returns error", async () => {
+    it("should return error when fetchAllByMessageId returns error", async () => {
       const expectedError = new Error("Dummy error")
       jest.spyOn(gateway, "fetchAllByMessageId").mockResolvedValue(expectedError)
 
@@ -230,7 +230,7 @@ describe("AuditLogDynamoGateway", () => {
       expect(actualError.message).toBe(expectedError.message)
     })
 
-    it("should return error when DynamoDB returns error", async () => {
+    it("should return error when deleteMany returns error", async () => {
       const messageId = uuid()
       await Promise.all(
         [...Array(2).keys()].map((index) => {
