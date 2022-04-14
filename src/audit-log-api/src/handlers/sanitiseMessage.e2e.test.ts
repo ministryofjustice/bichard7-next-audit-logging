@@ -1,7 +1,7 @@
 jest.setTimeout(15000)
 
 import type { DynamoDbConfig, S3Config } from "shared-types"
-import { AuditLogEvent, BichardAuditLogEvent } from "shared-types"
+import { AuditLogEvent, AuditLogLookup, BichardAuditLogEvent } from "shared-types"
 import { AuditLog } from "shared-types"
 import { HttpStatusCode, TestAwsS3Gateway, TestDynamoGateway } from "shared"
 import axios from "axios"
@@ -9,10 +9,13 @@ import axios from "axios"
 const dynamoConfig: DynamoDbConfig = {
   DYNAMO_URL: "http://localhost:8000",
   DYNAMO_REGION: "eu-west-2",
-  TABLE_NAME: "auditLogTable",
+  TABLE_NAME: "",
   AWS_ACCESS_KEY_ID: "DUMMY",
   AWS_SECRET_ACCESS_KEY: "DUMMY"
 }
+
+const auditLogTableName = "auditLogTable"
+const auditLogLookupTableName = "auditLogLookupTable"
 
 const s3Config: S3Config = {
   url: "http://localhost:4569",
@@ -49,6 +52,8 @@ const createBichardAuditLogEvent = (eventS3Path: string) => {
 describe("sanitiseMessage", () => {
   beforeEach(async () => {
     await s3Gateway.deleteAll()
+    await testDynamoGateway.deleteAll(auditLogTableName, "messageId")
+    await testDynamoGateway.deleteAll(auditLogLookupTableName, "id")
   })
 
   it("should return Ok status when message has been sanitised successfully", async () => {
@@ -65,7 +70,14 @@ describe("sanitiseMessage", () => {
 
     await Promise.all([message.s3Path, event1.s3Path].map((s3Path) => s3Gateway.upload(s3Path, "dummy")))
 
-    await testDynamoGateway.insertOne(dynamoConfig.TABLE_NAME, message, "messageId")
+    await testDynamoGateway.insertOne(auditLogTableName, message, "messageId")
+
+    await Promise.all(
+      [...Array(2).keys()].map((index) => {
+        const item = new AuditLogLookup(`Record to delete ${index}`, message.messageId)
+        return testDynamoGateway.insertOne(auditLogLookupTableName, { ...item, id: `ID-${index}` }, "id")
+      })
+    )
 
     const response = await axios.post(`http://localhost:3010/messages/${message.messageId}/sanitise`, null, {
       validateStatus: undefined
@@ -74,15 +86,14 @@ describe("sanitiseMessage", () => {
     expect(response.status).toBe(HttpStatusCode.noContent)
     expect(await s3Gateway.getAll()).toEqual([])
 
-    const actualMessage = await testDynamoGateway.getOne<AuditLog>(
-      dynamoConfig.TABLE_NAME,
-      "messageId",
-      message.messageId
-    )
+    const actualMessage = await testDynamoGateway.getOne<AuditLog>(auditLogTableName, "messageId", message.messageId)
 
     const attributes = actualMessage?.events.find((event) => "s3Path" in event)?.attributes ?? {}
     expect(Object.keys(attributes)).toHaveLength(1)
     expect(attributes["Trigger 2 Details"]).toBe("TRPR0004")
+
+    const lookupItems = await testDynamoGateway.getAll(auditLogLookupTableName)
+    expect(lookupItems.Items).toHaveLength(0)
   })
 
   it("should return Error when the message ID does not exist", async () => {
