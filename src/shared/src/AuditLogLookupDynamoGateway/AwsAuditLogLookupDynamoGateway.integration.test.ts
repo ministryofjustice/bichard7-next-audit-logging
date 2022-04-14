@@ -38,6 +38,11 @@ describe("AuditLogDynamoGateway", () => {
     await testGateway.deleteAll(config.TABLE_NAME, primaryKey)
   })
 
+  afterEach(() => {
+    jest.clearAllMocks();
+    jest.restoreAllMocks();
+  })
+
   describe("create()", () => {
     it("should insert the given lookup item", async () => {
       const expectedLookupItem = new AuditLogLookup("Expected value", "Dummy message ID")
@@ -108,14 +113,12 @@ describe("AuditLogDynamoGateway", () => {
 
     it("should return items for a specific message ID when last item is provided", async () => {
       const expectedMessageId = uuid()
-      const items = [...Array(10).keys()].map((index) => {
-        const item = new AuditLogLookup(`Expected value ${index}`, expectedMessageId)
-        return { ...item, id: `ID-${index}` }
-      })
-
-      for (const item of items) {
-        await testGateway.insertOne(config.TABLE_NAME, item, "id")
-      }
+      await Promise.all(
+        [...Array(10).keys()].map((index) => {
+          const item = new AuditLogLookup(`Expected value ${index}`, expectedMessageId)
+          return testGateway.insertOne(config.TABLE_NAME, { ...item, id: `ID-${index}` }, "id")
+        })
+      )
 
       const insertedItems = (await testGateway.getAll(config.TABLE_NAME)).Items as AuditLogLookup[]
 
@@ -141,6 +144,37 @@ describe("AuditLogDynamoGateway", () => {
 
       const actualError = result as Error
       expect(actualError.message).toBe(expectedError.message)
+    })
+  })
+
+  describe("fetchAllByMessageId", () => {
+    it("should all items for a specific message ID", async () => {
+      const fetchByMessageIdSpy = jest.spyOn(gateway, "fetchByMessageId")
+      const expectedMessageId = uuid()
+      await Promise.all(
+        [...Array(15).keys()].map((index) => {
+          const item = new AuditLogLookup(`Expected value ${index}`, expectedMessageId)
+          return testGateway.insertOne(config.TABLE_NAME, { ...item, id: `ID-${index}` }, "id")
+        })
+      )
+
+      const insertedItems = (await testGateway.getAll(config.TABLE_NAME)).Items as AuditLogLookup[]
+
+      const result = await gateway.fetchAllByMessageId(expectedMessageId)
+
+      expect(isError(result)).toBe(false)
+      expect(fetchByMessageIdSpy).toHaveBeenCalledTimes(3)
+      expect(result).toStrictEqual(insertedItems)
+    })
+
+    it("should return [] when message ID not found", async () => {
+      const fetchByMessageIdSpy = jest.spyOn(gateway, "fetchByMessageId")
+
+      const result = await gateway.fetchAllByMessageId("dummy")
+
+      expect(isError(result)).toBe(false)
+      expect(fetchByMessageIdSpy).toHaveBeenCalledTimes(1)
+      expect(result).toHaveLength(0)
     })
   })
 })
