@@ -3,7 +3,7 @@
   "compilerOptions": {
     "outDir": "build",
     "types": ["node", "jest"],
-    "sourceMap": false,
+    "sourceMap": true,
     "baseUrl": ".",
     "preserveSymlinks": false,
     "declaration": true,
