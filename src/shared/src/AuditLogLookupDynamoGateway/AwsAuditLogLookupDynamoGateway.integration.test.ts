@@ -5,6 +5,7 @@ import type { DynamoDbConfig } from "shared-types"
 import { isError, AuditLogLookup } from "shared-types"
 import TestDynamoGateway from "../DynamoGateway/TestDynamoGateway"
 import AwsAuditLogLookupDynamoGateway from "./AwsAuditLogLookupDynamoGateway"
+import { IndexSearcher } from ".."
 
 const config: DynamoDbConfig = {
   DYNAMO_URL: "http://localhost:8000",
@@ -39,8 +40,8 @@ describe("AuditLogDynamoGateway", () => {
   })
 
   afterEach(() => {
-    jest.clearAllMocks();
-    jest.restoreAllMocks();
+    jest.clearAllMocks()
+    jest.restoreAllMocks()
   })
 
   describe("create()", () => {
@@ -136,7 +137,7 @@ describe("AuditLogDynamoGateway", () => {
 
     it("should return error when DynamoDB returns error", async () => {
       const expectedError = new Error("Dummy error")
-      jest.spyOn(gateway, "fetchByIndex").mockResolvedValue(expectedError)
+      jest.spyOn(IndexSearcher.prototype, "execute").mockResolvedValue(expectedError)
 
       const result = await gateway.fetchByMessageId("DummyMessageID")
 
@@ -175,6 +176,78 @@ describe("AuditLogDynamoGateway", () => {
       expect(isError(result)).toBe(false)
       expect(fetchByMessageIdSpy).toHaveBeenCalledTimes(1)
       expect(result).toHaveLength(0)
+    })
+
+    it("should return error when DynamoDB returns error", async () => {
+      const expectedError = new Error("Dummy error")
+      jest.spyOn(gateway, "fetchByMessageId").mockResolvedValue(expectedError)
+
+      const result = await gateway.fetchAllByMessageId("DummyMessageID")
+
+      expect(isError(result)).toBe(true)
+
+      const actualError = result as Error
+      expect(actualError.message).toBe(expectedError.message)
+    })
+  })
+
+  describe("deleteByMessageId", () => {
+    it("should delete all records with a specific message ID", async () => {
+      const messageId = uuid()
+      await Promise.all(
+        [...Array(15).keys()].map((index) => {
+          const item = new AuditLogLookup(`Record to delete ${index}`, messageId)
+          return testGateway.insertOne(config.TABLE_NAME, { ...item, id: `ID-${index}` }, "id")
+        })
+      )
+
+      const otherRecord = new AuditLogLookup(`Other record`, "otherMessageId")
+      testGateway.insertOne(config.TABLE_NAME, otherRecord, "id")
+
+      const result = await gateway.deleteByMessageId(messageId)
+      expect(isError(result)).toBe(false)
+
+      const recordsInDB = await testGateway.getAll(config.TABLE_NAME)
+      expect(recordsInDB.Items).toEqual([{ _: "_", ...otherRecord }])
+    })
+
+    it("should return undefined when message ID not found", async () => {
+      const result = await gateway.deleteByMessageId("dummy")
+
+      expect(isError(result)).toBe(false)
+      expect(result).toBeUndefined
+    })
+
+    it("should return error when DynamoDB returns error", async () => {
+      const expectedError = new Error("Dummy error")
+      jest.spyOn(gateway, "fetchAllByMessageId").mockResolvedValue(expectedError)
+
+      const result = await gateway.deleteByMessageId("DummyMessageID")
+
+      expect(isError(result)).toBe(true)
+
+      const actualError = result as Error
+      expect(actualError.message).toBe(expectedError.message)
+    })
+
+    it("should return error when DynamoDB returns error", async () => {
+      const messageId = uuid()
+      await Promise.all(
+        [...Array(2).keys()].map((index) => {
+          const item = new AuditLogLookup(`Record to delete ${index}`, messageId)
+          return testGateway.insertOne(config.TABLE_NAME, { ...item, id: `ID-${index}` }, "id")
+        })
+      )
+
+      const expectedError = new Error("Dummy error")
+      jest.spyOn(gateway, "deleteMany").mockResolvedValue(expectedError)
+
+      const result = await gateway.deleteByMessageId(messageId)
+
+      expect(isError(result)).toBe(true)
+
+      const actualError = result as Error
+      expect(actualError.message).toBe(expectedError.message)
     })
   })
 })
