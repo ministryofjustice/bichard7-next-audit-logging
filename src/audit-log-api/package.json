@@ -6,7 +6,7 @@
   "scripts": {
     "build": "rimraf build && webpack --config ./.webpack/webpack.prod.js",
     "build:dev": "rimraf build && webpack --config ./.webpack/webpack.dev.js",
-    "test": "jest --runInBand",
+    "test": "jest --runInBand --namePattern=",
     "test:unit": "jest --testPathIgnorePatterns='integration' 'e2e'",
     "test:unit:watch": "jest --watchAll --testPathIgnorePatterns='integration' 'e2e'",
     "test:integration": "jest --testPathPattern=integration",
@@ -43,6 +43,7 @@
     "fork-ts-checker-webpack-plugin": "^7.1.1",
     "jest": "^27.5.0",
     "jest-junit": "^13.0.0",
+    "mockdate": "^3.0.5",
     "rimraf": "^3.0.2",
     "serverless": "^3.1.1",
     "serverless-dynamodb-local": "^0.2.40",

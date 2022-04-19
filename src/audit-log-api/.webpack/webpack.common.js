@@ -7,7 +7,8 @@ module.exports = {
     createAuditLog: "./src/handlers/createAuditLog.ts",
     createAuditLogEvent: "./src/handlers/createAuditLogEvent.ts",
     getEvents: "./src/handlers/getEvents.ts",
-    retryMessage: "./src/handlers/retryMessage.ts"
+    retryMessage: "./src/handlers/retryMessage.ts",
+    sanitiseMessage: "./src/handlers/sanitiseMessage.ts"
   },
   resolve: {
     modules: [path.resolve("./node_modules"), path.resolve("."), path.resolve("../shared/node_modules")],

@@ -1,6 +1,7 @@
 import { DynamoDB } from "aws-sdk"
 import { DocumentClient } from "aws-sdk/clients/dynamodb"
 import type { PromiseResult, DynamoDbConfig } from "shared-types"
+import { isError } from "shared-types"
 import type FetchByIndexOptions from "./FetchByIndexOptions"
 import type UpdateOptions from "./UpdateOptions"
 import type GetManyOptions from "./GetManyOptions"
@@ -30,6 +31,23 @@ export default class DynamoGateway {
       TableName: tableName,
       Item: { _: "_", ...record },
       ConditionExpression: `attribute_not_exists(${keyName})`
+    }
+
+    return this.client
+      .put(params)
+      .promise()
+      .then(() => undefined)
+      .catch((error) => <Error>error)
+  }
+
+  updateOne<T>(tableName: string, record: T, keyName: string, version: number): PromiseResult<void> {
+    const params: DocumentClient.PutItemInput = {
+      TableName: tableName,
+      Item: { _: "_", ...record },
+      ConditionExpression: `attribute_exists(${keyName}) and version = :version`,
+      ExpressionAttributeValues: {
+        ":version": version
+      }
     }
 
     return this.client
@@ -149,5 +167,23 @@ export default class DynamoGateway {
       .update(updateParams)
       .promise()
       .catch((error) => <Error>error)
+  }
+
+  async deleteMany(tableName: string, keyName: string, keyValues: string[]): PromiseResult<void> {
+    for (const keyValue of keyValues) {
+      const result = await this.client
+        .delete({
+          TableName: tableName,
+          Key: {
+            [keyName]: keyValue
+          }
+        })
+        .promise()
+        .catch((error) => <Error>error)
+
+      if (isError(result)) {
+        return result
+      }
+    }
   }
 }

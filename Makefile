@@ -120,10 +120,6 @@ clean:
 # Run Commands
 ########################################
 
-.PHONY: run-incoming-message-handler
-run-incoming-message-handler:
-	cd src/incoming-message-handler && npm run setup:env
-
 .PHONY: run-api
 run-api:
 	cd src/audit-log-api && npm run start
@@ -132,18 +128,11 @@ run-api:
 run-portal:
 	cd src/audit-log-portal && npm run start
 
-.PHONY: run-event-handler
-run-event-handler:
-	cd src/event-handler && npm run setup:env
-
-.PHONY: run-all-without-portal
-run-all-without-portal: run-api run-incoming-message-handler run-event-handler
-
 .PHONY: run-infra
 run-infra: run-all-without-portal run-portal
 
 .PHONY: run-all
-run-all: run-all-without-portal run-portal run-mq-listener
+run-all: run-api run-portal
 
 .PHONY: run-all-e2e
 run-all-e2e:

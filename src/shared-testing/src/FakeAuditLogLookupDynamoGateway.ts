@@ -34,6 +34,16 @@ export default class FakeAuditLogLookupDynamoGateway implements AuditLogLookupDy
     return Promise.resolve(lookupItem)
   }
 
+  deleteByMessageId(messageId: string): PromiseResult<void> {
+    if (this.error) {
+      return Promise.resolve(this.error)
+    }
+
+    this.items = this.items.filter((item) => item.messageId !== messageId)
+
+    return Promise.resolve()
+  }
+
   shouldReturnError(error: Error): void {
     this.error = error
   }

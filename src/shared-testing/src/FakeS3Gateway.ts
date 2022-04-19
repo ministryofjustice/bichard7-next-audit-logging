@@ -3,7 +3,7 @@ import type { S3GatewayInterface } from "shared-types"
 import type { KeyValuePair, PromiseResult } from "shared-types"
 
 export default class FakeS3Gateway implements S3GatewayInterface {
-  private items: KeyValuePair<string, string> = {}
+  public items: KeyValuePair<string, string> = {}
 
   private error?: Error
 
@@ -48,10 +48,18 @@ export default class FakeS3Gateway implements S3GatewayInterface {
     throw new Error("Method not implemented.")
   }
 
-  // @ts-ignore
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars, class-methods-use-this
   deleteItem(key: string): PromiseResult<void> {
-    throw new Error("Method not implemented.")
+    if (this.error) {
+      return Promise.resolve(this.error)
+    }
+
+    if (!this.items.hasOwnProperty(key)) {
+      return Promise.resolve(new Error(`No item with key '${key}' found in the S3 bucket.`))
+    }
+
+    delete this.items[key]
+
+    return Promise.resolve(undefined)
   }
 
   shouldReturnError(error: Error): void {

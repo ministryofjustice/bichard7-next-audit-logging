@@ -6,6 +6,7 @@ import type { DynamoDbConfig } from "shared-types"
 import TestDynamoGateway from "./TestDynamoGateway"
 import type GetManyOptions from "./GetManyOptions"
 import type FetchByIndexOptions from "./FetchByIndexOptions"
+import DynamoGateway from "./DynamoGateway"
 
 const config: DynamoDbConfig = {
   DYNAMO_URL: "http://localhost:8000",
@@ -15,7 +16,8 @@ const config: DynamoDbConfig = {
   AWS_SECRET_ACCESS_KEY: "DUMMY"
 }
 
-const gateway = new TestDynamoGateway(config)
+const testGateway = new TestDynamoGateway(config)
+const gateway = new DynamoGateway(config)
 const sortKey = "someOtherValue"
 
 describe("DynamoGateway", () => {
@@ -32,11 +34,11 @@ describe("DynamoGateway", () => {
       skipIfExists: true
     }
 
-    await gateway.createTable(config.TABLE_NAME, options)
+    await testGateway.createTable(config.TABLE_NAME, options)
   })
 
   beforeEach(async () => {
-    await gateway.deleteAll(config.TABLE_NAME, "id")
+    await testGateway.deleteAll(config.TABLE_NAME, "id")
   })
 
   describe("insertOne()", () => {
@@ -50,7 +52,7 @@ describe("DynamoGateway", () => {
 
       expect(result).toBeUndefined()
 
-      const actualRecords = await gateway.getAll(config.TABLE_NAME)
+      const actualRecords = await testGateway.getAll(config.TABLE_NAME)
       expect(actualRecords.Count).toBe(1)
 
       const actualRecord = actualRecords.Items?.[0]
@@ -70,7 +72,87 @@ describe("DynamoGateway", () => {
       expect(isError(result)).toBe(true)
       expect((<Error>result).message).toBe("One or more parameter values were invalid: Type mismatch for key")
 
-      const actualRecords = await gateway.getAll(config.TABLE_NAME)
+      const actualRecords = await testGateway.getAll(config.TABLE_NAME)
+      expect(actualRecords.Count).toBe(0)
+    })
+  })
+
+  describe("updateOne()", () => {
+    it("should return error when the record does not exist in dynamoDB", async () => {
+      const record = {
+        id: "InsertOneRecord",
+        someOtherValue: "SomeOtherValue",
+        version: 1
+      }
+
+      const result = await gateway.updateOne(config.TABLE_NAME, record, "id", 1)
+
+      expect(result).toBeTruthy()
+      expect(isError(result)).toBe(true)
+      expect((<Error>result).message).toBe("The conditional request failed")
+    })
+
+    it("should return undefined when successful and have updated one record", async () => {
+      const oldRecord = {
+        id: "InsertOneRecord",
+        someOtherValue: "OldValue",
+        version: 1
+      }
+
+      await testGateway.insertOne(config.TABLE_NAME, oldRecord, "id")
+
+      const updatedRecord = {
+        id: "InsertOneRecord",
+        someOtherValue: "NewValue",
+        version: 2
+      }
+      const result = await gateway.updateOne(config.TABLE_NAME, updatedRecord, "id", 1)
+
+      expect(result).toBeUndefined()
+
+      const actualRecords = await testGateway.getAll(config.TABLE_NAME)
+      expect(actualRecords.Count).toBe(1)
+
+      const actualRecord = actualRecords.Items?.[0]
+      expect(actualRecord?.id).toBe(updatedRecord.id)
+      expect(actualRecord?.someOtherValue).toBe(updatedRecord.someOtherValue)
+    })
+
+    it("should return error if the version is different", async () => {
+      const oldRecord = {
+        id: "InsertOneRecord",
+        someOtherValue: "OldValue",
+        version: 1
+      }
+
+      await testGateway.insertOne(config.TABLE_NAME, oldRecord, "id")
+
+      const updatedRecord = {
+        id: "InsertOneRecord",
+        someOtherValue: "NewValue",
+        version: 2
+      }
+      const result = await gateway.updateOne(config.TABLE_NAME, updatedRecord, "id", 2)
+
+      expect(result).toBeTruthy()
+      expect(isError(result)).toBe(true)
+      expect((<Error>result).message).toBe("The conditional request failed")
+    })
+
+    it("should return an error when there is a failure and have inserted zero records", async () => {
+      const record = {
+        id: 1234,
+        someOtherValue: "Id should be a number",
+        version: 1
+      }
+
+      const result = await gateway.updateOne(config.TABLE_NAME, record, "id", 1)
+
+      expect(result).toBeTruthy()
+      expect(isError(result)).toBe(true)
+      expect((<Error>result).message).toBe("One or more parameter values were invalid: Type mismatch for key")
+
+      const actualRecords = await testGateway.getAll(config.TABLE_NAME)
       expect(actualRecords.Count).toBe(0)
     })
   })
@@ -84,7 +166,7 @@ describe("DynamoGateway", () => {
             someOtherValue: `Value ${i}`
           }
 
-          await gateway.insertOne(config.TABLE_NAME, record, "id")
+          await testGateway.insertOne(config.TABLE_NAME, record, "id")
         })
       )
     })
@@ -142,7 +224,7 @@ describe("DynamoGateway", () => {
             someOtherValue: `Value ${i}`
           }
 
-          await gateway.insertOne(config.TABLE_NAME, record, "id")
+          await testGateway.insertOne(config.TABLE_NAME, record, "id")
         })
       )
     })
@@ -191,21 +273,23 @@ describe("DynamoGateway", () => {
         someOtherValue: "Value 1"
       }
 
-      await gateway.insertOne(config.TABLE_NAME, expectedRecord, "id")
+      await testGateway.insertOne(config.TABLE_NAME, expectedRecord, "id")
 
-      const actualRecord = await gateway.getOne<{ id: string; someOtherValue: string }>(
-        config.TABLE_NAME,
-        "id",
-        "Record1"
-      )
+      const result = await gateway.getOne(config.TABLE_NAME, "id", "Record1")
 
+      const { Item: actualRecord } = result as {
+        Item: {
+          id: string
+          someOtherValue: string
+        }
+      }
       expect(actualRecord).toBeDefined()
       expect(actualRecord?.id).toBe(expectedRecord.id)
       expect(actualRecord?.someOtherValue).toBe(expectedRecord.someOtherValue)
     })
 
     it("should return null when no item has a matching key", async () => {
-      const result = await gateway.getOne(config.TABLE_NAME, "id", "InvalidKey")
+      const result = await testGateway.getOne(config.TABLE_NAME, "id", "InvalidKey")
 
       expect(isError(result)).toBe(false)
       expect(result).toBeNull()
@@ -220,7 +304,7 @@ describe("DynamoGateway", () => {
         version: 1
       }
 
-      await gateway.insertOne(config.TABLE_NAME, expectedRecord, "id")
+      await testGateway.insertOne(config.TABLE_NAME, expectedRecord, "id")
 
       const result = await gateway.getRecordVersion(config.TABLE_NAME, "id", "Record1")
 
@@ -256,7 +340,7 @@ describe("DynamoGateway", () => {
             someOtherValue: `Value ${i}`,
             version: 0
           }
-          await gateway.insertOne(config.TABLE_NAME, record, "messageId")
+          await testGateway.insertOne(config.TABLE_NAME, record, "messageId")
         })
       )
     })
@@ -284,7 +368,7 @@ describe("DynamoGateway", () => {
         sortKey,
         pagination: { limit: 3 }
       }
-      const actualRecords = <DocumentClient.ScanOutput>await gateway.getMany(config.TABLE_NAME, getManyOptions)
+      const actualRecords = <DocumentClient.ScanOutput>await testGateway.getMany(config.TABLE_NAME, getManyOptions)
       expect(isError(actualRecords)).toBeFalsy()
 
       const filteredRecords = actualRecords.Items?.filter((r) => r.id === recordId)
@@ -322,6 +406,46 @@ describe("DynamoGateway", () => {
       const result = await gateway.updateEntry(config.TABLE_NAME, options)
 
       expect(isError(result)).toBe(true)
+    })
+  })
+
+  describe("deleteMany", () => {
+    it("should delete all items when items exist in the table", async () => {
+      const ids = ["item-1", "item-2"]
+      await Promise.all(
+        ids.map((id) => {
+          const item = {
+            id,
+            someOtherValue: "OldValue"
+          }
+          return testGateway.insertOne(config.TABLE_NAME, item, "id")
+        })
+      )
+
+      const deleteResult = await gateway.deleteMany(config.TABLE_NAME, "id", ids)
+
+      expect(isError(deleteResult)).toBe(false)
+
+      const getResult = await testGateway.getAll(config.TABLE_NAME)
+
+      expect(getResult.Items).toHaveLength(0)
+    })
+
+    it("should be successful when items do not exist in the table", async () => {
+      const ids = ["item-1", "item-2"]
+      const deleteResult = await gateway.deleteMany(config.TABLE_NAME, "id", ids)
+
+      expect(isError(deleteResult)).toBe(false)
+    })
+
+    it("should return error when DynamoDB returns an error", async () => {
+      const ids = ["item-1", "item-2"]
+      const deleteResult = await gateway.deleteMany(config.TABLE_NAME, "invalid field", ids)
+
+      expect(isError(deleteResult)).toBe(true)
+
+      const actualError = deleteResult as Error
+      expect(actualError.message).toBe("One of the required keys was not given a value")
     })
   })
 })

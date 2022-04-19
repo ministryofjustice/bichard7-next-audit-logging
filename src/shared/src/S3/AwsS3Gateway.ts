@@ -1,7 +1,6 @@
 import { S3, Endpoint } from "aws-sdk"
-import type { PromiseResult } from "shared-types"
 import parseGetObjectResponse from "./parseGetObjectResponse"
-import type { S3Config } from "shared-types"
+import type { S3Config, PromiseResult } from "shared-types"
 import type { S3GatewayInterface } from "shared-types"
 
 export default class AwsS3Gateway implements S3GatewayInterface {
@@ -95,10 +94,11 @@ export default class AwsS3Gateway implements S3GatewayInterface {
       .catch((error) => <Error>error)
   }
 
-  deleteItem(key: string): PromiseResult<void> {
+  deleteItem(key: string, version?: string): PromiseResult<void> {
     const params: S3.Types.DeleteObjectRequest = {
       Bucket: this.getBucketName(),
-      Key: key
+      Key: key,
+      ...(version ? { VersionId: version } : {})
     }
 
     return this.client
