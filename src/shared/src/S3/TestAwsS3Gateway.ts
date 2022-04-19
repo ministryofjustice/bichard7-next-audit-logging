@@ -1,5 +1,4 @@
 import type * as S3 from "aws-sdk/clients/s3"
-import type { PromiseResult } from "shared-types"
 import AwsS3Gateway from "./AwsS3Gateway"
 
 export default class TestAwsS3Gateway extends AwsS3Gateway {
@@ -68,11 +67,5 @@ export default class TestAwsS3Gateway extends AwsS3Gateway {
     const params: S3.Types.GetObjectRequest = { Bucket: this.getBucketName(), Key: key }
     const content = await this.client.getObject(params).promise()
     return String(content.Body)
-  }
-
-  // @ts-ignore
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars, class-methods-use-this
-  deleteVersionedItem(key: string): PromiseResult<void> {
-    throw new Error("Method not implemented.")
   }
 }
