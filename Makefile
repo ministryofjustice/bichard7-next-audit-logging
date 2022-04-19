@@ -146,6 +146,15 @@ run-mq:
 stop-mq:
 	docker-compose -f environment/docker-compose.yml stop mq
 
+.PHONY: run-pg
+run-pg:
+	docker-compose -f environment/docker-compose.yml up -d pg
+
+.PHONY: stop-pg
+stop-pg:
+	docker-compose -f environment/docker-compose.yml stop pg
+
+
 ########################################
 # Destroy Commands
 ########################################
