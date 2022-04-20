@@ -9,6 +9,7 @@ services:
       - ./activemq.xml:/opt/activemq/conf/activemq.xml
   pg:
     build:
+      context: .
       dockerfile: PgDockerfile
     restart: always
     environment:
