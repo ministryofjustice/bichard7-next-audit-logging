@@ -1,12 +1,16 @@
 import type { PostgresConfig } from "shared-types"
+import { isError } from "shared-types"
 import AwsBichardPostgresGateway from "./AwsBichardPostgresGateway"
 import TestBichardPostgresGateway from "./TestBichardPostgresGateway"
+import pg from "pg"
 
 const config: PostgresConfig = {
   HOST: "localhost",
+  PORT: 5432,
   USERNAME: "bichard",
   PASSWORD: "password",
-  DATABASE_NAME: ""
+  DATABASE_NAME: "bichard",
+  TABLE_NAME: "archive_error_list"
 }
 
 const gateway = new AwsBichardPostgresGateway(config)
@@ -14,7 +18,10 @@ const testGateway = new TestBichardPostgresGateway(config)
 
 beforeEach(async () => {
   await testGateway.dropTable()
-  await testGateway.createArchiveErrorListTable()
+  await testGateway.createTable({
+    message_id: "varchar(70)",
+    updated_msg: "text"
+  })
 })
 
 afterAll(async () => {
@@ -33,7 +40,8 @@ describe("BichardPostgresGateway", () => {
     ]
     await testGateway.insertRecords(records)
 
-    await gateway.deleteArchivedErrors(messageId)
+    const result = await gateway.deleteArchivedErrors(messageId)
+    expect(isError(result)).toBe(false)
 
     const allResults = await testGateway.findAll()
     expect(allResults).toHaveLength(1)
@@ -45,14 +53,20 @@ describe("BichardPostgresGateway", () => {
     const otherRecord = [{ message_id: otherMessageId, updated_msg: "Other dummy data" }]
     await testGateway.insertRecords(otherRecord)
 
-    await gateway.deleteArchivedErrors("someMessageId")
+    const result = await gateway.deleteArchivedErrors("someMessageId")
+    expect(isError(result)).toBe(false)
 
     const records = await testGateway.findAll()
     expect(records).toHaveLength(1)
     expect(records).toEqual([{ message_id: otherMessageId, updated_msg: "Other dummy data" }])
   })
 
-  // it("returns error when Postgres returns error", () => {
+  it("returns error when Postgres returns error", async () => {
+    const expectedErrorMessage = "Dummy error"
+    jest.spyOn(pg.Client.prototype, "query").mockImplementation(() => Promise.reject(Error(expectedErrorMessage)))
 
-  // })
+    const result = await gateway.deleteArchivedErrors("someMessageId")
+
+    expect(isError(result)).toBe(true)
+  })
 })
