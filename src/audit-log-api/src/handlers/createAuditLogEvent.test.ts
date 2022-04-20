@@ -79,4 +79,20 @@ describe("createAuditLogEvent()", () => {
     expect(actualResponse.statusCode).toBe(HttpStatusCode.internalServerError)
     expect(actualResponse.body).toBe(expectedMessage)
   })
+
+  it("should respond with an Internal Server Error status when an the message version is different", async () => {
+    const expectedMessage = "Expected Message"
+    jest.spyOn(CreateAuditLogEventUseCase.prototype, "create").mockReturnValue(
+      Promise.resolve({
+        resultType: "invalidVersion",
+        resultDescription: expectedMessage
+      })
+    )
+
+    const event = createHandlerEvent()
+    const actualResponse = await createAuditLogEvent(event)
+
+    expect(actualResponse.statusCode).toBe(HttpStatusCode.conflict)
+    expect(actualResponse.body).toBe(expectedMessage)
+  })
 })

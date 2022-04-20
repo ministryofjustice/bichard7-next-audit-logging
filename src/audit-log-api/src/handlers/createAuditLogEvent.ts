@@ -42,6 +42,14 @@ export default async function createAuditLogEvent(event: APIGatewayProxyEvent): 
     })
   }
 
+  if (result.resultType === "invalidVersion") {
+    logger.error(`Message version is invalid: ${result.resultDescription}`)
+    return createJsonApiResult({
+      statusCode: HttpStatusCode.conflict,
+      body: result.resultDescription
+    })
+  }
+
   if (result.resultType === "error") {
     logger.error(`Error creating audit log: ${result.resultDescription}`)
     return createJsonApiResult({
