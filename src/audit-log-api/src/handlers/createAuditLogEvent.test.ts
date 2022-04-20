@@ -80,7 +80,7 @@ describe("createAuditLogEvent()", () => {
     expect(actualResponse.body).toBe(expectedMessage)
   })
 
-  it("should respond with an Internal Server Error status when an the message version is different", async () => {
+  it("should respond with a Conflict status when an the message version is different", async () => {
     const expectedMessage = "Expected Message"
     jest.spyOn(CreateAuditLogEventUseCase.prototype, "create").mockReturnValue(
       Promise.resolve({
