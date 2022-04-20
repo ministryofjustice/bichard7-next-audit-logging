@@ -1,11 +1,8 @@
-import type { BichardPostgresGateway, PostgresConfig, PromiseResult } from "shared-types"
+import type { BichardPostgresGateway, PromiseResult } from "shared-types"
+import PostgresGateway from "src/PostgresGateway/PostgresGateway"
 
-export default class AwsBichardPostgresGateway implements BichardPostgresGateway {
-  constructor(config: PostgresConfig) {
-    console.log(config)
-  }
-
+export default class AwsBichardPostgresGateway extends PostgresGateway implements BichardPostgresGateway {
   async deleteArchivedErrors(messageId: string): PromiseResult<void> {
-    console.log(messageId)
+    await this.query(`DELETE FROM archive_error_list WHERE message_id='${messageId}'`)
   }
 }
