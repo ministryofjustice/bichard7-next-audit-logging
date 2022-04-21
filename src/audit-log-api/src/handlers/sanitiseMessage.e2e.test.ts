@@ -1,9 +1,16 @@
 jest.setTimeout(15000)
-
+import { setEnvironmentVariables } from "shared-testing"
+setEnvironmentVariables({ BICHARD_DB_TABLE_NAME: "archive_error_list" })
 import type { DynamoDbConfig, S3Config } from "shared-types"
 import { AuditLogEvent, AuditLogLookup, BichardAuditLogEvent } from "shared-types"
 import { AuditLog } from "shared-types"
-import { AwsBichardPostgresGateway, HttpStatusCode, TestAwsS3Gateway, TestDynamoGateway, TestPostgresGateway } from "shared"
+import {
+  AwsBichardPostgresGateway,
+  HttpStatusCode,
+  TestAwsS3Gateway,
+  TestDynamoGateway,
+  TestPostgresGateway
+} from "shared"
 import axios from "axios"
 import createBichardPostgresGatewayConfig from "../createBichardPostgresGatewayConfig"
 
@@ -94,6 +101,14 @@ describe("sanitiseMessage", () => {
       })
     )
 
+    const otherMessageId = "otherMessageID"
+    const records = [
+      { message_id: message.messageId, updated_msg: "Dummy data" },
+      { message_id: message.messageId, updated_msg: "Dummy data" },
+      { message_id: otherMessageId, updated_msg: "Other dummy data" }
+    ]
+    await testPostgresGateway.insertRecords(records)
+
     const response = await axios.post(`http://localhost:3010/messages/${message.messageId}/sanitise`, null, {
       validateStatus: undefined
     })
@@ -109,6 +124,10 @@ describe("sanitiseMessage", () => {
 
     const lookupItems = await testDynamoGateway.getAll(auditLogLookupTableName)
     expect(lookupItems.Items).toHaveLength(0)
+
+    const allResults = await testPostgresGateway.findAll()
+    expect(allResults).toHaveLength(1)
+    expect(allResults).toEqual([{ message_id: otherMessageId, updated_msg: "Other dummy data" }])
   })
 
   it("should return Error when the message ID does not exist", async () => {

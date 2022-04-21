@@ -1,7 +1,8 @@
 import type { PostgresConfig } from "shared-types"
 
 export default function createBichardPostgresGatewayConfig(): PostgresConfig {
-  const { BICHARD_DB_HOST, BICHARD_DB_PORT, BICHARD_DB_USERNAME, BICHARD_DB_PASSWORD } = process.env
+  const { BICHARD_DB_HOST, BICHARD_DB_PORT, BICHARD_DB_USERNAME, BICHARD_DB_PASSWORD, BICHARD_DB_TABLE_NAME } =
+    process.env
 
   if (!BICHARD_DB_HOST) {
     throw Error("BICHARD_DB_HOST environment variable must have value.")
@@ -25,7 +26,7 @@ export default function createBichardPostgresGatewayConfig(): PostgresConfig {
     USERNAME: BICHARD_DB_USERNAME,
     PASSWORD: BICHARD_DB_PASSWORD,
     DATABASE_NAME: "bichard",
-    TABLE_NAME: "br7own.archive_error_list"
+    TABLE_NAME: BICHARD_DB_TABLE_NAME || "br7own.archive_error_list"
   }
 
   return config

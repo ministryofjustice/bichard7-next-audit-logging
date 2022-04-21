@@ -4,7 +4,7 @@ setEnvironmentVariables()
 import { AwsBichardPostgresGateway } from "shared"
 import { isError } from "shared-types"
 import DeleteArchivedErrorsUseCase from "./DeleteArchivedErrorsUseCase"
-import createBichardPostgresGatewayConfig from "src/createBichardPostgresGatewayConfig"
+import createBichardPostgresGatewayConfig from "../createBichardPostgresGatewayConfig"
 
 const postgresConfig = createBichardPostgresGatewayConfig()
 postgresConfig.TABLE_NAME = "archive_error_list"
