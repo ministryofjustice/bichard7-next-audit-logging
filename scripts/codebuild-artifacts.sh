@@ -83,12 +83,14 @@ zip createAuditLog.zip createAuditLog.js
 zip createAuditLogEvent.zip createAuditLogEvent.js
 zip getEvents.zip getEvents.js
 zip retryMessage.zip retryMessage.js
+zip sanitiseMessage.zip sanitiseMessage.js
 
 upload_to_s3 getMessages.zip getMessages.zip
 upload_to_s3 createAuditLog.zip createAuditLog.zip
 upload_to_s3 createAuditLogEvent.zip createAuditLogEvent.zip
 upload_to_s3 getEvents.zip getEvents.zip
 upload_to_s3 retryMessage.zip retryMessage.zip
+upload_to_s3 sanitiseMessage.zip sanitiseMessage.zip
 
 cd -
 
