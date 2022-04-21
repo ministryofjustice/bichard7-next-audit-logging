@@ -3,8 +3,9 @@ jest.setTimeout(15000)
 import type { DynamoDbConfig, S3Config } from "shared-types"
 import { AuditLogEvent, AuditLogLookup, BichardAuditLogEvent } from "shared-types"
 import { AuditLog } from "shared-types"
-import { HttpStatusCode, TestAwsS3Gateway, TestDynamoGateway } from "shared"
+import { AwsBichardPostgresGateway, HttpStatusCode, TestAwsS3Gateway, TestDynamoGateway, TestPostgresGateway } from "shared"
 import axios from "axios"
+import createBichardPostgresGatewayConfig from "../createBichardPostgresGatewayConfig"
 
 const dynamoConfig: DynamoDbConfig = {
   DYNAMO_URL: "http://localhost:8000",
@@ -25,8 +26,12 @@ const s3Config: S3Config = {
   secretAccessKey: "S3RVER"
 }
 
+const postgresConfig = createBichardPostgresGatewayConfig()
+
 const s3Gateway = new TestAwsS3Gateway(s3Config)
 const testDynamoGateway = new TestDynamoGateway(dynamoConfig)
+const testPostgresGateway = new TestPostgresGateway(postgresConfig)
+const postgresGateway = new AwsBichardPostgresGateway(postgresConfig)
 
 const createBichardAuditLogEvent = (eventS3Path: string) => {
   const event = new BichardAuditLogEvent({
@@ -54,6 +59,16 @@ describe("sanitiseMessage", () => {
     await s3Gateway.deleteAll()
     await testDynamoGateway.deleteAll(auditLogTableName, "messageId")
     await testDynamoGateway.deleteAll(auditLogLookupTableName, "id")
+    await testPostgresGateway.dropTable()
+    await testPostgresGateway.createTable({
+      message_id: "varchar(70)",
+      updated_msg: "text"
+    })
+  })
+
+  afterAll(async () => {
+    await testPostgresGateway.dispose()
+    await postgresGateway.dispose()
   })
 
   it("should return Ok status when message has been sanitised successfully", async () => {
