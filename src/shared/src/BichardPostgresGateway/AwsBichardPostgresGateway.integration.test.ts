@@ -1,7 +1,7 @@
 import type { PostgresConfig } from "shared-types"
 import { isError } from "shared-types"
 import AwsBichardPostgresGateway from "./AwsBichardPostgresGateway"
-import TestBichardPostgresGateway from "./TestBichardPostgresGateway"
+import TestPostgresGateway from "../PostgresGateway/TestPostgresGateway"
 import pg from "pg"
 
 const config: PostgresConfig = {
@@ -14,7 +14,7 @@ const config: PostgresConfig = {
 }
 
 const gateway = new AwsBichardPostgresGateway(config)
-const testGateway = new TestBichardPostgresGateway(config)
+const testGateway = new TestPostgresGateway(config)
 
 beforeEach(async () => {
   await testGateway.dropTable()

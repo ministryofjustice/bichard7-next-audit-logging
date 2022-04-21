@@ -1,6 +1,6 @@
 import type { BichardPostgresGateway, PromiseResult } from "shared-types"
 import { isError } from "shared-types"
-import PostgresGateway from "src/PostgresGateway/PostgresGateway"
+import PostgresGateway from "../PostgresGateway/PostgresGateway"
 
 export default class AwsBichardPostgresGateway extends PostgresGateway implements BichardPostgresGateway {
   async deleteArchivedErrors(messageId: string): PromiseResult<void> {

@@ -1,6 +1,6 @@
 import type { KeyValuePair } from "shared-types"
 import { isError } from "shared-types"
-import PostgresGateway from "src/PostgresGateway/PostgresGateway"
+import PostgresGateway from "./PostgresGateway"
 
 export default class TestPostgresGateway extends PostgresGateway {
   async createTable(columns: KeyValuePair<string, string>): Promise<void> {
