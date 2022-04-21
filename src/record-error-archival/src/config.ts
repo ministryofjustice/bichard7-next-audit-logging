@@ -23,6 +23,7 @@ export default {
   dbHost: process.env.DB_HOST,
   dbUser: process.env.DB_USER,
   dbPassword: process.env.DB_PASSWORD,
+  dbSsl: process.env.DB_SSL,
   dbName: process.env.DB_NAME,
   dbSchema: process.env.DB_SCHEMA || "br7own",
   archiveGroupLimit: parseInt(process.env.ARCHIVE_GROUP_LIMIT || "100")

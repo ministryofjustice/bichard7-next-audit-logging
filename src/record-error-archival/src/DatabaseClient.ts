@@ -21,6 +21,8 @@ export default class DatabaseClient {
 
   private database: string
 
+  private useSsl: boolean
+
   private schema: string
 
   private postgres: Client
@@ -31,6 +33,7 @@ export default class DatabaseClient {
     host: string,
     user: string,
     password: string,
+    useSsl: boolean,
     database: string,
     schema: string,
     archiveGroupLimit: number
@@ -38,15 +41,17 @@ export default class DatabaseClient {
     this.host = host
     this.user = user
     this.password = password
+    this.useSsl = useSsl
     this.database = database
     this.schema = schema
     this.archiveGroupLimit = archiveGroupLimit
 
     this.postgres = new Client({
-      database: this.database,
+      host: this.host,
       user: this.user,
       password: this.password,
-      host: this.host
+      ssl: this.useSsl,
+      database: this.database
     })
   }
 

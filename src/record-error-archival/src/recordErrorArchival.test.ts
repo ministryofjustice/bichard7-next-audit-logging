@@ -185,7 +185,7 @@ describe("Record Error Archival integration", () => {
       return Promise.resolve(dbResult)
     })
 
-    const db = new DatabaseClient("", "", "", "", "schema", 100)
+    const db = new DatabaseClient("", "", "", false, "", "schema", 100)
     const api = new FakeApiClient()
 
     await recordErrorArchival(db, api)
@@ -210,7 +210,7 @@ describe("Record Error Archival integration", () => {
       return Promise.resolve(dbResult)
     })
 
-    const db = new DatabaseClient("", "", "", "", "schema", 100)
+    const db = new DatabaseClient("", "", "", false, "", "schema", 100)
     const api = new FakeApiClient()
     api.shouldReturnError(new Error("API failed :("), ["createEvent"])
 
@@ -232,7 +232,7 @@ describe("Record Error Archival integration", () => {
       return Promise.resolve(dbResult)
     })
 
-    const db = new DatabaseClient("", "", "", "", "schema", 100)
+    const db = new DatabaseClient("", "", "", false, "", "schema", 100)
     const api = new FakeApiClient()
     api.shouldReturnErrorAfterNCalls(new Error("API quota exceeded"), 2, ["createEvent"])
 
@@ -260,7 +260,7 @@ describe("Record Error Archival integration", () => {
   })
 
   it("Should limit the number of archive log groups to a configured value", async () => {
-    const db = new DatabaseClient("", "", "", "", "schema", 50)
+    const db = new DatabaseClient("", "", "", false, "", "schema", 50)
     const api = new FakeApiClient()
 
     await recordErrorArchival(db, api)
@@ -277,7 +277,7 @@ describe("Record Error Archival integration", () => {
       return Promise.resolve(dbResult)
     })
 
-    const db = new DatabaseClient("", "", "", "", "schema", 100)
+    const db = new DatabaseClient("", "", "", false, "", "schema", 100)
     const api = new FakeApiClient()
 
     await recordErrorArchival(db, api)

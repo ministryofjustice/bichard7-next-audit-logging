@@ -8,6 +8,7 @@ const db = new DatabaseClient(
   config.dbHost,
   config.dbUser,
   config.dbPassword,
+  config.dbSsl,
   config.dbName,
   config.dbSchema,
   config.archiveGroupLimit
