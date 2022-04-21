@@ -124,3 +124,12 @@ cd -
 
 # Build the Portal Docker Image
 make codebuild-portal-image
+
+############################################
+# Record Error Archival
+############################################
+
+cd src/record-error-archival/build
+
+zip recordErrorArchival.zip recordErrorArchival.js
+upload_to_s3 recordErrorArchival.zip recordErrorArchival.zip
