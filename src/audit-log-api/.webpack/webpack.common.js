@@ -1,6 +1,5 @@
 const path = require("path")
 const ForkTsCheckerWebpackPlugin = require("fork-ts-checker-webpack-plugin")
-const webpack = require('webpack');
 
 module.exports = {
   entry: {
@@ -46,8 +45,5 @@ module.exports = {
       }
     ]
   },
-  plugins: [
-    new webpack.IgnorePlugin({ resourceRegExp: /^pg-native$/ }),
-    new ForkTsCheckerWebpackPlugin()
-  ]
+  plugins: [new ForkTsCheckerWebpackPlugin()]
 }
