@@ -15,6 +15,7 @@ There are some controls available as environment variables:
 | DB_HOST              | The host of the bichard7 database to use |
 | DB_USER              | The user to authenticate to the bihcard7 database as |
 | DB_PASSWORD          | The password to use to authenticate to the bichard7 database |
+| DB_SSL               | Whether to use SSL when connecting to the bichard7 database. Defaults to false |
 | DB_NAME              | The database name where the archived error tables reside |
 | DB_SCHEMA            | The schema name which the archived error tables reside under |
 | ARCHIVE_GROUP_LIMIT  | The number of archive log groups to audit log at a time |

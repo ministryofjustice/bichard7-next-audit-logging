@@ -26,6 +26,8 @@ Lambdas:
 
 * [**Archive User Logs** (`src/archive-user-logs`)](src/archive-user-logs/) - Subscribe to logs output by the User Service and the Store Event Lambda which match a subscription filter and then store them in s3 cold storage.
 
+* [**Record Error Archival** (`src/record-error-archival`)](src/record-error-archival) - Records in the audit log when error records have been archived in the postgres database.
+
 Code shared between multiple components:
 
 * [**Shared code** (`shared`)](src/shared/) - Library of code that is common to multiple components.
