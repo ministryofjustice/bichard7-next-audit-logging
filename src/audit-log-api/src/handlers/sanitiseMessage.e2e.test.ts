@@ -1,11 +1,12 @@
 jest.setTimeout(15000)
 import { setEnvironmentVariables } from "shared-testing"
 setEnvironmentVariables({ BICHARD_DB_TABLE_NAME: "archive_error_list" })
-import type { DynamoDbConfig, S3Config } from "shared-types"
+import type { DynamoDbConfig } from "shared-types"
 import { AuditLogEvent, AuditLogLookup, BichardAuditLogEvent } from "shared-types"
 import { AuditLog } from "shared-types"
 import {
   AwsBichardPostgresGateway,
+  createS3Config,
   HttpStatusCode,
   TestAwsS3Gateway,
   TestDynamoGateway,
@@ -25,20 +26,14 @@ const dynamoConfig: DynamoDbConfig = {
 const auditLogTableName = "auditLogTable"
 const auditLogLookupTableName = "auditLogLookupTable"
 
-const s3Config: S3Config = {
-  url: "http://localhost:4569",
-  region: "eu-west-2",
-  bucketName: "auditLogEventsBucket",
-  accessKeyId: "S3RVER",
-  secretAccessKey: "S3RVER"
-}
-
 const postgresConfig = createBichardPostgresGatewayConfig()
+const postgresGateway = new AwsBichardPostgresGateway(postgresConfig)
 
-const s3Gateway = new TestAwsS3Gateway(s3Config)
+const messagesS3Gateway = new TestAwsS3Gateway(createS3Config("INTERNAL_INCOMING_MESSAGES_BUCKET"))
+const eventsS3Gateway = new TestAwsS3Gateway(createS3Config("AUDIT_LOG_EVENTS_BUCKET"))
+
 const testDynamoGateway = new TestDynamoGateway(dynamoConfig)
 const testPostgresGateway = new TestPostgresGateway(postgresConfig)
-const postgresGateway = new AwsBichardPostgresGateway(postgresConfig)
 
 const createBichardAuditLogEvent = (eventS3Path: string) => {
   const event = new BichardAuditLogEvent({
@@ -63,7 +58,8 @@ const createBichardAuditLogEvent = (eventS3Path: string) => {
 
 describe("sanitiseMessage", () => {
   beforeEach(async () => {
-    await s3Gateway.deleteAll()
+    await eventsS3Gateway.deleteAll()
+    await messagesS3Gateway.deleteAll()
     await testDynamoGateway.deleteAll(auditLogTableName, "messageId")
     await testDynamoGateway.deleteAll(auditLogLookupTableName, "id")
     await testPostgresGateway.dropTable()
@@ -90,7 +86,8 @@ describe("sanitiseMessage", () => {
     })
     message.events = [event1, event2]
 
-    await Promise.all([message.s3Path, event1.s3Path].map((s3Path) => s3Gateway.upload(s3Path, "dummy")))
+    await messagesS3Gateway.upload(message.s3Path, "dummy")
+    await eventsS3Gateway.upload(event1.s3Path, "dummy")
 
     await testDynamoGateway.insertOne(auditLogTableName, message, "messageId")
 
@@ -114,7 +111,12 @@ describe("sanitiseMessage", () => {
     })
 
     expect(response.status).toBe(HttpStatusCode.noContent)
-    expect(await s3Gateway.getAll()).toEqual([])
+
+    const actualMessageS3Objects = await messagesS3Gateway.getAll()
+    expect(actualMessageS3Objects).toEqual([])
+
+    const actualEventS3Objects = await eventsS3Gateway.getAll()
+    expect(actualEventS3Objects).toEqual([])
 
     const actualMessage = await testDynamoGateway.getOne<AuditLog>(auditLogTableName, "messageId", message.messageId)
 

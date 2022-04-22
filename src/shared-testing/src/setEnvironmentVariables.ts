@@ -20,6 +20,8 @@ export default (additionalVariables?: KeyValuePair<string, string>): void => {
   process.env.DB_PASSWORD = "password"
   process.env.DB_SSL = "false"
   process.env.DB_NAME = "bichard"
+  process.env.INTERNAL_INCOMING_MESSAGES_BUCKET = "internalIncomingBucket"
+  process.env.AUDIT_LOG_EVENTS_BUCKET = "auditLogEventsBucket"
 
   if (additionalVariables) {
     Object.keys(additionalVariables).forEach((key) => {

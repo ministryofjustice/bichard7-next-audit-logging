@@ -28,8 +28,12 @@ const auditLogLookupDynamoGateway = new AwsAuditLogLookupDynamoGateway(
 )
 const postgresConfig = createBichardPostgresGatewayConfig()
 const awsBichardPostgresGateway = new AwsBichardPostgresGateway(postgresConfig)
-const awsS3Gateway = new AwsS3Gateway(createS3Config("AUDIT_LOG_EVENTS_BUCKET"))
-const deleteMessageObjectsFromS3UseCase = new DeleteMessageObjectsFromS3UseCase(awsS3Gateway)
+const awsMessagesS3Gateway = new AwsS3Gateway(createS3Config("INTERNAL_INCOMING_MESSAGES_BUCKET"))
+const awsEventsS3Gateway = new AwsS3Gateway(createS3Config("AUDIT_LOG_EVENTS_BUCKET"))
+const deleteMessageObjectsFromS3UseCase = new DeleteMessageObjectsFromS3UseCase(
+  awsMessagesS3Gateway,
+  awsEventsS3Gateway
+)
 const sanitiseAuditLogUseCase = new SanitiseAuditLogUseCase(auditLogGateway)
 const deleteAuditLogLookupItems = new DeleteAuditLogLookupItemsUseCase(auditLogLookupDynamoGateway)
 const deleteArchivedErrorsUseCase = new DeleteArchivedErrorsUseCase(awsBichardPostgresGateway)
