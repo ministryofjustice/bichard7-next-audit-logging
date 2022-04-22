@@ -7,8 +7,6 @@ import DeleteArchivedErrorsUseCase from "./DeleteArchivedErrorsUseCase"
 import createBichardPostgresGatewayConfig from "../createBichardPostgresGatewayConfig"
 
 const postgresConfig = createBichardPostgresGatewayConfig()
-postgresConfig.TABLE_NAME = "archive_error_list"
-
 const postgresGateway = new AwsBichardPostgresGateway(postgresConfig)
 const useCase = new DeleteArchivedErrorsUseCase(postgresGateway)
 

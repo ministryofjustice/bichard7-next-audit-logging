@@ -1,32 +1,36 @@
 import type { PostgresConfig } from "shared-types"
 
 export default function createBichardPostgresGatewayConfig(): PostgresConfig {
-  const { BICHARD_DB_HOST, BICHARD_DB_PORT, BICHARD_DB_USERNAME, BICHARD_DB_PASSWORD, BICHARD_DB_TABLE_NAME } =
-    process.env
+  const { DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_NAME, DB_SCHEMA, DB_SSL } = process.env
 
-  if (!BICHARD_DB_HOST) {
-    throw Error("BICHARD_DB_HOST environment variable must have value.")
+  if (!DB_HOST) {
+    throw Error("DB_HOST environment variable must have value.")
   }
 
-  if (!BICHARD_DB_PORT) {
-    throw Error("BICHARD_DB_PORT environment variable must have value.")
+  if (!DB_PORT) {
+    throw Error("DB_PORT environment variable must have value.")
   }
 
-  if (!BICHARD_DB_USERNAME) {
-    throw Error("BICHARD_DB_USERNAME environment variable must have value.")
+  if (!DB_USER) {
+    throw Error("DB_USER environment variable must have value.")
   }
 
-  if (!BICHARD_DB_PASSWORD) {
-    throw Error("BICHARD_DB_PASSWORD environment variable must have value.")
+  if (!DB_PASSWORD) {
+    throw Error("DB_PASSWORD environment variable must have value.")
+  }
+
+  if (!DB_NAME) {
+    throw Error("DB_NAME environment variable must have value.")
   }
 
   const config: PostgresConfig = {
-    HOST: BICHARD_DB_HOST,
-    PORT: parseInt(BICHARD_DB_PORT, 10),
-    USERNAME: BICHARD_DB_USERNAME,
-    PASSWORD: BICHARD_DB_PASSWORD,
-    DATABASE_NAME: "bichard",
-    TABLE_NAME: BICHARD_DB_TABLE_NAME || "br7own.archive_error_list"
+    HOST: DB_HOST,
+    PORT: parseInt(DB_PORT, 10),
+    USERNAME: DB_USER,
+    PASSWORD: DB_PASSWORD,
+    DATABASE_NAME: DB_NAME,
+    TABLE_NAME: DB_SCHEMA ? `{DB_SCHEMA}.archive_error_list` : "archive_error_list",
+    SSL: DB_SSL === "true"
   }
 
   return config

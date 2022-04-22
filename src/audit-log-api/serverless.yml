@@ -21,11 +21,13 @@ provider:
     S3_AWS_SECRET_ACCESS_KEY: S3RVER
     DYNAMO_AWS_ACCESS_KEY_ID: S3RVER
     DYNAMO_AWS_SECRET_ACCESS_KEY: S3RVER
-    BICHARD_DB_HOST: "localhost"
-    BICHARD_DB_PORT: "5432"
-    BICHARD_DB_USERNAME: "bichard"
-    BICHARD_DB_PASSWORD: "password"
-    BICHARD_DB_TABLE_NAME: "archive_error_list"
+    DB_HOST: "localhost"
+    DB_PORT: "5432"
+    DB_USER: "bichard"
+    DB_PASSWORD: "password"
+    DB_TABLE_NAME: "archive_error_list"
+    DB_SSL: "false"
+    DB_NAME: "bichard"
 
 plugins:
   - serverless-offline

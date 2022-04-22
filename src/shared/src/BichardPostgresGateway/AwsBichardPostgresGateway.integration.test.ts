@@ -10,7 +10,8 @@ const config: PostgresConfig = {
   USERNAME: "bichard",
   PASSWORD: "password",
   DATABASE_NAME: "bichard",
-  TABLE_NAME: "archive_error_list"
+  TABLE_NAME: "archive_error_list",
+  SSL: false
 }
 
 const gateway = new AwsBichardPostgresGateway(config)

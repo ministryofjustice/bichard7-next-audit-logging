@@ -5,6 +5,7 @@ type PostgresConfig = {
   PASSWORD: string
   DATABASE_NAME: string
   TABLE_NAME?: string
+  SSL: boolean
 }
 
 export default PostgresConfig

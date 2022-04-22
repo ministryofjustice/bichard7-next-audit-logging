@@ -13,7 +13,8 @@ export default class PostgresGateway {
       port: config.PORT,
       user: config.USERNAME,
       password: config.PASSWORD,
-      database: config.DATABASE_NAME
+      database: config.DATABASE_NAME,
+      ssl: config.SSL
     })
 
     if (config.TABLE_NAME) {
