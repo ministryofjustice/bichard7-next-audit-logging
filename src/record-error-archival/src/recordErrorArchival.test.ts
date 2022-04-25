@@ -1,5 +1,6 @@
 import { Client } from "pg"
 import { FakeApiClient, setEnvironmentVariables } from "shared-testing"
+import type { AuditLogEvent, KeyValuePair } from "shared-types"
 import type { ArchivedErrorRecord, DatabaseRow } from "./DatabaseClient"
 import DatabaseClient from "./DatabaseClient"
 import { recordErrorArchival } from "./recordErrorArchival"
@@ -67,6 +68,7 @@ const stripWhitespace = (string: string) => string.replace(/\s/g, "")
 describe("Record Error Archival integration", () => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let client: jest.Mocked<any>
+  let api: jest.Mocked<any>
 
   beforeEach(() => {
     jest.resetModules() // reset the cache of all required modules
@@ -82,6 +84,7 @@ describe("Record Error Archival integration", () => {
       DB_SCHEMA: "br7own"
     }
     client = new Client()
+    api = new FakeApiClient()
   })
 
   afterEach(() => {
@@ -100,7 +103,6 @@ describe("Record Error Archival integration", () => {
         archiveLogId: 1
       }
     ])
-    const api = new FakeApiClient()
     const apiSpy = jest.spyOn(api, "createEvent")
 
     await recordErrorArchival(stubDb, api)
@@ -151,7 +153,6 @@ describe("Record Error Archival integration", () => {
       }
     ]
     const stubDb = createStubDbWithRecords(errorRecords)
-    const api = new FakeApiClient()
     const apiSpy = jest.spyOn(api, "createEvent")
 
     await recordErrorArchival(stubDb, api)
@@ -178,7 +179,6 @@ describe("Record Error Archival integration", () => {
     })
 
     const db = new DatabaseClient("", "", "", false, "", "schema", 100)
-    const api = new FakeApiClient()
 
     await recordErrorArchival(db, api)
 
@@ -203,7 +203,6 @@ describe("Record Error Archival integration", () => {
     })
 
     const db = new DatabaseClient("", "", "", false, "", "schema", 100)
-    const api = new FakeApiClient()
     api.setErrorReturnedByFunctions(new Error("API failed :("), ["createEvent"])
 
     await recordErrorArchival(db, api)
@@ -225,8 +224,8 @@ describe("Record Error Archival integration", () => {
     })
 
     const db = new DatabaseClient("", "", "", false, "", "schema", 100)
-    const api = new FakeApiClient()
-    api.setErrorReturnedByFunctionsAfterNCalls(new Error("API quota exceeded"), 2, ["createEvent"])
+    // Each error requires 2 calls: one to getMessage and one to createEvent
+    api.setErrorReturnedByFunctionsAfterNCalls(new Error("API quota exceeded"), 4, ["createEvent"])
 
     await recordErrorArchival(db, api)
 
@@ -253,7 +252,6 @@ describe("Record Error Archival integration", () => {
 
   it("Should limit the number of archive log groups to a configured value", async () => {
     const db = new DatabaseClient("", "", "", false, "", "schema", 50)
-    const api = new FakeApiClient()
 
     await recordErrorArchival(db, api)
 
@@ -268,7 +266,6 @@ describe("Record Error Archival integration", () => {
     })
 
     const db = new DatabaseClient("", "", "", false, "", "schema", 100)
-    const api = new FakeApiClient()
 
     await recordErrorArchival(db, api)
 
@@ -284,10 +281,7 @@ describe("Record Error Archival integration", () => {
   })
 
   it("Should report failures when the database fails to update", async () => {
-    expect(true).toBeTruthy()
-
     const db = new DatabaseClient("", "", "", false, "", "schema", 100)
-    const api = new FakeApiClient()
 
     client.query.mockImplementation(
       jest.fn().mockRejectedValue(new Error("Database host on fire")).mockResolvedValueOnce(dbResult)
@@ -301,5 +295,37 @@ describe("Record Error Archival integration", () => {
       expect(result.errors.length).toBeGreaterThanOrEqual(1)
       expect(result.errors[0].message).toBe("Database host on fire")
     }
+  })
+
+  it("Shouldn't create duplicate audit log events for archival when one already exists", async () => {
+    client.query.mockImplementation(() => {
+      return Promise.resolve(dbResult)
+    })
+
+    const db = new DatabaseClient("", "", "", false, "", "schema", 100)
+
+    // Add a message with the archived event to the API
+    api.addMessage({
+      messageId: "Message2",
+      receivedDate: new Date().toISOString(),
+      events: [
+        <AuditLogEvent>{
+          eventSource: "Error archiver process 1",
+          category: "information",
+          eventType: "Error archival",
+          timestamp: new Date().toISOString(),
+          attributes: { "Error ID": 2 } as KeyValuePair<string, number>
+        }
+      ]
+    })
+
+    const apiSpy = jest.spyOn(api, "createEvent")
+
+    const results = await recordErrorArchival(db, api)
+    expect(apiSpy).toHaveBeenCalledTimes(3)
+    // Don't create an audit log event for the message which already has one
+    expect(apiSpy.mock.calls.map((args) => args[0])).not.toContain("Message2")
+    // The job should be marked as successful when the audit log event is already present
+    expect(results.filter((result) => result.errorRecord.messageId == "Message2")[0].success).toBeTruthy()
   })
 })
