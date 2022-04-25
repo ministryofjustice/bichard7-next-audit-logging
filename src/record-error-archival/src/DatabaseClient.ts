@@ -13,39 +13,17 @@ export type ArchivedErrorRecord = {
 const wherePlaceholderForRange = (range: number) => [...Array(range).keys()].map((x) => `$${x + 1}`).join(", ")
 
 export default class DatabaseClient {
-  private host: string
-
-  private user: string
-
-  private password: string
-
-  private database: string
-
-  private useSsl: boolean
-
-  private schema: string
-
   private postgres: Client
 
-  private archiveGroupLimit: number
-
   constructor(
-    host: string,
-    user: string,
-    password: string,
-    useSsl: boolean,
-    database: string,
-    schema: string,
-    archiveGroupLimit: number
+    private host: string,
+    private user: string,
+    private password: string,
+    private useSsl: boolean,
+    private database: string,
+    private schema: string,
+    private archiveGroupLimit: number
   ) {
-    this.host = host
-    this.user = user
-    this.password = password
-    this.useSsl = useSsl
-    this.database = database
-    this.schema = schema
-    this.archiveGroupLimit = archiveGroupLimit
-
     this.postgres = new Client({
       host: this.host,
       user: this.user,
