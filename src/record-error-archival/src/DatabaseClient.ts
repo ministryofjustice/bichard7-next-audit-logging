@@ -37,7 +37,11 @@ export default class DatabaseClient {
       host: this.host,
       user: this.user,
       password: this.password,
-      ssl: this.useSsl,
+      ssl: this.useSsl
+        ? {
+            rejectUnauthorized: true
+          }
+        : false,
       database: this.database
     })
   }
