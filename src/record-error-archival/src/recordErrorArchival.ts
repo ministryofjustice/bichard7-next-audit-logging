@@ -5,11 +5,21 @@ import type DatabaseClient from "./DatabaseClient"
 import groupBy from "lodash.groupby"
 import { logger } from "shared"
 
-export const recordErrorArchival = async (db: DatabaseClient, api: ApiClient) => {
+export type RecordErrorArchivalResult = {
+  success: boolean
+  reason?: string
+  errorRecord: ArchivedErrorRecord
+}
+
+export const recordErrorArchival = async (db: DatabaseClient, api: ApiClient): Promise<RecordErrorArchivalResult[]> => {
   await db.connect()
   const errorRecords = await db.fetchUnloggedArchivedErrors()
 
-  const results: { success: boolean; reason?: string; errorRecord: ArchivedErrorRecord }[] = []
+  if (isError(errorRecords)) {
+    throw errorRecords
+  }
+
+  const results: RecordErrorArchivalResult[] = []
 
   for (const errorRecord of errorRecords) {
     logger.debug({ message: "Would audit log the archival of an error", record: errorRecord })

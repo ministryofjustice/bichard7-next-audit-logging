@@ -1,5 +1,6 @@
 import { Client } from "pg"
 import { logger } from "shared"
+import type { PromiseResult } from "shared-types"
 
 export type ArchivedErrorRecord = {
   messageId: string
@@ -7,6 +8,14 @@ export type ArchivedErrorRecord = {
   archivedAt: Date
   archivedBy: string
   archiveLogId: number
+}
+
+type DatabaseRow = {
+  message_id: string
+  error_id: number
+  archived_at: string
+  archived_by: string
+  archive_log_id: number
 }
 
 // Produces the string "$1, $2, $3..." for the given range
@@ -41,10 +50,10 @@ export default class DatabaseClient {
     await this.postgres.end()
   }
 
-  async fetchUnloggedArchivedErrors(): Promise<ArchivedErrorRecord[]> {
+  fetchUnloggedArchivedErrors(): PromiseResult<ArchivedErrorRecord[]> {
     logger.debug("Fetching unlogged archived errors")
 
-    const errors: ArchivedErrorRecord[] = await this.postgres
+    return this.postgres
       .query(
         `SELECT message_id, error_id, archived_at, archived_by, archive_log_id
         FROM ${this.schema}.archive_error_list ael
@@ -58,7 +67,7 @@ export default class DatabaseClient {
       )
       .then((res) =>
         res.rows.map(
-          (row) =>
+          (row: DatabaseRow) =>
             <ArchivedErrorRecord>{
               messageId: row.message_id,
               errorId: row.error_id,
@@ -68,40 +77,45 @@ export default class DatabaseClient {
             }
         )
       )
-
-    return errors
+      .catch((error) => error)
   }
 
-  async markArchiveGroupAuditLogged(archiveLogGroupId: number) {
+  markArchiveGroupAuditLogged(archiveLogGroupId: number): PromiseResult<void> {
     logger.debug(`Marking log group ${archiveLogGroupId} as audit logged`)
 
-    await this.postgres.query(
-      `UPDATE ${this.schema}.archive_log
-       SET audit_logged_at = NOW()
-       WHERE log_id = $1`,
-      [archiveLogGroupId]
-    )
+    return this.postgres
+      .query(
+        `UPDATE ${this.schema}.archive_log
+        SET audit_logged_at = NOW()
+        WHERE log_id = $1`,
+        [archiveLogGroupId]
+      )
+      .catch((error) => error)
   }
 
-  async markErrorsAuditLogged(errorIds: number[]) {
+  markErrorsAuditLogged(errorIds: number[]): PromiseResult<void> {
     logger.debug({ message: "Marking errors as audit logged", errorIds: errorIds })
 
-    await this.postgres.query(
-      `UPDATE ${this.schema}.archive_error_list
-       SET audit_logged_at = NOW(), audit_log_attempts = audit_log_attempts + 1
-       WHERE error_id IN (${wherePlaceholderForRange(errorIds.length)})`,
-      errorIds
-    )
+    return this.postgres
+      .query(
+        `UPDATE ${this.schema}.archive_error_list
+        SET audit_logged_at = NOW(), audit_log_attempts = audit_log_attempts + 1
+        WHERE error_id IN (${wherePlaceholderForRange(errorIds.length)})`,
+        errorIds
+      )
+      .catch((error) => error)
   }
 
-  async markErrorsAuditLogFailed(errorIds: number[]) {
+  markErrorsAuditLogFailed(errorIds: number[]): PromiseResult<void> {
     logger.debug({ message: "Recording failure to audit log errors", errorIds: errorIds })
 
-    await this.postgres.query(
-      `UPDATE ${this.schema}.archive_error_list
-       SET audit_log_attempts = audit_log_attempts + 1
-       WHERE error_id IN (${wherePlaceholderForRange(errorIds.length)})`,
-      errorIds
-    )
+    return this.postgres
+      .query(
+        `UPDATE ${this.schema}.archive_error_list
+        SET audit_log_attempts = audit_log_attempts + 1
+        WHERE error_id IN (${wherePlaceholderForRange(errorIds.length)})`,
+        errorIds
+      )
+      .catch((error) => error)
   }
 }
