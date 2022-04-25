@@ -19,7 +19,7 @@ it("should return one message when externalCorrelationId exists", async () => {
 
 it("should return an error when fetchByExternalCorrelationId fails", async () => {
   const expectedError = new Error("Results not found")
-  gateway.shouldReturnError(expectedError)
+  gateway.setErrorForFunctions(expectedError)
 
   const messageFetcher = new FetchByExternalCorrelationId(gateway, "External correlation id")
   const result = await messageFetcher.fetch()

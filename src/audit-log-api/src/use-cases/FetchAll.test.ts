@@ -20,7 +20,7 @@ it("should return all messages", async () => {
 
 it("should return an error when fetchMany fails", async () => {
   const expectedError = new Error("Results not found")
-  gateway.shouldReturnError(expectedError)
+  gateway.setErrorForFunctions(expectedError)
 
   const messageFetcher = new FetchAll(gateway)
   const result = await messageFetcher.fetch()

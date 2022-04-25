@@ -28,7 +28,7 @@ describe("CreateEventUseCase tests", () => {
     const useCase = new CreateEventUseCase(fakeApiClient)
 
     fakeApiClient.reset()
-    fakeApiClient.shouldReturnError(expectedError, ["createAuditLog"])
+    fakeApiClient.setErrorForFunctions(expectedError, ["createAuditLog"])
     const result = await useCase.execute("DummyMessageId", {} as AuditLogEvent)
 
     expect(result).toBeError(expectedError.message)
@@ -39,7 +39,7 @@ describe("CreateEventUseCase tests", () => {
     const useCase = new CreateEventUseCase(fakeApiClient)
 
     fakeApiClient.reset()
-    fakeApiClient.shouldReturnError(expectedError, ["createEvent"])
+    fakeApiClient.setErrorForFunctions(expectedError, ["createEvent"])
     const result = await useCase.execute("DummyMessageId", {} as AuditLogEvent)
 
     expect(result).toBeError(expectedError.message)

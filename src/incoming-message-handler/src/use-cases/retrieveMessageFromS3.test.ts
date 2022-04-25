@@ -110,7 +110,7 @@ it("should return error when S3 gateway returns error", async () => {
   } as S3PutObjectEvent
 
   const expectedError = new Error("Dummy error")
-  s3Gateway.shouldReturnError(expectedError)
+  s3Gateway.setErrorForFunctions(expectedError)
   const receivedMessage = await retrieveMessageFromS3(input, s3Gateway)
   expect(receivedMessage).toBeError("Error while getting the message from S3")
 

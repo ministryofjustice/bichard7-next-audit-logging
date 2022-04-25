@@ -21,7 +21,7 @@ it("should return event xml when item exists in S3", async () => {
 it("should return error when an S3 gateway returns error", async () => {
   const expectedError = new Error("Dummy Error Message")
 
-  fakeS3Gateway.shouldReturnError(expectedError)
+  fakeS3Gateway.setErrorForFunctions(expectedError)
   const result = await useCase.retrieve("Dummy Path")
 
   expect(isError(result)).toBe(true)

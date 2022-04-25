@@ -29,7 +29,7 @@ it("returns the message when messageId exists in the database", async () => {
 
 it("returns error when an error has occured in the database", async () => {
   const expectedError = new Error("Error")
-  gateway.shouldReturnError(expectedError)
+  gateway.setErrorForFunctions(expectedError)
   const result = await getMessageById(gateway, "message Id")
 
   expect(isError(result)).toBe(true)
