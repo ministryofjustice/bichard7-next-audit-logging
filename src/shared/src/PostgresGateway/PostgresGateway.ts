@@ -14,7 +14,7 @@ export default class PostgresGateway {
       user: config.USERNAME,
       password: config.PASSWORD,
       database: config.DATABASE_NAME,
-      ssl: config.SSL
+      ssl: config.SSL ? { rejectUnauthorized: false } : false
     })
 
     if (config.TABLE_NAME) {
