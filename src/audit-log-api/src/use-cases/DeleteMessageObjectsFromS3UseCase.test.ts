@@ -47,7 +47,7 @@ it("should delete message xml from S3 when item exists in S3", async () => {
 it("should return error when an S3 gateway returns error", async () => {
   const expectedError = new Error("Dummy Error Message")
 
-  fakeS3Gateway.shouldReturnError(expectedError)
+  fakeS3Gateway.setErrorForFunctions(expectedError)
   const auditLog = createAuditLog("dummy", "dummy")
   const result = await useCase.call(auditLog)
 

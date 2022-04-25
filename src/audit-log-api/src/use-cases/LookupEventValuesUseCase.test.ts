@@ -49,7 +49,7 @@ describe("lookupEventValues", () => {
     event.addAttribute("attr1", { valueLookup: "dummy ID" })
 
     const expectedError = new Error("Dummy error message")
-    dynamoGateway.shouldReturnError(expectedError)
+    dynamoGateway.setErrorForFunctions(expectedError)
     const actualEvent = await useCase.execute(event)
 
     expect(actualEvent).toBeError(expectedError.message)

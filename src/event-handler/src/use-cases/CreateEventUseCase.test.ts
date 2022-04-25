@@ -40,7 +40,7 @@ describe("CreateEventUseCase", () => {
 
   it("should be successful when create audit log returns message id exists error", async () => {
     const expectedError = new Error("A message with Id DUMMY already exists")
-    fakeApiClient.shouldReturnError(expectedError, ["createAuditLog"])
+    fakeApiClient.setErrorForFunctions(expectedError, ["createAuditLog"])
     const result = await useCase.execute("ExistingMessageId", {} as AuditLogEvent)
 
     expect(result).toBeUndefined()
@@ -48,7 +48,7 @@ describe("CreateEventUseCase", () => {
 
   it("should be successful when create audit log returns message hash exists error", async () => {
     const expectedError = new Error("Error creating audit log: Message hash already exists")
-    fakeApiClient.shouldReturnError(expectedError, ["createAuditLog"])
+    fakeApiClient.setErrorForFunctions(expectedError, ["createAuditLog"])
     const result = await useCase.execute("DummyMessageId", {} as AuditLogEvent)
 
     expect(result).toBeUndefined()

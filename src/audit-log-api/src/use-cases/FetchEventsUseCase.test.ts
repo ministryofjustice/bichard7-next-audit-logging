@@ -86,7 +86,7 @@ describe("FetchEventsUseCase", () => {
     auditLogGateway.reset([message])
 
     const expectedError = new Error(`Couldn't lookup for events with message ID '${message.messageId}'`)
-    auditLogLookupGateway.shouldReturnError(expectedError)
+    auditLogLookupGateway.setErrorForFunctions(expectedError)
 
     const result = await useCase.get(message.messageId)
 

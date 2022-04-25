@@ -49,7 +49,7 @@ describe("StoreValuesInLookupTableUseCase", () => {
     event.addAttribute("attr1", "a".repeat(2000))
 
     const expectedError = new Error("Dummy error message")
-    dynamoGateway.shouldReturnError(expectedError)
+    dynamoGateway.setErrorForFunctions(expectedError)
 
     const actualEvent = await useCase.execute(event, "dummy message ID")
 

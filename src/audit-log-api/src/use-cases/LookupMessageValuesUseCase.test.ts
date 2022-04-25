@@ -57,7 +57,7 @@ describe("lookupEventValues", () => {
     message.events.push(event)
 
     const expectedError = new Error("Dummy error message")
-    dynamoGateway.shouldReturnError(expectedError)
+    dynamoGateway.setErrorForFunctions(expectedError)
     const actualEvent = await useCase.execute(message)
 
     expect(actualEvent).toBeError(expectedError.message)

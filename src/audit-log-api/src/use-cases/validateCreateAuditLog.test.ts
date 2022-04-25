@@ -201,7 +201,7 @@ describe("validateCreateAuditLog", () => {
 
     const expectedError = new Error("Unknown error")
     dynamoGateway.reset()
-    dynamoGateway.shouldReturnError(expectedError)
+    dynamoGateway.setErrorForFunctions(expectedError)
     const { errors, isValid } = await validateCreateAuditLog(item, dynamoGateway)
 
     expect(isValid).toBe(false)

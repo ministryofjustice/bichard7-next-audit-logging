@@ -16,7 +16,7 @@ it("should call deleteByMessageId with the given messageId", async () => {
 
 it("should return error when the DynamoDB gateway returns error", async () => {
   const expectedError = new Error("Dummy Error Message")
-  fakeAuditLogLookupDynamoGateway.shouldReturnError(expectedError)
+  fakeAuditLogLookupDynamoGateway.setErrorForFunctions(expectedError)
 
   const result = await useCase.call("dummyId")
 
