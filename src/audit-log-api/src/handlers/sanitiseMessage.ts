@@ -75,15 +75,6 @@ export default async function sanitiseMessage(event: APIGatewayProxyEvent): Prom
     })
   }
 
-  const sanitiseAuditLogResult = await sanitiseAuditLogUseCase.call(message)
-
-  if (isError(sanitiseAuditLogResult)) {
-    return createJsonApiResult({
-      statusCode: HttpStatusCode.internalServerError,
-      body: sanitiseAuditLogResult.message
-    })
-  }
-
   const deleteAuditLogLookupResult = await deleteAuditLogLookupItems.call(message.messageId)
 
   if (isError(deleteAuditLogLookupResult)) {
@@ -99,6 +90,15 @@ export default async function sanitiseMessage(event: APIGatewayProxyEvent): Prom
     return createJsonApiResult({
       statusCode: HttpStatusCode.internalServerError,
       body: deleteArchivedErrorsResult.message
+    })
+  }
+
+  const sanitiseAuditLogResult = await sanitiseAuditLogUseCase.call(message)
+
+  if (isError(sanitiseAuditLogResult)) {
+    return createJsonApiResult({
+      statusCode: HttpStatusCode.internalServerError,
+      body: sanitiseAuditLogResult.message
     })
   }
 
