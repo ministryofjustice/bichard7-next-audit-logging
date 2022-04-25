@@ -212,7 +212,7 @@ describe("Record Error Archival integration", () => {
 
     const db = new DatabaseClient("", "", "", false, "", "schema", 100)
     const api = new FakeApiClient()
-    api.shouldReturnError(new Error("API failed :("), ["createEvent"])
+    api.setErrorForFunctions(new Error("API failed :("), ["createEvent"])
 
     await recordErrorArchival(db, api)
 
@@ -234,7 +234,7 @@ describe("Record Error Archival integration", () => {
 
     const db = new DatabaseClient("", "", "", false, "", "schema", 100)
     const api = new FakeApiClient()
-    api.shouldReturnErrorAfterNCalls(new Error("API quota exceeded"), 2, ["createEvent"])
+    api.setErrorForFunctionsAfterNCalls(new Error("API quota exceeded"), 2, ["createEvent"])
 
     await recordErrorArchival(db, api)
 

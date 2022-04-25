@@ -95,7 +95,7 @@ describe("FetchEventsUseCase", () => {
 
   it("should return an error when fetchEvents fails", async () => {
     const expectedError = new Error(`Couldn't fetch events for message '1'`)
-    auditLogGateway.shouldReturnError(expectedError)
+    auditLogGateway.setErrorForFunctions(expectedError)
 
     const result = await useCase.get("1")
 

@@ -19,7 +19,7 @@ it("should return one message when messageId exists", async () => {
 
 it("should return an error when fetchOne fails", async () => {
   const expectedError = new Error("Results not found")
-  gateway.shouldReturnError(expectedError)
+  gateway.setErrorForFunctions(expectedError)
 
   const messageFetcher = new FetchById(gateway, "Invalid id")
   const result = await messageFetcher.fetch()

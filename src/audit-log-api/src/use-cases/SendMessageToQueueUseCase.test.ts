@@ -15,7 +15,7 @@ it("should be sucessful when MQ gateway successfully pushes the message to the q
 
 it("should return error when MQ gateway throws exception", async () => {
   const expectedError = new Error("Expected Error Message")
-  gateway.shouldReturnError(expectedError)
+  gateway.setErrorForFunctions(expectedError)
   const result = await useCase.send("Dummy Queue Name", "Dummy Message")
 
   expect(result).toBeError(expectedError.message)

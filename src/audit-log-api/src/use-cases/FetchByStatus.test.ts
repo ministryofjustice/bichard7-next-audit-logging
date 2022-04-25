@@ -25,7 +25,7 @@ it("should return one message when there is a message with the specified status"
 
 it("should return an error when fetchByStatus fails", async () => {
   const expectedError = new Error("Results not found")
-  gateway.shouldReturnError(expectedError)
+  gateway.setErrorForFunctions(expectedError)
 
   const messageFetcher = new FetchByStatus(gateway, AuditLogStatus.processing)
   const result = await messageFetcher.fetch()
