@@ -2,6 +2,7 @@ import type { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda"
 import {
   AwsAuditLogDynamoGateway,
   AwsAuditLogLookupDynamoGateway,
+  AwsBichardPostgresGateway,
   AwsS3Gateway,
   createS3Config,
   HttpStatusCode
@@ -10,23 +11,32 @@ import type { AuditLog } from "shared-types"
 import { isError } from "shared-types"
 import createAuditLogDynamoDbConfig from "../createAuditLogDynamoDbConfig"
 import createAuditLogLookupDynamoDbConfig from "../createAuditLogLookupDynamoDbConfig"
+import createBichardPostgresGatewayConfig from "../createBichardPostgresGatewayConfig"
 import FetchById from "../use-cases/FetchById"
 import DeleteMessageObjectsFromS3UseCase from "../use-cases/DeleteMessageObjectsFromS3UseCase"
 import { createJsonApiResult } from "../utils"
 import SanitiseAuditLogUseCase from "../use-cases/SanitisAuditLogUseCase"
 import DeleteAuditLogLookupItemsUseCase from "../use-cases/DeleteAuditLogLookupItemsUseCase"
+import DeleteArchivedErrorsUseCase from "../use-cases/DeleteArchivedErrorsUseCase"
 
 const auditLogDynamoDbConfig = createAuditLogDynamoDbConfig()
 const auditLogGateway = new AwsAuditLogDynamoGateway(auditLogDynamoDbConfig, auditLogDynamoDbConfig.TABLE_NAME)
 const auditLogLookupDynamoDbConfig = createAuditLogLookupDynamoDbConfig()
-const awsAuditLogLookupDynamoGateway = new AwsAuditLogLookupDynamoGateway(
+const auditLogLookupDynamoGateway = new AwsAuditLogLookupDynamoGateway(
   auditLogLookupDynamoDbConfig,
   auditLogLookupDynamoDbConfig.TABLE_NAME
 )
-const awsS3Gateway = new AwsS3Gateway(createS3Config("AUDIT_LOG_EVENTS_BUCKET"))
-const deleteMessageObjectsFromS3UseCase = new DeleteMessageObjectsFromS3UseCase(awsS3Gateway)
+const postgresConfig = createBichardPostgresGatewayConfig()
+const awsBichardPostgresGateway = new AwsBichardPostgresGateway(postgresConfig)
+const awsMessagesS3Gateway = new AwsS3Gateway(createS3Config("INTERNAL_INCOMING_MESSAGES_BUCKET"))
+const awsEventsS3Gateway = new AwsS3Gateway(createS3Config("AUDIT_LOG_EVENTS_BUCKET"))
+const deleteMessageObjectsFromS3UseCase = new DeleteMessageObjectsFromS3UseCase(
+  awsMessagesS3Gateway,
+  awsEventsS3Gateway
+)
 const sanitiseAuditLogUseCase = new SanitiseAuditLogUseCase(auditLogGateway)
-const deleteAuditLogLookupItems = new DeleteAuditLogLookupItemsUseCase(awsAuditLogLookupDynamoGateway)
+const deleteAuditLogLookupItems = new DeleteAuditLogLookupItemsUseCase(auditLogLookupDynamoGateway)
+const deleteArchivedErrorsUseCase = new DeleteArchivedErrorsUseCase(awsBichardPostgresGateway)
 /* eslint-disable require-await */
 export default async function sanitiseMessage(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
   const messageId = event.pathParameters?.messageId
@@ -65,21 +75,30 @@ export default async function sanitiseMessage(event: APIGatewayProxyEvent): Prom
     })
   }
 
-  const sanitiseAuditLogResult = await sanitiseAuditLogUseCase.call(message)
-
-  if (isError(sanitiseAuditLogResult)) {
-    return createJsonApiResult({
-      statusCode: HttpStatusCode.internalServerError,
-      body: sanitiseAuditLogResult.message
-    })
-  }
-
   const deleteAuditLogLookupResult = await deleteAuditLogLookupItems.call(message.messageId)
 
   if (isError(deleteAuditLogLookupResult)) {
     return createJsonApiResult({
       statusCode: HttpStatusCode.internalServerError,
       body: deleteAuditLogLookupResult.message
+    })
+  }
+
+  const deleteArchivedErrorsResult = await deleteArchivedErrorsUseCase.call(message.messageId)
+
+  if (isError(deleteArchivedErrorsResult)) {
+    return createJsonApiResult({
+      statusCode: HttpStatusCode.internalServerError,
+      body: deleteArchivedErrorsResult.message
+    })
+  }
+
+  const sanitiseAuditLogResult = await sanitiseAuditLogUseCase.call(message)
+
+  if (isError(sanitiseAuditLogResult)) {
+    return createJsonApiResult({
+      statusCode: HttpStatusCode.internalServerError,
+      body: sanitiseAuditLogResult.message
     })
   }
 

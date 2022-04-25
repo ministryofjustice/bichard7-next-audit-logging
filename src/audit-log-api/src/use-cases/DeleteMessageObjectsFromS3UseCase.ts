@@ -2,13 +2,16 @@ import type { S3GatewayInterface, PromiseResult, AuditLog, BichardAuditLogEvent 
 import { isError } from "shared-types"
 
 export default class DeleteMessageObjectsFromS3UseCase {
-  constructor(private readonly gateway: S3GatewayInterface) {}
+  constructor(
+    private readonly messagesGateway: S3GatewayInterface,
+    private readonly eventsGateway: S3GatewayInterface
+  ) {}
 
   async call(message: AuditLog): PromiseResult<void> {
     const s3Path = message?.s3Path
 
     if (s3Path) {
-      const deleteObjectFromS3Result = await this.gateway.deleteItem(s3Path)
+      const deleteObjectFromS3Result = await this.messagesGateway.deleteItem(s3Path)
       if (isError(deleteObjectFromS3Result)) {
         return deleteObjectFromS3Result
       }
@@ -18,7 +21,7 @@ export default class DeleteMessageObjectsFromS3UseCase {
     for (const auditLogEvent of message.events) {
       const { s3Path: eventS3Path } = auditLogEvent as BichardAuditLogEvent
       if (eventS3Path) {
-        const deleteEventObjectFromS3Result = await this.gateway.deleteItem(eventS3Path)
+        const deleteEventObjectFromS3Result = await this.eventsGateway.deleteItem(eventS3Path)
         if (isError(deleteEventObjectFromS3Result)) {
           return deleteEventObjectFromS3Result
         }

@@ -1,10 +1,19 @@
 jest.setTimeout(15000)
-
-import type { DynamoDbConfig, S3Config } from "shared-types"
+import { setEnvironmentVariables } from "shared-testing"
+setEnvironmentVariables({ BICHARD_DB_TABLE_NAME: "archive_error_list" })
+import type { DynamoDbConfig } from "shared-types"
 import { AuditLogEvent, AuditLogLookup, BichardAuditLogEvent } from "shared-types"
 import { AuditLog } from "shared-types"
-import { HttpStatusCode, TestAwsS3Gateway, TestDynamoGateway } from "shared"
+import {
+  AwsBichardPostgresGateway,
+  createS3Config,
+  HttpStatusCode,
+  TestAwsS3Gateway,
+  TestDynamoGateway,
+  TestPostgresGateway
+} from "shared"
 import axios from "axios"
+import createBichardPostgresGatewayConfig from "../createBichardPostgresGatewayConfig"
 
 const dynamoConfig: DynamoDbConfig = {
   DYNAMO_URL: "http://localhost:8000",
@@ -17,16 +26,14 @@ const dynamoConfig: DynamoDbConfig = {
 const auditLogTableName = "auditLogTable"
 const auditLogLookupTableName = "auditLogLookupTable"
 
-const s3Config: S3Config = {
-  url: "http://localhost:4569",
-  region: "eu-west-2",
-  bucketName: "auditLogEventsBucket",
-  accessKeyId: "S3RVER",
-  secretAccessKey: "S3RVER"
-}
+const postgresConfig = createBichardPostgresGatewayConfig()
+const postgresGateway = new AwsBichardPostgresGateway(postgresConfig)
 
-const s3Gateway = new TestAwsS3Gateway(s3Config)
+const messagesS3Gateway = new TestAwsS3Gateway(createS3Config("INTERNAL_INCOMING_MESSAGES_BUCKET"))
+const eventsS3Gateway = new TestAwsS3Gateway(createS3Config("AUDIT_LOG_EVENTS_BUCKET"))
+
 const testDynamoGateway = new TestDynamoGateway(dynamoConfig)
+const testPostgresGateway = new TestPostgresGateway(postgresConfig)
 
 const createBichardAuditLogEvent = (eventS3Path: string) => {
   const event = new BichardAuditLogEvent({
@@ -51,9 +58,20 @@ const createBichardAuditLogEvent = (eventS3Path: string) => {
 
 describe("sanitiseMessage", () => {
   beforeEach(async () => {
-    await s3Gateway.deleteAll()
+    await eventsS3Gateway.deleteAll()
+    await messagesS3Gateway.deleteAll()
     await testDynamoGateway.deleteAll(auditLogTableName, "messageId")
     await testDynamoGateway.deleteAll(auditLogLookupTableName, "id")
+    await testPostgresGateway.dropTable()
+    await testPostgresGateway.createTable({
+      message_id: "varchar(70)",
+      updated_msg: "text"
+    })
+  })
+
+  afterAll(async () => {
+    await testPostgresGateway.dispose()
+    await postgresGateway.dispose()
   })
 
   it("should return Ok status when message has been sanitised successfully", async () => {
@@ -68,7 +86,8 @@ describe("sanitiseMessage", () => {
     })
     message.events = [event1, event2]
 
-    await Promise.all([message.s3Path, event1.s3Path].map((s3Path) => s3Gateway.upload(s3Path, "dummy")))
+    await messagesS3Gateway.upload(message.s3Path, "dummy")
+    await eventsS3Gateway.upload(event1.s3Path, "dummy")
 
     await testDynamoGateway.insertOne(auditLogTableName, message, "messageId")
 
@@ -79,12 +98,25 @@ describe("sanitiseMessage", () => {
       })
     )
 
+    const otherMessageId = "otherMessageID"
+    const records = [
+      { message_id: message.messageId, updated_msg: "Dummy data" },
+      { message_id: message.messageId, updated_msg: "Dummy data" },
+      { message_id: otherMessageId, updated_msg: "Other dummy data" }
+    ]
+    await testPostgresGateway.insertRecords(records)
+
     const response = await axios.post(`http://localhost:3010/messages/${message.messageId}/sanitise`, null, {
       validateStatus: undefined
     })
 
     expect(response.status).toBe(HttpStatusCode.noContent)
-    expect(await s3Gateway.getAll()).toEqual([])
+
+    const actualMessageS3Objects = await messagesS3Gateway.getAll()
+    expect(actualMessageS3Objects).toEqual([])
+
+    const actualEventS3Objects = await eventsS3Gateway.getAll()
+    expect(actualEventS3Objects).toEqual([])
 
     const actualMessage = await testDynamoGateway.getOne<AuditLog>(auditLogTableName, "messageId", message.messageId)
 
@@ -94,6 +126,10 @@ describe("sanitiseMessage", () => {
 
     const lookupItems = await testDynamoGateway.getAll(auditLogLookupTableName)
     expect(lookupItems.Items).toHaveLength(0)
+
+    const allResults = await testPostgresGateway.findAll()
+    expect(allResults).toHaveLength(1)
+    expect(allResults).toEqual([{ message_id: otherMessageId, updated_msg: "Other dummy data" }])
   })
 
   it("should return Error when the message ID does not exist", async () => {

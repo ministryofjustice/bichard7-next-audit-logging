@@ -22,5 +22,7 @@ export type { default as AuditLogLookupDynamoGateway } from "./AuditLogLookupDyn
 export type { default as ApiClient } from "./ApiClient"
 export type { default as MqGateway } from "./MqGateway"
 export type { default as MqConfig } from "./MqConfig"
+export type { default as BichardPostgresGateway } from "./BichardPostgresGateway"
+export type { default as PostgresConfig } from "./PostgresConfig"
 export { default as ApplicationError } from "./ApplicationError"
 export * from "./Result"
