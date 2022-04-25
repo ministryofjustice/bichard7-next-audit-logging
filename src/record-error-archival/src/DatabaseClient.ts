@@ -10,7 +10,7 @@ export type ArchivedErrorRecord = {
   archiveLogId: number
 }
 
-type DatabaseRow = {
+export type DatabaseRow = {
   message_id: string
   error_id: number
   archived_at: string

@@ -1,18 +1,10 @@
 import { Client } from "pg"
 import { FakeApiClient, setEnvironmentVariables } from "shared-testing"
-import type { ArchivedErrorRecord } from "./DatabaseClient"
+import type { ArchivedErrorRecord, DatabaseRow } from "./DatabaseClient"
 import DatabaseClient from "./DatabaseClient"
 import { recordErrorArchival } from "./recordErrorArchival"
 
 setEnvironmentVariables()
-
-type DbReturnType = {
-  error_id: string
-  message_id: string
-  archived_at: string
-  archived_by: string
-  archive_log_id: string
-}
 
 const originalEnv = process.env
 
@@ -37,35 +29,35 @@ jest.mock("pg", () => {
   }
 })
 
-const dbResult: { rows: DbReturnType[] } = {
+const dbResult: { rows: DatabaseRow[] } = {
   rows: [
     {
-      error_id: "1",
+      error_id: 1,
       message_id: "Message1",
       archived_at: new Date(Date.now() - Math.random() * 10 * 24 * 60 * 60 * 1000).toISOString(),
       archived_by: "Error archiver process 1",
-      archive_log_id: "1"
+      archive_log_id: 1
     },
     {
-      error_id: "2",
+      error_id: 2,
       message_id: "Message2",
       archived_at: new Date(Date.now() - Math.random() * 10 * 24 * 60 * 60 * 1000).toISOString(),
       archived_by: "Error archiver process 1",
-      archive_log_id: "1"
+      archive_log_id: 1
     },
     {
-      error_id: "3",
+      error_id: 3,
       message_id: "Message3",
       archived_at: new Date(Date.now() - Math.random() * 10 * 24 * 60 * 60 * 1000).toISOString(),
       archived_by: "Error archiver process 1",
-      archive_log_id: "1"
+      archive_log_id: 1
     },
     {
-      error_id: "4",
+      error_id: 4,
       message_id: "Message4",
       archived_at: new Date(Date.now() - Math.random() * 10 * 24 * 60 * 60 * 1000).toISOString(),
       archived_by: "Error archiver process 1",
-      archive_log_id: "1"
+      archive_log_id: 1
     }
   ]
 }
@@ -196,7 +188,7 @@ describe("Record Error Archival integration", () => {
     expect(stripWhitespace(client.query.mock.calls[1][0])).toContain(
       stripWhitespace("UPDATE schema.archive_error_list SET audit_logged_at = NOW()")
     )
-    expect(client.query.mock.calls[1][1]).toStrictEqual(["1", "2", "3", "4"])
+    expect(client.query.mock.calls[1][1]).toStrictEqual([1, 2, 3, 4])
 
     // Expect archive log group to be updated
     expect(stripWhitespace(client.query.mock.calls[2][0])).toBe(
@@ -224,7 +216,7 @@ describe("Record Error Archival integration", () => {
         stripWhitespace("UPDATE schema.archive_error_list SET audit_log_attempts = audit_log_attempts + 1")
       )
     ).toBeTruthy()
-    expect(client.query.mock.calls[1][1]).toStrictEqual(["1", "2", "3", "4"])
+    expect(client.query.mock.calls[1][1]).toStrictEqual([1, 2, 3, 4])
   })
 
   it("Shouldn't mark achive groups as audit logged when some fail", async () => {
@@ -244,7 +236,7 @@ describe("Record Error Archival integration", () => {
     expect(stripWhitespace(client.query.mock.calls[1][0])).toContain(
       stripWhitespace("UPDATE schema.archive_error_list SET audit_logged_at = NOW()")
     )
-    expect(client.query.mock.calls[1][1]).toStrictEqual(["1", "2"])
+    expect(client.query.mock.calls[1][1]).toStrictEqual([1, 2])
 
     // Expect archive log group to not be updated
     expect(String(client.query.mock.calls[0][0]).includes("UPDATE schema.archive_log")).toBeFalsy()
@@ -256,7 +248,7 @@ describe("Record Error Archival integration", () => {
         stripWhitespace("UPDATE schema.archive_error_list SET audit_log_attempts = audit_log_attempts + 1")
       )
     ).toBeTruthy()
-    expect(client.query.mock.calls[2][1]).toStrictEqual(["3", "4"])
+    expect(client.query.mock.calls[2][1]).toStrictEqual([3, 4])
   })
 
   it("Should limit the number of archive log groups to a configured value", async () => {
@@ -271,8 +263,6 @@ describe("Record Error Archival integration", () => {
   })
 
   it("Should mark individual archive logs as audit logged", async () => {
-    expect(true).toBeTruthy()
-
     client.query.mockImplementation(() => {
       return Promise.resolve(dbResult)
     })
@@ -290,6 +280,26 @@ describe("Record Error Archival integration", () => {
         )
       )
     ).toBeTruthy()
-    expect(client.query.mock.calls[1][1]).toStrictEqual(["1", "2", "3", "4"])
+    expect(client.query.mock.calls[1][1]).toStrictEqual([1, 2, 3, 4])
+  })
+
+  it("Should report failures when the database fails to update", async () => {
+    expect(true).toBeTruthy()
+
+    const db = new DatabaseClient("", "", "", false, "", "schema", 100)
+    const api = new FakeApiClient()
+
+    client.query.mockImplementation(
+      jest.fn().mockRejectedValue(new Error("Database host on fire")).mockResolvedValueOnce(dbResult)
+    )
+
+    const results = await recordErrorArchival(db, api)
+    expect(client.query).toHaveBeenCalledTimes(3)
+    expect(results.map((result) => result.success)).not.toContain(true)
+    for (const result of results) {
+      expect(result.reason?.startsWith("Failed database update")).toBeTruthy()
+      expect(result.errors.length).toBeGreaterThanOrEqual(1)
+      expect(result.errors[0].message).toBe("Database host on fire")
+    }
   })
 })
