@@ -13,7 +13,7 @@ it("should create event when message id exists in the database", async () => {
 
 it("should return error when API returns error", async () => {
   const expectedError = new Error("Expected Error Message")
-  fakeApiClient.shouldReturnError(expectedError)
+  fakeApiClient.setErrorReturnedByFunctions(expectedError)
 
   const result = await useCase.create("Message ID")
 

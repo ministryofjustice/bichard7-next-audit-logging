@@ -1,4 +1,4 @@
-import type { AuditLog, AuditLogEvent, PromiseResult, ApiClient } from "shared-types"
+import type { ApiClient, AuditLog, AuditLogEvent, PromiseResult } from "shared-types"
 
 export default class FakeApiClient implements ApiClient {
   private messages: AuditLog[] = []
@@ -7,8 +7,21 @@ export default class FakeApiClient implements ApiClient {
 
   private errorFunctions: string[] = []
 
+  private successfullCallsRemaining?: number
+
   private shouldFunctionReturnError(functionName: string): boolean {
-    return !!this.error && (this.errorFunctions.length === 0 || this.errorFunctions.includes(functionName))
+    const isLimited = this.successfullCallsRemaining !== undefined
+    const exceededLimit = this.successfullCallsRemaining !== undefined && this.successfullCallsRemaining < 1
+    if (this.successfullCallsRemaining !== undefined) {
+      this.successfullCallsRemaining--
+    }
+
+    return (
+      (!!this.error &&
+        !isLimited &&
+        (this.errorFunctions.length === 0 || this.errorFunctions.includes(functionName))) ||
+      exceededLimit
+    )
   }
 
   getMessage(messageId: string): PromiseResult<AuditLog> {
@@ -40,9 +53,15 @@ export default class FakeApiClient implements ApiClient {
     return Promise.resolve()
   }
 
-  shouldReturnError(error: Error, functionNames?: string[]): void {
+  setErrorReturnedByFunctions(error: Error, functionNames?: string[]): void {
     this.error = error
     this.errorFunctions = functionNames || []
+  }
+
+  setErrorReturnedByFunctionsAfterNCalls(error: Error, calls: number, functionNames?: string[]): void {
+    this.error = error
+    this.errorFunctions = functionNames || []
+    this.successfullCallsRemaining = calls
   }
 
   reset(messages?: AuditLog[]): void {
