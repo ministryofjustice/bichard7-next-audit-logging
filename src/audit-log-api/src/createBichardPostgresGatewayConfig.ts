@@ -29,7 +29,7 @@ export default function createBichardPostgresGatewayConfig(): PostgresConfig {
     USERNAME: DB_USER,
     PASSWORD: DB_PASSWORD,
     DATABASE_NAME: DB_NAME,
-    TABLE_NAME: DB_SCHEMA ? `{DB_SCHEMA}.archive_error_list` : "archive_error_list",
+    TABLE_NAME: DB_SCHEMA ? `${DB_SCHEMA}.archive_error_list` : "archive_error_list",
     SSL: DB_SSL === "true"
   }
 
