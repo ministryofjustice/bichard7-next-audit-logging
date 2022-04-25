@@ -24,6 +24,9 @@ describe("CreateEventUseCase", () => {
 
   it("should fail when audit log API fails to create message", async () => {
     const expectedError = new Error("Create audit log failed")
+    const useCase = new CreateEventUseCase(fakeApiClient)
+
+    fakeApiClient.reset()
     fakeApiClient.setErrorForFunctions(expectedError, ["createAuditLog"])
     const result = await useCase.execute("DummyMessageId", {} as AuditLogEvent)
 
@@ -32,6 +35,9 @@ describe("CreateEventUseCase", () => {
 
   it("should fail when audit log API fails to create event", async () => {
     const expectedError = new Error("Create event failed")
+    const useCase = new CreateEventUseCase(fakeApiClient)
+
+    fakeApiClient.reset()
     fakeApiClient.setErrorForFunctions(expectedError, ["createEvent"])
     const result = await useCase.execute("DummyMessageId", {} as AuditLogEvent)
 
