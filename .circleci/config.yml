@@ -141,6 +141,9 @@ jobs:
           name: Install Java
           command: sudo apt-get update && sudo apt-get install openjdk-17-jre
       - run:
+          name: Start postgres
+          command: make run-pg
+      - run:
           name: Install Dynamo
           command: make -C ./src/audit-log-api install-dynamo
       - run:
