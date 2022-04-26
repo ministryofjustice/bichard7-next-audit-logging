@@ -26,6 +26,10 @@ test:
 validate:
 	npm i && NODE_OPTIONS=--max_old_space_size=4096 npm run lint
 
+.PHONY: audit-fix
+audit-fix:
+	scripts/audit-fix-all.sh
+
 ########################################
 # Build Commands
 ########################################

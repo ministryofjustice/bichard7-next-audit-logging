@@ -25,8 +25,11 @@ Lambdas:
 - [**Transfer Messages** (`src/transfer-messages`)](src/transfer-messages) - Transfers incoming messages from the external incoming messages S3 bucket to the internal one.
 
 - [**Archive User Logs** (`src/archive-user-logs`)](src/archive-user-logs/) - Subscribe to logs output by the User Service and the Store Event Lambda which match a subscription filter and then store them in s3 cold storage.
+<<<<<<< HEAD
 
 - [**Record Error Archival** (`src/record-error-archival`)](src/record-error-archival) - Records in the audit log when error records have been archived in the postgres database.
+=======
+>>>>>>> 7dcc6f900b47a86c955e7b82692c8d1c90cbe8a2
 
 Code shared between multiple components:
 
@@ -51,8 +54,8 @@ This will use the version specified in the [`.nvmrc`](.nvmrc) file.
 We use `pg-native` library to access PostgreSQL. You need to install the followings before installing node packages:
 
   ```shell
-  $ brew install postgresql
-  $ brew install libpq
+  brew install postgresql
+  brew install libpq
   ```
 
 You can then use the Makefile to get started:
@@ -82,6 +85,9 @@ $ make clean
 
 # Lint all of the code
 $ make validate
+
+# Auto fix all of the dependencies for all components
+$ make audit-fix
 ```
 
 ## Development
