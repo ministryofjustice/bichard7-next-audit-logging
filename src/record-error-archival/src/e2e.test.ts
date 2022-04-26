@@ -128,19 +128,17 @@ describe("Record Error Archival e2e", () => {
       attributes: { "Error ID": 1 },
       eventType: "Error archival",
       category: "information",
-      timestamp: "2022-04-26T12:53:55.057Z"
+      // One hour different than the input data for timezone difference
+      timestamp: "2022-04-26T11:53:55.057Z"
     })
 
     // Check postgres results
     const recordQueryResult = await pg.query(
       `SELECT audit_logged_at, audit_log_attempts FROM br7own.archive_error_list WHERE error_id = 1`
     )
-    console.log(recordQueryResult.rows)
-    expect(recordQueryResult.rows[0].audit_logged_at.length).toBeGreaterThan(0)
+    expect(recordQueryResult.rows[0].audit_logged_at.toISOString().length).toBeGreaterThan(0)
     expect(recordQueryResult.rows[0].audit_log_attempts).toBe(1)
-    const groupQueryResult = await pg.query(`SELECT br7own.audit_logged_at FROM archive_log WHERE log_id = 1`)
-    expect(groupQueryResult.rows[0].audit_logged_at.length).toBeGreaterThan(0)
-
-    expect(true).toBeTruthy()
+    const groupQueryResult = await pg.query(`SELECT audit_logged_at FROM br7own.archive_log WHERE log_id = 1`)
+    expect(groupQueryResult.rows[0].audit_logged_at.toISOString().length).toBeGreaterThan(0)
   })
 })
