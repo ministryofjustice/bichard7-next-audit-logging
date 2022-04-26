@@ -6,8 +6,9 @@ process.env.DB_PASSWORD = "password"
 process.env.DB_NAME = "bichard"
 
 import { Client } from "pg"
-import { AuditLogApiClient } from "shared"
+import { AuditLogApiClient, TestDynamoGateway } from "shared"
 import type { ApiClient, AuditLog } from "shared-types"
+import { isSuccess } from "shared-types"
 import { execute } from "lambda-local"
 import doRecordErrorArchival from "."
 
@@ -53,11 +54,20 @@ describe("Record Error Archival e2e", () => {
 
     await pg.query(createTableSql)
     await pg.query(
-      `INSERT INTO br7own.archive_log (log_id, archived_at, archived_by, audit_logged_at) VALUES (1, now(), 'me', NULL)`
+      `INSERT INTO br7own.archive_log (log_id, archived_at, archived_by, audit_logged_at) VALUES (1, '2022-04-26T12:53:55.057Z', 'me', NULL)`
     )
     await pg.query(
       `INSERT INTO br7own.archive_error_list (error_id, message_id, archive_log_id) VALUES (1, 'message_1', 1)`
     )
+
+    const testDynamoGateway = new TestDynamoGateway({
+      DYNAMO_URL: "http://localhost:8000",
+      DYNAMO_REGION: "eu-west-2",
+      TABLE_NAME: "auditLogTable",
+      AWS_ACCESS_KEY_ID: "DUMMY",
+      AWS_SECRET_ACCESS_KEY: "DUMMY"
+    })
+    await testDynamoGateway.deleteAll("auditLogTable", "messageId")
 
     api = new AuditLogApiClient("http://localhost:3010", "apiKey")
     await api.createAuditLog({
@@ -106,6 +116,30 @@ describe("Record Error Archival e2e", () => {
         DB_NAME: "bichard"
       }
     })
+
+    const messageResult = await api.getMessage("message_1")
+    expect(isSuccess(messageResult)).toBeTruthy()
+    const message = messageResult as AuditLog
+
+    // Check audit log results
+    expect(message.events).toHaveLength(1)
+    expect(message.events[0]).toStrictEqual({
+      eventSource: "me",
+      attributes: { "Error ID": 1 },
+      eventType: "Error archival",
+      category: "information",
+      timestamp: "2022-04-26T12:53:55.057Z"
+    })
+
+    // Check postgres results
+    const recordQueryResult = await pg.query(
+      `SELECT audit_logged_at, audit_log_attempts FROM br7own.archive_error_list WHERE error_id = 1`
+    )
+    console.log(recordQueryResult.rows)
+    expect(recordQueryResult.rows[0].audit_logged_at.length).toBeGreaterThan(0)
+    expect(recordQueryResult.rows[0].audit_log_attempts).toBe(1)
+    const groupQueryResult = await pg.query(`SELECT br7own.audit_logged_at FROM archive_log WHERE log_id = 1`)
+    expect(groupQueryResult.rows[0].audit_logged_at.length).toBeGreaterThan(0)
 
     expect(true).toBeTruthy()
   })
