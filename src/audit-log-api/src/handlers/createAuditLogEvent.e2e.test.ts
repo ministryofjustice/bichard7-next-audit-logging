@@ -1,6 +1,6 @@
 jest.retryTimes(10)
 import axios from "axios"
-import type { AuditLog, DynamoDbConfig } from "shared-types"
+import type { AuditLog, DynamoDbConfig, BichardAuditLogEvent } from "shared-types"
 import { HttpStatusCode, TestDynamoGateway } from "shared"
 import { mockAuditLog, mockAuditLogEvent } from "shared-testing"
 
@@ -33,10 +33,11 @@ describe("Creating Audit Log event", () => {
 
     expect(events).toHaveLength(1)
 
-    const actualEvent = events[0]
+    const actualEvent = events[0] as BichardAuditLogEvent
     expect(actualEvent.attributes?.["Attribute 1"]).toHaveProperty("valueLookup")
 
     actualEvent.attributes["Attribute 1"] = event.attributes["Attribute 1"]
-    expect(events).toEqual([event])
+    expect(actualEvent.eventXml).toHaveProperty("valueLookup")
+    expect({ ...actualEvent, eventXml: undefined }).toEqual({ ...event, eventXml: undefined })
   })
 })
