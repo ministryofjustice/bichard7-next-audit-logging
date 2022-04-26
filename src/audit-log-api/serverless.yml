@@ -12,6 +12,7 @@ provider:
     MQ_USER: admin
     MQ_PASSWORD: admin
     MQ_URL: failover:(stomp://localhost:51613)
+    INTERNAL_INCOMING_MESSAGES_BUCKET: internalIncomingBucket
     AUDIT_LOG_EVENTS_BUCKET: auditLogEventsBucket
     S3_URL: http://localhost:4569
     S3_REGION: eu-west-2
@@ -21,6 +22,13 @@ provider:
     S3_AWS_SECRET_ACCESS_KEY: S3RVER
     DYNAMO_AWS_ACCESS_KEY_ID: S3RVER
     DYNAMO_AWS_SECRET_ACCESS_KEY: S3RVER
+    DB_HOST: "localhost"
+    DB_PORT: "5432"
+    DB_USER: "bichard"
+    DB_PASSWORD: "password"
+    DB_TABLE_NAME: "archive_error_list"
+    DB_SSL: "false"
+    DB_NAME: "bichard"
 
 plugins:
   - serverless-offline

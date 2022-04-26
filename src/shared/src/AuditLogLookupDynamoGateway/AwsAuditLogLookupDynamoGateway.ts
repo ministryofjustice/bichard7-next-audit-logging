@@ -50,7 +50,7 @@ export default class AwsAuditLogLookupDynamoGateway extends DynamoGateway implem
   async fetchAllByMessageId(messageId: string): PromiseResult<AuditLogLookup[]> {
     let result: AuditLogLookup[] = []
     while (true) {
-      const fetchResult = await this.fetchByMessageId(messageId, result.at(-1))
+      const fetchResult = await this.fetchByMessageId(messageId, result.slice(-1)[0])
 
       if (isError(fetchResult)) {
         return fetchResult

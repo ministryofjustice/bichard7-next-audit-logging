@@ -48,6 +48,13 @@ The majority of code in this repository is written in Typescript. In order to en
 
 This will use the version specified in the [`.nvmrc`](.nvmrc) file.
 
+We use `pg-native` library to access PostgreSQL. You need to install the followings before installing node packages:
+
+  ```shell
+  $ brew install postgresql
+  $ brew install libpq
+  ```
+
 You can then use the Makefile to get started:
 
 ```shell
