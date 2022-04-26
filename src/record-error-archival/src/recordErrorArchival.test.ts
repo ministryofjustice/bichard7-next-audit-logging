@@ -35,28 +35,28 @@ const dbResult: { rows: DatabaseRow[] } = {
     {
       error_id: 1,
       message_id: "Message1",
-      archived_at: new Date(Date.now() - Math.random() * 10 * 24 * 60 * 60 * 1000).toISOString(),
+      archived_at: "2022-04-25 10:28:14.552",
       archived_by: "Error archiver process 1",
       archive_log_id: 1
     },
     {
       error_id: 2,
       message_id: "Message2",
-      archived_at: new Date(Date.now() - Math.random() * 10 * 24 * 60 * 60 * 1000).toISOString(),
+      archived_at: "2022-04-17 02:18:55.476",
       archived_by: "Error archiver process 1",
       archive_log_id: 1
     },
     {
       error_id: 3,
       message_id: "Message3",
-      archived_at: new Date(Date.now() - Math.random() * 10 * 24 * 60 * 60 * 1000).toISOString(),
+      archived_at: "2022-04-20 10:58:01.597",
       archived_by: "Error archiver process 1",
       archive_log_id: 1
     },
     {
       error_id: 4,
       message_id: "Message4",
-      archived_at: new Date(Date.now() - Math.random() * 10 * 24 * 60 * 60 * 1000).toISOString(),
+      archived_at: "2022-04-24 04:52:17.347",
       archived_by: "Error archiver process 1",
       archive_log_id: 1
     }
