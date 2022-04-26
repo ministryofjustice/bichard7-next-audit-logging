@@ -63,7 +63,11 @@ describe("Record Error Archival e2e", () => {
     await api.createAuditLog({
       messageId: "message_1",
       receivedDate: new Date().toISOString(),
-      events: []
+      events: [],
+      caseId: "message_1",
+      externalCorrelationId: "message_1",
+      createdBy: "record-error-archival e2e tests",
+      messageHash: "message_1"
     } as unknown as AuditLog)
   })
 
