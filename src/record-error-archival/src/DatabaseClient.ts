@@ -75,7 +75,7 @@ export default class DatabaseClient {
             <ArchivedErrorRecord>{
               messageId: row.message_id,
               errorId: row.error_id,
-              archivedAt: new Date(row.archived_at),
+              archivedAt: new Date(row.archived_at + " UTC"),
               archivedBy: row.archived_by,
               archiveLogId: row.archive_log_id
             }

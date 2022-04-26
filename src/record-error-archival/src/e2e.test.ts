@@ -54,7 +54,7 @@ describe("Record Error Archival e2e", () => {
 
     await pg.query(createTableSql)
     await pg.query(
-      `INSERT INTO br7own.archive_log (log_id, archived_at, archived_by, audit_logged_at) VALUES (1, '2022-04-26T12:53:55.057Z', 'me', NULL)`
+      `INSERT INTO br7own.archive_log (log_id, archived_at, archived_by, audit_logged_at) VALUES (1, '2022-04-26T12:53:55.000Z', 'me', NULL)`
     )
     await pg.query(
       `INSERT INTO br7own.archive_error_list (error_id, message_id, archive_log_id) VALUES (1, 'message_1', 1)`
@@ -128,8 +128,7 @@ describe("Record Error Archival e2e", () => {
       attributes: { "Error ID": 1 },
       eventType: "Error archival",
       category: "information",
-      // One hour different than the input data for timezone difference
-      timestamp: "2022-04-26T11:53:55.057Z"
+      timestamp: "2022-04-26T12:53:55.000Z"
     })
 
     // Check postgres results
