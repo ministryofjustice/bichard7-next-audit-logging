@@ -11,7 +11,7 @@ import { AuditLogLookup, isError } from "shared-types"
 const maxAttributeValueLength = 1000
 
 export default class StoreValuesInLookupTableUseCase {
-  constructor(private readonly lookupGateway: AuditLogLookupDynamoGateway) { }
+  constructor(private readonly lookupGateway: AuditLogLookupDynamoGateway) {}
 
   async execute(event: AuditLogEvent, messageId: string): PromiseResult<AuditLogEvent> {
     const attributes: KeyValuePair<string, unknown> = {}

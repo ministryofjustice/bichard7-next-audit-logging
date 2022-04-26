@@ -5,7 +5,7 @@ export default class DeleteMessageObjectsFromS3UseCase {
   constructor(
     private readonly messagesGateway: S3GatewayInterface,
     private readonly eventsGateway: S3GatewayInterface
-  ) { }
+  ) {}
 
   async call(message: AuditLog): PromiseResult<void> {
     const s3Path = message?.s3Path
