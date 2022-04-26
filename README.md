@@ -25,11 +25,8 @@ Lambdas:
 - [**Transfer Messages** (`src/transfer-messages`)](src/transfer-messages) - Transfers incoming messages from the external incoming messages S3 bucket to the internal one.
 
 - [**Archive User Logs** (`src/archive-user-logs`)](src/archive-user-logs/) - Subscribe to logs output by the User Service and the Store Event Lambda which match a subscription filter and then store them in s3 cold storage.
-<<<<<<< HEAD
 
 - [**Record Error Archival** (`src/record-error-archival`)](src/record-error-archival) - Records in the audit log when error records have been archived in the postgres database.
-=======
->>>>>>> 7dcc6f900b47a86c955e7b82692c8d1c90cbe8a2
 
 Code shared between multiple components:
 
