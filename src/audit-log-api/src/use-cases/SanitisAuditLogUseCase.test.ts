@@ -8,7 +8,6 @@ const fakeAuditLogDynamoGateway = new FakeAuditLogDynamoGateway()
 const sanitiseAuditLogUseCase = new SanitiseAuditLogUseCase(fakeAuditLogDynamoGateway)
 const createBichardAuditLogEvent = () => {
   const event = new BichardAuditLogEvent({
-    s3Path: "somePath",
     eventSourceArn: "dummy event source arn",
     eventSourceQueueName: "dummy event source queue name",
     eventSource: "dummy event source",
@@ -41,8 +40,7 @@ it("should remove attributes containing PII", async () => {
 
   expect(sanitiseAuditLogResult).toNotBeError()
   const actualMessage = sanitiseAuditLogResult as AuditLog
-
-  const attributes = actualMessage?.events.find((event) => "s3Path" in event)?.attributes ?? {}
+  const attributes = actualMessage?.events?.[0].attributes ?? {}
   expect(Object.keys(attributes)).toHaveLength(1)
   expect(attributes["Trigger 2 Details"]).toBe("TRPR0004")
 
