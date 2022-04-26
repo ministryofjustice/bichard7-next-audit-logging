@@ -1,5 +1,5 @@
 import type { PromiseResult } from "shared-types"
-import { decodeBase64, logger } from "shared"
+import { logger } from "shared"
 import { isError } from "shared-types"
 
 import type GetLastFailedMessageEventUseCase from "./GetLastEventUseCase"
@@ -7,6 +7,7 @@ import type RetrieveEventXmlFromS3 from "./RetrieveEventXmlFromS3UseCase"
 import type CreateRetryingEventUseCase from "./CreateRetryingEventUseCase"
 import type SendMessageToQueueUseCase from "./SendMessageToQueueUseCase"
 import validateEventForRetry from "./validateEventForRetry"
+import { decodeBase64 } from "shared"
 
 export default class RetryMessageUseCase {
   constructor(
@@ -30,31 +31,36 @@ export default class RetryMessageUseCase {
       return eventValidationResult
     }
 
-    const eventContent = await this.retrieveEventXmlFromS3UseCase.retrieve(event.s3Path)
+    let eventXml: string | undefined = event.eventXml
 
-    if (isError(eventContent)) {
-      return eventContent
+    if (!eventXml) {
+      const { s3Path } = event as unknown as { s3Path: string }
+      const eventContent = await this.retrieveEventXmlFromS3UseCase.retrieve(s3Path)
+
+      if (isError(eventContent)) {
+        return eventContent
+      }
+
+      let eventJsonContent
+
+      try {
+        eventJsonContent = JSON.parse(eventContent)
+      } catch (err) {
+        return isError(err) ? err : Error("Error parsing JSON from S3 object")
+      }
+
+      if (!eventJsonContent.messageData) {
+        return Error(`Event JSON does not have required 'messageData' key`)
+      }
+
+      eventXml = decodeBase64(eventJsonContent.messageData)
+
+      if (!eventXml) {
+        return Error(`Could not base64 decode event message`)
+      }
     }
 
-    let eventJsonContent
-
-    try {
-      eventJsonContent = JSON.parse(eventContent)
-    } catch (err) {
-      return isError(err) ? err : Error("Error parsing JSON from S3 object")
-    }
-
-    if (!eventJsonContent.messageData) {
-      return Error(`Event JSON does not have required 'messageData' key`)
-    }
-
-    const eventMessage = decodeBase64(eventJsonContent.messageData)
-
-    if (!eventMessage) {
-      return Error(`Could not base64 decode event message`)
-    }
-
-    const sendMessageToQueueResult = await this.sendMessageToQueueUseCase.send(event.eventSourceQueueName, eventMessage)
+    const sendMessageToQueueResult = await this.sendMessageToQueueUseCase.send(event.eventSourceQueueName, eventXml)
 
     if (isError(sendMessageToQueueResult)) {
       return sendMessageToQueueResult

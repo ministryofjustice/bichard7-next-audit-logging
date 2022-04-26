@@ -16,7 +16,7 @@ describe("lookupEventValues", () => {
       timestamp: new Date(),
       eventSourceArn: "event source arn",
       eventSourceQueueName: "event source queue name",
-      eventXml: { valueLookup: lookupItemForEventXml.value } as unknown as string
+      eventXml: { valueLookup: lookupItemForEventXml.id } as unknown as string
     })
     const lookupItem1 = new AuditLogLookup("a".repeat(2000), "dummy message ID")
     const lookupItem2 = new AuditLogLookup("b".repeat(3000), "dummy message ID")
@@ -25,7 +25,7 @@ describe("lookupEventValues", () => {
     event.addAttribute("attr3", 123)
     event.addAttribute("attr4", { valueLookup: lookupItem2.id })
 
-    dynamoGateway.reset([lookupItem1, lookupItem2])
+    dynamoGateway.reset([lookupItem1, lookupItem2, lookupItemForEventXml])
     const actualEvent = await useCase.execute(event)
 
     expect(actualEvent).toNotBeError()
@@ -35,7 +35,7 @@ describe("lookupEventValues", () => {
     expect(eventSource).toBe(event.eventSource)
     expect(eventType).toBe(event.eventType)
     expect(timestamp).toBe(event.timestamp)
-    expect(eventXml).toBe(event.eventXml)
+    expect(eventXml).toBe(lookupItemForEventXml.value)
     expect(attributes).toStrictEqual({
       attr1: lookupItem1.value,
       attr2: "short value",

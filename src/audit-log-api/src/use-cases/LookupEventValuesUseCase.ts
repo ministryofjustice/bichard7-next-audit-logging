@@ -2,7 +2,7 @@ import type { AuditLogEvent, AuditLogLookupDynamoGateway, KeyValuePair, PromiseR
 import { isError } from "shared-types"
 
 export default class LookupEventValuesUseCase {
-  constructor(private lookupGateway: AuditLogLookupDynamoGateway) {}
+  constructor(private lookupGateway: AuditLogLookupDynamoGateway) { }
 
   async execute(event: AuditLogEvent): PromiseResult<AuditLogEvent> {
     const attributes = {} as KeyValuePair<string, unknown>
@@ -26,7 +26,7 @@ export default class LookupEventValuesUseCase {
       }
     }
 
-    let eventXml: ValueLookup | string | undefined
+    let { eventXml } = event as unknown as { eventXml: ValueLookup | string | undefined }
     if (eventXml && typeof eventXml === "object" && "valueLookup" in eventXml) {
       const { valueLookup } = eventXml
       const lookupItem = await this.lookupGateway.fetchById(valueLookup)

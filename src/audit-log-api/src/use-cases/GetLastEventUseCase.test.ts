@@ -1,10 +1,12 @@
 import { FakeAuditLogDynamoGateway } from "shared-testing"
-import type { EventCategory, BichardAuditLogEvent } from "shared-types"
+import type { EventCategory, BichardAuditLogEvent, AuditLogLookupDynamoGateway } from "shared-types"
 import { AuditLog, AuditLogEvent } from "shared-types"
 import GetLastFailedMessageEventUseCase from "./GetLastEventUseCase"
+import LookupEventValuesUseCase from "./LookupEventValuesUseCase"
 
 const auditLogDynamoGateway = new FakeAuditLogDynamoGateway()
-const useCase = new GetLastFailedMessageEventUseCase(auditLogDynamoGateway)
+const lookupEventValuesUseCase = new LookupEventValuesUseCase({} as unknown as AuditLogLookupDynamoGateway)
+const useCase = new GetLastFailedMessageEventUseCase(auditLogDynamoGateway, lookupEventValuesUseCase)
 
 const createAuditLog = (): AuditLog =>
   new AuditLog("External Correlation Id", new Date("2021-07-22T08:10:10"), "Dummy hash")
@@ -21,13 +23,16 @@ const createBichardEvent = (date: string, category: EventCategory): BichardAudit
 
   return {
     ...event,
-    s3Path: "Expected S3 Path",
+    eventXml: "Expected Event XML",
     eventSourceArn: "Expected Event Source ARN",
     eventSourceQueueName: "Expected Queue Name"
   } as BichardAuditLogEvent
 }
 
 it("should return the last event when message exists and has events", async () => {
+  const lookupEventValuesUseCaseSpy = jest
+    .spyOn(lookupEventValuesUseCase, "execute")
+    .mockImplementation((event) => Promise.resolve(event))
   const message = createAuditLog()
   message.events.push(createEvent("2021-07-22T09:10:10", "information"))
   message.events.push(createBichardEvent("2021-07-22T12:10:10", "error"))
@@ -39,9 +44,10 @@ it("should return the last event when message exists and has events", async () =
   expect(result).toNotBeError()
 
   const event = result as BichardAuditLogEvent
-  expect(event.s3Path).toBe("Expected S3 Path")
+  expect(event.eventXml).toBe("Expected Event XML")
   expect(event.eventSourceArn).toBe("Expected Event Source ARN")
   expect(event.eventSourceQueueName).toBe("Expected Queue Name")
+  expect(lookupEventValuesUseCaseSpy).toHaveBeenCalledTimes(1)
 })
 
 it("should return error when there are no events against the message", async () => {
