@@ -1,13 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 jest.setTimeout(15000)
 
-process.env.API_URL = "http://localhost:3010"
-process.env.API_KEY = "apiKey"
-process.env.DB_HOST = "localhost"
-process.env.DB_USER = "bichard"
-process.env.DB_PASSWORD = "password"
-process.env.DB_NAME = "bichard"
-
 import { execute } from "lambda-local"
 import partition from "lodash.partition"
 import { Client } from "pg"
@@ -459,7 +452,7 @@ describe("Record Error Archival e2e", () => {
     // Assert only one archive log group is marked as audit logged in postgres
     const groupQueryResults = (await pg.query(`SELECT log_id, audit_logged_at FROM br7own.archive_log GROUP BY log_id`))
       .rows
-    expect(groupQueryResults.filter((row) => row.audit_logged_at !== undefined)).toHaveLength(1)
-    expect(groupQueryResults.filter((row) => row.audit_logged_at === undefined)).toHaveLength(1)
+    expect(groupQueryResults.filter((row) => row.audit_logged_at !== null)).toHaveLength(1)
+    expect(groupQueryResults.filter((row) => row.audit_logged_at === null)).toHaveLength(1)
   })
 })

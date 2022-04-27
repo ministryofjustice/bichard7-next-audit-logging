@@ -1,10 +1,12 @@
 import { recordErrorArchival } from "./recordErrorArchival"
-import config from "./config"
+import getConfig from "./config"
 import DatabaseClient from "./DatabaseClient"
 import { AuditLogApiClient } from "shared"
 import { logger } from "shared"
 
 export default async function doRecordErrorArchival(): Promise<void> {
+  const config = getConfig()
+
   const db = new DatabaseClient(
     config.dbHost,
     config.dbUser,
