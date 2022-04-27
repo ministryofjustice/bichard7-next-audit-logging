@@ -1,9 +1,9 @@
-import type { ApiClient, AuditLog } from "shared-types"
-import { AuditLogEvent, isError, isSuccess } from "shared-types"
-import type { ArchivedErrorRecord } from "./DatabaseClient"
-import type DatabaseClient from "./DatabaseClient"
 import groupBy from "lodash.groupby"
 import { logger } from "shared"
+import type { ApiClient, AuditLog } from "shared-types"
+import { AuditLogEvent, isError, isSuccess } from "shared-types"
+import type DatabaseClient from "./DatabaseClient"
+import type { ArchivedErrorRecord } from "./DatabaseClient"
 
 export type RecordErrorArchivalResult = {
   success: boolean
@@ -18,9 +18,9 @@ const archivalEventCategory = "information"
 const hasArchivalEvent = (auditLog: AuditLog, errorId: number): boolean =>
   auditLog.events.filter((event) => {
     return (
-      event.eventType == archivalEventType &&
-      event.category == archivalEventCategory &&
-      (event.attributes["Error ID"] || "") == errorId
+      event.eventType === archivalEventType &&
+      event.category === archivalEventCategory &&
+      (event.attributes["Error ID"] || "") === errorId
     )
   }).length > 0
 

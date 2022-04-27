@@ -19,3 +19,16 @@ There are some controls available as environment variables:
 | DB_NAME              | The database name where the archived error tables reside |
 | DB_SCHEMA            | The schema name which the archived error tables reside under |
 | ARCHIVE_GROUP_LIMIT  | The number of archive log groups to audit log at a time |
+
+## e2e Testing
+
+In order to run the `e2e` tests, you firstly need to be running a `postgres` instance and the `audit log api`. This can be acomplised by running:
+
+```bash
+    make run-pg
+    make run-api
+```
+
+from the top-level directory of this repository. If you have issues connecting to the `postgres` instance, ensure that the `postgres` container used by `bichard7-next` isn't running, as these will clash.
+
+The `e2e` tests also depend on the lambda code in `.../src` being build. To do this, run `npm run build` from within this directory, or as part of `make build-all` from the top-level directory.
