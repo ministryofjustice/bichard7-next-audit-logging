@@ -6,7 +6,7 @@ import type Translator from "./Translator"
 import transformEventDetails from "./transformEventDetails"
 
 const HearingOutcomePncUpdateTranslator: Translator = async (input: EventInput): PromiseResult<TranslationResult> => {
-  const { messageData, s3Path, eventSourceArn, eventSourceQueueName } = input
+  const { messageData, eventSourceArn, eventSourceQueueName } = input
   // Hearing Outcome PNC Updates are in base64 encoded XML
   const xml = decodeBase64(messageData)
   const inputItem = await parseXml<HearingOutcomePncUpdate>(xml)
@@ -23,7 +23,7 @@ const HearingOutcomePncUpdateTranslator: Translator = async (input: EventInput):
     correlationID: inputItem.AnnotatedHearingOutcome.HearingOutcome.Hearing.SourceReference.UniqueID,
     eventDateTime: new Date().toISOString()
   }
-  const event = transformEventDetails(logItem, s3Path, eventSourceArn, eventSourceQueueName)
+  const event = transformEventDetails(logItem, xml, eventSourceArn, eventSourceQueueName)
   return {
     messageId: logItem.correlationID,
     event
