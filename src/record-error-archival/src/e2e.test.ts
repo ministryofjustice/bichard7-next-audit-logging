@@ -267,4 +267,91 @@ describe("Record Error Archival e2e", () => {
     const groupQueryResult = await pg.query(`SELECT audit_logged_at FROM br7own.archive_log WHERE log_id = 1`)
     expect(groupQueryResult.rows[0].audit_logged_at.toISOString().length).toBeGreaterThan(0)
   })
+
+  it("should mark multiple audit log groups as completed when all succeed", async () => {
+    // Insert testdata into postgres
+    await pg.query(
+      `INSERT INTO br7own.archive_log (log_id, archived_at, archived_by, audit_logged_at) VALUES
+      (1, '2022-04-26T12:53:55.000Z', 'error-archival-process-1', NULL),
+      (2, '2022-04-27T13:09:21.000Z', 'error-archival-process-2', NULL)
+      `
+    )
+    await pg.query(
+      `INSERT INTO br7own.archive_error_list (error_id, message_id, archive_log_id) VALUES
+      (1, 'message_1', 1),
+      (2, 'message_2', 2),
+      (3, 'message_3', 1),
+      (4, 'message_4', 2)`
+    )
+
+    // Insert testdata into audit log
+    const messages = [
+      {
+        messageId: "message_1",
+        receivedDate: new Date().toISOString(),
+        events: [],
+        caseId: "message_1",
+        externalCorrelationId: "message_1",
+        createdBy: "record-error-archival e2e tests",
+        messageHash: "message_1"
+      },
+      {
+        messageId: "message_2",
+        receivedDate: new Date().toISOString(),
+        events: [],
+        caseId: "message_2",
+        externalCorrelationId: "message_2",
+        createdBy: "record-error-archival e2e tests",
+        messageHash: "message_2"
+      },
+      {
+        messageId: "message_3",
+        receivedDate: new Date().toISOString(),
+        events: [],
+        caseId: "message_3",
+        externalCorrelationId: "message_3",
+        createdBy: "record-error-archival e2e tests",
+        messageHash: "message_3"
+      },
+      {
+        messageId: "message_4",
+        receivedDate: new Date().toISOString(),
+        events: [],
+        caseId: "message_4",
+        externalCorrelationId: "message_4",
+        createdBy: "record-error-archival e2e tests",
+        messageHash: "message_4"
+      }
+    ]
+    for (const message of messages) {
+      await api.createAuditLog(message as unknown as AuditLog)
+    }
+
+    // Invoke lambda
+    await executeLambda()
+
+    // Assert audit log results
+    for (const [index, messageId] of messages.map((message) => message.messageId).entries()) {
+      const messageResult = await api.getMessage(messageId)
+      expect(isSuccess(messageResult)).toBeTruthy()
+      const message = messageResult as AuditLog
+
+      expect(message.events).toHaveLength(1)
+      expect(message.events[0].eventType).toBe("Error archival")
+      expect(message.events[0].attributes["Error ID"]).toBe(index + 1)
+    }
+
+    // Assert postgres results
+    const recordQueryResults = await pg.query(
+      `SELECT audit_logged_at, audit_log_attempts FROM br7own.archive_error_list WHERE error_id IN (1, 2, 3, 4)`
+    )
+    for (const row of recordQueryResults.rows) {
+      expect(row.audit_logged_at.toISOString().length).toBeGreaterThan(0)
+      expect(row.audit_log_attempts).toBe(1)
+    }
+    const groupQueryResults = await pg.query(`SELECT audit_logged_at FROM br7own.archive_log WHERE log_id IN (1, 2)`)
+    for (const row of groupQueryResults.rows) {
+      expect(row.audit_logged_at.toISOString().length).toBeGreaterThan(0)
+    }
+  })
 })
