@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 jest.setTimeout(15000)
 
 process.env.API_URL = "http://localhost:3010"
@@ -8,6 +9,7 @@ process.env.DB_PASSWORD = "password"
 process.env.DB_NAME = "bichard"
 
 import { execute } from "lambda-local"
+import partition from "lodash.partition"
 import { Client } from "pg"
 import { AuditLogApiClient, TestDynamoGateway } from "shared"
 import type { ApiClient, AuditLog } from "shared-types"
@@ -45,7 +47,7 @@ const lambdaEnvironment = {
   DB_NAME: "bichard"
 }
 
-const executeLambda = (environment?: never): Promise<unknown> =>
+const executeLambda = (environment?: any): Promise<unknown> =>
   execute({
     event: {},
     lambdaFunc: { handler: doRecordErrorArchival },
@@ -55,7 +57,6 @@ const executeLambda = (environment?: never): Promise<unknown> =>
   })
 
 describe("Record Error Archival e2e", () => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let dynamo: any
   let pg: Client
   let api: ApiClient
@@ -92,16 +93,6 @@ describe("Record Error Archival e2e", () => {
     await pg.query(createTableSql)
 
     await dynamo.deleteAll("auditLogTable", "messageId")
-
-    await api.createAuditLog({
-      messageId: "message_1",
-      receivedDate: new Date().toISOString(),
-      events: [],
-      caseId: "message_1",
-      externalCorrelationId: "message_1",
-      createdBy: "record-error-archival e2e tests",
-      messageHash: "message_1"
-    } as unknown as AuditLog)
   })
 
   it("should archive single record errors successfully", async () => {
@@ -112,6 +103,17 @@ describe("Record Error Archival e2e", () => {
     await pg.query(
       `INSERT INTO br7own.archive_error_list (error_id, message_id, archive_log_id) VALUES (1, 'message_1', 1)`
     )
+
+    // Insert testdata into audit log
+    await api.createAuditLog({
+      messageId: "message_1",
+      receivedDate: new Date().toISOString(),
+      events: [],
+      caseId: "message_1",
+      externalCorrelationId: "message_1",
+      createdBy: "record-error-archival e2e tests",
+      messageHash: "message_1"
+    } as unknown as AuditLog)
 
     // Invoke lambda
     await executeLambda()
@@ -148,6 +150,17 @@ describe("Record Error Archival e2e", () => {
     await pg.query(
       `INSERT INTO br7own.archive_error_list (error_id, message_id, archive_log_id) VALUES (1, 'message_1', 1)`
     )
+
+    // Insert testdata into audit log
+    await api.createAuditLog({
+      messageId: "message_1",
+      receivedDate: new Date().toISOString(),
+      events: [],
+      caseId: "message_1",
+      externalCorrelationId: "message_1",
+      createdBy: "record-error-archival e2e tests",
+      messageHash: "message_1"
+    } as unknown as AuditLog)
 
     // Insert testdata into audit log
     const existingEvent = new AuditLogEvent({
@@ -353,5 +366,100 @@ describe("Record Error Archival e2e", () => {
     for (const row of groupQueryResults.rows) {
       expect(row.audit_logged_at.toISOString().length).toBeGreaterThan(0)
     }
+  })
+
+  it("should only audit log as many archive groups as configured", async () => {
+    // Insert testdata into postgres
+    await pg.query(
+      `INSERT INTO br7own.archive_log (log_id, archived_at, archived_by, audit_logged_at) VALUES
+      (1, '2022-04-26T12:53:55.000Z', 'error-archival-process-1', NULL),
+      (2, '2022-04-27T13:09:21.000Z', 'error-archival-process-2', NULL)
+      `
+    )
+    await pg.query(
+      `INSERT INTO br7own.archive_error_list (error_id, message_id, archive_log_id) VALUES
+      (1, 'message_1', 1),
+      (2, 'message_2', 2),
+      (3, 'message_3', 1),
+      (4, 'message_4', 2)`
+    )
+
+    // Insert testdata into audit log
+    const messages = [
+      {
+        messageId: "message_1",
+        receivedDate: new Date().toISOString(),
+        events: [],
+        caseId: "message_1",
+        externalCorrelationId: "message_1",
+        createdBy: "record-error-archival e2e tests",
+        messageHash: "message_1",
+        archiveLogGroup: 1
+      },
+      {
+        messageId: "message_2",
+        receivedDate: new Date().toISOString(),
+        events: [],
+        caseId: "message_2",
+        externalCorrelationId: "message_2",
+        createdBy: "record-error-archival e2e tests",
+        messageHash: "message_2",
+        archiveLogGroup: 2
+      },
+      {
+        messageId: "message_3",
+        receivedDate: new Date().toISOString(),
+        events: [],
+        caseId: "message_3",
+        externalCorrelationId: "message_3",
+        createdBy: "record-error-archival e2e tests",
+        messageHash: "message_3",
+        archiveLogGroup: 1
+      },
+      {
+        messageId: "message_4",
+        receivedDate: new Date().toISOString(),
+        events: [],
+        caseId: "message_4",
+        externalCorrelationId: "message_4",
+        createdBy: "record-error-archival e2e tests",
+        messageHash: "message_4",
+        archiveLogGroup: 2
+      }
+    ]
+    for (const message of messages) {
+      await api.createAuditLog(message as unknown as AuditLog)
+    }
+
+    // Invoke lambda
+    await executeLambda({ ...lambdaEnvironment, ARCHIVE_GROUP_LIMIT: 1 })
+
+    // Helper function to determine if all audit log results in an array belong to the same archive log group
+    const allSameArchiveLogGroup = (arr: any) => arr.every((v: any) => v.archiveLogGroup === arr[0].archiveLogGroup)
+
+    // Assert only one archive log group gets audit logged
+    const auditLogResults = messages.map(async (message) => {
+      const messageResult = await api.getMessage(message.messageId)
+      expect(isSuccess(messageResult)).toBeTruthy()
+      const auditLogMessage = messageResult as AuditLog
+      return {
+        messageId: message.messageId,
+        archiveLogGroup: message.archiveLogGroup,
+        isAuditLogged: auditLogMessage.events?.length > 0
+      }
+    })
+    const [auditLogged, notAuditLogged] = partition(
+      auditLogResults,
+      (result: { isAuditLogged: boolean }) => result.isAuditLogged
+    )
+
+    expect(allSameArchiveLogGroup(auditLogged)).toBeTruthy()
+    expect(allSameArchiveLogGroup(notAuditLogged)).toBeTruthy()
+
+    // Assert only one archive log group is marked as audit logged in postgres
+    const groupQueryResults = (await pg.query(`SELECT log_id, audit_logged_at FROM br7own.archive_log GROUP BY log_id`))
+      .rows
+    expect(groupQueryResults.filter((row) => row.audit_logged_at !== undefined)).toHaveLength(1)
+    expect(groupQueryResults.filter((row) => row.audit_logged_at === undefined)).toHaveLength(1)
   })
 })
