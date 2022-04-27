@@ -1,13 +1,11 @@
 import type { PromiseResult } from "shared-types"
-import { logger } from "shared"
+import { logger, decodeBase64 } from "shared"
 import { isError } from "shared-types"
-
 import type GetLastFailedMessageEventUseCase from "./GetLastEventUseCase"
 import type RetrieveEventXmlFromS3 from "./RetrieveEventXmlFromS3UseCase"
 import type CreateRetryingEventUseCase from "./CreateRetryingEventUseCase"
 import type SendMessageToQueueUseCase from "./SendMessageToQueueUseCase"
 import validateEventForRetry from "./validateEventForRetry"
-import { decodeBase64 } from "shared"
 
 export default class RetryMessageUseCase {
   constructor(
