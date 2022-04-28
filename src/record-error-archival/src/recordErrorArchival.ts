@@ -50,7 +50,7 @@ const recordErrorGroupArchival = async (
   db.markErrorsAuditLogged(successfulIds)
   db.markErrorsAuditLogFailed(failedIds)
 
-  const allSucceeded = !!failedIds
+  const allSucceeded = failedIds.length < 1
   if (allSucceeded) {
     const err = await db.markArchiveGroupAuditLogged(Number(groupId))
     if (err) {
