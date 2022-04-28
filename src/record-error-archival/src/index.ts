@@ -1,8 +1,7 @@
-import { recordErrorArchival } from "./recordErrorArchival"
+import { AuditLogApiClient, logger } from "shared"
 import getConfig from "./config"
 import DatabaseClient from "./DatabaseClient"
-import { AuditLogApiClient } from "shared"
-import { logger } from "shared"
+import { addErrorRecordsToAuditLog } from "./recordErrorArchival"
 
 export default async function doRecordErrorArchival(): Promise<void> {
   const config = getConfig()
@@ -18,8 +17,10 @@ export default async function doRecordErrorArchival(): Promise<void> {
   )
   const auditLogApi = new AuditLogApiClient(config.apiUrl, config.apiKey)
 
+  await db.connect()
+
   try {
-    const statuses = await recordErrorArchival(db, auditLogApi)
+    const statuses = await addErrorRecordsToAuditLog(db, auditLogApi)
     const successfulRecords = statuses?.filter((record) => record.success).length ?? 0
     logger.info({
       message: `Successfully updated ${successfulRecords} records`,

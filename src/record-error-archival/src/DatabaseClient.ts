@@ -1,6 +1,12 @@
+import groupBy from "lodash.groupby"
+import type { QueryResult } from "pg"
 import { Client } from "pg"
 import { logger } from "shared"
 import type { PromiseResult } from "shared-types"
+
+interface Dictionary<T> {
+  [Key: string]: T
+}
 
 export type ArchivedErrorRecord = {
   messageId: string
@@ -54,11 +60,12 @@ export default class DatabaseClient {
     await this.postgres.end()
   }
 
-  fetchUnloggedArchivedErrors(): PromiseResult<ArchivedErrorRecord[]> {
-    logger.debug("Fetching unlogged archived errors")
+  async fetchUnloggedArchivedErrors(): PromiseResult<Dictionary<ArchivedErrorRecord[]>> {
+    let res: QueryResult<DatabaseRow>
 
-    return this.postgres
-      .query(
+    try {
+      logger.debug("Fetching unlogged archived errors")
+      res = await this.postgres.query(
         `SELECT message_id, error_id, archived_at, archived_by, archive_log_id
         FROM ${this.schema}.archive_error_list ael
         INNER JOIN (
@@ -66,22 +73,25 @@ export default class DatabaseClient {
             FROM ${this.schema}.archive_log
             WHERE audit_logged_at IS NULL LIMIT $1)
           al ON (ael.archive_log_id = al.log_id)
-        WHERE audit_logged_at IS NULL`,
+        WHERE audit_logged_at IS NULL GROUP BY`,
         [this.archiveGroupLimit]
       )
-      .then((res) =>
-        res.rows.map(
-          (row: DatabaseRow) =>
-            <ArchivedErrorRecord>{
-              messageId: row.message_id,
-              errorId: row.error_id,
-              archivedAt: new Date(row.archived_at + " UTC"),
-              archivedBy: row.archived_by,
-              archiveLogId: row.archive_log_id
-            }
-        )
-      )
-      .catch((error) => error)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (e: any) {
+      return e
+    }
+    const rows: ArchivedErrorRecord[] = res.rows.map(
+      (row: DatabaseRow) =>
+        <ArchivedErrorRecord>{
+          messageId: row.message_id,
+          errorId: row.error_id,
+          archivedAt: new Date(row.archived_at + " UTC"),
+          archivedBy: row.archived_by,
+          archiveLogId: row.archive_log_id
+        }
+    )
+
+    return groupBy(rows, (row) => row.archiveLogId)
   }
 
   markArchiveGroupAuditLogged(archiveLogGroupId: number): PromiseResult<void> {
@@ -98,6 +108,10 @@ export default class DatabaseClient {
   }
 
   markErrorsAuditLogged(errorIds: number[]): PromiseResult<void> {
+    if (!errorIds.length) {
+      return Promise.resolve()
+    }
+
     logger.debug({ message: "Marking errors as audit logged", errorIds: errorIds })
 
     return this.postgres
@@ -111,6 +125,10 @@ export default class DatabaseClient {
   }
 
   markErrorsAuditLogFailed(errorIds: number[]): PromiseResult<void> {
+    if (!errorIds.length) {
+      return Promise.resolve()
+    }
+
     logger.debug({ message: "Recording failure to audit log errors", errorIds: errorIds })
 
     return this.postgres

@@ -1,7 +1,8 @@
 import groupBy from "lodash.groupby"
 import { logger } from "shared"
-import type { ApiClient, AuditLog } from "shared-types"
+import type { ApiClient } from "shared-types"
 import { AuditLogEvent, isError, isSuccess } from "shared-types"
+import { createRecordInAuditLog, isRecordInAuditLog } from "./api"
 import type DatabaseClient from "./DatabaseClient"
 import type { ArchivedErrorRecord } from "./DatabaseClient"
 
@@ -12,17 +13,104 @@ export type RecordErrorArchivalResult = {
   errorRecord: ArchivedErrorRecord
 }
 
-const archivalEventType = "Error archival"
-const archivalEventCategory = "information"
+const addErrorRecordToAuditLog = async (api: ApiClient, errorRecord: ArchivedErrorRecord): Promise<boolean> => {
+  const { exists, err } = await isRecordInAuditLog(api, errorRecord)
+  if (err) {
+    return false
+  }
 
-const hasArchivalEvent = (auditLog: AuditLog, errorId: number): boolean =>
-  auditLog.events.filter((event) => {
-    return (
-      event.eventType === archivalEventType &&
-      event.category === archivalEventCategory &&
-      (event.attributes["Error ID"] || "") === errorId
-    )
-  }).length > 0
+  if (!exists) {
+    const createRecordErr = await createRecordInAuditLog(api, errorRecord)
+    if (createRecordErr) {
+      return false
+    }
+  }
+
+  return true
+}
+
+export const addErrorRecordsToAuditLog = async (
+  db: DatabaseClient,
+  api: ApiClient
+): Promise<RecordErrorArchivalResult[]> => {
+  const errorRecords = await db.fetchUnloggedArchivedErrors()
+  if (isError(errorRecords)) {
+    throw errorRecords
+  }
+
+  const successfulIds: number[] = []
+  const failedIds: number[] = []
+  for (const errorRecord of errorRecords) {
+    const ok = await addErrorRecordToAuditLog(api, errorRecord)
+    if (ok) {
+      successfulIds.push(errorRecord.errorId)
+    } else {
+      failedIds.push(errorRecord.errorId)
+    }
+  }
+
+  db.markErrorsAuditLogged(successfulIds)
+  db.markErrorsAuditLogFailed(failedIds)
+
+  
+
+  // ===================== NOPE
+  const results: RecordErrorArchivalResult[] = []
+  for (const errorRecord of errorRecords) {
+    results.push(await createArchivalEventIfNeeded(api, errorRecord))
+  }
+
+  // Mark successfully audit logged errors
+  const successful = results.filter((result) => result.success).map((result) => result.errorRecord.errorId)
+  if (successful.length > 0) {
+    const dbResult = await db.markErrorsAuditLogged(successful)
+
+    if (isError(dbResult)) {
+      results
+        .filter((result) => result.success)
+        .map((result) => {
+          result.success = false
+          result.reason = "Failed database update: successfully audit logged individual record"
+          result.errors.push(dbResult)
+        })
+    }
+  }
+
+  // Record failed attempts to audit log
+  const failed = results.filter((result) => !result.success).map((result) => result.errorRecord.errorId)
+  if (failed.length > 0) {
+    const dbResult = await db.markErrorsAuditLogFailed(failed)
+
+    if (isError(dbResult)) {
+      results
+        .filter((result) => !result.success)
+        .map((result) => {
+          result.success = false
+          result.reason = "Failed database update: unsuccessfully audit logged individual record"
+          result.errors.push(dbResult)
+        })
+    }
+  }
+
+  // Mark groups with no failed updates as complete
+  const groupedResults = groupBy(results, (result) => result.errorRecord.archiveLogId)
+  for (const [archiveLogGroup, groupResults] of Object.entries(groupedResults)) {
+    if (groupResults.filter((result) => !result.success).length < 1) {
+      const dbResult = await db.markArchiveGroupAuditLogged(Number(archiveLogGroup))
+
+      if (isError(dbResult)) {
+        groupResults.map((result) => {
+          result.success = false
+          result.reason = "Failed database update: successfully audit logged archive group"
+          result.errors.push(dbResult)
+        })
+      }
+    }
+  }
+
+  await db.disconnect()
+  return results
+}
 
 const createArchivalEventIfNeeded = async (
   api: ApiClient,
@@ -86,69 +174,4 @@ const createArchivalEventIfNeeded = async (
     result.errors.push(response)
   }
   return result
-}
-
-export const recordErrorArchival = async (db: DatabaseClient, api: ApiClient): Promise<RecordErrorArchivalResult[]> => {
-  await db.connect()
-  const errorRecords = await db.fetchUnloggedArchivedErrors()
-
-  if (isError(errorRecords)) {
-    throw errorRecords
-  }
-
-  const results: RecordErrorArchivalResult[] = []
-  for (const errorRecord of errorRecords) {
-    results.push(await createArchivalEventIfNeeded(api, errorRecord))
-  }
-
-  // Mark successfully audit logged errors
-  const successful = results.filter((result) => result.success).map((result) => result.errorRecord.errorId)
-  if (successful.length > 0) {
-    const dbResult = await db.markErrorsAuditLogged(successful)
-
-    if (isError(dbResult)) {
-      results
-        .filter((result) => result.success)
-        .map((result) => {
-          result.success = false
-          result.reason = "Failed database update: successfully audit logged individual record"
-          result.errors.push(dbResult)
-        })
-    }
-  }
-
-  // Record failed attempts to audit log
-  const failed = results.filter((result) => !result.success).map((result) => result.errorRecord.errorId)
-  if (failed.length > 0) {
-    const dbResult = await db.markErrorsAuditLogFailed(failed)
-
-    if (isError(dbResult)) {
-      results
-        .filter((result) => !result.success)
-        .map((result) => {
-          result.success = false
-          result.reason = "Failed database update: unsuccessfully audit logged individual record"
-          result.errors.push(dbResult)
-        })
-    }
-  }
-
-  // Mark groups with no failed updates as complete
-  const groupedResults = groupBy(results, (result) => result.errorRecord.archiveLogId)
-  for (const [archiveLogGroup, groupResults] of Object.entries(groupedResults)) {
-    if (groupResults.filter((result) => !result.success).length < 1) {
-      const dbResult = await db.markArchiveGroupAuditLogged(Number(archiveLogGroup))
-
-      if (isError(dbResult)) {
-        groupResults.map((result) => {
-          result.success = false
-          result.reason = "Failed database update: successfully audit logged archive group"
-          result.errors.push(dbResult)
-        })
-      }
-    }
-  }
-
-  await db.disconnect()
-  return results
 }
