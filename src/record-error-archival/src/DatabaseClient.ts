@@ -73,7 +73,7 @@ export default class DatabaseClient {
             FROM ${this.schema}.archive_log
             WHERE audit_logged_at IS NULL LIMIT $1)
           al ON (ael.archive_log_id = al.log_id)
-        WHERE audit_logged_at IS NULL GROUP BY`,
+        WHERE audit_logged_at IS NULL`,
         [this.archiveGroupLimit]
       )
     } catch (e) {
