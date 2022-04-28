@@ -9,6 +9,9 @@ import type { ApiClient, AuditLog } from "shared-types"
 import { AuditLogEvent, isSuccess } from "shared-types"
 import doRecordErrorArchival from "."
 
+import { logger } from "shared"
+logger.level = "debug"
+
 const createTableSql = `
   CREATE SCHEMA br7own;
   GRANT ALL ON SCHEMA br7own TO bichard;

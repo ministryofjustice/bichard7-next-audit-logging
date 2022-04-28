@@ -1,7 +1,7 @@
 import { logger } from "shared"
 import type { ApiClient } from "shared-types"
 import { isError } from "shared-types"
-import { createRecordInAuditLog, isRecordInAuditLog } from "./api"
+import { createArchivalEventInAuditLog, isRecordInAuditLog } from "./api"
 import type DatabaseClient from "./DatabaseClient"
 import type { ArchivedErrorRecord } from "./DatabaseClient"
 
@@ -19,7 +19,7 @@ const addErrorRecordToAuditLog = async (api: ApiClient, errorRecord: ArchivedErr
   }
 
   if (!exists) {
-    const createRecordErr = await createRecordInAuditLog(api, errorRecord)
+    const createRecordErr = await createArchivalEventInAuditLog(api, errorRecord)
     if (createRecordErr) {
       return false
     }

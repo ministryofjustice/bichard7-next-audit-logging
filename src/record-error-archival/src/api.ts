@@ -1,6 +1,6 @@
 import { logger } from "shared"
 import type { ApiClient, AuditLog } from "shared-types"
-import { AuditLogEvent, isError, isSuccess } from "shared-types"
+import { AuditLogEvent, isError } from "shared-types"
 import type { ArchivedErrorRecord } from "./DatabaseClient"
 
 const ARCHIVAL_EVENT_TYPE = "Error archival"
@@ -33,7 +33,10 @@ export const isRecordInAuditLog = async (
   return { exists: hasArchivalEvent(messageResult, errorRecord.errorId), err: false }
 }
 
-export const createRecordInAuditLog = async (api: ApiClient, errorRecord: ArchivedErrorRecord): Promise<boolean> => {
+export const createArchivalEventInAuditLog = async (
+  api: ApiClient,
+  errorRecord: ArchivedErrorRecord
+): Promise<boolean> => {
   const auditLogEvent = new AuditLogEvent({
     eventSource: errorRecord.archivedBy,
     category: ARCHIVAL_EVENT_CATAGORY,
@@ -44,14 +47,15 @@ export const createRecordInAuditLog = async (api: ApiClient, errorRecord: Archiv
 
   logger.debug({ message: "Audit logging the archival of an error", record: errorRecord })
   const response = await api.createEvent(errorRecord.messageId, auditLogEvent)
+
   if (isError(response)) {
     logger.error({
-      message: "Failed to add archived error to audit log",
+      message: "Failed to mark archived of error to audit log",
       reason: response.message,
       record: errorRecord
     })
-    return false
+    return true
   }
 
-  return isSuccess(response)
+  return isError(response)
 }
