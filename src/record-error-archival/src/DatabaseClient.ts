@@ -76,9 +76,8 @@ export default class DatabaseClient {
         WHERE audit_logged_at IS NULL GROUP BY`,
         [this.archiveGroupLimit]
       )
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (e: any) {
-      return e
+    } catch (e) {
+      return e as Error
     }
     const rows: ArchivedErrorRecord[] = res.rows.map(
       (row: DatabaseRow) =>

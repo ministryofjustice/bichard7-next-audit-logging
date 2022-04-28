@@ -29,18 +29,14 @@ const addErrorRecordToAuditLog = async (api: ApiClient, errorRecord: ArchivedErr
   return true
 }
 
-export const addErrorRecordsToAuditLog = async (
+const addErrorGroupToAuditLog = async (
   db: DatabaseClient,
-  api: ApiClient
-): Promise<RecordErrorArchivalResult[]> => {
-  const errorRecords = await db.fetchUnloggedArchivedErrors()
-  if (isError(errorRecords)) {
-    throw errorRecords
-  }
-
+  api: ApiClient,
+  errorGroup: ArchivedErrorRecord[]
+): Promise<boolean> => {
   const successfulIds: number[] = []
   const failedIds: number[] = []
-  for (const errorRecord of errorRecords) {
+  for (const errorRecord of errorGroup) {
     const ok = await addErrorRecordToAuditLog(api, errorRecord)
     if (ok) {
       successfulIds.push(errorRecord.errorId)
@@ -52,61 +48,78 @@ export const addErrorRecordsToAuditLog = async (
   db.markErrorsAuditLogged(successfulIds)
   db.markErrorsAuditLogFailed(failedIds)
 
-  
+  return !!failedIds
+}
+
+export const addArchivedExceptionsToAuditLog = async (
+  db: DatabaseClient,
+  api: ApiClient
+): Promise<RecordErrorArchivalResult[]> => {
+  const exceptionGroups = await db.fetchUnloggedArchivedErrors()
+  if (isError(exceptionGroups)) {
+    throw exceptionGroups
+  }
+
+  for (const [groupId, exceptionGroup] of Object.entries(exceptionGroups)) {
+    const err = await addErrorGroupToAuditLog(db, api, exceptionGroup)
+    if (!err) {
+      db.markArchiveGroupAuditLogged(Number(groupId))
+    }
+  }
 
   // ===================== NOPE
-  const results: RecordErrorArchivalResult[] = []
-  for (const errorRecord of errorRecords) {
-    results.push(await createArchivalEventIfNeeded(api, errorRecord))
-  }
+  // const results: RecordErrorArchivalResult[] = []
+  // for (const exceptionRecord of exceptionRecords) {
+  //   results.push(await createArchivalEventIfNeeded(api, exceptionRecord))
+  // }
 
-  // Mark successfully audit logged errors
-  const successful = results.filter((result) => result.success).map((result) => result.errorRecord.errorId)
-  if (successful.length > 0) {
-    const dbResult = await db.markErrorsAuditLogged(successful)
+  // // Mark successfully audit logged errors
+  // const successful = results.filter((result) => result.success).map((result) => result.errorRecord.errorId)
+  // if (successful.length > 0) {
+  //   const dbResult = await db.markErrorsAuditLogged(successful)
 
-    if (isError(dbResult)) {
-      results
-        .filter((result) => result.success)
-        .map((result) => {
-          result.success = false
-          result.reason = "Failed database update: successfully audit logged individual record"
-          result.errors.push(dbResult)
-        })
-    }
-  }
+  //   if (isError(dbResult)) {
+  //     results
+  //       .filter((result) => result.success)
+  //       .map((result) => {
+  //         result.success = false
+  //         result.reason = "Failed database update: successfully audit logged individual record"
+  //         result.errors.push(dbResult)
+  //       })
+  //   }
+  // }
 
-  // Record failed attempts to audit log
-  const failed = results.filter((result) => !result.success).map((result) => result.errorRecord.errorId)
-  if (failed.length > 0) {
-    const dbResult = await db.markErrorsAuditLogFailed(failed)
+  // // Record failed attempts to audit log
+  // const failed = results.filter((result) => !result.success).map((result) => result.errorRecord.errorId)
+  // if (failed.length > 0) {
+  //   const dbResult = await db.markErrorsAuditLogFailed(failed)
 
-    if (isError(dbResult)) {
-      results
-        .filter((result) => !result.success)
-        .map((result) => {
-          result.success = false
-          result.reason = "Failed database update: unsuccessfully audit logged individual record"
-          result.errors.push(dbResult)
-        })
-    }
-  }
+  //   if (isError(dbResult)) {
+  //     results
+  //       .filter((result) => !result.success)
+  //       .map((result) => {
+  //         result.success = false
+  //         result.reason = "Failed database update: unsuccessfully audit logged individual record"
+  //         result.errors.push(dbResult)
+  //       })
+  //   }
+  // }
 
-  // Mark groups with no failed updates as complete
-  const groupedResults = groupBy(results, (result) => result.errorRecord.archiveLogId)
-  for (const [archiveLogGroup, groupResults] of Object.entries(groupedResults)) {
-    if (groupResults.filter((result) => !result.success).length < 1) {
-      const dbResult = await db.markArchiveGroupAuditLogged(Number(archiveLogGroup))
+  // // Mark groups with no failed updates as complete
+  // const groupedResults = groupBy(results, (result) => result.errorRecord.archiveLogId)
+  // for (const [archiveLogGroup, groupResults] of Object.entries(groupedResults)) {
+  //   if (groupResults.filter((result) => !result.success).length < 1) {
+  //     const dbResult = await db.markArchiveGroupAuditLogged(Number(archiveLogGroup))
 
-      if (isError(dbResult)) {
-        groupResults.map((result) => {
-          result.success = false
-          result.reason = "Failed database update: successfully audit logged archive group"
-          result.errors.push(dbResult)
-        })
-      }
-    }
-  }
+  //     if (isError(dbResult)) {
+  //       groupResults.map((result) => {
+  //         result.success = false
+  //         result.reason = "Failed database update: successfully audit logged archive group"
+  //         result.errors.push(dbResult)
+  //       })
+  //     }
+  //   }
+  // }
 
   await db.disconnect()
   return results
