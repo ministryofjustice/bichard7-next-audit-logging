@@ -4,8 +4,8 @@ import { Client } from "pg"
 import { logger } from "shared"
 import type { PromiseResult } from "shared-types"
 
-interface Dictionary<T> {
-  [Key: string]: T
+export interface Dictionary<T> {
+  [Key: number]: T
 }
 
 export type ArchivedErrorRecord = {

@@ -2,7 +2,7 @@
 import { Client } from "pg"
 import { FakeApiClient, setEnvironmentVariables } from "shared-testing"
 import type { AuditLogEvent, KeyValuePair } from "shared-types"
-import type { ArchivedErrorRecord, DatabaseRow } from "./DatabaseClient"
+import type { ArchivedErrorRecord, DatabaseRow, Dictionary } from "./DatabaseClient"
 import DatabaseClient from "./DatabaseClient"
 import { addArchivedExceptionsToAuditLog } from "./recordErrorArchival"
 
@@ -10,12 +10,13 @@ setEnvironmentVariables()
 
 const originalEnv = process.env
 
-const createStubDbWithRecords = (records: ArchivedErrorRecord[]): DatabaseClient => {
+const createStubDbWithRecords = (records: Dictionary<ArchivedErrorRecord[]>): DatabaseClient => {
   return {
     fetchUnloggedArchivedErrors: jest.fn(() => records),
     connect: jest.fn(),
     disconnect: jest.fn(),
     markArchiveGroupAuditLogged: jest.fn(),
+    markErrorsAuditLogFailed: jest.fn(),
     markErrorsAuditLogged: jest.fn()
   } as unknown as DatabaseClient
 }
@@ -92,17 +93,20 @@ describe("Record Error Archival integration", () => {
     jest.clearAllMocks()
   })
 
+  // eslint-disable-next-line jest/no-focused-tests
   it("Should create an audit log event when a single error record is archived", async () => {
     const archivalDate = new Date("2022-04-06 09:45:15")
-    const stubDb = createStubDbWithRecords([
-      {
-        errorId: 1,
-        messageId: "Message01",
-        archivedAt: archivalDate,
-        archivedBy: "Error archiver process 1",
-        archiveLogId: 1
-      }
-    ])
+    const stubDb = createStubDbWithRecords({
+      1: [
+        {
+          errorId: 1,
+          messageId: "Message01",
+          archivedAt: archivalDate,
+          archivedBy: "Error archiver process 1",
+          archiveLogId: 1
+        }
+      ]
+    })
     const apiSpy = jest.spyOn(api, "createEvent")
 
     await addArchivedExceptionsToAuditLog(stubDb, api)
@@ -152,7 +156,7 @@ describe("Record Error Archival integration", () => {
         archiveLogId: 1
       }
     ]
-    const stubDb = createStubDbWithRecords(errorRecords)
+    const stubDb = createStubDbWithRecords({ 1: errorRecords })
     const apiSpy = jest.spyOn(api, "createEvent")
 
     await addArchivedExceptionsToAuditLog(stubDb, api)

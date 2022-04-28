@@ -52,7 +52,7 @@ const recordErrorGroupArchival = async (
 
   const allSucceeded = failedIds.length < 1
   if (allSucceeded) {
-    const err = await db.markArchiveGroupAuditLogged(Number(groupId))
+    const err = await db.markArchiveGroupAuditLogged(groupId)
     if (err) {
       logger.error({ message: "Failed database update: successfully audit logged archive group", groupId: groupId })
       // TODO handle case where group isn't updated in db but all individual records are
