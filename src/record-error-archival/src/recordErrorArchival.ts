@@ -1,7 +1,6 @@
-import groupBy from "lodash.groupby"
 import { logger } from "shared"
 import type { ApiClient } from "shared-types"
-import { AuditLogEvent, isError, isSuccess } from "shared-types"
+import { isError } from "shared-types"
 import { createRecordInAuditLog, isRecordInAuditLog } from "./api"
 import type DatabaseClient from "./DatabaseClient"
 import type { ArchivedErrorRecord } from "./DatabaseClient"
@@ -29,10 +28,13 @@ const addErrorRecordToAuditLog = async (api: ApiClient, errorRecord: ArchivedErr
   return true
 }
 
-const addErrorGroupToAuditLog = async (
+// Record the archival of an entire group in the audit log and database
+// Returns whether all records in the group were updated successfully
+const recordErrorGroupArchival = async (
   db: DatabaseClient,
   api: ApiClient,
-  errorGroup: ArchivedErrorRecord[]
+  errorGroup: ArchivedErrorRecord[],
+  groupId: number
 ): Promise<boolean> => {
   const successfulIds: number[] = []
   const failedIds: number[] = []
@@ -48,143 +50,27 @@ const addErrorGroupToAuditLog = async (
   db.markErrorsAuditLogged(successfulIds)
   db.markErrorsAuditLogFailed(failedIds)
 
-  return !!failedIds
+  const allSucceeded = !!failedIds
+  if (allSucceeded) {
+    const err = await db.markArchiveGroupAuditLogged(Number(groupId))
+    if (err) {
+      logger.error({ message: "Failed database update: successfully audit logged archive group", groupId: groupId })
+      // TODO handle case where group isn't updated in db but all individual records are
+    }
+  }
+  return allSucceeded
 }
 
-export const addArchivedExceptionsToAuditLog = async (
-  db: DatabaseClient,
-  api: ApiClient
-): Promise<RecordErrorArchivalResult[]> => {
+export const addArchivedExceptionsToAuditLog = async (db: DatabaseClient, api: ApiClient): Promise<void> => {
   const exceptionGroups = await db.fetchUnloggedArchivedErrors()
   if (isError(exceptionGroups)) {
     throw exceptionGroups
   }
 
   for (const [groupId, exceptionGroup] of Object.entries(exceptionGroups)) {
-    const err = await addErrorGroupToAuditLog(db, api, exceptionGroup)
-    if (!err) {
-      db.markArchiveGroupAuditLogged(Number(groupId))
+    const err = await recordErrorGroupArchival(db, api, exceptionGroup, Number(groupId))
+    if (err) {
+      continue
     }
   }
-
-  // ===================== NOPE
-  // const results: RecordErrorArchivalResult[] = []
-  // for (const exceptionRecord of exceptionRecords) {
-  //   results.push(await createArchivalEventIfNeeded(api, exceptionRecord))
-  // }
-
-  // // Mark successfully audit logged errors
-  // const successful = results.filter((result) => result.success).map((result) => result.errorRecord.errorId)
-  // if (successful.length > 0) {
-  //   const dbResult = await db.markErrorsAuditLogged(successful)
-
-  //   if (isError(dbResult)) {
-  //     results
-  //       .filter((result) => result.success)
-  //       .map((result) => {
-  //         result.success = false
-  //         result.reason = "Failed database update: successfully audit logged individual record"
-  //         result.errors.push(dbResult)
-  //       })
-  //   }
-  // }
-
-  // // Record failed attempts to audit log
-  // const failed = results.filter((result) => !result.success).map((result) => result.errorRecord.errorId)
-  // if (failed.length > 0) {
-  //   const dbResult = await db.markErrorsAuditLogFailed(failed)
-
-  //   if (isError(dbResult)) {
-  //     results
-  //       .filter((result) => !result.success)
-  //       .map((result) => {
-  //         result.success = false
-  //         result.reason = "Failed database update: unsuccessfully audit logged individual record"
-  //         result.errors.push(dbResult)
-  //       })
-  //   }
-  // }
-
-  // // Mark groups with no failed updates as complete
-  // const groupedResults = groupBy(results, (result) => result.errorRecord.archiveLogId)
-  // for (const [archiveLogGroup, groupResults] of Object.entries(groupedResults)) {
-  //   if (groupResults.filter((result) => !result.success).length < 1) {
-  //     const dbResult = await db.markArchiveGroupAuditLogged(Number(archiveLogGroup))
-
-  //     if (isError(dbResult)) {
-  //       groupResults.map((result) => {
-  //         result.success = false
-  //         result.reason = "Failed database update: successfully audit logged archive group"
-  //         result.errors.push(dbResult)
-  //       })
-  //     }
-  //   }
-  // }
-
-  await db.disconnect()
-  return results
-}
-
-const createArchivalEventIfNeeded = async (
-  api: ApiClient,
-  errorRecord: ArchivedErrorRecord
-): Promise<RecordErrorArchivalResult> => {
-  const result: RecordErrorArchivalResult = {
-    success: false,
-    errors: [],
-    errorRecord: errorRecord
-  }
-
-  /*
-   * Check for existing archival event
-   */
-
-  logger.debug({ message: "Retreiving message from audit log", record: errorRecord })
-  const messageResult = await api.getMessage(errorRecord.messageId)
-
-  if (isError(messageResult)) {
-    result.success = false
-    result.reason = "Failed to retrieve message from audit log API"
-    result.errors.push(messageResult)
-
-    logger.error({ message: result.reason, record: errorRecord })
-
-    return result
-  }
-
-  if (hasArchivalEvent(messageResult, errorRecord.errorId)) {
-    logger.debug({ message: "Message already has archival event", record: errorRecord })
-
-    result.success = true
-    return result
-  }
-
-  /*
-   * Create archival event
-   */
-
-  const auditLogEvent = new AuditLogEvent({
-    eventSource: errorRecord.archivedBy,
-    category: archivalEventCategory,
-    eventType: archivalEventType,
-    timestamp: errorRecord.archivedAt
-  })
-  auditLogEvent.addAttribute("Error ID", errorRecord.errorId)
-
-  logger.debug({ message: "Audit logging the archival of an error", record: errorRecord })
-
-  const response = await api.createEvent(errorRecord.messageId, auditLogEvent)
-
-  result.success = isSuccess(response)
-  if (isError(response)) {
-    logger.error({
-      message: "Failed to add archived error to audit log",
-      reason: response.message,
-      record: errorRecord
-    })
-
-    result.reason = "Audit log API failure"
-    result.errors.push(response)
-  }
-  return result
 }

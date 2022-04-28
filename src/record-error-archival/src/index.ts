@@ -1,7 +1,7 @@
 import { AuditLogApiClient, logger } from "shared"
 import getConfig from "./config"
 import DatabaseClient from "./DatabaseClient"
-import { addErrorRecordsToAuditLog } from "./recordErrorArchival"
+import { addArchivedExceptionsToAuditLog } from "./recordErrorArchival"
 
 export default async function doRecordErrorArchival(): Promise<void> {
   const config = getConfig()
@@ -20,21 +20,10 @@ export default async function doRecordErrorArchival(): Promise<void> {
   await db.connect()
 
   try {
-    const statuses = await addErrorRecordsToAuditLog(db, auditLogApi)
-    const successfulRecords = statuses?.filter((record) => record.success).length ?? 0
-    logger.info({
-      message: `Successfully updated ${successfulRecords} records`,
-      successfulRecords: successfulRecords
-    })
-
-    const failedRecords = statuses?.filter((record) => !record.success)
-
-    if (failedRecords !== undefined && failedRecords.length > 0) {
-      logger.error({ message: "Failed to audit log some archived errors", failedRecords: failedRecords })
-    }
-    return
+    await addArchivedExceptionsToAuditLog(db, auditLogApi)
   } catch (error) {
+    logger.error(error as Error)
+  } finally {
     db.disconnect()
-    throw error
   }
 }
