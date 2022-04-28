@@ -24,6 +24,70 @@ const hasArchivalEvent = (auditLog: AuditLog, errorId: number): boolean =>
     )
   }).length > 0
 
+const createArchivalEventIfNeeded = async (
+  api: ApiClient,
+  errorRecord: ArchivedErrorRecord
+): Promise<RecordErrorArchivalResult> => {
+  const result: RecordErrorArchivalResult = {
+    success: false,
+    errors: [],
+    errorRecord: errorRecord
+  }
+
+  /*
+   * Check for existing archival event
+   */
+
+  logger.debug({ message: "Retreiving message from audit log", record: errorRecord })
+  const messageResult = await api.getMessage(errorRecord.messageId)
+
+  if (isError(messageResult)) {
+    result.success = false
+    result.reason = "Failed to retrieve message from audit log API"
+    result.errors.push(messageResult)
+
+    logger.error({ message: result.reason, record: errorRecord })
+
+    return result
+  }
+
+  if (hasArchivalEvent(messageResult, errorRecord.errorId)) {
+    logger.debug({ message: "Message already has archival event", record: errorRecord })
+
+    result.success = true
+    return result
+  }
+
+  /*
+   * Create archival event
+   */
+
+  const auditLogEvent = new AuditLogEvent({
+    eventSource: errorRecord.archivedBy,
+    category: archivalEventCategory,
+    eventType: archivalEventType,
+    timestamp: errorRecord.archivedAt
+  })
+  auditLogEvent.addAttribute("Error ID", errorRecord.errorId)
+
+  logger.debug({ message: "Audit logging the archival of an error", record: errorRecord })
+
+  const response = await api.createEvent(errorRecord.messageId, auditLogEvent)
+
+  result.success = isSuccess(response)
+  if (isError(response)) {
+    logger.error({
+      message: "Failed to add archived error to audit log",
+      reason: response.message,
+      record: errorRecord
+    })
+
+    result.reason = "Audit log API failure"
+    result.errors.push(response)
+  }
+  return result
+}
+
 export const recordErrorArchival = async (db: DatabaseClient, api: ApiClient): Promise<RecordErrorArchivalResult[]> => {
   await db.connect()
   const errorRecords = await db.fetchUnloggedArchivedErrors()
@@ -33,60 +97,8 @@ export const recordErrorArchival = async (db: DatabaseClient, api: ApiClient): P
   }
 
   const results: RecordErrorArchivalResult[] = []
-
   for (const errorRecord of errorRecords) {
-    const result: RecordErrorArchivalResult = {
-      success: false,
-      errors: [],
-      errorRecord: errorRecord
-    }
-
-    const messageResult = await api.getMessage(errorRecord.messageId)
-
-    if (isError(messageResult)) {
-      result.success = false
-      result.reason = "Failed to retrieve message from audit log API"
-      result.errors.push(messageResult)
-
-      logger.error({ message: result.reason, record: errorRecord })
-
-      results.push(result)
-      continue
-    }
-
-    if (hasArchivalEvent(messageResult, errorRecord.errorId)) {
-      logger.debug({ message: "Message already has archival event", record: errorRecord })
-
-      result.success = true
-      results.push(result)
-      continue
-    }
-
-    const auditLogEvent = new AuditLogEvent({
-      eventSource: errorRecord.archivedBy,
-      category: archivalEventCategory,
-      eventType: archivalEventType,
-      timestamp: errorRecord.archivedAt
-    })
-    auditLogEvent.addAttribute("Error ID", errorRecord.errorId)
-
-    logger.debug({ message: "Would audit log the archival of an error", record: errorRecord })
-
-    const response = await api.createEvent(errorRecord.messageId, auditLogEvent)
-    if (isError(response)) {
-      logger.error({
-        message: "Failed to add archived error to audit log",
-        reason: response.message,
-        record: errorRecord
-      })
-    }
-
-    result.success = isSuccess(response)
-    if (isError(response)) {
-      result.reason = "Audit log API failure"
-      result.errors.push(response)
-    }
-    results.push(result)
+    results.push(await createArchivalEventIfNeeded(api, errorRecord))
   }
 
   // Mark successfully audit logged errors
