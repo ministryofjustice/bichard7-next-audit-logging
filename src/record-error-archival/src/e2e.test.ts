@@ -458,8 +458,7 @@ describe("Record Error Archival e2e", () => {
     expect(groupQueryResults.filter((row) => row.audit_logged_at === null)).toHaveLength(1)
   })
 
-  // eslint-disable-next-line jest/no-focused-tests
-  it.only("should mark an audit log group as completed when all records have already been completed", async () => {
+  it("should mark an audit log group as completed when all records have already been completed", async () => {
     // Insert testdata into postgres
     await pg.query(
       `INSERT INTO br7own.archive_log (log_id, archived_at, archived_by, audit_logged_at) VALUES
@@ -549,7 +548,7 @@ describe("Record Error Archival e2e", () => {
       expect(row.audit_log_attempts).toBe(1)
     }
 
-    const groupQueryResult = await pg.query(`SELECT audit_logged_at FROM br7own.archive_log`)
+    const groupQueryResult = await pg.query(`SELECT log_id, audit_logged_at FROM br7own.archive_log`)
     expect(groupQueryResult.rows).toHaveLength(2)
     for (const row of groupQueryResult.rows) {
       expect(row.audit_logged_at).not.toBeNull()
