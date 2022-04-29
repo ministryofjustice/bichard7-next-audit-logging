@@ -458,7 +458,8 @@ describe("Record Error Archival e2e", () => {
     expect(groupQueryResults.filter((row) => row.audit_logged_at === null)).toHaveLength(1)
   })
 
-  it("should mark an audit log group as completed when all records have already been completed", async () => {
+  // eslint-disable-next-line jest/no-focused-tests
+  it.only("should mark an audit log group as completed when all records have already been completed", async () => {
     // Insert testdata into postgres
     await pg.query(
       `INSERT INTO br7own.archive_log (log_id, archived_at, archived_by, audit_logged_at) VALUES
@@ -466,14 +467,23 @@ describe("Record Error Archival e2e", () => {
       (2, '2022-03-26T12:53:55.000Z', 'you', NULL)`
     )
     await pg.query(
-      `INSERT INTO br7own.archive_error_list (error_id, message_id, archive_log_id, audit_logged_at) VALUES
-      (1, 'message_1', 1, NULL),
-      (2, 'message_2', 2, '2022-05-26T12:53:55.000Z'),
-      (3, 'message_3', 2, '2022-05-26T12:53:55.000Z')`
+      `INSERT INTO br7own.archive_error_list (error_id, message_id, archive_log_id, audit_logged_at, audit_log_attempts) VALUES
+      (1, 'message_1', 1, NULL, 0),
+      (2, 'message_2', 2, '2022-05-26T12:53:55.000Z', 1),
+      (3, 'message_3', 2, '2022-05-26T12:53:55.000Z', 1)`
     )
 
     // Insert testdata into audit log
     const messages = [
+      {
+        messageId: "message_1",
+        receivedDate: new Date("2022-05-26T12:53:55.000Z").toISOString(),
+        events: [],
+        caseId: "message_1",
+        externalCorrelationId: "message_2",
+        createdBy: "record-error-archival e2e tests",
+        messageHash: "message_1"
+      },
       {
         messageId: "message_2",
         receivedDate: new Date("2022-05-26T12:53:55.000Z").toISOString(),
@@ -520,7 +530,7 @@ describe("Record Error Archival e2e", () => {
 
     // Assert audit log results
     for (let i = 0; i < 3; i++) {
-      const message = (await api.getMessage(String(i + 1))) as AuditLog
+      const message = (await api.getMessage("message_" + (i + 1))) as AuditLog
 
       expect(isSuccess(message)).toBeTruthy()
       expect(message.events).toHaveLength(1)
@@ -534,13 +544,15 @@ describe("Record Error Archival e2e", () => {
     )
     expect(recordQueryResults.rows).toHaveLength(3)
     for (const row of recordQueryResults.rows) {
+      expect(row.audit_logged_at).not.toBeNull()
       expect(row.audit_logged_at.toISOString().length).toBeGreaterThan(0)
       expect(row.audit_log_attempts).toBe(1)
     }
 
     const groupQueryResult = await pg.query(`SELECT audit_logged_at FROM br7own.archive_log`)
-    expect(recordQueryResults.rows).toHaveLength(2)
+    expect(groupQueryResult.rows).toHaveLength(2)
     for (const row of groupQueryResult.rows) {
+      expect(row.audit_logged_at).not.toBeNull()
       expect(row.audit_logged_at.toISOString().length).toBeGreaterThan(0)
     }
   })
