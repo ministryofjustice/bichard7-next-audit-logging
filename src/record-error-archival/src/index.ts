@@ -1,7 +1,7 @@
 import { AuditLogApiClient, logger } from "shared"
 import getConfig from "./config"
-import DatabaseClient from "./DatabaseClient"
-import { addArchivedExceptionsToAuditLog } from "./recordErrorArchival"
+import DatabaseClient from "./db"
+import { addBichardRecordsToAuditLog } from "./recordErrorArchival"
 
 export default async function doRecordErrorArchival(): Promise<void> {
   const config = getConfig()
@@ -21,7 +21,7 @@ export default async function doRecordErrorArchival(): Promise<void> {
 
   try {
     await db.markUnmarkedGroupsCompleted()
-    await addArchivedExceptionsToAuditLog(db, auditLogApi)
+    await addBichardRecordsToAuditLog(db, auditLogApi)
   } catch (error) {
     logger.error(error as Error)
   } finally {

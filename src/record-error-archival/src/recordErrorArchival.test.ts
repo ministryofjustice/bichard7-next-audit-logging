@@ -2,22 +2,23 @@
 import { Client } from "pg"
 import { FakeApiClient, setEnvironmentVariables } from "shared-testing"
 import type { AuditLogEvent, KeyValuePair } from "shared-types"
-import type { ArchivedErrorRecord, DatabaseRow, Dictionary } from "./DatabaseClient"
-import DatabaseClient from "./DatabaseClient"
-import { addArchivedExceptionsToAuditLog } from "./recordErrorArchival"
+import type { BichardRecord, DatabaseRow, Dictionary } from "./db"
+import DatabaseClient from "./db"
+import { addBichardRecordsToAuditLog } from "./recordErrorArchival"
 
 setEnvironmentVariables()
 
 const originalEnv = process.env
 
-const createStubDbWithRecords = (records: Dictionary<ArchivedErrorRecord[]>): DatabaseClient => {
+const createStubDbWithRecords = (records: Dictionary<BichardRecord[]>): DatabaseClient => {
   return {
-    fetchUnloggedArchivedErrors: jest.fn(() => records),
+    fetchUnloggedBichardRecords: jest.fn(() => records),
     connect: jest.fn(),
     disconnect: jest.fn(),
-    markArchiveGroupAuditLogged: jest.fn(),
-    markErrorsAuditLogFailed: jest.fn(),
-    markErrorsAuditLogged: jest.fn()
+    markBichardRecordGroupAuditLogged: jest.fn(),
+    markBichardRecordsAuditLogFailed: jest.fn(),
+    markBichardRecordsAuditLogged: jest.fn(),
+    markUnmarkedGroupsCompleted: jest.fn()
   } as unknown as DatabaseClient
 }
 
@@ -93,7 +94,6 @@ describe("Record Error Archival integration", () => {
     jest.clearAllMocks()
   })
 
-  // eslint-disable-next-line jest/no-focused-tests
   it("Should create an audit log event when a single error record is archived", async () => {
     const archivalDate = new Date("2022-04-06 09:45:15")
     const stubDb = createStubDbWithRecords({
@@ -109,7 +109,7 @@ describe("Record Error Archival integration", () => {
     })
     const apiSpy = jest.spyOn(api, "createEvent")
 
-    await addArchivedExceptionsToAuditLog(stubDb, api)
+    await addBichardRecordsToAuditLog(stubDb, api)
 
     expect(apiSpy).toHaveBeenCalledTimes(1)
 
@@ -159,7 +159,7 @@ describe("Record Error Archival integration", () => {
     const stubDb = createStubDbWithRecords({ 1: errorRecords })
     const apiSpy = jest.spyOn(api, "createEvent")
 
-    await addArchivedExceptionsToAuditLog(stubDb, api)
+    await addBichardRecordsToAuditLog(stubDb, api)
 
     expect(apiSpy).toHaveBeenCalledTimes(errorRecords.length)
 
@@ -184,7 +184,7 @@ describe("Record Error Archival integration", () => {
 
     const db = new DatabaseClient("", "", "", false, "", "schema", 100)
 
-    await addArchivedExceptionsToAuditLog(db, api)
+    await addBichardRecordsToAuditLog(db, api)
 
     expect(client.query).toHaveBeenCalledTimes(3)
 
@@ -209,7 +209,7 @@ describe("Record Error Archival integration", () => {
     const db = new DatabaseClient("", "", "", false, "", "schema", 100)
     api.setErrorReturnedByFunctions(new Error("API failed :("), ["createEvent"])
 
-    await addArchivedExceptionsToAuditLog(db, api)
+    await addBichardRecordsToAuditLog(db, api)
 
     expect(client.query).toHaveBeenCalledTimes(2)
     expect(client.query.mock.calls[0][0].split(" ")[0]).toBe("SELECT")
@@ -231,7 +231,7 @@ describe("Record Error Archival integration", () => {
     // Each error requires 2 calls: one to getMessage and one to createEvent
     api.setErrorReturnedByFunctionsAfterNCalls(new Error("API quota exceeded"), 4, ["createEvent"])
 
-    await addArchivedExceptionsToAuditLog(db, api)
+    await addBichardRecordsToAuditLog(db, api)
 
     expect(client.query).toHaveBeenCalledTimes(3)
 
@@ -257,7 +257,7 @@ describe("Record Error Archival integration", () => {
   it("Should limit the number of archive log groups to a configured value", async () => {
     const db = new DatabaseClient("", "", "", false, "", "schema", 50)
 
-    await addArchivedExceptionsToAuditLog(db, api)
+    await addBichardRecordsToAuditLog(db, api)
 
     expect(client.query).toHaveBeenCalledTimes(3)
     expect(String(client.query.mock.calls[0][0]).includes("LIMIT $1")).toBeTruthy()
@@ -271,7 +271,7 @@ describe("Record Error Archival integration", () => {
 
     const db = new DatabaseClient("", "", "", false, "", "schema", 100)
 
-    await addArchivedExceptionsToAuditLog(db, api)
+    await addBichardRecordsToAuditLog(db, api)
 
     expect(client.query).toHaveBeenCalledTimes(3)
     expect(
@@ -291,7 +291,7 @@ describe("Record Error Archival integration", () => {
       jest.fn().mockRejectedValue(new Error("Database host on fire")).mockResolvedValueOnce(dbResult)
     )
 
-    await addArchivedExceptionsToAuditLog(db, api)
+    await addBichardRecordsToAuditLog(db, api)
     expect(client.query).toHaveBeenCalledTimes(3)
   })
 
@@ -319,7 +319,7 @@ describe("Record Error Archival integration", () => {
 
     const apiSpy = jest.spyOn(api, "createEvent")
 
-    await addArchivedExceptionsToAuditLog(db, api)
+    await addBichardRecordsToAuditLog(db, api)
     expect(apiSpy).toHaveBeenCalledTimes(3)
     // Don't create an audit log event for the message which already has one
     expect(apiSpy.mock.calls.map((args) => args[0])).not.toContain("Message2")

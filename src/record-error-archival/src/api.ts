@@ -1,58 +1,55 @@
 import { logger } from "shared"
 import type { ApiClient, AuditLog } from "shared-types"
 import { AuditLogEvent, isError } from "shared-types"
-import type { ArchivedErrorRecord } from "./DatabaseClient"
+import type { BichardRecord } from "./db"
 
 const ARCHIVAL_EVENT_TYPE = "Error archival"
 const ARCHIVAL_EVENT_CATAGORY = "information"
 
-const hasArchivalEvent = (auditLog: AuditLog, errorId: number): boolean =>
+const hasArchivalEvent = (auditLog: AuditLog, recordId: number): boolean =>
   auditLog.events.filter((event) => {
     return (
       event.eventType === ARCHIVAL_EVENT_TYPE &&
       event.category === ARCHIVAL_EVENT_CATAGORY &&
-      (event.attributes["Error ID"] || "") === errorId
+      (event.attributes["Error ID"] || "") === recordId
     )
   }).length > 0
 
 export const isRecordInAuditLog = async (
   api: ApiClient,
-  errorRecord: ArchivedErrorRecord
+  bichardRecord: BichardRecord
 ): Promise<{ exists: boolean; err: boolean }> => {
-  logger.debug({ message: "Retreiving message from audit log", record: errorRecord })
-  const messageResult = await api.getMessage(errorRecord.messageId)
+  logger.debug({ message: "Retreiving message from audit log", record: bichardRecord })
+  const messageResult = await api.getMessage(bichardRecord.messageId)
   if (isError(messageResult)) {
     logger.error({
       message: "Failed to retrieve message from audit log API",
       reason: messageResult.message,
-      record: errorRecord
+      record: bichardRecord
     })
     return { exists: false, err: true }
   }
 
-  return { exists: hasArchivalEvent(messageResult, errorRecord.errorId), err: false }
+  return { exists: hasArchivalEvent(messageResult, bichardRecord.errorId), err: false }
 }
 
-export const createArchivalEventInAuditLog = async (
-  api: ApiClient,
-  errorRecord: ArchivedErrorRecord
-): Promise<boolean> => {
+export const createArchivalEventInAuditLog = async (api: ApiClient, bichardRecord: BichardRecord): Promise<boolean> => {
   const auditLogEvent = new AuditLogEvent({
-    eventSource: errorRecord.archivedBy,
+    eventSource: bichardRecord.archivedBy,
     category: ARCHIVAL_EVENT_CATAGORY,
     eventType: ARCHIVAL_EVENT_TYPE,
-    timestamp: errorRecord.archivedAt
+    timestamp: bichardRecord.archivedAt
   })
-  auditLogEvent.addAttribute("Error ID", errorRecord.errorId)
+  auditLogEvent.addAttribute("Error ID", bichardRecord.errorId)
 
-  logger.debug({ message: "Audit logging the archival of an error", record: errorRecord })
-  const response = await api.createEvent(errorRecord.messageId, auditLogEvent)
+  logger.debug({ message: "Audit logging the archival of an error", record: bichardRecord })
+  const response = await api.createEvent(bichardRecord.messageId, auditLogEvent)
 
   if (isError(response)) {
     logger.error({
       message: "Failed to mark archived of error to audit log",
       reason: response.message,
-      record: errorRecord
+      record: bichardRecord
     })
     return true
   }

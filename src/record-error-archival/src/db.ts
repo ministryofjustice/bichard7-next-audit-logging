@@ -8,7 +8,7 @@ export interface Dictionary<T> {
   [Key: number]: T
 }
 
-export type ArchivedErrorRecord = {
+export type BichardRecord = {
   messageId: string
   errorId: number
   archivedAt: Date
@@ -60,11 +60,11 @@ export default class DatabaseClient {
     await this.postgres.end()
   }
 
-  async fetchUnloggedArchivedErrors(): PromiseResult<Dictionary<ArchivedErrorRecord[]>> {
+  async fetchUnloggedBichardRecords(): PromiseResult<Dictionary<BichardRecord[]>> {
     let res: QueryResult<DatabaseRow>
 
     try {
-      logger.debug("Fetching unlogged archived errors")
+      logger.debug("Fetching unlogged archived records")
       res = await this.postgres.query(
         `SELECT message_id, error_id, archived_at, archived_by, archive_log_id
         FROM ${this.schema}.archive_error_list ael
@@ -79,9 +79,9 @@ export default class DatabaseClient {
     } catch (e) {
       return e as Error
     }
-    const rows: ArchivedErrorRecord[] = res.rows.map(
+    const rows: BichardRecord[] = res.rows.map(
       (row: DatabaseRow) =>
-        <ArchivedErrorRecord>{
+        <BichardRecord>{
           messageId: row.message_id,
           errorId: row.error_id,
           archivedAt: new Date(row.archived_at + " UTC"),
@@ -93,7 +93,7 @@ export default class DatabaseClient {
     return groupBy(rows, (row) => row.archiveLogId)
   }
 
-  markArchiveGroupAuditLogged(archiveLogGroupId: number): PromiseResult<void> {
+  markBichardRecordGroupAuditLogged(archiveLogGroupId: number): PromiseResult<void> {
     logger.debug(`Marking log group ${archiveLogGroupId} as audit logged`)
 
     return this.postgres
@@ -106,36 +106,36 @@ export default class DatabaseClient {
       .catch((error) => error)
   }
 
-  markErrorsAuditLogged(errorIds: number[]): PromiseResult<void> {
-    if (!errorIds.length) {
+  markBichardRecordsAuditLogged(recordIds: number[]): PromiseResult<void> {
+    if (!recordIds.length) {
       return Promise.resolve()
     }
 
-    logger.debug({ message: "Marking errors as audit logged", errorIds: errorIds })
+    logger.debug({ message: "Marking records as audit logged", errorIds: recordIds })
 
     return this.postgres
       .query(
         `UPDATE ${this.schema}.archive_error_list
         SET audit_logged_at = NOW(), audit_log_attempts = audit_log_attempts + 1
-        WHERE error_id IN (${wherePlaceholderForRange(errorIds.length)})`,
-        errorIds
+        WHERE error_id IN (${wherePlaceholderForRange(recordIds.length)})`,
+        recordIds
       )
       .catch((error) => error)
   }
 
-  markErrorsAuditLogFailed(errorIds: number[]): PromiseResult<void> {
-    if (!errorIds.length) {
+  markBichardRecordsAuditLogFailed(recordIds: number[]): PromiseResult<void> {
+    if (!recordIds.length) {
       return Promise.resolve()
     }
 
-    logger.debug({ message: "Recording failure to audit log errors", errorIds: errorIds })
+    logger.debug({ message: "Recording failure to audit log records", errorIds: recordIds })
 
     return this.postgres
       .query(
         `UPDATE ${this.schema}.archive_error_list
         SET audit_log_attempts = audit_log_attempts + 1
-        WHERE error_id IN (${wherePlaceholderForRange(errorIds.length)})`,
-        errorIds
+        WHERE error_id IN (${wherePlaceholderForRange(recordIds.length)})`,
+        recordIds
       )
       .catch((error) => error)
   }

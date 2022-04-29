@@ -1,19 +1,19 @@
 import { logger } from "shared"
 import type { ApiClient } from "shared-types"
 import { isError } from "shared-types"
-import { createArchivalEventInAuditLog, isRecordInAuditLog } from "./api"
-import type DatabaseClient from "./DatabaseClient"
-import type { ArchivedErrorRecord } from "./DatabaseClient"
+import { createArchivalEventInAuditLog, isRecordInAuditLog as isBichardRecordInAuditLog } from "./api"
+import type DatabaseClient from "./db"
+import type { BichardRecord } from "./db"
 
 export type RecordErrorArchivalResult = {
   success: boolean
   reason?: string
   errors: Error[]
-  errorRecord: ArchivedErrorRecord
+  errorRecord: BichardRecord
 }
 
-const addErrorRecordToAuditLog = async (api: ApiClient, errorRecord: ArchivedErrorRecord): Promise<boolean> => {
-  const { exists, err } = await isRecordInAuditLog(api, errorRecord)
+const addBichardRecordToAuditLog = async (api: ApiClient, errorRecord: BichardRecord): Promise<boolean> => {
+  const { exists, err } = await isBichardRecordInAuditLog(api, errorRecord)
   if (err) {
     return false
   }
@@ -30,16 +30,16 @@ const addErrorRecordToAuditLog = async (api: ApiClient, errorRecord: ArchivedErr
 
 // Record the archival of an entire group in the audit log and database
 // Returns whether all records in the group were updated successfully
-const recordErrorGroupArchival = async (
+const addBichardRecordGroupToAuditLog = async (
   db: DatabaseClient,
   api: ApiClient,
-  errorGroup: ArchivedErrorRecord[],
+  errorGroup: BichardRecord[],
   groupId: number
 ): Promise<boolean> => {
   const successfulIds: number[] = []
   const failedIds: number[] = []
   for (const errorRecord of errorGroup) {
-    const ok = await addErrorRecordToAuditLog(api, errorRecord)
+    const ok = await addBichardRecordToAuditLog(api, errorRecord)
     if (ok) {
       successfulIds.push(errorRecord.errorId)
     } else {
@@ -47,28 +47,27 @@ const recordErrorGroupArchival = async (
     }
   }
 
-  db.markErrorsAuditLogged(successfulIds)
-  db.markErrorsAuditLogFailed(failedIds)
+  db.markBichardRecordsAuditLogged(successfulIds)
+  db.markBichardRecordsAuditLogFailed(failedIds)
 
   const allSucceeded = failedIds.length < 1
   if (allSucceeded) {
-    const err = await db.markArchiveGroupAuditLogged(groupId)
+    const err = await db.markBichardRecordGroupAuditLogged(groupId)
     if (err) {
       logger.error({ message: "Failed database update: successfully audit logged archive group", groupId: groupId })
-      // TODO handle case where group isn't updated in db but all individual records are
     }
   }
   return allSucceeded
 }
 
-export const addArchivedExceptionsToAuditLog = async (db: DatabaseClient, api: ApiClient): Promise<void> => {
-  const exceptionGroups = await db.fetchUnloggedArchivedErrors()
-  if (isError(exceptionGroups)) {
-    throw exceptionGroups
+export const addBichardRecordsToAuditLog = async (db: DatabaseClient, api: ApiClient): Promise<void> => {
+  const recordGroups = await db.fetchUnloggedBichardRecords()
+  if (isError(recordGroups)) {
+    throw recordGroups
   }
 
-  for (const [groupId, exceptionGroup] of Object.entries(exceptionGroups)) {
-    const err = await recordErrorGroupArchival(db, api, exceptionGroup, Number(groupId))
+  for (const [groupId, recordGroup] of Object.entries(recordGroups)) {
+    const err = await addBichardRecordGroupToAuditLog(db, api, recordGroup, Number(groupId))
     if (err) {
       continue
     }
