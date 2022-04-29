@@ -144,10 +144,18 @@ export default class DatabaseClient {
   markUnmarkedGroupsCompleted(): PromiseResult<void> {
     return this.postgres
       .query(
-        `UPDATE ${this.schema}.archive_log as g
-      SET audit_logged_at = NOW()
-      FROM ${this.schema}.archive_error_list as r
-      WHERE num_nonnulls(r.audit_logged_at) = 0`
+        `UPDATE br7own.archive_log
+        SET audit_logged_at = NOW()
+        WHERE log_id IN (
+          SELECT archive_log_id
+          FROM br7own.archive_error_list
+          WHERE archive_log_id IN
+            (SELECT log_id
+            FROM br7own.archive_log
+            WHERE audit_logged_at IS NULL)
+          GROUP BY archive_log_id
+          HAVING every(audit_logged_at IS NOT NULL)
+        )`
       )
       .catch((error) => error)
   }
