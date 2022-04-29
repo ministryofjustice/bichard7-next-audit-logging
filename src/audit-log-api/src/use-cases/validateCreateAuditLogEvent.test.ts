@@ -88,7 +88,7 @@ it("should be invalid when audit log event fields have incorrect format", () => 
     eventSourceArn: 3,
     eventSourceQueueName: 4,
     eventType: 5,
-    s3Path: 6,
+    eventXml: 6,
     timestamp: "2021-10-05 12:13:14"
   } as unknown as BichardAuditLogEvent
 
@@ -102,7 +102,7 @@ it("should be invalid when audit log event fields have incorrect format", () => 
   expect(errors).toContain("event source ARN must be string")
   expect(errors).toContain("Event source queue name must be string")
   expect(errors).toContain("Event type must be string")
-  expect(errors).toContain("S3 path must be string")
+  expect(errors).toContain("Event XML must be string")
   expect(errors).toContain("Timestamp must be ISO format")
 })
 

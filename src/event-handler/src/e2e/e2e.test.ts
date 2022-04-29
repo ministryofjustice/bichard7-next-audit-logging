@@ -31,13 +31,15 @@ const dynamoConfig: DynamoDbConfig = {
   AWS_ACCESS_KEY_ID: "S3RVER",
   AWS_SECRET_ACCESS_KEY: "S3RVER"
 }
-const dynamoGateway = new AwsAuditLogDynamoGateway(dynamoConfig, dynamoConfig.TABLE_NAME)
+const auditLogTableName = "auditLogTable"
+const auditLogLookupTableName = "auditLogLookupTable"
+const auditLogDynamoGateway = new AwsAuditLogDynamoGateway(dynamoConfig, dynamoConfig.TABLE_NAME)
 const testDynamoGateway = new TestDynamoGateway(dynamoConfig)
 const eventHandlerSimulator = new EventHandlerSimulator()
 
 const getEvents = async (messageId1: string, messageId2: string): Promise<DynamoPollResult> => {
-  const actualEvents1 = <AuditLogEvent[]>await dynamoGateway.fetchEvents(messageId1)
-  const actualEvents2 = <AuditLogEvent[]>await dynamoGateway.fetchEvents(messageId2)
+  const actualEvents1 = <AuditLogEvent[]>await auditLogDynamoGateway.fetchEvents(messageId1)
+  const actualEvents2 = <AuditLogEvent[]>await auditLogDynamoGateway.fetchEvents(messageId2)
 
   return {
     actualEvents1,
@@ -58,7 +60,8 @@ type DynamoPollResult = {
 }
 
 beforeEach(async () => {
-  await testDynamoGateway.deleteAll(dynamoConfig.TABLE_NAME, "messageId")
+  await testDynamoGateway.deleteAll(auditLogTableName, "messageId")
+  await testDynamoGateway.deleteAll(auditLogLookupTableName, "id")
   await s3Gateway.deleteAll()
 })
 
@@ -76,8 +79,8 @@ test.each<TestInput>([
     const auditLog1 = new AuditLog("CorrelationId1", new Date(), "hash-1")
     const auditLog2 = new AuditLog("CorrelationId2", new Date(), "hash-2")
 
-    await dynamoGateway.create(auditLog1)
-    await dynamoGateway.create(auditLog2)
+    await auditLogDynamoGateway.create(auditLog1)
+    await auditLogDynamoGateway.create(auditLog2)
 
     const rawMessage = fs.readFileSync(`../../events/${eventFilename}.xml`).toString()
     const messageData1 = encodeBase64(rawMessage.replace("{MESSAGE_ID}", auditLog1.messageId))

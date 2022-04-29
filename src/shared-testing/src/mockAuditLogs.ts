@@ -1,5 +1,5 @@
 import type { EventCategory } from "shared-types"
-import { AuditLog, AuditLogEvent } from "shared-types"
+import { AuditLog, BichardAuditLogEvent } from "shared-types"
 import { v4 as uuid } from "uuid"
 
 export function mockAuditLog(date?: Date): AuditLog {
@@ -13,12 +13,22 @@ export function mockAuditLog(date?: Date): AuditLog {
   return auditLog
 }
 
-export function mockAuditLogEvent(category?: EventCategory, eventType?: string, date?: Date): AuditLogEvent {
-  const event = new AuditLogEvent({
+export function mockAuditLogEvent(
+  category?: EventCategory,
+  eventType?: string,
+  date?: Date,
+  eventSourceArn?: string,
+  eventSourceQueueName?: string,
+  eventXml?: string
+): BichardAuditLogEvent {
+  const event = new BichardAuditLogEvent({
     category: category ?? "information",
     timestamp: date ?? new Date(),
     eventType: eventType ?? "Test event",
-    eventSource: "Test"
+    eventSource: "Test",
+    eventSourceArn: eventSourceArn ?? "Test event source ARN",
+    eventSourceQueueName: eventSourceQueueName ?? "Test event source queue name",
+    eventXml: eventXml ?? "Test event xml".repeat(500)
   })
 
   event.addAttribute("Attribute 1", "Attribute 1 data".repeat(500))

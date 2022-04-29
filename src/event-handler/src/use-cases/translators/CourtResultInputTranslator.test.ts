@@ -1,6 +1,6 @@
 import "shared-testing"
 import fs from "fs"
-import { encodeBase64 } from "shared"
+import { decodeBase64, encodeBase64 } from "shared"
 import type { EventInput } from "../../types"
 import type TranslationResult from "./TranslationResult"
 import CourtResultInputTranslator from "./CourtResultInputTranslator"
@@ -29,6 +29,6 @@ test("parses the message data and returns an AuditLogEvent", async () => {
   const eventTimestamp = new Date(event.timestamp)
   expect(eventTimestamp).toBeBetween(beforeDate, afterDate)
 
-  expect(event.s3Path).toBe("DummyPath")
+  expect(event.eventXml).toBe(decodeBase64(messageData))
   expect(event.eventSourceArn).toBe("DummyArn")
 })

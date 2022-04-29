@@ -17,6 +17,10 @@ const httpsAgent = new https.Agent({
 export default class AuditLogApiClient implements ApiClient {
   constructor(private readonly apiUrl: string, private readonly apiKey: string, private readonly timeout: number = 0) {}
 
+  private stringify(message: unknown): string {
+    return typeof message === "string" ? message : JSON.stringify(message)
+  }
+
   getMessages(options?: GetMessagesOptions): PromiseResult<AuditLog[]> {
     let queryString = ""
     const queries = []
@@ -37,8 +41,11 @@ export default class AuditLogApiClient implements ApiClient {
       })
       .then((response) => response.data)
       .catch((error: AxiosError) => {
-        logger.error(`Error getting messages: ${error.response?.data}`)
-        return new ApplicationError(`Error getting messages: ${error.response?.data ?? error.message}`, error)
+        logger.error(`Error getting messages: ${this.stringify(error.response?.data)}`)
+        return new ApplicationError(
+          `Error getting messages: ${this.stringify(error.response?.data) ?? error.message}`,
+          error
+        )
       })
   }
 
@@ -51,14 +58,17 @@ export default class AuditLogApiClient implements ApiClient {
       .then((response) => response.data)
       .then((result) => result[0])
       .catch((error: AxiosError) => {
-        logger.error(`Error getting messages: ${error.response?.data}`)
-        return new ApplicationError(`Error getting messages: ${error.response?.data ?? error.message}`, error)
+        logger.error(`Error getting messages: ${this.stringify(error.response?.data)}`)
+        return new ApplicationError(
+          `Error getting messages: ${this.stringify(error.response?.data) ?? error.message}`,
+          error
+        )
       })
   }
 
   createAuditLog(auditLog: AuditLog): PromiseResult<void> {
     return axios
-      .post(`${this.apiUrl}/messages`, JSON.stringify(auditLog), {
+      .post(`${this.apiUrl}/messages`, this.stringify(auditLog), {
         headers: {
           "Content-Type": "application/json",
           "X-API-Key": this.apiKey
@@ -74,8 +84,11 @@ export default class AuditLogApiClient implements ApiClient {
         }
       })
       .catch((error: AxiosError) => {
-        logger.error(`Error creating audit log: ${error.response?.data}`)
-        return new ApplicationError(`Error creating audit log: ${error.response?.data ?? error.message}`, error)
+        logger.error(`Error creating audit log: ${this.stringify(error.response?.data)}`)
+        return new ApplicationError(
+          `Error creating audit log: ${this.stringify(error.response?.data) ?? error.message}`,
+          error
+        )
       })
   }
 
@@ -105,8 +118,11 @@ export default class AuditLogApiClient implements ApiClient {
           case "ECONNABORTED":
             return Error(`Timed out creating event for message with Id ${messageId}.`)
           default:
-            logger.error(`Error creating event", ${error.response?.data}`)
-            return new ApplicationError(`Error creating event: ${error.response?.data ?? error.message}`, error)
+            logger.error(`Error creating event", ${this.stringify(error.response?.data)}`)
+            return new ApplicationError(
+              `Error creating event: ${this.stringify(error.response?.data) ?? error.message}`,
+              error
+            )
         }
       })
   }
@@ -135,8 +151,11 @@ export default class AuditLogApiClient implements ApiClient {
         }
       })
       .catch((error: AxiosError) => {
-        logger.error(`Error retrying event: ${error.response?.data}`)
-        return new ApplicationError(`Error retrying event: ${error.response?.data ?? error.message}`, error)
+        logger.error(`Error retrying event: ${this.stringify(error.response?.data)}`)
+        return new ApplicationError(
+          `Error retrying event: ${this.stringify(error.response?.data) ?? error.message}`,
+          error
+        )
       })
   }
 }

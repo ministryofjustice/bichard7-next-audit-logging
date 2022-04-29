@@ -35,9 +35,8 @@ const eventsS3Gateway = new TestAwsS3Gateway(createS3Config("AUDIT_LOG_EVENTS_BU
 const testDynamoGateway = new TestDynamoGateway(dynamoConfig)
 const testPostgresGateway = new TestPostgresGateway(postgresConfig)
 
-const createBichardAuditLogEvent = (eventS3Path: string) => {
+const createBichardAuditLogEvent = (eventS3Path: string): BichardAuditLogEvent => {
   const event = new BichardAuditLogEvent({
-    s3Path: eventS3Path,
     eventSourceArn: "dummy event source arn",
     eventSourceQueueName: "dummy event source queue name",
     eventSource: "dummy event source",
@@ -53,7 +52,7 @@ const createBichardAuditLogEvent = (eventS3Path: string) => {
   event.addAttribute("AmendedHearingOutcome", "<?xml><dummy></dummy>")
   event.addAttribute("AmendedPNCUpdateDataset", "<?xml><dummy></dummy>")
 
-  return event
+  return { ...event, s3Path: eventS3Path } as unknown as BichardAuditLogEvent
 }
 
 describe("sanitiseMessage", () => {
@@ -77,7 +76,7 @@ describe("sanitiseMessage", () => {
   it("should return Ok status when message has been sanitised successfully", async () => {
     const message = new AuditLog("External Correlation ID", new Date(), "Dummy hash")
     message.s3Path = "message.xml"
-    const event1 = createBichardAuditLogEvent("event1.xml")
+    const event1 = createBichardAuditLogEvent("event1.xml") as BichardAuditLogEvent & { s3Path: string }
     const event2 = new AuditLogEvent({
       eventSource: "dummy event source",
       category: "information",
