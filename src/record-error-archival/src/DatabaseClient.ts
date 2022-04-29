@@ -139,4 +139,16 @@ export default class DatabaseClient {
       )
       .catch((error) => error)
   }
+
+  // Mark any unmarked groups that should be as completed, i.e, where all their records are completed
+  markUnmarkedGroupsCompleted(): PromiseResult<void> {
+    return this.postgres
+      .query(
+        `UPDATE ${this.schema}.archive_log as g
+      SET audit_logged_at = NOW()
+      FROM ${this.schema}.archive_error_list as r
+      WHERE num_nonnulls(r.audit_logged_at) = 0`
+      )
+      .catch((error) => error)
+  }
 }

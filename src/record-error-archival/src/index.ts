@@ -20,6 +20,7 @@ export default async function doRecordErrorArchival(): Promise<void> {
   await db.connect()
 
   try {
+    await db.markUnmarkedGroupsCompleted()
     await addArchivedExceptionsToAuditLog(db, auditLogApi)
   } catch (error) {
     logger.error(error as Error)
