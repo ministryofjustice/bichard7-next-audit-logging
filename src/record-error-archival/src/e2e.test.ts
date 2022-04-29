@@ -440,7 +440,7 @@ describe("Record Error Archival e2e", () => {
       return {
         messageId: message.messageId,
         archiveLogGroup: message.archiveLogGroup,
-        isAuditLogged: auditLogMessage.events?.length > 0
+        isAuditLogged: auditLogMessage?.events?.length > 0
       }
     })
     const [auditLogged, notAuditLogged] = partition(
@@ -479,7 +479,7 @@ describe("Record Error Archival e2e", () => {
         receivedDate: new Date("2022-05-26T12:53:55.000Z").toISOString(),
         events: [],
         caseId: "message_1",
-        externalCorrelationId: "message_2",
+        externalCorrelationId: "message_1",
         createdBy: "record-error-archival e2e tests",
         messageHash: "message_1"
       },
