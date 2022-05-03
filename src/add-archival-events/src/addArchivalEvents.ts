@@ -45,8 +45,8 @@ const addBichardRecordGroupToAuditLog = async (
 
   const allSucceeded = failedIds.length < 1
   if (allSucceeded) {
-    const err = await db.markBichardRecordGroupAuditLogged(groupId)
-    if (err) {
+    const result = await db.markBichardRecordGroupAuditLogged(groupId)
+    if (isError(result)) {
       logger.error({ message: "Failed database update: successfully audit logged archive group", groupId: groupId })
     }
   }
