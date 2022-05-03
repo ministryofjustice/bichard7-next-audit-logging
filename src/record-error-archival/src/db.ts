@@ -10,10 +10,10 @@ export interface Dictionary<T> {
 
 export type BichardRecord = {
   messageId: string
-  errorId: number
+  recordId: number
   archivedAt: Date
   archivedBy: string
-  archiveLogId: number
+  groupId: number
 }
 
 export type DatabaseRow = {
@@ -63,8 +63,8 @@ export default class DatabaseClient {
   async fetchUnloggedBichardRecords(): PromiseResult<Dictionary<BichardRecord[]>> {
     let res: QueryResult<DatabaseRow>
 
+    logger.debug("Fetching unlogged archived records")
     try {
-      logger.debug("Fetching unlogged archived records")
       res = await this.postgres.query(
         `SELECT message_id, error_id, archived_at, archived_by, archive_log_id
         FROM ${this.schema}.archive_error_list ael
@@ -83,25 +83,25 @@ export default class DatabaseClient {
       (row: DatabaseRow) =>
         <BichardRecord>{
           messageId: row.message_id,
-          errorId: row.error_id,
+          recordId: row.error_id,
           archivedAt: new Date(row.archived_at + " UTC"),
           archivedBy: row.archived_by,
-          archiveLogId: row.archive_log_id
+          groupId: row.archive_log_id
         }
     )
 
-    return groupBy(rows, (row) => row.archiveLogId)
+    return groupBy(rows, (row) => row.groupId)
   }
 
-  markBichardRecordGroupAuditLogged(archiveLogGroupId: number): PromiseResult<void> {
-    logger.debug(`Marking log group ${archiveLogGroupId} as audit logged`)
+  markBichardRecordGroupAuditLogged(groupId: number): PromiseResult<void> {
+    logger.debug(`Marking log group ${groupId} as audit logged`)
 
     return this.postgres
       .query(
         `UPDATE ${this.schema}.archive_log
         SET audit_logged_at = NOW()
         WHERE log_id = $1`,
-        [archiveLogGroupId]
+        [groupId]
       )
       .catch((error) => error)
   }
@@ -111,7 +111,7 @@ export default class DatabaseClient {
       return Promise.resolve()
     }
 
-    logger.debug({ message: "Marking records as audit logged", errorIds: recordIds })
+    logger.debug({ message: "Marking records as audit logged", recordIds: recordIds })
 
     return this.postgres
       .query(
@@ -128,7 +128,7 @@ export default class DatabaseClient {
       return Promise.resolve()
     }
 
-    logger.debug({ message: "Recording failure to audit log records", errorIds: recordIds })
+    logger.debug({ message: "Recording failure to audit log records", recordIds: recordIds })
 
     return this.postgres
       .query(
@@ -141,6 +141,7 @@ export default class DatabaseClient {
   }
 
   // Mark any unmarked groups that should be as completed, i.e, where all their records are completed
+  // This condition can occur after a previous failed update to mark the group as completed
   markUnmarkedGroupsCompleted(): PromiseResult<void> {
     return this.postgres
       .query(

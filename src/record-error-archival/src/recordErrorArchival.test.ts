@@ -99,11 +99,11 @@ describe("Record Error Archival integration", () => {
     const stubDb = createStubDbWithRecords({
       1: [
         {
-          errorId: 1,
+          recordId: 1,
           messageId: "Message01",
           archivedAt: archivalDate,
           archivedBy: "Error archiver process 1",
-          archiveLogId: 1
+          groupId: 1
         }
       ]
     })
@@ -118,60 +118,60 @@ describe("Record Error Archival integration", () => {
       expect.objectContaining({
         eventSource: "Error archiver process 1",
         category: "information",
-        eventType: "Error archival",
+        eventType: "Error record archival",
         timestamp: archivalDate.toISOString(),
-        attributes: { "Error ID": 1 }
+        attributes: { "Record ID": 1 }
       })
     )
   })
 
   it("Should create audit log events with a timestamp of when the archival occured", async () => {
-    const errorRecords = [
+    const records = [
       {
-        errorId: Math.floor(Math.random() * 10_000),
+        recordId: Math.floor(Math.random() * 10_000),
         messageId: "Message" + Math.floor(Math.random() * 10_000),
         archivedAt: new Date(Date.now() - Math.random() * 10 * 24 * 60 * 60 * 1000),
         archivedBy: "Error archiver process 1",
-        archiveLogId: 1
+        groupId: 1
       },
       {
-        errorId: Math.floor(Math.random() * 10_000),
+        recordId: Math.floor(Math.random() * 10_000),
         messageId: "Message" + Math.floor(Math.random() * 10_000),
         archivedAt: new Date(Date.now() - Math.random() * 10 * 24 * 60 * 60 * 1000),
         archivedBy: "Error archiver process 1",
-        archiveLogId: 1
+        groupId: 1
       },
       {
-        errorId: Math.floor(Math.random() * 10_000),
+        recordId: Math.floor(Math.random() * 10_000),
         messageId: "Message" + Math.floor(Math.random() * 10_000),
         archivedAt: new Date(Date.now() - Math.random() * 10 * 24 * 60 * 60 * 1000),
         archivedBy: "Error archiver process 1",
-        archiveLogId: 1
+        groupId: 1
       },
       {
-        errorId: Math.floor(Math.random() * 10_000),
+        recordId: Math.floor(Math.random() * 10_000),
         messageId: "Message" + Math.floor(Math.random() * 10_000),
         archivedAt: new Date(Date.now() - Math.random() * 10 * 24 * 60 * 60 * 1000),
         archivedBy: "Error archiver process 1",
-        archiveLogId: 1
+        groupId: 1
       }
     ]
-    const stubDb = createStubDbWithRecords({ 1: errorRecords })
+    const stubDb = createStubDbWithRecords({ 1: records })
     const apiSpy = jest.spyOn(api, "createEvent")
 
     await addBichardRecordsToAuditLog(stubDb, api)
 
-    expect(apiSpy).toHaveBeenCalledTimes(errorRecords.length)
+    expect(apiSpy).toHaveBeenCalledTimes(records.length)
 
-    for (const errorRecord of errorRecords) {
+    for (const errorRecord of records) {
       expect(apiSpy).toHaveBeenCalledWith(
         errorRecord.messageId,
         expect.objectContaining({
           eventSource: errorRecord.archivedBy,
           category: "information",
-          eventType: "Error archival",
+          eventType: "Error record archival",
           timestamp: errorRecord.archivedAt.toISOString(),
-          attributes: { "Error ID": errorRecord.errorId }
+          attributes: { "Record ID": errorRecord.recordId }
         })
       )
     }
@@ -310,9 +310,9 @@ describe("Record Error Archival integration", () => {
         <AuditLogEvent>{
           eventSource: "Error archiver process 1",
           category: "information",
-          eventType: "Error archival",
+          eventType: "Error record archival",
           timestamp: new Date().toISOString(),
-          attributes: { "Error ID": 2 } as KeyValuePair<string, number>
+          attributes: { "Record ID": 2 } as KeyValuePair<string, number>
         }
       ]
     })

@@ -3,7 +3,7 @@ import type { ApiClient, AuditLog } from "shared-types"
 import { AuditLogEvent, isError } from "shared-types"
 import type { BichardRecord } from "./db"
 
-const ARCHIVAL_EVENT_TYPE = "Error archival"
+const ARCHIVAL_EVENT_TYPE = "Error record archival"
 const ARCHIVAL_EVENT_CATAGORY = "information"
 
 const hasArchivalEvent = (auditLog: AuditLog, recordId: number): boolean =>
@@ -11,7 +11,7 @@ const hasArchivalEvent = (auditLog: AuditLog, recordId: number): boolean =>
     return (
       event.eventType === ARCHIVAL_EVENT_TYPE &&
       event.category === ARCHIVAL_EVENT_CATAGORY &&
-      (event.attributes["Error ID"] || "") === recordId
+      (event.attributes["Record ID"] || "") === recordId
     )
   }).length > 0
 
@@ -30,7 +30,7 @@ export const isRecordInAuditLog = async (
     return { exists: false, err: true }
   }
 
-  return { exists: hasArchivalEvent(messageResult, bichardRecord.errorId), err: false }
+  return { exists: hasArchivalEvent(messageResult, bichardRecord.recordId), err: false }
 }
 
 export const createArchivalEventInAuditLog = async (api: ApiClient, bichardRecord: BichardRecord): Promise<boolean> => {
@@ -40,9 +40,9 @@ export const createArchivalEventInAuditLog = async (api: ApiClient, bichardRecor
     eventType: ARCHIVAL_EVENT_TYPE,
     timestamp: bichardRecord.archivedAt
   })
-  auditLogEvent.addAttribute("Error ID", bichardRecord.errorId)
+  auditLogEvent.addAttribute("Record ID", bichardRecord.recordId)
 
-  logger.debug({ message: "Audit logging the archival of an error", record: bichardRecord })
+  logger.debug({ message: "Audit logging the archival of an error record", record: bichardRecord })
   const response = await api.createEvent(bichardRecord.messageId, auditLogEvent)
 
   if (isError(response)) {

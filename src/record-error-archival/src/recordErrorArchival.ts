@@ -5,13 +5,6 @@ import { createArchivalEventInAuditLog, isRecordInAuditLog as isBichardRecordInA
 import type DatabaseClient from "./db"
 import type { BichardRecord } from "./db"
 
-export type RecordErrorArchivalResult = {
-  success: boolean
-  reason?: string
-  errors: Error[]
-  errorRecord: BichardRecord
-}
-
 const addBichardRecordToAuditLog = async (api: ApiClient, errorRecord: BichardRecord): Promise<boolean> => {
   const { exists, err } = await isBichardRecordInAuditLog(api, errorRecord)
   if (err) {
@@ -33,17 +26,17 @@ const addBichardRecordToAuditLog = async (api: ApiClient, errorRecord: BichardRe
 const addBichardRecordGroupToAuditLog = async (
   db: DatabaseClient,
   api: ApiClient,
-  errorGroup: BichardRecord[],
+  records: BichardRecord[],
   groupId: number
 ): Promise<boolean> => {
   const successfulIds: number[] = []
   const failedIds: number[] = []
-  for (const errorRecord of errorGroup) {
-    const ok = await addBichardRecordToAuditLog(api, errorRecord)
+  for (const record of records) {
+    const ok = await addBichardRecordToAuditLog(api, record)
     if (ok) {
-      successfulIds.push(errorRecord.errorId)
+      successfulIds.push(record.recordId)
     } else {
-      failedIds.push(errorRecord.errorId)
+      failedIds.push(record.recordId)
     }
   }
 

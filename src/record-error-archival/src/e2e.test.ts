@@ -90,7 +90,7 @@ describe("Record Error Archival e2e", () => {
     await dynamo.deleteAll("auditLogTable", "messageId")
   })
 
-  it("should archive single record errors successfully", async () => {
+  it("should archive single error records successfully", async () => {
     // Insert testdata into postgres
     await pg.query(
       `INSERT INTO br7own.archive_log (log_id, archived_at, archived_by, audit_logged_at) VALUES (1, '2022-04-26T12:53:55.000Z', 'me', NULL)`
@@ -121,8 +121,8 @@ describe("Record Error Archival e2e", () => {
     expect(message.events).toHaveLength(1)
     expect(message.events[0]).toStrictEqual({
       eventSource: "me",
-      attributes: { "Error ID": 1 },
-      eventType: "Error archival",
+      attributes: { "Record ID": 1 },
+      eventType: "Error record archival",
       category: "information",
       timestamp: "2022-04-26T12:53:55.000Z"
     })
@@ -137,7 +137,7 @@ describe("Record Error Archival e2e", () => {
     expect(groupQueryResult.rows[0].audit_logged_at.toISOString().length).toBeGreaterThan(0)
   })
 
-  it("shouldn't duplicate record errors which are already in the audit log", async () => {
+  it("shouldn't duplicate audit log events for error records which are already audit logged", async () => {
     // Insert testdata into postgres
     await pg.query(
       `INSERT INTO br7own.archive_log (log_id, archived_at, archived_by, audit_logged_at) VALUES (1, '2022-04-26T12:53:55.000Z', 'me', NULL)`
@@ -161,10 +161,10 @@ describe("Record Error Archival e2e", () => {
     const existingEvent = new AuditLogEvent({
       eventSource: "me",
       category: "information",
-      eventType: "Error archival",
+      eventType: "Error record archival",
       timestamp: new Date("2022-04-26T12:53:55.000Z")
     })
-    existingEvent.addAttribute("Error ID", 1)
+    existingEvent.addAttribute("Record ID", 1)
     await api.createEvent("message_1", existingEvent)
 
     // Invoke lambda
@@ -178,8 +178,8 @@ describe("Record Error Archival e2e", () => {
     expect(message.events).toHaveLength(1)
     expect(message.events[0]).toStrictEqual({
       eventSource: "me",
-      attributes: { "Error ID": 1 },
-      eventType: "Error archival",
+      attributes: { "Record ID": 1 },
+      eventType: "Error record archival",
       category: "information",
       timestamp: "2022-04-26T12:53:55.000Z"
     })
@@ -260,8 +260,8 @@ describe("Record Error Archival e2e", () => {
       const message = messageResult as AuditLog
 
       expect(message.events).toHaveLength(1)
-      expect(message.events[0].eventType).toBe("Error archival")
-      expect(message.events[0].attributes["Error ID"]).toBe(index + 1)
+      expect(message.events[0].eventType).toBe("Error record archival")
+      expect(message.events[0].attributes["Record ID"]).toBe(index + 1)
     }
 
     // Assert postgres results
@@ -345,8 +345,8 @@ describe("Record Error Archival e2e", () => {
       const message = messageResult as AuditLog
 
       expect(message.events).toHaveLength(1)
-      expect(message.events[0].eventType).toBe("Error archival")
-      expect(message.events[0].attributes["Error ID"]).toBe(index + 1)
+      expect(message.events[0].eventType).toBe("Error record archival")
+      expect(message.events[0].attributes["Record ID"]).toBe(index + 1)
     }
 
     // Assert postgres results
@@ -509,19 +509,19 @@ describe("Record Error Archival e2e", () => {
     const existingEvent2 = new AuditLogEvent({
       eventSource: "you",
       category: "information",
-      eventType: "Error archival",
+      eventType: "Error record archival",
       timestamp: new Date("2022-05-26T12:53:55.000Z")
     })
-    existingEvent2.addAttribute("Error ID", 2)
+    existingEvent2.addAttribute("Record ID", 2)
     await api.createEvent("message_2", existingEvent2)
 
     const existingEvent3 = new AuditLogEvent({
       eventSource: "you",
       category: "information",
-      eventType: "Error archival",
+      eventType: "Error record archival",
       timestamp: new Date("2022-05-26T12:53:55.000Z")
     })
-    existingEvent3.addAttribute("Error ID", 3)
+    existingEvent3.addAttribute("Record ID", 3)
     await api.createEvent("message_3", existingEvent3)
 
     // Invoke lambda
@@ -533,8 +533,8 @@ describe("Record Error Archival e2e", () => {
 
       expect(isSuccess(message)).toBeTruthy()
       expect(message.events).toHaveLength(1)
-      expect(message.events[0].eventType).toBe("Error archival")
-      expect(message.events[0].attributes["Error ID"]).toBe(i + 1)
+      expect(message.events[0].eventType).toBe("Error record archival")
+      expect(message.events[0].attributes["Record ID"]).toBe(i + 1)
     }
 
     // Assert postgres results
