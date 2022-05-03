@@ -26,7 +26,7 @@ Lambdas:
 
 - [**Archive User Logs** (`src/archive-user-logs`)](src/archive-user-logs/) - Subscribe to logs output by the User Service and the Store Event Lambda which match a subscription filter and then store them in s3 cold storage.
 
-- [**Record Error Archival** (`src/add-archival-events`)](src/add-archival-events) - Records in the audit log when error records have been archived in the postgres database.
+- [**Add Archival Events** (`src/add-archival-events`)](src/add-archival-events) - Records in the audit log when error records have been archived in the postgres database.
 
 Code shared between multiple components:
 
