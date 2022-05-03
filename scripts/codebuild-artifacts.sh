@@ -128,12 +128,12 @@ cd -
 make codebuild-portal-image
 
 ############################################
-# Record Error Archival
+# Add Archival Events
 ############################################
 
-cd src/record-error-archival/build
+cd src/add-archival-events/build
 
-zip recordErrorArchival.zip recordErrorArchival.js
-upload_to_s3 recordErrorArchival.zip recordErrorArchival.zip
+zip addArchivalEvents.zip addArchivalEvents.js
+upload_to_s3 addArchivalEvents.zip addArchivalEvents.zip
 
 cd -

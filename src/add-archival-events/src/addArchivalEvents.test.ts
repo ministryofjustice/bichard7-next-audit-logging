@@ -4,7 +4,7 @@ import { FakeApiClient, setEnvironmentVariables } from "shared-testing"
 import type { AuditLogEvent, KeyValuePair } from "shared-types"
 import type { BichardRecord, DatabaseRow, Dictionary } from "./db"
 import DatabaseClient from "./db"
-import { addBichardRecordsToAuditLog } from "./recordErrorArchival"
+import { addBichardRecordsToAuditLog } from "./addArchivalEvents"
 
 setEnvironmentVariables()
 
@@ -68,7 +68,7 @@ const dbResult: { rows: DatabaseRow[] } = {
 
 const stripWhitespace = (string: string) => string.replace(/\s/g, "")
 
-describe("Record Error Archival integration", () => {
+describe("Add Archival Events integration", () => {
   let client: jest.Mocked<any>
   let api: jest.Mocked<any>
 

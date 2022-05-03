@@ -3,7 +3,7 @@ const ForkTsCheckerWebpackPlugin = require("fork-ts-checker-webpack-plugin")
 
 module.exports = {
   entry: {
-    recordErrorArchival: "./src/index.ts"
+    addArchivalEvents: "./src/index.ts"
   },
   resolve: {
     modules: [path.resolve("./node_modules"), path.resolve("."), path.resolve("../shared/node_modules")],

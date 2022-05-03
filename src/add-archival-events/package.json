@@ -1,5 +1,5 @@
 {
-  "name": "record-error-archival",
+  "name": "add-archival-events",
   "version": "1.0.0",
   "description": "A lamdba that records in the audit log when error records are archived",
   "main": "index.js",

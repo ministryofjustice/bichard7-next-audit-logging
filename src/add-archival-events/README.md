@@ -1,4 +1,4 @@
-# Record Error Archival
+# Add Archival Events
 
 A lamdba that records in the audit log when error records have been archived in the postgres database.
 

@@ -1,9 +1,9 @@
 import { AuditLogApiClient, logger } from "shared"
 import getConfig from "./config"
 import DatabaseClient from "./db"
-import { addBichardRecordsToAuditLog } from "./recordErrorArchival"
+import { addBichardRecordsToAuditLog } from "./addArchivalEvents"
 
-export default async function doRecordErrorArchival(): Promise<void> {
+export default async function addArchivalEvents(): Promise<void> {
   const config = getConfig()
 
   const db = new DatabaseClient(

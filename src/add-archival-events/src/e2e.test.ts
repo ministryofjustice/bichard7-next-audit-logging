@@ -7,7 +7,7 @@ import { Client } from "pg"
 import { AuditLogApiClient, logger, TestDynamoGateway } from "shared"
 import type { ApiClient, AuditLog } from "shared-types"
 import { AuditLogEvent, isSuccess } from "shared-types"
-import doRecordErrorArchival from "."
+import addArchivalEvents from "."
 
 logger.level = "debug"
 
@@ -45,13 +45,13 @@ const lambdaEnvironment = {
 const executeLambda = (environment?: any): Promise<unknown> =>
   execute({
     event: {},
-    lambdaFunc: { handler: doRecordErrorArchival },
+    lambdaFunc: { handler: addArchivalEvents },
     region: "eu-west-2",
     timeoutMs: 120 * 1_000,
     environment: environment ?? lambdaEnvironment
   })
 
-describe("Record Error Archival e2e", () => {
+describe("Add Error Records e2e", () => {
   let dynamo: any
   let pg: Client
   let api: ApiClient
@@ -90,7 +90,7 @@ describe("Record Error Archival e2e", () => {
     await dynamo.deleteAll("auditLogTable", "messageId")
   })
 
-  it("should archive single error records successfully", async () => {
+  it("should audit log single error records successfully", async () => {
     // Insert testdata into postgres
     await pg.query(
       `INSERT INTO br7own.archive_log (log_id, archived_at, archived_by, audit_logged_at) VALUES (1, '2022-04-26T12:53:55.000Z', 'me', NULL)`
@@ -106,7 +106,7 @@ describe("Record Error Archival e2e", () => {
       events: [],
       caseId: "message_1",
       externalCorrelationId: "message_1",
-      createdBy: "record-error-archival e2e tests",
+      createdBy: "add-archival-events e2e tests",
       messageHash: "message_1"
     } as unknown as AuditLog)
 
@@ -153,7 +153,7 @@ describe("Record Error Archival e2e", () => {
       events: [],
       caseId: "message_1",
       externalCorrelationId: "message_1",
-      createdBy: "record-error-archival e2e tests",
+      createdBy: "add-archival-events e2e tests",
       messageHash: "message_1"
     } as unknown as AuditLog)
 
@@ -215,7 +215,7 @@ describe("Record Error Archival e2e", () => {
         events: [],
         caseId: "message_1",
         externalCorrelationId: "message_1",
-        createdBy: "record-error-archival e2e tests",
+        createdBy: "add-archival-events e2e tests",
         messageHash: "message_1"
       },
       {
@@ -224,7 +224,7 @@ describe("Record Error Archival e2e", () => {
         events: [],
         caseId: "message_2",
         externalCorrelationId: "message_2",
-        createdBy: "record-error-archival e2e tests",
+        createdBy: "add-archival-events e2e tests",
         messageHash: "message_2"
       },
       {
@@ -233,7 +233,7 @@ describe("Record Error Archival e2e", () => {
         events: [],
         caseId: "message_3",
         externalCorrelationId: "message_3",
-        createdBy: "record-error-archival e2e tests",
+        createdBy: "add-archival-events e2e tests",
         messageHash: "message_3"
       },
       {
@@ -242,7 +242,7 @@ describe("Record Error Archival e2e", () => {
         events: [],
         caseId: "message_4",
         externalCorrelationId: "message_4",
-        createdBy: "record-error-archival e2e tests",
+        createdBy: "add-archival-events e2e tests",
         messageHash: "message_4"
       }
     ]
@@ -300,7 +300,7 @@ describe("Record Error Archival e2e", () => {
         events: [],
         caseId: "message_1",
         externalCorrelationId: "message_1",
-        createdBy: "record-error-archival e2e tests",
+        createdBy: "add-archival-events e2e tests",
         messageHash: "message_1"
       },
       {
@@ -309,7 +309,7 @@ describe("Record Error Archival e2e", () => {
         events: [],
         caseId: "message_2",
         externalCorrelationId: "message_2",
-        createdBy: "record-error-archival e2e tests",
+        createdBy: "add-archival-events e2e tests",
         messageHash: "message_2"
       },
       {
@@ -318,7 +318,7 @@ describe("Record Error Archival e2e", () => {
         events: [],
         caseId: "message_3",
         externalCorrelationId: "message_3",
-        createdBy: "record-error-archival e2e tests",
+        createdBy: "add-archival-events e2e tests",
         messageHash: "message_3"
       },
       {
@@ -327,7 +327,7 @@ describe("Record Error Archival e2e", () => {
         events: [],
         caseId: "message_4",
         externalCorrelationId: "message_4",
-        createdBy: "record-error-archival e2e tests",
+        createdBy: "add-archival-events e2e tests",
         messageHash: "message_4"
       }
     ]
@@ -387,7 +387,7 @@ describe("Record Error Archival e2e", () => {
         events: [],
         caseId: "message_1",
         externalCorrelationId: "message_1",
-        createdBy: "record-error-archival e2e tests",
+        createdBy: "add-archival-events e2e tests",
         messageHash: "message_1",
         archiveLogGroup: 1
       },
@@ -397,7 +397,7 @@ describe("Record Error Archival e2e", () => {
         events: [],
         caseId: "message_2",
         externalCorrelationId: "message_2",
-        createdBy: "record-error-archival e2e tests",
+        createdBy: "add-archival-events e2e tests",
         messageHash: "message_2",
         archiveLogGroup: 2
       },
@@ -407,7 +407,7 @@ describe("Record Error Archival e2e", () => {
         events: [],
         caseId: "message_3",
         externalCorrelationId: "message_3",
-        createdBy: "record-error-archival e2e tests",
+        createdBy: "add-archival-events e2e tests",
         messageHash: "message_3",
         archiveLogGroup: 1
       },
@@ -417,7 +417,7 @@ describe("Record Error Archival e2e", () => {
         events: [],
         caseId: "message_4",
         externalCorrelationId: "message_4",
-        createdBy: "record-error-archival e2e tests",
+        createdBy: "add-archival-events e2e tests",
         messageHash: "message_4",
         archiveLogGroup: 2
       }
@@ -480,7 +480,7 @@ describe("Record Error Archival e2e", () => {
         events: [],
         caseId: "message_1",
         externalCorrelationId: "message_1",
-        createdBy: "record-error-archival e2e tests",
+        createdBy: "add-archival-events e2e tests",
         messageHash: "message_1"
       },
       {
@@ -489,7 +489,7 @@ describe("Record Error Archival e2e", () => {
         events: [],
         caseId: "message_2",
         externalCorrelationId: "message_2",
-        createdBy: "record-error-archival e2e tests",
+        createdBy: "add-archival-events e2e tests",
         messageHash: "message_2"
       },
       {
@@ -498,7 +498,7 @@ describe("Record Error Archival e2e", () => {
         events: [],
         caseId: "message_3",
         externalCorrelationId: "message_3",
-        createdBy: "record-error-archival e2e tests",
+        createdBy: "add-archival-events e2e tests",
         messageHash: "message_3"
       }
     ]
