@@ -5,7 +5,8 @@ export default (event: BichardAuditLogEvent): Result<void> => {
     return new Error("This message has not failed and cannot be retried")
   }
 
-  if (!event.s3Path || !event.eventSourceQueueName) {
+  const { s3Path } = event as unknown as { s3Path: string }
+  if ((!event.eventXml && !s3Path) || !event.eventSourceQueueName) {
     return new Error("Failed to retrieve the source event, so unable to retry")
   }
 

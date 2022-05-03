@@ -1,4 +1,4 @@
-import type { S3GatewayInterface, PromiseResult, AuditLog, BichardAuditLogEvent } from "shared-types"
+import type { S3GatewayInterface, PromiseResult, AuditLog } from "shared-types"
 import { isError } from "shared-types"
 
 export default class DeleteMessageObjectsFromS3UseCase {
@@ -19,7 +19,7 @@ export default class DeleteMessageObjectsFromS3UseCase {
 
     // Delete event objects from S3
     for (const auditLogEvent of message.events) {
-      const { s3Path: eventS3Path } = auditLogEvent as BichardAuditLogEvent
+      const { s3Path: eventS3Path } = auditLogEvent as unknown as { s3Path: string }
       if (eventS3Path) {
         const deleteEventObjectFromS3Result = await this.eventsGateway.deleteItem(eventS3Path)
         if (isError(deleteEventObjectFromS3Result)) {

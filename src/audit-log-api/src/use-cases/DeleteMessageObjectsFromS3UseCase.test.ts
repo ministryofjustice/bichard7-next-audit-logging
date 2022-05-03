@@ -9,9 +9,9 @@ const useCase = new DeleteMessageObjectsFromS3UseCase(fakeMessagesS3Gateway, fak
 const createAuditLog = (s3Path: string, eventS3Path: string) => {
   const auditLog = new AuditLog("dummy correlation id", new Date(), "dummy hash")
   auditLog.s3Path = s3Path
-  auditLog.events = [
-    new BichardAuditLogEvent({
-      s3Path: eventS3Path,
+  const event = {
+    s3Path: eventS3Path,
+    ...new BichardAuditLogEvent({
       eventSourceArn: "dummy event source arn",
       eventSourceQueueName: "dummy event source queue name",
       eventSource: "dummy event source",
@@ -19,7 +19,8 @@ const createAuditLog = (s3Path: string, eventS3Path: string) => {
       eventType: "dummy event type",
       timestamp: new Date()
     })
-  ]
+  } as unknown as BichardAuditLogEvent
+  auditLog.events = [event]
 
   return auditLog
 }

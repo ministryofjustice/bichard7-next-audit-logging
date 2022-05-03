@@ -20,7 +20,12 @@ const retrieveEventFromS3UseCase = new RetrieveEventFromS3UseCase(s3Gateway)
 const api = new AuditLogApiClient(apiUrl, apiKey, 5_000)
 const createEventUseCase = new CreateEventUseCase(api)
 
-export default async function storeEvent(event: S3PutObjectEvent): Promise<void> {
+interface StoreEventResult {
+  bucketName: string
+  s3Path: string
+}
+
+export default async function storeEvent(event: S3PutObjectEvent): Promise<StoreEventResult> {
   const retrieveEventFromS3Result = await retrieveEventFromS3UseCase.execute(event)
 
   if (isError(retrieveEventFromS3Result)) {
@@ -39,5 +44,10 @@ export default async function storeEvent(event: S3PutObjectEvent): Promise<void>
 
   if (isError(createEventResult)) {
     throw createEventResult
+  }
+
+  return {
+    bucketName: event.detail.requestParameters.bucketName,
+    s3Path: event.detail.requestParameters.key
   }
 }
