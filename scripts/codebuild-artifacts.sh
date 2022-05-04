@@ -126,3 +126,14 @@ cd -
 
 # Build the Portal Docker Image
 make codebuild-portal-image
+
+############################################
+# Add Archival Events
+############################################
+
+cd src/add-archival-events/build
+
+zip addArchivalEvents.zip addArchivalEvents.js
+upload_to_s3 addArchivalEvents.zip addArchivalEvents.zip
+
+cd -

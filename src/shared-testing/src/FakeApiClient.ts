@@ -30,7 +30,7 @@ export default class FakeApiClient implements ApiClient {
     }
 
     const message = this.messages.filter((x) => x.messageId === messageId)[0]
-    return Promise.resolve(message)
+    return Promise.resolve(message ?? { events: [] })
   }
 
   // @ts-ignore
@@ -67,5 +67,9 @@ export default class FakeApiClient implements ApiClient {
   reset(messages?: AuditLog[]): void {
     this.error = undefined
     this.messages = messages ?? []
+  }
+
+  addMessage(message: AuditLog): void {
+    this.messages.push(message)
   }
 }

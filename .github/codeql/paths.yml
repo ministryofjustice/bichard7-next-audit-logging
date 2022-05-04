@@ -10,5 +10,6 @@ paths:
   - src/audit-log-portal
   - src/archive-user-logs
   - src/retry-failed-messages
+  - src/add-archival-events
 paths-ignore:
   - "*.test.ts"

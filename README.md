@@ -26,6 +26,8 @@ Lambdas:
 
 - [**Archive User Logs** (`src/archive-user-logs`)](src/archive-user-logs/) - Subscribe to logs output by the User Service and the Store Event Lambda which match a subscription filter and then store them in s3 cold storage.
 
+- [**Add Archival Events** (`src/add-archival-events`)](src/add-archival-events) - Records in the audit log when error records have been archived in the postgres database.
+
 Code shared between multiple components:
 
 - [**Shared code** (`shared`)](src/shared/) - Library of code that is common to multiple components.
@@ -123,10 +125,10 @@ All of these approaches will execute tests in a watch mode, which will allow you
 Before you commit and push your code, and especially before raising a pull request, make sure you run through the following steps first.
 
 1. You have run `make validate` from the root of the repository and fixed any related errors or warnings.
-1. You have built all projects using `make build`.
-1. You have run `make test` and all tests pass.
+2. You have built all projects using `make build`.
+3. You have run `make test` and all tests pass.
 
-# A note on running the docker container locally
+## A note on running the docker container locally
 
 Nginx is doing ssl termination and requires a certificate and key pair to be in the `/certs` path.
 In order to run this locally you can generate a self-signed certificate and key using [this method](https://linuxize.com/post/creating-a-self-signed-ssl-certificate/) and then mount

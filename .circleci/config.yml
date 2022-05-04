@@ -29,6 +29,8 @@ commands:
                 key: v1-npm-deps-{{ checksum "src/audit-log-api/package-lock.json.md5" }}
             - restore_cache:
                 key: v1-npm-deps-{{ checksum "src/audit-log-portal/package-lock.json.md5" }}
+            - restore_cache:
+                key: v1-npm-deps-{{ checksum "src/add-archival-events/package-lock.json.md5" }}
 
     save_all_caches:
         description: Save all of the node_modules directories
@@ -63,6 +65,9 @@ commands:
             - save_cache:
                 key: v1-npm-deps-{{ checksum "src/audit-log-portal/package-lock.json.md5" }}
                 paths: src/audit-log-portal/node_modules
+            - save_cache:
+                key: v1-npm-deps-{{ checksum "src/add-archival-events/package-lock.json.md5" }}
+                paths: src/add-archival-events/node_modules
 
     persist_build_dirs:
         description: Save all of the build directories
@@ -94,6 +99,8 @@ commands:
                 path: ./src/audit-log-api/test-results/jest/
             - store_test_results:
                 path: ./src/audit-log-portal/test-results/jest/
+            - store_test_results:
+                path: ./src/add-archival-events/test-results/jest/
 
 jobs:
   build:
@@ -133,6 +140,9 @@ jobs:
       - run:
           name: Install Java
           command: sudo apt-get update && sudo apt-get install openjdk-17-jre
+      - run:
+          name: Start postgres
+          command: make run-pg
       - run:
           name: Install Dynamo
           command: make -C ./src/audit-log-api install-dynamo
