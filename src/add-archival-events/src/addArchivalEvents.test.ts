@@ -177,7 +177,7 @@ describe("Add Archival Events integration", () => {
     }
   })
 
-  it("Should mark achive groups as audit logged when all succeed", async () => {
+  it("Should mark archive groups as audit logged when all succeed", async () => {
     client.query.mockImplementation(() => {
       return Promise.resolve(dbResult)
     })
