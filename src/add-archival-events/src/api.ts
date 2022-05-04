@@ -47,7 +47,7 @@ export const createArchivalEventInAuditLog = async (api: ApiClient, bichardRecor
 
   if (isError(response)) {
     logger.error({
-      message: "Failed to mark archived of error to audit log",
+      message: "Error marking record as archived in audit log",
       reason: response.message,
       record: bichardRecord
     })
