@@ -1,6 +1,6 @@
 import "shared-testing"
 import { AuditLog, AuditLogEvent, BichardAuditLogEvent } from "shared-types"
-import SanitiseAuditLogUseCase from "./SanitisAuditLogUseCase"
+import SanitiseAuditLogUseCase from "./SanitiseAuditLogUseCase"
 import { FakeAuditLogDynamoGateway } from "shared-testing"
 import MockDate from "mockdate"
 
