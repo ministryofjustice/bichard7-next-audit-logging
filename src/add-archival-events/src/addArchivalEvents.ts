@@ -60,9 +60,6 @@ export const addBichardRecordsToAuditLog = async (db: DatabaseClient, api: ApiCl
   }
 
   for (const [groupId, recordGroup] of Object.entries(recordGroups)) {
-    const err = await addBichardRecordGroupToAuditLog(db, api, recordGroup, Number(groupId))
-    if (err) {
-      continue
-    }
+    await addBichardRecordGroupToAuditLog(db, api, recordGroup, Number(groupId))
   }
 }
