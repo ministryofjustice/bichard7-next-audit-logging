@@ -2,11 +2,7 @@ import groupBy from "lodash.groupby"
 import type { QueryResult } from "pg"
 import { Client } from "pg"
 import { logger } from "shared"
-import type { PromiseResult } from "shared-types"
-
-export interface Dictionary<T> {
-  [Key: number]: T
-}
+import type { KeyValuePair, PromiseResult } from "shared-types"
 
 export type BichardRecord = {
   messageId: string
@@ -60,7 +56,7 @@ export default class DatabaseClient {
     await this.postgres.end()
   }
 
-  async fetchUnloggedBichardRecords(): PromiseResult<Dictionary<BichardRecord[]>> {
+  async fetchUnloggedBichardRecords(): PromiseResult<KeyValuePair<number, BichardRecord[]>> {
     let res: QueryResult<DatabaseRow>
 
     logger.debug("Fetching unlogged archived records")

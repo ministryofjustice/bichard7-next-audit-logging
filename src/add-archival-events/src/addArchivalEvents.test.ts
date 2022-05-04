@@ -2,7 +2,7 @@
 import { Client } from "pg"
 import { FakeApiClient, setEnvironmentVariables } from "shared-testing"
 import type { AuditLogEvent, KeyValuePair } from "shared-types"
-import type { BichardRecord, DatabaseRow, Dictionary } from "./db"
+import type { BichardRecord, DatabaseRow } from "./db"
 import DatabaseClient from "./db"
 import { addBichardRecordsToAuditLog } from "./addArchivalEvents"
 
@@ -10,7 +10,7 @@ setEnvironmentVariables()
 
 const originalEnv = process.env
 
-const createStubDbWithRecords = (records: Dictionary<BichardRecord[]>): DatabaseClient => {
+const createStubDbWithRecords = (records: KeyValuePair<number, BichardRecord[]>): DatabaseClient => {
   return {
     fetchUnloggedBichardRecords: jest.fn(() => records),
     connect: jest.fn(),
