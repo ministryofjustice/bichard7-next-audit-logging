@@ -26,8 +26,6 @@ export default class SanitiseAuditLogUseCase {
       })
     )
 
-    auditLog.status = "Sanitised"
-
     return this.auditLogDynamoGateway.update(auditLog)
   }
 }
