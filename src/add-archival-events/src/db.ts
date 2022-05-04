@@ -45,7 +45,7 @@ export default class DatabaseClient {
       password: this.password,
       ssl: this.useSsl
         ? {
-            rejectUnauthorized: true
+            rejectUnauthorized: false
           }
         : false,
       database: this.database
