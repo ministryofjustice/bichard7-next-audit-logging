@@ -9,6 +9,10 @@ export default class AuditLog {
 
   public readonly receivedDate: string
 
+  public errorRecordArchivalDate?: string
+
+  public sanitisedDate?: string
+
   public caseId: string
 
   public systemId: string
