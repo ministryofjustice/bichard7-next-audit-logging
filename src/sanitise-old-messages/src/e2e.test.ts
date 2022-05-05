@@ -1,8 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { AuditLogApiClient, logger, TestDynamoGateway } from "shared"
 import type { ApiClient } from "shared-types"
 import "shared-testing"
 import { execute } from "lambda-local"
+import sanitiseOldMessages from "./index"
 
 logger.level = "debug"
 
@@ -18,9 +20,9 @@ const lambdaEnvironment = {
 const executeLambda = (environment?: any): Promise<unknown> => {
   return execute({
     event: {},
-    lambdaFunc: { handler: () => logger.error("Not implemented") },
+    lambdaFunc: { handler: sanitiseOldMessages },
     region: "eu-west-2",
-    timeoutMs: 120 * 1_000,
+    timeoutMs: 60 * 1_000,
     environment: environment ?? lambdaEnvironment
   })
 }
