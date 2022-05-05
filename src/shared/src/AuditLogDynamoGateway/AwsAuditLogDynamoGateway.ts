@@ -1,8 +1,14 @@
 import { DynamoGateway, IndexSearcher } from "../DynamoGateway"
 import type { FetchByIndexOptions, UpdateOptions } from "../DynamoGateway"
-import { AuditLog, AuditLogEvent, KeyValuePair, PromiseResult, DynamoDbConfig, EventType } from "shared-types"
-import { isError } from "shared-types"
-import type { AuditLogDynamoGateway } from "shared-types"
+import { isError, EventType } from "shared-types"
+import type {
+  AuditLogDynamoGateway,
+  AuditLog,
+  AuditLogEvent,
+  KeyValuePair,
+  PromiseResult,
+  DynamoDbConfig
+} from "shared-types"
 import shouldLogForTopExceptionsReport from "./shouldLogForTopExceptionsReport"
 import shouldLogForAutomationReport from "./shouldLogForAutomationReport"
 import getForceOwnerForAutomationReport from "./getForceOwnerForAutomationReport"
