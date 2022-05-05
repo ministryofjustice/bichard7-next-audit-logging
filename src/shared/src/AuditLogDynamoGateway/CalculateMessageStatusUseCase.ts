@@ -112,7 +112,7 @@ export default class CalculateMessageStatusUseCase {
   }
 
   private get isRetrying(): boolean {
-    return this.events[this.events.length - 1].eventType === EventType.Retrying
+    return this.events[this.events.length - 1]?.eventType === EventType.Retrying
   }
 
   private get hasErrorEvent(): boolean {

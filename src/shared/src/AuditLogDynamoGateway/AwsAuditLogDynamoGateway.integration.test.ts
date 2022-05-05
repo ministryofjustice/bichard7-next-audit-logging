@@ -590,4 +590,63 @@ describe("AuditLogDynamoGateway", () => {
       expect(error.message).toBe(`Couldn't get events for message '${messageId}'.`)
     })
   })
+
+  describe("update", () => {
+    it("should calculate the status and update the record", async () => {
+      const event = createAuditLogEvent("information", new Date(), EventType.RecordIgnoredNoOffences)
+
+      event.addAttribute("Attribute one", "Some value")
+      event.addAttribute("Attribute two", 2)
+
+      const message = new AuditLog("one", new Date(), "dummy hash")
+      message.status = AuditLogStatus.processing
+      const otherMessage = new AuditLog("two", new Date(), "dummy hash")
+
+      await gateway.create(message)
+      await gateway.create(otherMessage)
+
+      const amendedMessage = {
+        ...message,
+        events: [event]
+      }
+      const result = await gateway.update(amendedMessage)
+
+      expect(isError(result)).toBe(false)
+
+      const getManyOptions = {
+        sortKey,
+        pagination: { limit: 2 }
+      }
+      const actualRecords = <DocumentClient.ScanOutput>await gateway.getMany(config.TABLE_NAME, getManyOptions)
+
+      const actualOtherMessage = <AuditLog>actualRecords.Items?.find((r) => r.messageId === otherMessage.messageId)
+      expect(actualOtherMessage).toBeDefined()
+      expect(actualOtherMessage.events).toBeDefined()
+      expect(actualOtherMessage.events).toHaveLength(0)
+      expect(actualOtherMessage.status).toBe(otherMessage.status)
+
+      const actualMessage = <AuditLog>actualRecords.Items?.find((r) => r.messageId === message.messageId)
+      expect(actualMessage).toBeDefined()
+      expect(actualMessage.events).toBeDefined()
+      expect(actualMessage.events).toHaveLength(1)
+      expect(actualMessage.status).toBe(AuditLogStatus.completed)
+
+      const actualEvent = actualMessage.events[0]
+      expect(actualEvent.eventSource).toBe(event.eventSource)
+      expect(actualEvent.category).toBe(event.category)
+      expect(actualEvent.timestamp).toBe(event.timestamp)
+      expect(actualEvent.eventType).toBe(event.eventType)
+
+      const actualEventAttributes = actualEvent.attributes
+      expect(actualEventAttributes).toBeDefined()
+      expect(actualEventAttributes["Attribute one"]).toBe("Some value")
+      expect(actualEventAttributes["Attribute two"]).toBe(2)
+    })
+
+    it("should return error when audit log does not exist", async () => {
+      const result = await gateway.update(new AuditLog("External correlation id", new Date(), "dummy hash"))
+
+      expect(isError(result)).toBe(true)
+    })
+  })
 })
