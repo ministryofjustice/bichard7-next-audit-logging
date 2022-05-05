@@ -71,7 +71,10 @@ export default class CalculateMessageStatusUseCase {
         .map((key) => event.attributes[key])
     )
 
-    return !generatedTriggers.some((generatedTrigger) => !resolvedTriggers.includes(generatedTrigger))
+    return (
+      generatedTriggers.length === resolvedTriggers.length &&
+      !generatedTriggers.some((generatedTrigger) => !resolvedTriggers.includes(generatedTrigger))
+    )
   }
 
   private get hasNoExceptions(): boolean {

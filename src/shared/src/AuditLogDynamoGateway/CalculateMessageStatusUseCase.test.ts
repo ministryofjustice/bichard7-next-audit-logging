@@ -29,8 +29,14 @@ const postPNCUpdateTriggersGeneratedEvent = () =>
 const triggerInstancesResolvedEvent = () =>
   createEvent(EventType.TriggerInstancesResolved, "information", {
     "Trigger Code 01": "TRPR0004",
-    "Trigger Code 02": "TRPR0006",
-    "Trigger Code 03": "TRPS0003"
+    "Trigger Code 02": "TRPR0004",
+    "Trigger Code 03": "TRPR0006",
+    "Trigger Code 04": "TRPS0003"
+  })
+const triggerInstancesPartiallyResolvedEvent = () =>
+  createEvent(EventType.TriggerInstancesResolved, "information", {
+    "Trigger Code 01": "TRPR0004",
+    "Trigger Code 02": "TRPR0004"
   })
 const exceptionsGeneratedEvent = () => createEvent(EventType.ExceptionsGenerated)
 const amendedAndResubmittedEvent = () => createEvent(EventType.AmendedAndResubmitted)
@@ -214,11 +220,25 @@ describe("CalculateMessageStatusUseCase", () => {
     expect(status).toBe(AuditLogStatus.processing)
   })
 
+  it("should return Processing status when triggers are partially resolved", () => {
+    const status = new CalculateMessageStatusUseCase(
+      exceptionsGeneratedEvent(),
+      amendedAndResubmittedEvent(),
+      prePNCUpdateTriggersGeneratedEvent(),
+      postPNCUpdateTriggersGeneratedEvent(),
+      triggerInstancesPartiallyResolvedEvent(),
+      recordIgnoredNoRecordableOffencesEvent()
+    ).call()
+
+    expect(status).toBe(AuditLogStatus.processing)
+  })
+
   it("should return Processing status when exceptions are not resolved", () => {
     const status = new CalculateMessageStatusUseCase(
       exceptionsGeneratedEvent(),
       prePNCUpdateTriggersGeneratedEvent(),
-      triggerInstancesResolvedEvent()
+      triggerInstancesResolvedEvent(),
+      recordIgnoredNoRecordableOffencesEvent()
     ).call()
 
     expect(status).toBe(AuditLogStatus.processing)
