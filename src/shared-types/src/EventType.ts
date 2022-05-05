@@ -7,7 +7,8 @@ enum EventType {
   AmendedAndResubmitted = "Amended Hearing Outcome Submitted",
   ExceptionsManuallyResolved = "Hearing Outcome marked as resolved by user",
   PncUpdated = "PNC Update applied successfully",
-  RecordIgnored = "Hearing Outcome ignored as no offences are recordable", // No PNC update needed
+  RecordIgnoredNoRecordableOffences = "Hearing Outcome ignored as no offences are recordable",
+  RecordIgnoredNoOffences = "Hearing Outcome ignored as it contains no offences",
   Retrying = "Retrying failed message"
 }
 

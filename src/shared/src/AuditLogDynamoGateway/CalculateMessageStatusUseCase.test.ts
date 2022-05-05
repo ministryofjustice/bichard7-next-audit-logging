@@ -16,7 +16,8 @@ const archivedRecordEvent = () => createEvent(EventType.RecordArchived)
 const errorEvent = () => createEvent("Dummy error event", "error")
 const retryingEvent = () => createEvent(EventType.Retrying)
 const pncUpdatedEvent = () => createEvent(EventType.PncUpdated)
-const recordIgnoredEvent = () => createEvent(EventType.RecordIgnored)
+const recordIgnoredNoRecordableOffencesEvent = () => createEvent(EventType.RecordIgnoredNoRecordableOffences)
+const recordIgnoredNoOffencesEvent = () => createEvent(EventType.RecordIgnoredNoOffences)
 const prePNCUpdateTriggersGeneratedEvent = () =>
   createEvent(EventType.TriggersGenerated, "information", {
     "Trigger 1 Details": "TRPR0004",
@@ -54,8 +55,14 @@ describe("CalculateMessageStatusUseCase", () => {
     expect(status).toBe(AuditLogStatus.completed)
   })
 
-  it("should return Completed status when there are no exceptions and triggers, and record is ignored", () => {
-    const status = new CalculateMessageStatusUseCase(recordIgnoredEvent()).call()
+  it("should return Completed status when there are no exceptions and triggers, and record is ignored (no offences)", () => {
+    const status = new CalculateMessageStatusUseCase(recordIgnoredNoOffencesEvent()).call()
+
+    expect(status).toBe(AuditLogStatus.completed)
+  })
+
+  it("should return Completed status when there are no exceptions and triggers, and record is ignored (no recordable offences)", () => {
+    const status = new CalculateMessageStatusUseCase(recordIgnoredNoRecordableOffencesEvent()).call()
 
     expect(status).toBe(AuditLogStatus.completed)
   })
@@ -76,7 +83,7 @@ describe("CalculateMessageStatusUseCase", () => {
       prePNCUpdateTriggersGeneratedEvent(),
       postPNCUpdateTriggersGeneratedEvent(),
       triggerInstancesResolvedEvent(),
-      recordIgnoredEvent()
+      recordIgnoredNoRecordableOffencesEvent()
     ).call()
 
     expect(status).toBe(AuditLogStatus.completed)
@@ -86,7 +93,7 @@ describe("CalculateMessageStatusUseCase", () => {
     const status = new CalculateMessageStatusUseCase(
       exceptionsGeneratedEvent(),
       amendedAndResubmittedEvent(),
-      recordIgnoredEvent()
+      recordIgnoredNoRecordableOffencesEvent()
     ).call()
 
     expect(status).toBe(AuditLogStatus.completed)
@@ -106,7 +113,7 @@ describe("CalculateMessageStatusUseCase", () => {
     const status = new CalculateMessageStatusUseCase(
       exceptionsGeneratedEvent(),
       exceptionsManuallyResolvedEvent(),
-      recordIgnoredEvent()
+      recordIgnoredNoRecordableOffencesEvent()
     ).call()
 
     expect(status).toBe(AuditLogStatus.completed)
@@ -129,7 +136,7 @@ describe("CalculateMessageStatusUseCase", () => {
       prePNCUpdateTriggersGeneratedEvent(),
       postPNCUpdateTriggersGeneratedEvent(),
       triggerInstancesResolvedEvent(),
-      recordIgnoredEvent()
+      recordIgnoredNoRecordableOffencesEvent()
     ).call()
 
     expect(status).toBe(AuditLogStatus.completed)
@@ -155,7 +162,7 @@ describe("CalculateMessageStatusUseCase", () => {
       prePNCUpdateTriggersGeneratedEvent(),
       postPNCUpdateTriggersGeneratedEvent(),
       triggerInstancesResolvedEvent(),
-      recordIgnoredEvent()
+      recordIgnoredNoRecordableOffencesEvent()
     ).call()
 
     expect(status).toBe(AuditLogStatus.completed)

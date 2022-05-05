@@ -1,9 +1,9 @@
 jest.retryTimes(10)
 import "shared-testing"
 import type { DocumentClient } from "aws-sdk/clients/dynamodb"
-import type { EventCategory } from "shared-types"
+import { EventType } from "shared-types"
 import { isError, AuditLog, AuditLogEvent, AuditLogStatus } from "shared-types"
-import type { DynamoDbConfig } from "shared-types"
+import type { DynamoDbConfig, EventCategory } from "shared-types"
 import TestDynamoGateway from "../DynamoGateway/TestDynamoGateway"
 import AwsAuditLogDynamoGateway from "./AwsAuditLogDynamoGateway"
 
@@ -87,11 +87,7 @@ describe("AuditLogDynamoGateway", () => {
 
   describe("addEvent()", () => {
     it("should only add an event to and update the status of the specified audit log", async () => {
-      const expectedEvent = createAuditLogEvent(
-        "information",
-        new Date(),
-        "Hearing Outcome ignored as it contains no offences"
-      )
+      const expectedEvent = createAuditLogEvent("information", new Date(), EventType.RecordIgnoredNoOffences)
 
       expectedEvent.addAttribute("Attribute one", "Some value")
       expectedEvent.addAttribute("Attribute two", 2)

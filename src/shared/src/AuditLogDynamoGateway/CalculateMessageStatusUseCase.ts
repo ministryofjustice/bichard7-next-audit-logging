@@ -102,7 +102,10 @@ export default class CalculateMessageStatusUseCase {
   }
 
   private get recordIsIgnored(): boolean {
-    return this.hasEventType(EventType.RecordIgnored)
+    return (
+      this.hasEventType(EventType.RecordIgnoredNoOffences) ||
+      this.hasEventType(EventType.RecordIgnoredNoRecordableOffences)
+    )
   }
 
   private get isRetrying(): boolean {
