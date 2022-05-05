@@ -11,21 +11,19 @@ export default class CalculateMessageStatusUseCase {
   }
 
   call(): string {
-    let status = AuditLogStatus.processing
-
     if (
       (this.hasNoTriggers || this.triggersAreResolved) &&
       (this.hasNoExceptions || this.exceptionsAreResolvedAndResubmitted || this.exceptionsAreManuallyResolved) &&
       (this.pncIsUpdated || this.recordIsIgnored)
     ) {
-      status = AuditLogStatus.completed
+      return AuditLogStatus.completed
     } else if (this.isRetrying) {
-      status = AuditLogStatus.retrying
+      return AuditLogStatus.retrying
     } else if (this.hasErrorEvent) {
-      status = AuditLogStatus.error
+      return AuditLogStatus.error
     }
 
-    return status
+    return AuditLogStatus.processing
   }
 
   private hasEventType(eventType: EventType): boolean {
