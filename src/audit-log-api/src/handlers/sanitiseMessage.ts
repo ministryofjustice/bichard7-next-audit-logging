@@ -15,7 +15,7 @@ import createBichardPostgresGatewayConfig from "../createBichardPostgresGatewayC
 import FetchById from "../use-cases/FetchById"
 import DeleteMessageObjectsFromS3UseCase from "../use-cases/DeleteMessageObjectsFromS3UseCase"
 import { createJsonApiResult } from "../utils"
-import SanitiseAuditLogUseCase from "../use-cases/SanitisAuditLogUseCase"
+import SanitiseAuditLogUseCase from "../use-cases/SanitiseAuditLogUseCase"
 import DeleteAuditLogLookupItemsUseCase from "../use-cases/DeleteAuditLogLookupItemsUseCase"
 import DeleteArchivedErrorsUseCase from "../use-cases/DeleteArchivedErrorsUseCase"
 
@@ -37,6 +37,7 @@ const deleteMessageObjectsFromS3UseCase = new DeleteMessageObjectsFromS3UseCase(
 const sanitiseAuditLogUseCase = new SanitiseAuditLogUseCase(auditLogGateway)
 const deleteAuditLogLookupItems = new DeleteAuditLogLookupItemsUseCase(auditLogLookupDynamoGateway)
 const deleteArchivedErrorsUseCase = new DeleteArchivedErrorsUseCase(awsBichardPostgresGateway)
+
 /* eslint-disable require-await */
 export default async function sanitiseMessage(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
   const messageId = event.pathParameters?.messageId

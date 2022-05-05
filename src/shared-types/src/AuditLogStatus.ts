@@ -6,6 +6,4 @@ export default class AuditLogStatus {
   public static readonly completed = "Completed"
 
   public static readonly error = "Error"
-
-  public static readonly archived = "Archived"
 }

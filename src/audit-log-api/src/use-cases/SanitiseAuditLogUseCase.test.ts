@@ -1,6 +1,6 @@
 import "shared-testing"
 import { AuditLog, AuditLogEvent, BichardAuditLogEvent } from "shared-types"
-import SanitiseAuditLogUseCase from "./SanitisAuditLogUseCase"
+import SanitiseAuditLogUseCase from "./SanitiseAuditLogUseCase"
 import { FakeAuditLogDynamoGateway } from "shared-testing"
 import MockDate from "mockdate"
 
@@ -51,14 +51,6 @@ it("should remove attributes containing PII", async () => {
   const topExceptionsReportAttributes = actualMessage?.topExceptionsReport.events[0].attributes ?? {}
   expect(Object.keys(topExceptionsReportAttributes)).toHaveLength(1)
   expect(topExceptionsReportAttributes["Trigger 2 Details"]).toBe("TRPR0004")
-})
-
-it("should update the AuditLog  status to Sanitised", async () => {
-  const sanitiseAuditLogResult = await sanitiseAuditLogUseCase.call(message)
-
-  expect(sanitiseAuditLogResult).toNotBeError()
-  const actualMessage = sanitiseAuditLogResult as AuditLog
-  expect(actualMessage?.status).toBe("Sanitised")
 })
 
 it("should add a new event when the audit log successfully sanitised", async () => {

@@ -1,12 +1,18 @@
 import { DynamoGateway, IndexSearcher } from "../DynamoGateway"
 import type { FetchByIndexOptions, UpdateOptions } from "../DynamoGateway"
-import type { AuditLog, AuditLogEvent, KeyValuePair, PromiseResult, DynamoDbConfig } from "shared-types"
-import { isError } from "shared-types"
-import getMessageStatus from "./getMessageStatus"
-import type { AuditLogDynamoGateway } from "shared-types"
+import { isError, EventType } from "shared-types"
+import type {
+  AuditLogDynamoGateway,
+  AuditLog,
+  AuditLogEvent,
+  KeyValuePair,
+  PromiseResult,
+  DynamoDbConfig
+} from "shared-types"
 import shouldLogForTopExceptionsReport from "./shouldLogForTopExceptionsReport"
 import shouldLogForAutomationReport from "./shouldLogForAutomationReport"
 import getForceOwnerForAutomationReport from "./getForceOwnerForAutomationReport"
+import CalculateMessageStatusUseCase from "./CalculateMessageStatusUseCase"
 
 export default class AwsAuditLogDynamoGateway extends DynamoGateway implements AuditLogDynamoGateway {
   private readonly tableKey: string = "messageId"
@@ -28,6 +34,14 @@ export default class AwsAuditLogDynamoGateway extends DynamoGateway implements A
   }
 
   async update(message: AuditLog): PromiseResult<AuditLog> {
+    message.status = new CalculateMessageStatusUseCase(message.events).call()
+
+    message.errorRecordArchivalDate =
+      message.errorRecordArchivalDate ??
+      message.events.find((event) => event.eventType === EventType.ErrorRecordArchival)?.timestamp
+    message.sanitisedDate =
+      message.sanitisedDate ?? message.events.find((event) => event.eventType === EventType.SanitisedMessage)?.timestamp
+
     const result = await this.updateOne(this.tableName, message, "messageId", message.version)
 
     if (isError(result)) {
@@ -150,7 +164,12 @@ export default class AwsAuditLogDynamoGateway extends DynamoGateway implements A
   }
 
   async addEvent(messageId: string, messageVersion: number, event: AuditLogEvent): PromiseResult<void> {
-    const status = getMessageStatus(event)
+    const events = await this.fetchEvents(messageId)
+    if (isError(events)) {
+      return events
+    }
+
+    const status = new CalculateMessageStatusUseCase(events, event).call()
 
     const expressionAttributeNames: KeyValuePair<string, string> = {
       "#lastEventType": "lastEventType"
@@ -185,7 +204,15 @@ export default class AwsAuditLogDynamoGateway extends DynamoGateway implements A
       updateExpression += ",#status = :status"
     }
 
-    if (event.eventType === "Retrying failed message") {
+    if (event.eventType === EventType.ErrorRecordArchival) {
+      expressionAttributeNames["#errorRecordArchivalDate"] = "errorRecordArchivalDate"
+      updateExpressionValues[":errorRecordArchivalDate"] = event.timestamp
+      updateExpression += ",#errorRecordArchivalDate = :errorRecordArchivalDate"
+    } else if (event.eventType === EventType.SanitisedMessage) {
+      expressionAttributeNames["#sanitisedDate"] = "sanitisedDate"
+      updateExpressionValues[":sanitisedDate"] = event.timestamp
+      updateExpression += ",#sanitisedDate = :sanitisedDate"
+    } else if (event.eventType === "Retrying failed message") {
       updateExpression = `${updateExpression}, retryCount = if_not_exists(retryCounter, :zero) + :one`
       updateExpressionValues[":zero"] = 0
       updateExpressionValues[":one"] = 1
