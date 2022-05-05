@@ -53,14 +53,6 @@ it("should remove attributes containing PII", async () => {
   expect(topExceptionsReportAttributes["Trigger 2 Details"]).toBe("TRPR0004")
 })
 
-it("should update the AuditLog  status to Sanitised", async () => {
-  const sanitiseAuditLogResult = await sanitiseAuditLogUseCase.call(message)
-
-  expect(sanitiseAuditLogResult).toNotBeError()
-  const actualMessage = sanitiseAuditLogResult as AuditLog
-  expect(actualMessage?.status).toBe("Sanitised")
-})
-
 it("should add a new event when the audit log successfully sanitised", async () => {
   const currentDateTime = new Date("2022-04-12T10:11:12.000Z")
   MockDate.set(currentDateTime)
