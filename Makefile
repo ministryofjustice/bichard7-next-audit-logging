@@ -47,6 +47,7 @@ audit-log-portal: src/audit-log-portal/build
 archive-user-logs: src/archive-user-logs/build
 retry-failed-messages: src/retry-failed-messages/build
 add-archival-events: src/add-archival-events/build
+sanitise-old-messages: src/sanitise-old-messages/build
 
 define get_source_files
 	$(shell find $(1) \
@@ -80,6 +81,7 @@ AUDIT_LOG_PORTAL_SOURCE := $(call get_source_files,src/audit-log-portal)
 ARCHIVE_USER_LOGS := $(call get_source_files,src/archive-user-logs)
 RETRY_FAILED_MESSAGES_SOURCE := $(call get_source_files,src/retry-failed-messages)
 ADD_ARCHIVAL_EVENTS_SOURCE := $(call get_source_files,src/add-archival-events)
+SANITISE_OLD_MESSAGES_SOURCE := $(call get_source_files,src/sanitise-old-messages)
 
 # How to build each package
 src/shared-types/build: $(SHARED_TYPES_SOURCE)
@@ -120,6 +122,9 @@ src/retry-failed-messages/build: src/shared-types/build src/shared/build $(RETRY
 
 src/add-archival-events/build: src/shared-types/build src/shared-testing/build src/shared/build $(ADD_ARCHIVAL_EVENTS_SOURCE)
 	cd src/add-archival-events && npm run build
+
+src/sanitise-old-messages/build: src/shared-types/build src/shared-testing/build src/shared/build $(SANITISE_OLD_MESSAGES_SOURCE)
+	cd src/sanitise-old-messages && npm run build
 
 # Clean
 .PHONY: clean

@@ -31,6 +31,8 @@ commands:
                 key: v1-npm-deps-{{ checksum "src/audit-log-portal/package-lock.json.md5" }}
             - restore_cache:
                 key: v1-npm-deps-{{ checksum "src/add-archival-events/package-lock.json.md5" }}
+            - restore_cache:
+                key: v1-npm-deps-{{ checksum "src/add-archival-events/package-lock.json.md5" }}
 
     save_all_caches:
         description: Save all of the node_modules directories
@@ -68,6 +70,9 @@ commands:
             - save_cache:
                 key: v1-npm-deps-{{ checksum "src/add-archival-events/package-lock.json.md5" }}
                 paths: src/add-archival-events/node_modules
+            - save_cache:
+                key: v1-npm-deps-{{ checksum "src/add-archival-events/package-lock.json.md5" }}
+                paths: src/sanitise-old-messages/node_modules
 
     persist_build_dirs:
         description: Save all of the build directories
@@ -100,7 +105,9 @@ commands:
             - store_test_results:
                 path: ./src/audit-log-portal/test-results/jest/
             - store_test_results:
-                path: ./src/add-archival-events/test-results/jest/
+            path: ./src/add-archival-events/test-results/jest/
+            - store_test_results:
+            path: ./src/sanitise-old-messages/test-results/jest/
 
 jobs:
   build:

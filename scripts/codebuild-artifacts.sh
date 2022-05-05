@@ -137,3 +137,14 @@ zip addArchivalEvents.zip addArchivalEvents.js
 upload_to_s3 addArchivalEvents.zip addArchivalEvents.zip
 
 cd -
+
+############################################
+## Sanitise Old Messages
+############################################
+
+cd src/sanitise-old-messages/build
+
+zip sanitiseOldMessages.zip sanitiseOldMessages.js
+upload_to_s3 sanitiseOldMessages.zip sanitiseOldMessages.zip
+
+cd -
