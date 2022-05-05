@@ -13,11 +13,7 @@ export default class CalculateMessageStatusUseCase {
   call(): string {
     let status = AuditLogStatus.processing
 
-    if (this.isSanitised) {
-      status = AuditLogStatus.sanitised
-    } else if (this.isArchived) {
-      status = AuditLogStatus.archived
-    } else if (
+    if (
       (this.hasNoTriggers || this.triggersAreResolved) &&
       (this.hasNoExceptions || this.exceptionsAreResolvedAndResubmitted || this.exceptionsAreManuallyResolved) &&
       (this.pncIsUpdated || this.recordIsIgnored)
@@ -34,14 +30,6 @@ export default class CalculateMessageStatusUseCase {
 
   private hasEventType(eventType: EventType): boolean {
     return !!this.events.find((event) => event.eventType === eventType)
-  }
-
-  private get isSanitised(): boolean {
-    return this.hasEventType(EventType.SanitisedMessage)
-  }
-
-  private get isArchived(): boolean {
-    return !this.isSanitised && this.hasEventType(EventType.RecordArchived)
   }
 
   private get hasNoTriggers(): boolean {

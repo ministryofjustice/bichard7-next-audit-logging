@@ -1,6 +1,6 @@
 enum EventType {
   SanitisedMessage = "Sanitised message",
-  RecordArchived = "Record archived",
+  ErrorRecordArchival = "Error record archival",
   TriggersGenerated = "Trigger generated",
   TriggerInstancesResolved = "Trigger Instances resolved",
   ExceptionsGenerated = "Hearing Outcome passed to Error List",

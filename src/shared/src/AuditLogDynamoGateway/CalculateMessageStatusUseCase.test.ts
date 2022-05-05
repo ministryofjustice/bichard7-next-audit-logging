@@ -12,7 +12,7 @@ const createEvent = (eventType: string, category = "information", attributes?: K
     timestamp: new Date(new Date().getTime() + 1000 * eventIndex++)
   } as unknown as AuditLogEvent)
 const sanitisedEvent = () => createEvent(EventType.SanitisedMessage)
-const archivedRecordEvent = () => createEvent(EventType.RecordArchived)
+const archivedRecordEvent = () => createEvent(EventType.ErrorRecordArchival)
 const errorEvent = () => createEvent("Dummy error event", "error")
 const retryingEvent = () => createEvent(EventType.Retrying)
 const pncUpdatedEvent = () => createEvent(EventType.PncUpdated)
@@ -43,16 +43,16 @@ const amendedAndResubmittedEvent = () => createEvent(EventType.AmendedAndResubmi
 const exceptionsManuallyResolvedEvent = () => createEvent(EventType.ExceptionsManuallyResolved)
 
 describe("CalculateMessageStatusUseCase", () => {
-  it("should return Sanitised status when message has sanitised event", () => {
-    const status = new CalculateMessageStatusUseCase(sanitisedEvent(), archivedRecordEvent()).call()
+  it("should not affect the status calculation when message has sanitised event", () => {
+    const status = new CalculateMessageStatusUseCase(errorEvent(), sanitisedEvent(), archivedRecordEvent()).call()
 
-    expect(status).toBe(AuditLogStatus.sanitised)
+    expect(status).toBe(AuditLogStatus.error)
   })
 
-  it("should return Archived status when message has archived record event and not sanitised", () => {
-    const status = new CalculateMessageStatusUseCase(archivedRecordEvent(), errorEvent()).call()
+  it("should not affect the status calculation when message has error record archival event", () => {
+    const status = new CalculateMessageStatusUseCase(errorEvent(), archivedRecordEvent()).call()
 
-    expect(status).toBe(AuditLogStatus.archived)
+    expect(status).toBe(AuditLogStatus.error)
   })
 
   it("should return Completed status when there are no exceptions and triggers, and PNC is updated", () => {
