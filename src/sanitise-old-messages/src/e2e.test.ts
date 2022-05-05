@@ -3,7 +3,7 @@
 jest.setTimeout(15_000)
 
 import { AuditLogApiClient, logger, TestDynamoGateway } from "shared"
-import type { ApiClient } from "shared-types"
+import type { ApiClient, KeyValuePair } from "shared-types"
 import { AuditLog } from "shared-types"
 import "shared-testing"
 import { execute } from "lambda-local"
@@ -53,14 +53,20 @@ const insertDbRecords = async (
   }
 }
 
+// Returns a mapping of externalCorrelationId => messageId
 const insertAuditLogRecords = async (
   gateway: TestDynamoGateway,
-  records: { messageId: string; receivedAt: Date }[]
-) => {
+  records: { externalCorrelationId: string; receivedAt: Date }[]
+): Promise<KeyValuePair<string, string>> => {
+  const messageIds: KeyValuePair<string, string> = {}
+
   for (const record of records) {
-    const auditLog = new AuditLog("External Correlation ID", record.receivedAt, "Dummy hash")
-    await gateway.insertOne(auditLogTableName, auditLog, record.messageId)
+    const auditLog = new AuditLog(record.externalCorrelationId, record.receivedAt, record.externalCorrelationId)
+    await gateway.insertOne(auditLogTableName, auditLog, record.externalCorrelationId)
+    messageIds[record.externalCorrelationId] = auditLog.messageId
   }
+
+  return messageIds
 }
 
 const lambdaEnvironment = {
@@ -122,13 +128,17 @@ describe("Sanitise Old Messages e2e", () => {
   // eslint-disable-next-line jest/no-focused-tests
   it("should sanitise a single message older than the configured threshold which has been archived", async () => {
     await insertDbRecords(db, [], ["message_1"])
-    await insertAuditLogRecords(gateway, [{ messageId: "message_1", receivedAt: new Date("2022-01-01T09:00:00") }])
+    const messageIds = await insertAuditLogRecords(gateway, [
+      { externalCorrelationId: "message_1", receivedAt: new Date("2022-01-01T09:00:00") }
+    ])
 
     await executeLambda()
 
-    const messageResult = await api.getMessage("message_1")
+    const messageResult = await api.getMessage(messageIds.message_1)
 
     expect(messageResult).toNotBeError()
+    const message = messageResult as AuditLog
+    expect(message.sanitisedDate).toBeDefined()
   })
 
   it("should sanitise a single message older than the configured threshold which isn't in the database", async () => {
