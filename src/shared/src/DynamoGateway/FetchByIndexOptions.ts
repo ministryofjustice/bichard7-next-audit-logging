@@ -1,8 +1,5 @@
 import type Pagination from "./Pagination"
-
-export enum RangeKeyComparison {
-  LessThanOrEqual
-}
+import type RangeKeyComparison from "./RangeKeyComparison"
 
 export default interface FetchByIndexOptions {
   indexName: string

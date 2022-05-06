@@ -4,7 +4,7 @@ import type { KeyValuePair, PromiseResult, Result } from "shared-types"
 import { isError } from "shared-types"
 import type DynamoGateway from "./DynamoGateway"
 import type FetchByIndexOptions from "./FetchByIndexOptions"
-import type { RangeKeyComparison } from "./FetchByIndexOptions"
+import type RangeKeyComparison from "./RangeKeyComparison"
 import type Pagination from "./Pagination"
 
 export default class IndexSearcher<TResult> {
@@ -18,7 +18,7 @@ export default class IndexSearcher<TResult> {
 
   private rangeKey?: string
 
-  private rangeKeyValue?: unknown[]
+  private rangeKeyValue?: unknown
 
   private rangeKeyComparison?: RangeKeyComparison
 

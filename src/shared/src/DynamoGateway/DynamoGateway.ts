@@ -5,7 +5,7 @@ import { isError } from "shared-types"
 import type FetchByIndexOptions from "./FetchByIndexOptions"
 import type UpdateOptions from "./UpdateOptions"
 import type GetManyOptions from "./GetManyOptions"
-import { RangeKeyComparison } from "./FetchByIndexOptions"
+import RangeKeyComparison from "./RangeKeyComparison"
 
 export default class DynamoGateway {
   protected readonly service: DynamoDB

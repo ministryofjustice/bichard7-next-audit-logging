@@ -1,4 +1,4 @@
-import { DynamoGateway, IndexSearcher } from "../DynamoGateway"
+import { DynamoGateway, IndexSearcher, RangeKeyComparison } from "../DynamoGateway"
 import type { FetchByIndexOptions, UpdateOptions } from "../DynamoGateway"
 import { isError, EventType } from "shared-types"
 import type {
@@ -13,7 +13,6 @@ import shouldLogForTopExceptionsReport from "./shouldLogForTopExceptionsReport"
 import shouldLogForAutomationReport from "./shouldLogForAutomationReport"
 import getForceOwnerForAutomationReport from "./getForceOwnerForAutomationReport"
 import CalculateMessageStatusUseCase from "./CalculateMessageStatusUseCase"
-import { RangeKeyComparison } from "src/DynamoGateway/FetchByIndexOptions"
 
 export default class AwsAuditLogDynamoGateway extends DynamoGateway implements AuditLogDynamoGateway {
   private readonly tableKey: string = "messageId"
