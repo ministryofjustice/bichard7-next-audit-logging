@@ -607,7 +607,7 @@ describe("AuditLogDynamoGateway", () => {
         [...Array(3).keys()].map(async (i: number) => {
           const auditLog = new AuditLog(
             `External correlation id ${i}`,
-            new Date("2022-05-06T06:13:27+0000"),
+            new Date("2021-05-06T06:13:27+0000"),
             "dummy hash"
           )
           auditLog.isSanitised = 1
@@ -633,6 +633,7 @@ describe("AuditLogDynamoGateway", () => {
 
       const item = items[0]
       expect(item.isSanitised).toBeFalsy()
+      expect(item.externalCorrelationId).toBe("External correlation id 4")
     })
   })
 
