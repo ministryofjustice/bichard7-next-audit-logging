@@ -232,8 +232,8 @@ describe("DynamoGateway", () => {
     it("should return one record when key value exists", async () => {
       const options: FetchByIndexOptions = {
         indexName: "someOtherValueSecondaryIndex",
-        attributeName: "someOtherValue",
-        attributeValue: "Value 1",
+        hashKeyName: "someOtherValue",
+        hashKeyValue: "Value 1",
         pagination: { limit: 10 }
       }
 
@@ -252,8 +252,8 @@ describe("DynamoGateway", () => {
     it("should return null when key value does not exist", async () => {
       const options: FetchByIndexOptions = {
         indexName: "someOtherValueSecondaryIndex",
-        attributeName: "someOtherValue",
-        attributeValue: "Value doesn't exist",
+        hashKeyName: "someOtherValue",
+        hashKeyValue: "Value doesn't exist",
         pagination: { limit: 10 }
       }
 

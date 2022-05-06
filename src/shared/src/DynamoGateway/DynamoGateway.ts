@@ -5,6 +5,7 @@ import { isError } from "shared-types"
 import type FetchByIndexOptions from "./FetchByIndexOptions"
 import type UpdateOptions from "./UpdateOptions"
 import type GetManyOptions from "./GetManyOptions"
+import { RangeKeyComparison } from "./FetchByIndexOptions"
 
 export default class DynamoGateway {
   protected readonly service: DynamoDB
@@ -86,22 +87,30 @@ export default class DynamoGateway {
   }
 
   fetchByIndex(tableName: string, options: FetchByIndexOptions): PromiseResult<DocumentClient.QueryOutput> {
-    const { indexName, attributeName, attributeValue, isAscendingOrder } = options
+    const { indexName, hashKeyName: attributeName, hashKeyValue: attributeValue, isAscendingOrder } = options
     const { limit, lastItemKey } = options.pagination
 
     const queryOptions: DynamoDB.DocumentClient.QueryInput = {
       TableName: tableName,
       IndexName: indexName,
       KeyConditionExpression: "#keyName = :keyValue",
-      ExpressionAttributeValues: {
-        ":keyValue": attributeValue
-      },
       ExpressionAttributeNames: {
         "#keyName": attributeName
+      },
+      ExpressionAttributeValues: {
+        ":keyValue": attributeValue
       },
       ScanIndexForward: isAscendingOrder,
       Limit: limit,
       ExclusiveStartKey: lastItemKey
+    }
+
+    if (options.rangeKeyName && options.rangeKeyValue && options.rangeKeyComparison) {
+      if (options.rangeKeyComparison == RangeKeyComparison.LessThanOrEqual) {
+        queryOptions.ExpressionAttributeNames!["#rangeKeyName"] = options.rangeKeyName
+        queryOptions.ExpressionAttributeValues![":rangeKeyValue"] = options.rangeKeyValue
+        queryOptions.KeyConditionExpression += " AND #rangeKeyName <= :rangeKeyValue"
+      }
     }
 
     return this.client

@@ -11,7 +11,7 @@ export default class AuditLog {
 
   public errorRecordArchivalDate?: string
 
-  public sanitisedDate?: string
+  public isSanitised = 0
 
   public caseId: string
 

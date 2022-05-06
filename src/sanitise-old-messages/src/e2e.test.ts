@@ -125,7 +125,6 @@ describe("Sanitise Old Messages e2e", () => {
     await db.end()
   })
 
-  // eslint-disable-next-line jest/no-focused-tests
   it("should sanitise a single message older than the configured threshold which has been archived", async () => {
     await insertDbRecords(db, [], ["message_1"])
     const messageIds = await insertAuditLogRecords(gateway, [
@@ -138,7 +137,7 @@ describe("Sanitise Old Messages e2e", () => {
 
     expect(messageResult).toNotBeError()
     const message = messageResult as AuditLog
-    expect(message.sanitisedDate).toBeDefined()
+    expect(message.isSanitised).toBeTruthy()
   })
 
   it("should sanitise a single message older than the configured threshold which isn't in the database", async () => {

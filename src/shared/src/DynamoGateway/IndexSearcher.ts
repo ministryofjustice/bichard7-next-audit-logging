@@ -4,6 +4,7 @@ import type { KeyValuePair, PromiseResult, Result } from "shared-types"
 import { isError } from "shared-types"
 import type DynamoGateway from "./DynamoGateway"
 import type FetchByIndexOptions from "./FetchByIndexOptions"
+import type { RangeKeyComparison } from "./FetchByIndexOptions"
 import type Pagination from "./Pagination"
 
 export default class IndexSearcher<TResult> {
@@ -16,6 +17,10 @@ export default class IndexSearcher<TResult> {
   private hashKeyValue: unknown
 
   private rangeKey?: string
+
+  private rangeKeyValue?: unknown[]
+
+  private rangeKeyComparison?: RangeKeyComparison
 
   private limit = 10
 
@@ -71,10 +76,18 @@ export default class IndexSearcher<TResult> {
     return this
   }
 
-  setIndexKeys(hashKey: string, hashKeyValue: unknown, rangeKey?: string): IndexSearcher<TResult> {
+  setIndexKeys(
+    hashKey: string,
+    hashKeyValue: unknown,
+    rangeKey?: string,
+    rangeKeyValue?: unknown,
+    rangeKeyComparison?: RangeKeyComparison
+  ): IndexSearcher<TResult> {
     this.hashKey = hashKey
     this.hashKeyValue = hashKeyValue
     this.rangeKey = rangeKey
+    this.rangeKeyValue = rangeKeyValue
+    this.rangeKeyComparison = rangeKeyComparison
     return this
   }
 
@@ -104,8 +117,11 @@ export default class IndexSearcher<TResult> {
 
     const options: FetchByIndexOptions = {
       indexName: this.indexName,
-      attributeName: this.hashKey,
-      attributeValue: this.hashKeyValue,
+      hashKeyName: this.hashKey,
+      hashKeyValue: this.hashKeyValue,
+      rangeKeyName: this.rangeKey,
+      rangeKeyValue: this.rangeKeyValue,
+      rangeKeyComparison: this.rangeKeyComparison,
       isAscendingOrder: this.isAscendingOrder,
       pagination
     }

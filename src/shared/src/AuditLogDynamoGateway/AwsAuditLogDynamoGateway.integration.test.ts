@@ -413,7 +413,7 @@ describe("AuditLogDynamoGateway", () => {
       expect(actualMessage).toNotBeError()
 
       const actualAuditLog = actualMessage as AuditLog
-      expect(actualAuditLog.sanitisedDate).toBe(expectedEvent.timestamp)
+      expect(actualAuditLog.isSanitised).toBeTruthy()
       expect(actualAuditLog.status).toBe(AuditLogStatus.processing)
     })
   })
@@ -601,6 +601,41 @@ describe("AuditLogDynamoGateway", () => {
     })
   })
 
+  describe("fetchUnsanitisedBeforeDate", () => {
+    it("should return one AuditLog when there is an unsanitised record before the given date", async () => {
+      await Promise.allSettled(
+        [...Array(3).keys()].map(async (i: number) => {
+          const auditLog = new AuditLog(
+            `External correlation id ${i}`,
+            new Date("2022-05-06T06:13:27+0000"),
+            "dummy hash"
+          )
+          auditLog.isSanitised = 1
+          await gateway.create(auditLog)
+        })
+      )
+
+      const expectedAuditLog = new AuditLog(
+        `External correlation id 4`,
+        new Date("2021-05-06T06:13:27+0000"),
+        "dummy hash"
+      )
+      expectedAuditLog.status = AuditLogStatus.completed
+      await gateway.create(expectedAuditLog)
+
+      const result = await gateway.fetchUnsanitisedBeforeDate(new Date("2022-05-07T06:13:27+0000"))
+
+      expect(isError(result)).toBe(false)
+      expect(result).toBeDefined()
+
+      const items = <AuditLog[]>result
+      expect(items).toHaveLength(1)
+
+      const item = items[0]
+      expect(item.isSanitised).toBeTruthy()
+    })
+  })
+
   describe("fetchEvents", () => {
     it("should return AuditLogEvents when message id exists in the table", async () => {
       const auditLog = new AuditLog(`External correlation id 1`, new Date(), "dummy hash")
@@ -715,7 +750,7 @@ describe("AuditLogDynamoGateway", () => {
       expect(actualMessage).toNotBeError()
 
       const actualAuditLog = actualMessage as AuditLog
-      expect(actualAuditLog).not.toHaveProperty("sanitisedDate")
+      expect(actualAuditLog.isSanitised).toBeFalsy()
       expect(actualAuditLog.errorRecordArchivalDate).toBe(expectedEvent.timestamp)
       expect(actualAuditLog.status).toBe(AuditLogStatus.processing)
     })
@@ -737,7 +772,7 @@ describe("AuditLogDynamoGateway", () => {
 
       const actualAuditLog = actualMessage as AuditLog
       expect(actualAuditLog).not.toHaveProperty("errorRecordArchivalDate")
-      expect(actualAuditLog.sanitisedDate).toBe(expectedEvent.timestamp)
+      expect(actualAuditLog.isSanitised).toBeTruthy()
       expect(actualAuditLog.status).toBe(AuditLogStatus.processing)
     })
 

@@ -13,6 +13,7 @@ import shouldLogForTopExceptionsReport from "./shouldLogForTopExceptionsReport"
 import shouldLogForAutomationReport from "./shouldLogForAutomationReport"
 import getForceOwnerForAutomationReport from "./getForceOwnerForAutomationReport"
 import CalculateMessageStatusUseCase from "./CalculateMessageStatusUseCase"
+import { RangeKeyComparison } from "src/DynamoGateway/FetchByIndexOptions"
 
 export default class AwsAuditLogDynamoGateway extends DynamoGateway implements AuditLogDynamoGateway {
   private readonly tableKey: string = "messageId"
@@ -39,8 +40,7 @@ export default class AwsAuditLogDynamoGateway extends DynamoGateway implements A
     message.errorRecordArchivalDate =
       message.errorRecordArchivalDate ??
       message.events.find((event) => event.eventType === EventType.ErrorRecordArchival)?.timestamp
-    message.sanitisedDate =
-      message.sanitisedDate ?? message.events.find((event) => event.eventType === EventType.SanitisedMessage)?.timestamp
+    message.isSanitised = message.events.find((event) => event.eventType === EventType.SanitisedMessage) ? 1 : 0
 
     const result = await this.updateOne(this.tableName, message, "messageId", message.version)
 
@@ -68,8 +68,8 @@ export default class AwsAuditLogDynamoGateway extends DynamoGateway implements A
   async fetchByExternalCorrelationId(externalCorrelationId: string): PromiseResult<AuditLog | null> {
     const options: FetchByIndexOptions = {
       indexName: "externalCorrelationIdIndex",
-      attributeName: "externalCorrelationId",
-      attributeValue: externalCorrelationId,
+      hashKeyName: "externalCorrelationId",
+      hashKeyValue: externalCorrelationId,
       pagination: { limit: 1 }
     }
 
@@ -90,8 +90,8 @@ export default class AwsAuditLogDynamoGateway extends DynamoGateway implements A
   async fetchByHash(hash: string): PromiseResult<AuditLog | null> {
     const options: FetchByIndexOptions = {
       indexName: "messageHashIndex",
-      attributeName: "messageHash",
-      attributeValue: hash,
+      hashKeyName: "messageHash",
+      hashKeyValue: hash,
       pagination: { limit: 1 }
     }
 
@@ -113,6 +113,20 @@ export default class AwsAuditLogDynamoGateway extends DynamoGateway implements A
     const result = await new IndexSearcher<AuditLog[]>(this, this.tableName, this.tableKey)
       .useIndex("statusIndex")
       .setIndexKeys("status", status, "receivedDate")
+      .paginate(limit, lastMessage)
+      .execute()
+
+    if (isError(result)) {
+      return result
+    }
+
+    return <AuditLog[]>result
+  }
+
+  async fetchUnsanitisedBeforeDate(before: Date, limit = 10, lastMessage?: AuditLog): PromiseResult<AuditLog[]> {
+    const result = await new IndexSearcher<AuditLog[]>(this, this.tableName, this.tableKey)
+      .useIndex("isSanitisedIndex")
+      .setIndexKeys("isSanitised", 0, "receivedDate", before, RangeKeyComparison.LessThanOrEqual)
       .paginate(limit, lastMessage)
       .execute()
 
@@ -209,9 +223,9 @@ export default class AwsAuditLogDynamoGateway extends DynamoGateway implements A
       updateExpressionValues[":errorRecordArchivalDate"] = event.timestamp
       updateExpression += ",#errorRecordArchivalDate = :errorRecordArchivalDate"
     } else if (event.eventType === EventType.SanitisedMessage) {
-      expressionAttributeNames["#sanitisedDate"] = "sanitisedDate"
-      updateExpressionValues[":sanitisedDate"] = event.timestamp
-      updateExpression += ",#sanitisedDate = :sanitisedDate"
+      expressionAttributeNames["#isSanitised"] = "isSanitised"
+      updateExpressionValues[":isSanitised"] = 1
+      updateExpression += ",#isSanitised = :isSanitised"
     } else if (event.eventType === "Retrying failed message") {
       updateExpression = `${updateExpression}, retryCount = if_not_exists(retryCounter, :zero) + :one`
       updateExpressionValues[":zero"] = 0

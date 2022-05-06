@@ -92,6 +92,8 @@ resources:
             AttributeType: S
           - AttributeName: caseId
             AttributeType: S
+          - AttributeName: isSanitised
+            AttributeType: N
         KeySchema:
           - AttributeName: messageId
             KeyType: HASH
@@ -140,6 +142,17 @@ resources:
             KeySchema:
               - AttributeName: caseId
                 KeyType: HASH
+            Projection:
+              ProjectionType: "ALL"
+            ProvisionedThroughput:
+              ReadCapacityUnits: 1
+              WriteCapacityUnits: 1
+          - IndexName: isSanitisedIndex
+            KeySchema:
+              - AttributeName: isSanitised
+                KeyType: HASH
+              - AttributeName: receivedDate
+                KeyType: RANGE
             Projection:
               ProjectionType: "ALL"
             ProvisionedThroughput:
