@@ -1,9 +1,8 @@
 jest.retryTimes(10)
-import "shared-testing"
 import type { DocumentClient } from "aws-sdk/clients/dynamodb"
-import { EventType } from "shared-types"
-import { isError, AuditLog, AuditLogEvent, AuditLogStatus } from "shared-types"
+import "shared-testing"
 import type { DynamoDbConfig, EventCategory } from "shared-types"
+import { AuditLog, AuditLogEvent, AuditLogStatus, EventType, isError } from "shared-types"
 import TestDynamoGateway from "../DynamoGateway/TestDynamoGateway"
 import AwsAuditLogDynamoGateway from "./AwsAuditLogDynamoGateway"
 
@@ -634,6 +633,36 @@ describe("AuditLogDynamoGateway", () => {
       const item = items[0]
       expect(item.isSanitised).toBeFalsy()
       expect(item.externalCorrelationId).toBe("External correlation id 4")
+    })
+
+    it("shouldn't return any AuditLogs with unsanitised records after the given date", async () => {
+      await Promise.allSettled(
+        [...Array(3).keys()].map(async (i: number) => {
+          const auditLog = new AuditLog(
+            `External correlation id ${i}`,
+            new Date("2021-05-06T06:13:27+0000"),
+            "dummy hash"
+          )
+          auditLog.isSanitised = 1
+          await gateway.create(auditLog)
+        })
+      )
+
+      const expectedAuditLog = new AuditLog(
+        `External correlation id 4`,
+        new Date("2021-05-06T06:13:27+0000"),
+        "dummy hash"
+      )
+      expectedAuditLog.status = AuditLogStatus.completed
+      await gateway.create(expectedAuditLog)
+
+      const result = await gateway.fetchUnsanitisedBeforeDate(new Date("2021-05-05T06:13:27+0000"))
+
+      expect(isError(result)).toBe(false)
+      expect(result).toBeDefined()
+
+      const items = <AuditLog[]>result
+      expect(items).toHaveLength(0)
     })
   })
 

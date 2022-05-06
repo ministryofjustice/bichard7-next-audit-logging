@@ -1,18 +1,18 @@
-import { DynamoGateway, IndexSearcher, RangeKeyComparison } from "../DynamoGateway"
-import type { FetchByIndexOptions, UpdateOptions } from "../DynamoGateway"
-import { isError, EventType } from "shared-types"
 import type {
-  AuditLogDynamoGateway,
   AuditLog,
+  AuditLogDynamoGateway,
   AuditLogEvent,
+  DynamoDbConfig,
   KeyValuePair,
-  PromiseResult,
-  DynamoDbConfig
+  PromiseResult
 } from "shared-types"
-import shouldLogForTopExceptionsReport from "./shouldLogForTopExceptionsReport"
-import shouldLogForAutomationReport from "./shouldLogForAutomationReport"
-import getForceOwnerForAutomationReport from "./getForceOwnerForAutomationReport"
+import { EventType, isError } from "shared-types"
+import type { FetchByIndexOptions, UpdateOptions } from "../DynamoGateway"
+import { DynamoGateway, IndexSearcher, RangeKeyComparison } from "../DynamoGateway"
 import CalculateMessageStatusUseCase from "./CalculateMessageStatusUseCase"
+import getForceOwnerForAutomationReport from "./getForceOwnerForAutomationReport"
+import shouldLogForAutomationReport from "./shouldLogForAutomationReport"
+import shouldLogForTopExceptionsReport from "./shouldLogForTopExceptionsReport"
 
 export default class AwsAuditLogDynamoGateway extends DynamoGateway implements AuditLogDynamoGateway {
   private readonly tableKey: string = "messageId"
@@ -125,7 +125,7 @@ export default class AwsAuditLogDynamoGateway extends DynamoGateway implements A
   async fetchUnsanitisedBeforeDate(before: Date, limit = 10, lastMessage?: AuditLog): PromiseResult<AuditLog[]> {
     const result = await new IndexSearcher<AuditLog[]>(this, this.tableName, this.tableKey)
       .useIndex("isSanitisedIndex")
-      .setIndexKeys("isSanitised", 0, "receivedDate", before, RangeKeyComparison.LessThanOrEqual)
+      .setIndexKeys("isSanitised", 0, "receivedDate", before.toISOString(), RangeKeyComparison.LessThanOrEqual)
       .paginate(limit, lastMessage)
       .execute()
 

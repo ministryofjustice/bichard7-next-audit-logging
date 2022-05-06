@@ -105,7 +105,7 @@ export default class DynamoGateway {
       ExclusiveStartKey: lastItemKey
     }
 
-    if (options.rangeKeyName && options.rangeKeyValue && options.rangeKeyComparison) {
+    if (options.rangeKeyName && options.rangeKeyValue && options.rangeKeyComparison !== undefined) {
       if (options.rangeKeyComparison == RangeKeyComparison.LessThanOrEqual) {
         queryOptions.ExpressionAttributeNames!["#rangeKeyName"] = options.rangeKeyName
         queryOptions.ExpressionAttributeValues![":rangeKeyValue"] = options.rangeKeyValue
