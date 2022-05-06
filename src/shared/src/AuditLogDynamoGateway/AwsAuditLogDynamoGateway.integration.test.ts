@@ -632,7 +632,7 @@ describe("AuditLogDynamoGateway", () => {
       expect(items).toHaveLength(1)
 
       const item = items[0]
-      expect(item.isSanitised).toBeTruthy()
+      expect(item.isSanitised).toBeFalsy()
     })
   })
 
