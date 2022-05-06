@@ -2,13 +2,13 @@
 
 jest.setTimeout(15_000)
 
-import { AuditLogApiClient, logger, TestDynamoGateway } from "shared"
+import { execute } from "lambda-local"
+import { Client } from "pg"
+import { logger, TestDynamoGateway } from "shared"
+import "shared-testing"
 import type { ApiClient, KeyValuePair } from "shared-types"
 import { AuditLog } from "shared-types"
-import "shared-testing"
-import { execute } from "lambda-local"
 import sanitiseOldMessages from "./index"
-import { Client } from "pg"
 
 logger.level = "debug"
 
@@ -111,7 +111,6 @@ describe("Sanitise Old Messages e2e", () => {
       AWS_ACCESS_KEY_ID: "DUMMY",
       AWS_SECRET_ACCESS_KEY: "DUMMY"
     })
-    api = new AuditLogApiClient("http://localhost:3010", "apiKey")
   })
 
   beforeEach(async () => {
@@ -140,21 +139,76 @@ describe("Sanitise Old Messages e2e", () => {
     expect(message.isSanitised).toBeTruthy()
   })
 
+  it("shouldn't sanitise a single message older than the configured threshold which is unarchived", async () => {
+    await insertDbRecords(db, ["message_1"], [])
+    const messageIds = await insertAuditLogRecords(gateway, [
+      { externalCorrelationId: "message_1", receivedAt: new Date("2022-01-01T09:00:00") }
+    ])
+
+    await executeLambda()
+
+    const messageResult = await api.getMessage(messageIds.message_1)
+
+    expect(messageResult).toNotBeError()
+    const message = messageResult as AuditLog
+    expect(message.isSanitised).toBeFalsy()
+  })
+
   it("should sanitise a single message older than the configured threshold which isn't in the database", async () => {
+    const messageIds = await insertAuditLogRecords(gateway, [
+      { externalCorrelationId: "message_1", receivedAt: new Date("2022-01-01T09:00:00") }
+    ])
+
     await executeLambda()
 
-    expect(true).toBeTruthy()
+    const messageResult = await api.getMessage(messageIds.message_1)
+
+    expect(messageResult).toNotBeError()
+    const message = messageResult as AuditLog
+    expect(message.isSanitised).toBeTruthy()
   })
 
-  it("shouldn't sanitise a single message older than the configured threshold which hasn't been archived", async () => {
+  it("shouldn't sanitise a single message newer than the configured threshold which has been archived", async () => {
+    await insertDbRecords(db, [], ["message_1"])
+    const messageIds = await insertAuditLogRecords(gateway, [
+      { externalCorrelationId: "message_1", receivedAt: new Date() }
+    ])
+
     await executeLambda()
 
-    expect(true).toBeTruthy()
+    const messageResult = await api.getMessage(messageIds.message_1)
+
+    expect(messageResult).toNotBeError()
+    const message = messageResult as AuditLog
+    expect(message.isSanitised).toBeFalsy()
   })
 
-  it("shouldn't sanitise messages fresher than the configured threshold", async () => {
+  it("shouldn't sanitise a single message newer than the configured threshold which is unarchived", async () => {
+    await insertDbRecords(db, ["message_1"], [])
+    const messageIds = await insertAuditLogRecords(gateway, [
+      { externalCorrelationId: "message_1", receivedAt: new Date() }
+    ])
+
     await executeLambda()
 
-    expect(true).toBeTruthy()
+    const messageResult = await api.getMessage(messageIds.message_1)
+
+    expect(messageResult).toNotBeError()
+    const message = messageResult as AuditLog
+    expect(message.isSanitised).toBeFalsy()
+  })
+
+  it("shouldn't sanitise a single message newer than the configured threshold which isn't in the database", async () => {
+    const messageIds = await insertAuditLogRecords(gateway, [
+      { externalCorrelationId: "message_1", receivedAt: new Date() }
+    ])
+
+    await executeLambda()
+
+    const messageResult = await api.getMessage(messageIds.message_1)
+
+    expect(messageResult).toNotBeError()
+    const message = messageResult as AuditLog
+    expect(message.isSanitised).toBeFalsy()
   })
 })

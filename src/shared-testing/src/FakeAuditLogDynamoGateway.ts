@@ -97,6 +97,11 @@ export default class FakeAuditLogDynamoGateway implements AuditLogDynamoGateway 
     throw new Error("Method not implemented.")
   }
 
+  // @ts-ignore
+  fetchUnsanitisedBeforeDate(before: Date, limit: number, lastMessage?: AuditLog): PromiseResult<AuditLog[]> {
+    throw new Error("Method not implemented.")
+  }
+
   shouldReturnError(error: Error): void {
     this.error = error
   }
