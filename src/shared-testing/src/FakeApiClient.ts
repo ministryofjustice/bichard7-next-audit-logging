@@ -53,6 +53,12 @@ export default class FakeApiClient implements ApiClient {
     return Promise.resolve()
   }
 
+  // @ts-ignore
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  sanitiseMessage(messageId: string): PromiseResult<void> {
+    return Promise.resolve(Error("sanitiseMessage not implemented"))
+  }
+
   setErrorReturnedByFunctions(error: Error, functionNames?: string[]): void {
     this.error = error
     this.errorFunctions = functionNames || []

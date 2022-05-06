@@ -158,4 +158,34 @@ export default class AuditLogApiClient implements ApiClient {
         )
       })
   }
+
+  sanitiseMessage(messageId: string): PromiseResult<void> {
+    return axios
+      .post(
+        `${this.apiUrl}/messages/${messageId}/sanitise`,
+        {},
+        {
+          httpsAgent,
+          headers: {
+            "X-API-Key": this.apiKey
+          },
+          timeout: this.timeout
+        }
+      )
+      .then((result) => {
+        switch (result.status) {
+          case HttpStatusCode.notFound:
+            return Error(`The message with Id ${messageId} does not exist.`)
+          default:
+            return Error(`Error ${result.status}: Could not sanitise message.`)
+        }
+      })
+      .catch((error: AxiosError) => {
+        logger.error(`Error retrying event: ${this.stringify(error.response?.data)}`)
+        return new ApplicationError(
+          `Error retrying event: ${this.stringify(error.response?.data) ?? error.message}`,
+          error
+        )
+      })
+  }
 }
