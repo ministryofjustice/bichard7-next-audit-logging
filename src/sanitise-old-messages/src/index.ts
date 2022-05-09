@@ -5,6 +5,8 @@ import sanitiseOldMessages from "./sanitiseOldMessages"
 export default async (): Promise<void> => {
   logger.info("Sanitise Old Messages lambda not implemented")
 
+  // TODO get config values from environment variables
+
   const api = new AuditLogApiClient("http://localhost:3010", "apiKey")
   const dynamo = new AwsAuditLogDynamoGateway(
     {

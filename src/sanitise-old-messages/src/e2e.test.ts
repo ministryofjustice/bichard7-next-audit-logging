@@ -126,11 +126,11 @@ describe("Sanitise Old Messages e2e", () => {
     await db.end()
   })
 
-  it.only("should sanitise a single message older than the configured threshold which has been archived", async () => {
-    await insertDbRecords(db, [], ["message_1"])
+  it("should sanitise a single message older than the configured threshold which has been archived", async () => {
     const messageIds = await insertAuditLogRecords(gateway, [
       { externalCorrelationId: "message_1", receivedAt: new Date("2022-01-01T09:00:00") }
     ])
+    await insertDbRecords(db, [], [messageIds.message_1])
 
     await executeLambda()
 
@@ -142,10 +142,10 @@ describe("Sanitise Old Messages e2e", () => {
   })
 
   it("shouldn't sanitise a single message older than the configured threshold which is unarchived", async () => {
-    await insertDbRecords(db, ["message_1"], [])
     const messageIds = await insertAuditLogRecords(gateway, [
       { externalCorrelationId: "message_1", receivedAt: new Date("2022-01-01T09:00:00") }
     ])
+    await insertDbRecords(db, [messageIds.message_1], [])
 
     await executeLambda()
 
@@ -171,10 +171,10 @@ describe("Sanitise Old Messages e2e", () => {
   })
 
   it("shouldn't sanitise a single message newer than the configured threshold which has been archived", async () => {
-    await insertDbRecords(db, [], ["message_1"])
     const messageIds = await insertAuditLogRecords(gateway, [
       { externalCorrelationId: "message_1", receivedAt: new Date() }
     ])
+    await insertDbRecords(db, [], [messageIds.message_1])
 
     await executeLambda()
 
@@ -186,10 +186,10 @@ describe("Sanitise Old Messages e2e", () => {
   })
 
   it("shouldn't sanitise a single message newer than the configured threshold which is unarchived", async () => {
-    await insertDbRecords(db, ["message_1"], [])
     const messageIds = await insertAuditLogRecords(gateway, [
       { externalCorrelationId: "message_1", receivedAt: new Date() }
     ])
+    await insertDbRecords(db, [messageIds.message_1], [messageIds.message_1])
 
     await executeLambda()
 
