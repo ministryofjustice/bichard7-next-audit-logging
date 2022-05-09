@@ -46,6 +46,7 @@ export default async (api: ApiClient, dynamo: AuditLogDynamoGateway, db: Client)
   for (const message of messages) {
     // If yes, call sanitise endpoint on api for message
     if (await shouldSanitise(db, message.messageId)) {
+      // TODO error handling
       await api.sanitiseMessage(message.messageId)
     }
   }
