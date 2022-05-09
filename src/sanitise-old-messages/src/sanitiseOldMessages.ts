@@ -1,8 +1,8 @@
+import { subMonths } from "date-fns"
 import type { Client } from "pg"
 import { logger } from "shared"
 import type { ApiClient, AuditLog, AuditLogDynamoGateway, PromiseResult } from "shared-types"
 import { isError } from "shared-types"
-import { subMonths } from "date-fns"
 
 const shouldSanitise = async (db: Client, messageId: string): PromiseResult<boolean> => {
   // TODO error handling

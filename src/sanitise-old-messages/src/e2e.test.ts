@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-jest.setTimeout(15_000)
+jest.setTimeout(30_000)
 
 import { execute } from "lambda-local"
 import { Client } from "pg"
@@ -73,9 +73,17 @@ const lambdaEnvironment = {
   API_URL: "http://localhost:3010",
   API_KEY: "apiKey",
   DB_HOST: "localhost",
+  DB_PORT: 5432,
   DB_USER: "bichard",
   DB_PASSWORD: "password",
-  DB_NAME: "bichard"
+  DB_NAME: "bichard",
+  DB_SCHEMA: "br7own",
+  DB_SSL: false,
+  AWS_URL: "http://localhost:8000",
+  AWS_REGION: "eu-west-2",
+  AUDIT_LOG_TABLE_NAME: "auditLogTable",
+  DYNAMO_AWS_ACCESS_KEY_ID: "dummy1",
+  DYNAMO_AWS_SECRET_ACCESS_KEY: "dummy2"
 }
 
 const executeLambda = (environment?: any): Promise<unknown> => {
