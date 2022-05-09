@@ -4,7 +4,7 @@ jest.setTimeout(15_000)
 
 import { execute } from "lambda-local"
 import { Client } from "pg"
-import { logger, TestDynamoGateway } from "shared"
+import { AuditLogApiClient, logger, TestDynamoGateway } from "shared"
 import "shared-testing"
 import type { ApiClient, KeyValuePair } from "shared-types"
 import { AuditLog } from "shared-types"
@@ -111,6 +111,8 @@ describe("Sanitise Old Messages e2e", () => {
       AWS_ACCESS_KEY_ID: "DUMMY",
       AWS_SECRET_ACCESS_KEY: "DUMMY"
     })
+
+    api = new AuditLogApiClient(lambdaEnvironment.API_URL, lambdaEnvironment.API_KEY)
   })
 
   beforeEach(async () => {
