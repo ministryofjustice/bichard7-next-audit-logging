@@ -2,10 +2,16 @@ import type { Client } from "pg"
 import { logger } from "shared"
 import type { ApiClient, AuditLog, AuditLogDynamoGateway, PromiseResult } from "shared-types"
 import { isError } from "shared-types"
+import { subMonths } from "date-fns"
 
-const isArchived = async (db: Client, messageId: string): PromiseResult<boolean> => {}
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const isArchived = async (_db: Client, _messageId: string): PromiseResult<boolean> => {
+  await Promise.resolve()
+  return false
+}
 
-const fetchOldMessages = async (dynamo: AuditLogDynamoGateway): PromiseResult<AuditLog[]> => {}
+const fetchOldMessages = (dynamo: AuditLogDynamoGateway): PromiseResult<AuditLog[]> =>
+  dynamo.fetchUnsanitisedBeforeDate(subMonths(new Date(), 3), 500)
 
 export default async (api: ApiClient, dynamo: AuditLogDynamoGateway, db: Client): Promise<void> => {
   logger.debug("Fetching messages to sanitise")

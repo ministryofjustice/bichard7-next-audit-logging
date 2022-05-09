@@ -126,7 +126,7 @@ describe("Sanitise Old Messages e2e", () => {
     await db.end()
   })
 
-  it("should sanitise a single message older than the configured threshold which has been archived", async () => {
+  it.only("should sanitise a single message older than the configured threshold which has been archived", async () => {
     await insertDbRecords(db, [], ["message_1"])
     const messageIds = await insertAuditLogRecords(gateway, [
       { externalCorrelationId: "message_1", receivedAt: new Date("2022-01-01T09:00:00") }
