@@ -1,4 +1,4 @@
-import { inflate, deflate } from "node:zlib"
+import { inflate, deflate } from "zlib"
 import type { PromiseResult } from "shared-types"
 import { isError } from "shared-types"
 import { promisify } from "util"
