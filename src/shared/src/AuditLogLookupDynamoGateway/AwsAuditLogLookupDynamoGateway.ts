@@ -11,7 +11,7 @@ export default class AwsAuditLogLookupDynamoGateway extends DynamoGateway implem
   }
 
   private async decompressItemValue(item: AuditLogLookup): Promise<AuditLogLookup> {
-    if (!item || !item.isCompressed) {
+    if (!item.isCompressed) {
       return item
     }
 
@@ -36,7 +36,9 @@ export default class AwsAuditLogLookupDynamoGateway extends DynamoGateway implem
       return result
     }
 
-    return this.decompressItemValue(result?.Item as AuditLogLookup)
+    const item = result?.Item as AuditLogLookup
+
+    return item ? this.decompressItemValue(item) : item
   }
 
   async fetchByMessageId(
