@@ -5,7 +5,7 @@ import type { DynamoDbConfig } from "shared-types"
 import { isError, AuditLogLookup } from "shared-types"
 import TestDynamoGateway from "../DynamoGateway/TestDynamoGateway"
 import AwsAuditLogLookupDynamoGateway from "./AwsAuditLogLookupDynamoGateway"
-import { IndexSearcher } from ".."
+import { decompress, IndexSearcher } from ".."
 
 const config: DynamoDbConfig = {
   DYNAMO_URL: "http://localhost:8000",
@@ -86,6 +86,20 @@ describe("AuditLogDynamoGateway", () => {
       expect(actualLookupItem.messageId).toBe(expectedLookupItem.messageId)
     })
 
+    it("should return the matching lookup item when the value is not compressed", async () => {
+      const expectedLookupItem = new AuditLogLookup("Value 1", "MessageID")
+      await testGateway.insertOne(config.TABLE_NAME, expectedLookupItem, "id")
+
+      const result = await gateway.fetchById(expectedLookupItem.id)
+
+      expect(isError(result)).toBe(false)
+
+      const actualLookupItem = <AuditLogLookup>result
+      expect(actualLookupItem.id).toBe(expectedLookupItem.id)
+      expect(actualLookupItem.value).toBe(expectedLookupItem.value)
+      expect(actualLookupItem.messageId).toBe(expectedLookupItem.messageId)
+    })
+
     it("should return null when no lookup item matches the given id", async () => {
       const result = await gateway.fetchById("InvalidMessageId")
 
@@ -96,6 +110,23 @@ describe("AuditLogDynamoGateway", () => {
 
   describe("fetchByMessageId", () => {
     it("should return an item for a specific message ID", async () => {
+      const expectedLookupItem = new AuditLogLookup("Expected value 1", "Expected message ID")
+      const anotherLookupItem = new AuditLogLookup("Expected value 2", "Dummy message ID")
+
+      await gateway.create(expectedLookupItem)
+      await testGateway.insertOne(config.TABLE_NAME, anotherLookupItem, "id")
+
+      const result = await gateway.fetchByMessageId(expectedLookupItem.messageId)
+
+      expect(isError(result)).toBe(false)
+
+      const [{ id, messageId, value }] = result as AuditLogLookup[]
+      expect(id).toStrictEqual(expectedLookupItem.id)
+      expect(messageId).toStrictEqual(expectedLookupItem.messageId)
+      expect(value).toStrictEqual(expectedLookupItem.value)
+    })
+
+    it("should return an item for a specific message ID when value is not compressed", async () => {
       const expectedLookupItem = new AuditLogLookup("Expected value 1", "Expected message ID")
       const anotherLookupItem = new AuditLogLookup("Expected value 2", "Dummy message ID")
 
@@ -150,6 +181,29 @@ describe("AuditLogDynamoGateway", () => {
 
   describe("fetchAllByMessageId", () => {
     it("should all items for a specific message ID", async () => {
+      const fetchByMessageIdSpy = jest.spyOn(gateway, "fetchByMessageId")
+      const expectedMessageId = uuid()
+      const expectedItems = [...Array(15).keys()].map((index) => {
+        const item = new AuditLogLookup(`Expected value ${index}`, expectedMessageId)
+        return { ...item, id: `ID-${index}` } as AuditLogLookup
+      })
+      await Promise.all(expectedItems.map((item) => gateway.create(item)))
+
+      const insertedItems = await Promise.all(
+        ((await testGateway.getAll(config.TABLE_NAME)).Items as AuditLogLookup[]).map(async (item) => ({
+          ...item,
+          value: await decompress(item.value)
+        }))
+      )
+
+      const result = await gateway.fetchAllByMessageId(expectedMessageId)
+
+      expect(isError(result)).toBe(false)
+      expect(fetchByMessageIdSpy).toHaveBeenCalledTimes(3)
+      expect(result).toStrictEqual(insertedItems)
+    })
+
+    it("should all items for a specific message ID when values are not compressed", async () => {
       const fetchByMessageIdSpy = jest.spyOn(gateway, "fetchByMessageId")
       const expectedMessageId = uuid()
       await Promise.all(

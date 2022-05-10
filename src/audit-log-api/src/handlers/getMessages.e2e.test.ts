@@ -1,4 +1,5 @@
 jest.retryTimes(10)
+import type { AxiosError } from "axios"
 import axios from "axios"
 import type { AuditLog } from "shared-types"
 import { isError } from "shared-types"
@@ -18,6 +19,15 @@ describe("Getting Audit Logs", () => {
     expect(Array.isArray(result2.data)).toBeTruthy()
     const messageIds = result2.data.map((record) => record.messageId)
     expect(messageIds).toContain(auditLog.messageId)
+  })
+
+  it("should return 404 status code and empty array", async () => {
+    const result2 = await axios
+      .get(`http://localhost:3010/messages/dummy-id`)
+      .catch((error: AxiosError) => error.response)
+    expect(result2).toBeDefined()
+    expect(result2!.status).toEqual(HttpStatusCode.notFound)
+    expect(result2!.data).toHaveLength(0)
   })
 
   it("should return a specific audit log record", async () => {
