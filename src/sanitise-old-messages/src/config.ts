@@ -1,5 +1,10 @@
 import type { DynamoDbConfig, PostgresConfig } from "shared-types"
 
+export type ApiConfig = {
+  API_URL: string
+  API_KEY: string
+}
+
 export const getPostgresConfig = () => {
   const { DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_NAME, DB_SCHEMA, DB_SSL } = process.env
 
@@ -66,11 +71,6 @@ export const getDynamoConfig = () => {
     config.AWS_SECRET_ACCESS_KEY = DYNAMO_AWS_SECRET_ACCESS_KEY
   }
   return config
-}
-
-export type ApiConfig = {
-  API_URL: string
-  API_KEY: string
 }
 
 export const getApiConfig = (): ApiConfig => {
