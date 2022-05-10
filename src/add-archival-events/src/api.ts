@@ -1,6 +1,6 @@
 import { logger } from "shared"
-import type { ApiClient, AuditLog } from "shared-types"
-import { AuditLogEvent, isError, EventType } from "shared-types"
+import type { ApiClient } from "shared-types"
+import { AuditLog, AuditLogEvent, isError, EventType } from "shared-types"
 import type { BichardRecord } from "./db"
 
 const hasArchivalEvent = (auditLog: AuditLog, recordId: number): boolean =>
@@ -12,12 +12,28 @@ const hasArchivalEvent = (auditLog: AuditLog, recordId: number): boolean =>
     )
   }).length > 0
 
+const createAuditLog = async (api: ApiClient, messageId: string, archivedAt: Date): Promise<boolean> => {
+  const message = {
+    ...new AuditLog(messageId, archivedAt, messageId, messageId), // We don't have the message XML to compute the message hash
+    messageId,
+    caseId: "Unknown",
+    createdBy: "Add Archival Events"
+  }
+  const createEventResult = await api.createAuditLog(message)
+  if (isError(createEventResult)) {
+    logger.error({ message: "Failed to create audit log for record", messageId: messageId })
+  }
+
+  return isError(createEventResult)
+}
+
 export const isRecordInAuditLog = async (
   api: ApiClient,
   bichardRecord: BichardRecord
 ): Promise<{ exists: boolean; err: boolean }> => {
   logger.debug({ message: "Retreiving message from audit log", record: bichardRecord })
   const messageResult = await api.getMessage(bichardRecord.messageId)
+
   if (isError(messageResult)) {
     logger.error({
       message: "Failed to retrieve message from audit log API",
@@ -25,6 +41,15 @@ export const isRecordInAuditLog = async (
       record: bichardRecord
     })
     return { exists: false, err: true }
+  }
+
+  // Create audit log message if one does not already exist
+  if (messageResult === undefined) {
+    const err = await createAuditLog(api, bichardRecord.messageId, bichardRecord.archivedAt)
+    if (err) {
+      logger.error({ message: "Failed to create audit log for record", messageId: bichardRecord.messageId })
+    }
+    return { exists: false, err }
   }
 
   return { exists: hasArchivalEvent(messageResult, bichardRecord.recordId), err: false }

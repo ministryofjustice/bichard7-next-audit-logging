@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-jest.setTimeout(30000)
+jest.setTimeout(60_000)
 
 import { execute } from "lambda-local"
 import partition from "lodash.partition"
@@ -433,16 +433,18 @@ describe("Add Error Records e2e", () => {
     const allSameArchiveLogGroup = (arr: any) => arr.every((v: any) => v.archiveLogGroup === arr[0].archiveLogGroup)
 
     // Assert only one archive log group gets audit logged
-    const auditLogResults = messages.map(async (message) => {
-      const messageResult = await api.getMessage(message.messageId)
-      expect(isSuccess(messageResult)).toBeTruthy()
-      const auditLogMessage = messageResult as AuditLog
-      return {
-        messageId: message.messageId,
-        archiveLogGroup: message.archiveLogGroup,
-        isAuditLogged: auditLogMessage?.events?.length > 0
-      }
-    })
+    const auditLogResults = await Promise.all(
+      messages.map(async (message) => {
+        const messageResult = await api.getMessage(message.messageId)
+        expect(isSuccess(messageResult)).toBeTruthy()
+        const auditLogMessage = messageResult as AuditLog
+        return {
+          messageId: message.messageId,
+          archiveLogGroup: message.archiveLogGroup,
+          isAuditLogged: auditLogMessage?.events?.length > 0
+        }
+      })
+    )
     const [auditLogged, notAuditLogged] = partition(
       auditLogResults,
       (result: { isAuditLogged: boolean }) => result.isAuditLogged
@@ -554,5 +556,43 @@ describe("Add Error Records e2e", () => {
       expect(row.audit_logged_at).not.toBeNull()
       expect(row.audit_logged_at.toISOString().length).toBeGreaterThan(0)
     }
+  })
+
+  it("should audit log single error records with legacy IDs and no existing audit log successfully", async () => {
+    const legacyRecordId = "202114:29ID:414d5120574153514d30322020202020c5450e608af19a23"
+
+    // Insert testdata into postgres
+    await pg.query(
+      `INSERT INTO br7own.archive_log (log_id, archived_at, archived_by, audit_logged_at) VALUES (1, '2022-04-26T12:53:55.000Z', 'me', NULL)`
+    )
+    await pg.query(
+      `INSERT INTO br7own.archive_error_list (error_id, message_id, archive_log_id) VALUES (1, '${legacyRecordId}', 1)`
+    )
+
+    // Invoke lambda
+    await executeLambda()
+
+    // Assert audit log results
+    const messageResult = await api.getMessage(legacyRecordId)
+    expect(isSuccess(messageResult)).toBeTruthy()
+    const message = messageResult as AuditLog
+
+    expect(message.events).toHaveLength(1)
+    expect(message.events[0]).toStrictEqual({
+      eventSource: "me",
+      attributes: { "Record ID": 1 },
+      eventType: "Error record archival",
+      category: "information",
+      timestamp: "2022-04-26T12:53:55.000Z"
+    })
+
+    // Assert postgres results
+    const recordQueryResult = await pg.query(
+      `SELECT audit_logged_at, audit_log_attempts FROM br7own.archive_error_list WHERE error_id = 1`
+    )
+    expect(recordQueryResult.rows[0].audit_logged_at.toISOString().length).toBeGreaterThan(0)
+    expect(recordQueryResult.rows[0].audit_log_attempts).toBe(1)
+    const groupQueryResult = await pg.query(`SELECT audit_logged_at FROM br7own.archive_log WHERE log_id = 1`)
+    expect(groupQueryResult.rows[0].audit_logged_at.toISOString().length).toBeGreaterThan(0)
   })
 })
