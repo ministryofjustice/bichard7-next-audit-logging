@@ -41,6 +41,10 @@ export default class AuditLogApiClient implements ApiClient {
       })
       .then((response) => response.data)
       .catch((error: AxiosError) => {
+        if (error.response?.status === HttpStatusCode.notFound) {
+          return []
+        }
+
         logger.error(`Error getting messages: ${this.stringify(error.response?.data)}`)
         return new ApplicationError(
           `Error getting messages: ${this.stringify(error.response?.data) ?? error.message}`,
@@ -58,6 +62,10 @@ export default class AuditLogApiClient implements ApiClient {
       .then((response) => response.data)
       .then((result) => result[0])
       .catch((error: AxiosError) => {
+        if (error.response?.status === HttpStatusCode.notFound) {
+          return undefined
+        }
+
         logger.error(`Error getting messages: ${this.stringify(error.response?.data)}`)
         return new ApplicationError(
           `Error getting messages: ${this.stringify(error.response?.data) ?? error.message}`,

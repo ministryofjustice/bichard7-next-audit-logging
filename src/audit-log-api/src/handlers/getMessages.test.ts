@@ -119,7 +119,7 @@ test("should return an empty array when externalCorrelationId is specified and n
   const messages = await getMessages(event)
 
   const actualResponse = <APIGatewayProxyResult>messages
-  expect(actualResponse.statusCode).toBe(HttpStatusCode.ok)
+  expect(actualResponse.statusCode).toBe(HttpStatusCode.notFound)
 
   const actualMessages: AuditLog[] = JSON.parse(actualResponse.body)
   expect(actualMessages).toBeDefined()

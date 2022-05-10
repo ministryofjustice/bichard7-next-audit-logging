@@ -16,12 +16,6 @@ const auditLogLookupGateway = new AwsAuditLogLookupDynamoGateway(auditLogLookupC
 const lookupEventValuesUseCase = new LookupEventValuesUseCase(auditLogLookupGateway)
 const lookupMessageValuesUseCase = new LookupMessageValuesUseCase(lookupEventValuesUseCase)
 
-const createOkResult = (messages: AuditLog[]): APIGatewayProxyResult =>
-  createJsonApiResult({
-    statusCode: HttpStatusCode.ok,
-    body: messages
-  })
-
 export default async function getMessages(event: APIGatewayProxyEvent): PromiseResult<APIGatewayProxyResult> {
   const messageFetcher = createMessageFetcher(event, auditLogGateway)
   const messageFetcherResult = await messageFetcher.fetch()
@@ -34,8 +28,11 @@ export default async function getMessages(event: APIGatewayProxyEvent): PromiseR
     })
   }
 
-  if (messageFetcherResult === null) {
-    return createOkResult([])
+  if (!messageFetcherResult) {
+    return createJsonApiResult({
+      statusCode: HttpStatusCode.notFound,
+      body: []
+    })
   }
 
   let messages = messageFetcherResult as AuditLog[]
@@ -56,5 +53,8 @@ export default async function getMessages(event: APIGatewayProxyEvent): PromiseR
     messages[index] = lookupMessageValuesResult
   }
 
-  return createOkResult(messages)
+  return createJsonApiResult({
+    statusCode: HttpStatusCode.ok,
+    body: messages
+  })
 }
