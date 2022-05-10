@@ -1,7 +1,7 @@
 jest.retryTimes(10)
 import type { AuditLogLookup, DynamoDbConfig } from "shared-types"
 import { AuditLog, AuditLogEvent } from "shared-types"
-import { AwsAuditLogDynamoGateway } from "shared"
+import { AwsAuditLogDynamoGateway, decompress } from "shared"
 import { TestDynamoGateway } from "shared"
 import CreateAuditLogEventUseCase from "./CreateAuditLogEventUseCase"
 import { AwsAuditLogLookupDynamoGateway } from "shared"
@@ -126,7 +126,8 @@ describe("CreateAuditLogUseCase", () => {
     expect(lookupResult).toBeDefined()
 
     const { value: attributeValue } = lookupResult as AuditLogLookup
-    expect(attributeValue).toBe(event.attributes.attribute1)
+    const decompressedAttributeValue = await decompress(attributeValue)
+    expect(decompressedAttributeValue).toBe(event.attributes.attribute1)
   })
 
   it("should return not found result when audit log does not exist", async () => {

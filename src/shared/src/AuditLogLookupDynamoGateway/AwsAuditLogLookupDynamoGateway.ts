@@ -1,5 +1,6 @@
 import type { AuditLogLookupDynamoGateway, AuditLogLookup, DynamoDbConfig, PromiseResult } from "shared-types"
 import { isError } from "shared-types"
+import { compress, decompress } from ".."
 import { DynamoGateway, IndexSearcher } from "../DynamoGateway"
 
 export default class AwsAuditLogLookupDynamoGateway extends DynamoGateway implements AuditLogLookupDynamoGateway {
@@ -9,8 +10,17 @@ export default class AwsAuditLogLookupDynamoGateway extends DynamoGateway implem
     super(config)
   }
 
+  private async decompressItemValue(item: AuditLogLookup): Promise<AuditLogLookup> {
+    if (!item.isCompressed) {
+      return item
+    }
+
+    return { ...item, value: await decompress(item.value) } as AuditLogLookup
+  }
+
   async create(lookupItem: AuditLogLookup): PromiseResult<AuditLogLookup> {
-    const result = await this.insertOne(this.tableName, lookupItem, "id")
+    const itemToSave = { ...lookupItem, value: await compress(lookupItem.value), isCompressed: true }
+    const result = await this.insertOne(this.tableName, itemToSave, "id")
 
     if (isError(result)) {
       return result
@@ -26,7 +36,9 @@ export default class AwsAuditLogLookupDynamoGateway extends DynamoGateway implem
       return result
     }
 
-    return result?.Item as AuditLogLookup
+    const item = result?.Item as AuditLogLookup
+
+    return item ? this.decompressItemValue(item) : item
   }
 
   async fetchByMessageId(
@@ -44,7 +56,7 @@ export default class AwsAuditLogLookupDynamoGateway extends DynamoGateway implem
       return result
     }
 
-    return result ?? []
+    return Promise.all((result ?? []).map(this.decompressItemValue))
   }
 
   async fetchAllByMessageId(messageId: string): PromiseResult<AuditLogLookup[]> {
