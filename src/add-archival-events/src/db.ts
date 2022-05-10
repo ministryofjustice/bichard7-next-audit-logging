@@ -23,7 +23,7 @@ export type DatabaseRow = {
 // Produces the string "$1, $2, $3..." for the given range
 const wherePlaceholderForRange = (range: number) => [...Array(range).keys()].map((x) => `$${x + 1}`).join(", ")
 
-export default class DatabaseClient {
+export class DatabaseClient {
   private postgres: Client
 
   constructor(
