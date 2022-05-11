@@ -13,6 +13,8 @@ export default class AuditLog {
 
   public isSanitised = 0
 
+  public lastSanitiseCheck = "1970-01-01T00:00:00Z"
+
   public caseId: string
 
   public systemId: string
