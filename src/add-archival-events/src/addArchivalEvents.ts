@@ -1,65 +1,67 @@
+import type { AuditLogApiClient } from "shared"
 import { logger } from "shared"
-import type { ApiClient } from "shared-types"
 import { isError } from "shared-types"
-import { createArchivalEventInAuditLog, isRecordInAuditLog as isBichardRecordInAuditLog } from "./api"
-import type DatabaseClient from "./db"
-import type { BichardRecord } from "./db"
+import ArchivalEventsApiClient from "./api"
+import type { BichardRecord, DatabaseClient } from "./db"
 
-const addBichardRecordToAuditLog = async (api: ApiClient, errorRecord: BichardRecord): Promise<boolean> => {
-  const { exists, err } = await isBichardRecordInAuditLog(api, errorRecord)
-  if (err) {
-    return false
+export default class AddArchivalEvents {
+  private api: ArchivalEventsApiClient
+
+  constructor(apiClient: AuditLogApiClient, private db: DatabaseClient) {
+    this.api = new ArchivalEventsApiClient(apiClient)
   }
 
-  if (!exists) {
-    const createRecordErr = await createArchivalEventInAuditLog(api, errorRecord)
-    if (createRecordErr) {
+  public addBichardRecordToAuditLog = async (errorRecord: BichardRecord): Promise<boolean> => {
+    const { exists, err } = await this.api.isRecordInAuditLog(errorRecord)
+    if (err) {
       return false
     }
-  }
 
-  return true
-}
-
-// Record the archival of an entire group in the audit log and database
-// Returns whether all records in the group were updated successfully
-const addBichardRecordGroupToAuditLog = async (
-  db: DatabaseClient,
-  api: ApiClient,
-  records: BichardRecord[],
-  groupId: number
-): Promise<boolean> => {
-  const successfulIds: number[] = []
-  const failedIds: number[] = []
-  for (const record of records) {
-    const ok = await addBichardRecordToAuditLog(api, record)
-    if (ok) {
-      successfulIds.push(record.recordId)
-    } else {
-      failedIds.push(record.recordId)
+    if (!exists) {
+      const createRecordErr = await this.api.createArchivalEventInAuditLog(errorRecord)
+      if (createRecordErr) {
+        return false
+      }
     }
+
+    return true
   }
 
-  db.markBichardRecordsAuditLogged(successfulIds)
-  db.markBichardRecordsAuditLogFailed(failedIds)
-
-  const allSucceeded = failedIds.length < 1
-  if (allSucceeded) {
-    const result = await db.markBichardRecordGroupAuditLogged(groupId)
-    if (isError(result)) {
-      logger.error({ message: "Failed database update: successfully audit logged archive group", groupId: groupId })
+  // Record the archival of an entire group in the audit log and database
+  // Returns whether all records in the group were updated successfully
+  public addBichardRecordGroupToAuditLog = async (records: BichardRecord[], groupId: number): Promise<boolean> => {
+    const successfulIds: number[] = []
+    const failedIds: number[] = []
+    for (const record of records) {
+      const ok = await this.addBichardRecordToAuditLog(record)
+      if (ok) {
+        successfulIds.push(record.recordId)
+      } else {
+        failedIds.push(record.recordId)
+      }
     }
-  }
-  return allSucceeded
-}
 
-export const addBichardRecordsToAuditLog = async (db: DatabaseClient, api: ApiClient): Promise<void> => {
-  const recordGroups = await db.fetchUnloggedBichardRecords()
-  if (isError(recordGroups)) {
-    throw recordGroups
+    await this.db.markBichardRecordsAuditLogged(successfulIds)
+    await this.db.markBichardRecordsAuditLogFailed(failedIds)
+
+    const allSucceeded = failedIds.length < 1
+    if (allSucceeded) {
+      const result = await this.db.markBichardRecordGroupAuditLogged(groupId)
+      if (isError(result)) {
+        logger.error({ message: "Failed database update: successfully audit logged archive group", groupId: groupId })
+      }
+    }
+    return allSucceeded
   }
 
-  for (const [groupId, recordGroup] of Object.entries(recordGroups)) {
-    await addBichardRecordGroupToAuditLog(db, api, recordGroup, Number(groupId))
+  public addBichardRecordsToAuditLog = async (): Promise<void> => {
+    const recordGroups = await this.db.fetchUnloggedBichardRecords()
+    if (isError(recordGroups)) {
+      throw recordGroups
+    }
+
+    for (const [groupId, recordGroup] of Object.entries(recordGroups)) {
+      await this.addBichardRecordGroupToAuditLog(recordGroup as BichardRecord[], Number(groupId))
+    }
   }
 }
