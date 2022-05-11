@@ -1,11 +1,12 @@
-import type { AuditLog, S3PutObjectEvent } from "shared-types"
 import { AuditLogApiClient, AwsS3Gateway, createS3Config, logger } from "shared"
+import type { AuditLog, S3PutObjectEvent } from "shared-types"
 import { isError } from "shared-types"
-import readMessage from "../use-cases/readMessage"
-import { getApiKey, getApiUrl } from "../configs"
-import retrieveMessageFromS3 from "../use-cases/retrieveMessageFromS3"
-import formatMessage from "../use-cases/formatMessage"
 import CreateAuditLogUseCase from "src/use-cases/CreateAuditLogUseCase"
+import logBadUnicode from "src/use-cases/logBadUnicode"
+import { getApiKey, getApiUrl } from "../configs"
+import formatMessage from "../use-cases/formatMessage"
+import readMessage from "../use-cases/readMessage"
+import retrieveMessageFromS3 from "../use-cases/retrieveMessageFromS3"
 
 interface StoreMessageResult {
   auditLog: AuditLog
@@ -46,6 +47,8 @@ export default async function storeMessage(
     logger.info(JSON.stringify(receivedMessage))
     return createValidationResult(receivedMessage, event)
   }
+
+  logBadUnicode(receivedMessage)
 
   const formattedMessage = await formatMessage(receivedMessage)
 
