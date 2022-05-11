@@ -19,11 +19,19 @@ export interface ValidationResult {
 
 interface StoreMessageValidationResult {
   validationResult: ValidationResult
+  bucketName: string
+  s3Path: string
 }
 
 const s3Gateway = new AwsS3Gateway(createS3Config())
 const apiClient = new AuditLogApiClient(getApiUrl(), getApiKey())
 const createAuditLogUseCase = new CreateAuditLogUseCase(apiClient)
+
+const createValidationResult = (validationResult: ValidationResult, event: S3PutObjectEvent) => ({
+  validationResult,
+  bucketName: event.detail.requestParameters.bucketName,
+  s3Path: event.detail.requestParameters.key
+})
 
 export default async function storeMessage(
   event: S3PutObjectEvent
@@ -36,7 +44,7 @@ export default async function storeMessage(
 
   if ("isValid" in receivedMessage) {
     logger.info(JSON.stringify(receivedMessage))
-    return { validationResult: receivedMessage }
+    return createValidationResult(receivedMessage, event)
   }
 
   const formattedMessage = await formatMessage(receivedMessage)
@@ -59,7 +67,7 @@ export default async function storeMessage(
 
   if (!createAuditLogResult.isValid) {
     logger.info(JSON.stringify(createAuditLogResult))
-    return { validationResult: createAuditLogResult }
+    return createValidationResult(createAuditLogResult, event)
   }
 
   return { auditLog, messageXml: formattedMessage.messageXml }
