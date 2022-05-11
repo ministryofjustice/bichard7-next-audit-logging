@@ -221,4 +221,30 @@ describe("Sanitise Old Messages e2e", () => {
     const message = messageResult as AuditLog
     expect(message.isSanitised).toBeFalsy()
   })
+
+  it("should update the lastSanitiseCheck date of all messages considered", async () => {
+    const messageIds = await insertAuditLogRecords(gateway, [
+      { externalCorrelationId: "message_1", receivedAt: new Date("2022-01-01T09:00:00") },
+      { externalCorrelationId: "message_2", receivedAt: new Date("2022-01-02T09:00:00") },
+      { externalCorrelationId: "message_3", receivedAt: new Date("2022-01-03T09:00:00") },
+      { externalCorrelationId: "message_4", receivedAt: new Date("2022-01-04T09:00:00") },
+      { externalCorrelationId: "message_5", receivedAt: new Date("2022-01-05T09:00:00") }
+    ])
+    await insertDbRecords(
+      db,
+      [messageIds.message_1, messageIds.message_2, messageIds.message_3],
+      [messageIds.message_4, messageIds.message_5]
+    )
+
+    await executeLambda()
+
+    for (const messageId of Object.values(messageIds)) {
+      const messageResult = await api.getMessage(messageId)
+      expect(messageResult).toNotBeError()
+
+      const message = messageResult as AuditLog
+      const today = new Date().toISOString().split("T")[0]
+      expect(message.lastSanitiseCheck).toContain(today)
+    }
+  })
 })
