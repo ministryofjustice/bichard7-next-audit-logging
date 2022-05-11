@@ -413,7 +413,7 @@ describe("AuditLogDynamoGateway", () => {
       expect(actualMessage).toNotBeError()
 
       const actualAuditLog = actualMessage as AuditLog
-      expect(actualAuditLog.sanitisedDate).toBe(expectedEvent.timestamp)
+      expect(actualAuditLog.isSanitised).toBeTruthy()
       expect(actualAuditLog.status).toBe(AuditLogStatus.processing)
     })
   })
@@ -702,7 +702,8 @@ describe("AuditLogDynamoGateway", () => {
     it("should not change the status and should set error record archival date", async () => {
       const expectedEvent = createAuditLogEvent("information", new Date(), EventType.ErrorRecordArchival)
 
-      const message = new AuditLog("one", new Date(), `dummy hash`)
+      const now = new Date()
+      const message = new AuditLog("one", now, `dummy hash`)
 
       await gateway.create(message)
 
@@ -715,7 +716,10 @@ describe("AuditLogDynamoGateway", () => {
       expect(actualMessage).toNotBeError()
 
       const actualAuditLog = actualMessage as AuditLog
-      expect(actualAuditLog).not.toHaveProperty("sanitisedDate")
+      expect(actualAuditLog).toHaveProperty("isSanitised")
+      expect(actualAuditLog.isSanitised).toBeFalsy()
+      expect(actualAuditLog).toHaveProperty("nextSanitiseCheck")
+      expect(actualAuditLog.nextSanitiseCheck).toBe(now.toISOString())
       expect(actualAuditLog.errorRecordArchivalDate).toBe(expectedEvent.timestamp)
       expect(actualAuditLog.status).toBe(AuditLogStatus.processing)
     })
@@ -723,7 +727,8 @@ describe("AuditLogDynamoGateway", () => {
     it("should not change the status and should set sanitised date", async () => {
       const expectedEvent = createAuditLogEvent("information", new Date(), EventType.SanitisedMessage)
 
-      const message = new AuditLog("one", new Date(), `dummy hash`)
+      const now = new Date()
+      const message = new AuditLog("one", now, `dummy hash`)
 
       await gateway.create(message)
 
@@ -737,7 +742,9 @@ describe("AuditLogDynamoGateway", () => {
 
       const actualAuditLog = actualMessage as AuditLog
       expect(actualAuditLog).not.toHaveProperty("errorRecordArchivalDate")
-      expect(actualAuditLog.sanitisedDate).toBe(expectedEvent.timestamp)
+      expect(actualAuditLog).toHaveProperty("isSanitised")
+      expect(actualAuditLog.isSanitised).toBeTruthy()
+      expect(actualAuditLog).toHaveProperty("nextSanitiseCheck")
       expect(actualAuditLog.status).toBe(AuditLogStatus.processing)
     })
 

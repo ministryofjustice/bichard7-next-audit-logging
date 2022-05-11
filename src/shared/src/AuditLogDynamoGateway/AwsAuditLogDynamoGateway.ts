@@ -39,8 +39,7 @@ export default class AwsAuditLogDynamoGateway extends DynamoGateway implements A
     message.errorRecordArchivalDate =
       message.errorRecordArchivalDate ??
       message.events.find((event) => event.eventType === EventType.ErrorRecordArchival)?.timestamp
-    message.sanitisedDate =
-      message.sanitisedDate ?? message.events.find((event) => event.eventType === EventType.SanitisedMessage)?.timestamp
+    message.isSanitised = message.events.find((event) => event.eventType === EventType.SanitisedMessage) ? 1 : 0
 
     const result = await this.updateOne(this.tableName, message, "messageId", message.version)
 
@@ -209,9 +208,9 @@ export default class AwsAuditLogDynamoGateway extends DynamoGateway implements A
       updateExpressionValues[":errorRecordArchivalDate"] = event.timestamp
       updateExpression += ",#errorRecordArchivalDate = :errorRecordArchivalDate"
     } else if (event.eventType === EventType.SanitisedMessage) {
-      expressionAttributeNames["#sanitisedDate"] = "sanitisedDate"
-      updateExpressionValues[":sanitisedDate"] = event.timestamp
-      updateExpression += ",#sanitisedDate = :sanitisedDate"
+      expressionAttributeNames["#isSanitised"] = "isSanitised"
+      updateExpressionValues[":isSanitised"] = 1
+      updateExpression += ",#isSanitised = :isSanitised"
     } else if (event.eventType === "Retrying failed message") {
       updateExpression = `${updateExpression}, retryCount = if_not_exists(retryCounter, :zero) + :one`
       updateExpressionValues[":zero"] = 0
