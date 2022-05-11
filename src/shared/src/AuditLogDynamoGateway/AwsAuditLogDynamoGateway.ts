@@ -8,7 +8,7 @@ import type {
 } from "shared-types"
 import { EventType, isError } from "shared-types"
 import type { FetchByIndexOptions, UpdateOptions } from "../DynamoGateway"
-import { DynamoGateway, IndexSearcher, RangeKeyComparison } from "../DynamoGateway"
+import { DynamoGateway, IndexSearcher, KeyComparison } from "../DynamoGateway"
 import CalculateMessageStatusUseCase from "./CalculateMessageStatusUseCase"
 import getForceOwnerForAutomationReport from "./getForceOwnerForAutomationReport"
 import shouldLogForAutomationReport from "./shouldLogForAutomationReport"
@@ -125,7 +125,9 @@ export default class AwsAuditLogDynamoGateway extends DynamoGateway implements A
   async fetchUnsanitisedBeforeDate(before: Date, limit = 10, lastMessage?: AuditLog): PromiseResult<AuditLog[]> {
     const result = await new IndexSearcher<AuditLog[]>(this, this.tableName, this.tableKey)
       .useIndex("isSanitisedIndex")
-      .setIndexKeys("isSanitised", 0, "receivedDate", before.toISOString(), RangeKeyComparison.LessThanOrEqual)
+      .setIndexKeys("isSanitised", 0, "lastSanitiseCheck")
+      .setFilter("receivedDate", before.toISOString(), KeyComparison.LessThanOrEqual)
+      .setAscendingOrder(true)
       .paginate(limit, lastMessage)
       .execute()
 

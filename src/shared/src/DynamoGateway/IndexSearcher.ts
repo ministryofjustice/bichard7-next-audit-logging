@@ -4,7 +4,7 @@ import type { KeyValuePair, PromiseResult, Result } from "shared-types"
 import { isError } from "shared-types"
 import type DynamoGateway from "./DynamoGateway"
 import type FetchByIndexOptions from "./FetchByIndexOptions"
-import type RangeKeyComparison from "./RangeKeyComparison"
+import type KeyComparison from "./KeyComparison"
 import type Pagination from "./Pagination"
 
 export default class IndexSearcher<TResult> {
@@ -20,7 +20,13 @@ export default class IndexSearcher<TResult> {
 
   private rangeKeyValue?: unknown
 
-  private rangeKeyComparison?: RangeKeyComparison
+  private rangeKeyComparison?: KeyComparison
+
+  private filterKeyName?: string
+
+  private filterKeyValue?: unknown
+
+  private filterKeyComparison?: KeyComparison
 
   private limit = 10
 
@@ -81,7 +87,7 @@ export default class IndexSearcher<TResult> {
     hashKeyValue: unknown,
     rangeKey?: string,
     rangeKeyValue?: unknown,
-    rangeKeyComparison?: RangeKeyComparison
+    rangeKeyComparison?: KeyComparison
   ): IndexSearcher<TResult> {
     this.hashKey = hashKey
     this.hashKeyValue = hashKeyValue
@@ -99,6 +105,18 @@ export default class IndexSearcher<TResult> {
     this.limit = limit
     this.lastItemForPagination = lastItemForPagination as KeyValuePair<string, unknown>
     this.isAscendingOrder = isAscendingOrder
+    return this
+  }
+
+  setAscendingOrder(isAscendingOrder: boolean): IndexSearcher<TResult> {
+    this.isAscendingOrder = isAscendingOrder
+    return this
+  }
+
+  setFilter(keyName: string, keyValue: unknown, comparison: KeyComparison): IndexSearcher<TResult> {
+    this.filterKeyName = keyName
+    this.filterKeyValue = keyValue
+    this.filterKeyComparison = comparison
     return this
   }
 
@@ -122,6 +140,9 @@ export default class IndexSearcher<TResult> {
       rangeKeyName: this.rangeKey,
       rangeKeyValue: this.rangeKeyValue,
       rangeKeyComparison: this.rangeKeyComparison,
+      filterKeyName: this.filterKeyName,
+      filterKeyValue: this.filterKeyValue,
+      filterKeyComparison: this.filterKeyComparison,
       isAscendingOrder: this.isAscendingOrder,
       pagination
     }

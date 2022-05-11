@@ -5,7 +5,7 @@ import { isError } from "shared-types"
 import type FetchByIndexOptions from "./FetchByIndexOptions"
 import type UpdateOptions from "./UpdateOptions"
 import type GetManyOptions from "./GetManyOptions"
-import RangeKeyComparison from "./RangeKeyComparison"
+import KeyComparison from "./KeyComparison"
 
 export default class DynamoGateway {
   protected readonly service: DynamoDB
@@ -105,11 +105,21 @@ export default class DynamoGateway {
       ExclusiveStartKey: lastItemKey
     }
 
-    if (options.rangeKeyName && options.rangeKeyValue && options.rangeKeyComparison !== undefined) {
-      if (options.rangeKeyComparison == RangeKeyComparison.LessThanOrEqual) {
+    // set query options for comparison to a range key value
+    if (options.rangeKeyName && options.rangeKeyValue !== undefined && options.rangeKeyComparison !== undefined) {
+      if (options.rangeKeyComparison == KeyComparison.LessThanOrEqual) {
+        queryOptions.KeyConditionExpression += " AND #rangeKeyName <= :rangeKeyValue"
         queryOptions.ExpressionAttributeNames!["#rangeKeyName"] = options.rangeKeyName
         queryOptions.ExpressionAttributeValues![":rangeKeyValue"] = options.rangeKeyValue
-        queryOptions.KeyConditionExpression += " AND #rangeKeyName <= :rangeKeyValue"
+      }
+    }
+
+    // set query options for the filter if given
+    if (options.filterKeyName && options.filterKeyValue !== undefined && options.filterKeyComparison !== undefined) {
+      if (options.filterKeyComparison == KeyComparison.LessThanOrEqual) {
+        queryOptions.FilterExpression = "#filterKeyName <= :filterKeyValue"
+        queryOptions.ExpressionAttributeNames!["#filterKeyName"] = options.filterKeyName
+        queryOptions.ExpressionAttributeValues![":filterKeyValue"] = options.filterKeyValue
       }
     }
 
