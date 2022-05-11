@@ -11,7 +11,9 @@ export default class AuditLog {
 
   public errorRecordArchivalDate?: string
 
-  public sanitisedDate?: string
+  public isSanitised = 0
+
+  public nextSanitiseCheck: string
 
   public caseId: string
 
@@ -47,5 +49,6 @@ export default class AuditLog {
   ) {
     this.messageId = messageId ?? uuid()
     this.receivedDate = receivedDate.toISOString()
+    this.nextSanitiseCheck = this.receivedDate
   }
 }

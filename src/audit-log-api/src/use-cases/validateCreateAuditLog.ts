@@ -106,7 +106,9 @@ export default async (auditLog: AuditLog, dynamoGateway: AuditLogDynamoGateway):
     events: [],
     automationReport: { events: [] },
     topExceptionsReport: { events: [] },
-    messageHash
+    messageHash,
+    isSanitised: 0,
+    nextSanitiseCheck: formattedReceivedDate || receivedDate
   }
 
   return {
