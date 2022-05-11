@@ -94,7 +94,7 @@ resources:
             AttributeType: S
           - AttributeName: isSanitised
             AttributeType: N
-          - AttributeName: lastSanitiseCheck
+          - AttributeName: nextSanitiseCheck
             AttributeType: S
         KeySchema:
           - AttributeName: messageId
@@ -153,7 +153,7 @@ resources:
             KeySchema:
               - AttributeName: isSanitised
                 KeyType: HASH
-              - AttributeName: lastSanitiseCheck
+              - AttributeName: nextSanitiseCheck
                 KeyType: RANGE
             Projection:
               ProjectionType: "ALL"

@@ -13,7 +13,7 @@ export default class AuditLog {
 
   public isSanitised = 0
 
-  public lastSanitiseCheck = "1970-01-01T00:00:00Z"
+  public nextSanitiseCheck: string
 
   public caseId: string
 
@@ -44,5 +44,6 @@ export default class AuditLog {
   constructor(public readonly externalCorrelationId: string, receivedDate: Date, public readonly messageHash: string) {
     this.messageId = uuid()
     this.receivedDate = receivedDate.toISOString()
+    this.nextSanitiseCheck = this.receivedDate
   }
 }

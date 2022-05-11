@@ -2,6 +2,7 @@
 
 jest.setTimeout(30_000)
 
+import { addDays } from "date-fns"
 import { execute } from "lambda-local"
 import { Client } from "pg"
 import { AuditLogApiClient, logger, TestDynamoGateway } from "shared"
@@ -29,8 +30,8 @@ const createTableSql = `
   );
 `
 
-// Produces the string "$1, $2, $3..." for the given range
-const sqlPlaceholderForRange = (range: number) => [...Array(range).keys()].map((x) => `$${x + 1}`).join(", ")
+// Produces the string "($1), ($2), ($3), ..." for the given range
+const sqlPlaceholderForRange = (range: number) => [...Array(range).keys()].map((x) => `($${x + 1})`).join(", ")
 
 const insertDbRecords = async (
   db: Client,
@@ -39,15 +40,13 @@ const insertDbRecords = async (
 ): Promise<void> => {
   if (unarchivedRecordIds.length > 0) {
     await db.query(
-      `INSERT INTO br7own.error_list (message_id) VALUES (${sqlPlaceholderForRange(unarchivedRecordIds.length)});`,
+      `INSERT INTO br7own.error_list (message_id) VALUES ${sqlPlaceholderForRange(unarchivedRecordIds.length)};`,
       unarchivedRecordIds
     )
   }
   if (archivedRecordIds.length > 0) {
     await db.query(
-      `INSERT INTO br7own.archive_error_list (message_id) VALUES (${sqlPlaceholderForRange(
-        archivedRecordIds.length
-      )});`,
+      `INSERT INTO br7own.archive_error_list (message_id) VALUES ${sqlPlaceholderForRange(archivedRecordIds.length)};`,
       archivedRecordIds
     )
   }
@@ -222,18 +221,20 @@ describe("Sanitise Old Messages e2e", () => {
     expect(message.isSanitised).toBeFalsy()
   })
 
-  it("should update the lastSanitiseCheck date of all messages considered", async () => {
+  it("should update the nextSanitiseCheck date of messages we don't sanitise", async () => {
     const messageIds = await insertAuditLogRecords(gateway, [
       { externalCorrelationId: "message_1", receivedAt: new Date("2022-01-01T09:00:00") },
       { externalCorrelationId: "message_2", receivedAt: new Date("2022-01-02T09:00:00") },
       { externalCorrelationId: "message_3", receivedAt: new Date("2022-01-03T09:00:00") },
       { externalCorrelationId: "message_4", receivedAt: new Date("2022-01-04T09:00:00") },
-      { externalCorrelationId: "message_5", receivedAt: new Date("2022-01-05T09:00:00") }
+      { externalCorrelationId: "message_5", receivedAt: new Date("2022-01-05T09:00:00") },
+      { externalCorrelationId: "message_6", receivedAt: new Date() },
+      { externalCorrelationId: "message_7", receivedAt: new Date() }
     ])
     await insertDbRecords(
       db,
-      [messageIds.message_1, messageIds.message_2, messageIds.message_3],
-      [messageIds.message_4, messageIds.message_5]
+      [messageIds.message_1, messageIds.message_2, messageIds.message_3, messageIds.message_6],
+      [messageIds.message_4, messageIds.message_5, messageIds.message_7]
     )
 
     await executeLambda()
@@ -243,8 +244,8 @@ describe("Sanitise Old Messages e2e", () => {
       expect(messageResult).toNotBeError()
 
       const message = messageResult as AuditLog
-      const today = new Date().toISOString().split("T")[0]
-      expect(message.lastSanitiseCheck).toContain(today)
+      const expectedNextCheck = message.isSanitised ? message.receivedDate : addDays(new Date(), 2).toISOString()
+      expect(message.nextSanitiseCheck).toContain(expectedNextCheck.split("T")[0])
     }
   })
 })

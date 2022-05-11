@@ -108,7 +108,7 @@ export default async (auditLog: AuditLog, dynamoGateway: AuditLogDynamoGateway):
     topExceptionsReport: { events: [] },
     messageHash,
     isSanitised: 0,
-    lastSanitiseCheck: "1970-01-01T00:00:00Z"
+    nextSanitiseCheck: formattedReceivedDate || receivedDate
   }
 
   return {
