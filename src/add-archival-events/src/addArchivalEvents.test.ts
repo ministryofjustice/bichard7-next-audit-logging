@@ -3,8 +3,8 @@ import { Client } from "pg"
 import { FakeApiClient, setEnvironmentVariables } from "shared-testing"
 import type { AuditLogEvent, KeyValuePair } from "shared-types"
 import type { BichardRecord, DatabaseRow } from "./db"
-import DatabaseClient from "./db"
-import { addBichardRecordsToAuditLog } from "./addArchivalEvents"
+import { DatabaseClient } from "./db"
+import AddArchivalEvents from "./addArchivalEvents"
 
 setEnvironmentVariables()
 
@@ -71,6 +71,7 @@ const stripWhitespace = (string: string) => string.replace(/\s/g, "")
 describe("Add Archival Events integration", () => {
   let client: jest.Mocked<any>
   let api: jest.Mocked<any>
+  let addArchivalEvents: AddArchivalEvents
 
   beforeEach(() => {
     jest.resetModules() // reset the cache of all required modules
@@ -87,6 +88,7 @@ describe("Add Archival Events integration", () => {
     }
     client = new Client()
     api = new FakeApiClient()
+    addArchivalEvents = new AddArchivalEvents(api, client)
   })
 
   afterEach(() => {
@@ -108,8 +110,9 @@ describe("Add Archival Events integration", () => {
       ]
     })
     const apiSpy = jest.spyOn(api, "createEvent")
+    addArchivalEvents = new AddArchivalEvents(api, stubDb)
 
-    await addBichardRecordsToAuditLog(stubDb, api)
+    await addArchivalEvents.addBichardRecordsToAuditLog()
 
     expect(apiSpy).toHaveBeenCalledTimes(1)
 
@@ -158,8 +161,9 @@ describe("Add Archival Events integration", () => {
     ]
     const stubDb = createStubDbWithRecords({ 1: records })
     const apiSpy = jest.spyOn(api, "createEvent")
+    addArchivalEvents = new AddArchivalEvents(api, stubDb)
 
-    await addBichardRecordsToAuditLog(stubDb, api)
+    await addArchivalEvents.addBichardRecordsToAuditLog()
 
     expect(apiSpy).toHaveBeenCalledTimes(records.length)
 
@@ -183,8 +187,9 @@ describe("Add Archival Events integration", () => {
     })
 
     const db = new DatabaseClient("", "", "", false, "", "schema", 100)
+    addArchivalEvents = new AddArchivalEvents(api, db)
 
-    await addBichardRecordsToAuditLog(db, api)
+    await addArchivalEvents.addBichardRecordsToAuditLog()
 
     expect(client.query).toHaveBeenCalledTimes(3)
 
@@ -208,8 +213,9 @@ describe("Add Archival Events integration", () => {
 
     const db = new DatabaseClient("", "", "", false, "", "schema", 100)
     api.setErrorReturnedByFunctions(new Error("API failed :("), ["createEvent"])
+    addArchivalEvents = new AddArchivalEvents(api, db)
 
-    await addBichardRecordsToAuditLog(db, api)
+    await addArchivalEvents.addBichardRecordsToAuditLog()
 
     expect(client.query).toHaveBeenCalledTimes(2)
     expect(client.query.mock.calls[0][0].split(" ")[0]).toBe("SELECT")
@@ -230,8 +236,9 @@ describe("Add Archival Events integration", () => {
     const db = new DatabaseClient("", "", "", false, "", "schema", 100)
     // Each error requires 2 calls: one to getMessage and one to createEvent
     api.setErrorReturnedByFunctionsAfterNCalls(new Error("API quota exceeded"), 4, ["createEvent"])
+    addArchivalEvents = new AddArchivalEvents(api, db)
 
-    await addBichardRecordsToAuditLog(db, api)
+    await addArchivalEvents.addBichardRecordsToAuditLog()
 
     expect(client.query).toHaveBeenCalledTimes(3)
 
@@ -256,8 +263,9 @@ describe("Add Archival Events integration", () => {
 
   it("Should limit the number of archive log groups to a configured value", async () => {
     const db = new DatabaseClient("", "", "", false, "", "schema", 50)
+    addArchivalEvents = new AddArchivalEvents(api, db)
 
-    await addBichardRecordsToAuditLog(db, api)
+    await addArchivalEvents.addBichardRecordsToAuditLog()
 
     expect(client.query).toHaveBeenCalledTimes(3)
     expect(String(client.query.mock.calls[0][0]).includes("LIMIT $1")).toBeTruthy()
@@ -270,8 +278,9 @@ describe("Add Archival Events integration", () => {
     })
 
     const db = new DatabaseClient("", "", "", false, "", "schema", 100)
+    addArchivalEvents = new AddArchivalEvents(api, db)
 
-    await addBichardRecordsToAuditLog(db, api)
+    await addArchivalEvents.addBichardRecordsToAuditLog()
 
     expect(client.query).toHaveBeenCalledTimes(3)
     expect(
@@ -291,7 +300,10 @@ describe("Add Archival Events integration", () => {
       jest.fn().mockRejectedValue(new Error("Database host on fire")).mockResolvedValueOnce(dbResult)
     )
 
-    await addBichardRecordsToAuditLog(db, api)
+    addArchivalEvents = new AddArchivalEvents(api, db)
+
+    await addArchivalEvents.addBichardRecordsToAuditLog()
+
     expect(client.query).toHaveBeenCalledTimes(3)
   })
 
@@ -319,7 +331,10 @@ describe("Add Archival Events integration", () => {
 
     const apiSpy = jest.spyOn(api, "createEvent")
 
-    await addBichardRecordsToAuditLog(db, api)
+    addArchivalEvents = new AddArchivalEvents(api, db)
+
+    await addArchivalEvents.addBichardRecordsToAuditLog()
+
     expect(apiSpy).toHaveBeenCalledTimes(3)
     // Don't create an audit log event for the message which already has one
     expect(apiSpy.mock.calls.map((args) => args[0])).not.toContain("Message2")

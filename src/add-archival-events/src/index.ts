@@ -1,7 +1,7 @@
 import { AuditLogApiClient, logger } from "shared"
 import getConfig from "./config"
-import DatabaseClient from "./db"
-import { addBichardRecordsToAuditLog } from "./addArchivalEvents"
+import { DatabaseClient } from "./db"
+import AddArchivalEvents from "./addArchivalEvents"
 
 export default async function addArchivalEvents(): Promise<void> {
   const config = getConfig()
@@ -16,12 +16,13 @@ export default async function addArchivalEvents(): Promise<void> {
     config.archiveGroupLimit
   )
   const auditLogApi = new AuditLogApiClient(config.apiUrl, config.apiKey)
+  const addArchialEvents = new AddArchivalEvents(auditLogApi, db)
 
   await db.connect()
 
   try {
     await db.markUnmarkedGroupsCompleted()
-    await addBichardRecordsToAuditLog(db, auditLogApi)
+    await addArchialEvents.addBichardRecordsToAuditLog()
   } catch (error) {
     logger.error(error as Error)
   } finally {

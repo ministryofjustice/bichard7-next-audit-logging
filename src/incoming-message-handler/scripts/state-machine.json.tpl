@@ -27,7 +27,7 @@
               "BooleanEquals": false
             }
           ],
-          "Next": "Message validation failed"
+          "Next": "Delete invalid message from S3"
         },
         {
           "Variable": "$.validationResult",
@@ -36,9 +36,20 @@
         }
       ]
     },
-    "Message validation failed": {
-      "Type": "Pass",
-      "End": true
+    "Delete invalid message from S3": {
+      "Type": "Task",
+      "End": true,
+      "Parameters": {
+        "Bucket.$": "$.bucketName",
+        "Key.$": "$.s3Path"
+      },
+      "Resource": "arn:aws:states:::aws-sdk:s3:deleteObject",
+      "Retry": [{
+        "ErrorEquals": ["States.ALL"],
+        "IntervalSeconds": 180,
+        "MaxAttempts": 99999999,
+        "BackoffRate": 1.1
+      }]
     },
     "Send to Bichard": {
       "Type": "Task",

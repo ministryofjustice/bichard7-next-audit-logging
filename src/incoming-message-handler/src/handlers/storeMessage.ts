@@ -1,11 +1,12 @@
-import type { AuditLog, S3PutObjectEvent } from "shared-types"
 import { AuditLogApiClient, AwsS3Gateway, createS3Config, logger } from "shared"
+import type { AuditLog, S3PutObjectEvent } from "shared-types"
 import { isError } from "shared-types"
-import readMessage from "../use-cases/readMessage"
-import { getApiKey, getApiUrl } from "../configs"
-import retrieveMessageFromS3 from "../use-cases/retrieveMessageFromS3"
-import formatMessage from "../use-cases/formatMessage"
 import CreateAuditLogUseCase from "src/use-cases/CreateAuditLogUseCase"
+import logBadUnicode from "src/use-cases/logBadUnicode"
+import { getApiKey, getApiUrl } from "../configs"
+import formatMessage from "../use-cases/formatMessage"
+import readMessage from "../use-cases/readMessage"
+import retrieveMessageFromS3 from "../use-cases/retrieveMessageFromS3"
 
 interface StoreMessageResult {
   auditLog: AuditLog
@@ -19,11 +20,19 @@ export interface ValidationResult {
 
 interface StoreMessageValidationResult {
   validationResult: ValidationResult
+  bucketName: string
+  s3Path: string
 }
 
 const s3Gateway = new AwsS3Gateway(createS3Config())
 const apiClient = new AuditLogApiClient(getApiUrl(), getApiKey())
 const createAuditLogUseCase = new CreateAuditLogUseCase(apiClient)
+
+const createValidationResult = (validationResult: ValidationResult, event: S3PutObjectEvent) => ({
+  validationResult,
+  bucketName: event.detail.requestParameters.bucketName,
+  s3Path: event.detail.requestParameters.key
+})
 
 export default async function storeMessage(
   event: S3PutObjectEvent
@@ -36,8 +45,10 @@ export default async function storeMessage(
 
   if ("isValid" in receivedMessage) {
     logger.info(JSON.stringify(receivedMessage))
-    return { validationResult: receivedMessage }
+    return createValidationResult(receivedMessage, event)
   }
+
+  logBadUnicode(receivedMessage)
 
   const formattedMessage = await formatMessage(receivedMessage)
 
@@ -59,7 +70,7 @@ export default async function storeMessage(
 
   if (!createAuditLogResult.isValid) {
     logger.info(JSON.stringify(createAuditLogResult))
-    return { validationResult: createAuditLogResult }
+    return createValidationResult(createAuditLogResult, event)
   }
 
   return { auditLog, messageXml: formattedMessage.messageXml }
