@@ -1,8 +1,14 @@
-import { subMonths } from "date-fns"
+import { addDays, subMonths } from "date-fns"
 import type { Client } from "pg"
 import { logger } from "shared"
 import type { ApiClient, AuditLog, AuditLogDynamoGateway, PromiseResult } from "shared-types"
 import { isError } from "shared-types"
+
+const rescheduleSanitiseCheck = (dynamo: AuditLogDynamoGateway, message: AuditLog): PromiseResult<AuditLog> => {
+  // TODO: Incrementally increase reschedule date, double each time
+  message.nextSanitiseCheck = addDays(new Date(), 2).toISOString()
+  return dynamo.update(message)
+}
 
 const shouldSanitise = async (db: Client, messageId: string): PromiseResult<boolean> => {
   // TODO error handling
@@ -44,10 +50,28 @@ export default async (api: ApiClient, dynamo: AuditLogDynamoGateway, db: Client)
 
   // Call postgres and check if we should sanitise each message
   for (const message of messages) {
-    // If yes, call sanitise endpoint on api for message
-    if (await shouldSanitise(db, message.messageId)) {
-      // TODO error handling
-      await api.sanitiseMessage(message.messageId)
+    const shouldSanitiseResult = await shouldSanitise(db, message.messageId)
+    if (isError(shouldSanitiseResult)) {
+      logger.error({
+        message: "Unable to check if message is sanitised",
+        error: shouldSanitiseResult,
+        messageId: message.messageId
+      })
+    } else if (shouldSanitiseResult as boolean) {
+      const sanitiseResult = await api.sanitiseMessage(message.messageId)
+      if (isError(sanitiseResult)) {
+        logger.error({ message: "Unable to sanitise message", error: sanitiseResult, messageId: message.messageId })
+      }
+    }
+
+    // Set next date to check if message should be sanitised
+    const rescheduleSanitiseCheckResult = await rescheduleSanitiseCheck(dynamo, message)
+    if (isError(rescheduleSanitiseCheckResult)) {
+      logger.error({
+        message: "Unable to reschedule sanitise check",
+        error: rescheduleSanitiseCheckResult,
+        messageId: message.messageId
+      })
     }
   }
 }
