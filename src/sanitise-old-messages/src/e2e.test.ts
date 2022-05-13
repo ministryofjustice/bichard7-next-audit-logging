@@ -221,7 +221,7 @@ describe("Sanitise Old Messages e2e", () => {
     expect(message.isSanitised).toBeFalsy()
   })
 
-  it("should update the nextSanitiseCheck date of messages we don't sanitise", async () => {
+  it("should schedule the nextSanitiseCheck date of every message we check for 2 days time", async () => {
     const messageIds = await insertAuditLogRecords(gateway, [
       { externalCorrelationId: "message_1", receivedAt: new Date("2022-01-01T09:00:00") },
       { externalCorrelationId: "message_2", receivedAt: new Date("2022-01-02T09:00:00") },
@@ -244,7 +244,7 @@ describe("Sanitise Old Messages e2e", () => {
       expect(messageResult).toNotBeError()
 
       const message = messageResult as AuditLog
-      const expectedNextCheck = message.isSanitised ? message.receivedDate : addDays(new Date(), 2).toISOString()
+      const expectedNextCheck = addDays(new Date(), 2).toISOString()
       expect(message.nextSanitiseCheck).toContain(expectedNextCheck.split("T")[0])
     }
   })

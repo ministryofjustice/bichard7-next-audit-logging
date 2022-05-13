@@ -1,12 +1,11 @@
 import { DynamoDB } from "aws-sdk"
 import { DocumentClient } from "aws-sdk/clients/dynamodb"
-import type { DynamoDbConfig, PromiseResult } from "shared-types"
+import type { DynamoDbConfig, PromiseResult, UnconditionalUpdateOptions } from "shared-types"
 import { isError } from "shared-types"
 import type FetchByIndexOptions from "./FetchByIndexOptions"
 import type GetManyOptions from "./GetManyOptions"
 import KeyComparison from "./KeyComparison"
 import type UpdateOptions from "./UpdateOptions"
-import type { UnconditionalUpdateOptions } from "./UpdateOptions"
 
 export default class DynamoGateway {
   protected readonly service: DynamoDB

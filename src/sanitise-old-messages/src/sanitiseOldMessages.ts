@@ -4,10 +4,9 @@ import { logger } from "shared"
 import type { ApiClient, AuditLog, AuditLogDynamoGateway, PromiseResult } from "shared-types"
 import { isError } from "shared-types"
 
-const rescheduleSanitiseCheck = (dynamo: AuditLogDynamoGateway, message: AuditLog): PromiseResult<AuditLog> => {
+const rescheduleSanitiseCheck = (dynamo: AuditLogDynamoGateway, message: AuditLog): PromiseResult<void> => {
   // TODO: Incrementally increase reschedule date, double each time
-  message.nextSanitiseCheck = addDays(new Date(), 2).toISOString()
-  return dynamo.update(message)
+  return dynamo.updateSanitiseCheck(message.messageId, addDays(new Date(), 2))
 }
 
 const shouldSanitise = async (db: Client, messageId: string): PromiseResult<boolean> => {
