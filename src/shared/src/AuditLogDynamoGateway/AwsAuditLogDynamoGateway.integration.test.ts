@@ -600,8 +600,8 @@ describe("AuditLogDynamoGateway", () => {
     })
   })
 
-  describe("fetchUnsanitisedBeforeDate", () => {
-    it("should return one AuditLog when there is an unsanitised record before the given date", async () => {
+  describe("fetchUnsanitised", () => {
+    it("should return one AuditLog when there is an unsanitised record to check", async () => {
       await Promise.allSettled(
         [...Array(3).keys()].map(async (i: number) => {
           const auditLog = new AuditLog(
@@ -635,7 +635,7 @@ describe("AuditLogDynamoGateway", () => {
       expect(item.externalCorrelationId).toBe("External correlation id 4")
     })
 
-    it("shouldn't return any AuditLogs with unsanitised records after the given date", async () => {
+    it("shouldn't return any AuditLogs with unsanitised records not due to be checked", async () => {
       await Promise.allSettled(
         [...Array(3).keys()].map(async (i: number) => {
           const auditLog = new AuditLog(
