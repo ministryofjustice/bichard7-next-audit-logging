@@ -1,5 +1,6 @@
 jest.retryTimes(10)
 import type { DocumentClient } from "aws-sdk/clients/dynamodb"
+import { addDays } from "date-fns"
 import "shared-testing"
 import type { DynamoDbConfig, EventCategory } from "shared-types"
 import { AuditLog, AuditLogEvent, AuditLogStatus, EventType, isError } from "shared-types"
@@ -653,7 +654,7 @@ describe("AuditLogDynamoGateway", () => {
         new Date("2021-05-06T06:13:27+0000"),
         "dummy hash"
       )
-      expectedAuditLog.status = AuditLogStatus.completed
+      expectedAuditLog.nextSanitiseCheck = addDays(new Date(), 1).toISOString()
       await gateway.create(expectedAuditLog)
 
       const result = await gateway.fetchUnsanitised()
