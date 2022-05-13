@@ -1,4 +1,4 @@
-import { addDays } from "date-fns"
+import { addDays, addMonths } from "date-fns"
 import type { Client } from "pg"
 import { logger } from "shared"
 import type { ApiClient, AuditLog, AuditLogDynamoGateway, PromiseResult } from "shared-types"
@@ -9,14 +9,18 @@ const rescheduleSanitiseCheck = (dynamo: AuditLogDynamoGateway, message: AuditLo
   return dynamo.updateSanitiseCheck(message.messageId, addDays(new Date(), 2))
 }
 
-const shouldSanitise = async (db: Client, messageId: string): PromiseResult<boolean> => {
-  // TODO don't sanitise before 3 months after the received date
+const shouldSanitise = async (db: Client, message: AuditLog): PromiseResult<boolean> => {
+  // Only sanitise messages more than 3 months old
+  if (addMonths(new Date(message.receivedDate), 3) > new Date()) {
+    return false
+  }
+
   // TODO error handling
   const archiveTableResult = await db.query(
     `SELECT 1
     FROM br7own.archive_error_list
     WHERE message_id = $1`,
-    [messageId]
+    [message.messageId]
   )
   if (archiveTableResult.rowCount > 0) {
     return true
@@ -26,7 +30,7 @@ const shouldSanitise = async (db: Client, messageId: string): PromiseResult<bool
     `SELECT 1
     FROM br7own.error_list
     WHERE message_id = $1`,
-    [messageId]
+    [message.messageId]
   )
   if (unarchivedTableResult.rowCount > 0) {
     return false
@@ -49,7 +53,7 @@ export default async (api: ApiClient, dynamo: AuditLogDynamoGateway, db: Client)
 
   // Call postgres and check if we should sanitise each message
   for (const message of messages) {
-    const shouldSanitiseResult = await shouldSanitise(db, message.messageId)
+    const shouldSanitiseResult = await shouldSanitise(db, message)
     if (isError(shouldSanitiseResult)) {
       logger.error({
         message: "Unable to check if message is sanitised",

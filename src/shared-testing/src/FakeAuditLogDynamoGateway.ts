@@ -1,6 +1,14 @@
+// @ts-ignore
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable class-methods-use-this */
-import type { AuditLog, AuditLogDynamoGateway, AuditLogEvent, PromiseResult  } from "shared-types"
+import type { DocumentClient } from "aws-sdk/clients/dynamodb"
+import type {
+  AuditLog,
+  AuditLogDynamoGateway,
+  AuditLogEvent,
+  PromiseResult,
+  UnconditionalUpdateOptions
+} from "shared-types"
 
 export default class FakeAuditLogDynamoGateway implements AuditLogDynamoGateway {
   private messages: AuditLog[] = []
@@ -103,7 +111,12 @@ export default class FakeAuditLogDynamoGateway implements AuditLogDynamoGateway 
   }
 
   // @ts-ignore
-  updateSanitiseCheck(messageId: string, nextSanitiseCheck: Date): PromiseResult<void> {
+  updateEntryUnconditionally(
+    // @ts-ignore
+    tableName: string,
+    // @ts-ignore
+    options: UnconditionalUpdateOptions
+  ): PromiseResult<DocumentClient.UpdateItemOutput> {
     throw new Error("Method not implemented.")
   }
 

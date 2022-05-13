@@ -4,7 +4,10 @@ import type { AuditLog, AuditLogEvent, PromiseResult, UnconditionalUpdateOptions
 export default interface AuditLogDynamoGateway {
   create(message: AuditLog): PromiseResult<AuditLog>
   update(message: AuditLog): PromiseResult<AuditLog>
-  updateEntryUnconditionally(tableName: string, options: UnconditionalUpdateOptions): PromiseResult<DocumentClient.UpdateItemOutput>
+  updateEntryUnconditionally(
+    tableName: string,
+    options: UnconditionalUpdateOptions
+  ): PromiseResult<DocumentClient.UpdateItemOutput>
   fetchMany(limit: number, lastMessage?: AuditLog): PromiseResult<AuditLog[]>
   fetchByExternalCorrelationId(externalCorrelationId: string): PromiseResult<AuditLog | null>
   fetchByHash(hash: string): PromiseResult<AuditLog | null>
