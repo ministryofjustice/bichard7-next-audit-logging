@@ -137,7 +137,7 @@ clean:
 
 .PHONY: run-api
 run-api:
-	cd src/audit-log-api && npm run start
+	DB_SCHMEA=br7own cd src/audit-log-api && npm run start
 
 .PHONY: run-portal
 run-portal:

@@ -13,3 +13,11 @@ export default interface UpdateOptions {
   expressionAttributeNames?: ExpressionAttributeNameMap | KeyValuePair<string, string>
   currentVersion: number
 }
+
+export interface UnconditionalUpdateOptions {
+  keyName: string
+  keyValue: unknown
+  updateExpression: UpdateExpression
+  updateExpressionValues: ExpressionAttributeValueMap | KeyValuePair<string, unknown>
+  expressionAttributeNames?: ExpressionAttributeNameMap | KeyValuePair<string, string>
+}
