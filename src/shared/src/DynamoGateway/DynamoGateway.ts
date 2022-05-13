@@ -6,7 +6,7 @@ import type FetchByIndexOptions from "./FetchByIndexOptions"
 import type GetManyOptions from "./GetManyOptions"
 import KeyComparison from "./KeyComparison"
 import type UpdateOptions from "./UpdateOptions"
-import { UnconditionalUpdateOptions } from "./UpdateOptions"
+import type { UnconditionalUpdateOptions } from "./UpdateOptions"
 
 export default class DynamoGateway {
   protected readonly service: DynamoDB

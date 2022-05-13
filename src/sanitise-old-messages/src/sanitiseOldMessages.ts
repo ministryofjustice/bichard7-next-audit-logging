@@ -11,6 +11,7 @@ const rescheduleSanitiseCheck = (dynamo: AuditLogDynamoGateway, message: AuditLo
 }
 
 const shouldSanitise = async (db: Client, messageId: string): PromiseResult<boolean> => {
+  // TODO don't sanitise before 3 months after the received date
   // TODO error handling
   const archiveTableResult = await db.query(
     `SELECT 1

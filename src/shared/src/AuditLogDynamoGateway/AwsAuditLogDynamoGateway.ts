@@ -7,8 +7,7 @@ import type {
   PromiseResult
 } from "shared-types"
 import { EventType, isError } from "shared-types"
-import { UnconditionalUpdateOptions } from "src/DynamoGateway/UpdateOptions"
-import type { FetchByIndexOptions, UpdateOptions } from "../DynamoGateway"
+import type { FetchByIndexOptions, UpdateOptions, UnconditionalUpdateOptions } from "../DynamoGateway"
 import { DynamoGateway, IndexSearcher, KeyComparison } from "../DynamoGateway"
 import CalculateMessageStatusUseCase from "./CalculateMessageStatusUseCase"
 import getForceOwnerForAutomationReport from "./getForceOwnerForAutomationReport"
