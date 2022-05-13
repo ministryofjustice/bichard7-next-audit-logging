@@ -110,11 +110,12 @@ describe("validateCreateAuditLog", () => {
     const { errors, isValid } = await validateCreateAuditLog(item, dynamoGateway)
 
     expect(isValid).toBe(false)
-    expect(errors).toHaveLength(6)
+    expect(errors).toHaveLength(7)
     expect(errors).toContain("Case ID is mandatory")
     expect(errors).toContain("External Correlation ID is mandatory")
     expect(errors).toContain("Message ID is mandatory")
     expect(errors).toContain("Received date is mandatory")
+    expect(errors).toContain("Next sanitise check is mandatory")
     expect(errors).toContain("Created by is mandatory")
     expect(errors).toContain("Message hash is mandatory")
   })
@@ -126,6 +127,7 @@ describe("validateCreateAuditLog", () => {
       systemId: 3,
       externalCorrelationId: 3,
       receivedDate: "2021-10-05 12:13:14",
+      nextSanitiseCheck: "2021-10-05 12:13:14",
       createdBy: 5,
       messageHash: 6,
       s3Path: 7,
@@ -135,12 +137,13 @@ describe("validateCreateAuditLog", () => {
     const { errors, isValid } = await validateCreateAuditLog(item, dynamoGateway)
 
     expect(isValid).toBe(false)
-    expect(errors).toHaveLength(10)
+    expect(errors).toHaveLength(11)
     expect(errors).toContain("Case ID must be string")
     expect(errors).toContain("System ID must be string")
     expect(errors).toContain("External Correlation ID must be string")
     expect(errors).toContain("Message ID must be string")
     expect(errors).toContain("Received date must be ISO format")
+    expect(errors).toContain("Next sanitise check must be ISO format")
     expect(errors).toContain("Created by must be string")
     expect(errors).toContain("Message hash must be string")
     expect(errors).toContain("S3 path must be string")

@@ -5,8 +5,8 @@ import { execute } from "lambda-local"
 import partition from "lodash.partition"
 import { Client } from "pg"
 import { AuditLogApiClient, logger, TestDynamoGateway } from "shared"
-import type { ApiClient, AuditLog } from "shared-types"
-import { AuditLogEvent, isSuccess } from "shared-types"
+import type { ApiClient } from "shared-types"
+import { AuditLog, AuditLogEvent, isSuccess } from "shared-types"
 import addArchivalEvents from "."
 
 logger.level = "debug"
@@ -22,7 +22,7 @@ const createTableSql = `
       archived_by     TEXT,
       audit_logged_at TIMESTAMP
   );
-  
+
   CREATE TABLE br7own.archive_error_list
   (
       error_id                INTEGER PRIMARY KEY,
@@ -475,38 +475,18 @@ describe("Add Error Records e2e", () => {
     )
 
     // Insert testdata into audit log
-    const messages = [
-      {
-        messageId: "message_1",
-        receivedDate: new Date("2022-05-26T12:53:55.000Z").toISOString(),
-        events: [],
-        caseId: "message_1",
-        externalCorrelationId: "message_1",
-        createdBy: "add-archival-events e2e tests",
-        messageHash: "message_1"
-      },
-      {
-        messageId: "message_2",
-        receivedDate: new Date("2022-05-26T12:53:55.000Z").toISOString(),
-        events: [],
-        caseId: "message_2",
-        externalCorrelationId: "message_2",
-        createdBy: "add-archival-events e2e tests",
-        messageHash: "message_2"
-      },
-      {
-        messageId: "message_3",
-        receivedDate: new Date("2022-05-26T12:53:55.000Z").toISOString(),
-        events: [],
-        caseId: "message_3",
-        externalCorrelationId: "message_3",
-        createdBy: "add-archival-events e2e tests",
-        messageHash: "message_3"
-      }
-    ]
-    for (const message of messages) {
-      await api.createAuditLog(message as unknown as AuditLog)
-    }
+    await Promise.all(
+      [1, 2, 3].map((messageNumber) => {
+        const messageId = `message_${messageNumber}`
+        const message = {
+          ...new AuditLog(messageId, new Date("2022-05-26T12:53:55.000Z"), messageId, messageId),
+          caseId: messageId,
+          createdBy: "add-archival-events e2e tests"
+        } as unknown as AuditLog
+
+        return api.createAuditLog(message)
+      })
+    )
 
     const existingEvent2 = new AuditLogEvent({
       eventSource: "you",

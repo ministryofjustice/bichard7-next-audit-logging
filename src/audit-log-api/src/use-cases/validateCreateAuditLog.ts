@@ -13,6 +13,7 @@ interface ValidationResult {
 export default async (auditLog: AuditLog, dynamoGateway: AuditLogDynamoGateway): Promise<ValidationResult> => {
   const errors: string[] = []
   let formattedReceivedDate = ""
+  let formattedNextSanitiseCheck = ""
   const {
     caseId,
     systemId,
@@ -23,7 +24,8 @@ export default async (auditLog: AuditLog, dynamoGateway: AuditLogDynamoGateway):
     s3Path,
     stepExecutionId,
     externalId,
-    messageHash
+    messageHash,
+    nextSanitiseCheck
   } = auditLog
 
   if (!caseId) {
@@ -54,6 +56,14 @@ export default async (auditLog: AuditLog, dynamoGateway: AuditLogDynamoGateway):
     errors.push("Received date must be ISO format")
   } else {
     formattedReceivedDate = new Date(receivedDate).toISOString()
+  }
+
+  if (!nextSanitiseCheck) {
+    errors.push("Next sanitise check is mandatory")
+  } else if (!isIsoDate(nextSanitiseCheck)) {
+    errors.push("Next sanitise check must be ISO format")
+  } else {
+    formattedNextSanitiseCheck = new Date(nextSanitiseCheck).toISOString()
   }
 
   if (!createdBy) {
@@ -97,7 +107,7 @@ export default async (auditLog: AuditLog, dynamoGateway: AuditLogDynamoGateway):
     externalId,
     stepExecutionId,
     externalCorrelationId,
-    receivedDate: formattedReceivedDate || receivedDate,
+    receivedDate: formattedReceivedDate,
     createdBy,
     status: AuditLogStatus.processing,
     lastEventType: "",
@@ -108,7 +118,7 @@ export default async (auditLog: AuditLog, dynamoGateway: AuditLogDynamoGateway):
     topExceptionsReport: { events: [] },
     messageHash,
     isSanitised: 0,
-    nextSanitiseCheck: formattedReceivedDate || receivedDate
+    nextSanitiseCheck: formattedNextSanitiseCheck
   }
 
   return {
