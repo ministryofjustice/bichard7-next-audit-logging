@@ -122,12 +122,10 @@ export default class AwsAuditLogDynamoGateway extends DynamoGateway implements A
     return <AuditLog[]>result
   }
 
-  async fetchUnsanitisedBeforeDate(before: Date, limit = 10, lastMessage?: AuditLog): PromiseResult<AuditLog[]> {
+  async fetchUnsanitised(limit = 10, lastMessage?: AuditLog): PromiseResult<AuditLog[]> {
     const result = await new IndexSearcher<AuditLog[]>(this, this.tableName, this.tableKey)
       .useIndex("isSanitisedIndex")
       .setIndexKeys("isSanitised", 0, "nextSanitiseCheck", new Date().toISOString(), KeyComparison.LessThanOrEqual)
-      // TODO: Remove filter
-      .setFilter("receivedDate", before.toISOString(), KeyComparison.LessThanOrEqual)
       .setAscendingOrder(true)
       .paginate(limit, lastMessage)
       .execute()

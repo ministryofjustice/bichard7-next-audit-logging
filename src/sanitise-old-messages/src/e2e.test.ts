@@ -221,7 +221,7 @@ describe("Sanitise Old Messages e2e", () => {
     expect(message.isSanitised).toBeFalsy()
   })
 
-  it.only("should update the nextSanitiseCheck date of messages we don't sanitise", async () => {
+  it("should update the nextSanitiseCheck date of messages we don't sanitise", async () => {
     const messageIds = await insertAuditLogRecords(gateway, [
       { externalCorrelationId: "message_1", receivedAt: new Date("2022-01-01T09:00:00") },
       { externalCorrelationId: "message_2", receivedAt: new Date("2022-01-02T09:00:00") },

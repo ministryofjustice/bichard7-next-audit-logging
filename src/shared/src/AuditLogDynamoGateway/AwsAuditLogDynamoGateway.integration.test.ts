@@ -622,7 +622,7 @@ describe("AuditLogDynamoGateway", () => {
       expectedAuditLog.status = AuditLogStatus.completed
       await gateway.create(expectedAuditLog)
 
-      const result = await gateway.fetchUnsanitisedBeforeDate(new Date("2022-05-07T06:13:27+0000"))
+      const result = await gateway.fetchUnsanitised()
 
       expect(isError(result)).toBe(false)
       expect(result).toBeDefined()
@@ -656,7 +656,7 @@ describe("AuditLogDynamoGateway", () => {
       expectedAuditLog.status = AuditLogStatus.completed
       await gateway.create(expectedAuditLog)
 
-      const result = await gateway.fetchUnsanitisedBeforeDate(new Date("2021-05-05T06:13:27+0000"))
+      const result = await gateway.fetchUnsanitised()
 
       expect(isError(result)).toBe(false)
       expect(result).toBeDefined()

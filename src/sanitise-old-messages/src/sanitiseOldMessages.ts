@@ -1,4 +1,4 @@
-import { addDays, subMonths } from "date-fns"
+import { addDays } from "date-fns"
 import type { Client } from "pg"
 import { logger } from "shared"
 import type { ApiClient, AuditLog, AuditLogDynamoGateway, PromiseResult } from "shared-types"
@@ -35,8 +35,7 @@ const shouldSanitise = async (db: Client, messageId: string): PromiseResult<bool
   return true
 }
 
-const fetchOldMessages = (dynamo: AuditLogDynamoGateway): PromiseResult<AuditLog[]> =>
-  dynamo.fetchUnsanitisedBeforeDate(subMonths(new Date(), 3), 500)
+const fetchOldMessages = (dynamo: AuditLogDynamoGateway): PromiseResult<AuditLog[]> => dynamo.fetchUnsanitised(500)
 
 export default async (api: ApiClient, dynamo: AuditLogDynamoGateway, db: Client): Promise<void> => {
   logger.debug("Fetching messages to sanitise")
