@@ -181,11 +181,8 @@ export default class AuditLogApiClient implements ApiClient {
         }
       )
       .then((result) => {
-        switch (result.status) {
-          case HttpStatusCode.notFound:
-            return Error(`The message with Id ${messageId} does not exist.`)
-          default:
-            return Error(`Error ${result.status}: Could not sanitise message.`)
+        if (result.status === HttpStatusCode.notFound) {
+          return Error(`The message with Id ${messageId} does not exist.`)
         }
       })
       .catch((error: AxiosError) => {
