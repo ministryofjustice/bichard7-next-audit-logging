@@ -189,9 +189,9 @@ export default class AuditLogApiClient implements ApiClient {
         }
       })
       .catch((error: AxiosError) => {
-        logger.error(`Error retrying event: ${this.stringify(error.response?.data)}`)
+        logger.error(`Error sanitising message: ${this.stringify(error.response?.data)}`)
         return new ApplicationError(
-          `Error retrying event: ${this.stringify(error.response?.data) ?? error.message}`,
+          `Error sanitising message: ${this.stringify(error.response?.data) ?? error.message}`,
           error
         )
       })
