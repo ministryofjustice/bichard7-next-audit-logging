@@ -10,7 +10,7 @@ const config: PostgresConfig = {
   USERNAME: "bichard",
   PASSWORD: "password",
   DATABASE_NAME: "bichard",
-  TABLE_NAME: "archive_error_list",
+  TABLE_NAME: "br7own.archive_error_list",
   SSL: false
 }
 
