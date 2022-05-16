@@ -17,7 +17,8 @@ export default class {
       ...new AuditLog(messageId, new Date("1970-01-01T00:00:00.000Z"), messageId), // We don't have the message XML to compute the message hash
       messageId,
       caseId: "Unknown",
-      createdBy: "Event handler"
+      createdBy: "Event handler",
+      nextSanitiseCheck: new Date().toISOString()
     }
     const createAuditLogResult = await this.api.createAuditLog(message)
 
