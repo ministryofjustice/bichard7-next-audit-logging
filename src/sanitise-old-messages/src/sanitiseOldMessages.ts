@@ -5,7 +5,7 @@ import type { ApiClient, AuditLog, AuditLogDynamoGateway, PromiseResult } from "
 import { isError } from "shared-types"
 
 const rescheduleSanitiseCheck = (dynamo: AuditLogDynamoGateway, message: AuditLog): PromiseResult<void> => {
-  // TODO: Incrementally increase reschedule date, double each time
+  // TODO: Make time between sanitiseChecks configurable
   return dynamo.updateSanitiseCheck(message.messageId, addDays(new Date(), 2))
 }
 
@@ -75,8 +75,6 @@ export default async (api: ApiClient, dynamo: AuditLogDynamoGateway, db: Client)
       }
     }
 
-    // TODO: Double check if we need to do this for EVERY message (can we skip for messages we've just sanitised)
-    // Set next date to check if message should be sanitised
     const rescheduleSanitiseCheckResult = await rescheduleSanitiseCheck(dynamo, message)
     if (isError(rescheduleSanitiseCheckResult)) {
       logger.error({
