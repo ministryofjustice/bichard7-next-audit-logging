@@ -1,9 +1,9 @@
 jest.setTimeout(15000)
+import pg from "pg"
 import type { PostgresConfig } from "shared-types"
 import { isError } from "shared-types"
-import AwsBichardPostgresGateway from "./AwsBichardPostgresGateway"
 import TestPostgresGateway from "../PostgresGateway/TestPostgresGateway"
-import pg from "pg"
+import AwsBichardPostgresGateway from "./AwsBichardPostgresGateway"
 
 const config: PostgresConfig = {
   HOST: "localhost",
