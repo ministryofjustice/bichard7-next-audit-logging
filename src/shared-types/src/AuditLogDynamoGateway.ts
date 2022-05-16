@@ -8,6 +8,7 @@ export default interface AuditLogDynamoGateway {
     tableName: string,
     options: UnconditionalUpdateOptions
   ): PromiseResult<DocumentClient.UpdateItemOutput>
+  updateSanitiseCheck(messageId: string, nextSanitiseCheck: Date): PromiseResult<void>
   fetchMany(limit: number, lastMessage?: AuditLog): PromiseResult<AuditLog[]>
   fetchByExternalCorrelationId(externalCorrelationId: string): PromiseResult<AuditLog | null>
   fetchByHash(hash: string): PromiseResult<AuditLog | null>

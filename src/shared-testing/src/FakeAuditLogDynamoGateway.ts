@@ -120,6 +120,11 @@ export default class FakeAuditLogDynamoGateway implements AuditLogDynamoGateway 
     throw new Error("Method not implemented.")
   }
 
+  // @ts-ignore
+  updateSanitiseCheck(messageId: string, nextSanitiseCheck: Date): PromiseResult<void> {
+    throw new Error("Method not implemented.")
+  }
+
   shouldReturnError(error: Error): void {
     this.error = error
   }

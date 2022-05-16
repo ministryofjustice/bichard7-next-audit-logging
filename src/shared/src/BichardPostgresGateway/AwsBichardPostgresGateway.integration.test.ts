@@ -47,9 +47,6 @@ describe("BichardPostgresGateway", () => {
     await testGateway.insertRecords(records)
 
     const result = await gateway.deleteArchivedErrors(messageId)
-    if (isError(result)) {
-      console.log(JSON.stringify(result))
-    }
     expect(isError(result)).toBe(false)
 
     const allResults = await testGateway.findAll()
@@ -75,9 +72,6 @@ describe("BichardPostgresGateway", () => {
     jest.spyOn(pg.Client.prototype, "query").mockImplementation(() => Promise.reject(Error(expectedErrorMessage)))
 
     const result = await gateway.deleteArchivedErrors("someMessageId")
-    if (isError(result)) {
-      console.log(JSON.stringify(result))
-    }
     expect(isError(result)).toBe(true)
   })
 })
