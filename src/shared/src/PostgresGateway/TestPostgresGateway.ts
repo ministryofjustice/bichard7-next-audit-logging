@@ -26,14 +26,14 @@ export default class TestPostgresGateway extends PostgresGateway {
         const params = keys.map((_, index) => `$${index + 1}`).join(",")
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const values = keys.map((key) => (record as any)[key])
-        const queryString = `insert into archive_error_list (${columns}) VALUES (${params});`
+        const queryString = `insert into br7own.archive_error_list (${columns}) VALUES (${params});`
         return this.query(queryString, values).catch((error) => console.error(error))
       })
     )
   }
 
   async findAll<T>(): Promise<T[] | undefined> {
-    const records = await this.query(`SELECT * FROM archive_error_list`)
+    const records = await this.query(`SELECT * FROM br7own.archive_error_list`)
     if (isError(records)) {
       console.error(records)
       return undefined
