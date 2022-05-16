@@ -9,34 +9,42 @@ const rescheduleSanitiseCheck = (dynamo: AuditLogDynamoGateway, message: AuditLo
   return dynamo.updateSanitiseCheck(message.messageId, addDays(new Date(), 2))
 }
 
-const shouldSanitise = async (db: Client, message: AuditLog): PromiseResult<boolean> => {
+const shouldSanitise = async (db: Client, message: AuditLog): PromiseResult<{ sanitise: boolean; error: boolean }> => {
   // Only sanitise messages more than 3 months old
   if (addMonths(new Date(message.receivedDate), 3) > new Date()) {
-    return false
+    return { sanitise: false, error: false }
   }
 
-  // TODO error handling
-  const archiveTableResult = await db.query(
-    `SELECT 1
-    FROM br7own.archive_error_list
-    WHERE message_id = $1`,
-    [message.messageId]
-  )
-  if (archiveTableResult.rowCount > 0) {
-    return true
+  try {
+    const archiveTableResult = await db.query(
+      `SELECT 1
+      FROM br7own.archive_error_list
+      WHERE message_id = $1`,
+      [message.messageId]
+    )
+    if (archiveTableResult.rowCount > 0) {
+      return { sanitise: true, error: false }
+    }
+
+    const unarchivedTableResult = await db.query(
+      `SELECT 1
+      FROM br7own.error_list
+      WHERE message_id = $1`,
+      [message.messageId]
+    )
+    if (unarchivedTableResult.rowCount > 0) {
+      return { sanitise: false, error: false }
+    }
+  } catch (e) {
+    logger.error({
+      message: "Unable to check if message is sanitised",
+      error: e,
+      messageId: message.messageId
+    })
+    return { sanitise: false, error: true }
   }
 
-  const unarchivedTableResult = await db.query(
-    `SELECT 1
-    FROM br7own.error_list
-    WHERE message_id = $1`,
-    [message.messageId]
-  )
-  if (unarchivedTableResult.rowCount > 0) {
-    return false
-  }
-
-  return true
+  return { sanitise: true, error: false }
 }
 
 const fetchOldMessages = (dynamo: AuditLogDynamoGateway): PromiseResult<AuditLog[]> => dynamo.fetchUnsanitised(500)
@@ -54,19 +62,20 @@ export default async (api: ApiClient, dynamo: AuditLogDynamoGateway, db: Client)
   // Call postgres and check if we should sanitise each message
   for (const message of messages) {
     const shouldSanitiseResult = await shouldSanitise(db, message)
-    if (isError(shouldSanitiseResult)) {
+    if (isError(shouldSanitiseResult) || shouldSanitiseResult.error) {
       logger.error({
         message: "Unable to check if message is sanitised",
         error: shouldSanitiseResult,
         messageId: message.messageId
       })
-    } else if (shouldSanitiseResult as boolean) {
+    } else if (shouldSanitiseResult.sanitise as boolean) {
       const sanitiseResult = await api.sanitiseMessage(message.messageId)
       if (isError(sanitiseResult)) {
         logger.error({ message: "Unable to sanitise message", error: sanitiseResult, messageId: message.messageId })
       }
     }
 
+    // TODO: Double check if we need to do this for EVERY message (can we skip for messages we've just sanitised)
     // Set next date to check if message should be sanitised
     const rescheduleSanitiseCheckResult = await rescheduleSanitiseCheck(dynamo, message)
     if (isError(rescheduleSanitiseCheckResult)) {
