@@ -1,6 +1,6 @@
 jest.setTimeout(15000)
 import { setEnvironmentVariables } from "shared-testing"
-setEnvironmentVariables({ BICHARD_DB_TABLE_NAME: "archive_error_list" })
+setEnvironmentVariables({ BICHARD_DB_TABLE_NAME: "br7own.archive_error_list", DB_SCHEMA: "br7own" })
 import type { DynamoDbConfig } from "shared-types"
 import { AuditLogEvent, AuditLogLookup, BichardAuditLogEvent } from "shared-types"
 import { AuditLog } from "shared-types"
