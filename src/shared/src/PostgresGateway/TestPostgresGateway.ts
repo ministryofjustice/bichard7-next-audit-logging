@@ -3,6 +3,10 @@ import { isError } from "shared-types"
 import PostgresGateway from "./PostgresGateway"
 
 export default class TestPostgresGateway extends PostgresGateway {
+  async createSchema(schema: string): Promise<void> {
+    await this.query(`CREATE SCHEMA ${schema}`).catch((error) => console.error(error))
+  }
+
   async createTable(columns: KeyValuePair<string, string>): Promise<void> {
     await this.query(
       `

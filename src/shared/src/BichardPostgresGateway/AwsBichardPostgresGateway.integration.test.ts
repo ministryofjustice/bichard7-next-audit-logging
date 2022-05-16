@@ -18,6 +18,10 @@ const config: PostgresConfig = {
 const gateway = new AwsBichardPostgresGateway(config)
 const testGateway = new TestPostgresGateway(config)
 
+beforeAll(async () => {
+  await testGateway.createSchema("br7own")
+})
+
 beforeEach(async () => {
   await testGateway.dropTable()
   await testGateway.createTable({
