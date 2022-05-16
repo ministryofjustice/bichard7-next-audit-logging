@@ -1,8 +1,30 @@
+import type { Duration } from "date-fns"
 import type { DynamoDbConfig, PostgresConfig } from "shared-types"
 
 export type ApiConfig = {
   API_URL: string
   API_KEY: string
+}
+
+export type SanitiseOldMessagesConfig = {
+  SANITISE_AFTER: Duration
+  CHECK_FREQUENCY: Duration
+}
+
+export const getSanitiseConfig = (): SanitiseOldMessagesConfig => {
+  const { SANITISE_AFTER_DAYS, CHECK_FREQUENCY: CHECK_FREQUENCY_DAYS } = process.env
+
+  if (!SANITISE_AFTER_DAYS) {
+    throw Error("SANITISE_AFTER_DAYS environment variable must have value.")
+  }
+
+  if (!CHECK_FREQUENCY_DAYS) {
+    throw Error("CHECK_FREQUENCY_DAYS environment variable must have value.")
+  }
+  return {
+    SANITISE_AFTER: { days: parseInt(SANITISE_AFTER_DAYS, 10) },
+    CHECK_FREQUENCY: { days: parseInt(CHECK_FREQUENCY_DAYS, 10) }
+  }
 }
 
 export const getPostgresConfig = () => {
@@ -89,3 +111,4 @@ export const getApiConfig = (): ApiConfig => {
     API_KEY
   } as ApiConfig
 }
+

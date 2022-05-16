@@ -1,17 +1,22 @@
-import { addDays, addMonths } from "date-fns"
+import { add } from "date-fns"
 import type { Client } from "pg"
 import { logger } from "shared"
 import type { ApiClient, AuditLog, AuditLogDynamoGateway, PromiseResult } from "shared-types"
 import { isError } from "shared-types"
+import type { SanitiseOldMessagesConfig } from "./config"
 
-const rescheduleSanitiseCheck = (dynamo: AuditLogDynamoGateway, message: AuditLog): PromiseResult<void> => {
+const rescheduleSanitiseCheck = (
+  dynamo: AuditLogDynamoGateway,
+  message: AuditLog,
+  frequency: Duration
+): PromiseResult<void> => {
   // TODO: Make time between sanitiseChecks configurable
-  return dynamo.updateSanitiseCheck(message.messageId, addDays(new Date(), 2))
+  return dynamo.updateSanitiseCheck(message.messageId, add(new Date(), frequency))
 }
 
-const shouldSanitise = async (db: Client, message: AuditLog): PromiseResult<{ sanitise: boolean; error: boolean }> => {
+const shouldSanitise = async (db: Client, message: AuditLog, ageThreshold: Duration): PromiseResult<{ sanitise: boolean; error: boolean }> => {
   // Only sanitise messages more than 3 months old
-  if (addMonths(new Date(message.receivedDate), 3) > new Date()) {
+  if (add(new Date(message.receivedDate), ageThreshold) > new Date()) {
     return { sanitise: false, error: false }
   }
 
@@ -49,7 +54,7 @@ const shouldSanitise = async (db: Client, message: AuditLog): PromiseResult<{ sa
 
 const fetchOldMessages = (dynamo: AuditLogDynamoGateway): PromiseResult<AuditLog[]> => dynamo.fetchUnsanitised(500)
 
-export default async (api: ApiClient, dynamo: AuditLogDynamoGateway, db: Client): Promise<void> => {
+export default async (api: ApiClient, dynamo: AuditLogDynamoGateway, db: Client, config: SanitiseOldMessagesConfig): Promise<void> => {
   logger.debug("Fetching messages to sanitise")
 
   // Fetch old messages (over 3 months) from dynamo
@@ -61,13 +66,14 @@ export default async (api: ApiClient, dynamo: AuditLogDynamoGateway, db: Client)
 
   // Call postgres and check if we should sanitise each message
   for (const message of messages) {
-    const shouldSanitiseResult = await shouldSanitise(db, message)
+    const shouldSanitiseResult = await shouldSanitise(db, message, config.SANITISE_AFTER)
     if (isError(shouldSanitiseResult) || shouldSanitiseResult.error) {
       logger.error({
         message: "Unable to check if message is sanitised",
         error: shouldSanitiseResult,
         messageId: message.messageId
       })
+      continue
     } else if (shouldSanitiseResult.sanitise as boolean) {
       const sanitiseResult = await api.sanitiseMessage(message.messageId)
       if (isError(sanitiseResult)) {
@@ -75,7 +81,7 @@ export default async (api: ApiClient, dynamo: AuditLogDynamoGateway, db: Client)
       }
     }
 
-    const rescheduleSanitiseCheckResult = await rescheduleSanitiseCheck(dynamo, message)
+    const rescheduleSanitiseCheckResult = await rescheduleSanitiseCheck(dynamo, message, config.CHECK_FREQUENCY)
     if (isError(rescheduleSanitiseCheckResult)) {
       logger.error({
         message: "Unable to reschedule sanitise check",

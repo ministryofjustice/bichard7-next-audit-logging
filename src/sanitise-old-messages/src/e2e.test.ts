@@ -82,7 +82,9 @@ const lambdaEnvironment = {
   AWS_REGION: "eu-west-2",
   AUDIT_LOG_TABLE_NAME: "auditLogTable",
   DYNAMO_AWS_ACCESS_KEY_ID: "dummy1",
-  DYNAMO_AWS_SECRET_ACCESS_KEY: "dummy2"
+  DYNAMO_AWS_SECRET_ACCESS_KEY: "dummy2",
+  SANITISE_AFTER_DAYS: 90,
+  CHECK_FREQUENCY_DAYS: 2
 }
 
 const executeLambda = (environment?: any): Promise<unknown> => {
