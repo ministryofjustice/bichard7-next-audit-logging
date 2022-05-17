@@ -1,6 +1,6 @@
-import "shared-testing"
 import type { AxiosError } from "axios"
 import axios from "axios"
+import "shared-testing"
 import { AuditLog, AuditLogEvent } from "shared-types"
 import AuditLogApiClient from "./AuditLogApiClient"
 
@@ -188,40 +188,84 @@ describe("createEvent()", () => {
 
     expect(result).toBeError(expectedErrorMsg)
   })
+})
 
-  describe("retryEvent()", () => {
-    it("should succeed when the message exists", async () => {
-      jest.spyOn(axios, "post").mockResolvedValue({ status: 204 })
+describe("retryEvent()", () => {
+  it("should succeed when the message exists", async () => {
+    jest.spyOn(axios, "post").mockResolvedValue({ status: 204 })
 
-      const result = await apiClient.retryEvent(message.messageId)
+    const result = await apiClient.retryEvent(message.messageId)
 
-      expect(result).toNotBeError()
-    })
+    expect(result).toNotBeError()
+  })
 
-    it("should fail when message does not exist", async () => {
-      jest.spyOn(axios, "post").mockResolvedValue({ status: 404 })
+  it("should fail when message does not exist", async () => {
+    jest.spyOn(axios, "post").mockResolvedValue({ status: 404 })
 
-      const result = await apiClient.retryEvent(message.messageId)
+    const result = await apiClient.retryEvent(message.messageId)
 
-      expect(result).toBeError(`The message with Id ${message.messageId} does not exist.`)
-    })
+    expect(result).toBeError(`The message with Id ${message.messageId} does not exist.`)
+  })
 
-    it("should fail when the error is unknown", async () => {
-      const expectedError = <AxiosError>new Error("An unknown error")
-      jest.spyOn(axios, "post").mockRejectedValue(expectedError)
+  it("should fail when the error is unknown", async () => {
+    const expectedError = <AxiosError>new Error("An unknown error")
+    jest.spyOn(axios, "post").mockRejectedValue(expectedError)
 
-      const result = await apiClient.retryEvent(message.messageId)
+    const result = await apiClient.retryEvent(message.messageId)
 
-      expect(result).toBeError(`Error retrying event: ${expectedError.message}`)
-    })
+    expect(result).toBeError(`Error retrying event: ${expectedError.message}`)
+  })
 
-    it("should pass through the api key as a header", async () => {
-      const mockPost = jest.spyOn(axios, "post").mockResolvedValue({ status: 204 })
+  it("should pass through the api key as a header", async () => {
+    const mockPost = jest.spyOn(axios, "post").mockResolvedValue({ status: 204 })
 
-      const result = await apiClient.retryEvent(message.messageId)
+    const result = await apiClient.retryEvent(message.messageId)
 
-      expect(result).toNotBeError()
-      expect(mockPost.mock?.calls?.[0]?.[2]?.headers?.["X-API-Key"]).toBe("dummy")
-    })
+    expect(result).toNotBeError()
+    expect(mockPost.mock?.calls?.[0]?.[2]?.headers?.["X-API-Key"]).toBe("dummy")
+  })
+})
+
+describe("sanitiseMessage()", () => {
+  it("should return NoContent http status code when successful", async () => {
+    jest.spyOn(axios, "post").mockResolvedValue({ status: 204 })
+
+    const result = await apiClient.sanitiseMessage(message.messageId)
+
+    expect(result).toNotBeError()
+  })
+
+  it("should fail when message does not exist", async () => {
+    jest.spyOn(axios, "post").mockResolvedValue({ status: 404 })
+
+    const result = await apiClient.sanitiseMessage(message.messageId)
+
+    expect(result).toBeError(`The message with Id ${message.messageId} does not exist.`)
+  })
+
+  it("should fail when the api errors", async () => {
+    jest.spyOn(axios, "post").mockResolvedValue({ status: 500, data: "api has gone bang" })
+
+    const result = await apiClient.sanitiseMessage(message.messageId)
+
+    expect(result).toBeError(`Error from audit log api while sanitising: api has gone bang`)
+  })
+
+  it("should fail when the error is unknown", async () => {
+    const expectedError = <AxiosError>new Error("An unknown error")
+    jest.spyOn(axios, "post").mockRejectedValue(expectedError)
+
+    const result = await apiClient.sanitiseMessage(message.messageId)
+
+    expect(result).toBeError("Error sanitising message: An unknown error")
+  })
+
+  it("should fail when the api request times out", async () => {
+    const timedOutResponse = <AxiosError>{ code: "ECONNABORTED", message: "Connection expired" }
+    jest.spyOn(axios, "post").mockRejectedValue(timedOutResponse)
+
+    const result = await apiClient.sanitiseMessage(message.messageId)
+
+    expect(result).toBeError("Error sanitising message: Connection expired")
   })
 })
