@@ -7,6 +7,7 @@ import { execute } from "lambda-local"
 import { Client } from "pg"
 import { AuditLogApiClient, logger, TestDynamoGateway } from "shared"
 import "shared-testing"
+import { setEnvironmentVariables } from "shared-testing"
 import type { ApiClient, KeyValuePair } from "shared-types"
 import { AuditLog } from "shared-types"
 import sanitiseOldMessages from "./index"
@@ -68,24 +69,10 @@ const insertAuditLogRecords = async (
   return messageIds
 }
 
-const lambdaEnvironment = {
-  API_URL: "http://localhost:3010",
-  API_KEY: "apiKey",
-  DB_HOST: "localhost",
-  DB_PORT: 5432,
-  DB_USER: "bichard",
-  DB_PASSWORD: "password",
-  DB_NAME: "bichard",
-  DB_SCHEMA: "br7own",
-  DB_SSL: false,
-  AWS_URL: "http://localhost:8000",
-  AWS_REGION: "eu-west-2",
-  AUDIT_LOG_TABLE_NAME: "auditLogTable",
-  DYNAMO_AWS_ACCESS_KEY_ID: "dummy1",
-  DYNAMO_AWS_SECRET_ACCESS_KEY: "dummy2",
-  SANITISE_AFTER_DAYS: 90,
-  CHECK_FREQUENCY_DAYS: 2
-}
+setEnvironmentVariables({
+  SANITISE_AFTER_DAYS: "90",
+  CHECK_FREQUENCY_DAYS: "2"
+})
 
 const executeLambda = (environment?: any): Promise<unknown> => {
   return execute({
@@ -93,7 +80,7 @@ const executeLambda = (environment?: any): Promise<unknown> => {
     lambdaFunc: { handler: sanitiseOldMessages },
     region: "eu-west-2",
     timeoutMs: 60 * 1_000,
-    environment: environment ?? lambdaEnvironment
+    environment: environment ?? process.env
   })
 }
 
@@ -121,7 +108,7 @@ describe("Sanitise Old Messages e2e", () => {
       AWS_SECRET_ACCESS_KEY: "DUMMY"
     })
 
-    api = new AuditLogApiClient(lambdaEnvironment.API_URL, lambdaEnvironment.API_KEY)
+    api = new AuditLogApiClient(process.env.API_URL || "", process.env.API_KEY || "")
   })
 
   beforeEach(async () => {

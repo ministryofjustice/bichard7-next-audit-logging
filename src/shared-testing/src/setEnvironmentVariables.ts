@@ -14,6 +14,7 @@ export default (additionalVariables?: KeyValuePair<string, string>): void => {
   process.env.S3_AWS_SECRET_ACCESS_KEY = "S3RVER"
   process.env.DYNAMO_AWS_ACCESS_KEY_ID = "S3RVER"
   process.env.DYNAMO_AWS_SECRET_ACCESS_KEY = "S3RVER"
+  process.env.AUDIT_LOG_TABLE_NAME = "auditLogTable"
   process.env.DB_HOST = "localhost"
   process.env.DB_PORT = "5432"
   process.env.DB_USER = "bichard"
