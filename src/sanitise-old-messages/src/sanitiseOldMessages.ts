@@ -66,7 +66,7 @@ export default async (
 ): Promise<void> => {
   logger.debug("Fetching messages to sanitise")
 
-  // Fetch old messages (over 3 months) from dynamo
+  // Fetch messages over the configured age threshold from dynamo
   const messages = await fetchOldMessages(dynamo, config.MESSAGE_FETCH_BATCH_NUM)
   if (isError(messages)) {
     logger.error({ message: "Unable to fetch messages from dynamo, exiting", error: messages })
