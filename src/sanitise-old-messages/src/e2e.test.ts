@@ -14,8 +14,6 @@ import sanitiseOldMessages from "./index"
 
 logger.level = "debug"
 
-const auditLogTableName = "auditLogTable"
-
 const createTableSql = `
   CREATE SCHEMA br7own;
   GRANT ALL ON SCHEMA br7own TO bichard;
@@ -62,7 +60,7 @@ const insertAuditLogRecords = async (
 
   for (const record of records) {
     const auditLog = new AuditLog(record.externalCorrelationId, record.receivedAt, record.externalCorrelationId)
-    await gateway.insertOne(auditLogTableName, auditLog, record.externalCorrelationId)
+    await gateway.insertOne(process.env.AUDIT_LOG_TABLE_NAME!, auditLog, record.externalCorrelationId)
     messageIds[record.externalCorrelationId] = auditLog.messageId
   }
 
@@ -91,24 +89,24 @@ describe("Sanitise Old Messages e2e", () => {
 
   beforeAll(async () => {
     db = new Client({
-      host: "localhost",
-      port: 5432,
-      user: "bichard",
-      password: "password",
-      ssl: false,
-      database: "bichard"
+      host: process.env.DB_HOST,
+      port: parseInt(process.env.DB_PORT!, 10),
+      user: process.env.DB_USER,
+      password: process.env.DB_PASSWORD,
+      ssl: process.env.DB_SSL != "false",
+      database: process.env.DB_NAME
     })
     await db.connect()
 
     gateway = new TestDynamoGateway({
-      DYNAMO_URL: "http://localhost:8000",
-      DYNAMO_REGION: "eu-west-2",
-      TABLE_NAME: auditLogTableName,
-      AWS_ACCESS_KEY_ID: "DUMMY",
-      AWS_SECRET_ACCESS_KEY: "DUMMY"
+      DYNAMO_URL: process.env.AWS_URL!,
+      DYNAMO_REGION: process.env.AWS_REGION!,
+      TABLE_NAME: process.env.AUDIT_LOG_TABLE_NAME!,
+      AWS_ACCESS_KEY_ID: process.env.DYNAMO_AWS_ACCESS_KEY_ID,
+      AWS_SECRET_ACCESS_KEY: process.env.DYNAMO_AWS_SECRET_ACCESS_KEY
     })
 
-    api = new AuditLogApiClient(process.env.API_URL || "", process.env.API_KEY || "")
+    api = new AuditLogApiClient(process.env.API_URL!, process.env.API_KEY!)
   })
 
   beforeEach(async () => {
