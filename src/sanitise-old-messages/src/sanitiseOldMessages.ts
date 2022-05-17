@@ -10,11 +10,14 @@ const rescheduleSanitiseCheck = (
   message: AuditLog,
   frequency: Duration
 ): PromiseResult<void> => {
-  // TODO: Make time between sanitiseChecks configurable
   return dynamo.updateSanitiseCheck(message.messageId, add(new Date(), frequency))
 }
 
-const shouldSanitise = async (db: Client, message: AuditLog, ageThreshold: Duration): PromiseResult<{ sanitise: boolean; error: boolean }> => {
+const shouldSanitise = async (
+  db: Client,
+  message: AuditLog,
+  ageThreshold: Duration
+): PromiseResult<{ sanitise: boolean; error: boolean }> => {
   // Only sanitise messages more than 3 months old
   if (add(new Date(message.receivedDate), ageThreshold) > new Date()) {
     return { sanitise: false, error: false }
@@ -52,13 +55,19 @@ const shouldSanitise = async (db: Client, message: AuditLog, ageThreshold: Durat
   return { sanitise: true, error: false }
 }
 
-const fetchOldMessages = (dynamo: AuditLogDynamoGateway): PromiseResult<AuditLog[]> => dynamo.fetchUnsanitised(500)
+const fetchOldMessages = (dynamo: AuditLogDynamoGateway, limit: number): PromiseResult<AuditLog[]> =>
+  dynamo.fetchUnsanitised(limit)
 
-export default async (api: ApiClient, dynamo: AuditLogDynamoGateway, db: Client, config: SanitiseOldMessagesConfig): Promise<void> => {
+export default async (
+  api: ApiClient,
+  dynamo: AuditLogDynamoGateway,
+  db: Client,
+  config: SanitiseOldMessagesConfig
+): Promise<void> => {
   logger.debug("Fetching messages to sanitise")
 
   // Fetch old messages (over 3 months) from dynamo
-  const messages = await fetchOldMessages(dynamo)
+  const messages = await fetchOldMessages(dynamo, config.MESSAGE_FETCH_BATCH_NUM)
   if (isError(messages)) {
     logger.error({ message: "Unable to fetch messages from dynamo, exiting", error: messages })
     return

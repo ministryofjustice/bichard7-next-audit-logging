@@ -9,10 +9,11 @@ export type ApiConfig = {
 export type SanitiseOldMessagesConfig = {
   SANITISE_AFTER: Duration
   CHECK_FREQUENCY: Duration
+  MESSAGE_FETCH_BATCH_NUM: number
 }
 
 export const getSanitiseConfig = (): SanitiseOldMessagesConfig => {
-  const { SANITISE_AFTER_DAYS, CHECK_FREQUENCY: CHECK_FREQUENCY_DAYS } = process.env
+  const { SANITISE_AFTER_DAYS, CHECK_FREQUENCY: CHECK_FREQUENCY_DAYS, MESSAGE_FETCH_BATCH_NUM } = process.env
 
   if (!SANITISE_AFTER_DAYS) {
     throw Error("SANITISE_AFTER_DAYS environment variable must have value.")
@@ -21,9 +22,11 @@ export const getSanitiseConfig = (): SanitiseOldMessagesConfig => {
   if (!CHECK_FREQUENCY_DAYS) {
     throw Error("CHECK_FREQUENCY_DAYS environment variable must have value.")
   }
+
   return {
     SANITISE_AFTER: { days: parseInt(SANITISE_AFTER_DAYS, 10) },
-    CHECK_FREQUENCY: { days: parseInt(CHECK_FREQUENCY_DAYS, 10) }
+    CHECK_FREQUENCY: { days: parseInt(CHECK_FREQUENCY_DAYS, 10) },
+    MESSAGE_FETCH_BATCH_NUM: MESSAGE_FETCH_BATCH_NUM ? parseInt(MESSAGE_FETCH_BATCH_NUM, 10) : 100
   }
 }
 
@@ -111,4 +114,3 @@ export const getApiConfig = (): ApiConfig => {
     API_KEY
   } as ApiConfig
 }
-
