@@ -13,7 +13,7 @@ export type SanitiseOldMessagesConfig = {
 }
 
 export const getSanitiseConfig = (): SanitiseOldMessagesConfig => {
-  const { SANITISE_AFTER_DAYS, CHECK_FREQUENCY: CHECK_FREQUENCY_DAYS, MESSAGE_FETCH_BATCH_NUM } = process.env
+  const { SANITISE_AFTER_DAYS, CHECK_FREQUENCY_DAYS, MESSAGE_FETCH_BATCH_NUM } = process.env
 
   if (!SANITISE_AFTER_DAYS) {
     throw Error("SANITISE_AFTER_DAYS environment variable must have value.")
