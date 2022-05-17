@@ -1,2 +1,2 @@
 build:
-	make -C ../../.. santise-old-messages
+	make -C ../../ sanitise-old-messages
