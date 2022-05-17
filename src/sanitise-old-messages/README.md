@@ -36,3 +36,10 @@ This lambda uses several environment variables to connect to other services:
 
 ## Queueing
 
+The messages that have not previously been sanitised are checked by the date on the `nextSanitiseCheck` field in dynamodb, with the oldest date being checked first. When messages have been created, they are eligible to be checked straight away so they have the `nextSanitiseCheck` set to the current date. 
+
+After a sanitise check is performed, the `nextSanitiseCheck` field is updated to be `CHECK_FREQUENCY_DAYS` from now.
+
+## When are messages sanitised
+
+When the outstanding actions have been performed, the message gets archived. When the message has been archived and is older than the `SANITISE_AFTER_DAYS` threshold, the message is eligible to be sanitised and will be sanitised next time it is checked.
