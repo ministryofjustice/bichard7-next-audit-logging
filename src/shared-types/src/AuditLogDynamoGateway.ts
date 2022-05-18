@@ -1,14 +1,9 @@
-import type { DocumentClient } from "aws-sdk/clients/dynamodb"
-import type { AuditLog, AuditLogEvent, PromiseResult, UnconditionalUpdateOptions } from "."
+import type { AuditLog, AuditLogEvent, PromiseResult } from "."
 
 export default interface AuditLogDynamoGateway {
   create(message: AuditLog): PromiseResult<AuditLog>
   update(message: AuditLog): PromiseResult<AuditLog>
-  updateEntryUnconditionally(
-    tableName: string,
-    options: UnconditionalUpdateOptions
-  ): PromiseResult<DocumentClient.UpdateItemOutput>
-  updateSanitiseCheck(messageId: string, nextSanitiseCheck: Date): PromiseResult<void>
+  updateSanitiseCheck(message: AuditLog, nextSanitiseCheck: Date): PromiseResult<void>
   fetchMany(limit: number, lastMessage?: AuditLog): PromiseResult<AuditLog[]>
   fetchByExternalCorrelationId(externalCorrelationId: string): PromiseResult<AuditLog | null>
   fetchByHash(hash: string): PromiseResult<AuditLog | null>

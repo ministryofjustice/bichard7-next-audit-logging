@@ -1,6 +1,6 @@
 jest.retryTimes(10)
 import type { DocumentClient, GetItemOutput } from "aws-sdk/clients/dynamodb"
-import type { DynamoDbConfig, UnconditionalUpdateOptions } from "shared-types"
+import type { DynamoDbConfig } from "shared-types"
 import { isError } from "shared-types"
 import DynamoGateway from "./DynamoGateway"
 import type FetchByIndexOptions from "./FetchByIndexOptions"
@@ -404,66 +404,6 @@ describe("DynamoGateway", () => {
         currentVersion: 1
       }
       const result = await gateway.updateEntry(config.TABLE_NAME, options)
-
-      expect(isError(result)).toBe(true)
-    })
-  })
-
-  describe("updateEntryUnconditionally()", () => {
-    beforeEach(async () => {
-      await Promise.allSettled(
-        [...Array(3).keys()].map(async (i: number) => {
-          const record = {
-            id: `Record ${i}`,
-            someOtherValue: `Value ${i}`,
-            version: 0
-          }
-          await testGateway.insertOne(config.TABLE_NAME, record, "messageId")
-        })
-      )
-    })
-
-    it("should update one entry when key exists", async () => {
-      const recordId = "Record 1"
-      const expectedValue = "Updated value"
-      const options: UnconditionalUpdateOptions = {
-        keyName: "id",
-        keyValue: recordId,
-        updateExpression: "set #attributeName = :newValue",
-        expressionAttributeNames: {
-          "#attributeName": "someOtherValue"
-        },
-        updateExpressionValues: {
-          ":newValue": expectedValue
-        }
-      }
-      const result = await gateway.updateEntryUnconditionally(config.TABLE_NAME, options)
-
-      expect(isError(result)).toBe(false)
-
-      const getManyOptions: GetManyOptions = {
-        sortKey,
-        pagination: { limit: 3 }
-      }
-      const actualRecords = <DocumentClient.ScanOutput>await testGateway.getMany(config.TABLE_NAME, getManyOptions)
-      expect(isError(actualRecords)).toBeFalsy()
-
-      const filteredRecords = actualRecords.Items?.filter((r) => r.id === recordId)
-      expect(filteredRecords).toHaveLength(1)
-      expect(filteredRecords?.[0].someOtherValue).toBe(expectedValue)
-    })
-
-    it("should return error when key does not exist", async () => {
-      const recordId = "Invalid record Id"
-      const options: UnconditionalUpdateOptions = {
-        keyName: "id",
-        keyValue: recordId,
-        updateExpression: "set someOtherValue = :newValue",
-        updateExpressionValues: {
-          ":newValue": "Some value"
-        }
-      }
-      const result = await gateway.updateEntryUnconditionally(config.TABLE_NAME, options)
 
       expect(isError(result)).toBe(true)
     })

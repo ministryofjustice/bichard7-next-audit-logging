@@ -38,20 +38,22 @@ export default class SanitiseOldMessages {
           messageId: message.messageId
         })
         continue
-      } else if (shouldSanitiseResult.sanitise) {
+      }
+
+      if (shouldSanitiseResult.sanitise) {
         const sanitiseResult = await this.api.sanitiseMessage(message.messageId)
         if (isError(sanitiseResult)) {
           logger.error({ message: "Unable to sanitise message", error: sanitiseResult, messageId: message.messageId })
         }
-      }
-
-      const rescheduleSanitiseCheckResult = await this.rescheduleSanitiseCheck(message, this.config.CHECK_FREQUENCY)
-      if (isError(rescheduleSanitiseCheckResult)) {
-        logger.error({
-          message: "Unable to reschedule sanitise check",
-          error: rescheduleSanitiseCheckResult,
-          messageId: message.messageId
-        })
+      } else {
+        const rescheduleSanitiseCheckResult = await this.rescheduleSanitiseCheck(message, this.config.CHECK_FREQUENCY)
+        if (isError(rescheduleSanitiseCheckResult)) {
+          logger.error({
+            message: "Unable to reschedule sanitise check",
+            error: rescheduleSanitiseCheckResult,
+            messageId: message.messageId
+          })
+        }
       }
     }
   }
@@ -98,6 +100,6 @@ export default class SanitiseOldMessages {
   }
 
   private rescheduleSanitiseCheck(message: AuditLog, frequency: Duration) {
-    return this.dynamo.updateSanitiseCheck(message.messageId, add(new Date(), frequency))
+    return this.dynamo.updateSanitiseCheck(message, add(new Date(), frequency))
   }
 }

@@ -1,6 +1,6 @@
 import { DynamoDB } from "aws-sdk"
 import { DocumentClient } from "aws-sdk/clients/dynamodb"
-import type { DynamoDbConfig, PromiseResult, UnconditionalUpdateOptions } from "shared-types"
+import type { DynamoDbConfig, PromiseResult } from "shared-types"
 import { isError } from "shared-types"
 import type FetchByIndexOptions from "./FetchByIndexOptions"
 import type GetManyOptions from "./GetManyOptions"
@@ -180,35 +180,6 @@ export default class DynamoGateway {
       ExpressionAttributeValues: expressionAttributeValues,
       ExpressionAttributeNames: expressionAttributeNames,
       ConditionExpression: `attribute_exists(${keyName}) and version = :version`
-    }
-
-    return this.client
-      .update(updateParams)
-      .promise()
-      .catch((error) => <Error>error)
-  }
-
-  // Updates an entry in Dynamo without checking versions (unconditionally)
-  updateEntryUnconditionally(
-    tableName: string,
-    options: UnconditionalUpdateOptions
-  ): PromiseResult<DocumentClient.UpdateItemOutput> {
-    const { keyName, keyValue, expressionAttributeNames } = options
-    const expressionAttributeValues = {
-      ...options.updateExpressionValues,
-      ":version_increment": 1
-    }
-    const updateExpression = `${options.updateExpression} ADD version :version_increment`
-
-    const updateParams = <DocumentClient.UpdateItemInput>{
-      TableName: tableName,
-      Key: {
-        [keyName]: keyValue
-      },
-      UpdateExpression: updateExpression,
-      ExpressionAttributeValues: expressionAttributeValues,
-      ExpressionAttributeNames: expressionAttributeNames,
-      ConditionExpression: `attribute_exists(${keyName})`
     }
 
     return this.client

@@ -225,13 +225,22 @@ describe("Sanitise Old Messages e2e", () => {
 
     await executeLambda()
 
+    const messages: AuditLog[] = []
     for (const messageId of Object.values(messageIds)) {
       const messageResult = await api.getMessage(messageId)
       expect(messageResult).toNotBeError()
 
-      const message = messageResult as AuditLog
-      const expectedNextCheck = addDays(new Date(), 2).toISOString()
-      expect(message.nextSanitiseCheck).toContain(expectedNextCheck.split("T")[0])
+      messages.push(messageResult as AuditLog)
     }
+
+    const expectedNextCheck = addDays(new Date(), 2).toISOString()
+
+    expect(messages[0].nextSanitiseCheck).toContain(expectedNextCheck.split("T")[0])
+    expect(messages[1].nextSanitiseCheck).toContain(expectedNextCheck.split("T")[0])
+    expect(messages[2].nextSanitiseCheck).toContain(expectedNextCheck.split("T")[0])
+    expect(messages[3].nextSanitiseCheck).toBeFalsy()
+    expect(messages[4].nextSanitiseCheck).toBeFalsy()
+    expect(messages[5].nextSanitiseCheck).toContain(expectedNextCheck.split("T")[0])
+    expect(messages[6].nextSanitiseCheck).toContain(expectedNextCheck.split("T")[0])
   })
 })

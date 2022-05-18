@@ -7,7 +7,7 @@ import type {
   PromiseResult
 } from "shared-types"
 import { EventType, isError } from "shared-types"
-import type { FetchByIndexOptions, UpdateOptions, UnconditionalUpdateOptions } from "../DynamoGateway"
+import type { FetchByIndexOptions, UpdateOptions } from "../DynamoGateway"
 import { DynamoGateway, IndexSearcher, KeyComparison } from "../DynamoGateway"
 import CalculateMessageStatusUseCase from "./CalculateMessageStatusUseCase"
 import getForceOwnerForAutomationReport from "./getForceOwnerForAutomationReport"
@@ -50,14 +50,15 @@ export default class AwsAuditLogDynamoGateway extends DynamoGateway implements A
     return message
   }
 
-  async updateSanitiseCheck(messageId: string, nextSanitiseCheck: Date): PromiseResult<void> {
-    const options: UnconditionalUpdateOptions = {
+  async updateSanitiseCheck(message: AuditLog, nextSanitiseCheck: Date): PromiseResult<void> {
+    const options: UpdateOptions = {
       keyName: this.tableKey,
-      keyValue: messageId,
+      keyValue: message.messageId,
       updateExpression: "SET nextSanitiseCheck = :value",
-      updateExpressionValues: { ":value": nextSanitiseCheck.toISOString() }
+      updateExpressionValues: { ":value": nextSanitiseCheck.toISOString() },
+      currentVersion: message.version
     }
-    const result = await this.updateEntryUnconditionally(this.tableName, options)
+    const result = await this.updateEntry(this.tableName, options)
     if (isError(result)) {
       return result
     }

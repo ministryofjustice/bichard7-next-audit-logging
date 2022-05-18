@@ -1,8 +1,8 @@
+import MockDate from "mockdate"
 import "shared-testing"
+import { FakeAuditLogDynamoGateway } from "shared-testing"
 import { AuditLog, AuditLogEvent, BichardAuditLogEvent } from "shared-types"
 import SanitiseAuditLogUseCase from "./SanitiseAuditLogUseCase"
-import { FakeAuditLogDynamoGateway } from "shared-testing"
-import MockDate from "mockdate"
 
 const fakeAuditLogDynamoGateway = new FakeAuditLogDynamoGateway()
 const sanitiseAuditLogUseCase = new SanitiseAuditLogUseCase(fakeAuditLogDynamoGateway)
@@ -30,6 +30,7 @@ const message = new AuditLog("External Correlation ID", new Date(), "Dummy hash"
 message.events = [createBichardAuditLogEvent()]
 message.automationReport.events = [createBichardAuditLogEvent()]
 message.topExceptionsReport.events = [createBichardAuditLogEvent()]
+message.nextSanitiseCheck = new Date().toISOString()
 
 afterAll(() => {
   MockDate.reset()
@@ -69,4 +70,12 @@ it("should add a new event when the audit log successfully sanitised", async () 
   expect(sanitiseAuditLogResult).toNotBeError()
   const actualMessage = sanitiseAuditLogResult as AuditLog
   expect(actualMessage?.events.slice(-1)[0]).toEqual(expectedAuditLogEvent)
+})
+
+it("should delete the nextSanitisedCheck from the audit log when sucessfully sanitised", async () => {
+  const sanitiseAuditLogResult = await sanitiseAuditLogUseCase.call(message)
+
+  expect(sanitiseAuditLogResult).toNotBeError()
+  const actualMessage = sanitiseAuditLogResult as AuditLog
+  expect(actualMessage.nextSanitiseCheck).toBeFalsy()
 })

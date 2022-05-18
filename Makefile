@@ -16,7 +16,7 @@ build:
 build-all: shared-types shared-testing shared \
 	   message-receiver transfer-messages incoming-message-handler event-handler \
 	   audit-log-api audit-log-portal archive-user-logs retry-failed-messages \
-	   add-archival-events
+	   add-archival-events sanitise-old-messages
 
 .PHONY: test
 test:

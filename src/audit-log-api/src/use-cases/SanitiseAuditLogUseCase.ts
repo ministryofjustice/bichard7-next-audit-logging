@@ -1,6 +1,5 @@
 import type { AuditLog, AuditLogDynamoGateway, PromiseResult } from "shared-types"
-import { EventType } from "shared-types"
-import { AuditLogEvent } from "shared-types"
+import { AuditLogEvent, EventType } from "shared-types"
 
 export default class SanitiseAuditLogUseCase {
   constructor(private readonly auditLogDynamoGateway: AuditLogDynamoGateway) {}
@@ -25,6 +24,9 @@ export default class SanitiseAuditLogUseCase {
         eventSource: "Audit Log Api"
       })
     )
+
+    // Delete nextSanitseCheck now that the audit log has been sanitised
+    auditLog.nextSanitiseCheck = undefined
 
     return this.auditLogDynamoGateway.update(auditLog)
   }
