@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-
 jest.setTimeout(30_000)
 
 import { addDays } from "date-fns"
@@ -11,6 +10,11 @@ import { setEnvironmentVariables } from "shared-testing"
 import type { ApiClient, KeyValuePair } from "shared-types"
 import { AuditLog } from "shared-types"
 import sanitiseOldMessages from "./index"
+
+setEnvironmentVariables({
+  SANITISE_AFTER_DAYS: "90",
+  CHECK_FREQUENCY_DAYS: "2"
+})
 
 logger.level = "debug"
 
@@ -66,11 +70,6 @@ const insertAuditLogRecords = async (
 
   return messageIds
 }
-
-setEnvironmentVariables({
-  SANITISE_AFTER_DAYS: "90",
-  CHECK_FREQUENCY_DAYS: "2"
-})
 
 const executeLambda = (environment?: any): Promise<unknown> => {
   return execute({

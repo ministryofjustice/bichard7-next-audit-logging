@@ -1,7 +1,7 @@
 import { Client } from "pg"
 import { AuditLogApiClient, AwsAuditLogDynamoGateway, logger } from "shared"
 import { getApiConfig, getDynamoConfig, getPostgresConfig, getSanitiseConfig } from "./config"
-import sanitiseOldMessages from "./sanitiseOldMessages"
+import SanitiseOldMessages from "./sanitiseOldMessages"
 
 export default async (): Promise<void> => {
   const pgConfig = getPostgresConfig()
@@ -24,9 +24,11 @@ export default async (): Promise<void> => {
     database: pgConfig.DATABASE_NAME
   })
 
+  const s = new SanitiseOldMessages(api, dynamo, db, config)
+
   try {
     await db.connect()
-    await sanitiseOldMessages(api, dynamo, db, config)
+    await s.sanitiseOldMessages()
   } catch (error) {
     logger.error(error as Error)
   } finally {
