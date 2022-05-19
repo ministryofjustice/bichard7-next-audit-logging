@@ -11,12 +11,7 @@ export default class SanitiseOldMessages {
     private dynamo: AuditLogDynamoGateway,
     private db: Client,
     private config: SanitiseOldMessagesConfig
-  ) {
-    this.api = api
-    this.dynamo = dynamo
-    this.db = db
-    this.config = config
-  }
+  ) {}
 
   public async sanitiseOldMessages() {
     logger.debug("Fetching messages to sanitise")
