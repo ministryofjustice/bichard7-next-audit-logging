@@ -12,12 +12,12 @@ import { isError } from "shared-types"
 import createAuditLogDynamoDbConfig from "../createAuditLogDynamoDbConfig"
 import createAuditLogLookupDynamoDbConfig from "../createAuditLogLookupDynamoDbConfig"
 import createBichardPostgresGatewayConfig from "../createBichardPostgresGatewayConfig"
-import FetchById from "../use-cases/FetchById"
-import DeleteMessageObjectsFromS3UseCase from "../use-cases/DeleteMessageObjectsFromS3UseCase"
-import { createJsonApiResult } from "../utils"
-import SanitiseAuditLogUseCase from "../use-cases/SanitiseAuditLogUseCase"
-import DeleteAuditLogLookupItemsUseCase from "../use-cases/DeleteAuditLogLookupItemsUseCase"
 import DeleteArchivedErrorsUseCase from "../use-cases/DeleteArchivedErrorsUseCase"
+import DeleteAuditLogLookupItemsUseCase from "../use-cases/DeleteAuditLogLookupItemsUseCase"
+import DeleteMessageObjectsFromS3UseCase from "../use-cases/DeleteMessageObjectsFromS3UseCase"
+import FetchById from "../use-cases/FetchById"
+import SanitiseAuditLogUseCase from "../use-cases/SanitiseAuditLogUseCase"
+import { createJsonApiResult } from "../utils"
 
 const auditLogDynamoDbConfig = createAuditLogDynamoDbConfig()
 const auditLogGateway = new AwsAuditLogDynamoGateway(auditLogDynamoDbConfig, auditLogDynamoDbConfig.TABLE_NAME)
@@ -95,7 +95,6 @@ export default async function sanitiseMessage(event: APIGatewayProxyEvent): Prom
   }
 
   const sanitiseAuditLogResult = await sanitiseAuditLogUseCase.call(message)
-
   if (isError(sanitiseAuditLogResult)) {
     return createJsonApiResult({
       statusCode: HttpStatusCode.internalServerError,

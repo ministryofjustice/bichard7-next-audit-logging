@@ -6,4 +6,6 @@ export default interface ApiClient {
   createAuditLog(auditLog: AuditLog): PromiseResult<void>
 
   createEvent(messageId: string, event: AuditLogEvent): PromiseResult<void>
+
+  sanitiseMessage(messageId: string): PromiseResult<void>
 }

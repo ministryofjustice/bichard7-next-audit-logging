@@ -1,9 +1,16 @@
 import type Pagination from "./Pagination"
+import type KeyComparison from "./KeyComparison"
 
 export default interface FetchByIndexOptions {
   indexName: string
-  attributeName: string
-  attributeValue: unknown
+  hashKeyName: string
+  hashKeyValue: unknown
+  rangeKeyName?: string
+  rangeKeyValue?: unknown
+  rangeKeyComparison?: KeyComparison
+  filterKeyName?: string
+  filterKeyValue?: unknown
+  filterKeyComparison?: KeyComparison
   isAscendingOrder?: boolean
   pagination: Pagination
 }

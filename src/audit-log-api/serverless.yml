@@ -29,6 +29,7 @@ provider:
     DB_TABLE_NAME: "archive_error_list"
     DB_SSL: "false"
     DB_NAME: "bichard"
+    DB_SCHEMA: "br7own"
 
 plugins:
   - serverless-offline

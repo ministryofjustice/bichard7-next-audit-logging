@@ -1,12 +1,12 @@
 jest.retryTimes(10)
 import type { DocumentClient, GetItemOutput } from "aws-sdk/clients/dynamodb"
-import type UpdateOptions from "./UpdateOptions"
-import { isError } from "shared-types"
 import type { DynamoDbConfig } from "shared-types"
-import TestDynamoGateway from "./TestDynamoGateway"
-import type GetManyOptions from "./GetManyOptions"
-import type FetchByIndexOptions from "./FetchByIndexOptions"
+import { isError } from "shared-types"
 import DynamoGateway from "./DynamoGateway"
+import type FetchByIndexOptions from "./FetchByIndexOptions"
+import type GetManyOptions from "./GetManyOptions"
+import TestDynamoGateway from "./TestDynamoGateway"
+import type UpdateOptions from "./UpdateOptions"
 
 const config: DynamoDbConfig = {
   DYNAMO_URL: "http://localhost:8000",
@@ -232,8 +232,8 @@ describe("DynamoGateway", () => {
     it("should return one record when key value exists", async () => {
       const options: FetchByIndexOptions = {
         indexName: "someOtherValueSecondaryIndex",
-        attributeName: "someOtherValue",
-        attributeValue: "Value 1",
+        hashKeyName: "someOtherValue",
+        hashKeyValue: "Value 1",
         pagination: { limit: 10 }
       }
 
@@ -252,8 +252,8 @@ describe("DynamoGateway", () => {
     it("should return null when key value does not exist", async () => {
       const options: FetchByIndexOptions = {
         indexName: "someOtherValueSecondaryIndex",
-        attributeName: "someOtherValue",
-        attributeValue: "Value doesn't exist",
+        hashKeyName: "someOtherValue",
+        hashKeyValue: "Value doesn't exist",
         pagination: { limit: 10 }
       }
 

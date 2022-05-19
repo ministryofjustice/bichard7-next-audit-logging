@@ -1,10 +1,11 @@
 import { DynamoDB } from "aws-sdk"
 import { DocumentClient } from "aws-sdk/clients/dynamodb"
-import type { PromiseResult, DynamoDbConfig } from "shared-types"
+import type { DynamoDbConfig, PromiseResult } from "shared-types"
 import { isError } from "shared-types"
 import type FetchByIndexOptions from "./FetchByIndexOptions"
-import type UpdateOptions from "./UpdateOptions"
 import type GetManyOptions from "./GetManyOptions"
+import KeyComparison from "./KeyComparison"
+import type UpdateOptions from "./UpdateOptions"
 
 export default class DynamoGateway {
   protected readonly service: DynamoDB
@@ -86,22 +87,40 @@ export default class DynamoGateway {
   }
 
   fetchByIndex(tableName: string, options: FetchByIndexOptions): PromiseResult<DocumentClient.QueryOutput> {
-    const { indexName, attributeName, attributeValue, isAscendingOrder } = options
+    const { indexName, hashKeyName: attributeName, hashKeyValue: attributeValue, isAscendingOrder } = options
     const { limit, lastItemKey } = options.pagination
 
     const queryOptions: DynamoDB.DocumentClient.QueryInput = {
       TableName: tableName,
       IndexName: indexName,
       KeyConditionExpression: "#keyName = :keyValue",
-      ExpressionAttributeValues: {
-        ":keyValue": attributeValue
-      },
       ExpressionAttributeNames: {
         "#keyName": attributeName
+      },
+      ExpressionAttributeValues: {
+        ":keyValue": attributeValue
       },
       ScanIndexForward: isAscendingOrder,
       Limit: limit,
       ExclusiveStartKey: lastItemKey
+    }
+
+    // set query options for comparison to a range key value
+    if (options.rangeKeyName && options.rangeKeyValue !== undefined && options.rangeKeyComparison !== undefined) {
+      if (options.rangeKeyComparison == KeyComparison.LessThanOrEqual) {
+        queryOptions.KeyConditionExpression += " AND #rangeKeyName <= :rangeKeyValue"
+        queryOptions.ExpressionAttributeNames!["#rangeKeyName"] = options.rangeKeyName
+        queryOptions.ExpressionAttributeValues![":rangeKeyValue"] = options.rangeKeyValue
+      }
+    }
+
+    // set query options for the filter if given
+    if (options.filterKeyName && options.filterKeyValue !== undefined && options.filterKeyComparison !== undefined) {
+      if (options.filterKeyComparison == KeyComparison.LessThanOrEqual) {
+        queryOptions.FilterExpression = "#filterKeyName <= :filterKeyValue"
+        queryOptions.ExpressionAttributeNames!["#filterKeyName"] = options.filterKeyName
+        queryOptions.ExpressionAttributeValues![":filterKeyValue"] = options.filterKeyValue
+      }
     }
 
     return this.client
