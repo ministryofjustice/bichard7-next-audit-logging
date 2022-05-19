@@ -71,11 +71,3 @@ it("should add a new event when the audit log successfully sanitised", async () 
   const actualMessage = sanitiseAuditLogResult as AuditLog
   expect(actualMessage?.events.slice(-1)[0]).toEqual(expectedAuditLogEvent)
 })
-
-it("should delete the nextSanitisedCheck from the audit log when sucessfully sanitised", async () => {
-  const sanitiseAuditLogResult = await sanitiseAuditLogUseCase.call(message)
-
-  expect(sanitiseAuditLogResult).toNotBeError()
-  const actualMessage = sanitiseAuditLogResult as AuditLog
-  expect(actualMessage.nextSanitiseCheck).toBeFalsy()
-})

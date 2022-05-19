@@ -790,11 +790,37 @@ describe("AuditLogDynamoGateway", () => {
       expect(actualAuditLog.status).toBe(AuditLogStatus.processing)
     })
 
-    it("should not change the status and should set sanitised date", async () => {
+    it("should not change the status and should set nextSanitiseCheck if unsanitised", async () => {
+      const expectedEvent = createAuditLogEvent("information", new Date(), EventType.ErrorRecordArchival)
+
+      const now = new Date()
+      const message = new AuditLog("one", now, `dummy hash`)
+      message.nextSanitiseCheck = now.toISOString()
+
+      await gateway.create(message)
+
+      message.events.push(expectedEvent)
+      await gateway.update(message)
+
+      const actualMessage = await gateway.fetchOne(message.messageId)
+
+      expect(actualMessage).toBeDefined()
+      expect(actualMessage).toNotBeError()
+
+      const actualAuditLog = actualMessage as AuditLog
+      expect(actualAuditLog).toHaveProperty("isSanitised")
+      expect(actualAuditLog.isSanitised).toBe(0)
+      expect(actualAuditLog).toHaveProperty("nextSanitiseCheck")
+      expect(actualAuditLog.nextSanitiseCheck).toBe(now.toISOString())
+      expect(actualAuditLog.status).toBe(AuditLogStatus.processing)
+    })
+
+    it("should not change the status and should set nextSanitiseCheck if sanitised", async () => {
       const expectedEvent = createAuditLogEvent("information", new Date(), EventType.SanitisedMessage)
 
       const now = new Date()
       const message = new AuditLog("one", now, `dummy hash`)
+      message.nextSanitiseCheck = now.toISOString()
 
       await gateway.create(message)
 
@@ -809,9 +835,8 @@ describe("AuditLogDynamoGateway", () => {
       const actualAuditLog = actualMessage as AuditLog
       expect(actualAuditLog).not.toHaveProperty("errorRecordArchivalDate")
       expect(actualAuditLog).toHaveProperty("isSanitised")
-      expect(actualAuditLog.isSanitised).toBeTruthy()
-      expect(actualAuditLog).toHaveProperty("nextSanitiseCheck")
-      expect(actualAuditLog.status).toBe(AuditLogStatus.processing)
+      expect(actualAuditLog.isSanitised).toBe(1)
+      expect(actualAuditLog.nextSanitiseCheck).toBeFalsy()
     })
 
     it("should return error when audit log does not exist", async () => {

@@ -25,9 +25,6 @@ export default class SanitiseAuditLogUseCase {
       })
     )
 
-    // Delete nextSanitseCheck now that the audit log has been sanitised
-    auditLog.nextSanitiseCheck = undefined
-
     return this.auditLogDynamoGateway.update(auditLog)
   }
 }

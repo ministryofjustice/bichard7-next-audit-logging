@@ -41,10 +41,33 @@ export default class AwsAuditLogDynamoGateway extends DynamoGateway implements A
       message.events.find((event) => event.eventType === EventType.ErrorRecordArchival)?.timestamp
     message.isSanitised = message.events.find((event) => event.eventType === EventType.SanitisedMessage) ? 1 : 0
 
-    const result = await this.updateOne(this.tableName, message, "messageId", message.version)
+    const updateResult = await this.updateOne(this.tableName, message, "messageId", message.version)
+    if (isError(updateResult)) {
+      return updateResult
+    }
 
-    if (isError(result)) {
-      return result
+    const newVersionResult = await this.fetchVersion(message.messageId)
+    if (isError(newVersionResult)) {
+      return newVersionResult
+    }
+    if (newVersionResult === null) {
+      return Error(`Message with id ${message.messageId} was not found in the database`)
+    }
+
+    // Remove nextSanitiseCheck if the message is already sanitised
+    if (message.isSanitised) {
+      const options: UpdateOptions = {
+        keyName: this.tableKey,
+        keyValue: message.messageId,
+        updateExpression: "REMOVE nextSanitiseCheck",
+        updateExpressionValues: {},
+        currentVersion: newVersionResult
+      }
+
+      const removeSanitiseCheckResult = await this.updateEntry(this.tableName, options)
+      if (isError(removeSanitiseCheckResult)) {
+        return removeSanitiseCheckResult
+      }
     }
 
     return message
