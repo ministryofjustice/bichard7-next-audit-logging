@@ -1,3 +1,4 @@
+// @ts-ignore
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable class-methods-use-this */
 import type { AuditLog, AuditLogDynamoGateway, AuditLogEvent, PromiseResult } from "shared-types"
@@ -94,6 +95,16 @@ export default class FakeAuditLogDynamoGateway implements AuditLogDynamoGateway 
 
   // @ts-ignore
   insertOne<T>(tableName: string, record: T, keyName: string): PromiseResult<void> {
+    throw new Error("Method not implemented.")
+  }
+
+  // @ts-ignore
+  fetchUnsanitised(limit: number, lastMessage?: AuditLog): PromiseResult<AuditLog[]> {
+    throw new Error("Method not implemented.")
+  }
+
+  // @ts-ignore
+  updateSanitiseCheck(message: AuditLog, nextSanitiseCheck: Date): PromiseResult<void> {
     throw new Error("Method not implemented.")
   }
 

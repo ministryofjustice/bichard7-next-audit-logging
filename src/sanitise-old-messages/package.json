@@ -1,0 +1,47 @@
+{
+  "name": "sanitise-old-messages",
+  "version": "1.0.0",
+  "description": "A lamdba that sanitises (removes PII from) audit log messages older than a threshold",
+  "main": "index.js",
+  "scripts": {
+    "clean": "rimraf build",
+    "build": "npm run clean && webpack --config ./.webpack/webpack.prod.js",
+    "build:dev": "npm run clean && webpack --config ./.webpack/webpack.dev.js",
+    "test": "jest --runInBand",
+    "test:unit": "jest --testPathIgnorePatterns='integration' 'e2e'",
+    "test:unit:watch": "jest --watchAll --testPathIgnorePatterns='integration' 'e2e'",
+    "test:e2e": "jest --testPathPattern=e2e --runInBand"
+  },
+  "dependencies": {
+    "@types/pg": "^8.6.5",
+    "date-fns": "^2.28.0",
+    "pg": "^8.7.3",
+    "shared": "file:../shared",
+    "shared-types": "file:../shared-types"
+  },
+  "devDependencies": {
+    "@babel/preset-env": "^7.16.11",
+    "@babel/preset-typescript": "^7.16.7",
+    "@types/jest": "^27.4.0",
+    "babel-loader": "^8.2.3",
+    "fork-ts-checker-webpack-plugin": "^7.1.1",
+    "jest": "^27.5.0",
+    "lambda-local": "^2.0.2",
+    "rimraf": "^3.0.2",
+    "shared-testing": "file:../shared-testing",
+    "ts-jest": "^27.1.3",
+    "typescript": "^4.5.5",
+    "webpack": "^5.72.0",
+    "webpack-cli": "^4.9.2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ministryofjustice/bichard7-next-audit-logging.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ministryofjustice/bichard7-next-audit-logging/issues"
+  },
+  "homepage": "https://github.com/ministryofjustice/bichard7-next-audit-logging#readme"
+}

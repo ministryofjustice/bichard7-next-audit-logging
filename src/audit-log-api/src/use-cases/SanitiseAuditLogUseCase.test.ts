@@ -1,8 +1,8 @@
+import MockDate from "mockdate"
 import "shared-testing"
+import { FakeAuditLogDynamoGateway } from "shared-testing"
 import { AuditLog, AuditLogEvent, BichardAuditLogEvent } from "shared-types"
 import SanitiseAuditLogUseCase from "./SanitiseAuditLogUseCase"
-import { FakeAuditLogDynamoGateway } from "shared-testing"
-import MockDate from "mockdate"
 
 const fakeAuditLogDynamoGateway = new FakeAuditLogDynamoGateway()
 const sanitiseAuditLogUseCase = new SanitiseAuditLogUseCase(fakeAuditLogDynamoGateway)
@@ -30,6 +30,7 @@ const message = new AuditLog("External Correlation ID", new Date(), "Dummy hash"
 message.events = [createBichardAuditLogEvent()]
 message.automationReport.events = [createBichardAuditLogEvent()]
 message.topExceptionsReport.events = [createBichardAuditLogEvent()]
+message.nextSanitiseCheck = new Date().toISOString()
 
 afterAll(() => {
   MockDate.reset()

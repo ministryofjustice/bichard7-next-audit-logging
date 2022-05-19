@@ -18,7 +18,7 @@
     "test:unit:watch": "jest --watch"
   },
   "dependencies": {
-    "aws-sdk": "^2.1069.0",
+    "aws-sdk": "^2.1134.0",
     "axios": "^0.25.0",
     "shared-types": "file:../shared-types",
     "uuid": "^8.3.2"

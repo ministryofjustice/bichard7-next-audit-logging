@@ -1,9 +1,9 @@
 jest.retryTimes(10)
-import "shared-testing"
 import type { DocumentClient } from "aws-sdk/clients/dynamodb"
-import { EventType } from "shared-types"
-import { isError, AuditLog, AuditLogEvent, AuditLogStatus } from "shared-types"
+import { addDays } from "date-fns"
+import "shared-testing"
 import type { DynamoDbConfig, EventCategory } from "shared-types"
+import { AuditLog, AuditLogEvent, AuditLogStatus, EventType, isError } from "shared-types"
 import TestDynamoGateway from "../DynamoGateway/TestDynamoGateway"
 import AwsAuditLogDynamoGateway from "./AwsAuditLogDynamoGateway"
 
@@ -601,6 +601,72 @@ describe("AuditLogDynamoGateway", () => {
     })
   })
 
+  describe("fetchUnsanitised", () => {
+    it("should return one AuditLog when there is an unsanitised record to check", async () => {
+      await Promise.allSettled(
+        [...Array(3).keys()].map(async (i: number) => {
+          const auditLog = new AuditLog(
+            `External correlation id ${i}`,
+            new Date("2021-05-06T06:13:27+0000"),
+            "dummy hash"
+          )
+          auditLog.isSanitised = 1
+          await gateway.create(auditLog)
+        })
+      )
+
+      const expectedAuditLog = new AuditLog(
+        `External correlation id 4`,
+        new Date("2021-05-06T06:13:27+0000"),
+        "dummy hash"
+      )
+      expectedAuditLog.status = AuditLogStatus.completed
+      await gateway.create(expectedAuditLog)
+
+      const result = await gateway.fetchUnsanitised()
+
+      expect(isError(result)).toBe(false)
+      expect(result).toBeDefined()
+
+      const items = <AuditLog[]>result
+      expect(items).toHaveLength(1)
+
+      const item = items[0]
+      expect(item.isSanitised).toBeFalsy()
+      expect(item.externalCorrelationId).toBe("External correlation id 4")
+    })
+
+    it("shouldn't return any AuditLogs with unsanitised records not due to be checked", async () => {
+      await Promise.allSettled(
+        [...Array(3).keys()].map(async (i: number) => {
+          const auditLog = new AuditLog(
+            `External correlation id ${i}`,
+            new Date("2021-05-06T06:13:27+0000"),
+            "dummy hash"
+          )
+          auditLog.isSanitised = 1
+          await gateway.create(auditLog)
+        })
+      )
+
+      const expectedAuditLog = new AuditLog(
+        `External correlation id 4`,
+        new Date("2021-05-06T06:13:27+0000"),
+        "dummy hash"
+      )
+      expectedAuditLog.nextSanitiseCheck = addDays(new Date(), 1).toISOString()
+      await gateway.create(expectedAuditLog)
+
+      const result = await gateway.fetchUnsanitised()
+
+      expect(isError(result)).toBe(false)
+      expect(result).toBeDefined()
+
+      const items = <AuditLog[]>result
+      expect(items).toHaveLength(0)
+    })
+  })
+
   describe("fetchEvents", () => {
     it("should return AuditLogEvents when message id exists in the table", async () => {
       const auditLog = new AuditLog(`External correlation id 1`, new Date(), "dummy hash")
@@ -724,11 +790,37 @@ describe("AuditLogDynamoGateway", () => {
       expect(actualAuditLog.status).toBe(AuditLogStatus.processing)
     })
 
-    it("should not change the status and should set sanitised date", async () => {
+    it("should not change the status and should set nextSanitiseCheck if unsanitised", async () => {
+      const expectedEvent = createAuditLogEvent("information", new Date(), EventType.ErrorRecordArchival)
+
+      const now = new Date()
+      const message = new AuditLog("one", now, `dummy hash`)
+      message.nextSanitiseCheck = now.toISOString()
+
+      await gateway.create(message)
+
+      message.events.push(expectedEvent)
+      await gateway.update(message)
+
+      const actualMessage = await gateway.fetchOne(message.messageId)
+
+      expect(actualMessage).toBeDefined()
+      expect(actualMessage).toNotBeError()
+
+      const actualAuditLog = actualMessage as AuditLog
+      expect(actualAuditLog).toHaveProperty("isSanitised")
+      expect(actualAuditLog.isSanitised).toBe(0)
+      expect(actualAuditLog).toHaveProperty("nextSanitiseCheck")
+      expect(actualAuditLog.nextSanitiseCheck).toBe(now.toISOString())
+      expect(actualAuditLog.status).toBe(AuditLogStatus.processing)
+    })
+
+    it("should not change the status and should set nextSanitiseCheck if sanitised", async () => {
       const expectedEvent = createAuditLogEvent("information", new Date(), EventType.SanitisedMessage)
 
       const now = new Date()
       const message = new AuditLog("one", now, `dummy hash`)
+      message.nextSanitiseCheck = now.toISOString()
 
       await gateway.create(message)
 
@@ -743,9 +835,8 @@ describe("AuditLogDynamoGateway", () => {
       const actualAuditLog = actualMessage as AuditLog
       expect(actualAuditLog).not.toHaveProperty("errorRecordArchivalDate")
       expect(actualAuditLog).toHaveProperty("isSanitised")
-      expect(actualAuditLog.isSanitised).toBeTruthy()
-      expect(actualAuditLog).toHaveProperty("nextSanitiseCheck")
-      expect(actualAuditLog.status).toBe(AuditLogStatus.processing)
+      expect(actualAuditLog.isSanitised).toBe(1)
+      expect(actualAuditLog.nextSanitiseCheck).toBeFalsy()
     })
 
     it("should return error when audit log does not exist", async () => {

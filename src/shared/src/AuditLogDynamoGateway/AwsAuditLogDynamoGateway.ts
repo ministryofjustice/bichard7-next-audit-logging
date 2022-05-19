@@ -1,18 +1,18 @@
-import { DynamoGateway, IndexSearcher } from "../DynamoGateway"
-import type { FetchByIndexOptions, UpdateOptions } from "../DynamoGateway"
-import { isError, EventType } from "shared-types"
 import type {
-  AuditLogDynamoGateway,
   AuditLog,
+  AuditLogDynamoGateway,
   AuditLogEvent,
+  DynamoDbConfig,
   KeyValuePair,
-  PromiseResult,
-  DynamoDbConfig
+  PromiseResult
 } from "shared-types"
-import shouldLogForTopExceptionsReport from "./shouldLogForTopExceptionsReport"
-import shouldLogForAutomationReport from "./shouldLogForAutomationReport"
-import getForceOwnerForAutomationReport from "./getForceOwnerForAutomationReport"
+import { EventType, isError } from "shared-types"
+import type { FetchByIndexOptions, UpdateOptions } from "../DynamoGateway"
+import { DynamoGateway, IndexSearcher, KeyComparison } from "../DynamoGateway"
 import CalculateMessageStatusUseCase from "./CalculateMessageStatusUseCase"
+import getForceOwnerForAutomationReport from "./getForceOwnerForAutomationReport"
+import shouldLogForAutomationReport from "./shouldLogForAutomationReport"
+import shouldLogForTopExceptionsReport from "./shouldLogForTopExceptionsReport"
 
 export default class AwsAuditLogDynamoGateway extends DynamoGateway implements AuditLogDynamoGateway {
   private readonly tableKey: string = "messageId"
@@ -41,13 +41,50 @@ export default class AwsAuditLogDynamoGateway extends DynamoGateway implements A
       message.events.find((event) => event.eventType === EventType.ErrorRecordArchival)?.timestamp
     message.isSanitised = message.events.find((event) => event.eventType === EventType.SanitisedMessage) ? 1 : 0
 
-    const result = await this.updateOne(this.tableName, message, "messageId", message.version)
+    const updateResult = await this.updateOne(this.tableName, message, "messageId", message.version)
+    if (isError(updateResult)) {
+      return updateResult
+    }
 
-    if (isError(result)) {
-      return result
+    const newVersionResult = await this.fetchVersion(message.messageId)
+    if (isError(newVersionResult)) {
+      return newVersionResult
+    }
+    if (newVersionResult === null) {
+      return Error(`Message with id ${message.messageId} was not found in the database`)
+    }
+
+    // Remove nextSanitiseCheck if the message is already sanitised
+    if (message.isSanitised) {
+      const options: UpdateOptions = {
+        keyName: this.tableKey,
+        keyValue: message.messageId,
+        updateExpression: "REMOVE nextSanitiseCheck",
+        updateExpressionValues: {},
+        currentVersion: newVersionResult
+      }
+
+      const removeSanitiseCheckResult = await this.updateEntry(this.tableName, options)
+      if (isError(removeSanitiseCheckResult)) {
+        return removeSanitiseCheckResult
+      }
     }
 
     return message
+  }
+
+  async updateSanitiseCheck(message: AuditLog, nextSanitiseCheck: Date): PromiseResult<void> {
+    const options: UpdateOptions = {
+      keyName: this.tableKey,
+      keyValue: message.messageId,
+      updateExpression: "SET nextSanitiseCheck = :value",
+      updateExpressionValues: { ":value": nextSanitiseCheck.toISOString() },
+      currentVersion: message.version
+    }
+    const result = await this.updateEntry(this.tableName, options)
+    if (isError(result)) {
+      return result
+    }
   }
 
   async fetchMany(limit = 10, lastMessage?: AuditLog): PromiseResult<AuditLog[]> {
@@ -67,8 +104,8 @@ export default class AwsAuditLogDynamoGateway extends DynamoGateway implements A
   async fetchByExternalCorrelationId(externalCorrelationId: string): PromiseResult<AuditLog | null> {
     const options: FetchByIndexOptions = {
       indexName: "externalCorrelationIdIndex",
-      attributeName: "externalCorrelationId",
-      attributeValue: externalCorrelationId,
+      hashKeyName: "externalCorrelationId",
+      hashKeyValue: externalCorrelationId,
       pagination: { limit: 1 }
     }
 
@@ -89,8 +126,8 @@ export default class AwsAuditLogDynamoGateway extends DynamoGateway implements A
   async fetchByHash(hash: string): PromiseResult<AuditLog | null> {
     const options: FetchByIndexOptions = {
       indexName: "messageHashIndex",
-      attributeName: "messageHash",
-      attributeValue: hash,
+      hashKeyName: "messageHash",
+      hashKeyValue: hash,
       pagination: { limit: 1 }
     }
 
@@ -112,6 +149,21 @@ export default class AwsAuditLogDynamoGateway extends DynamoGateway implements A
     const result = await new IndexSearcher<AuditLog[]>(this, this.tableName, this.tableKey)
       .useIndex("statusIndex")
       .setIndexKeys("status", status, "receivedDate")
+      .paginate(limit, lastMessage)
+      .execute()
+
+    if (isError(result)) {
+      return result
+    }
+
+    return <AuditLog[]>result
+  }
+
+  async fetchUnsanitised(limit = 10, lastMessage?: AuditLog): PromiseResult<AuditLog[]> {
+    const result = await new IndexSearcher<AuditLog[]>(this, this.tableName, this.tableKey)
+      .useIndex("isSanitisedIndex")
+      .setIndexKeys("isSanitised", 0, "nextSanitiseCheck", new Date().toISOString(), KeyComparison.LessThanOrEqual)
+      .setAscendingOrder(true)
       .paginate(limit, lastMessage)
       .execute()
 

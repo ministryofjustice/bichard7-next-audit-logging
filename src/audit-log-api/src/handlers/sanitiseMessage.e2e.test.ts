@@ -1,9 +1,5 @@
 jest.setTimeout(15000)
-import { setEnvironmentVariables } from "shared-testing"
-setEnvironmentVariables({ BICHARD_DB_TABLE_NAME: "archive_error_list" })
-import type { DynamoDbConfig } from "shared-types"
-import { AuditLogEvent, AuditLogLookup, BichardAuditLogEvent } from "shared-types"
-import { AuditLog } from "shared-types"
+import axios from "axios"
 import {
   AwsBichardPostgresGateway,
   createS3Config,
@@ -12,8 +8,12 @@ import {
   TestDynamoGateway,
   TestPostgresGateway
 } from "shared"
-import axios from "axios"
+import { setEnvironmentVariables } from "shared-testing"
+import type { DynamoDbConfig } from "shared-types"
+import { AuditLog, AuditLogEvent, AuditLogLookup, BichardAuditLogEvent } from "shared-types"
 import createBichardPostgresGatewayConfig from "../createBichardPostgresGatewayConfig"
+
+setEnvironmentVariables()
 
 const dynamoConfig: DynamoDbConfig = {
   DYNAMO_URL: "http://localhost:8000",

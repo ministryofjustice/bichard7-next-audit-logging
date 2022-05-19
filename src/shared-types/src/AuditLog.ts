@@ -13,7 +13,7 @@ export default class AuditLog {
 
   public isSanitised = 0
 
-  public nextSanitiseCheck: string
+  public nextSanitiseCheck?: string
 
   public caseId: string
 

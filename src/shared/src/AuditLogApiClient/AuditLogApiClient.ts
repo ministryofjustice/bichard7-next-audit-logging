@@ -1,9 +1,9 @@
-import axios from "axios"
 import type { AxiosError } from "axios"
+import axios from "axios"
 import * as https from "https"
 import type { ApiClient, AuditLog, AuditLogEvent, PromiseResult } from "shared-types"
-import { HttpStatusCode, logger } from "../utils"
 import { ApplicationError } from "shared-types"
+import { HttpStatusCode, logger } from "../utils"
 
 export type GetMessagesOptions = {
   status?: string
@@ -162,6 +162,50 @@ export default class AuditLogApiClient implements ApiClient {
         logger.error(`Error retrying event: ${this.stringify(error.response?.data)}`)
         return new ApplicationError(
           `Error retrying event: ${this.stringify(error.response?.data) ?? error.message}`,
+          error
+        )
+      })
+  }
+
+  sanitiseMessage(messageId: string): PromiseResult<void> {
+    return axios
+      .post(
+        `${this.apiUrl}/messages/${messageId}/sanitise`,
+        {},
+        {
+          httpsAgent,
+          headers: {
+            "X-API-Key": this.apiKey
+          },
+          timeout: this.timeout
+        }
+      )
+      .then((result) => {
+        if (result.status === HttpStatusCode.noContent) {
+          return
+        } else if (result.status === HttpStatusCode.notFound) {
+          return Error(`The message with Id ${messageId} does not exist.`)
+        } else {
+          logger.error({
+            message: `Error from audit log api while sanitising`,
+            responseCode: result.status,
+            messageId: messageId,
+            data: result.data
+          })
+          return new ApplicationError(
+            `Error from audit log api while sanitising: ${this.stringify(result.data)}`,
+            result.data
+          )
+        }
+      })
+      .catch((error: AxiosError) => {
+        logger.error({
+          message: `Error sanitising message`,
+          error: error.message,
+          messageId: messageId
+        })
+        return new ApplicationError(
+          `Error sanitising message: ${this.stringify(error.response?.data) ?? error.message}`,
           error
         )
       })

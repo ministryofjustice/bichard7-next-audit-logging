@@ -1,8 +1,9 @@
+jest.setTimeout(15000)
+import pg from "pg"
 import type { PostgresConfig } from "shared-types"
 import { isError } from "shared-types"
-import AwsBichardPostgresGateway from "./AwsBichardPostgresGateway"
 import TestPostgresGateway from "../PostgresGateway/TestPostgresGateway"
-import pg from "pg"
+import AwsBichardPostgresGateway from "./AwsBichardPostgresGateway"
 
 const config: PostgresConfig = {
   HOST: "localhost",
@@ -10,12 +11,16 @@ const config: PostgresConfig = {
   USERNAME: "bichard",
   PASSWORD: "password",
   DATABASE_NAME: "bichard",
-  TABLE_NAME: "archive_error_list",
+  TABLE_NAME: "br7own.archive_error_list",
   SSL: false
 }
 
 const gateway = new AwsBichardPostgresGateway(config)
 const testGateway = new TestPostgresGateway(config)
+
+beforeAll(async () => {
+  await testGateway.createSchema("br7own")
+})
 
 beforeEach(async () => {
   await testGateway.dropTable()
@@ -67,7 +72,6 @@ describe("BichardPostgresGateway", () => {
     jest.spyOn(pg.Client.prototype, "query").mockImplementation(() => Promise.reject(Error(expectedErrorMessage)))
 
     const result = await gateway.deleteArchivedErrors("someMessageId")
-
     expect(isError(result)).toBe(true)
   })
 })
