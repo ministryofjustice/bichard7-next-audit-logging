@@ -163,8 +163,7 @@ export default class AwsAuditLogDynamoGateway extends DynamoGateway implements A
     const result = await new IndexSearcher<AuditLog[]>(this, this.tableName, this.tableKey)
       .useIndex("isSanitisedIndex")
       .setIndexKeys("isSanitised", 0, "nextSanitiseCheck", new Date().toISOString(), KeyComparison.LessThanOrEqual)
-      .setAscendingOrder(true)
-      .paginate(limit, lastMessage)
+      .paginate(limit, lastMessage, true)
       .execute()
 
     if (isError(result)) {

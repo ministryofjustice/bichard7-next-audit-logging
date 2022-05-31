@@ -108,11 +108,6 @@ export default class IndexSearcher<TResult> {
     return this
   }
 
-  setAscendingOrder(isAscendingOrder: boolean): IndexSearcher<TResult> {
-    this.isAscendingOrder = isAscendingOrder
-    return this
-  }
-
   setFilter(keyName: string, keyValue: unknown, comparison: KeyComparison): IndexSearcher<TResult> {
     this.filterKeyName = keyName
     this.filterKeyValue = keyValue
