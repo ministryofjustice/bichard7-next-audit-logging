@@ -4,6 +4,8 @@ import { AuditLogApiClient, AwsS3Gateway, createS3Config } from "shared"
 import translateEvent from "src/use-cases/translateEvent"
 import CreateEventUseCase from "src/use-cases/CreateEventUseCase"
 import RetrieveEventFromS3UseCase from "src/use-cases/RetrieveEventFromS3UseCase"
+import DoesS3ObjectExist from "src/use-cases/DoesS3ObjectExist"
+import { logger } from "shared"
 
 const apiUrl = process.env.API_URL
 if (!apiUrl) {
@@ -16,6 +18,7 @@ if (!apiKey) {
 }
 
 const s3Gateway = new AwsS3Gateway(createS3Config())
+const doesS3ObjectExistUseCase = new DoesS3ObjectExist(s3Gateway)
 const retrieveEventFromS3UseCase = new RetrieveEventFromS3UseCase(s3Gateway)
 const api = new AuditLogApiClient(apiUrl, apiKey, 5_000)
 const createEventUseCase = new CreateEventUseCase(api)
@@ -25,7 +28,27 @@ interface StoreEventResult {
   s3Path: string
 }
 
-export default async function storeEvent(event: S3PutObjectEvent): Promise<StoreEventResult> {
+interface StoreEventValidationResult {
+  validationResult: {
+    s3ObjectNotFound: boolean
+  }
+}
+
+export default async function storeEvent(
+  event: S3PutObjectEvent
+): Promise<StoreEventResult | StoreEventValidationResult> {
+  const { key: s3Path, bucketName } = event.detail.requestParameters
+  const s3ObjectExists = await doesS3ObjectExistUseCase.execute(event)
+
+  if (isError(s3ObjectExists)) {
+    throw s3ObjectExists
+  }
+
+  if (!s3ObjectExists) {
+    logger.info(`EventHandler.S3ObjectNotFound, bucket: ${bucketName} key: ${s3Path}`)
+    return { validationResult: { s3ObjectNotFound: true } }
+  }
+
   const retrieveEventFromS3Result = await retrieveEventFromS3UseCase.execute(event)
 
   if (isError(retrieveEventFromS3Result)) {
@@ -46,8 +69,5 @@ export default async function storeEvent(event: S3PutObjectEvent): Promise<Store
     throw createEventResult
   }
 
-  return {
-    bucketName: event.detail.requestParameters.bucketName,
-    s3Path: event.detail.requestParameters.key
-  }
+  return { bucketName, s3Path }
 }

@@ -11,7 +11,34 @@
         "MaxAttempts": 99999999,
         "BackoffRate": 1.1
       }],
-      "Next": "Delete from S3"
+      "Next": "Validate Store Event result"
+    },
+    "Validate Store Event result": {
+      "Type": "Choice",
+      "Choices": [
+        {
+          "And": [
+            {
+              "Variable": "$.validationResult",
+              "IsPresent": true
+            },
+            {
+              "Variable": "$.validationResult.s3ObjectNotFound",
+              "BooleanEquals": true
+            }
+          ],
+          "Next": "S3 object not found"
+        },
+        {
+          "Variable": "$.validationResult",
+          "IsPresent": false,
+          "Next": "Delete from S3"
+        }
+      ]
+    },
+    "S3 object not found": {
+      "Type": "Pass",
+      "End": true
     },
     "Delete from S3": {
       "Type": "Task",

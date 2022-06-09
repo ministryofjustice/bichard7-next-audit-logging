@@ -31,6 +31,14 @@ export default class FakeS3Gateway implements S3GatewayInterface {
     return Promise.resolve(this.items[key])
   }
 
+  doesItemExist(key: string): PromiseResult<boolean> {
+    if (this.error) {
+      return Promise.resolve(this.error)
+    }
+
+    return Promise.resolve(Boolean(this.items[key]))
+  }
+
   // @ts-ignore
   // eslint-disable-next-line @typescript-eslint/no-unused-vars, class-methods-use-this
   upload<T>(fileName: string, content: T): PromiseResult<void> {
