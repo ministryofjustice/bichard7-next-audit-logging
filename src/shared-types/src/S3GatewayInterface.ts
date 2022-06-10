@@ -5,6 +5,7 @@ export default interface S3GatewayInterface {
   forBucket(bucketName: string): S3GatewayInterface
   getBucketName(): string
   getItem(key: string): PromiseResult<string>
+  doesItemExist(key: string): PromiseResult<boolean>
   upload<T>(fileName: string, content: T): PromiseResult<void>
   list(): PromiseResult<S3.ObjectList>
   copyItemTo(key: string, destinationBucketName: string): PromiseResult<void>

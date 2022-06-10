@@ -54,6 +54,25 @@ export default class AwsS3Gateway implements S3GatewayInterface {
       .catch((error) => <Error>error)
   }
 
+  doesItemExist(key: string): PromiseResult<boolean> {
+    return this.s3
+      .headObject({
+        Bucket: this.getBucketName(),
+        Key: key
+      })
+      .promise()
+      .then(
+        () => true,
+        (error: AWS.AWSError) => {
+          if (error.code === "NotFound") {
+            return false
+          }
+          return error
+        }
+      )
+      .catch((error) => <Error>error)
+  }
+
   upload<T>(fileName: string, content: T): PromiseResult<void> {
     const params: S3.Types.PutObjectRequest = {
       Bucket: this.getBucketName(),

@@ -67,6 +67,22 @@ describe("AwsS3Gateway", () => {
     })
   })
 
+  describe("doesItemExist()", () => {
+    it("should return true when object exists in the bucket", async () => {
+      await gateway.upload(fileName, "Message to be saved")
+
+      const result = await gateway.doesItemExist(fileName)
+
+      expect(result).toBe(true)
+    })
+
+    it("should return false when object does not exist in the bucket", async () => {
+      const result = await gateway.doesItemExist("non-existent-object-key")
+
+      expect(result).toBe(false)
+    })
+  })
+
   describe("upload()", () => {
     it("should save the message in the bucket", async () => {
       const result = await gateway.upload(fileName, "Message to be saved")

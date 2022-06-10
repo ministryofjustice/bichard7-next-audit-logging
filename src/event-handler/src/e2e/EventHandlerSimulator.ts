@@ -9,6 +9,10 @@ export default class {
     this.stateMachine = new StepFunctionSimulator([storeEvent])
   }
 
+  getStoreEventOutput() {
+    return this.stateMachine.getOutput(0)
+  }
+
   async start(s3ObjectKey: string, executionId: string): Promise<void> {
     await this.stateMachine.execute({
       id: executionId,

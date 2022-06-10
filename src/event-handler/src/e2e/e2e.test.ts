@@ -209,3 +209,12 @@ test("Event with no MesageId should not fail to be processed by the audit logger
 
   expect(eventHandlerResult).toNotBeError()
 })
+
+test("Event should fail the validation when S3 object does not exist", async () => {
+  // Simulating EventBridge rule for triggering state machine for the uploaded object to S3 bucket
+  const objectKey = "dummy-non-existent-s3-key"
+  const eventHandlerResult = await eventHandlerSimulator.start(objectKey!, uuid()).catch((error) => error)
+
+  expect(eventHandlerResult).toNotBeError()
+  expect(eventHandlerSimulator.getStoreEventOutput()).toStrictEqual({ validationResult: { s3ObjectNotFound: true } })
+})
