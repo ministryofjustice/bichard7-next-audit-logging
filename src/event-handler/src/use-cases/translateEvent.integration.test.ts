@@ -15,7 +15,8 @@ const filenameMappings: Record<MessageFormat, string> = {
   HearingOutcomePncUpdate: "hearing-outcome-pnc-update",
   DataSetPncUpdate: "data-set-pnc-update",
   HearingOutcomeInput: "hearing-outcome-input",
-  PncUpdateRequest: "pnc-update-request"
+  PncUpdateRequest: "pnc-update-request",
+  ProcessingValidation: "processing-validation"
 }
 
 const createPayload = (messageFormat: MessageFormat): EventInput => {

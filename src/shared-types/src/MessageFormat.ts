@@ -6,5 +6,6 @@ type MessageFormat =
   | "HearingOutcomePncUpdate"
   | "HearingOutcomeInput"
   | "PncUpdateRequest"
+  | "ProcessingValidation"
 
 export default MessageFormat
