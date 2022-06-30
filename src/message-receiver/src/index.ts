@@ -1,7 +1,7 @@
 import { isError } from "shared-types"
 import type { AmazonMqEventSourceRecordEvent, MessageFormat } from "shared-types"
 import { AwsS3Gateway, createS3Config } from "shared"
-import embellishMessages from "./embellishMessages"
+import formatMessages from "./formatMessages"
 import StoreInS3UseCase from "./StoreInS3UseCase"
 
 if (!process.env.MESSAGE_FORMAT) {
@@ -17,11 +17,12 @@ export default async (event: AmazonMqEventSourceRecordEvent): Promise<void> => {
   }
 
   const messageFormat = process.env.MESSAGE_FORMAT as MessageFormat
-  const messages = embellishMessages(event, messageFormat)
+
+  const messages = formatMessages(event, messageFormat)
 
   await Promise.all(
     messages.map(async (message) => {
-      const result = await useCase.execute(message)
+      const result = await useCase.execute(message, messageFormat)
 
       if (isError(result)) {
         throw result

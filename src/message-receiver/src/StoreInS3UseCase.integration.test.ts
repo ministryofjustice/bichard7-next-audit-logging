@@ -33,7 +33,7 @@ describe("StoreInS3UseCase", () => {
     }
 
     const useCase = new StoreInS3UseCase(gateway)
-    const result = await useCase.execute(message)
+    const result = await useCase.execute(message, message.messageFormat)
 
     expect(isError(result)).toBe(false)
 
