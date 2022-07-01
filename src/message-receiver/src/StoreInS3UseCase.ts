@@ -1,5 +1,5 @@
 import { v4 as uuid } from "uuid"
-import type { EventMessage, PromiseResult, MessageFormat } from "shared-types"
+import type { PromiseResult, MessageFormat } from "shared-types"
 import type { S3GatewayInterface } from "shared-types"
 import { isError } from "shared-types"
 
@@ -10,8 +10,8 @@ export type StoreInS3Result = {
 export default class StoreInS3UseCase {
   constructor(private readonly gateway: S3GatewayInterface) {}
 
-  async execute(message: EventMessage): PromiseResult<StoreInS3Result> {
-    const filename = StoreInS3UseCase.getMessageFilename(message.messageFormat)
+  async execute(message: unknown, messageFormat: MessageFormat): PromiseResult<StoreInS3Result> {
+    const filename = StoreInS3UseCase.getMessageFilename(messageFormat)
 
     const result = await this.gateway.upload(filename, JSON.stringify(message))
     if (isError(result)) {

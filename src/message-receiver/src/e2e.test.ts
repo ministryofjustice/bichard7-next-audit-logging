@@ -1,7 +1,7 @@
 jest.retryTimes(10)
 import "shared-testing"
 import type { AmazonMqEventSourceRecordEvent } from "shared-types"
-import { TestAwsS3Gateway, createS3Config } from "shared"
+import { TestAwsS3Gateway, createS3Config, encodeBase64 } from "shared"
 import { setEnvironmentVariables } from "shared-testing"
 setEnvironmentVariables()
 process.env.MESSAGE_FORMAT = "AuditEvent"
@@ -66,5 +66,76 @@ describe("Message receiver e2e test", () => {
       .sort((messageA, messageB) => (messageA.messageData > messageB.messageData ? 1 : -1))
 
     expect(actualMessages).toEqual(expectedMessages)
+  })
+
+  test("ProcessingValidation messages are decoded and stored unaltered", async () => {
+    const originalMessageFormat = process.env.MESSAGE_FORMAT
+    process.env.MESSAGE_FORMAT = "ProcessingValidation"
+
+    const expectedMessages = [
+      {
+        incomingMessage: "dummy XML",
+        annotatedHearingOutcome: "dummy AHO XML",
+        triggers: [
+          {
+            code: "TRPR0002",
+            identifier: "2"
+          },
+          {
+            code: "TRPR0001",
+            identifier: "1"
+          }
+        ]
+      },
+      {
+        incomingMessage: "dummy XML 2",
+        annotatedHearingOutcome: "dummy AHO XML 2",
+        triggers: [
+          {
+            code: "TRPR0003",
+            identifier: "1"
+          },
+          {
+            code: "TRPR0004",
+            identifier: "2"
+          }
+        ]
+      }
+    ]
+
+    const event: AmazonMqEventSourceRecordEvent = {
+      eventSource: "DummyEventSource",
+      eventSourceArn: "DummyEventSourceARN",
+      messages: [
+        {
+          messageID: "Message1",
+          messageType: "Type1",
+          data: encodeBase64(JSON.stringify(expectedMessages[0])),
+          destination: {
+            physicalName: "PROCESSING_VALIDATION"
+          }
+        },
+        {
+          messageID: "Message2",
+          messageType: "Type2",
+          data: encodeBase64(JSON.stringify(expectedMessages[1])),
+          destination: {
+            physicalName: "PROCESSING_VALIDATION"
+          }
+        }
+      ]
+    }
+
+    const result = await messageReceiver(event)
+
+    expect(result).toNotBeError()
+
+    const s3Objects = await s3Gateway.getAll()
+    const rawMessages = await Promise.all(s3Objects!.map((s3Object) => s3Gateway.getItem(s3Object.Key!)))
+    const actualMessages = rawMessages.map((rawMessage) => JSON.parse(rawMessage as string)).sort()
+
+    expect(actualMessages).toEqual(expectedMessages)
+
+    process.env.MESSAGE_FORMAT = originalMessageFormat
   })
 })
