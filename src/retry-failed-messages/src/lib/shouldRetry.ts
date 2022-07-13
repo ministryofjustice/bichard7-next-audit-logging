@@ -1,8 +1,15 @@
-import type { AuditLog, Result } from "shared-types"
+import type { AuditLog, BichardAuditLogEvent, Result } from "shared-types"
 import config from "../config"
 
 export default (message: AuditLog): Result<boolean> => {
   let retryTime: number
+
+  const hasFailedEvent = (message.events as BichardAuditLogEvent[]).some(
+    (event) => event.category === "error" && (!!event.eventXml || "s3Path" in event) && !!event.eventSourceQueueName
+  )
+  if (!hasFailedEvent) {
+    return false
+  }
 
   const retryEvents = message.events.filter((m) => m.eventType === "Retrying failed message")
 
