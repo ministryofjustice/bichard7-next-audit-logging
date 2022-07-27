@@ -6,9 +6,6 @@ phases:
   install:
     commands:
       - yum install -y jq
-      - yum install -y zip
-      - amazon-linux-extras install docker -y
-      - amazon-linux-extras install python3.8 -y
       - npm config set python python3.8
       - yum install which -y
       - yum install postgresql-devel -y
