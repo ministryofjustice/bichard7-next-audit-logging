@@ -1,6 +1,6 @@
 jest.retryTimes(10)
 import type { DocumentClient } from "aws-sdk/clients/dynamodb"
-import { addDays } from "date-fns"
+import { addDays, differenceInDays, subHours } from "date-fns"
 import "shared-testing"
 import type { DynamoDbConfig, EventCategory } from "shared-types"
 import { AuditLog, AuditLogEvent, AuditLogStatus, EventType, isError } from "shared-types"
@@ -70,6 +70,7 @@ describe("AuditLogDynamoGateway", () => {
       const actualMessage = <AuditLog>result
       expect(actualMessage.messageId).toBe(expectedMessage.messageId)
       expect(actualMessage.receivedDate).toBe(expectedMessage.receivedDate)
+      expect(actualMessage.expiryTime).toBeUndefined()
     })
 
     it("should return an error when the given message already exists", async () => {
@@ -82,6 +83,22 @@ describe("AuditLogDynamoGateway", () => {
 
       const actualError = <Error>result
       expect(actualError.message).toBe("The conditional request failed")
+    })
+
+    it("should set an expiry time of ~1 week in the E2E environment", async () => {
+      const expectedMessage = new AuditLog("E2EMessage", new Date(), "dummy hash")
+
+      process.env.IS_E2E = "true"
+      const result = await gateway.create(expectedMessage)
+      process.env.IS_E2E = undefined
+
+      expect(isError(result)).toBe(false)
+
+      const actualMessage = <AuditLog>result
+      expect(actualMessage.messageId).toBe(expectedMessage.messageId)
+      expect(actualMessage.expiryTime).toBeDefined()
+      // The expiry time will be very slightly sooner than 1 week just after we have created it, so give 1 hour margin
+      expect(differenceInDays(new Date(actualMessage.expiryTime || ""), subHours(new Date(), 1))).toBe(7)
     })
   })
 
