@@ -6,7 +6,6 @@ import { isError, AuditLogLookup } from "shared-types"
 import TestDynamoGateway from "../DynamoGateway/TestDynamoGateway"
 import AwsAuditLogLookupDynamoGateway from "./AwsAuditLogLookupDynamoGateway"
 import { decompress, IndexSearcher } from ".."
-import { differenceInDays, subHours } from "date-fns"
 
 const config: DynamoDbConfig = {
   DYNAMO_URL: "http://localhost:8000",
@@ -82,8 +81,12 @@ describe("AuditLogLookupDynamoGateway", () => {
       expect(isError(result)).toBe(false)
 
       const actualLookupItem = <AuditLogLookup>result
+
+      expect(actualLookupItem.expiryTime).toBeDefined()
+      const secondsToExpiry = parseInt(actualLookupItem.expiryTime || "0") - new Date().getTime() / 1000
       // The expiry time will be very slightly sooner than 1 week just after we have created it, so give 1 hour margin
-      expect(differenceInDays(new Date(actualLookupItem.expiryTime || ""), subHours(new Date(), 1))).toBe(7)
+      expect(secondsToExpiry).toBeGreaterThanOrEqual((6 * 24 + 23) * 60 * 60)
+      expect(secondsToExpiry).toBeLessThanOrEqual(7 * 24 * 60 * 60)
     })
   })
 

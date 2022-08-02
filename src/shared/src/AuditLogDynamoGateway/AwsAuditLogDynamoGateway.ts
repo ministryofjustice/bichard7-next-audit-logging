@@ -26,7 +26,9 @@ export default class AwsAuditLogDynamoGateway extends DynamoGateway implements A
 
   async create(message: AuditLog): PromiseResult<AuditLog> {
     if (process.env.IS_E2E) {
-      message.expiryTime = addDays(new Date(), parseInt(process.env.EXPIRY_DAYS || "7")).toISOString()
+      message.expiryTime = Math.round(
+        addDays(new Date(), parseInt(process.env.EXPIRY_DAYS || "7")).getTime() / 1000
+      ).toString()
     }
 
     const result = await this.insertOne(this.tableName, message, "messageId")

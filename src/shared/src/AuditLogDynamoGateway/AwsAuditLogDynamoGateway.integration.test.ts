@@ -1,6 +1,6 @@
 jest.retryTimes(10)
 import type { DocumentClient } from "aws-sdk/clients/dynamodb"
-import { addDays, differenceInDays, subHours } from "date-fns"
+import { addDays } from "date-fns"
 import "shared-testing"
 import type { DynamoDbConfig, EventCategory } from "shared-types"
 import { AuditLog, AuditLogEvent, AuditLogStatus, EventType, isError } from "shared-types"
@@ -96,9 +96,12 @@ describe("AuditLogDynamoGateway", () => {
 
       const actualMessage = <AuditLog>result
       expect(actualMessage.messageId).toBe(expectedMessage.messageId)
+
       expect(actualMessage.expiryTime).toBeDefined()
+      const secondsToExpiry = parseInt(actualMessage.expiryTime || "0") - new Date().getTime() / 1000
       // The expiry time will be very slightly sooner than 1 week just after we have created it, so give 1 hour margin
-      expect(differenceInDays(new Date(actualMessage.expiryTime || ""), subHours(new Date(), 1))).toBe(7)
+      expect(secondsToExpiry).toBeGreaterThanOrEqual((6 * 24 + 23) * 60 * 60)
+      expect(secondsToExpiry).toBeLessThanOrEqual(7 * 24 * 60 * 60)
     })
   })
 
