@@ -6,6 +6,7 @@ import { isError, AuditLogLookup } from "shared-types"
 import TestDynamoGateway from "../DynamoGateway/TestDynamoGateway"
 import AwsAuditLogLookupDynamoGateway from "./AwsAuditLogLookupDynamoGateway"
 import { decompress, IndexSearcher } from ".."
+import { differenceInDays, subHours } from "date-fns"
 
 const config: DynamoDbConfig = {
   DYNAMO_URL: "http://localhost:8000",
@@ -19,7 +20,7 @@ const gateway = new AwsAuditLogLookupDynamoGateway(config, config.TABLE_NAME)
 const testGateway = new TestDynamoGateway(config)
 const primaryKey = "id"
 
-describe("AuditLogDynamoGateway", () => {
+describe("AuditLogLookupDynamoGateway", () => {
   beforeAll(async () => {
     const options = {
       keyName: primaryKey,
@@ -56,6 +57,7 @@ describe("AuditLogDynamoGateway", () => {
       expect(actualLookupItem.id).toBe(expectedLookupItem.id)
       expect(actualLookupItem.value).toBe(expectedLookupItem.value)
       expect(actualLookupItem.messageId).toBe(expectedLookupItem.messageId)
+      expect(actualLookupItem.expiryTime).toBeUndefined()
     })
 
     it("should return an error when the given lookup item already exists", async () => {
@@ -68,6 +70,20 @@ describe("AuditLogDynamoGateway", () => {
 
       const actualError = <Error>result
       expect(actualError.message).toBe("The conditional request failed")
+    })
+
+    it("should set an expiry time of ~1 week in the E2E environment", async () => {
+      const expectedLookupItem = new AuditLogLookup("Expected value", "Dummy message ID")
+
+      process.env.IS_E2E = "true"
+      const result = await gateway.create(expectedLookupItem)
+      process.env.IS_E2E = undefined
+
+      expect(isError(result)).toBe(false)
+
+      const actualLookupItem = <AuditLogLookup>result
+      // The expiry time will be very slightly sooner than 1 week just after we have created it, so give 1 hour margin
+      expect(differenceInDays(new Date(actualLookupItem.expiryTime || ""), subHours(new Date(), 1))).toBe(7)
     })
   })
 
