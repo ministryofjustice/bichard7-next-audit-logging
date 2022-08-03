@@ -70,6 +70,7 @@ describe("AuditLogDynamoGateway", () => {
       const actualMessage = <AuditLog>result
       expect(actualMessage.messageId).toBe(expectedMessage.messageId)
       expect(actualMessage.receivedDate).toBe(expectedMessage.receivedDate)
+      expect(actualMessage.expiryTime).toBeUndefined()
     })
 
     it("should return an error when the given message already exists", async () => {
@@ -82,6 +83,25 @@ describe("AuditLogDynamoGateway", () => {
 
       const actualError = <Error>result
       expect(actualError.message).toBe("The conditional request failed")
+    })
+
+    it("should set an expiry time of ~1 week in the E2E environment", async () => {
+      const expectedMessage = new AuditLog("E2EMessage", new Date(), "dummy hash")
+
+      process.env.IS_E2E = "true"
+      const result = await gateway.create(expectedMessage)
+      process.env.IS_E2E = undefined
+
+      expect(isError(result)).toBe(false)
+
+      const actualMessage = <AuditLog>result
+      expect(actualMessage.messageId).toBe(expectedMessage.messageId)
+
+      expect(actualMessage.expiryTime).toBeDefined()
+      const secondsToExpiry = parseInt(actualMessage.expiryTime || "0") - new Date().getTime() / 1000
+      // The expiry time will be very slightly sooner than 1 week just after we have created it, so give 1 hour margin
+      expect(secondsToExpiry).toBeGreaterThanOrEqual((6 * 24 + 23) * 60 * 60)
+      expect(secondsToExpiry).toBeLessThanOrEqual(7 * 24 * 60 * 60)
     })
   })
 

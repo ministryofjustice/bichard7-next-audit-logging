@@ -1,3 +1,4 @@
+import { addDays } from "date-fns"
 import type {
   AuditLog,
   AuditLogDynamoGateway,
@@ -24,6 +25,12 @@ export default class AwsAuditLogDynamoGateway extends DynamoGateway implements A
   }
 
   async create(message: AuditLog): PromiseResult<AuditLog> {
+    if (process.env.IS_E2E) {
+      message.expiryTime = Math.round(
+        addDays(new Date(), parseInt(process.env.EXPIRY_DAYS || "7")).getTime() / 1000
+      ).toString()
+    }
+
     const result = await this.insertOne(this.tableName, message, "messageId")
 
     if (isError(result)) {

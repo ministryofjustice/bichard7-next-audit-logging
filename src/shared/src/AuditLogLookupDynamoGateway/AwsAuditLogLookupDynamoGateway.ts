@@ -1,3 +1,4 @@
+import { addDays } from "date-fns"
 import type { AuditLogLookupDynamoGateway, AuditLogLookup, DynamoDbConfig, PromiseResult } from "shared-types"
 import { isError } from "shared-types"
 import { compress, decompress } from ".."
@@ -19,7 +20,14 @@ export default class AwsAuditLogLookupDynamoGateway extends DynamoGateway implem
   }
 
   async create(lookupItem: AuditLogLookup): PromiseResult<AuditLogLookup> {
+    if (process.env.IS_E2E) {
+      lookupItem.expiryTime = Math.round(
+        addDays(new Date(), parseInt(process.env.EXPIRY_DAYS || "7")).getTime() / 1000
+      ).toString()
+    }
+
     const itemToSave = { ...lookupItem, value: await compress(lookupItem.value), isCompressed: true }
+
     const result = await this.insertOne(this.tableName, itemToSave, "id")
 
     if (isError(result)) {

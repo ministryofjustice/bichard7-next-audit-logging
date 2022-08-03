@@ -41,6 +41,8 @@ export default class AuditLog {
 
   public readonly version = 0
 
+  public expiryTime?: string
+
   constructor(
     public readonly externalCorrelationId: string,
     receivedDate: Date,

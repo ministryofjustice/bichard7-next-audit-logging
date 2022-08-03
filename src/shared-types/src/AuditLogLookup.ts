@@ -5,6 +5,8 @@ export default class AuditLogLookup {
 
   public isCompressed?: boolean
 
+  public expiryTime?: string
+
   constructor(public readonly value: string, public readonly messageId: string) {
     this.id = uuid()
   }
