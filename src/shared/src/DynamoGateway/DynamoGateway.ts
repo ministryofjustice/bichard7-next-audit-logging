@@ -67,12 +67,16 @@ export default class DynamoGateway {
         }
       })
       .promise()
-      .then(() => undefined)
-      .catch(
-        (error) =>
-          // TODO better distinguish which errors came from which items
-          <Error>(cancellationReasons ? new Error(cancellationReasons.map((r) => r.Message).join(", ")) : error)
-      )
+      .then(() => {
+        console.log(cancellationReasons)
+        return undefined
+      })
+      .catch((error) => {
+        if (cancellationReasons) {
+          error.cancellationReasons = cancellationReasons
+        }
+        return <Error>error
+      })
   }
 
   updateOne<T>(tableName: string, record: T, keyName: string, version: number): PromiseResult<void> {

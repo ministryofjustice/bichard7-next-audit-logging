@@ -18,7 +18,7 @@ export default class CreateAuditLogsUseCase {
         return {
           resultType: "conflict",
           // TODO give information about _which_ item failed here
-          resultDescription: `A conflict occured`
+          resultDescription: `A conflict occurred`
         }
       }
 
