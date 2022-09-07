@@ -77,6 +77,42 @@ describe("DynamoGateway", () => {
     })
   })
 
+  describe("insertMany()", () => {
+    it("should return undefined when successful and have inserted one record", async () => {
+      const expectedRecord = {
+        id: "InsertManyRecord",
+        someOtherValue: "SomeOtherValue"
+      }
+
+      const result = await gateway.insertMany(config.TABLE_NAME, [expectedRecord], "id")
+
+      expect(result).toBeUndefined()
+
+      const actualRecords = await testGateway.getAll(config.TABLE_NAME)
+      expect(actualRecords.Count).toBe(1)
+
+      const actualRecord = actualRecords.Items?.[0]
+      expect(actualRecord?.id).toBe(expectedRecord.id)
+      expect(actualRecord?.someOtherValue).toBe(expectedRecord.someOtherValue)
+    })
+
+    it("should return an error when there is a failure and have inserted zero records", async () => {
+      const record = {
+        id: 1234,
+        someOtherValue: "Id should be a number"
+      }
+
+      const result = await gateway.insertMany(config.TABLE_NAME, [record], "id")
+
+      expect(result).toBeTruthy()
+      expect(isError(result)).toBe(true)
+      expect((<Error>result).message).toContain("ValidationError")
+
+      const actualRecords = await testGateway.getAll(config.TABLE_NAME)
+      expect(actualRecords.Count).toBe(0)
+    })
+  })
+
   describe("updateOne()", () => {
     it("should return error when the record does not exist in dynamoDB", async () => {
       const record = {

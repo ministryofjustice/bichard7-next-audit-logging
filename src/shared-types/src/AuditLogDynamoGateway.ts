@@ -2,6 +2,7 @@ import type { AuditLog, AuditLogEvent, PromiseResult } from "."
 
 export default interface AuditLogDynamoGateway {
   create(message: AuditLog): PromiseResult<AuditLog>
+  createMany(messages: AuditLog[]): PromiseResult<AuditLog[]>
   update(message: AuditLog): PromiseResult<AuditLog>
   updateSanitiseCheck(message: AuditLog, nextSanitiseCheck: Date): PromiseResult<void>
   fetchMany(limit: number, lastMessage?: AuditLog): PromiseResult<AuditLog[]>

@@ -40,6 +40,24 @@ export default class AwsAuditLogDynamoGateway extends DynamoGateway implements A
     return message
   }
 
+  async createMany(messages: AuditLog[]): PromiseResult<AuditLog[]> {
+    if (process.env.IS_E2E) {
+      messages.map((message) => {
+        message.expiryTime = Math.round(
+          addDays(new Date(), parseInt(process.env.EXPIRY_DAYS || "7")).getTime() / 1000
+        ).toString()
+      })
+    }
+
+    const result = await this.insertMany(this.tableName, messages, "messageId")
+
+    if (isError(result)) {
+      return result
+    }
+
+    return messages
+  }
+
   async update(message: AuditLog): PromiseResult<AuditLog> {
     message.status = new CalculateMessageStatusUseCase(message.events).call()
 

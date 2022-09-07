@@ -41,6 +41,26 @@ export default class DynamoGateway {
       .catch((error) => <Error>error)
   }
 
+  insertMany<T>(tableName: string, records: T[], keyName: string): PromiseResult<void> {
+    const params: DocumentClient.TransactWriteItemsInput = {
+      TransactItems: records.map((record) => {
+        return {
+          Put: {
+            TableName: tableName,
+            Item: { _: "_", ...record },
+            ConditionExpression: `attribute_not_exists(${keyName})`
+          }
+        }
+      })
+    }
+
+    return this.client
+      .transactWrite(params)
+      .promise()
+      .then(() => undefined)
+      .catch((error) => <Error>error)
+  }
+
   updateOne<T>(tableName: string, record: T, keyName: string, version: number): PromiseResult<void> {
     const params: DocumentClient.PutItemInput = {
       TableName: tableName,
