@@ -106,7 +106,7 @@ describe("DynamoGateway", () => {
 
       expect(result).toBeTruthy()
       expect(isError(result)).toBe(true)
-      expect((<Error>result).message).toContain("ValidationError")
+      expect((<Error>result).message).toBe("One or more parameter values were invalid: Type mismatch for key")
 
       const actualRecords = await testGateway.getAll(config.TABLE_NAME)
       expect(actualRecords.Count).toBe(0)

@@ -54,11 +54,25 @@ export default class DynamoGateway {
       })
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let cancellationReasons: any[]
     return this.client
       .transactWrite(params)
+      .on("extractError", (response) => {
+        try {
+          cancellationReasons = JSON.parse(response.httpResponse.body.toString()).CancellationReasons
+        } catch (err) {
+          // suppress this just in case some types of errors aren't JSON parseable
+          console.error("Error extracting cancellation error", err)
+        }
+      })
       .promise()
       .then(() => undefined)
-      .catch((error) => <Error>error)
+      .catch(
+        (error) =>
+          // TODO better distinguish which errors came from which items
+          <Error>(cancellationReasons ? new Error(cancellationReasons.map((r) => r.Message).join(", ")) : error)
+      )
   }
 
   updateOne<T>(tableName: string, record: T, keyName: string, version: number): PromiseResult<void> {
