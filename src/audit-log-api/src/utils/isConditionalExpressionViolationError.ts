@@ -1,9 +1,8 @@
-export default function isConditionalExpressionViolationError(error: Error): boolean {
-  if (error.name === "TransactionCanceledException") {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const reasons = (error as unknown as { cancellationReasons: any[] }).cancellationReasons ?? []
+import isTransactionFailedError from "./isTransactionFailedError"
 
-    return reasons.some((reason) => reason.Code === "ConditionalCheckFailed")
+export default function isConditionalExpressionViolationError(error: Error): boolean {
+  if (isTransactionFailedError(error)) {
+    return error.failureReasons && error.failureReasons.some((reason) => reason.Code == "ConditionalCheckFailed")
   }
   return error.name === "ConditionalCheckFailedException"
 }

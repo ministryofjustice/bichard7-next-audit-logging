@@ -1,6 +1,7 @@
 import { DynamoDB } from "aws-sdk"
 import { DocumentClient } from "aws-sdk/clients/dynamodb"
 import type { DynamoDbConfig, PromiseResult } from "shared-types"
+import { TransactionFailedError } from "shared-types"
 import { isError } from "shared-types"
 import type FetchByIndexOptions from "./FetchByIndexOptions"
 import type GetManyOptions from "./GetManyOptions"
@@ -55,12 +56,12 @@ export default class DynamoGateway {
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let cancellationReasons: any[]
+    let failureReasons: any[]
     return this.client
       .transactWrite(params)
       .on("extractError", (response) => {
         try {
-          cancellationReasons = JSON.parse(response.httpResponse.body.toString()).CancellationReasons
+          failureReasons = JSON.parse(response.httpResponse.body.toString()).CancellationReasons
         } catch (err) {
           // suppress this just in case some types of errors aren't JSON parseable
           console.error("Error extracting cancellation error", err)
@@ -68,12 +69,11 @@ export default class DynamoGateway {
       })
       .promise()
       .then(() => {
-        console.log(cancellationReasons)
         return undefined
       })
       .catch((error) => {
-        if (cancellationReasons) {
-          error.cancellationReasons = cancellationReasons
+        if (failureReasons) {
+          return new TransactionFailedError(failureReasons, error.message)
         }
         return <Error>error
       })

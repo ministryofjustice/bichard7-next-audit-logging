@@ -1,6 +1,6 @@
 jest.retryTimes(10)
 import type { DocumentClient, GetItemOutput } from "aws-sdk/clients/dynamodb"
-import type { DynamoDbConfig } from "shared-types"
+import type { DynamoDbConfig, TransactionFailedError } from "shared-types"
 import { isError } from "shared-types"
 import DynamoGateway from "./DynamoGateway"
 import type FetchByIndexOptions from "./FetchByIndexOptions"
@@ -106,7 +106,14 @@ describe("DynamoGateway", () => {
 
       expect(result).toBeTruthy()
       expect(isError(result)).toBe(true)
-      expect((<Error>result).message).toBe("One or more parameter values were invalid: Type mismatch for key")
+      expect((<Error>result).message).toBe(
+        "Transaction cancelled, please refer cancellation reasons for specific reasons [ValidationError]"
+      )
+      expect((<TransactionFailedError>result).failureReasons).toHaveLength(1)
+      expect((<TransactionFailedError>result).failureReasons[0].Code).toBe("ValidationError")
+      expect((<TransactionFailedError>result).failureReasons[0].Message).toBe(
+        "One or more parameter values were invalid: Type mismatch for key"
+      )
 
       const actualRecords = await testGateway.getAll(config.TABLE_NAME)
       expect(actualRecords.Count).toBe(0)

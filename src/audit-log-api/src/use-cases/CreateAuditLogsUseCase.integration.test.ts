@@ -34,7 +34,7 @@ describe("CreateAuditLogsUseCase", () => {
     const result = await createAuditLogsUseCase.create([auditLog])
 
     expect(result.resultType).toBe("conflict")
-    expect(result.resultDescription).toBe(`A conflict occurred`)
+    expect(result.resultDescription).toBe("A conflict occurred when creating audit logs")
   })
 
   it("should return an error result when an unknown error occurs within the database", async () => {
