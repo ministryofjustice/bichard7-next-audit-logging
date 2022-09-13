@@ -92,6 +92,8 @@ export default class CalculateMessageStatusUseCase {
 
   private get recordIsIgnored(): boolean {
     return (
+      this.hasEventType(EventType.InterimHearingWithAncillaryOnlyCourtResults_PncNotUpdated) ||
+      this.hasEventType(EventType.StatutoryDeclarationCaseIgnored) ||
       this.hasEventType(EventType.RecordIgnoredNoOffences) ||
       this.hasEventType(EventType.RecordIgnoredNoRecordableOffences)
     )
