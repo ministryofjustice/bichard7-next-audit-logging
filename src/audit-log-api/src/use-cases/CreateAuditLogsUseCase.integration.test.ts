@@ -17,7 +17,8 @@ const testDynamoGateway = new TestDynamoGateway(config)
 const auditLogDynamoGateway = new AwsAuditLogDynamoGateway(config, config.TABLE_NAME)
 const createAuditLogsUseCase = new CreateAuditLogsUseCase(auditLogDynamoGateway)
 
-const createAuditLog = (): AuditLog => new AuditLog("CorrelationId", new Date(), "Dummy hash")
+const createAuditLog = (correlationId = "CorrelationId"): AuditLog =>
+  new AuditLog(correlationId, new Date(), "Dummy hash")
 
 const getAuditLog = (messageId: string): Promise<AuditLog | null> =>
   testDynamoGateway.getOne(config.TABLE_NAME, "messageId", messageId)
@@ -65,5 +66,21 @@ describe("CreateAuditLogsUseCase", () => {
     expect(actualAuditLog?.externalCorrelationId).toBe(expectedAuditLog.externalCorrelationId)
     expect(actualAuditLog?.caseId).toBe(expectedAuditLog.caseId)
     expect(actualAuditLog?.receivedDate).toBe(expectedAuditLog.receivedDate)
+  })
+
+  it("should return a conflict result when one audit log in a batch is a duplicate", async () => {
+    const expectedAuditLog = createAuditLog("id0")
+    const initialResult = await createAuditLogsUseCase.create([expectedAuditLog])
+    expect(initialResult.resultType).toBe("success")
+    expect(initialResult.resultDescription).toBeUndefined()
+
+    const expectedAuditLogs = new Array(10).fill(0).map((_, idx) => createAuditLog(`id${idx}`))
+    Object.assign(expectedAuditLogs[0], { messageId: expectedAuditLog.messageId })
+    const result = await createAuditLogsUseCase.create(expectedAuditLogs)
+
+    expect(result.resultType).toBe("conflict")
+    expect(result.failureReasons).toHaveLength(10)
+    expect(result.failureReasons![0].Code).toBe("ConditionalCheckFailed")
+    result.failureReasons!.slice(1).forEach((failureReason) => expect(failureReason.Code).toBe("None"))
   })
 })

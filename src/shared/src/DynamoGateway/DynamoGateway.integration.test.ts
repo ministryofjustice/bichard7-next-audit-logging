@@ -96,27 +96,42 @@ describe("DynamoGateway", () => {
       expect(actualRecord?.someOtherValue).toBe(expectedRecord.someOtherValue)
     })
 
-    it("should return an error when there is a failure and have inserted zero records", async () => {
-      const record = {
-        id: 1234,
-        someOtherValue: "Id should be a number"
-      }
+    it("should return an error when one record is malformed", async () => {
+      const records: { id: string | number; someOtherValue: string }[] = new Array(10).fill(0).map((_, idx) => {
+        return {
+          id: `123${idx}`,
+          someOtherValue: "Id should be a string"
+        }
+      })
+      records[7].id = 1237
 
-      const result = await gateway.insertMany(config.TABLE_NAME, [record], "id")
+      const result = await gateway.insertMany(config.TABLE_NAME, records, "id")
 
       expect(result).toBeTruthy()
       expect(isError(result)).toBe(true)
       expect((<Error>result).message).toBe(
-        "Transaction cancelled, please refer cancellation reasons for specific reasons [ValidationError]"
+        "Transaction cancelled, please refer cancellation reasons for specific reasons [None, None, None, None, None, None, None, ValidationError, None, None]"
       )
-      expect((<TransactionFailedError>result).failureReasons).toHaveLength(1)
-      expect((<TransactionFailedError>result).failureReasons[0].Code).toBe("ValidationError")
-      expect((<TransactionFailedError>result).failureReasons[0].Message).toBe(
+      expect((<TransactionFailedError>result).failureReasons).toHaveLength(10)
+      expect((<TransactionFailedError>result).failureReasons[7].Code).toBe("ValidationError")
+      expect((<TransactionFailedError>result).failureReasons[7].Message).toBe(
         "One or more parameter values were invalid: Type mismatch for key"
       )
 
       const actualRecords = await testGateway.getAll(config.TABLE_NAME)
       expect(actualRecords.Count).toBe(0)
+    })
+
+    it("should return an error when attempting to insert more records than is supported", async () => {
+      const records = new Array(50).fill(0).map((_, idx) => {
+        return {
+          id: `123${idx}`
+        }
+      })
+      const result = await gateway.insertMany(config.TABLE_NAME, records, "id")
+      expect(result).toBeTruthy()
+      expect(isError(result)).toBe(true)
+      expect((<Error>result).message).toBe("Member must have length less than or equal to 25")
     })
   })
 

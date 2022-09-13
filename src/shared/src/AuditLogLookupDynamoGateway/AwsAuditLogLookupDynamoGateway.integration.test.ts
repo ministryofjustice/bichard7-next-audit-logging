@@ -86,7 +86,7 @@ describe("AuditLogLookupDynamoGateway", () => {
       const secondsToExpiry = parseInt(actualLookupItem.expiryTime || "0") - new Date().getTime() / 1000
       const oneWeekInSecs = 7 * 24 * 60 * 60
       // The expiry time will be very slightly sooner than 1 week just after we have created it, so give some margin
-      expect(secondsToExpiry).toBeLessThanOrEqual(oneWeekInSecs)
+      expect(secondsToExpiry).toBeLessThanOrEqual(oneWeekInSecs + 5)
       expect(secondsToExpiry).toBeGreaterThanOrEqual(oneWeekInSecs - 60 * 60)
     })
   })

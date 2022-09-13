@@ -101,7 +101,7 @@ describe("AuditLogDynamoGateway", () => {
       const secondsToExpiry = Math.floor(parseInt(actualMessage.expiryTime || "0") - new Date().getTime() / 1000)
       const oneWeekInSecs = 7 * 24 * 60 * 60
       // The expiry time will be very slightly sooner than 1 week just after we have created it, so give some margin
-      expect(secondsToExpiry).toBeLessThanOrEqual(oneWeekInSecs)
+      expect(secondsToExpiry).toBeLessThanOrEqual(oneWeekInSecs + 5)
       expect(secondsToExpiry).toBeGreaterThanOrEqual(oneWeekInSecs - 60 * 60)
     })
   })
@@ -122,10 +122,10 @@ describe("AuditLogDynamoGateway", () => {
     })
 
     it("should return an error when the given message already exists", async () => {
-      const message = new AuditLog("one", new Date(), "dummy hash")
-      await gateway.create(message)
+      const messages = new Array(10).fill(0).map(() => new AuditLog("one", new Date(), "dummy hash"))
+      await gateway.create(messages[4])
 
-      const result = await gateway.createMany([message])
+      const result = await gateway.createMany(messages)
 
       expect(isError(result)).toBe(true)
 
@@ -150,7 +150,7 @@ describe("AuditLogDynamoGateway", () => {
       const secondsToExpiry = Math.floor(parseInt(actualMessages[0].expiryTime || "0") - new Date().getTime() / 1000)
       const oneWeekInSecs = 7 * 24 * 60 * 60
       // The expiry time will be very slightly sooner than 1 week just after we have created it, so give some margin
-      expect(secondsToExpiry).toBeLessThanOrEqual(oneWeekInSecs)
+      expect(secondsToExpiry).toBeLessThanOrEqual(oneWeekInSecs + 5)
       expect(secondsToExpiry).toBeGreaterThanOrEqual(oneWeekInSecs - 60 * 60)
     })
   })
