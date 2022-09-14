@@ -7,7 +7,18 @@ interface ValidationResult {
   auditLogs: AuditLog[]
 }
 
+// dynamodb limit https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/transaction-apis.html#transaction-apis-txwriteitems
+const MAX_AUDIT_LOGS = 25
+
 export default async (auditLogs: AuditLog[], dynamoGateway: AuditLogDynamoGateway): Promise<ValidationResult> => {
+  if (auditLogs.length > MAX_AUDIT_LOGS) {
+    return {
+      isValid: false,
+      errors: ["Too many audit logs to create in one transaction"],
+      auditLogs
+    }
+  }
+
   return (
     await Promise.all(
       auditLogs.map(async (auditLog) => {
