@@ -209,6 +209,12 @@ functions:
       - httpApi:
           path: /messages
           method: post
+  createAuditLogs:
+    handler: src/handlers/createAuditLogs.default
+    events:
+      - httpApi:
+          path: /manyMessages
+          method: post
   getEvents:
     handler: src/handlers/getEvents.default
     events:
