@@ -11,6 +11,7 @@ enum EventType {
   RecordIgnoredNoOffences = "Hearing Outcome ignored as it contains no offences",
   StatutoryDeclarationCaseIgnored = "Re-opened / Statutory Declaration case ignored",
   InterimHearingWithAncillaryOnlyCourtResults_PncNotUpdated = "Interim hearing with ancillary only court results. PNC not updated",
+  FailedToUpdatePnc = "Message Rejected by [PNCUpdateProcessorBean] MDB",
   Retrying = "Retrying failed message"
 }
 

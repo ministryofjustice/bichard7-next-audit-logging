@@ -35,7 +35,7 @@ export default class CalculateMessageStatusUseCase {
   }
 
   private get triggersAreResolved(): boolean {
-    const triggersGeneratedEvents = this.events.filter((event) => event.eventType)
+    const triggersGeneratedEvents = this.events.filter((event) => event.eventType === EventType.TriggersGenerated)
     if (triggersGeneratedEvents.length === 0) {
       return false
     }
@@ -106,7 +106,23 @@ export default class CalculateMessageStatusUseCase {
   private get hasErrorEvent(): boolean {
     const errorEvent = this.events.filter((event) => event.category === "error").slice(-1)[0]
     const retryingEvent = this.events.filter((event) => event.eventType === EventType.Retrying).slice(-1)[0]
+    const otherEvent = this.events
+      .filter(
+        (event) =>
+          event.eventType === EventType.PncUpdated ||
+          event.eventType.includes("added to Error List") ||
+          event.eventType.includes("passed to Error List") ||
+          event.eventType === EventType.RecordIgnoredNoRecordableOffences ||
+          event.eventType === EventType.TriggerInstancesResolved ||
+          event.eventType === EventType.TriggersGenerated
+      )
+      .slice(-1)[0]
 
-    return errorEvent && (!retryingEvent || errorEvent.timestamp > retryingEvent.timestamp)
+    return (
+      errorEvent &&
+      (!retryingEvent || errorEvent.timestamp > retryingEvent.timestamp) &&
+      (!otherEvent || errorEvent.timestamp > otherEvent.timestamp) &&
+      (errorEvent.eventType !== EventType.FailedToUpdatePnc || !this.pncIsUpdated)
+    )
   }
 }
