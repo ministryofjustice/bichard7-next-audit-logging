@@ -12,6 +12,10 @@ export default class FakeAuditLogDynamoGateway implements AuditLogDynamoGateway 
     throw new Error("Method not implemented.")
   }
 
+  createMany(_: AuditLog[]): PromiseResult<AuditLog[]> {
+    throw new Error("Method not implemented.")
+  }
+
   update(message: AuditLog): PromiseResult<AuditLog> {
     if (this.error) {
       return Promise.resolve(this.error)

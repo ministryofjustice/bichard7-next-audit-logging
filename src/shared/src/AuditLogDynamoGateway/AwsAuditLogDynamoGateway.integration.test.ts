@@ -90,7 +90,7 @@ describe("AuditLogDynamoGateway", () => {
 
       process.env.IS_E2E = "true"
       const result = await gateway.create(expectedMessage)
-      process.env.IS_E2E = undefined
+      delete process.env.IS_E2E
 
       expect(isError(result)).toBe(false)
 
@@ -98,10 +98,60 @@ describe("AuditLogDynamoGateway", () => {
       expect(actualMessage.messageId).toBe(expectedMessage.messageId)
 
       expect(actualMessage.expiryTime).toBeDefined()
-      const secondsToExpiry = parseInt(actualMessage.expiryTime || "0") - new Date().getTime() / 1000
-      // The expiry time will be very slightly sooner than 1 week just after we have created it, so give 1 hour margin
-      expect(secondsToExpiry).toBeGreaterThanOrEqual((6 * 24 + 23) * 60 * 60)
-      expect(secondsToExpiry).toBeLessThanOrEqual(7 * 24 * 60 * 60)
+      const secondsToExpiry = Math.floor(parseInt(actualMessage.expiryTime || "0") - new Date().getTime() / 1000)
+      const oneWeekInSecs = 7 * 24 * 60 * 60
+      // The expiry time will be very slightly sooner than 1 week just after we have created it, so give some margin
+      expect(secondsToExpiry).toBeLessThanOrEqual(oneWeekInSecs + 5)
+      expect(secondsToExpiry).toBeGreaterThanOrEqual(oneWeekInSecs - 60 * 60)
+    })
+  })
+
+  describe("createMany()", () => {
+    it("should insert the given message", async () => {
+      const expectedMessage = new AuditLog("ExpectedMessage", new Date(), "dummy hash")
+
+      const result = await gateway.createMany([expectedMessage])
+
+      expect(isError(result)).toBe(false)
+
+      const actualMessages = <AuditLog[]>result
+      expect(actualMessages).toHaveLength(1)
+      expect(actualMessages[0].messageId).toBe(expectedMessage.messageId)
+      expect(actualMessages[0].receivedDate).toBe(expectedMessage.receivedDate)
+      expect(actualMessages[0].expiryTime).toBeUndefined()
+    })
+
+    it("should return an error when the given message already exists", async () => {
+      const messages = new Array(10).fill(0).map(() => new AuditLog("one", new Date(), "dummy hash"))
+      await gateway.create(messages[4])
+
+      const result = await gateway.createMany(messages)
+
+      expect(isError(result)).toBe(true)
+
+      const actualError = <Error>result
+      expect(actualError.message).toContain("ConditionalCheckFailed")
+    })
+
+    it("should set an expiry time of ~1 week in the E2E environment", async () => {
+      const expectedMessage = new AuditLog("E2EMessage", new Date(), "dummy hash")
+
+      process.env.IS_E2E = "true"
+      const result = await gateway.createMany([expectedMessage])
+      delete process.env.IS_E2E
+
+      expect(isError(result)).toBe(false)
+
+      const actualMessages = <AuditLog[]>result
+      expect(actualMessages).toHaveLength(1)
+      expect(actualMessages[0].messageId).toBe(expectedMessage.messageId)
+
+      expect(actualMessages[0].expiryTime).toBeDefined()
+      const secondsToExpiry = Math.floor(parseInt(actualMessages[0].expiryTime || "0") - new Date().getTime() / 1000)
+      const oneWeekInSecs = 7 * 24 * 60 * 60
+      // The expiry time will be very slightly sooner than 1 week just after we have created it, so give some margin
+      expect(secondsToExpiry).toBeLessThanOrEqual(oneWeekInSecs + 5)
+      expect(secondsToExpiry).toBeGreaterThanOrEqual(oneWeekInSecs - 60 * 60)
     })
   })
 

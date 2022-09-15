@@ -1,6 +1,7 @@
 import { DynamoDB } from "aws-sdk"
 import { DocumentClient } from "aws-sdk/clients/dynamodb"
 import type { DynamoDbConfig, PromiseResult } from "shared-types"
+import { TransactionFailedError } from "shared-types"
 import { isError } from "shared-types"
 import type FetchByIndexOptions from "./FetchByIndexOptions"
 import type GetManyOptions from "./GetManyOptions"
@@ -39,6 +40,43 @@ export default class DynamoGateway {
       .promise()
       .then(() => undefined)
       .catch((error) => <Error>error)
+  }
+
+  insertMany<T>(tableName: string, records: T[], keyName: string): PromiseResult<void> {
+    const params: DocumentClient.TransactWriteItemsInput = {
+      TransactItems: records.map((record) => {
+        return {
+          Put: {
+            TableName: tableName,
+            Item: { _: "_", ...record },
+            ConditionExpression: `attribute_not_exists(${keyName})`
+          }
+        }
+      })
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let failureReasons: any[]
+    return this.client
+      .transactWrite(params)
+      .on("extractError", (response) => {
+        try {
+          failureReasons = JSON.parse(response.httpResponse.body.toString()).CancellationReasons
+        } catch (err) {
+          // suppress this just in case some types of errors aren't JSON parseable
+          console.error("Error extracting cancellation error", err)
+        }
+      })
+      .promise()
+      .then(() => {
+        return undefined
+      })
+      .catch((error) => {
+        if (failureReasons) {
+          return new TransactionFailedError(failureReasons, error.message)
+        }
+        return <Error>error
+      })
   }
 
   updateOne<T>(tableName: string, record: T, keyName: string, version: number): PromiseResult<void> {
