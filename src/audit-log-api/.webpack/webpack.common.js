@@ -5,6 +5,7 @@ module.exports = {
   entry: {
     getMessages: "./src/handlers/getMessages.ts",
     createAuditLog: "./src/handlers/createAuditLog.ts",
+    createAuditLogs: "./src/handlers/createAuditLogs.ts",
     createAuditLogEvent: "./src/handlers/createAuditLogEvent.ts",
     getEvents: "./src/handlers/getEvents.ts",
     retryMessage: "./src/handlers/retryMessage.ts",
