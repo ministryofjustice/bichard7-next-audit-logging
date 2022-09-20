@@ -80,20 +80,20 @@ export default class CreateAuditLogEventUseCase {
 
     const transactionActions: DocumentClient.TransactWriteItem[] = []
 
-    // TODO how might the event be transformed?
-    const lookupTransactionParams = await this.storeValuesInLookupTableUseCase.prepare(originalEvent, messageId)
+    const lookupPrepareResult = await this.storeValuesInLookupTableUseCase.prepare(originalEvent, messageId)
 
-    if (isError(lookupTransactionParams)) {
+    if (isError(lookupPrepareResult)) {
       return {
         resultType: "error",
-        resultDescription: `Couldn't save attribute value in lookup table. ${lookupTransactionParams.message}`
+        resultDescription: `Couldn't save attribute value in lookup table. ${lookupPrepareResult.message}`
       }
-    } else {
-      transactionActions.push(...lookupTransactionParams)
     }
 
+    const [lookupTransactionParams, updatedEvent] = lookupPrepareResult
+    transactionActions.push(...lookupTransactionParams)
+
     // TODO prepare function on gateway should act like "addEvents", not "create"
-    const addEventsTransactionParams = await this.auditLogGateway.prepare(messageId, messageVersion, originalEvent)
+    const addEventsTransactionParams = await this.auditLogGateway.prepare(messageId, messageVersion, updatedEvent)
 
     if (isError(addEventsTransactionParams)) {
       if (isConditionalExpressionViolationError(addEventsTransactionParams)) {
@@ -107,7 +107,7 @@ export default class CreateAuditLogEventUseCase {
       transactionActions.push(addEventsTransactionParams)
     }
 
-    const transactionResult = this.auditLogGateway.executeTransaction(transactionActions)
+    const transactionResult = await this.auditLogGateway.executeTransaction(transactionActions)
 
     if (isError(transactionResult)) {
       return {

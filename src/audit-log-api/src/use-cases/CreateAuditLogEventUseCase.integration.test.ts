@@ -97,7 +97,7 @@ describe("CreateAuditLogUseCase", () => {
     expect(actualEvent?.eventSource).toBe(event.eventSource)
   })
 
-  it("should store long attribute values in lookup table", async () => {
+  it.only("should store long attribute values in lookup table", async () => {
     const auditLog = createAuditLog()
     await auditLogDynamoGateway.create(auditLog)
 
@@ -126,6 +126,7 @@ describe("CreateAuditLogUseCase", () => {
     const { valueLookup } = attribute1 as KeyValuePair<string, string>
     expect(valueLookup).toBeDefined()
 
+    // TODO investigate why this lookup item ID is different to what was inserted
     const lookupResult = await lookupValue(valueLookup)
     expect(lookupResult).toBeDefined()
 
@@ -219,7 +220,7 @@ describe("CreateAuditLogUseCase", () => {
     const event = createAuditLogEvent()
 
     jest
-      .spyOn(storeValuesInLookupTableUseCase, "execute")
+      .spyOn(storeValuesInLookupTableUseCase, "prepare")
       .mockResolvedValueOnce(new Error("Failed to create lookup table entry"))
 
     const result = await createAuditLogEventUseCase.create(auditLog.messageId, event)
@@ -242,7 +243,7 @@ describe("CreateAuditLogUseCase", () => {
     event.addAttribute("reallyLongAttribute", "X".repeat(10_000))
 
     jest
-      .spyOn(auditLogDynamoGateway, "addEvent")
+      .spyOn(auditLogDynamoGateway, "prepare")
       .mockResolvedValueOnce(new Error("Failed to create audit log table entry"))
 
     const result = await createAuditLogEventUseCase.create(auditLog.messageId, event)

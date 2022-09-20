@@ -54,7 +54,10 @@ export default class StoreValuesInLookupTableUseCase {
   }
 
   // TODO do we also need to return the modified audit log event?
-  async prepare(event: AuditLogEvent, messageId: string): PromiseResult<DocumentClient.TransactWriteItem[]> {
+  async prepare(
+    event: AuditLogEvent,
+    messageId: string
+  ): PromiseResult<[DocumentClient.TransactWriteItem[], AuditLogEvent]> {
     const attributes: KeyValuePair<string, unknown> = {}
     const transactionParams: DocumentClient.TransactWriteItem[] = []
 
@@ -90,6 +93,11 @@ export default class StoreValuesInLookupTableUseCase {
       eventXml = { valueLookup: lookupItem.id }
     }
 
-    return transactionParams
+    const updatedEvent = {
+      ...event,
+      attributes,
+      ...(eventXml ? { eventXml } : {})
+    } as AuditLogEvent
+    return [transactionParams, updatedEvent]
   }
 }
