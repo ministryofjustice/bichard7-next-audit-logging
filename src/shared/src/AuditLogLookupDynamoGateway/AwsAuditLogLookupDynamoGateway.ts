@@ -1,5 +1,6 @@
+import type { DocumentClient } from "aws-sdk/clients/dynamodb"
 import { addDays } from "date-fns"
-import type { AuditLogLookupDynamoGateway, AuditLogLookup, DynamoDbConfig, PromiseResult } from "shared-types"
+import type { AuditLogLookup, AuditLogLookupDynamoGateway, DynamoDbConfig, PromiseResult } from "shared-types"
 import { isError } from "shared-types"
 import { compress, decompress } from ".."
 import { DynamoGateway, IndexSearcher } from "../DynamoGateway"
@@ -28,13 +29,31 @@ export default class AwsAuditLogLookupDynamoGateway extends DynamoGateway implem
 
     const itemToSave = { ...lookupItem, value: await compress(lookupItem.value), isCompressed: true }
 
-    const result = await this.insertOne(this.tableName, itemToSave, "id")
+    const result = await this.insertOne(this.tableName, itemToSave, this.tableKey)
 
     if (isError(result)) {
       return result
     }
 
     return lookupItem
+  }
+
+  async prepare(lookupItem: AuditLogLookup): PromiseResult<DocumentClient.TransactWriteItem> {
+    if (process.env.IS_E2E) {
+      lookupItem.expiryTime = Math.round(
+        addDays(new Date(), parseInt(process.env.EXPIRY_DAYS || "7")).getTime() / 1000
+      ).toString()
+    }
+
+    const itemToSave = { ...lookupItem, value: await compress(lookupItem.value), isCompressed: true }
+
+    return {
+      Put: {
+        Item: itemToSave,
+        TableName: this.tableName,
+        ConditionExpression: `attribute_not_exists(${this.tableKey})`
+      }
+    }
   }
 
   async fetchById(id: string): PromiseResult<AuditLogLookup> {

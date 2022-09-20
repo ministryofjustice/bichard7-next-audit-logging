@@ -1,3 +1,4 @@
+import type { DocumentClient } from "aws-sdk/clients/dynamodb"
 import { addDays } from "date-fns"
 import type {
   AuditLog,
@@ -5,7 +6,8 @@ import type {
   AuditLogEvent,
   DynamoDbConfig,
   KeyValuePair,
-  PromiseResult
+  PromiseResult,
+  Result
 } from "shared-types"
 import { EventType, isError } from "shared-types"
 import type { FetchByIndexOptions, UpdateOptions } from "../DynamoGateway"
@@ -31,7 +33,7 @@ export default class AwsAuditLogDynamoGateway extends DynamoGateway implements A
       ).toString()
     }
 
-    const result = await this.insertOne(this.tableName, message, "messageId")
+    const result = await this.insertOne(this.tableName, message, this.tableKey)
 
     if (isError(result)) {
       return result
@@ -56,6 +58,22 @@ export default class AwsAuditLogDynamoGateway extends DynamoGateway implements A
     }
 
     return messages
+  }
+
+  prepare(message: AuditLog): Result<DocumentClient.TransactWriteItem> {
+    if (process.env.IS_E2E) {
+      message.expiryTime = Math.round(
+        addDays(new Date(), parseInt(process.env.EXPIRY_DAYS || "7")).getTime() / 1000
+      ).toString()
+    }
+
+    return {
+      Put: {
+        Item: message,
+        TableName: this.tableName,
+        ConditionExpression: `attribute_not_exists(${this.tableKey})`
+      }
+    }
   }
 
   async update(message: AuditLog): PromiseResult<AuditLog> {

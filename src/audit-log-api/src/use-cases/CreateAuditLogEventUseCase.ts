@@ -77,29 +77,45 @@ export default class CreateAuditLogEventUseCase {
       }
     }
 
-    const event = await this.storeValuesInLookupTableUseCase.execute(originalEvent, messageId)
-    if (isError(event)) {
+    // TODO how might the event be transformed?
+    const lookupTransactionParams = await this.storeValuesInLookupTableUseCase.prepare(originalEvent, messageId)
+
+    if (isError(lookupTransactionParams)) {
       return {
         resultType: "error",
-        resultDescription: `Couldn't save attribute value in lookup table. ${event.message}`
+        resultDescription: `Couldn't save attribute value in lookup table. ${lookupTransactionParams.message}`
       }
     }
 
-    const result = await this.auditLogGateway.addEvent(messageId, messageVersion, event)
+    // TODO prepare function on gateway should act like "addEvents", not "create"
+    const addEventsTransactionParams = this.auditLogGateway.prepare(messageId, messageVersion, originalEvent)
 
-    if (isError(result)) {
-      if (isConditionalExpressionViolationError(result)) {
+    if (isError(addEventsTransactionParams)) {
+      if (isConditionalExpressionViolationError(addEventsTransactionParams)) {
         return {
           resultType: "invalidVersion",
           resultDescription: `Message with Id ${messageId} has a different version in the database.`
         }
       }
+    }
 
+    const transactionResult = this.auditLogGateway.executeTransaction([
+      ...lookupTransactionParams,
+      addEventsTransactionParams
+    ])
+
+    if (isError(transactionResult)) {
       return {
-        resultType: "error",
-        resultDescription: result.message
+        resultType: "transactionFailed",
+        resultDescription: transactionResult.message
       }
     }
+
+    //   return {
+    //     resultType: "error",
+    //     resultDescription: result.message
+    //   }
+    // }
 
     return {
       resultType: "success"

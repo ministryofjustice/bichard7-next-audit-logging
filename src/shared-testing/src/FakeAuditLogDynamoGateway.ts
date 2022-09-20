@@ -1,7 +1,8 @@
 // @ts-ignore
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable class-methods-use-this */
-import type { AuditLog, AuditLogDynamoGateway, AuditLogEvent, PromiseResult } from "shared-types"
+import type { DocumentClient } from "aws-sdk/clients/dynamodb"
+import type { AuditLog, AuditLogDynamoGateway, AuditLogEvent, PromiseResult, Result } from "shared-types"
 
 export default class FakeAuditLogDynamoGateway implements AuditLogDynamoGateway {
   private messages: AuditLog[] = []
@@ -14,6 +15,10 @@ export default class FakeAuditLogDynamoGateway implements AuditLogDynamoGateway 
 
   createMany(_: AuditLog[]): PromiseResult<AuditLog[]> {
     throw new Error("Method not implemented.")
+  }
+
+  prepare(_: AuditLog): Result<DocumentClient.TransactWriteItem> {
+    throw new Error("Method not implemented")
   }
 
   update(message: AuditLog): PromiseResult<AuditLog> {
@@ -110,6 +115,10 @@ export default class FakeAuditLogDynamoGateway implements AuditLogDynamoGateway 
   // @ts-ignore
   updateSanitiseCheck(message: AuditLog, nextSanitiseCheck: Date): PromiseResult<void> {
     throw new Error("Method not implemented.")
+  }
+
+  executeTransaction(_: DocumentClient.TransactWriteItem[]): PromiseResult<void> {
+    throw new Error("Method not implemented")
   }
 
   shouldReturnError(error: Error): void {
