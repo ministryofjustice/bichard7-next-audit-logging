@@ -66,10 +66,14 @@ const getAuditLog = (messageId: string): Promise<AuditLog | null> =>
 const lookupValue = (lookupId: string): Promise<AuditLogLookup | null> =>
   testAuditLogLookupDynamoGateway.getOne(auditLogLookupConfig.TABLE_NAME, "id", lookupId)
 
+const lookupMessageId = (messageId: string): Promise<AuditLogLookup[] | null> =>
+  testAuditLogLookupDynamoGateway.getManyById(auditLogLookupConfig.TABLE_NAME, "messageIdIndex", "messageId", messageId)
+
 describe("CreateAuditLogUseCase", () => {
   beforeEach(async () => {
     await testAuditLogDynamoGateway.deleteAll(auditLogConfig.TABLE_NAME, "messageId")
     await testAuditLogLookupDynamoGateway.deleteAll(auditLogLookupConfig.TABLE_NAME, "id")
+    jest.clearAllMocks()
   })
 
   it("should return success result when event is added to the audit log", async () => {
@@ -207,5 +211,49 @@ describe("CreateAuditLogUseCase", () => {
     expect(actualAuditLog).toBeDefined()
     expect(actualAuditLog?.events).toBeDefined()
     expect(actualAuditLog?.events).toHaveLength(2)
+  })
+
+  it("shouldn't add events when creating the lookup table entry fails", async () => {
+    const auditLog = createAuditLog()
+    await auditLogDynamoGateway.create(auditLog)
+    const event = createAuditLogEvent()
+
+    jest
+      .spyOn(storeValuesInLookupTableUseCase, "execute")
+      .mockResolvedValueOnce(new Error("Failed to create lookup table entry"))
+
+    const result = await createAuditLogEventUseCase.create(auditLog.messageId, event)
+
+    expect(result.resultType).toBe("transactionError")
+
+    const actualAuditLog = await getAuditLog(auditLog.messageId)
+    expect(actualAuditLog).toBeDefined()
+    expect(actualAuditLog?.events).toHaveLength(0)
+
+    const lookupResult = await lookupMessageId(auditLog.messageId)
+    expect(lookupResult).toBeNull()
+  })
+
+  it("shouldn't add events when creating the audit log table entry fails", async () => {
+    const auditLog = createAuditLog()
+    await auditLogDynamoGateway.create(auditLog)
+
+    const event = createAuditLogEvent()
+    event.addAttribute("reallyLongAttribute", "X".repeat(10_000))
+
+    jest
+      .spyOn(auditLogDynamoGateway, "addEvent")
+      .mockResolvedValueOnce(new Error("Failed to create audit log table entry"))
+
+    const result = await createAuditLogEventUseCase.create(auditLog.messageId, event)
+
+    expect(result.resultType).toBe("transactionError")
+
+    const actualAuditLog = await getAuditLog(auditLog.messageId)
+    expect(actualAuditLog).toBeDefined()
+    expect(actualAuditLog?.events).toHaveLength(0)
+
+    const lookupResult = await lookupMessageId(auditLog.messageId)
+    expect(lookupResult).toBeNull()
   })
 })

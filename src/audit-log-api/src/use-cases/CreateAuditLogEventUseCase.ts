@@ -4,7 +4,7 @@ import { isConditionalExpressionViolationError } from "../utils"
 import type StoreValuesInLookupTableUseCase from "./StoreValuesInLookupTableUseCase"
 
 interface CreateAuditLogEventResult {
-  resultType: "success" | "notFound" | "invalidVersion" | "error"
+  resultType: "success" | "notFound" | "invalidVersion" | "transactionFailed" | "error"
   resultDescription?: string
 }
 

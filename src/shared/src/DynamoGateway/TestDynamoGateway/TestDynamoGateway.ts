@@ -89,6 +89,28 @@ export default class TestDynamoGateway extends DynamoGateway {
     return <T>result.Item
   }
 
+  async getManyById<T>(tableName: string, indexName: string, keyName: string, keyValue: KeyValue): Promise<T[] | null> {
+    const result = await this.client
+      .query({
+        TableName: tableName,
+        IndexName: indexName,
+        KeyConditionExpression: "#keyName = :keyValue",
+        ExpressionAttributeNames: {
+          "#keyName": keyName
+        },
+        ExpressionAttributeValues: {
+          ":keyValue": keyValue
+        }
+      })
+      .promise()
+
+    if (!result.Items || result.Items.length < 1) {
+      return null
+    }
+
+    return <T[]>result.Items
+  }
+
   async deleteAll(tableName: string, keyName: string, attempts = 5): Promise<void> {
     const items = await this.getAll(tableName)
 
