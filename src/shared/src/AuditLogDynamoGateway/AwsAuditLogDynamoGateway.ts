@@ -6,8 +6,7 @@ import type {
   AuditLogEvent,
   DynamoDbConfig,
   KeyValuePair,
-  PromiseResult,
-  Result
+  PromiseResult
 } from "shared-types"
 import { EventType, isError } from "shared-types"
 import type { FetchByIndexOptions, UpdateOptions } from "../DynamoGateway"
@@ -58,22 +57,6 @@ export default class AwsAuditLogDynamoGateway extends DynamoGateway implements A
     }
 
     return messages
-  }
-
-  prepare(message: AuditLog): Result<DocumentClient.TransactWriteItem> {
-    if (process.env.IS_E2E) {
-      message.expiryTime = Math.round(
-        addDays(new Date(), parseInt(process.env.EXPIRY_DAYS || "7")).getTime() / 1000
-      ).toString()
-    }
-
-    return {
-      Put: {
-        Item: message,
-        TableName: this.tableName,
-        ConditionExpression: `attribute_not_exists(${this.tableKey})`
-      }
-    }
   }
 
   async update(message: AuditLog): PromiseResult<AuditLog> {
@@ -327,5 +310,78 @@ export default class AwsAuditLogDynamoGateway extends DynamoGateway implements A
     }
 
     return undefined
+  }
+
+  async prepare(
+    messageId: string,
+    messageVersion: number,
+    event: AuditLogEvent
+  ): PromiseResult<DocumentClient.TransactWriteItem> {
+    const events = await this.fetchEvents(messageId)
+    if (isError(events)) {
+      return events
+    }
+
+    const status = new CalculateMessageStatusUseCase(events, event).call()
+
+    const expressionAttributeNames: KeyValuePair<string, string> = {
+      "#lastEventType": "lastEventType"
+    }
+    const updateExpressionValues: KeyValuePair<string, unknown> = {
+      ":event": [event],
+      ":empty_list": <AuditLogEvent[]>[],
+      ":lastEventType": event.eventType
+    }
+    let updateExpression = `
+      set events = list_append(if_not_exists(events, :empty_list), :event),
+      #lastEventType = :lastEventType
+    `
+
+    const forceOwnerForAutomationReport = getForceOwnerForAutomationReport(event)
+    if (forceOwnerForAutomationReport) {
+      updateExpressionValues[":forceOwner"] = forceOwnerForAutomationReport
+      updateExpression = `${updateExpression}, automationReport.forceOwner = :forceOwner`
+    }
+
+    if (shouldLogForTopExceptionsReport(event)) {
+      updateExpression = `${updateExpression}, topExceptionsReport.events = list_append(if_not_exists(topExceptionsReport.events, :empty_list), :event)`
+    }
+
+    if (shouldLogForAutomationReport(event)) {
+      updateExpression = `${updateExpression}, automationReport.events = list_append(if_not_exists(automationReport.events, :empty_list), :event)`
+    }
+
+    if (status) {
+      expressionAttributeNames["#status"] = "status"
+      updateExpressionValues[":status"] = status
+      updateExpression += ",#status = :status"
+    }
+
+    if (event.eventType === EventType.ErrorRecordArchival) {
+      expressionAttributeNames["#errorRecordArchivalDate"] = "errorRecordArchivalDate"
+      updateExpressionValues[":errorRecordArchivalDate"] = event.timestamp
+      updateExpression += ",#errorRecordArchivalDate = :errorRecordArchivalDate"
+    } else if (event.eventType === EventType.SanitisedMessage) {
+      expressionAttributeNames["#isSanitised"] = "isSanitised"
+      updateExpressionValues[":isSanitised"] = 1
+      updateExpression += ",#isSanitised = :isSanitised"
+    } else if (event.eventType === "Retrying failed message") {
+      updateExpression = `${updateExpression}, retryCount = if_not_exists(retryCounter, :zero) + :one`
+      updateExpressionValues[":zero"] = 0
+      updateExpressionValues[":one"] = 1
+    }
+
+    return {
+      Update: {
+        TableName: this.tableName,
+        Key: {
+          messageId: messageId
+        },
+        UpdateExpression: updateExpression + " ADD version :version_increment",
+        ExpressionAttributeNames: expressionAttributeNames,
+        ExpressionAttributeValues: { ...updateExpressionValues, ":version": messageVersion, ":version_increment": 1 },
+        ConditionExpression: `attribute_exists(${this.tableKey}) AND version = :version`
+      }
+    }
   }
 }

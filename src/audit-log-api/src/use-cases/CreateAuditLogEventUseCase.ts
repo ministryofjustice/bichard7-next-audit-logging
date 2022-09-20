@@ -2,6 +2,7 @@ import type { AuditLogEvent, AuditLogDynamoGateway } from "shared-types"
 import { isError } from "shared-types"
 import { isConditionalExpressionViolationError } from "../utils"
 import type StoreValuesInLookupTableUseCase from "./StoreValuesInLookupTableUseCase"
+import type { DocumentClient } from "aws-sdk/clients/dynamodb"
 
 interface CreateAuditLogEventResult {
   resultType: "success" | "notFound" | "invalidVersion" | "transactionFailed" | "error"
@@ -77,6 +78,8 @@ export default class CreateAuditLogEventUseCase {
       }
     }
 
+    const transactionActions: DocumentClient.TransactWriteItem[] = []
+
     // TODO how might the event be transformed?
     const lookupTransactionParams = await this.storeValuesInLookupTableUseCase.prepare(originalEvent, messageId)
 
@@ -85,10 +88,12 @@ export default class CreateAuditLogEventUseCase {
         resultType: "error",
         resultDescription: `Couldn't save attribute value in lookup table. ${lookupTransactionParams.message}`
       }
+    } else {
+      transactionActions.push(...lookupTransactionParams)
     }
 
     // TODO prepare function on gateway should act like "addEvents", not "create"
-    const addEventsTransactionParams = this.auditLogGateway.prepare(messageId, messageVersion, originalEvent)
+    const addEventsTransactionParams = await this.auditLogGateway.prepare(messageId, messageVersion, originalEvent)
 
     if (isError(addEventsTransactionParams)) {
       if (isConditionalExpressionViolationError(addEventsTransactionParams)) {
@@ -97,12 +102,12 @@ export default class CreateAuditLogEventUseCase {
           resultDescription: `Message with Id ${messageId} has a different version in the database.`
         }
       }
+      // TODO handle the case the error is not a conditional expression violation error
+    } else {
+      transactionActions.push(addEventsTransactionParams)
     }
 
-    const transactionResult = this.auditLogGateway.executeTransaction([
-      ...lookupTransactionParams,
-      addEventsTransactionParams
-    ])
+    const transactionResult = this.auditLogGateway.executeTransaction(transactionActions)
 
     if (isError(transactionResult)) {
       return {
@@ -110,12 +115,6 @@ export default class CreateAuditLogEventUseCase {
         resultDescription: transactionResult.message
       }
     }
-
-    //   return {
-    //     resultType: "error",
-    //     resultDescription: result.message
-    //   }
-    // }
 
     return {
       resultType: "success"

@@ -4,7 +4,6 @@ import type {
   BichardAuditLogEvent,
   KeyValuePair,
   PromiseResult,
-  Result,
   ValueLookup
 } from "shared-types"
 import { AuditLogLookup, isError } from "shared-types"
