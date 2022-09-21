@@ -15,7 +15,7 @@ import CalculateMessageStatusUseCase from "./CalculateMessageStatusUseCase"
 import getForceOwnerForAutomationReport from "./getForceOwnerForAutomationReport"
 import shouldLogForAutomationReport from "./shouldLogForAutomationReport"
 import shouldLogForTopExceptionsReport from "./shouldLogForTopExceptionsReport"
-// import maxBy from "lodash.maxby"
+import maxBy from "lodash.maxby"
 
 export default class AwsAuditLogDynamoGateway extends DynamoGateway implements AuditLogDynamoGateway {
   private readonly tableKey: string = "messageId"
@@ -386,78 +386,83 @@ export default class AwsAuditLogDynamoGateway extends DynamoGateway implements A
     }
   }
 
-  // async prepareEvents(
-  //   messageId: string,
-  //   messageVersion: number,
-  //   events: AuditLogEvent[]
-  // ): PromiseResult<DocumentClient.TransactWriteItem> {
-  //   const currentEvents = await this.fetchEvents(messageId)
-  //   if (isError(currentEvents)) {
-  //     return currentEvents
-  //   }
+  async prepareEvents(
+    messageId: string,
+    messageVersion: number,
+    events: AuditLogEvent[]
+  ): PromiseResult<DocumentClient.TransactWriteItem> {
+    const currentEvents = await this.fetchEvents(messageId)
+    if (isError(currentEvents)) {
+      return currentEvents
+    }
 
-  //   const status = new CalculateMessageStatusUseCase(...events, ...currentEvents).call()
+    const status = new CalculateMessageStatusUseCase(...events, ...currentEvents).call()
 
-  //   const lastEventType = maxBy(events, (event) => event.timestamp)?.eventType
+    const lastEventType = maxBy(events, (event) => event.timestamp)?.eventType
 
-  //   const expressionAttributeNames: KeyValuePair<string, string> = {
-  //     "#lastEventType": "lastEventType"
-  //   }
-  //   const updateExpressionValues: KeyValuePair<string, unknown> = {
-  //     ":events": events,
-  //     ":empty_list": <AuditLogEvent[]>[],
-  //     ":lastEventType": lastEventType
-  //   }
-  //   let updateExpression = `
-  //     set events = list_append(if_not_exists(events, :empty_list), :events),
-  //     #lastEventType = :lastEventType
-  //   `
+    const expressionAttributeNames: KeyValuePair<string, string> = {
+      "#lastEventType": "lastEventType"
+    }
+    const updateExpressionValues: KeyValuePair<string, unknown> = {
+      ":events": events,
+      ":empty_list": <AuditLogEvent[]>[],
+      ":lastEventType": lastEventType
+    }
+    let updateExpression = `
+      set events = list_append(if_not_exists(events, :empty_list), :events),
+      #lastEventType = :lastEventType
+    `
 
-  //   const forceOwnerForAutomationReport = getForceOwnerForAutomationReport(event)
-  //   if (forceOwnerForAutomationReport) {
-  //     updateExpressionValues[":forceOwner"] = forceOwnerForAutomationReport
-  //     updateExpression = `${updateExpression}, automationReport.forceOwner = :forceOwner`
-  //   }
+    const forceOwnerEvents = events.filter((event) => getForceOwnerForAutomationReport(event))
+    const forceOwnerEventForAutomationReport = maxBy(forceOwnerEvents, (event) => event.timestamp)
+    if (forceOwnerEventForAutomationReport) {
+      updateExpressionValues[":forceOwner"] = getForceOwnerForAutomationReport(forceOwnerEventForAutomationReport)
+      updateExpression = `${updateExpression}, automationReport.forceOwner = :forceOwner`
+    }
 
-  //   if (shouldLogForTopExceptionsReport(event)) {
-  //     updateExpression = `${updateExpression}, topExceptionsReport.events = list_append(if_not_exists(topExceptionsReport.events, :empty_list), :event)`
-  //   }
+    if (status) {
+      expressionAttributeNames["#status"] = "status"
+      updateExpressionValues[":status"] = status
+      updateExpression += ",#status = :status"
+    }
 
-  //   if (shouldLogForAutomationReport(event)) {
-  //     updateExpression = `${updateExpression}, automationReport.events = list_append(if_not_exists(automationReport.events, :empty_list), :event)`
-  //   }
+    const topExceptionsReportEvents = events.filter((event) => shouldLogForTopExceptionsReport(event))
+    if (topExceptionsReportEvents.length > 0) {
+      updateExpressionValues[":topExceptionEvents"] = topExceptionsReportEvents
+      updateExpression = `${updateExpression}, topExceptionsReport.events = list_append(if_not_exists(topExceptionsReport.events, :empty_list), :topExceptionEvents)`
+    }
 
-  //   if (status) {
-  //     expressionAttributeNames["#status"] = "status"
-  //     updateExpressionValues[":status"] = status
-  //     updateExpression += ",#status = :status"
-  //   }
+    const automationReportEvents = events.filter((event) => shouldLogForAutomationReport(event))
+    if (automationReportEvents.length > 0) {
+      updateExpressionValues[":automationReportEvents"] = automationReportEvents
+      updateExpression = `${updateExpression}, automationReportEvents.events = list_append(if_not_exists(automationReportEvents.events, :empty_list), :automationReportEvents)`
+    }
 
-  //   if (event.eventType === EventType.ErrorRecordArchival) {
-  //     expressionAttributeNames["#errorRecordArchivalDate"] = "errorRecordArchivalDate"
-  //     updateExpressionValues[":errorRecordArchivalDate"] = event.timestamp
-  //     updateExpression += ",#errorRecordArchivalDate = :errorRecordArchivalDate"
-  //   } else if (event.eventType === EventType.SanitisedMessage) {
-  //     expressionAttributeNames["#isSanitised"] = "isSanitised"
-  //     updateExpressionValues[":isSanitised"] = 1
-  //     updateExpression += ",#isSanitised = :isSanitised"
-  //   } else if (event.eventType === "Retrying failed message") {
-  //     updateExpression = `${updateExpression}, retryCount = if_not_exists(retryCounter, :zero) + :one`
-  //     updateExpressionValues[":zero"] = 0
-  //     updateExpressionValues[":one"] = 1
-  //   }
+    // if (event.eventType === EventType.ErrorRecordArchival) {
+    //   expressionAttributeNames["#errorRecordArchivalDate"] = "errorRecordArchivalDate"
+    //   updateExpressionValues[":errorRecordArchivalDate"] = event.timestamp
+    //   updateExpression += ",#errorRecordArchivalDate = :errorRecordArchivalDate"
+    // } else if (event.eventType === EventType.SanitisedMessage) {
+    //   expressionAttributeNames["#isSanitised"] = "isSanitised"
+    //   updateExpressionValues[":isSanitised"] = 1
+    //   updateExpression += ",#isSanitised = :isSanitised"
+    // } else if (event.eventType === "Retrying failed message") {
+    //   updateExpression = `${updateExpression}, retryCount = if_not_exists(retryCounter, :zero) + :one`
+    //   updateExpressionValues[":zero"] = 0
+    //   updateExpressionValues[":one"] = 1
+    // }
 
-  //   return {
-  //     Update: {
-  //       TableName: this.tableName,
-  //       Key: {
-  //         messageId: messageId
-  //       },
-  //       UpdateExpression: updateExpression + " ADD version :version_increment",
-  //       ExpressionAttributeNames: expressionAttributeNames,
-  //       ExpressionAttributeValues: { ...updateExpressionValues, ":version": messageVersion, ":version_increment": 1 },
-  //       ConditionExpression: `attribute_exists(${this.tableKey}) AND version = :version`
-  //     }
-  //   }
-  // }
+    return {
+      Update: {
+        TableName: this.tableName,
+        Key: {
+          messageId: messageId
+        },
+        UpdateExpression: updateExpression + " ADD version :version_increment",
+        ExpressionAttributeNames: expressionAttributeNames,
+        ExpressionAttributeValues: { ...updateExpressionValues, ":version": messageVersion, ":version_increment": 1 },
+        ConditionExpression: `attribute_exists(${this.tableKey}) AND version = :version`
+      }
+    }
+  }
 }

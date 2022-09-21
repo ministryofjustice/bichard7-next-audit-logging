@@ -107,5 +107,7 @@ export default class CreateAuditLogEventsUseCase {
       }
       return eventActions
     })
+
+    // TODO check number of transaction items is below dynamodb limit
   }
 }

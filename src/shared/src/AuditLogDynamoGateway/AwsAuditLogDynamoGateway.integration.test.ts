@@ -1,6 +1,7 @@
 jest.retryTimes(10)
 import type { DocumentClient } from "aws-sdk/clients/dynamodb"
 import { addDays } from "date-fns"
+import { shuffle } from "lodash"
 import "shared-testing"
 import type { DynamoDbConfig, EventCategory } from "shared-types"
 import { AuditLog, AuditLogEvent, AuditLogStatus, EventType, isError } from "shared-types"
@@ -916,7 +917,7 @@ describe("AuditLogDynamoGateway", () => {
     })
   })
 
-  describe.only("prepare()", () => {
+  describe("prepare()", () => {
     it("should only add an event to and update the status of the specified audit log", async () => {
       const expectedEvent = createAuditLogEvent("information", new Date(), EventType.RecordIgnoredNoOffences)
 
@@ -954,6 +955,164 @@ describe("AuditLogDynamoGateway", () => {
       }
 
       expect(result).toStrictEqual(expectedUpdate)
+    })
+  })
+
+  describe("prepareEvents()", () => {
+    it("should only add an event to and update the status of the specified audit log", async () => {
+      const expectedEvent = createAuditLogEvent("information", new Date(), EventType.RecordIgnoredNoOffences)
+
+      expectedEvent.addAttribute("Attribute one", "Some value")
+      expectedEvent.addAttribute("Attribute two", 2)
+
+      const message = new AuditLog("one", new Date(), "dummy hash")
+
+      await gateway.create(message)
+
+      const result = await gateway.prepareEvents(message.messageId, message.version, [expectedEvent])
+
+      expect(isError(result)).toBe(false)
+
+      const expectedUpdate = {
+        Update: {
+          TableName: "auditLogTable",
+          Key: { messageId: message.messageId },
+          UpdateExpression:
+            "\n" +
+            "      set events = list_append(if_not_exists(events, :empty_list), :events),\n" +
+            "      #lastEventType = :lastEventType\n" +
+            "    ,#status = :status ADD version :version_increment",
+          ExpressionAttributeNames: { "#lastEventType": "lastEventType", "#status": "status" },
+          ExpressionAttributeValues: {
+            ":events": [expectedEvent],
+            ":empty_list": [],
+            ":lastEventType": "Hearing Outcome ignored as it contains no offences",
+            ":status": "Completed",
+            ":version": 0,
+            ":version_increment": 1
+          },
+          ConditionExpression: "attribute_exists(messageId) AND version = :version"
+        }
+      }
+
+      expect(result).toStrictEqual(expectedUpdate)
+    })
+
+    it("should use the latest force owner change event to set the force owner", async () => {
+      const forceOwnerChange1 = createAuditLogEvent("information", new Date(), EventType.InputMessageReceived)
+      forceOwnerChange1.addAttribute("Force Owner", "1")
+      const forceOwnerChange2 = createAuditLogEvent("information", new Date(), EventType.InputMessageReceived)
+      forceOwnerChange2.addAttribute("Force Owner", "2")
+      const forceOwnerChange3 = createAuditLogEvent(
+        "information",
+        addDays(new Date(), 1),
+        EventType.InputMessageReceived
+      )
+      forceOwnerChange3.addAttribute("Force Owner", "3")
+      const forceOwnerChange4 = createAuditLogEvent("information", new Date(), EventType.InputMessageReceived)
+      forceOwnerChange4.addAttribute("Force Owner", "4")
+
+      const message = new AuditLog("one", new Date(), "dummy hash")
+
+      await gateway.create(message)
+
+      const result = await gateway.prepareEvents(message.messageId, message.version, [
+        forceOwnerChange1,
+        forceOwnerChange2,
+        forceOwnerChange3,
+        forceOwnerChange4
+      ])
+
+      expect(isError(result)).toBe(false)
+
+      const transaction = result as DocumentClient.TransactWriteItem
+
+      expect(transaction.Update).toBeDefined()
+      expect(transaction.Update!.UpdateExpression).toContain("automationReport.forceOwner = :forceOwner")
+      expect(transaction.Update!.ExpressionAttributeValues).toBeDefined()
+      expect(transaction.Update!.ExpressionAttributeValues![":forceOwner"]).toBe("3")
+    })
+
+    it("should add all events to be logged for the automation report", async () => {
+      const eventsToBeLogged = [
+        createAuditLogEvent("information", new Date(), "Hearing Outcome passed to Error List"),
+        createAuditLogEvent("information", new Date(), "PNC Update added to Error List"),
+        createAuditLogEvent("information", new Date(), "Exception marked as resolved by user"),
+        createAuditLogEvent("information", new Date(), "PNC Update applied successfully")
+      ]
+      const eventsNotToBeLogged = [
+        createAuditLogEvent("information", new Date(), "Some other event"),
+        createAuditLogEvent("information", new Date(), "Some other other event")
+      ]
+      const allEvents = shuffle([...eventsToBeLogged, ...eventsNotToBeLogged])
+
+      const message = new AuditLog("one", new Date(), "dummy hash")
+
+      await gateway.create(message)
+
+      const result = await gateway.prepareEvents(message.messageId, message.version, allEvents)
+
+      expect(isError(result)).toBe(false)
+
+      const transaction = result as DocumentClient.TransactWriteItem
+
+      expect(transaction.Update).toBeDefined()
+      expect(transaction.Update!.UpdateExpression).toContain(
+        "automationReportEvents.events = list_append(if_not_exists(automationReportEvents.events, :empty_list), :automationReportEvents)"
+      )
+      expect(transaction.Update!.ExpressionAttributeValues).toBeDefined()
+      expect(transaction.Update!.ExpressionAttributeValues![":automationReportEvents"]).toHaveLength(4)
+      expect(transaction.Update!.ExpressionAttributeValues![":automationReportEvents"]).toContainEqual(
+        eventsToBeLogged[0]
+      )
+      expect(transaction.Update!.ExpressionAttributeValues![":automationReportEvents"]).toContainEqual(
+        eventsToBeLogged[1]
+      )
+      expect(transaction.Update!.ExpressionAttributeValues![":automationReportEvents"]).toContainEqual(
+        eventsToBeLogged[2]
+      )
+      expect(transaction.Update!.ExpressionAttributeValues![":automationReportEvents"]).toContainEqual(
+        eventsToBeLogged[3]
+      )
+    })
+
+    it("should add all events to be logged for the top exceptions report", async () => {
+      const eventsToBeLogged = [
+        createAuditLogEvent("information", new Date(), "SPIResults"),
+        createAuditLogEvent("information", new Date(), "SPIResults"),
+        createAuditLogEvent("information", new Date(), "SPIResults"),
+        createAuditLogEvent("information", new Date(), "SPIResults")
+      ]
+      eventsToBeLogged.forEach((event) => {
+        event.addAttribute("Message Type", "SPIResults")
+        event.addAttribute("Error Details", "An error occured")
+      })
+      const eventsNotToBeLogged = [
+        createAuditLogEvent("information", new Date(), "Some other event"),
+        createAuditLogEvent("information", new Date(), "Some other other event")
+      ]
+      const allEvents = shuffle([...eventsToBeLogged, ...eventsNotToBeLogged])
+
+      const message = new AuditLog("one", new Date(), "dummy hash")
+
+      await gateway.create(message)
+
+      const result = await gateway.prepareEvents(message.messageId, message.version, allEvents)
+
+      expect(isError(result)).toBe(false)
+
+      const transaction = result as DocumentClient.TransactWriteItem
+
+      expect(transaction.Update).toBeDefined()
+      expect(transaction.Update!.UpdateExpression).toContain(
+        "topExceptionsReport.events = list_append(if_not_exists(topExceptionsReport.events, :empty_list), :topExceptionEvents)"
+      )
+      expect(transaction.Update!.ExpressionAttributeValues).toBeDefined()
+      expect(transaction.Update!.ExpressionAttributeValues![":topExceptionEvents"]).toHaveLength(4)
+      expect(transaction.Update!.ExpressionAttributeValues![":topExceptionEvents"]).toContainEqual(eventsToBeLogged[0])
+      expect(transaction.Update!.ExpressionAttributeValues![":topExceptionEvents"]).toContainEqual(eventsToBeLogged[1])
+      expect(transaction.Update!.ExpressionAttributeValues![":topExceptionEvents"]).toContainEqual(eventsToBeLogged[2])
+      expect(transaction.Update!.ExpressionAttributeValues![":topExceptionEvents"]).toContainEqual(eventsToBeLogged[3])
     })
   })
 })

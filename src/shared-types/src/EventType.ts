@@ -9,7 +9,8 @@ enum EventType {
   PncUpdated = "PNC Update applied successfully",
   RecordIgnoredNoRecordableOffences = "Hearing Outcome ignored as no offences are recordable",
   RecordIgnoredNoOffences = "Hearing Outcome ignored as it contains no offences",
-  Retrying = "Retrying failed message"
+  Retrying = "Retrying failed message",
+  InputMessageReceived = "Input message received"
 }
 
 export default EventType
