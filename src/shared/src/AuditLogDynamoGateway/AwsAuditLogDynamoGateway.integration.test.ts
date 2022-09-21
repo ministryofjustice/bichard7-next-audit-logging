@@ -1,6 +1,6 @@
 jest.retryTimes(10)
 import type { DocumentClient } from "aws-sdk/clients/dynamodb"
-import { addDays } from "date-fns"
+import { addDays, subDays } from "date-fns"
 import { shuffle } from "lodash"
 import "shared-testing"
 import type { DynamoDbConfig, EventCategory } from "shared-types"
@@ -981,7 +981,7 @@ describe("AuditLogDynamoGateway", () => {
             "\n" +
             "      set events = list_append(if_not_exists(events, :empty_list), :events),\n" +
             "      #lastEventType = :lastEventType\n" +
-            "    ,#status = :status ADD version :version_increment",
+            "    , #status = :status ADD version :version_increment",
           ExpressionAttributeNames: { "#lastEventType": "lastEventType", "#status": "status" },
           ExpressionAttributeValues: {
             ":events": [expectedEvent],
@@ -1113,6 +1113,84 @@ describe("AuditLogDynamoGateway", () => {
       expect(transaction.Update!.ExpressionAttributeValues![":topExceptionEvents"]).toContainEqual(eventsToBeLogged[1])
       expect(transaction.Update!.ExpressionAttributeValues![":topExceptionEvents"]).toContainEqual(eventsToBeLogged[2])
       expect(transaction.Update!.ExpressionAttributeValues![":topExceptionEvents"]).toContainEqual(eventsToBeLogged[3])
+    })
+
+    it("should set the archival date to the earliest archival event timestamp", async () => {
+      const events = [
+        createAuditLogEvent("information", new Date(), EventType.ErrorRecordArchival),
+        createAuditLogEvent("information", new Date(), EventType.ErrorRecordArchival),
+        createAuditLogEvent("information", new Date(), EventType.ErrorRecordArchival)
+      ]
+      const earliestEvent = createAuditLogEvent("information", subDays(new Date(), 1), EventType.ErrorRecordArchival)
+      events.splice(2, 0, earliestEvent)
+
+      const message = new AuditLog("one", new Date(), "dummy hash")
+
+      await gateway.create(message)
+
+      const result = await gateway.prepareEvents(message.messageId, message.version, events)
+
+      expect(isError(result)).toBe(false)
+
+      const transaction = result as DocumentClient.TransactWriteItem
+
+      expect(transaction.Update).toBeDefined()
+      expect(transaction.Update!.UpdateExpression).toContain("#errorRecordArchivalDate = :errorRecordArchivalDate")
+      expect(transaction.Update!.ExpressionAttributeNames).toBeDefined()
+      expect(transaction.Update!.ExpressionAttributeNames!["#errorRecordArchivalDate"]).toBe("errorRecordArchivalDate")
+      expect(transaction.Update!.ExpressionAttributeValues).toBeDefined()
+      expect(transaction.Update!.ExpressionAttributeValues![":errorRecordArchivalDate"]).toBe(earliestEvent.timestamp)
+    })
+
+    it("should set the sanitised flag when one of the events is a sanitisation event", async () => {
+      const events = [
+        createAuditLogEvent("information", new Date(), EventType.ErrorRecordArchival),
+        createAuditLogEvent("information", new Date(), EventType.SanitisedMessage),
+        createAuditLogEvent("information", new Date(), "SPIResults")
+      ]
+
+      const message = new AuditLog("one", new Date(), "dummy hash")
+
+      await gateway.create(message)
+
+      const result = await gateway.prepareEvents(message.messageId, message.version, events)
+
+      expect(isError(result)).toBe(false)
+
+      const transaction = result as DocumentClient.TransactWriteItem
+
+      expect(transaction.Update).toBeDefined()
+      expect(transaction.Update!.UpdateExpression).toContain("#isSanitised = :isSanitised")
+      expect(transaction.Update!.ExpressionAttributeNames).toBeDefined()
+      expect(transaction.Update!.ExpressionAttributeNames!["#isSanitised"]).toBe("isSanitised")
+      expect(transaction.Update!.ExpressionAttributeValues).toBeDefined()
+      expect(transaction.Update!.ExpressionAttributeValues![":isSanitised"]).toBe(1)
+    })
+
+    it("should update the retry count when there are retry events", async () => {
+      const events = [
+        createAuditLogEvent("information", new Date(), EventType.ErrorRecordArchival),
+        createAuditLogEvent("information", new Date(), EventType.Retrying),
+        createAuditLogEvent("information", new Date(), "SPIResults")
+      ]
+
+      const message = new AuditLog("one", new Date(), "dummy hash")
+
+      await gateway.create(message)
+
+      const result = await gateway.prepareEvents(message.messageId, message.version, events)
+
+      expect(isError(result)).toBe(false)
+
+      const transaction = result as DocumentClient.TransactWriteItem
+
+      expect(transaction.Update).toBeDefined()
+      expect(transaction.Update!.UpdateExpression).toContain(
+        "retryCount = if_not_exists(retryCounter, :zero) + :retryCount"
+      )
+      expect(transaction.Update!.ExpressionAttributeValues).toBeDefined()
+      expect(transaction.Update!.ExpressionAttributeValues![":zero"]).toBe(0)
+      expect(transaction.Update!.ExpressionAttributeValues![":retryCount"]).toBe(1)
     })
   })
 })

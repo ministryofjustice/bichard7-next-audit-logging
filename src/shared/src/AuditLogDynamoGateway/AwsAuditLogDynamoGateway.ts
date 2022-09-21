@@ -16,6 +16,7 @@ import getForceOwnerForAutomationReport from "./getForceOwnerForAutomationReport
 import shouldLogForAutomationReport from "./shouldLogForAutomationReport"
 import shouldLogForTopExceptionsReport from "./shouldLogForTopExceptionsReport"
 import maxBy from "lodash.maxby"
+import minBy from "lodash.minby"
 
 export default class AwsAuditLogDynamoGateway extends DynamoGateway implements AuditLogDynamoGateway {
   private readonly tableKey: string = "messageId"
@@ -417,40 +418,49 @@ export default class AwsAuditLogDynamoGateway extends DynamoGateway implements A
     const forceOwnerEventForAutomationReport = maxBy(forceOwnerEvents, (event) => event.timestamp)
     if (forceOwnerEventForAutomationReport) {
       updateExpressionValues[":forceOwner"] = getForceOwnerForAutomationReport(forceOwnerEventForAutomationReport)
-      updateExpression = `${updateExpression}, automationReport.forceOwner = :forceOwner`
+      updateExpression += ", automationReport.forceOwner = :forceOwner"
     }
 
     if (status) {
       expressionAttributeNames["#status"] = "status"
       updateExpressionValues[":status"] = status
-      updateExpression += ",#status = :status"
+      updateExpression += ", #status = :status"
     }
 
     const topExceptionsReportEvents = events.filter((event) => shouldLogForTopExceptionsReport(event))
     if (topExceptionsReportEvents.length > 0) {
       updateExpressionValues[":topExceptionEvents"] = topExceptionsReportEvents
-      updateExpression = `${updateExpression}, topExceptionsReport.events = list_append(if_not_exists(topExceptionsReport.events, :empty_list), :topExceptionEvents)`
+      updateExpression +=
+        ", topExceptionsReport.events = list_append(if_not_exists(topExceptionsReport.events, :empty_list), :topExceptionEvents)"
     }
 
     const automationReportEvents = events.filter((event) => shouldLogForAutomationReport(event))
     if (automationReportEvents.length > 0) {
       updateExpressionValues[":automationReportEvents"] = automationReportEvents
-      updateExpression = `${updateExpression}, automationReportEvents.events = list_append(if_not_exists(automationReportEvents.events, :empty_list), :automationReportEvents)`
+      updateExpression +=
+        ", automationReportEvents.events = list_append(if_not_exists(automationReportEvents.events, :empty_list), :automationReportEvents)"
     }
 
-    // if (event.eventType === EventType.ErrorRecordArchival) {
-    //   expressionAttributeNames["#errorRecordArchivalDate"] = "errorRecordArchivalDate"
-    //   updateExpressionValues[":errorRecordArchivalDate"] = event.timestamp
-    //   updateExpression += ",#errorRecordArchivalDate = :errorRecordArchivalDate"
-    // } else if (event.eventType === EventType.SanitisedMessage) {
-    //   expressionAttributeNames["#isSanitised"] = "isSanitised"
-    //   updateExpressionValues[":isSanitised"] = 1
-    //   updateExpression += ",#isSanitised = :isSanitised"
-    // } else if (event.eventType === "Retrying failed message") {
-    //   updateExpression = `${updateExpression}, retryCount = if_not_exists(retryCounter, :zero) + :one`
-    //   updateExpressionValues[":zero"] = 0
-    //   updateExpressionValues[":one"] = 1
-    // }
+    const archivalEvents = events.filter((event) => event.eventType === EventType.ErrorRecordArchival)
+    if (archivalEvents.length > 0) {
+      expressionAttributeNames["#errorRecordArchivalDate"] = "errorRecordArchivalDate"
+      updateExpressionValues[":errorRecordArchivalDate"] = minBy(archivalEvents, (event) => event.timestamp)?.timestamp
+      updateExpression += ", #errorRecordArchivalDate = :errorRecordArchivalDate"
+    }
+
+    const sanitisationEvents = events.filter((event) => event.eventType === EventType.SanitisedMessage)
+    if (sanitisationEvents.length > 0) {
+      expressionAttributeNames["#isSanitised"] = "isSanitised"
+      updateExpressionValues[":isSanitised"] = 1
+      updateExpression += ", #isSanitised = :isSanitised"
+    }
+
+    const retryingEvents = events.filter((event) => event.eventType === EventType.Retrying)
+    if (retryingEvents.length > 0) {
+      updateExpressionValues[":zero"] = 0
+      updateExpressionValues[":retryCount"] = retryingEvents.length
+      updateExpression += ", retryCount = if_not_exists(retryCounter, :zero) + :retryCount"
+    }
 
     return {
       Update: {
