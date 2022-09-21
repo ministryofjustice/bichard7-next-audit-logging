@@ -38,7 +38,7 @@ export default class AwsAuditLogLookupDynamoGateway extends DynamoGateway implem
     return lookupItem
   }
 
-  async prepare(lookupItem: AuditLogLookup): PromiseResult<DocumentClient.TransactWriteItem> {
+  async prepare(lookupItem: AuditLogLookup): Promise<DocumentClient.TransactWriteItem> {
     if (process.env.IS_E2E) {
       lookupItem.expiryTime = Math.round(
         addDays(new Date(), parseInt(process.env.EXPIRY_DAYS || "7")).getTime() / 1000

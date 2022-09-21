@@ -92,7 +92,6 @@ export default class CreateAuditLogEventUseCase {
     const [lookupTransactionParams, updatedEvent] = lookupPrepareResult
     transactionActions.push(...lookupTransactionParams)
 
-    // TODO prepare function on gateway should act like "addEvents", not "create"
     const addEventsTransactionParams = await this.auditLogGateway.prepare(messageId, messageVersion, updatedEvent)
 
     if (isError(addEventsTransactionParams)) {
