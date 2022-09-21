@@ -915,4 +915,45 @@ describe("AuditLogDynamoGateway", () => {
       expect(isError(result)).toBe(true)
     })
   })
+
+  describe.only("prepare()", () => {
+    it("should only add an event to and update the status of the specified audit log", async () => {
+      const expectedEvent = createAuditLogEvent("information", new Date(), EventType.RecordIgnoredNoOffences)
+
+      expectedEvent.addAttribute("Attribute one", "Some value")
+      expectedEvent.addAttribute("Attribute two", 2)
+
+      const message = new AuditLog("one", new Date(), "dummy hash")
+
+      await gateway.create(message)
+
+      const result = await gateway.prepare(message.messageId, message.version, expectedEvent)
+
+      expect(isError(result)).toBe(false)
+
+      const expectedUpdate = {
+        Update: {
+          TableName: "auditLogTable",
+          Key: { messageId: message.messageId },
+          UpdateExpression:
+            "\n" +
+            "      set events = list_append(if_not_exists(events, :empty_list), :event),\n" +
+            "      #lastEventType = :lastEventType\n" +
+            "    ,#status = :status ADD version :version_increment",
+          ExpressionAttributeNames: { "#lastEventType": "lastEventType", "#status": "status" },
+          ExpressionAttributeValues: {
+            ":event": [expectedEvent],
+            ":empty_list": [],
+            ":lastEventType": "Hearing Outcome ignored as it contains no offences",
+            ":status": "Completed",
+            ":version": 0,
+            ":version_increment": 1
+          },
+          ConditionExpression: "attribute_exists(messageId) AND version = :version"
+        }
+      }
+
+      expect(result).toStrictEqual(expectedUpdate)
+    })
+  })
 })
