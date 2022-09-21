@@ -97,7 +97,7 @@ describe("CreateAuditLogUseCase", () => {
     expect(actualEvent?.eventSource).toBe(event.eventSource)
   })
 
-  it.only("should store long attribute values in lookup table", async () => {
+  it("should store long attribute values in lookup table", async () => {
     const auditLog = createAuditLog()
     await auditLogDynamoGateway.create(auditLog)
 

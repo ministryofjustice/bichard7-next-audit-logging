@@ -67,7 +67,7 @@ export default class StoreValuesInLookupTableUseCase {
       const attributeValue = event.attributes[attributeKey]
       if (attributeValue && typeof attributeValue === "string" && attributeValue.length > maxAttributeValueLength) {
         const lookupItem = new AuditLogLookup(attributeValue, messageId)
-        const lookupPutParams = await this.lookupGateway.prepare(new AuditLogLookup(attributeValue, messageId))
+        const lookupPutParams = await this.lookupGateway.prepare(lookupItem)
 
         if (isError(lookupPutParams)) {
           return lookupPutParams
