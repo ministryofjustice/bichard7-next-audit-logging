@@ -78,7 +78,7 @@ export default class CreateAuditLogEventsUseCase {
       }
     }
 
-    const eventsToAdd = []
+    const eventsToAdd: AuditLogEvent[] = []
     const deduplicatedEvents = originalEvents.filter(
       (event) => !(shouldDeduplicate(event) && isDuplicateEvent(event, message.events))
     )
@@ -95,11 +95,7 @@ export default class CreateAuditLogEventsUseCase {
       )
     ).flat()
     // TODO: check for duplicate messages in the batch were adding
-    const addEventsTransactionParams = await this.auditLogGateway.prepareEvents(
-      messageId,
-      messageVersion,
-      deduplicatedEvents
-    )
+    const addEventsTransactionParams = await this.auditLogGateway.prepareEvents(messageId, messageVersion, eventsToAdd)
 
     if (isError(addEventsTransactionParams) && isConditionalExpressionViolationError(addEventsTransactionParams)) {
       return {
@@ -110,7 +106,7 @@ export default class CreateAuditLogEventsUseCase {
     }
 
     // TODO check number of transaction items is below dynamodb limit
-    const transactionResult = this.auditLogGateway.executeTransaction(
+    const transactionResult = await this.auditLogGateway.executeTransaction(
       ...transactionActions,
       addEventsTransactionParams as DocumentClient.TransactWriteItem
     )
