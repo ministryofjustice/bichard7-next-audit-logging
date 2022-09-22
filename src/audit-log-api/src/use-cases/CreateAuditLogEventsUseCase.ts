@@ -1,3 +1,4 @@
+jest.setTimeout(60 * 60 * 1000)
 import type { AuditLogEvent, AuditLogDynamoGateway } from "shared-types"
 import { isError } from "shared-types"
 import { isConditionalExpressionViolationError } from "../utils"
@@ -78,10 +79,15 @@ export default class CreateAuditLogEventsUseCase {
       }
     }
 
+    const deduplicatedEvents = []
+    for (const event of originalEvents) {
+      if (shouldDeduplicate(event) && isDuplicateEvent(event, [...message.events, ...deduplicatedEvents])) {
+        continue
+      }
+      deduplicatedEvents.push(event)
+    }
+
     const eventsToAdd: AuditLogEvent[] = []
-    const deduplicatedEvents = originalEvents.filter(
-      (event) => !(shouldDeduplicate(event) && isDuplicateEvent(event, message.events))
-    )
     const transactionActions = (
       await Promise.all(
         deduplicatedEvents.map(async (originalEvent) => {
@@ -95,15 +101,8 @@ export default class CreateAuditLogEventsUseCase {
       )
     ).flat()
     // TODO: check for duplicate messages in the batch were adding
-    const addEventsTransactionParams = await this.auditLogGateway.prepareEvents(messageId, messageVersion, eventsToAdd)
 
-    if (isError(addEventsTransactionParams) && isConditionalExpressionViolationError(addEventsTransactionParams)) {
-      return {
-        resultType: "invalidVersion",
-        resultDescription: `Message with Id ${messageId} has a different version in the database.`
-      }
-      // TODO handle the case the error is not a conditional expression violation error
-    }
+    const addEventsTransactionParams = await this.auditLogGateway.prepareEvents(messageId, messageVersion, eventsToAdd)
 
     // TODO check number of transaction items is below dynamodb limit
     const transactionResult = await this.auditLogGateway.executeTransaction(
@@ -111,7 +110,13 @@ export default class CreateAuditLogEventsUseCase {
       addEventsTransactionParams as DocumentClient.TransactWriteItem
     )
 
-    if (isError(transactionResult)) {
+    if (isError(transactionResult) && isConditionalExpressionViolationError(transactionResult)) {
+      return {
+        resultType: "invalidVersion",
+        resultDescription: `Message with Id ${messageId} has a different version in the database.`
+      }
+      // TODO handle the case the error is not a conditional expression violation error
+    } else if (isError(transactionResult)) {
       return {
         resultType: "transactionFailed",
         resultDescription: transactionResult.message

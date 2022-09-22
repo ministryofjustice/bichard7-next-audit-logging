@@ -1,4 +1,3 @@
-jest.retryTimes(10)
 import type { AuditLogLookup, DynamoDbConfig } from "shared-types"
 import { AuditLog, AuditLogEvent } from "shared-types"
 import { AwsAuditLogDynamoGateway, decompress } from "shared"
@@ -156,6 +155,28 @@ describe("CreateAuditLogEventsUseCase", () => {
     const result2 = await createAuditLogEventsUseCase.create(auditLog.messageId, [event2])
 
     expect(result2.resultType).toBe("success")
+
+    const actualAuditLog = await getAuditLog(auditLog.messageId)
+    expect(actualAuditLog).toBeDefined()
+    expect(actualAuditLog?.events).toBeDefined()
+    expect(actualAuditLog?.events).toHaveLength(1)
+
+    const actualEvent = actualAuditLog?.events[0]
+    expect(actualEvent?.category).toBe(event1.category)
+    expect(actualEvent?.timestamp).toBe(event1.timestamp)
+    expect(actualEvent?.eventType).toBe(event1.eventType)
+    expect(actualEvent?.eventSource).toBe(event1.eventSource)
+  })
+
+  it("should deduplicate stacktrace logs in the same batch", async () => {
+    const auditLog = createAuditLog()
+    await auditLogDynamoGateway.create(auditLog)
+
+    const event1 = createStacktraceAuditLogEvent()
+    const event2 = createStacktraceAuditLogEvent()
+    const result = await createAuditLogEventsUseCase.create(auditLog.messageId, [event1, event2])
+
+    expect(result.resultType).toBe("success")
 
     const actualAuditLog = await getAuditLog(auditLog.messageId)
     expect(actualAuditLog).toBeDefined()
