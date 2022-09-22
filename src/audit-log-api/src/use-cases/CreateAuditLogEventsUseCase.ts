@@ -78,36 +78,52 @@ export default class CreateAuditLogEventsUseCase {
       }
     }
 
-    const transactionActions = await originalEvents.flatMap(async (originalEvent) => {
-      if (shouldDeduplicate(originalEvent)) {
-        if (isDuplicateEvent(originalEvent, message.events)) {
-          return []
-        }
+    const eventsToAdd = []
+    const deduplicatedEvents = originalEvents.filter(
+      (event) => !(shouldDeduplicate(event) && isDuplicateEvent(event, message.events))
+    )
+    const transactionActions = (
+      await Promise.all(
+        deduplicatedEvents.map(async (originalEvent) => {
+          const lookupPrepareResult = await this.storeValuesInLookupTableUseCase.prepare(originalEvent, messageId)
+
+          const [lookupTransactionParams, updatedEvent] = lookupPrepareResult
+          eventsToAdd.push(updatedEvent)
+
+          return lookupTransactionParams
+        })
+      )
+    ).flat()
+    // TODO: check for duplicate messages in the batch were adding
+    const addEventsTransactionParams = await this.auditLogGateway.prepareEvents(
+      messageId,
+      messageVersion,
+      deduplicatedEvents
+    )
+
+    if (isError(addEventsTransactionParams) && isConditionalExpressionViolationError(addEventsTransactionParams)) {
+      return {
+        resultType: "invalidVersion",
+        resultDescription: `Message with Id ${messageId} has a different version in the database.`
       }
-
-      const eventActions: DocumentClient.TransactWriteItem[] = []
-
-      const lookupPrepareResult = await this.storeValuesInLookupTableUseCase.prepare(originalEvent, messageId)
-
-      const [lookupTransactionParams, updatedEvent] = lookupPrepareResult
-      eventActions.push(...lookupTransactionParams)
-
-      const addEventsTransactionParams = await this.auditLogGateway.prepare(messageId, messageVersion, updatedEvent)
-
-      if (isError(addEventsTransactionParams)) {
-        if (isConditionalExpressionViolationError(addEventsTransactionParams)) {
-          return {
-            resultType: "invalidVersion",
-            resultDescription: `Message with Id ${messageId} has a different version in the database.`
-          }
-        }
-        // TODO handle the case the error is not a conditional expression violation error
-      } else {
-        eventActions.push(addEventsTransactionParams)
-      }
-      return eventActions
-    })
+      // TODO handle the case the error is not a conditional expression violation error
+    }
 
     // TODO check number of transaction items is below dynamodb limit
+    const transactionResult = this.auditLogGateway.executeTransaction(
+      ...transactionActions,
+      addEventsTransactionParams as DocumentClient.TransactWriteItem
+    )
+
+    if (isError(transactionResult)) {
+      return {
+        resultType: "transactionFailed",
+        resultDescription: transactionResult.message
+      }
+    }
+
+    return {
+      resultType: "success"
+    }
   }
 }

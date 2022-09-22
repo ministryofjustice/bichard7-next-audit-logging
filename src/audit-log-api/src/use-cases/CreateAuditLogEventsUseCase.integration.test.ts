@@ -3,7 +3,7 @@ import type { AuditLogLookup, DynamoDbConfig } from "shared-types"
 import { AuditLog, AuditLogEvent } from "shared-types"
 import { AwsAuditLogDynamoGateway, decompress } from "shared"
 import { TestDynamoGateway } from "shared"
-import CreateAuditLogEventUseCase from "./CreateAuditLogEventUseCase"
+import CreateAuditLogEventsUseCase from "./CreateAuditLogEventsUseCase"
 import { AwsAuditLogLookupDynamoGateway } from "shared"
 import StoreValuesInLookupTableUseCase from "./StoreValuesInLookupTableUseCase"
 import type { KeyValuePair } from "shared-types"
@@ -32,7 +32,7 @@ const auditLogLookupDynamoGateway = new AwsAuditLogLookupDynamoGateway(
   auditLogLookupConfig.TABLE_NAME
 )
 const storeValuesInLookupTableUseCase = new StoreValuesInLookupTableUseCase(auditLogLookupDynamoGateway)
-const createAuditLogEventUseCase = new CreateAuditLogEventUseCase(
+const createAuditLogEventsUseCase = new CreateAuditLogEventsUseCase(
   auditLogDynamoGateway,
   storeValuesInLookupTableUseCase
 )
@@ -69,7 +69,7 @@ const lookupValue = (lookupId: string): Promise<AuditLogLookup | null> =>
 const lookupMessageId = (messageId: string): Promise<AuditLogLookup[] | null> =>
   testAuditLogLookupDynamoGateway.getManyById(auditLogLookupConfig.TABLE_NAME, "messageIdIndex", "messageId", messageId)
 
-describe("CreateAuditLogUseCase", () => {
+describe("CreateAuditLogEventsUseCase", () => {
   beforeEach(async () => {
     await testAuditLogDynamoGateway.deleteAll(auditLogConfig.TABLE_NAME, "messageId")
     await testAuditLogLookupDynamoGateway.deleteAll(auditLogLookupConfig.TABLE_NAME, "id")
@@ -81,7 +81,7 @@ describe("CreateAuditLogUseCase", () => {
     await auditLogDynamoGateway.create(auditLog)
 
     const event = createAuditLogEvent()
-    const result = await createAuditLogEventUseCase.create(auditLog.messageId, event)
+    const result = await createAuditLogEventsUseCase.create(auditLog.messageId, [event])
 
     expect(result.resultType).toBe("success")
 
@@ -103,7 +103,7 @@ describe("CreateAuditLogUseCase", () => {
 
     const event = createAuditLogEvent()
     event.addAttribute("attribute1", "test".repeat(500))
-    const result = await createAuditLogEventUseCase.create(auditLog.messageId, event)
+    const result = await createAuditLogEventsUseCase.create(auditLog.messageId, [event])
 
     expect(result.resultType).toBe("success")
 
@@ -138,7 +138,7 @@ describe("CreateAuditLogUseCase", () => {
   it("should return not found result when audit log does not exist", async () => {
     const nonExistentMessageId = "11290b62-e8b8-47a8-ab24-6702a8fc6bba"
     const event = createAuditLogEvent()
-    const result = await createAuditLogEventUseCase.create(nonExistentMessageId, event)
+    const result = await createAuditLogEventsUseCase.create(nonExistentMessageId, [event])
 
     expect(result.resultType).toBe("notFound")
   })
@@ -148,12 +148,12 @@ describe("CreateAuditLogUseCase", () => {
     await auditLogDynamoGateway.create(auditLog)
 
     const event1 = createStacktraceAuditLogEvent()
-    const result1 = await createAuditLogEventUseCase.create(auditLog.messageId, event1)
+    const result1 = await createAuditLogEventsUseCase.create(auditLog.messageId, [event1])
 
     expect(result1.resultType).toBe("success")
 
     const event2 = createStacktraceAuditLogEvent()
-    const result2 = await createAuditLogEventUseCase.create(auditLog.messageId, event2)
+    const result2 = await createAuditLogEventsUseCase.create(auditLog.messageId, [event2])
 
     expect(result2.resultType).toBe("success")
 
@@ -174,17 +174,17 @@ describe("CreateAuditLogUseCase", () => {
     await auditLogDynamoGateway.create(auditLog)
 
     const event1 = createStacktraceAuditLogEvent()
-    const result1 = await createAuditLogEventUseCase.create(auditLog.messageId, event1)
+    const result1 = await createAuditLogEventsUseCase.create(auditLog.messageId, [event1])
 
     expect(result1.resultType).toBe("success")
 
     const event2 = createAuditLogEvent()
-    const result2 = await createAuditLogEventUseCase.create(auditLog.messageId, event2)
+    const result2 = await createAuditLogEventsUseCase.create(auditLog.messageId, [event2])
 
     expect(result2.resultType).toBe("success")
 
     const event3 = createStacktraceAuditLogEvent()
-    const result3 = await createAuditLogEventUseCase.create(auditLog.messageId, event3)
+    const result3 = await createAuditLogEventsUseCase.create(auditLog.messageId, [event3])
 
     expect(result3.resultType).toBe("success")
 
@@ -199,12 +199,12 @@ describe("CreateAuditLogUseCase", () => {
     await auditLogDynamoGateway.create(auditLog)
 
     const event1 = createAuditLogEvent()
-    const result1 = await createAuditLogEventUseCase.create(auditLog.messageId, event1)
+    const result1 = await createAuditLogEventsUseCase.create(auditLog.messageId, [event1])
 
     expect(result1.resultType).toBe("success")
 
     const event2 = createAuditLogEvent()
-    const result2 = await createAuditLogEventUseCase.create(auditLog.messageId, event2)
+    const result2 = await createAuditLogEventsUseCase.create(auditLog.messageId, [event2])
 
     expect(result2.resultType).toBe("success")
 
@@ -225,7 +225,7 @@ describe("CreateAuditLogUseCase", () => {
       .spyOn(auditLogDynamoGateway, "executeTransaction")
       .mockResolvedValueOnce(new Error("Failed to create audit log table entry"))
 
-    const result = await createAuditLogEventUseCase.create(auditLog.messageId, event)
+    const result = await createAuditLogEventsUseCase.create(auditLog.messageId, [event])
 
     expect(result.resultType).toBe("transactionFailed")
 

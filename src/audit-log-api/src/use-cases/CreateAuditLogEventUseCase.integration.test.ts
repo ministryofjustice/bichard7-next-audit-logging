@@ -69,7 +69,7 @@ const lookupValue = (lookupId: string): Promise<AuditLogLookup | null> =>
 const lookupMessageId = (messageId: string): Promise<AuditLogLookup[] | null> =>
   testAuditLogLookupDynamoGateway.getManyById(auditLogLookupConfig.TABLE_NAME, "messageIdIndex", "messageId", messageId)
 
-describe("CreateAuditLogUseCase", () => {
+describe("CreateAuditLogEventUseCase", () => {
   beforeEach(async () => {
     await testAuditLogDynamoGateway.deleteAll(auditLogConfig.TABLE_NAME, "messageId")
     await testAuditLogLookupDynamoGateway.deleteAll(auditLogLookupConfig.TABLE_NAME, "id")

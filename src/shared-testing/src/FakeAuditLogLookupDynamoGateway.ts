@@ -21,11 +21,7 @@ export default class FakeAuditLogLookupDynamoGateway implements AuditLogLookupDy
     return Promise.resolve(lookupItem)
   }
 
-  prepare(lookupItem: AuditLogLookup): PromiseResult<DocumentClient.TransactWriteItem> {
-    if (this.error) {
-      return Promise.resolve(this.error)
-    }
-
+  prepare(lookupItem: AuditLogLookup): Promise<DocumentClient.TransactWriteItem> {
     return Promise.resolve({
       Put: {
         Item: lookupItem,

@@ -25,6 +25,14 @@ export default class FakeAuditLogDynamoGateway implements AuditLogDynamoGateway 
     throw new Error("Method not implemented")
   }
 
+  prepareEvents(
+    _messageId: string,
+    _messageVersion: number,
+    _events: AuditLogEvent[]
+  ): PromiseResult<DocumentClient.TransactWriteItem> {
+    throw new Error("Method not implemented")
+  }
+
   update(message: AuditLog): PromiseResult<AuditLog> {
     if (this.error) {
       return Promise.resolve(this.error)
@@ -121,7 +129,7 @@ export default class FakeAuditLogDynamoGateway implements AuditLogDynamoGateway 
     throw new Error("Method not implemented.")
   }
 
-  executeTransaction(_: DocumentClient.TransactWriteItem[]): PromiseResult<void> {
+  executeTransaction(..._: DocumentClient.TransactWriteItem[]): PromiseResult<void> {
     throw new Error("Method not implemented")
   }
 

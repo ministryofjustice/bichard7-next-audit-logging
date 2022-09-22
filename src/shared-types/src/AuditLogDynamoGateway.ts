@@ -20,5 +20,10 @@ export default interface AuditLogDynamoGateway {
     messageVersion: number,
     event: AuditLogEvent
   ): PromiseResult<DocumentClient.TransactWriteItem>
+  prepareEvents(
+    messageId: string,
+    messageVersion: number,
+    events: AuditLogEvent[]
+  ): PromiseResult<DocumentClient.TransactWriteItem>
   executeTransaction(actions: DocumentClient.TransactWriteItem[]): PromiseResult<void>
 }
