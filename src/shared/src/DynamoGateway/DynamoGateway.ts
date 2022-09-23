@@ -243,7 +243,7 @@ export default class DynamoGateway {
     }
   }
 
-  async executeTransaction(...actions: DocumentClient.TransactWriteItem[]): PromiseResult<void> {
+  async executeTransaction(actions: DocumentClient.TransactWriteItem[]): PromiseResult<void> {
     let failureReasons: any[]
     await this.client
       .transactWrite({ TransactItems: actions })

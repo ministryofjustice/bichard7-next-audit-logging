@@ -129,7 +129,7 @@ export default class FakeAuditLogDynamoGateway implements AuditLogDynamoGateway 
     throw new Error("Method not implemented.")
   }
 
-  executeTransaction(..._: DocumentClient.TransactWriteItem[]): PromiseResult<void> {
+  executeTransaction(_: DocumentClient.TransactWriteItem[]): PromiseResult<void> {
     throw new Error("Method not implemented")
   }
 

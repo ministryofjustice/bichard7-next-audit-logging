@@ -104,11 +104,18 @@ export default class CreateAuditLogEventsUseCase {
 
     const addEventsTransactionParams = await this.auditLogGateway.prepareEvents(messageId, messageVersion, eventsToAdd)
 
+    if (isError(addEventsTransactionParams)) {
+      return {
+        resultType: "error",
+        resultDescription: addEventsTransactionParams.message
+      }
+    }
+
     // TODO check number of transaction items is below dynamodb limit
-    const transactionResult = await this.auditLogGateway.executeTransaction(
+    const transactionResult = await this.auditLogGateway.executeTransaction([
       ...transactionActions,
       addEventsTransactionParams as DocumentClient.TransactWriteItem
-    )
+    ])
 
     if (isError(transactionResult) && isConditionalExpressionViolationError(transactionResult)) {
       return {
