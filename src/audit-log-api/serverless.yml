@@ -227,6 +227,12 @@ functions:
       - httpApi:
           path: /messages/{messageId}/events
           method: post
+  createAuditLogEvents:
+    handler: src/handlers/createAuditLogEvents.default
+    events:
+      - httpApi:
+          path: /messages/{messageId}/manyEvents
+          method: post
   retryMessage:
     handler: src/handlers/retryMessage.default
     events:
