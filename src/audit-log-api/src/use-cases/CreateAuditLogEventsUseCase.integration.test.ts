@@ -142,7 +142,7 @@ describe("CreateAuditLogEventsUseCase", () => {
     expect(result.resultType).toBe("notFound")
   })
 
-  it("should deduplicate stacktrace logs", async () => {
+  it("should deduplicate stacktrace logs added separately", async () => {
     const auditLog = createAuditLog()
     await auditLogDynamoGateway.create(auditLog)
 
@@ -195,19 +195,11 @@ describe("CreateAuditLogEventsUseCase", () => {
     await auditLogDynamoGateway.create(auditLog)
 
     const event1 = createStacktraceAuditLogEvent()
-    const result1 = await createAuditLogEventsUseCase.create(auditLog.messageId, [event1])
-
-    expect(result1.resultType).toBe("success")
-
     const event2 = createAuditLogEvent()
-    const result2 = await createAuditLogEventsUseCase.create(auditLog.messageId, [event2])
-
-    expect(result2.resultType).toBe("success")
-
     const event3 = createStacktraceAuditLogEvent()
-    const result3 = await createAuditLogEventsUseCase.create(auditLog.messageId, [event3])
+    const result = await createAuditLogEventsUseCase.create(auditLog.messageId, [event1, event2, event3])
 
-    expect(result3.resultType).toBe("success")
+    expect(result.resultType).toBe("success")
 
     const actualAuditLog = await getAuditLog(auditLog.messageId)
     expect(actualAuditLog).toBeDefined()
@@ -220,12 +212,8 @@ describe("CreateAuditLogEventsUseCase", () => {
     await auditLogDynamoGateway.create(auditLog)
 
     const event1 = createAuditLogEvent()
-    const result1 = await createAuditLogEventsUseCase.create(auditLog.messageId, [event1])
-
-    expect(result1.resultType).toBe("success")
-
     const event2 = createAuditLogEvent()
-    const result2 = await createAuditLogEventsUseCase.create(auditLog.messageId, [event2])
+    const result2 = await createAuditLogEventsUseCase.create(auditLog.messageId, [event1, event2])
 
     expect(result2.resultType).toBe("success")
 
