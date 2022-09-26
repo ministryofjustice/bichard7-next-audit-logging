@@ -1,28 +1,13 @@
 jest.setTimeout(15000)
 
-import type { DynamoDbConfig, MqConfig, S3Config } from "shared-types"
+import type { MqConfig, S3Config } from "shared-types"
 import { AuditLogLookup } from "shared-types"
 import { AuditLog, BichardAuditLogEvent } from "shared-types"
 import { HttpStatusCode, TestDynamoGateway, TestAwsS3Gateway, TestStompitMqGateway } from "shared"
 import axios from "axios"
 import { v4 as uuid } from "uuid"
 import { encodeBase64 } from "shared"
-
-const auditLogDynamoConfig: DynamoDbConfig = {
-  DYNAMO_URL: "http://localhost:8000",
-  DYNAMO_REGION: "eu-west-2",
-  TABLE_NAME: "auditLogTable",
-  AWS_ACCESS_KEY_ID: "DUMMY",
-  AWS_SECRET_ACCESS_KEY: "DUMMY"
-}
-
-const auditLogLookupDynamoConfig: DynamoDbConfig = {
-  DYNAMO_URL: "http://localhost:8000",
-  DYNAMO_REGION: "eu-west-2",
-  TABLE_NAME: "auditLogLookupTable",
-  AWS_ACCESS_KEY_ID: "DUMMY",
-  AWS_SECRET_ACCESS_KEY: "DUMMY"
-}
+import { auditLogDynamoConfig, auditLogLookupDynamoConfig } from "shared-testing"
 
 const s3Config: S3Config = {
   url: "http://localhost:4569",

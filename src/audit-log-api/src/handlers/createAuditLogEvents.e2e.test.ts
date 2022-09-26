@@ -1,22 +1,14 @@
 jest.retryTimes(10)
 import axios from "axios"
-import type { AuditLog, DynamoDbConfig, BichardAuditLogEvent } from "shared-types"
+import type { AuditLog, BichardAuditLogEvent } from "shared-types"
 import { HttpStatusCode, TestDynamoGateway } from "shared"
-import { mockAuditLog, mockAuditLogEvent } from "shared-testing"
-
-const dynamoConfig: DynamoDbConfig = {
-  DYNAMO_URL: "http://localhost:8000",
-  DYNAMO_REGION: "eu-west-2",
-  TABLE_NAME: "auditLogTable",
-  AWS_ACCESS_KEY_ID: "DUMMY",
-  AWS_SECRET_ACCESS_KEY: "DUMMY"
-}
+import { auditLogDynamoConfig, mockAuditLog, mockAuditLogEvent } from "shared-testing"
 
 describe("Creating Audit Log events", () => {
-  const gateway = new TestDynamoGateway(dynamoConfig)
+  const gateway = new TestDynamoGateway(auditLogDynamoConfig)
 
   beforeEach(async () => {
-    await gateway.deleteAll(dynamoConfig.TABLE_NAME, "messageId")
+    await gateway.deleteAll(auditLogDynamoConfig.TABLE_NAME, "messageId")
   })
 
   it("should create a single new audit log event for an existing audit log record", async () => {
@@ -28,7 +20,7 @@ describe("Creating Audit Log events", () => {
     const result2 = await axios.post(`http://localhost:3010/messages/${auditLog.messageId}/manyEvents`, [event])
     expect(result2.status).toEqual(HttpStatusCode.created)
 
-    const record = await gateway.getOne<AuditLog>(dynamoConfig.TABLE_NAME, "messageId", auditLog.messageId)
+    const record = await gateway.getOne<AuditLog>(auditLogDynamoConfig.TABLE_NAME, "messageId", auditLog.messageId)
 
     expect(record).not.toBeNull()
 
@@ -54,7 +46,7 @@ describe("Creating Audit Log events", () => {
     const result2 = await axios.post(`http://localhost:3010/messages/${auditLog.messageId}/manyEvents`, events)
     expect(result2.status).toEqual(HttpStatusCode.created)
 
-    const record = await gateway.getOne<AuditLog>(dynamoConfig.TABLE_NAME, "messageId", auditLog.messageId)
+    const record = await gateway.getOne<AuditLog>(auditLogDynamoConfig.TABLE_NAME, "messageId", auditLog.messageId)
 
     expect(record).not.toBeNull()
 

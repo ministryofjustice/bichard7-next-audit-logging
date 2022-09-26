@@ -8,20 +8,11 @@ import {
   TestDynamoGateway,
   TestPostgresGateway
 } from "shared"
-import { setEnvironmentVariables } from "shared-testing"
-import type { DynamoDbConfig } from "shared-types"
+import { auditLogDynamoConfig, setEnvironmentVariables } from "shared-testing"
 import { AuditLog, AuditLogEvent, AuditLogLookup, BichardAuditLogEvent } from "shared-types"
 import createBichardPostgresGatewayConfig from "../createBichardPostgresGatewayConfig"
 
 setEnvironmentVariables()
-
-const dynamoConfig: DynamoDbConfig = {
-  DYNAMO_URL: "http://localhost:8000",
-  DYNAMO_REGION: "eu-west-2",
-  TABLE_NAME: "",
-  AWS_ACCESS_KEY_ID: "DUMMY",
-  AWS_SECRET_ACCESS_KEY: "DUMMY"
-}
 
 const auditLogTableName = "auditLogTable"
 const auditLogLookupTableName = "auditLogLookupTable"
@@ -32,7 +23,7 @@ const postgresGateway = new AwsBichardPostgresGateway(postgresConfig)
 const messagesS3Gateway = new TestAwsS3Gateway(createS3Config("INTERNAL_INCOMING_MESSAGES_BUCKET"))
 const eventsS3Gateway = new TestAwsS3Gateway(createS3Config("AUDIT_LOG_EVENTS_BUCKET"))
 
-const testDynamoGateway = new TestDynamoGateway(dynamoConfig)
+const testDynamoGateway = new TestDynamoGateway(auditLogDynamoConfig)
 const testPostgresGateway = new TestPostgresGateway(postgresConfig)
 
 const createBichardAuditLogEvent = (eventS3Path: string): BichardAuditLogEvent => {

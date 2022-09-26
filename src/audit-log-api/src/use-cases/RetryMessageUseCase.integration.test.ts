@@ -1,6 +1,6 @@
 jest.retryTimes(10)
 import "shared-testing"
-import type { DynamoDbConfig, MqConfig, S3Config } from "shared-types"
+import type { MqConfig, S3Config } from "shared-types"
 import { AuditLog, BichardAuditLogEvent } from "shared-types"
 import {
   AwsAuditLogDynamoGateway,
@@ -18,19 +18,13 @@ import { AuditLogLookup } from "shared-types"
 import RetrieveEventXmlFromS3UseCase from "./RetrieveEventXmlFromS3UseCase"
 import LookupEventValuesUseCase from "./LookupEventValuesUseCase"
 import { encodeBase64 } from "shared"
+import { auditLogDynamoConfig } from "shared-testing"
 
-const dynamoDbConfig: DynamoDbConfig = {
-  DYNAMO_URL: "http://localhost:8000",
-  DYNAMO_REGION: "eu-west-2",
-  TABLE_NAME: "to be set in the test",
-  AWS_ACCESS_KEY_ID: "DUMMY",
-  AWS_SECRET_ACCESS_KEY: "DUMMY"
-}
 const auditLogTableName = "auditLogTable"
 const auditLogLookupTableName = "auditLogLookupTable"
-const testDynamoGateway = new TestDynamoGateway(dynamoDbConfig)
-const auditLogDynamoGateway = new AwsAuditLogDynamoGateway(dynamoDbConfig, auditLogTableName)
-const auditLogLookupDynamoGateway = new AwsAuditLogLookupDynamoGateway(dynamoDbConfig, auditLogLookupTableName)
+const testDynamoGateway = new TestDynamoGateway(auditLogDynamoConfig)
+const auditLogDynamoGateway = new AwsAuditLogDynamoGateway(auditLogDynamoConfig, auditLogTableName)
+const auditLogLookupDynamoGateway = new AwsAuditLogLookupDynamoGateway(auditLogDynamoConfig, auditLogLookupTableName)
 const lookupEventValuesUseCase = new LookupEventValuesUseCase(auditLogLookupDynamoGateway)
 const getLastEventUseCase = new GetLastFailedMessageEventUseCase(auditLogDynamoGateway, lookupEventValuesUseCase)
 

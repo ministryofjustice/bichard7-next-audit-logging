@@ -2,9 +2,9 @@ jest.setTimeout(50000)
 
 import "shared-testing"
 import fs from "fs"
-import { setEnvironmentVariables } from "shared-testing"
+import { auditLogDynamoConfig, setEnvironmentVariables } from "shared-testing"
 setEnvironmentVariables()
-import type { AmazonMqEventSourceRecordEvent, AuditLogEvent, DynamoDbConfig } from "shared-types"
+import type { AmazonMqEventSourceRecordEvent, AuditLogEvent } from "shared-types"
 import { AuditLog } from "shared-types"
 import { AwsAuditLogDynamoGateway, encodeBase64, Poller, PollOptions, TestDynamoGateway, TestS3Gateway } from "shared"
 import type { S3 } from "aws-sdk"
@@ -23,18 +23,10 @@ const s3Gateway = new TestS3Gateway({
   accessKeyId: "S3RVER",
   secretAccessKey: "S3RVER"
 })
-
-const dynamoConfig: DynamoDbConfig = {
-  DYNAMO_URL: "http://localhost:8000",
-  DYNAMO_REGION: "eu-west-2",
-  TABLE_NAME: "auditLogTable",
-  AWS_ACCESS_KEY_ID: "S3RVER",
-  AWS_SECRET_ACCESS_KEY: "S3RVER"
-}
 const auditLogTableName = "auditLogTable"
 const auditLogLookupTableName = "auditLogLookupTable"
-const auditLogDynamoGateway = new AwsAuditLogDynamoGateway(dynamoConfig, dynamoConfig.TABLE_NAME)
-const testDynamoGateway = new TestDynamoGateway(dynamoConfig)
+const auditLogDynamoGateway = new AwsAuditLogDynamoGateway(auditLogDynamoConfig, auditLogDynamoConfig.TABLE_NAME)
+const testDynamoGateway = new TestDynamoGateway(auditLogDynamoConfig)
 const eventHandlerSimulator = new EventHandlerSimulator()
 
 const getEvents = async (messageId1: string, messageId2: string): Promise<DynamoPollResult> => {

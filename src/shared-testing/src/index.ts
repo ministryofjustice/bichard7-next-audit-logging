@@ -8,5 +8,6 @@ export { default as FakeS3Gateway } from "./FakeS3Gateway"
 export { default as StepFunctionSimulator } from "./StepFunctionSimulator"
 export * from "./createMockAuditLogs"
 export * from "./mockAuditLogs"
+export * from "./dynamoDbConfig"
 
 import "./jest"
