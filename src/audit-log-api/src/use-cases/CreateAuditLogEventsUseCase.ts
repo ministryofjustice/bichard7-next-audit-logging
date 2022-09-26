@@ -1,4 +1,3 @@
-jest.setTimeout(60 * 60 * 1000)
 import type { AuditLogEvent, AuditLogDynamoGateway } from "shared-types"
 import { isError } from "shared-types"
 import { isConditionalExpressionViolationError } from "../utils"
