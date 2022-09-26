@@ -28,15 +28,18 @@ export default async function createAuditLogEvents(event: APIGatewayProxyEvent):
     })
   }
 
-  const { isValid, errors, auditLogEvents } = validateCreateAuditLogEvents(request.auditLogEvents)
+  const { isValid, eventValidationResults } = validateCreateAuditLogEvents(request.auditLogEvents)
 
   if (!isValid) {
     return createJsonApiResult({
       statusCode: HttpStatusCode.badRequest,
-      body: errors.join(", ")
+      body: eventValidationResults.map((result) => {
+        return { eventTimestamp: result.timestamp, errors: result.errors, isValid: result.errors.length === 0 }
+      })
     })
   }
 
+  const auditLogEvents = eventValidationResults.map((result) => result.auditLogEvent)
   const result = await createAuditLogEventUseCase.create(request.messageId, auditLogEvents)
 
   if (result.resultType === "notFound") {

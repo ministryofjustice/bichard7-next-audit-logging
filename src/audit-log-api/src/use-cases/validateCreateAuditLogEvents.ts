@@ -1,23 +1,29 @@
 import type { AuditLogEvent } from "shared-types"
 import { validateAuditLogEvent } from "../utils"
 
-interface ValidationResult {
-  isValid: boolean
+export interface EventValidationResult {
+  timestamp: string
   errors: string[]
-  auditLogEvents: AuditLogEvent[]
+  auditLogEvent: AuditLogEvent
+}
+
+export interface ValidationResult {
+  isValid: boolean
+  eventValidationResults: EventValidationResult[]
 }
 
 export default (unvalidatedAuditLogEvents: AuditLogEvent[]): ValidationResult => {
-  const validationErrors: string[] = []
-  const validatedAuditLogEvents = unvalidatedAuditLogEvents.map((unvalidatedAuditLogEvent) => {
+  const validationResults: EventValidationResult[] = unvalidatedAuditLogEvents.map((unvalidatedAuditLogEvent) => {
     const { errors, auditLogEvent } = validateAuditLogEvent(unvalidatedAuditLogEvent)
-    validationErrors.push(...errors)
-    return auditLogEvent
+    return {
+      timestamp: auditLogEvent.timestamp || "No event timestamp given",
+      errors,
+      auditLogEvent
+    }
   })
 
   return {
-    isValid: validationErrors.length === 0,
-    errors: validationErrors,
-    auditLogEvents: validatedAuditLogEvents
+    isValid: !validationResults.some((result) => result.errors.length > 0),
+    eventValidationResults: validationResults
   }
 }

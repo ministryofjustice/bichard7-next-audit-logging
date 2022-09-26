@@ -10,18 +10,20 @@ it("should be valid when a single audit log event is valid", () => {
     timestamp: new Date("2021-10-05T15:12:13.000Z")
   })
 
-  const { isValid, errors, auditLogEvents } = validateCreateAuditLogEvents([event])
+  const { isValid, eventValidationResults } = validateCreateAuditLogEvents([event])
 
   expect(isValid).toBe(true)
-  expect(errors).toHaveLength(0)
-  expect(auditLogEvents).toBeDefined()
-  expect(auditLogEvents).toHaveLength(1)
+  expect(eventValidationResults.map((r) => r.errors).flat()).toHaveLength(0)
+  expect(eventValidationResults).toBeDefined()
+  expect(eventValidationResults).toHaveLength(1)
 
-  expect(auditLogEvents[0].category).toBe(event.category)
-  expect(auditLogEvents[0].eventSource).toBe(event.eventSource)
-  expect(auditLogEvents[0].eventType).toBe(event.eventType)
-  expect(auditLogEvents[0].timestamp).toBe(event.timestamp)
-  expect(auditLogEvents[0].attributes).toEqual({})
+  const auditLogEvent = eventValidationResults[0].auditLogEvent
+  expect(auditLogEvent).toBeDefined()
+  expect(auditLogEvent.category).toBe(event.category)
+  expect(auditLogEvent.eventSource).toBe(event.eventSource)
+  expect(auditLogEvent.eventType).toBe(event.eventType)
+  expect(auditLogEvent.timestamp).toBe(event.timestamp)
+  expect(auditLogEvent.attributes).toEqual({})
 })
 
 it("should be valid and set attributes when a single audit log is undefined", () => {
@@ -34,13 +36,13 @@ it("should be valid and set attributes when a single audit log is undefined", ()
 
   event = { ...event, attributes: undefined } as unknown as AuditLogEvent
 
-  const { isValid, errors, auditLogEvents } = validateCreateAuditLogEvents([event])
+  const { isValid, eventValidationResults } = validateCreateAuditLogEvents([event])
 
   expect(isValid).toBe(true)
-  expect(errors).toHaveLength(0)
-  expect(auditLogEvents).toBeDefined()
-  expect(auditLogEvents).toHaveLength(1)
-  expect(auditLogEvents[0].attributes).toEqual({})
+  expect(eventValidationResults.map((r) => r.errors).flat()).toHaveLength(0)
+  expect(eventValidationResults).toBeDefined()
+  expect(eventValidationResults).toHaveLength(1)
+  expect(eventValidationResults[0].auditLogEvent.attributes).toEqual({})
 })
 
 it("should remove arbitrary keys from a single audit log event", () => {
@@ -52,20 +54,22 @@ it("should remove arbitrary keys from a single audit log event", () => {
   })
   event = { ...event, customKey1: "Value", myKey: { anotherKey: 5 } } as unknown as AuditLogEvent
 
-  const { isValid, errors, auditLogEvents } = validateCreateAuditLogEvents([event])
+  const { isValid, eventValidationResults } = validateCreateAuditLogEvents([event])
 
   expect(isValid).toBe(true)
-  expect(errors).toHaveLength(0)
-  expect(auditLogEvents).toBeDefined()
-  expect(auditLogEvents).toHaveLength(1)
+  expect(eventValidationResults.map((r) => r.errors).flat()).toHaveLength(0)
+  expect(eventValidationResults).toBeDefined()
+  expect(eventValidationResults).toHaveLength(1)
 
-  expect(auditLogEvents[0].category).toBe(event.category)
-  expect(auditLogEvents[0].eventSource).toBe(event.eventSource)
-  expect(auditLogEvents[0].eventType).toBe(event.eventType)
-  expect(auditLogEvents[0].timestamp).toBe(event.timestamp)
-  expect(auditLogEvents[0].attributes).toEqual({})
+  const auditLogEvent = eventValidationResults[0].auditLogEvent
+  expect(auditLogEvent).toBeDefined()
+  expect(auditLogEvent.category).toBe(event.category)
+  expect(auditLogEvent.eventSource).toBe(event.eventSource)
+  expect(auditLogEvent.eventType).toBe(event.eventType)
+  expect(auditLogEvent.timestamp).toBe(event.timestamp)
+  expect(auditLogEvent.attributes).toEqual({})
 
-  const keys = Object.keys(auditLogEvents[0])
+  const keys = Object.keys(auditLogEvent)
   expect(keys).not.toContain("customKey1")
   expect(keys).not.toContain("myKey")
 })
@@ -73,14 +77,21 @@ it("should remove arbitrary keys from a single audit log event", () => {
 it("should be invalid when a single audit log event is missing all fields", () => {
   const event = {} as AuditLogEvent
 
-  const { isValid, errors } = validateCreateAuditLogEvents([event])
+  const { isValid, eventValidationResults } = validateCreateAuditLogEvents([event])
 
   expect(isValid).toBe(false)
-  expect(errors).toHaveLength(4)
-  expect(errors).toContain("Category is mandatory")
-  expect(errors).toContain("Event source is mandatory")
-  expect(errors).toContain("Event type is mandatory")
-  expect(errors).toContain("Timestamp is mandatory")
+  expect(eventValidationResults).toStrictEqual([
+    {
+      timestamp: "No event timestamp given",
+      errors: [
+        "Category is mandatory",
+        "Event source is mandatory",
+        "Event type is mandatory",
+        "Timestamp is mandatory"
+      ],
+      auditLogEvent: { attributes: {} }
+    }
+  ])
 })
 
 it("should be invalid when a single audit log event fields have incorrect format", () => {
@@ -95,9 +106,13 @@ it("should be invalid when a single audit log event fields have incorrect format
     timestamp: "2021-10-05 12:13:14"
   } as unknown as BichardAuditLogEvent
 
-  const { isValid, errors } = validateCreateAuditLogEvents([event])
+  const { isValid, eventValidationResults } = validateCreateAuditLogEvents([event])
 
   expect(isValid).toBe(false)
+  expect(eventValidationResults).toBeDefined()
+  expect(eventValidationResults).toHaveLength(1)
+
+  const errors = eventValidationResults[0].errors
   expect(errors).toHaveLength(8)
   expect(errors).toContain("Attributes must be key/value object")
   expect(errors).toContain("Category can be either information, error, or warning")
@@ -117,9 +132,36 @@ it("should be invalid when a single audit log event category is invalid", () => 
     timestamp: new Date("2021-10-05T15:12:13.000Z")
   })
 
-  const { isValid, errors } = validateCreateAuditLogEvents([event])
+  const { isValid, eventValidationResults } = validateCreateAuditLogEvents([event])
 
   expect(isValid).toBe(false)
-  expect(errors).toHaveLength(1)
-  expect(errors[0]).toBe("Category can be either information, error, or warning")
+  expect(eventValidationResults).toBeDefined()
+  expect(eventValidationResults).toHaveLength(1)
+  expect(eventValidationResults[0].errors).toStrictEqual(["Category can be either information, error, or warning"])
+})
+
+it("should attribute validation errors to the correct event", () => {
+  const validEvent = new AuditLogEvent({
+    category: "information",
+    eventSource: "Event source",
+    eventType: "Event type",
+    timestamp: new Date("2021-10-05T15:12:13.000Z")
+  })
+  const invalidEvent = {} as AuditLogEvent
+
+  const { isValid, eventValidationResults } = validateCreateAuditLogEvents([validEvent, invalidEvent])
+
+  expect(isValid).toBe(false)
+  expect(eventValidationResults).toBeDefined()
+  expect(eventValidationResults).toHaveLength(2)
+  expect(eventValidationResults[0]).toEqual({
+    timestamp: validEvent.timestamp,
+    errors: [],
+    auditLogEvent: validEvent
+  })
+  expect(eventValidationResults[1]).toEqual({
+    timestamp: "No event timestamp given",
+    errors: ["Category is mandatory", "Event source is mandatory", "Event type is mandatory", "Timestamp is mandatory"],
+    auditLogEvent: { attributes: {} }
+  })
 })
