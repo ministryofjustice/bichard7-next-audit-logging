@@ -7,6 +7,8 @@ import DoesS3ObjectExist from "./DoesS3ObjectExist"
 const gateway = new TestAwsS3Gateway(auditLogEventsS3Config)
 const useCase = new DoesS3ObjectExist(gateway)
 
+const bucketName = auditLogEventsS3Config.bucketName || "auditLogEventsBucket"
+
 describe("Check if an event object key exists in S3 bucket end-to-end", () => {
   beforeEach(async () => {
     await gateway.deleteAll()
