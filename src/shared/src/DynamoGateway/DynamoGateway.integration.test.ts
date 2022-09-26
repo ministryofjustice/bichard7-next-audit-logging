@@ -9,7 +9,6 @@ import type GetManyOptions from "./GetManyOptions"
 import TestDynamoGateway from "./TestDynamoGateway"
 import type UpdateOptions from "./UpdateOptions"
 
-
 const testGateway = new TestDynamoGateway(auditLogDynamoConfig)
 const gateway = new DynamoGateway(auditLogDynamoConfig)
 const sortKey = "someOtherValue"
@@ -420,7 +419,9 @@ describe("DynamoGateway", () => {
         sortKey,
         pagination: { limit: 3 }
       }
-      const actualRecords = <DocumentClient.ScanOutput>await testGateway.getMany(auditLogDynamoConfig.TABLE_NAME, getManyOptions)
+      const actualRecords = <DocumentClient.ScanOutput>(
+        await testGateway.getMany(auditLogDynamoConfig.TABLE_NAME, getManyOptions)
+      )
       expect(isError(actualRecords)).toBeFalsy()
 
       const filteredRecords = actualRecords.Items?.filter((r) => r.id === recordId)

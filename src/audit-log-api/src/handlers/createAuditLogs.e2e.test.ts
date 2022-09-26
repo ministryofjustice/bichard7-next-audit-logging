@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 jest.retryTimes(10)
 import axios from "axios"
 import { HttpStatusCode, TestDynamoGateway } from "shared"

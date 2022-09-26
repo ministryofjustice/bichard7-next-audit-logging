@@ -170,7 +170,9 @@ describe("AuditLogDynamoGateway", () => {
         sortKey,
         pagination: { limit: 2 }
       }
-      const actualRecords = <DocumentClient.ScanOutput>await gateway.getMany(auditLogDynamoConfig.TABLE_NAME, getManyOptions)
+      const actualRecords = <DocumentClient.ScanOutput>(
+        await gateway.getMany(auditLogDynamoConfig.TABLE_NAME, getManyOptions)
+      )
 
       const actualOtherMessage = <AuditLog>actualRecords.Items?.find((r) => r.messageId === otherMessage.messageId)
       expect(actualOtherMessage).toBeDefined()
@@ -217,7 +219,9 @@ describe("AuditLogDynamoGateway", () => {
         sortKey,
         pagination: { limit: 1 }
       }
-      const actualRecords = <DocumentClient.ScanOutput>await gateway.getMany(auditLogDynamoConfig.TABLE_NAME, getManyOptions)
+      const actualRecords = <DocumentClient.ScanOutput>(
+        await gateway.getMany(auditLogDynamoConfig.TABLE_NAME, getManyOptions)
+      )
 
       const actualMessage = <AuditLog>actualRecords.Items?.find((r) => r.messageId === message.messageId)
       expect(actualMessage).toBeDefined()
@@ -274,7 +278,9 @@ describe("AuditLogDynamoGateway", () => {
         sortKey,
         pagination: { limit: 2 }
       }
-      const actualRecords = <DocumentClient.ScanOutput>await gateway.getMany(auditLogDynamoConfig.TABLE_NAME, getManyOptions)
+      const actualRecords = <DocumentClient.ScanOutput>(
+        await gateway.getMany(auditLogDynamoConfig.TABLE_NAME, getManyOptions)
+      )
 
       const actualMessage = actualRecords.Items?.find((r) => r.messageId === message.messageId) as AuditLog & {
         topExceptionsReportEvents: AuditLogEvent[]
@@ -324,7 +330,9 @@ describe("AuditLogDynamoGateway", () => {
         sortKey,
         pagination: { limit: 2 }
       }
-      const actualRecords = <DocumentClient.ScanOutput>await gateway.getMany(auditLogDynamoConfig.TABLE_NAME, getManyOptions)
+      const actualRecords = <DocumentClient.ScanOutput>(
+        await gateway.getMany(auditLogDynamoConfig.TABLE_NAME, getManyOptions)
+      )
 
       const actualMessage = actualRecords.Items?.find((r) => r.messageId === message.messageId) as AuditLog & {
         automationReportEvents: AuditLogEvent[]
@@ -365,7 +373,9 @@ describe("AuditLogDynamoGateway", () => {
         sortKey,
         pagination: { limit: 2 }
       }
-      const actualRecords = <DocumentClient.ScanOutput>await gateway.getMany(auditLogDynamoConfig.TABLE_NAME, getManyOptions)
+      const actualRecords = <DocumentClient.ScanOutput>(
+        await gateway.getMany(auditLogDynamoConfig.TABLE_NAME, getManyOptions)
+      )
 
       const actualMessage = actualRecords.Items?.find((r) => r.messageId === message.messageId) as AuditLog & {
         automationReportEvents: AuditLogEvent[]
@@ -392,7 +402,9 @@ describe("AuditLogDynamoGateway", () => {
         sortKey,
         pagination: { limit: 2 }
       }
-      const actualRecords = <DocumentClient.ScanOutput>await gateway.getMany(auditLogDynamoConfig.TABLE_NAME, getManyOptions)
+      const actualRecords = <DocumentClient.ScanOutput>(
+        await gateway.getMany(auditLogDynamoConfig.TABLE_NAME, getManyOptions)
+      )
 
       const actualMessage = actualRecords.Items?.find((r) => r.messageId === message.messageId) as AuditLog & {
         topExceptionsReportEvents: AuditLogEvent[]
@@ -803,7 +815,9 @@ describe("AuditLogDynamoGateway", () => {
         sortKey,
         pagination: { limit: 2 }
       }
-      const actualRecords = <DocumentClient.ScanOutput>await gateway.getMany(auditLogDynamoConfig.TABLE_NAME, getManyOptions)
+      const actualRecords = <DocumentClient.ScanOutput>(
+        await gateway.getMany(auditLogDynamoConfig.TABLE_NAME, getManyOptions)
+      )
 
       const actualOtherMessage = <AuditLog>actualRecords.Items?.find((r) => r.messageId === otherMessage.messageId)
       expect(actualOtherMessage).toBeDefined()

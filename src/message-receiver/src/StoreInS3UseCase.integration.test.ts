@@ -1,19 +1,12 @@
 jest.retryTimes(10)
-import type { EventMessage, S3Config } from "shared-types"
+import type { EventMessage } from "shared-types"
 import { isError } from "shared-types"
 import { TestAwsS3Gateway } from "shared"
 import type { StoreInS3Result } from "./StoreInS3UseCase"
 import StoreInS3UseCase from "./StoreInS3UseCase"
+import { auditLogEventsS3Config } from "shared-testing"
 
-const config: S3Config = {
-  url: "http://localhost:4569",
-  region: "eu-west-2",
-  bucketName: "auditLogEventsBucket",
-  accessKeyId: "S3RVER",
-  secretAccessKey: "S3RVER"
-}
-
-const gateway = new TestAwsS3Gateway(config)
+const gateway = new TestAwsS3Gateway(auditLogEventsS3Config)
 
 describe("StoreInS3UseCase", () => {
   beforeAll(async () => {

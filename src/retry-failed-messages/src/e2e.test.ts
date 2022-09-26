@@ -1,8 +1,7 @@
 // jest.retryTimes(10)
 import "shared-testing"
 import { TestAwsS3Gateway, TestDynamoGateway, encodeBase64 } from "shared"
-import { setEnvironmentVariables, auditLogDynamoConfig } from "shared-testing"
-import type { S3Config } from "shared-types"
+import { setEnvironmentVariables, auditLogDynamoConfig, auditLogEventsS3Config } from "shared-testing"
 import { AuditLogLookup } from "shared-types"
 import { AuditLog, BichardAuditLogEvent } from "shared-types"
 import { v4 as uuid } from "uuid"
@@ -14,16 +13,8 @@ import handler from "./index"
 const auditLogTableName = "auditLogTable"
 const auditLogLookupTableName = "auditLogLookupTable"
 
-const s3Config: S3Config = {
-  url: "http://localhost:4569",
-  region: "eu-west-2",
-  bucketName: "auditLogEventsBucket",
-  accessKeyId: "S3RVER",
-  secretAccessKey: "S3RVER"
-}
-
 const dynamoGateway = new TestDynamoGateway(auditLogDynamoConfig)
-const s3Gateway = new TestAwsS3Gateway(s3Config)
+const s3Gateway = new TestAwsS3Gateway(auditLogEventsS3Config)
 
 describe("Retry Failed Messages", () => {
   beforeEach(async () => {

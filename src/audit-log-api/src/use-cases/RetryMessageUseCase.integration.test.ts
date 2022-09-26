@@ -1,6 +1,6 @@
 jest.retryTimes(10)
 import "shared-testing"
-import type { MqConfig, S3Config } from "shared-types"
+import type { MqConfig } from "shared-types"
 import { AuditLog, BichardAuditLogEvent } from "shared-types"
 import {
   AwsAuditLogDynamoGateway,
@@ -18,7 +18,7 @@ import { AuditLogLookup } from "shared-types"
 import RetrieveEventXmlFromS3UseCase from "./RetrieveEventXmlFromS3UseCase"
 import LookupEventValuesUseCase from "./LookupEventValuesUseCase"
 import { encodeBase64 } from "shared"
-import { auditLogDynamoConfig } from "shared-testing"
+import { auditLogDynamoConfig, auditLogEventsS3Config } from "shared-testing"
 
 const auditLogTableName = "auditLogTable"
 const auditLogLookupTableName = "auditLogLookupTable"
@@ -37,14 +37,7 @@ const mqConfig: MqConfig = {
 const mqGateway = new TestStompitMqGateway(mqConfig)
 const sendMessageToQueueUseCase = new SendMessageToQueueUseCase(mqGateway)
 
-const s3Config: S3Config = {
-  url: "http://localhost:4569",
-  region: "eu-west-2",
-  bucketName: "auditLogEventsBucket",
-  accessKeyId: "S3RVER",
-  secretAccessKey: "S3RVER"
-}
-const s3Gateway = new TestAwsS3Gateway(s3Config)
+const s3Gateway = new TestAwsS3Gateway(auditLogEventsS3Config)
 const retrieveEventXmlFromS3UseCase = new RetrieveEventXmlFromS3UseCase(s3Gateway)
 
 const apiClient = new AuditLogApiClient("http://localhost:3010", "DUMMY")

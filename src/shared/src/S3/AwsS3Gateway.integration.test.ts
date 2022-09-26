@@ -1,30 +1,14 @@
 jest.retryTimes(10)
-import "shared-testing"
 import type { S3 } from "aws-sdk"
+import "shared-testing"
+import { externalIncomingS3Config, internalIncomingS3Config } from "shared-testing"
 import { isError } from "shared-types"
 import AwsS3Gateway from "./AwsS3Gateway"
-import type { S3Config } from "shared-types"
 import TestAwsS3Gateway from "./TestAwsS3Gateway"
 
-const config: S3Config = {
-  url: "http://localhost:4569",
-  region: "eu-west-2",
-  bucketName: "externalIncomingBucket",
-  accessKeyId: "S3RVER",
-  secretAccessKey: "S3RVER"
-}
-
-const secondTestGatewayConfig: S3Config = {
-  url: "http://localhost:4569",
-  region: "eu-west-2",
-  bucketName: "internalIncomingBucket",
-  accessKeyId: "S3RVER",
-  secretAccessKey: "S3RVER"
-}
-
-const testGateway = new TestAwsS3Gateway(config)
-const gateway = new AwsS3Gateway(config)
-const secondTestGateway = new TestAwsS3Gateway(secondTestGatewayConfig)
+const testGateway = new TestAwsS3Gateway(externalIncomingS3Config)
+const gateway = new AwsS3Gateway(externalIncomingS3Config)
+const secondTestGateway = new TestAwsS3Gateway(internalIncomingS3Config)
 const fileName = "2021/04/09/12/06/123456.xml"
 
 describe("AwsS3Gateway", () => {
@@ -36,7 +20,7 @@ describe("AwsS3Gateway", () => {
   beforeEach(async () => {
     await testGateway.deleteAll()
     await secondTestGateway.deleteAll()
-    gateway.forBucket(config.bucketName!)
+    gateway.forBucket(externalIncomingS3Config.bucketName!)
   })
 
   describe("forBucket()", () => {

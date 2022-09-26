@@ -1,6 +1,6 @@
 import { DynamoDB } from "aws-sdk"
 import { DocumentClient } from "aws-sdk/clients/dynamodb"
-import type { DynamoDbConfig, PromiseResult } from "shared-types"
+import type { DynamoDbConfig, PromiseResult, TransactionFailureReason } from "shared-types"
 import { isError, TransactionFailedError } from "shared-types"
 import type FetchByIndexOptions from "./FetchByIndexOptions"
 import type GetManyOptions from "./GetManyOptions"
@@ -54,13 +54,13 @@ export default class DynamoGateway {
       })
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let failureReasons: any[]
+    let failureReasons: TransactionFailureReason[]
     return this.client
       .transactWrite(params)
       .on("extractError", (response) => {
         try {
-          failureReasons = JSON.parse(response.httpResponse.body.toString()).CancellationReasons
+          failureReasons = JSON.parse(response.httpResponse.body.toString())
+            .CancellationReasons as TransactionFailureReason[]
         } catch (err) {
           // suppress this just in case some types of errors aren't JSON parseable
           console.error("Error extracting cancellation error", err)
@@ -244,12 +244,13 @@ export default class DynamoGateway {
   }
 
   async executeTransaction(actions: DocumentClient.TransactWriteItem[]): PromiseResult<void> {
-    let failureReasons: any[]
+    let failureReasons: TransactionFailureReason[]
     await this.client
       .transactWrite({ TransactItems: actions })
       .on("extractError", (response) => {
         try {
-          failureReasons = JSON.parse(response.httpResponse.body.toString()).CancellationReasons
+          failureReasons = JSON.parse(response.httpResponse.body.toString())
+            .CancellationReasons as TransactionFailureReason[]
         } catch (err) {
           // suppress this just in case some types of errors aren't JSON parseable
           console.error("Error extracting cancellation error", err)
