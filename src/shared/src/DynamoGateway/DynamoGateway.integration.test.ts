@@ -1,4 +1,3 @@
-jest.retryTimes(10)
 import type { DocumentClient, GetItemOutput } from "aws-sdk/clients/dynamodb"
 import { auditLogDynamoConfig } from "shared-testing"
 import type { TransactionFailedError } from "shared-types"
@@ -8,6 +7,8 @@ import type FetchByIndexOptions from "./FetchByIndexOptions"
 import type GetManyOptions from "./GetManyOptions"
 import TestDynamoGateway from "./TestDynamoGateway"
 import type UpdateOptions from "./UpdateOptions"
+
+auditLogDynamoConfig.TABLE_NAME = "DynamoGatewayTesting"
 
 const testGateway = new TestDynamoGateway(auditLogDynamoConfig)
 const gateway = new DynamoGateway(auditLogDynamoConfig)

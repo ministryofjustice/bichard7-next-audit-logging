@@ -10,6 +10,8 @@ interface TestRecord {
   someOtherValue2: string
 }
 
+auditLogDynamoConfig.TABLE_NAME = "SearcherTesting"
+
 const gateway = new TestDynamoGateway(auditLogDynamoConfig)
 const partitionKey = "id"
 const indexName = "someOtherValueSecondaryIndex"
