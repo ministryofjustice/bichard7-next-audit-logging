@@ -260,11 +260,13 @@ export default class DynamoGateway {
             console.error("Error extracting cancellation error", error)
           }
 
-          if (failureReasons.length < 1) {
-            failureReasons.push({
-              Code: "UnknownError",
-              Message: response.httpResponse.body.toString()
-            })
+          if (failureReasons === undefined || failureReasons.length < 1) {
+            failureReasons = [
+              {
+                Code: "UnknownError",
+                Message: response.httpResponse.body.toString()
+              }
+            ]
           }
         }
       })
