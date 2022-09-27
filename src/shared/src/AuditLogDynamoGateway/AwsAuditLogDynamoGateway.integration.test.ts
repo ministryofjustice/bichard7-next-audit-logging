@@ -1066,7 +1066,7 @@ describe("AuditLogDynamoGateway", () => {
 
       expect(transaction.Update).toBeDefined()
       expect(transaction.Update!.UpdateExpression).toContain(
-        "automationReportEvents.events = list_append(if_not_exists(automationReportEvents.events, :empty_list), :automationReportEvents)"
+        "automationReport.events = list_append(if_not_exists(automationReport.events, :empty_list), :automationReportEvents)"
       )
       expect(transaction.Update!.ExpressionAttributeValues).toBeDefined()
       expect(transaction.Update!.ExpressionAttributeValues![":automationReportEvents"]).toHaveLength(4)
