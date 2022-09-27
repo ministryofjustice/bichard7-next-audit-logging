@@ -4,3 +4,4 @@ export { default as isConditionalExpressionViolationError } from "./isConditiona
 export { default as isTransactionFailedError } from "./isTransactionFailedError"
 export { default as isIsoDate } from "./isIsoDate"
 export { default as validateAuditLogEvent } from "./validateAuditLogEvent"
+export { default as isTooManyEventsError } from "./isTooManyEventsError"

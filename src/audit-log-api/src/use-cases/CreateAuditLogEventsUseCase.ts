@@ -1,9 +1,8 @@
 import type { AuditLogEvent, AuditLogDynamoGateway } from "shared-types"
 import { isError } from "shared-types"
-import { isConditionalExpressionViolationError } from "../utils"
+import { isConditionalExpressionViolationError, isTooManyEventsError } from "../utils"
 import type StoreValuesInLookupTableUseCase from "./StoreValuesInLookupTableUseCase"
 import type { DocumentClient } from "aws-sdk/clients/dynamodb"
-import isTooManyEventsError from "src/utils/isTooManyEventsError"
 
 interface CreateAuditLogEventsResult {
   resultType: "success" | "notFound" | "invalidVersion" | "transactionFailed" | "error" | "tooManyEvents"
