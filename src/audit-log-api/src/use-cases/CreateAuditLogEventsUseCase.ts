@@ -3,6 +3,7 @@ import { isError } from "shared-types"
 import { isConditionalExpressionViolationError } from "../utils"
 import type StoreValuesInLookupTableUseCase from "./StoreValuesInLookupTableUseCase"
 import type { DocumentClient } from "aws-sdk/clients/dynamodb"
+import isTooManyEventsError from "src/utils/isTooManyEventsError"
 
 interface CreateAuditLogEventsResult {
   resultType: "success" | "notFound" | "invalidVersion" | "transactionFailed" | "error" | "tooManyEvents"
@@ -110,19 +111,26 @@ export default class CreateAuditLogEventsUseCase {
       }
     }
 
-    // TODO check number of transaction items is below dynamodb limit
     const transactionResult = await this.auditLogGateway.executeTransaction([
       ...transactionActions,
       addEventsTransactionParams as DocumentClient.TransactWriteItem
     ])
 
-    if (isError(transactionResult) && isConditionalExpressionViolationError(transactionResult)) {
-      return {
-        resultType: "invalidVersion",
-        resultDescription: `Message with Id ${messageId} has a different version in the database.`
+    if (isError(transactionResult)) {
+      if (isConditionalExpressionViolationError(transactionResult)) {
+        return {
+          resultType: "invalidVersion",
+          resultDescription: `Message with Id ${messageId} has a different version in the database.`
+        }
       }
-      // TODO handle the case the error is not a conditional expression violation error
-    } else if (isError(transactionResult)) {
+      const [errorIsTooManyEventsError, tooManyEventsMessage] = isTooManyEventsError(transactionResult)
+      if (errorIsTooManyEventsError) {
+        return {
+          resultType: "tooManyEvents",
+          resultDescription: "Too many actions for a dynamodb transaction: " + tooManyEventsMessage
+        }
+      }
+
       return {
         resultType: "transactionFailed",
         resultDescription: transactionResult.message

@@ -235,4 +235,18 @@ describe("CreateAuditLogEventsUseCase", () => {
     const lookupResult = await lookupMessageId(auditLog.messageId)
     expect(lookupResult).toBeNull()
   })
+
+  it("should give an error when attempting to create more events than is supported by dynamodb transactions", async () => {
+    const auditLog = createAuditLog()
+    await auditLogDynamoGateway.create(auditLog)
+
+    const events = new Array(250).fill(0).map(() => {
+      const event = createAuditLogEvent()
+      event.addAttribute("longAttribute", "this goes in the lookup table".repeat(100))
+      return event
+    })
+
+    const result = await createAuditLogEventsUseCase.create(auditLog.messageId, events)
+    expect(result.resultType).toBe("tooManyEvents")
+  })
 })

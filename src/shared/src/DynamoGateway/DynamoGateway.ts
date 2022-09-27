@@ -61,9 +61,8 @@ export default class DynamoGateway {
         try {
           failureReasons = JSON.parse(response.httpResponse.body.toString())
             .CancellationReasons as TransactionFailureReason[]
-        } catch (err) {
-          // suppress this just in case some types of errors aren't JSON parseable
-          console.error("Error extracting cancellation error", err)
+        } catch (error) {
+          console.error("Error extracting cancellation error", error)
         }
       })
       .promise()
@@ -243,25 +242,32 @@ export default class DynamoGateway {
     }
   }
 
-  async executeTransaction(actions: DocumentClient.TransactWriteItem[]): PromiseResult<void> {
-    let failureReasons: TransactionFailureReason[]
-    await this.client
+  executeTransaction(actions: DocumentClient.TransactWriteItem[]): PromiseResult<void> {
+    const failureReasons: TransactionFailureReason[] = []
+    return this.client
       .transactWrite({ TransactItems: actions })
       .on("extractError", (response) => {
-        try {
-          failureReasons = JSON.parse(response.httpResponse.body.toString())
-            .CancellationReasons as TransactionFailureReason[]
-        } catch (err) {
-          // suppress this just in case some types of errors aren't JSON parseable
-          console.error("Error extracting cancellation error", err)
+        if (response.error && response.error.message.startsWith("Member must have length less than or equal to")) {
+          failureReasons.push({
+            Code: "TooManyItems",
+            Message: response.error.message
+          })
+        } else {
+          failureReasons.push({
+            Code: "UnknownError",
+            Message: response.httpResponse.body.toString()
+          })
         }
       })
       .promise()
       .then(() => {
+        if (failureReasons.length > 0) {
+          return new TransactionFailedError(failureReasons, failureReasons[0].Message)
+        }
         return undefined
       })
       .catch((error) => {
-        if (failureReasons) {
+        if (failureReasons.length > 0) {
           return new TransactionFailedError(failureReasons, error.message)
         }
         return <Error>error
