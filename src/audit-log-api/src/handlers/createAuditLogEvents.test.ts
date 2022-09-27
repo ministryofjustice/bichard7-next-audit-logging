@@ -67,9 +67,20 @@ describe("createAuditLogEvents()", () => {
     const actualResponse = await createAuditLogEvents(event)
 
     expect(actualResponse.statusCode).toBe(HttpStatusCode.badRequest)
-    expect(actualResponse.body).toBe(
-      "Category is mandatory, Event source is mandatory, Event type is mandatory, Timestamp is mandatory"
-    )
+    expect(() => JSON.parse(actualResponse.body)).not.toThrow()
+    const jsonResponse = JSON.parse(actualResponse.body)
+    expect(jsonResponse).toStrictEqual([
+      {
+        eventTimestamp: "No event timestamp given",
+        isValid: false,
+        errors: [
+          "Category is mandatory",
+          "Event source is mandatory",
+          "Event type is mandatory",
+          "Timestamp is mandatory"
+        ]
+      }
+    ])
   })
 
   it("should return Bad request status when a one audit log event among many is not valid", async () => {
@@ -79,9 +90,31 @@ describe("createAuditLogEvents()", () => {
     const actualResponse = await createAuditLogEvents(handlerEvent)
 
     expect(actualResponse.statusCode).toBe(HttpStatusCode.badRequest)
-    expect(actualResponse.body).toBe(
-      "Category is mandatory, Event source is mandatory, Event type is mandatory, Timestamp is mandatory"
-    )
+
+    const expectedResponses = events.map((event) => {
+      if (event.timestamp !== undefined) {
+        return {
+          isValid: true,
+          eventTimestamp: event.timestamp,
+          errors: []
+        }
+      } else {
+        return {
+          eventTimestamp: "No event timestamp given",
+          isValid: false,
+          errors: [
+            "Category is mandatory",
+            "Event source is mandatory",
+            "Event type is mandatory",
+            "Timestamp is mandatory"
+          ]
+        }
+      }
+    })
+
+    expect(() => JSON.parse(actualResponse.body)).not.toThrow()
+    const jsonResponse = JSON.parse(actualResponse.body)
+    expect(jsonResponse).toStrictEqual(expectedResponses)
   })
 
   it("should respond with an Not Found status when message id does not exist", async () => {
