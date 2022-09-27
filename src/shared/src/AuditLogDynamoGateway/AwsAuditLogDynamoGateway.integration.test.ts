@@ -6,6 +6,7 @@ import "shared-testing"
 import { auditLogDynamoConfig } from "shared-testing"
 import type { EventCategory } from "shared-types"
 import { AuditLog, AuditLogEvent, AuditLogStatus, EventType, isError } from "shared-types"
+import { isConditionalExpressionViolationError } from ".."
 import TestDynamoGateway from "../DynamoGateway/TestDynamoGateway"
 import AwsAuditLogDynamoGateway from "./AwsAuditLogDynamoGateway"
 
@@ -1198,6 +1199,34 @@ describe("AuditLogDynamoGateway", () => {
       expect(transaction.Update!.ExpressionAttributeValues).toBeDefined()
       expect(transaction.Update!.ExpressionAttributeValues![":zero"]).toBe(0)
       expect(transaction.Update!.ExpressionAttributeValues![":retryCount"]).toBe(1)
+    })
+  })
+
+  describe("prepare() and execute()", () => {
+    it("should give an appropriate error when adding many events to an audit log which has been updated in the background", async () => {
+      const events = [
+        createAuditLogEvent("information", new Date(), EventType.ErrorRecordArchival),
+        createAuditLogEvent("information", new Date(), EventType.PncUpdated),
+        createAuditLogEvent("information", new Date(), "SPIResults")
+      ]
+      const message = new AuditLog("one", new Date(), "dummy hash")
+
+      await gateway.create(message)
+
+      const prepareResult = await gateway.prepareEvents(message.messageId, message.version, events)
+      expect(isError(prepareResult)).toBe(false)
+
+      // Update audit log with additional messages before executing the prepared updates
+      const updateResult = await gateway.addEvent(
+        message.messageId,
+        message.version,
+        createAuditLogEvent("information", new Date(), "SPIResults")
+      )
+      expect(isError(updateResult)).toBe(false)
+
+      const executeResult = await gateway.executeTransaction([prepareResult as DocumentClient.TransactWriteItem])
+      expect(isError(executeResult)).toBe(true)
+      expect(isConditionalExpressionViolationError(executeResult as Error)).toBeTruthy()
     })
   })
 })

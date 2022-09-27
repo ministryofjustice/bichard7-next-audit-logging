@@ -1,8 +1,8 @@
 import type { AuditLogEvent, AuditLogDynamoGateway } from "shared-types"
 import { isError } from "shared-types"
-import { isConditionalExpressionViolationError } from "../utils"
 import type StoreValuesInLookupTableUseCase from "./StoreValuesInLookupTableUseCase"
 import type { DocumentClient } from "aws-sdk/clients/dynamodb"
+import { isConditionalExpressionViolationError } from "shared"
 
 interface CreateAuditLogEventResult {
   resultType: "success" | "notFound" | "invalidVersion" | "transactionFailed" | "error"
@@ -95,13 +95,10 @@ export default class CreateAuditLogEventUseCase {
     const addEventsTransactionParams = await this.auditLogGateway.prepare(messageId, messageVersion, updatedEvent)
 
     if (isError(addEventsTransactionParams)) {
-      if (isConditionalExpressionViolationError(addEventsTransactionParams)) {
-        return {
-          resultType: "invalidVersion",
-          resultDescription: `Message with Id ${messageId} has a different version in the database.`
-        }
+      return {
+        resultType: "error",
+        resultDescription: addEventsTransactionParams.message
       }
-      // TODO handle the case the error is not a conditional expression violation error
     } else {
       transactionActions.push(addEventsTransactionParams)
     }
@@ -109,6 +106,12 @@ export default class CreateAuditLogEventUseCase {
     const transactionResult = await this.auditLogGateway.executeTransaction(transactionActions)
 
     if (isError(transactionResult)) {
+      if (isConditionalExpressionViolationError(transactionResult)) {
+        return {
+          resultType: "invalidVersion",
+          resultDescription: `Message with Id ${messageId} has a different version in the database.`
+        }
+      }
       return {
         resultType: "transactionFailed",
         resultDescription: transactionResult.message

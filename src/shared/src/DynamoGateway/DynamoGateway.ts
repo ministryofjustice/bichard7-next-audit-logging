@@ -243,7 +243,7 @@ export default class DynamoGateway {
   }
 
   executeTransaction(actions: DocumentClient.TransactWriteItem[]): PromiseResult<void> {
-    const failureReasons: TransactionFailureReason[] = []
+    let failureReasons: TransactionFailureReason[] = []
     return this.client
       .transactWrite({ TransactItems: actions })
       .on("extractError", (response) => {
@@ -253,10 +253,19 @@ export default class DynamoGateway {
             Message: response.error.message
           })
         } else {
-          failureReasons.push({
-            Code: "UnknownError",
-            Message: response.httpResponse.body.toString()
-          })
+          try {
+            failureReasons = JSON.parse(response.httpResponse.body.toString())
+              .CancellationReasons as TransactionFailureReason[]
+          } catch (error) {
+            console.error("Error extracting cancellation error", error)
+          }
+
+          if (failureReasons.length < 1) {
+            failureReasons.push({
+              Code: "UnknownError",
+              Message: response.httpResponse.body.toString()
+            })
+          }
         }
       })
       .promise()

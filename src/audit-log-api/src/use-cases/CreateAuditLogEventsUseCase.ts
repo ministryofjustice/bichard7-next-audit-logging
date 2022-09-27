@@ -1,6 +1,6 @@
 import type { AuditLogEvent, AuditLogDynamoGateway } from "shared-types"
 import { isError } from "shared-types"
-import { isConditionalExpressionViolationError, isTooManyEventsError } from "../utils"
+import { isConditionalExpressionViolationError, isTooManyEventsError } from "shared"
 import type StoreValuesInLookupTableUseCase from "./StoreValuesInLookupTableUseCase"
 import type { DocumentClient } from "aws-sdk/clients/dynamodb"
 
