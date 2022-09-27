@@ -99,7 +99,6 @@ export default class CreateAuditLogEventsUseCase {
         })
       )
     ).flat()
-    // TODO: check for duplicate messages in the batch were adding
 
     const addEventsTransactionParams = await this.auditLogGateway.prepareEvents(messageId, messageVersion, eventsToAdd)
 

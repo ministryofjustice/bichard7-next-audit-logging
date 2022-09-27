@@ -115,7 +115,6 @@ describe("CreateAuditLogEventsUseCase", () => {
     const { valueLookup } = attribute1 as KeyValuePair<string, string>
     expect(valueLookup).toBeDefined()
 
-    // TODO investigate why this lookup item ID is different to what was inserted
     const lookupResult = await lookupValue(valueLookup)
     expect(lookupResult).toBeDefined()
 
