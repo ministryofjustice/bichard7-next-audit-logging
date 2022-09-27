@@ -72,6 +72,13 @@ export default class CreateAuditLogEventsUseCase {
       deduplicatedInputEvents.push(event)
     }
 
+    if (deduplicatedInputEvents.length < 1) {
+      return {
+        resultType: "success",
+        resultDescription: "nothing to add"
+      }
+    }
+
     const preparedEvents: AuditLogEvent[] = []
     const lookupDynamoUpdates = (
       await Promise.all(
@@ -108,11 +115,11 @@ export default class CreateAuditLogEventsUseCase {
           resultDescription: `Message with Id ${messageId} has a different version in the database.`
         }
       }
-      const [errorIsTooManyEvents, errorMessage] = isTooManyEventsError(transactionResult)
+      const [errorIsTooManyEvents, tooManyEventsMessage] = isTooManyEventsError(transactionResult)
       if (errorIsTooManyEvents) {
         return {
           resultType: "tooManyEvents",
-          resultDescription: "Too many actions for a dynamodb transaction: " + errorMessage
+          resultDescription: "Too many actions for a dynamodb transaction: " + tooManyEventsMessage
         }
       }
 
