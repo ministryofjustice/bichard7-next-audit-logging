@@ -1,13 +1,7 @@
-import type { AuditLogEvent, AuditLogDynamoGateway } from "shared-types"
+import type { AuditLogEvent, AuditLogDynamoGateway, CreateAuditLogEventsResult, DynamoUpdate } from "shared-types"
 import { isError } from "shared-types"
 import type StoreValuesInLookupTableUseCase from "./StoreValuesInLookupTableUseCase"
-import type { DocumentClient } from "aws-sdk/clients/dynamodb"
 import { isConditionalExpressionViolationError } from "shared"
-
-interface CreateAuditLogEventResult {
-  resultType: "success" | "notFound" | "invalidVersion" | "transactionFailed" | "error"
-  resultDescription?: string
-}
 
 const shouldDeduplicate = (event: AuditLogEvent): boolean =>
   event.category === "error" &&
@@ -44,7 +38,7 @@ export default class CreateAuditLogEventUseCase {
     private readonly storeValuesInLookupTableUseCase: StoreValuesInLookupTableUseCase
   ) {}
 
-  async create(messageId: string, originalEvent: AuditLogEvent): Promise<CreateAuditLogEventResult> {
+  async create(messageId: string, originalEvent: AuditLogEvent): Promise<CreateAuditLogEventsResult> {
     const messageVersion = await this.auditLogGateway.fetchVersion(messageId)
 
     if (isError(messageVersion)) {
@@ -78,7 +72,7 @@ export default class CreateAuditLogEventUseCase {
       }
     }
 
-    const transactionActions: DocumentClient.TransactWriteItem[] = []
+    const dynamoUpdates: DynamoUpdate[] = []
 
     const lookupPrepareResult = await this.storeValuesInLookupTableUseCase.prepare(originalEvent, messageId)
 
@@ -89,21 +83,21 @@ export default class CreateAuditLogEventUseCase {
       }
     }
 
-    const [lookupTransactionParams, updatedEvent] = lookupPrepareResult
-    transactionActions.push(...lookupTransactionParams)
+    const [lookupDynamoUpdates, updatedEvent] = lookupPrepareResult
+    dynamoUpdates.push(...lookupDynamoUpdates)
 
-    const addEventsTransactionParams = await this.auditLogGateway.prepare(messageId, messageVersion, updatedEvent)
+    const auditLogDynamoUpdate = await this.auditLogGateway.prepare(messageId, messageVersion, updatedEvent)
 
-    if (isError(addEventsTransactionParams)) {
+    if (isError(auditLogDynamoUpdate)) {
       return {
         resultType: "error",
-        resultDescription: addEventsTransactionParams.message
+        resultDescription: auditLogDynamoUpdate.message
       }
     } else {
-      transactionActions.push(addEventsTransactionParams)
+      dynamoUpdates.push(auditLogDynamoUpdate)
     }
 
-    const transactionResult = await this.auditLogGateway.executeTransaction(transactionActions)
+    const transactionResult = await this.auditLogGateway.executeTransaction(dynamoUpdates)
 
     if (isError(transactionResult)) {
       if (isConditionalExpressionViolationError(transactionResult)) {

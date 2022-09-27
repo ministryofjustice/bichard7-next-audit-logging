@@ -1,6 +1,11 @@
-import type { DocumentClient } from "aws-sdk/clients/dynamodb"
 import { addDays } from "date-fns"
-import type { AuditLogLookup, AuditLogLookupDynamoGateway, DynamoDbConfig, PromiseResult } from "shared-types"
+import type {
+  AuditLogLookup,
+  AuditLogLookupDynamoGateway,
+  DynamoDbConfig,
+  DynamoUpdate,
+  PromiseResult
+} from "shared-types"
 import { isError } from "shared-types"
 import { compress, decompress } from ".."
 import { DynamoGateway, IndexSearcher } from "../DynamoGateway"
@@ -38,7 +43,7 @@ export default class AwsAuditLogLookupDynamoGateway extends DynamoGateway implem
     return lookupItem
   }
 
-  async prepare(lookupItem: AuditLogLookup): Promise<DocumentClient.TransactWriteItem> {
+  async prepare(lookupItem: AuditLogLookup): Promise<DynamoUpdate> {
     if (process.env.IS_E2E) {
       lookupItem.expiryTime = Math.round(
         addDays(new Date(), parseInt(process.env.EXPIRY_DAYS || "7")).getTime() / 1000

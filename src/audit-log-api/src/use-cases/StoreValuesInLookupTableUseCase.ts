@@ -2,12 +2,12 @@ import type {
   AuditLogEvent,
   AuditLogLookupDynamoGateway,
   BichardAuditLogEvent,
+  DynamoUpdate,
   KeyValuePair,
   PromiseResult,
   ValueLookup
 } from "shared-types"
 import { AuditLogLookup, isError } from "shared-types"
-import type { DocumentClient } from "aws-sdk/clients/dynamodb"
 
 const maxAttributeValueLength = 1000
 
@@ -53,9 +53,9 @@ export default class StoreValuesInLookupTableUseCase {
     } as AuditLogEvent
   }
 
-  async prepare(event: AuditLogEvent, messageId: string): Promise<[DocumentClient.TransactWriteItem[], AuditLogEvent]> {
+  async prepare(event: AuditLogEvent, messageId: string): Promise<[DynamoUpdate[], AuditLogEvent]> {
     const attributes: KeyValuePair<string, unknown> = {}
-    const transactionParams: DocumentClient.TransactWriteItem[] = []
+    const transactionParams: DynamoUpdate[] = []
 
     const attributeKeys = Object.keys(event.attributes)
 

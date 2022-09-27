@@ -1,9 +1,8 @@
-import type { DocumentClient } from "aws-sdk/clients/dynamodb"
-import type { AuditLogLookup, PromiseResult } from "."
+import type { AuditLogLookup, DynamoUpdate, PromiseResult } from "."
 
 export default interface AuditLogLookupDynamoGateway {
   create(auditLogLookup: AuditLogLookup): PromiseResult<AuditLogLookup>
-  prepare(auditLogLookup: AuditLogLookup): Promise<DocumentClient.TransactWriteItem>
+  prepare(auditLogLookup: AuditLogLookup): Promise<DynamoUpdate>
   fetchById(id: string): PromiseResult<AuditLogLookup>
   deleteByMessageId(messageId: string): PromiseResult<void>
 }

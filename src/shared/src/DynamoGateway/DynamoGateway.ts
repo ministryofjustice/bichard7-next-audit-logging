@@ -1,6 +1,6 @@
 import { DynamoDB } from "aws-sdk"
 import { DocumentClient } from "aws-sdk/clients/dynamodb"
-import type { DynamoDbConfig, PromiseResult, TransactionFailureReason } from "shared-types"
+import type { DynamoDbConfig, DynamoUpdate, PromiseResult, TransactionFailureReason } from "shared-types"
 import { isError, TransactionFailedError } from "shared-types"
 import type FetchByIndexOptions from "./FetchByIndexOptions"
 import type GetManyOptions from "./GetManyOptions"
@@ -242,7 +242,7 @@ export default class DynamoGateway {
     }
   }
 
-  executeTransaction(actions: DocumentClient.TransactWriteItem[]): PromiseResult<void> {
+  executeTransaction(actions: DynamoUpdate[]): PromiseResult<void> {
     let failureReasons: TransactionFailureReason[] = []
     return this.client
       .transactWrite({ TransactItems: actions })

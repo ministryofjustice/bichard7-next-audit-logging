@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable class-methods-use-this */
-import type { DocumentClient } from "aws-sdk/clients/dynamodb"
-import type { AuditLogLookup, AuditLogLookupDynamoGateway, PromiseResult } from "shared-types"
+import type { AuditLogLookup, AuditLogLookupDynamoGateway, DynamoUpdate, PromiseResult } from "shared-types"
 
 export default class FakeAuditLogLookupDynamoGateway implements AuditLogLookupDynamoGateway {
   public items: AuditLogLookup[] = []
@@ -21,7 +20,7 @@ export default class FakeAuditLogLookupDynamoGateway implements AuditLogLookupDy
     return Promise.resolve(lookupItem)
   }
 
-  prepare(lookupItem: AuditLogLookup): Promise<DocumentClient.TransactWriteItem> {
+  prepare(lookupItem: AuditLogLookup): Promise<DynamoUpdate> {
     return Promise.resolve({
       Put: {
         Item: lookupItem,

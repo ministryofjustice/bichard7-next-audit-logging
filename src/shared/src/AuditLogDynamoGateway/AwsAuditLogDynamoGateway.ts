@@ -1,10 +1,10 @@
-import type { DocumentClient } from "aws-sdk/clients/dynamodb"
 import { addDays } from "date-fns"
 import type {
   AuditLog,
   AuditLogDynamoGateway,
   AuditLogEvent,
   DynamoDbConfig,
+  DynamoUpdate,
   KeyValuePair,
   PromiseResult
 } from "shared-types"
@@ -314,11 +314,7 @@ export default class AwsAuditLogDynamoGateway extends DynamoGateway implements A
     return undefined
   }
 
-  async prepare(
-    messageId: string,
-    messageVersion: number,
-    event: AuditLogEvent
-  ): PromiseResult<DocumentClient.TransactWriteItem> {
+  async prepare(messageId: string, messageVersion: number, event: AuditLogEvent): PromiseResult<DynamoUpdate> {
     const events = await this.fetchEvents(messageId)
     if (isError(events)) {
       return events
@@ -387,11 +383,7 @@ export default class AwsAuditLogDynamoGateway extends DynamoGateway implements A
     }
   }
 
-  async prepareEvents(
-    messageId: string,
-    messageVersion: number,
-    events: AuditLogEvent[]
-  ): PromiseResult<DocumentClient.TransactWriteItem> {
+  async prepareEvents(messageId: string, messageVersion: number, events: AuditLogEvent[]): PromiseResult<DynamoUpdate> {
     const currentEvents = await this.fetchEvents(messageId)
     if (isError(currentEvents)) {
       return currentEvents

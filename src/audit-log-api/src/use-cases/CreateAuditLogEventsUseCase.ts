@@ -1,13 +1,7 @@
-import type { AuditLogEvent, AuditLogDynamoGateway } from "shared-types"
+import type { AuditLogEvent, AuditLogDynamoGateway, CreateAuditLogEventsResult, DynamoUpdate } from "shared-types"
 import { isError } from "shared-types"
 import { isConditionalExpressionViolationError, isTooManyEventsError } from "shared"
 import type StoreValuesInLookupTableUseCase from "./StoreValuesInLookupTableUseCase"
-import type { DocumentClient } from "aws-sdk/clients/dynamodb"
-
-interface CreateAuditLogEventsResult {
-  resultType: "success" | "notFound" | "invalidVersion" | "transactionFailed" | "error" | "tooManyEvents"
-  resultDescription?: string
-}
 
 const shouldDeduplicate = (event: AuditLogEvent): boolean =>
   event.category === "error" &&
@@ -44,7 +38,7 @@ export default class CreateAuditLogEventsUseCase {
     private readonly storeValuesInLookupTableUseCase: StoreValuesInLookupTableUseCase
   ) {}
 
-  async create(messageId: string, originalEvents: AuditLogEvent[]): Promise<CreateAuditLogEventsResult> {
+  async create(messageId: string, inputEvents: AuditLogEvent[]): Promise<CreateAuditLogEventsResult> {
     const messageVersion = await this.auditLogGateway.fetchVersion(messageId)
 
     if (isError(messageVersion)) {
@@ -61,57 +55,50 @@ export default class CreateAuditLogEventsUseCase {
       }
     }
 
-    const message = await this.auditLogGateway.fetchOne(messageId)
+    const originalEvents = await this.auditLogGateway.fetchEvents(messageId)
 
-    if (isError(message)) {
+    if (isError(originalEvents)) {
       return {
         resultType: "error",
-        resultDescription: message.message
+        resultDescription: originalEvents.message
       }
     }
 
-    const currentEvents = await this.auditLogGateway.fetchEvents(messageId)
-    if (isError(currentEvents)) {
-      return {
-        resultType: "error",
-        resultDescription: currentEvents.message
-      }
-    }
-
-    const deduplicatedEvents = []
-    for (const event of originalEvents) {
-      if (shouldDeduplicate(event) && isDuplicateEvent(event, [...message.events, ...deduplicatedEvents])) {
+    const deduplicatedInputEvents = []
+    for (const event of inputEvents) {
+      if (shouldDeduplicate(event) && isDuplicateEvent(event, [...originalEvents, ...deduplicatedInputEvents])) {
         continue
       }
-      deduplicatedEvents.push(event)
+      deduplicatedInputEvents.push(event)
     }
 
-    const eventsToAdd: AuditLogEvent[] = []
-    const transactionActions = (
+    const preparedEvents: AuditLogEvent[] = []
+    const lookupDynamoUpdates = (
       await Promise.all(
-        deduplicatedEvents.map(async (originalEvent) => {
-          const lookupPrepareResult = await this.storeValuesInLookupTableUseCase.prepare(originalEvent, messageId)
+        deduplicatedInputEvents.map(async (event) => {
+          const [lookupDynamoUpdate, preparedEvent] = await this.storeValuesInLookupTableUseCase.prepare(
+            event,
+            messageId
+          )
+          preparedEvents.push(preparedEvent)
 
-          const [lookupTransactionParams, updatedEvent] = lookupPrepareResult
-          eventsToAdd.push(updatedEvent)
-
-          return lookupTransactionParams
+          return lookupDynamoUpdate
         })
       )
     ).flat()
 
-    const addEventsTransactionParams = await this.auditLogGateway.prepareEvents(messageId, messageVersion, eventsToAdd)
+    const auditLogDynamoUpdate = await this.auditLogGateway.prepareEvents(messageId, messageVersion, preparedEvents)
 
-    if (isError(addEventsTransactionParams)) {
+    if (isError(auditLogDynamoUpdate)) {
       return {
         resultType: "error",
-        resultDescription: addEventsTransactionParams.message
+        resultDescription: auditLogDynamoUpdate.message
       }
     }
 
     const transactionResult = await this.auditLogGateway.executeTransaction([
-      ...transactionActions,
-      addEventsTransactionParams as DocumentClient.TransactWriteItem
+      ...lookupDynamoUpdates,
+      auditLogDynamoUpdate as DynamoUpdate
     ])
 
     if (isError(transactionResult)) {
@@ -121,11 +108,11 @@ export default class CreateAuditLogEventsUseCase {
           resultDescription: `Message with Id ${messageId} has a different version in the database.`
         }
       }
-      const [errorIsTooManyEventsError, tooManyEventsMessage] = isTooManyEventsError(transactionResult)
-      if (errorIsTooManyEventsError) {
+      const [errorIsTooManyEvents, errorMessage] = isTooManyEventsError(transactionResult)
+      if (errorIsTooManyEvents) {
         return {
           resultType: "tooManyEvents",
-          resultDescription: "Too many actions for a dynamodb transaction: " + tooManyEventsMessage
+          resultDescription: "Too many actions for a dynamodb transaction: " + errorMessage
         }
       }
 

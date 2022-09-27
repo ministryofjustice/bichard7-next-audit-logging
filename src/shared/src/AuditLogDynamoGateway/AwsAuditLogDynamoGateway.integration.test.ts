@@ -4,7 +4,7 @@ import { addDays, subDays } from "date-fns"
 import { shuffle } from "lodash"
 import "shared-testing"
 import { auditLogDynamoConfig } from "shared-testing"
-import type { EventCategory } from "shared-types"
+import type { DynamoUpdate, EventCategory } from "shared-types"
 import { AuditLog, AuditLogEvent, AuditLogStatus, EventType, isError } from "shared-types"
 import { isConditionalExpressionViolationError } from ".."
 import TestDynamoGateway from "../DynamoGateway/TestDynamoGateway"
@@ -1033,7 +1033,7 @@ describe("AuditLogDynamoGateway", () => {
 
       expect(isError(result)).toBe(false)
 
-      const transaction = result as DocumentClient.TransactWriteItem
+      const transaction = result as DynamoUpdate
 
       expect(transaction.Update).toBeDefined()
       expect(transaction.Update!.UpdateExpression).toContain("automationReport.forceOwner = :forceOwner")
@@ -1062,7 +1062,7 @@ describe("AuditLogDynamoGateway", () => {
 
       expect(isError(result)).toBe(false)
 
-      const transaction = result as DocumentClient.TransactWriteItem
+      const transaction = result as DynamoUpdate
 
       expect(transaction.Update).toBeDefined()
       expect(transaction.Update!.UpdateExpression).toContain(
@@ -1109,7 +1109,7 @@ describe("AuditLogDynamoGateway", () => {
 
       expect(isError(result)).toBe(false)
 
-      const transaction = result as DocumentClient.TransactWriteItem
+      const transaction = result as DynamoUpdate
 
       expect(transaction.Update).toBeDefined()
       expect(transaction.Update!.UpdateExpression).toContain(
@@ -1140,7 +1140,7 @@ describe("AuditLogDynamoGateway", () => {
 
       expect(isError(result)).toBe(false)
 
-      const transaction = result as DocumentClient.TransactWriteItem
+      const transaction = result as DynamoUpdate
 
       expect(transaction.Update).toBeDefined()
       expect(transaction.Update!.UpdateExpression).toContain("#errorRecordArchivalDate = :errorRecordArchivalDate")
@@ -1165,7 +1165,7 @@ describe("AuditLogDynamoGateway", () => {
 
       expect(isError(result)).toBe(false)
 
-      const transaction = result as DocumentClient.TransactWriteItem
+      const transaction = result as DynamoUpdate
 
       expect(transaction.Update).toBeDefined()
       expect(transaction.Update!.UpdateExpression).toContain("#isSanitised = :isSanitised")
@@ -1190,7 +1190,7 @@ describe("AuditLogDynamoGateway", () => {
 
       expect(isError(result)).toBe(false)
 
-      const transaction = result as DocumentClient.TransactWriteItem
+      const transaction = result as DynamoUpdate
 
       expect(transaction.Update).toBeDefined()
       expect(transaction.Update!.UpdateExpression).toContain(
@@ -1224,7 +1224,7 @@ describe("AuditLogDynamoGateway", () => {
       )
       expect(isError(updateResult)).toBe(false)
 
-      const executeResult = await gateway.executeTransaction([prepareResult as DocumentClient.TransactWriteItem])
+      const executeResult = await gateway.executeTransaction([prepareResult as DynamoUpdate])
       expect(isError(executeResult)).toBe(true)
       expect(isConditionalExpressionViolationError(executeResult as Error)).toBeTruthy()
     })
