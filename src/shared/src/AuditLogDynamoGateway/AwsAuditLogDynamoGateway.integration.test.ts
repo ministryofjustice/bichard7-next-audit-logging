@@ -946,12 +946,12 @@ describe("AuditLogDynamoGateway", () => {
           Key: { messageId: message.messageId },
           UpdateExpression:
             "\n" +
-            "      set events = list_append(if_not_exists(events, :empty_list), :event),\n" +
+            "      set events = list_append(if_not_exists(events, :empty_list), :events),\n" +
             "      #lastEventType = :lastEventType\n" +
-            "    ,#status = :status ADD version :version_increment",
+            "    , #status = :status ADD version :version_increment",
           ExpressionAttributeNames: { "#lastEventType": "lastEventType", "#status": "status" },
           ExpressionAttributeValues: {
-            ":event": [expectedEvent],
+            ":events": [expectedEvent],
             ":empty_list": [],
             ":lastEventType": "Hearing Outcome ignored as it contains no offences",
             ":status": "Completed",

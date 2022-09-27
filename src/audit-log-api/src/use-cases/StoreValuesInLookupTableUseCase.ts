@@ -55,7 +55,7 @@ export default class StoreValuesInLookupTableUseCase {
 
   async prepare(event: AuditLogEvent, messageId: string): Promise<[DynamoUpdate[], AuditLogEvent]> {
     const attributes: KeyValuePair<string, unknown> = {}
-    const transactionParams: DynamoUpdate[] = []
+    const dynamoUpdates: DynamoUpdate[] = []
 
     const attributeKeys = Object.keys(event.attributes)
 
@@ -63,9 +63,9 @@ export default class StoreValuesInLookupTableUseCase {
       const attributeValue = event.attributes[attributeKey]
       if (attributeValue && typeof attributeValue === "string" && attributeValue.length > maxAttributeValueLength) {
         const lookupItem = new AuditLogLookup(attributeValue, messageId)
-        const lookupPutParams = await this.lookupGateway.prepare(lookupItem)
+        const lookupDynamoUpdate = await this.lookupGateway.prepare(lookupItem)
 
-        transactionParams.push(lookupPutParams)
+        dynamoUpdates.push(lookupDynamoUpdate)
         attributes[attributeKey] = { valueLookup: lookupItem.id } as ValueLookup
       } else {
         attributes[attributeKey] = attributeValue
@@ -76,9 +76,9 @@ export default class StoreValuesInLookupTableUseCase {
       "eventXml" in event ? (event as BichardAuditLogEvent).eventXml : undefined
     if (eventXml) {
       const lookupItem = new AuditLogLookup(eventXml, messageId)
-      const lookupPutParams = await this.lookupGateway.prepare(lookupItem)
+      const lookupDynamoUpdates = await this.lookupGateway.prepare(lookupItem)
 
-      transactionParams.push(lookupPutParams)
+      dynamoUpdates.push(lookupDynamoUpdates)
       eventXml = { valueLookup: lookupItem.id }
     }
 
@@ -87,6 +87,6 @@ export default class StoreValuesInLookupTableUseCase {
       attributes,
       ...(eventXml ? { eventXml } : {})
     } as AuditLogEvent
-    return [transactionParams, updatedEvent]
+    return [dynamoUpdates, updatedEvent]
   }
 }
