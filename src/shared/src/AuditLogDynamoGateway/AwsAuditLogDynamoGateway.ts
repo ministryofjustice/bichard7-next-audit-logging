@@ -1,4 +1,5 @@
 import { addDays } from "date-fns"
+import maxBy from "lodash.maxby"
 import type {
   AuditLog,
   AuditLogDynamoGateway,
@@ -9,14 +10,19 @@ import type {
   PromiseResult
 } from "shared-types"
 import { EventType, isError } from "shared-types"
+import type { UpdateComponent } from "src/utils/updateComponentTypes"
 import type { FetchByIndexOptions, UpdateOptions } from "../DynamoGateway"
 import { DynamoGateway, IndexSearcher, KeyComparison } from "../DynamoGateway"
 import CalculateMessageStatusUseCase from "./CalculateMessageStatusUseCase"
-import getForceOwnerForAutomationReport from "./getForceOwnerForAutomationReport"
-import shouldLogForAutomationReport from "./shouldLogForAutomationReport"
-import shouldLogForTopExceptionsReport from "./shouldLogForTopExceptionsReport"
-import maxBy from "lodash.maxby"
-import minBy from "lodash.minby"
+import {
+  archivalUpdateComponent,
+  automationRateReportUpdateComponent,
+  forceOwnerUpdateComponent,
+  retryCountUpdateComponent,
+  sanitisationUpdateComponent,
+  statusUpdateComponent,
+  topExceptionsReportUpdateComponent
+} from "./updateComponents"
 
 export default class AwsAuditLogDynamoGateway extends DynamoGateway implements AuditLogDynamoGateway {
   private readonly tableKey: string = "messageId"
@@ -271,68 +277,40 @@ export default class AwsAuditLogDynamoGateway extends DynamoGateway implements A
       set events = list_append(if_not_exists(events, :empty_list), :events),
       #lastEventType = :lastEventType
     `
-    const expressionAttributeNames: KeyValuePair<string, string> = {
+    let expressionAttributeNames: KeyValuePair<string, string> = {
       "#lastEventType": "lastEventType"
     }
     const lastEventType = maxBy(events, (event) => event.timestamp)?.eventType
-    const updateExpressionValues: KeyValuePair<string, unknown> = {
+    let updateExpressionValues: KeyValuePair<string, unknown> = {
       ":events": events,
       ":empty_list": <AuditLogEvent[]>[],
       ":lastEventType": lastEventType
     }
 
-    // Calculate which force owns this message for reports
-    const forceOwnerEvents = events.filter((event) => getForceOwnerForAutomationReport(event))
-    const forceOwnerEventForAutomationReport = maxBy(forceOwnerEvents, (event) => event.timestamp)
-    if (forceOwnerEventForAutomationReport) {
-      updateExpressionValues[":forceOwner"] = getForceOwnerForAutomationReport(forceOwnerEventForAutomationReport)
-      updateExpression += ", automationReport.forceOwner = :forceOwner"
-    }
+    const updateComponents: UpdateComponent[] = [
+      forceOwnerUpdateComponent,
+      statusUpdateComponent,
+      topExceptionsReportUpdateComponent,
+      automationRateReportUpdateComponent,
+      archivalUpdateComponent,
+      sanitisationUpdateComponent,
+      retryCountUpdateComponent
+    ]
 
-    // Set the status if it changed
-    const status = new CalculateMessageStatusUseCase(...events, ...currentEvents).call()
-    if (status) {
-      expressionAttributeNames["#status"] = "status"
-      updateExpressionValues[":status"] = status
-      updateExpression += ", #status = :status"
-    }
+    for (const updateComponent of updateComponents) {
+      const updateComponentResult = updateComponent(currentEvents, events)
 
-    // Add events relevant to reports to those arrays
-    const topExceptionsReportEvents = events.filter((event) => shouldLogForTopExceptionsReport(event))
-    if (topExceptionsReportEvents.length > 0) {
-      updateExpressionValues[":topExceptionEvents"] = topExceptionsReportEvents
-      updateExpression +=
-        ", topExceptionsReport.events = list_append(if_not_exists(topExceptionsReport.events, :empty_list), :topExceptionEvents)"
-    }
-    const automationReportEvents = events.filter((event) => shouldLogForAutomationReport(event))
-    if (automationReportEvents.length > 0) {
-      updateExpressionValues[":automationReportEvents"] = automationReportEvents
-      updateExpression +=
-        ", automationReport.events = list_append(if_not_exists(automationReport.events, :empty_list), :automationReportEvents)"
-    }
+      if (updateComponentResult.updateExpression) {
+        updateExpression += ", " + updateComponentResult.updateExpression
+      }
 
-    // Mark the message as archived if we're adding an archival event
-    const archivalEvents = events.filter((event) => event.eventType === EventType.ErrorRecordArchival)
-    if (archivalEvents.length > 0) {
-      expressionAttributeNames["#errorRecordArchivalDate"] = "errorRecordArchivalDate"
-      updateExpressionValues[":errorRecordArchivalDate"] = minBy(archivalEvents, (event) => event.timestamp)?.timestamp
-      updateExpression += ", #errorRecordArchivalDate = :errorRecordArchivalDate"
-    }
+      if (updateComponentResult.expressionAttributeNames) {
+        expressionAttributeNames = { ...expressionAttributeNames, ...updateComponentResult.expressionAttributeNames }
+      }
 
-    // Mark the message as sanitised if we're adding an archival event
-    const sanitisationEvents = events.filter((event) => event.eventType === EventType.SanitisedMessage)
-    if (sanitisationEvents.length > 0) {
-      expressionAttributeNames["#isSanitised"] = "isSanitised"
-      updateExpressionValues[":isSanitised"] = 1
-      updateExpression += ", #isSanitised = :isSanitised"
-    }
-
-    // Increment retry count if we're adding a retry event
-    const retryingEvents = events.filter((event) => event.eventType === EventType.Retrying)
-    if (retryingEvents.length > 0) {
-      updateExpressionValues[":zero"] = 0
-      updateExpressionValues[":retryCount"] = retryingEvents.length
-      updateExpression += ", retryCount = if_not_exists(retryCounter, :zero) + :retryCount"
+      if (updateComponentResult.updateExpressionValues) {
+        updateExpressionValues = { ...updateExpressionValues, ...updateComponentResult.updateExpressionValues }
+      }
     }
 
     return {

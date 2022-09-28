@@ -438,6 +438,26 @@ describe("AuditLogDynamoGateway", () => {
       expect(actualAuditLog.retryCount).toBe(1)
     })
 
+    it("should increment the retry count after several retry messages", async () => {
+      const retryEvent = createAuditLogEvent("information", new Date(), "Retrying failed message")
+
+      const message = new AuditLog("one", new Date(), `dummy hash`)
+
+      await gateway.create(message)
+
+      await gateway.addEvent(message.messageId, message.version, retryEvent)
+      await gateway.addEvent(message.messageId, message.version + 1, retryEvent)
+      await gateway.addEvent(message.messageId, message.version + 2, retryEvent)
+
+      const actualMessage = await gateway.fetchOne(message.messageId)
+
+      expect(actualMessage).toBeDefined()
+      expect(actualMessage).toNotBeError()
+
+      const actualAuditLog = actualMessage as AuditLog
+      expect(actualAuditLog.retryCount).toBe(3)
+    })
+
     it("should update the message status", async () => {
       const expectedEvent = createAuditLogEvent("information", new Date(), EventType.Retrying)
 
@@ -1194,11 +1214,13 @@ describe("AuditLogDynamoGateway", () => {
 
       expect(transaction.Update).toBeDefined()
       expect(transaction.Update!.UpdateExpression).toContain(
-        "retryCount = if_not_exists(retryCounter, :zero) + :retryCount"
+        "#retryCount = if_not_exists(#retryCount, :zero) + :retryCount"
       )
       expect(transaction.Update!.ExpressionAttributeValues).toBeDefined()
       expect(transaction.Update!.ExpressionAttributeValues![":zero"]).toBe(0)
       expect(transaction.Update!.ExpressionAttributeValues![":retryCount"]).toBe(1)
+      expect(transaction.Update!.ExpressionAttributeNames).toBeDefined()
+      expect(transaction.Update!.ExpressionAttributeNames!["#retryCount"]).toBe("retryCount")
     })
   })
 
