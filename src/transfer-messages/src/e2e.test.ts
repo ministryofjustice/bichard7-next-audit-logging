@@ -1,35 +1,18 @@
 jest.retryTimes(10)
 import "shared-testing"
-import { setEnvironmentVariables } from "shared-testing"
+import { externalIncomingS3Config, internalIncomingS3Config, setEnvironmentVariables } from "shared-testing"
 setEnvironmentVariables()
 import type { S3 } from "aws-sdk"
-import type { S3Config } from "shared-types"
 import { TestAwsS3Gateway } from "shared"
 import type { TransferMessagesInput, TransferMessagesResult } from "./types"
 
-const internalGatewayConfig: S3Config = {
-  url: "http://localhost:4569",
-  region: "eu-west-2",
-  bucketName: "internalIncomingBucket",
-  accessKeyId: "S3RVER",
-  secretAccessKey: "S3RVER"
-}
-
-const externalGatewayConfig: S3Config = {
-  url: "http://localhost:4569",
-  region: "eu-west-2",
-  bucketName: "externalIncomingBucket",
-  accessKeyId: "S3RVER",
-  secretAccessKey: "S3RVER"
-}
-
-process.env.EXTERNAL_INCOMING_MESSAGE_BUCKET_NAME = externalGatewayConfig.bucketName
-process.env.INTERNAL_INCOMING_MESSAGE_BUCKET_NAME = internalGatewayConfig.bucketName
+process.env.EXTERNAL_INCOMING_MESSAGE_BUCKET_NAME = externalIncomingS3Config.bucketName
+process.env.INTERNAL_INCOMING_MESSAGE_BUCKET_NAME = internalIncomingS3Config.bucketName
 
 import transferMessages from "."
 
-const internalGateway = new TestAwsS3Gateway(internalGatewayConfig)
-const externalGateway = new TestAwsS3Gateway(externalGatewayConfig)
+const internalGateway = new TestAwsS3Gateway(internalIncomingS3Config)
+const externalGateway = new TestAwsS3Gateway(externalIncomingS3Config)
 
 describe("Transfer Messages end-to-end", () => {
   beforeAll(async () => {

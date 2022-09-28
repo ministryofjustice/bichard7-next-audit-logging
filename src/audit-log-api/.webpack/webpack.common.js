@@ -7,6 +7,7 @@ module.exports = {
     createAuditLog: "./src/handlers/createAuditLog.ts",
     createAuditLogs: "./src/handlers/createAuditLogs.ts",
     createAuditLogEvent: "./src/handlers/createAuditLogEvent.ts",
+    createAuditLogEvents: "./src/handlers/createAuditLogEvents.ts",
     getEvents: "./src/handlers/getEvents.ts",
     retryMessage: "./src/handlers/retryMessage.ts",
     sanitiseMessage: "./src/handlers/sanitiseMessage.ts"

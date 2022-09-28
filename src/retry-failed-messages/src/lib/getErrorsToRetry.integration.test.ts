@@ -8,26 +8,19 @@ import {
   createMockError,
   createMockAuditLogs,
   createMockAuditLog,
-  createMockRetriedError
+  createMockRetriedError,
+  auditLogDynamoConfig
 } from "shared-testing"
 import { TestDynamoGateway } from "shared"
-import type { DynamoDbConfig } from "shared-types"
 import { isError } from "shared-types"
 import { AuditLogApiClient } from "shared"
 const apiClient = new AuditLogApiClient("http://localhost:3010", "DUMMY")
 
-const dynamoConfig: DynamoDbConfig = {
-  DYNAMO_URL: "http://localhost:8000",
-  DYNAMO_REGION: "eu-west-2",
-  TABLE_NAME: "auditLogTable",
-  AWS_ACCESS_KEY_ID: "DUMMY",
-  AWS_SECRET_ACCESS_KEY: "DUMMY"
-}
-const testDynamoGateway = new TestDynamoGateway(dynamoConfig)
+const testDynamoGateway = new TestDynamoGateway(auditLogDynamoConfig)
 
 describe("getErrorsToRetry", () => {
   beforeEach(async () => {
-    await testDynamoGateway.deleteAll(dynamoConfig.TABLE_NAME, "messageId")
+    await testDynamoGateway.deleteAll(auditLogDynamoConfig.TABLE_NAME, "messageId")
   })
 
   it("should get all errors, paginating where necessary", async () => {

@@ -1,22 +1,17 @@
 jest.retryTimes(10)
 import type { DocumentClient } from "aws-sdk/clients/dynamodb"
-import { addDays } from "date-fns"
+import { addDays, subDays } from "date-fns"
+import { shuffle } from "lodash"
 import "shared-testing"
-import type { DynamoDbConfig, EventCategory } from "shared-types"
+import { auditLogDynamoConfig } from "shared-testing"
+import type { DynamoUpdate, EventCategory } from "shared-types"
 import { AuditLog, AuditLogEvent, AuditLogStatus, EventType, isError } from "shared-types"
+import { isConditionalExpressionViolationError } from ".."
 import TestDynamoGateway from "../DynamoGateway/TestDynamoGateway"
 import AwsAuditLogDynamoGateway from "./AwsAuditLogDynamoGateway"
 
-const config: DynamoDbConfig = {
-  DYNAMO_URL: "http://localhost:8000",
-  DYNAMO_REGION: "eu-west-2",
-  TABLE_NAME: "auditLogTable",
-  AWS_ACCESS_KEY_ID: "DUMMY",
-  AWS_SECRET_ACCESS_KEY: "DUMMY"
-}
-
-const gateway = new AwsAuditLogDynamoGateway(config, config.TABLE_NAME)
-const testGateway = new TestDynamoGateway(config)
+const gateway = new AwsAuditLogDynamoGateway(auditLogDynamoConfig, auditLogDynamoConfig.TABLE_NAME)
+const testGateway = new TestDynamoGateway(auditLogDynamoConfig)
 const primaryKey = "messageId"
 const sortKey = "receivedDate"
 
@@ -52,11 +47,11 @@ describe("AuditLogDynamoGateway", () => {
       skipIfExists: true
     }
 
-    await testGateway.createTable(config.TABLE_NAME, options)
+    await testGateway.createTable(auditLogDynamoConfig.TABLE_NAME, options)
   })
 
   beforeEach(async () => {
-    await testGateway.deleteAll(config.TABLE_NAME, primaryKey)
+    await testGateway.deleteAll(auditLogDynamoConfig.TABLE_NAME, primaryKey)
   })
 
   describe("create()", () => {
@@ -176,7 +171,9 @@ describe("AuditLogDynamoGateway", () => {
         sortKey,
         pagination: { limit: 2 }
       }
-      const actualRecords = <DocumentClient.ScanOutput>await gateway.getMany(config.TABLE_NAME, getManyOptions)
+      const actualRecords = <DocumentClient.ScanOutput>(
+        await gateway.getMany(auditLogDynamoConfig.TABLE_NAME, getManyOptions)
+      )
 
       const actualOtherMessage = <AuditLog>actualRecords.Items?.find((r) => r.messageId === otherMessage.messageId)
       expect(actualOtherMessage).toBeDefined()
@@ -223,7 +220,9 @@ describe("AuditLogDynamoGateway", () => {
         sortKey,
         pagination: { limit: 1 }
       }
-      const actualRecords = <DocumentClient.ScanOutput>await gateway.getMany(config.TABLE_NAME, getManyOptions)
+      const actualRecords = <DocumentClient.ScanOutput>(
+        await gateway.getMany(auditLogDynamoConfig.TABLE_NAME, getManyOptions)
+      )
 
       const actualMessage = <AuditLog>actualRecords.Items?.find((r) => r.messageId === message.messageId)
       expect(actualMessage).toBeDefined()
@@ -280,7 +279,9 @@ describe("AuditLogDynamoGateway", () => {
         sortKey,
         pagination: { limit: 2 }
       }
-      const actualRecords = <DocumentClient.ScanOutput>await gateway.getMany(config.TABLE_NAME, getManyOptions)
+      const actualRecords = <DocumentClient.ScanOutput>(
+        await gateway.getMany(auditLogDynamoConfig.TABLE_NAME, getManyOptions)
+      )
 
       const actualMessage = actualRecords.Items?.find((r) => r.messageId === message.messageId) as AuditLog & {
         topExceptionsReportEvents: AuditLogEvent[]
@@ -330,7 +331,9 @@ describe("AuditLogDynamoGateway", () => {
         sortKey,
         pagination: { limit: 2 }
       }
-      const actualRecords = <DocumentClient.ScanOutput>await gateway.getMany(config.TABLE_NAME, getManyOptions)
+      const actualRecords = <DocumentClient.ScanOutput>(
+        await gateway.getMany(auditLogDynamoConfig.TABLE_NAME, getManyOptions)
+      )
 
       const actualMessage = actualRecords.Items?.find((r) => r.messageId === message.messageId) as AuditLog & {
         automationReportEvents: AuditLogEvent[]
@@ -371,7 +374,9 @@ describe("AuditLogDynamoGateway", () => {
         sortKey,
         pagination: { limit: 2 }
       }
-      const actualRecords = <DocumentClient.ScanOutput>await gateway.getMany(config.TABLE_NAME, getManyOptions)
+      const actualRecords = <DocumentClient.ScanOutput>(
+        await gateway.getMany(auditLogDynamoConfig.TABLE_NAME, getManyOptions)
+      )
 
       const actualMessage = actualRecords.Items?.find((r) => r.messageId === message.messageId) as AuditLog & {
         automationReportEvents: AuditLogEvent[]
@@ -398,7 +403,9 @@ describe("AuditLogDynamoGateway", () => {
         sortKey,
         pagination: { limit: 2 }
       }
-      const actualRecords = <DocumentClient.ScanOutput>await gateway.getMany(config.TABLE_NAME, getManyOptions)
+      const actualRecords = <DocumentClient.ScanOutput>(
+        await gateway.getMany(auditLogDynamoConfig.TABLE_NAME, getManyOptions)
+      )
 
       const actualMessage = actualRecords.Items?.find((r) => r.messageId === message.messageId) as AuditLog & {
         topExceptionsReportEvents: AuditLogEvent[]
@@ -429,6 +436,26 @@ describe("AuditLogDynamoGateway", () => {
 
       const actualAuditLog = actualMessage as AuditLog
       expect(actualAuditLog.retryCount).toBe(1)
+    })
+
+    it("should increment the retry count after several retry messages", async () => {
+      const retryEvent = createAuditLogEvent("information", new Date(), "Retrying failed message")
+
+      const message = new AuditLog("one", new Date(), `dummy hash`)
+
+      await gateway.create(message)
+
+      await gateway.addEvent(message.messageId, message.version, retryEvent)
+      await gateway.addEvent(message.messageId, message.version + 1, retryEvent)
+      await gateway.addEvent(message.messageId, message.version + 2, retryEvent)
+
+      const actualMessage = await gateway.fetchOne(message.messageId)
+
+      expect(actualMessage).toBeDefined()
+      expect(actualMessage).toNotBeError()
+
+      const actualAuditLog = actualMessage as AuditLog
+      expect(actualAuditLog.retryCount).toBe(3)
     })
 
     it("should update the message status", async () => {
@@ -809,7 +836,9 @@ describe("AuditLogDynamoGateway", () => {
         sortKey,
         pagination: { limit: 2 }
       }
-      const actualRecords = <DocumentClient.ScanOutput>await gateway.getMany(config.TABLE_NAME, getManyOptions)
+      const actualRecords = <DocumentClient.ScanOutput>(
+        await gateway.getMany(auditLogDynamoConfig.TABLE_NAME, getManyOptions)
+      )
 
       const actualOtherMessage = <AuditLog>actualRecords.Items?.find((r) => r.messageId === otherMessage.messageId)
       expect(actualOtherMessage).toBeDefined()
@@ -913,6 +942,313 @@ describe("AuditLogDynamoGateway", () => {
       const result = await gateway.update(new AuditLog("External correlation id", new Date(), "dummy hash"))
 
       expect(isError(result)).toBe(true)
+    })
+  })
+
+  describe("prepare()", () => {
+    it("should only add an event to and update the status of the specified audit log", async () => {
+      const expectedEvent = createAuditLogEvent("information", new Date(), EventType.RecordIgnoredNoOffences)
+
+      expectedEvent.addAttribute("Attribute one", "Some value")
+      expectedEvent.addAttribute("Attribute two", 2)
+
+      const message = new AuditLog("one", new Date(), "dummy hash")
+
+      await gateway.create(message)
+
+      const result = await gateway.prepare(message.messageId, message.version, expectedEvent)
+
+      expect(isError(result)).toBe(false)
+
+      const expectedUpdate = {
+        Update: {
+          TableName: "auditLogTable",
+          Key: { messageId: message.messageId },
+          UpdateExpression:
+            "\n" +
+            "      set events = list_append(if_not_exists(events, :empty_list), :events),\n" +
+            "      #lastEventType = :lastEventType\n" +
+            "    , #status = :status ADD version :version_increment",
+          ExpressionAttributeNames: { "#lastEventType": "lastEventType", "#status": "status" },
+          ExpressionAttributeValues: {
+            ":events": [expectedEvent],
+            ":empty_list": [],
+            ":lastEventType": "Hearing Outcome ignored as it contains no offences",
+            ":status": "Completed",
+            ":version": 0,
+            ":version_increment": 1
+          },
+          ConditionExpression: "attribute_exists(messageId) AND version = :version"
+        }
+      }
+
+      expect(result).toStrictEqual(expectedUpdate)
+    })
+  })
+
+  describe("prepareEvents()", () => {
+    it("should only add an event to and update the status of the specified audit log", async () => {
+      const expectedEvent = createAuditLogEvent("information", new Date(), EventType.RecordIgnoredNoOffences)
+
+      expectedEvent.addAttribute("Attribute one", "Some value")
+      expectedEvent.addAttribute("Attribute two", 2)
+
+      const message = new AuditLog("one", new Date(), "dummy hash")
+
+      await gateway.create(message)
+
+      const result = await gateway.prepareEvents(message.messageId, message.version, [expectedEvent])
+
+      expect(isError(result)).toBe(false)
+
+      const expectedUpdate = {
+        Update: {
+          TableName: "auditLogTable",
+          Key: { messageId: message.messageId },
+          UpdateExpression:
+            "\n" +
+            "      set events = list_append(if_not_exists(events, :empty_list), :events),\n" +
+            "      #lastEventType = :lastEventType\n" +
+            "    , #status = :status ADD version :version_increment",
+          ExpressionAttributeNames: { "#lastEventType": "lastEventType", "#status": "status" },
+          ExpressionAttributeValues: {
+            ":events": [expectedEvent],
+            ":empty_list": [],
+            ":lastEventType": "Hearing Outcome ignored as it contains no offences",
+            ":status": "Completed",
+            ":version": 0,
+            ":version_increment": 1
+          },
+          ConditionExpression: "attribute_exists(messageId) AND version = :version"
+        }
+      }
+
+      expect(result).toStrictEqual(expectedUpdate)
+    })
+
+    it("should use the latest force owner change event to set the force owner", async () => {
+      const forceOwnerChange1 = createAuditLogEvent("information", new Date(), EventType.InputMessageReceived)
+      forceOwnerChange1.addAttribute("Force Owner", "1")
+      const forceOwnerChange2 = createAuditLogEvent("information", new Date(), EventType.InputMessageReceived)
+      forceOwnerChange2.addAttribute("Force Owner", "2")
+      const forceOwnerChange3 = createAuditLogEvent(
+        "information",
+        addDays(new Date(), 1),
+        EventType.InputMessageReceived
+      )
+      forceOwnerChange3.addAttribute("Force Owner", "3")
+      const forceOwnerChange4 = createAuditLogEvent("information", new Date(), EventType.InputMessageReceived)
+      forceOwnerChange4.addAttribute("Force Owner", "4")
+
+      const message = new AuditLog("one", new Date(), "dummy hash")
+
+      await gateway.create(message)
+
+      const result = await gateway.prepareEvents(message.messageId, message.version, [
+        forceOwnerChange1,
+        forceOwnerChange2,
+        forceOwnerChange3,
+        forceOwnerChange4
+      ])
+
+      expect(isError(result)).toBe(false)
+
+      const transaction = result as DynamoUpdate
+
+      expect(transaction.Update).toBeDefined()
+      expect(transaction.Update!.UpdateExpression).toContain("automationReport.forceOwner = :forceOwner")
+      expect(transaction.Update!.ExpressionAttributeValues).toBeDefined()
+      expect(transaction.Update!.ExpressionAttributeValues![":forceOwner"]).toBe("3")
+    })
+
+    it("should add all events to be logged for the automation report", async () => {
+      const eventsToBeLogged = [
+        createAuditLogEvent("information", new Date(), "Hearing Outcome passed to Error List"),
+        createAuditLogEvent("information", new Date(), "PNC Update added to Error List"),
+        createAuditLogEvent("information", new Date(), "Exception marked as resolved by user"),
+        createAuditLogEvent("information", new Date(), "PNC Update applied successfully")
+      ]
+      const eventsNotToBeLogged = [
+        createAuditLogEvent("information", new Date(), "Some other event"),
+        createAuditLogEvent("information", new Date(), "Some other other event")
+      ]
+      const allEvents = shuffle([...eventsToBeLogged, ...eventsNotToBeLogged])
+
+      const message = new AuditLog("one", new Date(), "dummy hash")
+
+      await gateway.create(message)
+
+      const result = await gateway.prepareEvents(message.messageId, message.version, allEvents)
+
+      expect(isError(result)).toBe(false)
+
+      const transaction = result as DynamoUpdate
+
+      expect(transaction.Update).toBeDefined()
+      expect(transaction.Update!.UpdateExpression).toContain(
+        "automationReport.events = list_append(if_not_exists(automationReport.events, :empty_list), :automationReportEvents)"
+      )
+      expect(transaction.Update!.ExpressionAttributeValues).toBeDefined()
+      expect(transaction.Update!.ExpressionAttributeValues![":automationReportEvents"]).toHaveLength(4)
+      expect(transaction.Update!.ExpressionAttributeValues![":automationReportEvents"]).toContainEqual(
+        eventsToBeLogged[0]
+      )
+      expect(transaction.Update!.ExpressionAttributeValues![":automationReportEvents"]).toContainEqual(
+        eventsToBeLogged[1]
+      )
+      expect(transaction.Update!.ExpressionAttributeValues![":automationReportEvents"]).toContainEqual(
+        eventsToBeLogged[2]
+      )
+      expect(transaction.Update!.ExpressionAttributeValues![":automationReportEvents"]).toContainEqual(
+        eventsToBeLogged[3]
+      )
+    })
+
+    it("should add all events to be logged for the top exceptions report", async () => {
+      const eventsToBeLogged = [
+        createAuditLogEvent("information", new Date(), "SPIResults"),
+        createAuditLogEvent("information", new Date(), "SPIResults"),
+        createAuditLogEvent("information", new Date(), "SPIResults"),
+        createAuditLogEvent("information", new Date(), "SPIResults")
+      ]
+      eventsToBeLogged.forEach((event) => {
+        event.addAttribute("Message Type", "SPIResults")
+        event.addAttribute("Error Details", "An error occured")
+      })
+      const eventsNotToBeLogged = [
+        createAuditLogEvent("information", new Date(), "Some other event"),
+        createAuditLogEvent("information", new Date(), "Some other other event")
+      ]
+      const allEvents = shuffle([...eventsToBeLogged, ...eventsNotToBeLogged])
+
+      const message = new AuditLog("one", new Date(), "dummy hash")
+
+      await gateway.create(message)
+
+      const result = await gateway.prepareEvents(message.messageId, message.version, allEvents)
+
+      expect(isError(result)).toBe(false)
+
+      const transaction = result as DynamoUpdate
+
+      expect(transaction.Update).toBeDefined()
+      expect(transaction.Update!.UpdateExpression).toContain(
+        "topExceptionsReport.events = list_append(if_not_exists(topExceptionsReport.events, :empty_list), :topExceptionEvents)"
+      )
+      expect(transaction.Update!.ExpressionAttributeValues).toBeDefined()
+      expect(transaction.Update!.ExpressionAttributeValues![":topExceptionEvents"]).toHaveLength(4)
+      expect(transaction.Update!.ExpressionAttributeValues![":topExceptionEvents"]).toContainEqual(eventsToBeLogged[0])
+      expect(transaction.Update!.ExpressionAttributeValues![":topExceptionEvents"]).toContainEqual(eventsToBeLogged[1])
+      expect(transaction.Update!.ExpressionAttributeValues![":topExceptionEvents"]).toContainEqual(eventsToBeLogged[2])
+      expect(transaction.Update!.ExpressionAttributeValues![":topExceptionEvents"]).toContainEqual(eventsToBeLogged[3])
+    })
+
+    it("should set the archival date to the earliest archival event timestamp", async () => {
+      const events = [
+        createAuditLogEvent("information", new Date(), EventType.ErrorRecordArchival),
+        createAuditLogEvent("information", new Date(), EventType.ErrorRecordArchival),
+        createAuditLogEvent("information", new Date(), EventType.ErrorRecordArchival)
+      ]
+      const earliestEvent = createAuditLogEvent("information", subDays(new Date(), 1), EventType.ErrorRecordArchival)
+      events.splice(2, 0, earliestEvent)
+
+      const message = new AuditLog("one", new Date(), "dummy hash")
+
+      await gateway.create(message)
+
+      const result = await gateway.prepareEvents(message.messageId, message.version, events)
+
+      expect(isError(result)).toBe(false)
+
+      const transaction = result as DynamoUpdate
+
+      expect(transaction.Update).toBeDefined()
+      expect(transaction.Update!.UpdateExpression).toContain("#errorRecordArchivalDate = :errorRecordArchivalDate")
+      expect(transaction.Update!.ExpressionAttributeNames).toBeDefined()
+      expect(transaction.Update!.ExpressionAttributeNames!["#errorRecordArchivalDate"]).toBe("errorRecordArchivalDate")
+      expect(transaction.Update!.ExpressionAttributeValues).toBeDefined()
+      expect(transaction.Update!.ExpressionAttributeValues![":errorRecordArchivalDate"]).toBe(earliestEvent.timestamp)
+    })
+
+    it("should set the sanitised flag when one of the events is a sanitisation event", async () => {
+      const events = [
+        createAuditLogEvent("information", new Date(), EventType.ErrorRecordArchival),
+        createAuditLogEvent("information", new Date(), EventType.SanitisedMessage),
+        createAuditLogEvent("information", new Date(), "SPIResults")
+      ]
+
+      const message = new AuditLog("one", new Date(), "dummy hash")
+
+      await gateway.create(message)
+
+      const result = await gateway.prepareEvents(message.messageId, message.version, events)
+
+      expect(isError(result)).toBe(false)
+
+      const transaction = result as DynamoUpdate
+
+      expect(transaction.Update).toBeDefined()
+      expect(transaction.Update!.UpdateExpression).toContain("#isSanitised = :isSanitised")
+      expect(transaction.Update!.ExpressionAttributeNames).toBeDefined()
+      expect(transaction.Update!.ExpressionAttributeNames!["#isSanitised"]).toBe("isSanitised")
+      expect(transaction.Update!.ExpressionAttributeValues).toBeDefined()
+      expect(transaction.Update!.ExpressionAttributeValues![":isSanitised"]).toBe(1)
+    })
+
+    it("should update the retry count when there are retry events", async () => {
+      const events = [
+        createAuditLogEvent("information", new Date(), EventType.ErrorRecordArchival),
+        createAuditLogEvent("information", new Date(), EventType.Retrying),
+        createAuditLogEvent("information", new Date(), "SPIResults")
+      ]
+
+      const message = new AuditLog("one", new Date(), "dummy hash")
+
+      await gateway.create(message)
+
+      const result = await gateway.prepareEvents(message.messageId, message.version, events)
+
+      expect(isError(result)).toBe(false)
+
+      const transaction = result as DynamoUpdate
+
+      expect(transaction.Update).toBeDefined()
+      expect(transaction.Update!.UpdateExpression).toContain(
+        "#retryCount = if_not_exists(#retryCount, :zero) + :retryCount"
+      )
+      expect(transaction.Update!.ExpressionAttributeValues).toBeDefined()
+      expect(transaction.Update!.ExpressionAttributeValues![":zero"]).toBe(0)
+      expect(transaction.Update!.ExpressionAttributeValues![":retryCount"]).toBe(1)
+      expect(transaction.Update!.ExpressionAttributeNames).toBeDefined()
+      expect(transaction.Update!.ExpressionAttributeNames!["#retryCount"]).toBe("retryCount")
+    })
+  })
+
+  describe("prepare() and execute()", () => {
+    it("should give an appropriate error when adding many events to an audit log which has been updated in the background", async () => {
+      const events = [
+        createAuditLogEvent("information", new Date(), EventType.ErrorRecordArchival),
+        createAuditLogEvent("information", new Date(), EventType.PncUpdated),
+        createAuditLogEvent("information", new Date(), "SPIResults")
+      ]
+      const message = new AuditLog("one", new Date(), "dummy hash")
+
+      await gateway.create(message)
+
+      const prepareResult = await gateway.prepareEvents(message.messageId, message.version, events)
+      expect(isError(prepareResult)).toBe(false)
+
+      // Update audit log with additional messages before executing the prepared updates
+      const updateResult = await gateway.addEvent(
+        message.messageId,
+        message.version,
+        createAuditLogEvent("information", new Date(), "SPIResults")
+      )
+      expect(isError(updateResult)).toBe(false)
+
+      const executeResult = await gateway.executeTransaction([prepareResult as DynamoUpdate])
+      expect(isError(executeResult)).toBe(true)
+      expect(isConditionalExpressionViolationError(executeResult as Error)).toBeTruthy()
     })
   })
 })

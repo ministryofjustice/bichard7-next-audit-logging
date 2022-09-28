@@ -1,19 +1,28 @@
 import { addDays } from "date-fns"
+import maxBy from "lodash.maxby"
 import type {
   AuditLog,
   AuditLogDynamoGateway,
   AuditLogEvent,
   DynamoDbConfig,
+  DynamoUpdate,
   KeyValuePair,
   PromiseResult
 } from "shared-types"
 import { EventType, isError } from "shared-types"
+import type { UpdateComponent } from "src/utils/updateComponentTypes"
 import type { FetchByIndexOptions, UpdateOptions } from "../DynamoGateway"
 import { DynamoGateway, IndexSearcher, KeyComparison } from "../DynamoGateway"
 import CalculateMessageStatusUseCase from "./CalculateMessageStatusUseCase"
-import getForceOwnerForAutomationReport from "./getForceOwnerForAutomationReport"
-import shouldLogForAutomationReport from "./shouldLogForAutomationReport"
-import shouldLogForTopExceptionsReport from "./shouldLogForTopExceptionsReport"
+import {
+  archivalUpdateComponent,
+  automationRateReportUpdateComponent,
+  forceOwnerUpdateComponent,
+  retryCountUpdateComponent,
+  sanitisationUpdateComponent,
+  statusUpdateComponent,
+  topExceptionsReportUpdateComponent
+} from "./updateComponents"
 
 export default class AwsAuditLogDynamoGateway extends DynamoGateway implements AuditLogDynamoGateway {
   private readonly tableKey: string = "messageId"
@@ -31,7 +40,7 @@ export default class AwsAuditLogDynamoGateway extends DynamoGateway implements A
       ).toString()
     }
 
-    const result = await this.insertOne(this.tableName, message, "messageId")
+    const result = await this.insertOne(this.tableName, message, this.tableKey)
 
     if (isError(result)) {
       return result
@@ -239,75 +248,82 @@ export default class AwsAuditLogDynamoGateway extends DynamoGateway implements A
   }
 
   async addEvent(messageId: string, messageVersion: number, event: AuditLogEvent): PromiseResult<void> {
-    const events = await this.fetchEvents(messageId)
-    if (isError(events)) {
-      return events
+    const dynamoUpdate = await this.prepare(messageId, messageVersion, event)
+    if (isError(dynamoUpdate)) {
+      return dynamoUpdate
     }
 
-    const status = new CalculateMessageStatusUseCase(events, event).call()
-
-    const expressionAttributeNames: KeyValuePair<string, string> = {
-      "#lastEventType": "lastEventType"
-    }
-    const updateExpressionValues: KeyValuePair<string, unknown> = {
-      ":event": [event],
-      ":empty_list": <AuditLogEvent[]>[],
-      ":lastEventType": event.eventType
-    }
-    let updateExpression = `
-      set events = list_append(if_not_exists(events, :empty_list), :event),
-      #lastEventType = :lastEventType
-    `
-
-    const forceOwnerForAutomationReport = getForceOwnerForAutomationReport(event)
-    if (forceOwnerForAutomationReport) {
-      updateExpressionValues[":forceOwner"] = forceOwnerForAutomationReport
-      updateExpression = `${updateExpression}, automationReport.forceOwner = :forceOwner`
-    }
-
-    if (shouldLogForTopExceptionsReport(event)) {
-      updateExpression = `${updateExpression}, topExceptionsReport.events = list_append(if_not_exists(topExceptionsReport.events, :empty_list), :event)`
-    }
-
-    if (shouldLogForAutomationReport(event)) {
-      updateExpression = `${updateExpression}, automationReport.events = list_append(if_not_exists(automationReport.events, :empty_list), :event)`
-    }
-
-    if (status) {
-      expressionAttributeNames["#status"] = "status"
-      updateExpressionValues[":status"] = status
-      updateExpression += ",#status = :status"
-    }
-
-    if (event.eventType === EventType.ErrorRecordArchival) {
-      expressionAttributeNames["#errorRecordArchivalDate"] = "errorRecordArchivalDate"
-      updateExpressionValues[":errorRecordArchivalDate"] = event.timestamp
-      updateExpression += ",#errorRecordArchivalDate = :errorRecordArchivalDate"
-    } else if (event.eventType === EventType.SanitisedMessage) {
-      expressionAttributeNames["#isSanitised"] = "isSanitised"
-      updateExpressionValues[":isSanitised"] = 1
-      updateExpression += ",#isSanitised = :isSanitised"
-    } else if (event.eventType === "Retrying failed message") {
-      updateExpression = `${updateExpression}, retryCount = if_not_exists(retryCounter, :zero) + :one`
-      updateExpressionValues[":zero"] = 0
-      updateExpressionValues[":one"] = 1
-    }
-
-    const options: UpdateOptions = {
-      keyName: this.tableKey,
-      keyValue: messageId,
-      updateExpression,
-      expressionAttributeNames,
-      updateExpressionValues,
-      currentVersion: messageVersion
-    }
-
-    const result = await this.updateEntry(this.tableName, options)
+    const result = await this.executeTransaction([dynamoUpdate])
 
     if (isError(result)) {
       return result
     }
 
     return undefined
+  }
+
+  prepare(messageId: string, messageVersion: number, event: AuditLogEvent): PromiseResult<DynamoUpdate> {
+    return this.prepareEvents(messageId, messageVersion, [event])
+  }
+
+  async prepareEvents(messageId: string, messageVersion: number, events: AuditLogEvent[]): PromiseResult<DynamoUpdate> {
+    const currentEvents = await this.fetchEvents(messageId)
+    if (isError(currentEvents)) {
+      return currentEvents
+    }
+
+    // Add events to the array and set last event type
+    let updateExpression = `
+      set events = list_append(if_not_exists(events, :empty_list), :events),
+      #lastEventType = :lastEventType
+    `
+    let expressionAttributeNames: KeyValuePair<string, string> = {
+      "#lastEventType": "lastEventType"
+    }
+    const lastEventType = maxBy(events, (event) => event.timestamp)?.eventType
+    let updateExpressionValues: KeyValuePair<string, unknown> = {
+      ":events": events,
+      ":empty_list": <AuditLogEvent[]>[],
+      ":lastEventType": lastEventType
+    }
+
+    const updateComponents: UpdateComponent[] = [
+      forceOwnerUpdateComponent,
+      statusUpdateComponent,
+      topExceptionsReportUpdateComponent,
+      automationRateReportUpdateComponent,
+      archivalUpdateComponent,
+      sanitisationUpdateComponent,
+      retryCountUpdateComponent
+    ]
+
+    for (const updateComponent of updateComponents) {
+      const updateComponentResult = updateComponent(currentEvents, events)
+
+      if (updateComponentResult.updateExpression) {
+        updateExpression += ", " + updateComponentResult.updateExpression
+      }
+
+      if (updateComponentResult.expressionAttributeNames) {
+        expressionAttributeNames = { ...expressionAttributeNames, ...updateComponentResult.expressionAttributeNames }
+      }
+
+      if (updateComponentResult.updateExpressionValues) {
+        updateExpressionValues = { ...updateExpressionValues, ...updateComponentResult.updateExpressionValues }
+      }
+    }
+
+    return {
+      Update: {
+        TableName: this.tableName,
+        Key: {
+          messageId: messageId
+        },
+        UpdateExpression: updateExpression + " ADD version :version_increment",
+        ExpressionAttributeNames: expressionAttributeNames,
+        ExpressionAttributeValues: { ...updateExpressionValues, ":version": messageVersion, ":version_increment": 1 },
+        ConditionExpression: `attribute_exists(${this.tableKey}) AND version = :version`
+      }
+    }
   }
 }

@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable class-methods-use-this */
-import type { AuditLogLookup, AuditLogLookupDynamoGateway, PromiseResult } from "shared-types"
+import type { AuditLogLookup, AuditLogLookupDynamoGateway, DynamoUpdate, PromiseResult } from "shared-types"
 
 export default class FakeAuditLogLookupDynamoGateway implements AuditLogLookupDynamoGateway {
   public items: AuditLogLookup[] = []
@@ -18,6 +18,16 @@ export default class FakeAuditLogLookupDynamoGateway implements AuditLogLookupDy
 
     this.items.push(lookupItem)
     return Promise.resolve(lookupItem)
+  }
+
+  prepare(lookupItem: AuditLogLookup): Promise<DynamoUpdate> {
+    return Promise.resolve({
+      Put: {
+        Item: lookupItem,
+        TableName: "AuditLogLookup",
+        ConditionExpression: `attribute_not_exists(id)`
+      }
+    })
   }
 
   fetchById(lookupId: string): PromiseResult<AuditLogLookup> {
@@ -51,5 +61,14 @@ export default class FakeAuditLogLookupDynamoGateway implements AuditLogLookupDy
   reset(items?: AuditLogLookup[]): void {
     this.error = undefined
     this.items = items ?? []
+  }
+
+  executeTransaction(updates: DynamoUpdate[]): PromiseResult<void> {
+    if (this.error) {
+      return Promise.resolve(this.error)
+    }
+
+    this.items = updates.map((update) => update.Put!.Item as AuditLogLookup)
+    return Promise.resolve()
   }
 }

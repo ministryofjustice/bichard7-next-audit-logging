@@ -1,4 +1,4 @@
-import type { AuditLog, AuditLogEvent, PromiseResult } from "."
+import type { AuditLog, AuditLogEvent, DynamoUpdate, PromiseResult } from "."
 
 export default interface AuditLogDynamoGateway {
   create(message: AuditLog): PromiseResult<AuditLog>
@@ -14,4 +14,7 @@ export default interface AuditLogDynamoGateway {
   fetchVersion(messageId: string): PromiseResult<number | null>
   fetchEvents(messageId: string): PromiseResult<AuditLogEvent[]>
   addEvent(messageId: string, messageVersion: number, event: AuditLogEvent): PromiseResult<void>
+  prepare(messageId: string, messageVersion: number, event: AuditLogEvent): PromiseResult<DynamoUpdate>
+  prepareEvents(messageId: string, messageVersion: number, events: AuditLogEvent[]): PromiseResult<DynamoUpdate>
+  executeTransaction(actions: DynamoUpdate[]): PromiseResult<void>
 }

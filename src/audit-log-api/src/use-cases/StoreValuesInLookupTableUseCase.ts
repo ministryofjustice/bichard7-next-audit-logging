@@ -2,11 +2,13 @@ import type {
   AuditLogEvent,
   AuditLogLookupDynamoGateway,
   BichardAuditLogEvent,
+  DynamoUpdate,
   KeyValuePair,
   PromiseResult,
   ValueLookup
 } from "shared-types"
-import { AuditLogLookup, isError } from "shared-types"
+import { isError } from "shared-types"
+import { AuditLogLookup } from "shared-types"
 
 const maxAttributeValueLength = 1000
 
@@ -14,19 +16,26 @@ export default class StoreValuesInLookupTableUseCase {
   constructor(private readonly lookupGateway: AuditLogLookupDynamoGateway) {}
 
   async execute(event: AuditLogEvent, messageId: string): PromiseResult<AuditLogEvent> {
+    const [dynamoUpdates, updatedEvent] = await this.prepare(event, messageId)
+
+    const result = await this.lookupGateway.executeTransaction(dynamoUpdates)
+
+    return isError(result) ? result : updatedEvent
+  }
+
+  async prepare(event: AuditLogEvent, messageId: string): Promise<[DynamoUpdate[], AuditLogEvent]> {
     const attributes: KeyValuePair<string, unknown> = {}
+    const dynamoUpdates: DynamoUpdate[] = []
 
     const attributeKeys = Object.keys(event.attributes)
 
     for (const attributeKey of attributeKeys) {
       const attributeValue = event.attributes[attributeKey]
       if (attributeValue && typeof attributeValue === "string" && attributeValue.length > maxAttributeValueLength) {
-        const lookupItem = await this.lookupGateway.create(new AuditLogLookup(attributeValue, messageId))
+        const lookupItem = new AuditLogLookup(attributeValue, messageId)
+        const lookupDynamoUpdate = await this.lookupGateway.prepare(lookupItem)
 
-        if (isError(lookupItem)) {
-          return lookupItem
-        }
-
+        dynamoUpdates.push(lookupDynamoUpdate)
         attributes[attributeKey] = { valueLookup: lookupItem.id } as ValueLookup
       } else {
         attributes[attributeKey] = attributeValue
@@ -36,19 +45,18 @@ export default class StoreValuesInLookupTableUseCase {
     let eventXml: string | undefined | ValueLookup =
       "eventXml" in event ? (event as BichardAuditLogEvent).eventXml : undefined
     if (eventXml) {
-      const lookupItem = await this.lookupGateway.create(new AuditLogLookup(eventXml, messageId))
+      const lookupItem = new AuditLogLookup(eventXml, messageId)
+      const lookupDynamoUpdates = await this.lookupGateway.prepare(lookupItem)
 
-      if (isError(lookupItem)) {
-        return lookupItem
-      }
-
+      dynamoUpdates.push(lookupDynamoUpdates)
       eventXml = { valueLookup: lookupItem.id }
     }
 
-    return {
+    const updatedEvent = {
       ...event,
       attributes,
       ...(eventXml ? { eventXml } : {})
     } as AuditLogEvent
+    return [dynamoUpdates, updatedEvent]
   }
 }

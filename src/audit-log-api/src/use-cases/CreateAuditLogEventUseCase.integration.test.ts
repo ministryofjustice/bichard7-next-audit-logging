@@ -1,5 +1,5 @@
 jest.retryTimes(10)
-import type { AuditLogLookup, DynamoDbConfig } from "shared-types"
+import type { AuditLogLookup } from "shared-types"
 import { AuditLog, AuditLogEvent } from "shared-types"
 import { AwsAuditLogDynamoGateway, decompress } from "shared"
 import { TestDynamoGateway } from "shared"
@@ -7,29 +7,14 @@ import CreateAuditLogEventUseCase from "./CreateAuditLogEventUseCase"
 import { AwsAuditLogLookupDynamoGateway } from "shared"
 import StoreValuesInLookupTableUseCase from "./StoreValuesInLookupTableUseCase"
 import type { KeyValuePair } from "shared-types"
+import { auditLogDynamoConfig, auditLogLookupDynamoConfig } from "shared-testing"
 
-const auditLogConfig: DynamoDbConfig = {
-  DYNAMO_URL: "http://localhost:8000",
-  DYNAMO_REGION: "eu-west-2",
-  TABLE_NAME: "auditLogTable",
-  AWS_ACCESS_KEY_ID: "DUMMY",
-  AWS_SECRET_ACCESS_KEY: "DUMMY"
-}
-
-const auditLogLookupConfig: DynamoDbConfig = {
-  DYNAMO_URL: "http://localhost:8000",
-  DYNAMO_REGION: "eu-west-2",
-  TABLE_NAME: "auditLogLookupTable",
-  AWS_ACCESS_KEY_ID: "DUMMY",
-  AWS_SECRET_ACCESS_KEY: "DUMMY"
-}
-
-const testAuditLogDynamoGateway = new TestDynamoGateway(auditLogConfig)
-const testAuditLogLookupDynamoGateway = new TestDynamoGateway(auditLogLookupConfig)
-const auditLogDynamoGateway = new AwsAuditLogDynamoGateway(auditLogConfig, auditLogConfig.TABLE_NAME)
+const testAuditLogDynamoGateway = new TestDynamoGateway(auditLogDynamoConfig)
+const testAuditLogLookupDynamoGateway = new TestDynamoGateway(auditLogLookupDynamoConfig)
+const auditLogDynamoGateway = new AwsAuditLogDynamoGateway(auditLogDynamoConfig, auditLogDynamoConfig.TABLE_NAME)
 const auditLogLookupDynamoGateway = new AwsAuditLogLookupDynamoGateway(
-  auditLogLookupConfig,
-  auditLogLookupConfig.TABLE_NAME
+  auditLogLookupDynamoConfig,
+  auditLogLookupDynamoConfig.TABLE_NAME
 )
 const storeValuesInLookupTableUseCase = new StoreValuesInLookupTableUseCase(auditLogLookupDynamoGateway)
 const createAuditLogEventUseCase = new CreateAuditLogEventUseCase(
@@ -61,15 +46,24 @@ const createStacktraceAuditLogEvent = (): AuditLogEvent => {
 }
 
 const getAuditLog = (messageId: string): Promise<AuditLog | null> =>
-  testAuditLogDynamoGateway.getOne(auditLogConfig.TABLE_NAME, "messageId", messageId)
+  testAuditLogDynamoGateway.getOne(auditLogDynamoConfig.TABLE_NAME, "messageId", messageId)
 
 const lookupValue = (lookupId: string): Promise<AuditLogLookup | null> =>
-  testAuditLogLookupDynamoGateway.getOne(auditLogLookupConfig.TABLE_NAME, "id", lookupId)
+  testAuditLogLookupDynamoGateway.getOne(auditLogLookupDynamoConfig.TABLE_NAME, "id", lookupId)
 
-describe("CreateAuditLogUseCase", () => {
+const lookupMessageId = (messageId: string): Promise<AuditLogLookup[] | null> =>
+  testAuditLogLookupDynamoGateway.getManyById(
+    auditLogLookupDynamoConfig.TABLE_NAME,
+    "messageIdIndex",
+    "messageId",
+    messageId
+  )
+
+describe("CreateAuditLogEventUseCase", () => {
   beforeEach(async () => {
-    await testAuditLogDynamoGateway.deleteAll(auditLogConfig.TABLE_NAME, "messageId")
-    await testAuditLogLookupDynamoGateway.deleteAll(auditLogLookupConfig.TABLE_NAME, "id")
+    await testAuditLogDynamoGateway.deleteAll(auditLogDynamoConfig.TABLE_NAME, "messageId")
+    await testAuditLogLookupDynamoGateway.deleteAll(auditLogLookupDynamoConfig.TABLE_NAME, "id")
+    jest.clearAllMocks()
   })
 
   it("should return success result when event is added to the audit log", async () => {
@@ -207,5 +201,28 @@ describe("CreateAuditLogUseCase", () => {
     expect(actualAuditLog).toBeDefined()
     expect(actualAuditLog?.events).toBeDefined()
     expect(actualAuditLog?.events).toHaveLength(2)
+  })
+
+  it("shouldn't add events when creating the transaction fails", async () => {
+    const auditLog = createAuditLog()
+    await auditLogDynamoGateway.create(auditLog)
+
+    const event = createAuditLogEvent()
+    event.addAttribute("reallyLongAttribute", "X".repeat(10_000))
+
+    jest
+      .spyOn(auditLogDynamoGateway, "executeTransaction")
+      .mockResolvedValueOnce(new Error("Failed to create audit log table entry"))
+
+    const result = await createAuditLogEventUseCase.create(auditLog.messageId, event)
+
+    expect(result.resultType).toBe("transactionFailed")
+
+    const actualAuditLog = await getAuditLog(auditLog.messageId)
+    expect(actualAuditLog).toBeDefined()
+    expect(actualAuditLog?.events).toHaveLength(0)
+
+    const lookupResult = await lookupMessageId(auditLog.messageId)
+    expect(lookupResult).toBeNull()
   })
 })

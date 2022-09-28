@@ -1,23 +1,15 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 jest.retryTimes(10)
 import { isError } from "shared-types"
-import type { S3Config } from "shared-types"
 import TestS3Gateway from "./TestS3Gateway"
+import { externalIncomingS3Config } from "shared-testing"
 
-const config: S3Config = {
-  url: "http://localhost:4569",
-  region: "eu-west-2",
-  bucketName: "externalIncomingBucket",
-  accessKeyId: "S3RVER",
-  secretAccessKey: "S3RVER"
-}
-
-const gateway = new TestS3Gateway(config)
+const gateway = new TestS3Gateway(externalIncomingS3Config)
 const fileName = "2021/04/09/12/06/123456.xml"
 
 describe("S3Gateway", () => {
   beforeAll(async () => {
-    await gateway.createBucket(config.bucketName!)
+    await gateway.createBucket(externalIncomingS3Config.bucketName!)
     await gateway.deleteAll()
   })
 
@@ -25,7 +17,7 @@ describe("S3Gateway", () => {
     it("should return the contents of a file when it exists in the bucket", async () => {
       await gateway.upload(fileName, "Message to be saved")
 
-      const content = await gateway.getItem(config.bucketName!, fileName)
+      const content = await gateway.getItem(externalIncomingS3Config.bucketName!, fileName)
 
       expect(content).toBe("Message to be saved")
     })

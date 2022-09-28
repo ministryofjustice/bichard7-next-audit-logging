@@ -2,10 +2,9 @@ jest.retryTimes(10)
 import "shared-testing"
 import { v4 as uuid } from "uuid"
 import format from "xml-formatter"
-import type { DynamoDbConfig } from "shared-types"
 import { TestDynamoGateway, TestS3Gateway } from "shared"
 import TestMqGateway from "../gateways/MqGateway/TestMqGateway"
-import { setEnvironmentVariables } from "shared-testing"
+import { setEnvironmentVariables, auditLogDynamoConfig } from "shared-testing"
 process.env.MQ_QUEUE = "INCOMING_MESSAGE_HANDLER_QUEUE"
 process.env.INCOMING_MESSAGE_BUCKET_NAME = "internalIncomingBucket"
 setEnvironmentVariables()
@@ -41,14 +40,7 @@ const originalXml = formatXml(`
   </RouteData>
 `)
 
-const dynamoConfig: DynamoDbConfig = {
-  DYNAMO_URL: "http://localhost:8000",
-  DYNAMO_REGION: "eu-west-2",
-  TABLE_NAME: "auditLogTable",
-  AWS_ACCESS_KEY_ID: "DUMMY",
-  AWS_SECRET_ACCESS_KEY: "DUMMY"
-}
-const dynamoGateway = new TestDynamoGateway(dynamoConfig)
+const dynamoGateway = new TestDynamoGateway(auditLogDynamoConfig)
 
 const s3Gateway = new TestS3Gateway({
   url: "http://localhost:4569",
@@ -70,7 +62,7 @@ const testMqGateway = new TestMqGateway({
 
 describe("e2e tests", () => {
   beforeEach(async () => {
-    await dynamoGateway.deleteAll(dynamoConfig.TABLE_NAME, "messageId")
+    await dynamoGateway.deleteAll(auditLogDynamoConfig.TABLE_NAME, "messageId")
     await s3Gateway.deleteAll()
   })
 

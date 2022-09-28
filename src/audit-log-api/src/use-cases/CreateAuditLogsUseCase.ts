@@ -1,6 +1,6 @@
+import { isConditionalExpressionViolationError, isTransactionFailedError } from "shared"
 import type { AuditLog, AuditLogDynamoGateway, TransactionFailureReason } from "shared-types"
 import { isError } from "shared-types"
-import { isConditionalExpressionViolationError, isTransactionFailedError } from "../utils"
 
 interface CreateAuditLogsResult {
   resultType: "success" | "conflict" | "error"

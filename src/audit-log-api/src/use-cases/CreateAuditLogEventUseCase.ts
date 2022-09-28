@@ -1,12 +1,7 @@
-import type { AuditLogEvent, AuditLogDynamoGateway } from "shared-types"
+import type { AuditLogEvent, AuditLogDynamoGateway, CreateAuditLogEventsResult } from "shared-types"
 import { isError } from "shared-types"
-import { isConditionalExpressionViolationError } from "../utils"
 import type StoreValuesInLookupTableUseCase from "./StoreValuesInLookupTableUseCase"
-
-interface CreateAuditLogEventResult {
-  resultType: "success" | "notFound" | "invalidVersion" | "error"
-  resultDescription?: string
-}
+import { isConditionalExpressionViolationError } from "shared"
 
 const shouldDeduplicate = (event: AuditLogEvent): boolean =>
   event.category === "error" &&
@@ -43,7 +38,7 @@ export default class CreateAuditLogEventUseCase {
     private readonly storeValuesInLookupTableUseCase: StoreValuesInLookupTableUseCase
   ) {}
 
-  async create(messageId: string, originalEvent: AuditLogEvent): Promise<CreateAuditLogEventResult> {
+  async create(messageId: string, originalEvent: AuditLogEvent): Promise<CreateAuditLogEventsResult> {
     const messageVersion = await this.auditLogGateway.fetchVersion(messageId)
 
     if (isError(messageVersion)) {
@@ -70,6 +65,7 @@ export default class CreateAuditLogEventUseCase {
         }
       }
 
+      // Nothing to add for duplicate events
       if (isDuplicateEvent(originalEvent, message.events)) {
         return {
           resultType: "success"
@@ -77,27 +73,33 @@ export default class CreateAuditLogEventUseCase {
       }
     }
 
-    const event = await this.storeValuesInLookupTableUseCase.execute(originalEvent, messageId)
-    if (isError(event)) {
+    // Store long attribute values in the lookup table
+    const [dynamoUpdates, updatedEvent] = await this.storeValuesInLookupTableUseCase.prepare(originalEvent, messageId)
+
+    // Add the event to the audit log table entry
+    const auditLogDynamoUpdate = await this.auditLogGateway.prepare(messageId, messageVersion, updatedEvent)
+
+    if (isError(auditLogDynamoUpdate)) {
       return {
         resultType: "error",
-        resultDescription: `Couldn't save attribute value in lookup table. ${event.message}`
+        resultDescription: auditLogDynamoUpdate.message
       }
+    } else {
+      dynamoUpdates.push(auditLogDynamoUpdate)
     }
 
-    const result = await this.auditLogGateway.addEvent(messageId, messageVersion, event)
+    const transactionResult = await this.auditLogGateway.executeTransaction(dynamoUpdates)
 
-    if (isError(result)) {
-      if (isConditionalExpressionViolationError(result)) {
+    if (isError(transactionResult)) {
+      if (isConditionalExpressionViolationError(transactionResult)) {
         return {
           resultType: "invalidVersion",
           resultDescription: `Message with Id ${messageId} has a different version in the database.`
         }
       }
-
       return {
-        resultType: "error",
-        resultDescription: result.message
+        resultType: "transactionFailed",
+        resultDescription: transactionResult.message
       }
     }
 

@@ -1,8 +1,7 @@
 import { DynamoDB } from "aws-sdk"
 import { DocumentClient } from "aws-sdk/clients/dynamodb"
-import type { DynamoDbConfig, PromiseResult } from "shared-types"
-import { TransactionFailedError } from "shared-types"
-import { isError } from "shared-types"
+import type { DynamoDbConfig, DynamoUpdate, PromiseResult, TransactionFailureReason } from "shared-types"
+import { isError, TransactionFailedError } from "shared-types"
 import type FetchByIndexOptions from "./FetchByIndexOptions"
 import type GetManyOptions from "./GetManyOptions"
 import KeyComparison from "./KeyComparison"
@@ -55,16 +54,15 @@ export default class DynamoGateway {
       })
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let failureReasons: any[]
+    let failureReasons: TransactionFailureReason[]
     return this.client
       .transactWrite(params)
       .on("extractError", (response) => {
         try {
-          failureReasons = JSON.parse(response.httpResponse.body.toString()).CancellationReasons
-        } catch (err) {
-          // suppress this just in case some types of errors aren't JSON parseable
-          console.error("Error extracting cancellation error", err)
+          failureReasons = JSON.parse(response.httpResponse.body.toString())
+            .CancellationReasons as TransactionFailureReason[]
+        } catch (error) {
+          console.error("Error extracting cancellation error", error)
         }
       })
       .promise()
@@ -242,5 +240,51 @@ export default class DynamoGateway {
         return result
       }
     }
+  }
+
+  executeTransaction(actions: DynamoUpdate[]): PromiseResult<void> {
+    let failureReasons: TransactionFailureReason[] = []
+    return this.client
+      .transactWrite({ TransactItems: actions })
+      .on("extractError", (response) => {
+        // Error when we perform more actions than dynamodb supports
+        // see https://docs.aws.amazon.com/amazondynamodb/latest/APIReference/API_TransactWriteItems.html
+        if (response.error && response.error.message.startsWith("Member must have length less than or equal to")) {
+          failureReasons.push({
+            Code: "TooManyItems",
+            Message: response.error.message
+          })
+        } else {
+          // Save the returned reasons for the transaction failing as they are not returned
+          try {
+            failureReasons = JSON.parse(response.httpResponse.body.toString())
+              .CancellationReasons as TransactionFailureReason[]
+          } catch (error) {
+            console.error("Error extracting cancellation error", error)
+          }
+
+          if (failureReasons === undefined || failureReasons.length < 1) {
+            failureReasons = [
+              {
+                Code: "UnknownError",
+                Message: response.httpResponse.body.toString()
+              }
+            ]
+          }
+        }
+      })
+      .promise()
+      .then(() => {
+        if (failureReasons.length > 0) {
+          return new TransactionFailedError(failureReasons, failureReasons[0].Message)
+        }
+        return undefined
+      })
+      .catch((error) => {
+        if (failureReasons.length > 0) {
+          return new TransactionFailedError(failureReasons, error.message)
+        }
+        return <Error>error
+      })
   }
 }

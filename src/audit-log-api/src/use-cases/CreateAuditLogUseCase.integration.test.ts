@@ -1,30 +1,22 @@
 jest.retryTimes(10)
-import type { DynamoDbConfig } from "shared-types"
 import { AuditLog } from "shared-types"
 import { AwsAuditLogDynamoGateway } from "shared"
 import { TestDynamoGateway } from "shared"
 import CreateAuditLogUseCase from "./CreateAuditLogUseCase"
+import { auditLogDynamoConfig } from "shared-testing"
 
-const config: DynamoDbConfig = {
-  DYNAMO_URL: "http://localhost:8000",
-  DYNAMO_REGION: "eu-west-2",
-  TABLE_NAME: "auditLogTable",
-  AWS_ACCESS_KEY_ID: "DUMMY",
-  AWS_SECRET_ACCESS_KEY: "DUMMY"
-}
-
-const testDynamoGateway = new TestDynamoGateway(config)
-const auditLogDynamoGateway = new AwsAuditLogDynamoGateway(config, config.TABLE_NAME)
+const testDynamoGateway = new TestDynamoGateway(auditLogDynamoConfig)
+const auditLogDynamoGateway = new AwsAuditLogDynamoGateway(auditLogDynamoConfig, auditLogDynamoConfig.TABLE_NAME)
 const createAuditLogUseCase = new CreateAuditLogUseCase(auditLogDynamoGateway)
 
 const createAuditLog = (): AuditLog => new AuditLog("CorrelationId", new Date(), "Dummy hash")
 
 const getAuditLog = (messageId: string): Promise<AuditLog | null> =>
-  testDynamoGateway.getOne(config.TABLE_NAME, "messageId", messageId)
+  testDynamoGateway.getOne(auditLogDynamoConfig.TABLE_NAME, "messageId", messageId)
 
 describe("CreateAuditLogUseCase", () => {
   beforeEach(async () => {
-    await testDynamoGateway.deleteAll(config.TABLE_NAME, "messageId")
+    await testDynamoGateway.deleteAll(auditLogDynamoConfig.TABLE_NAME, "messageId")
   })
 
   it("should return a conflict result when an Audit Log record exists with the same messageId", async () => {
@@ -38,7 +30,7 @@ describe("CreateAuditLogUseCase", () => {
   })
 
   it("should return an error result when an unknown error occurs within the database", async () => {
-    const gateway = new AwsAuditLogDynamoGateway(config, "Invalid Table Name")
+    const gateway = new AwsAuditLogDynamoGateway(auditLogDynamoConfig, "Invalid Table Name")
     const useCase = new CreateAuditLogUseCase(gateway)
 
     const auditLog = createAuditLog()

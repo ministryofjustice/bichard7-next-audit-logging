@@ -1,7 +1,7 @@
 // @ts-ignore
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable class-methods-use-this */
-import type { AuditLog, AuditLogDynamoGateway, AuditLogEvent, PromiseResult } from "shared-types"
+import type { AuditLog, AuditLogDynamoGateway, AuditLogEvent, DynamoUpdate, PromiseResult } from "shared-types"
 
 export default class FakeAuditLogDynamoGateway implements AuditLogDynamoGateway {
   private messages: AuditLog[] = []
@@ -14,6 +14,14 @@ export default class FakeAuditLogDynamoGateway implements AuditLogDynamoGateway 
 
   createMany(_: AuditLog[]): PromiseResult<AuditLog[]> {
     throw new Error("Method not implemented.")
+  }
+
+  prepare(_messageId: string, _messageVersion: number, _event: AuditLogEvent): PromiseResult<DynamoUpdate> {
+    throw new Error("Method not implemented")
+  }
+
+  prepareEvents(_messageId: string, _messageVersion: number, _events: AuditLogEvent[]): PromiseResult<DynamoUpdate> {
+    throw new Error("Method not implemented")
   }
 
   update(message: AuditLog): PromiseResult<AuditLog> {
@@ -110,6 +118,10 @@ export default class FakeAuditLogDynamoGateway implements AuditLogDynamoGateway 
   // @ts-ignore
   updateSanitiseCheck(message: AuditLog, nextSanitiseCheck: Date): PromiseResult<void> {
     throw new Error("Method not implemented.")
+  }
+
+  executeTransaction(_: DynamoUpdate[]): PromiseResult<void> {
+    throw new Error("Method not implemented")
   }
 
   shouldReturnError(error: Error): void {
