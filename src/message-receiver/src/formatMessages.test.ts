@@ -117,3 +117,27 @@ test("decodes ProcessingValidation messages", () => {
     }
   ])
 })
+
+test("decodes ProcessingValidation messages containing utf8", () => {
+  const expectedMessage: JmsTextMessage = {
+    messageID: "",
+    messageType: "",
+    data: "eyJrZXkiOiAidGhpcyBjb250YWlucyBhIOKAmHV0Zi044oCZIHZhbHVlIn0=",
+    destination: {
+      physicalName: "PROCESSING_VALIDATION"
+    }
+  }
+
+  const event: AmazonMqEventSourceRecordEvent = {
+    eventSource: "",
+    eventSourceArn: "DummyArn",
+    messages: [expectedMessage]
+  }
+
+  const messages = formatMessages(event, "ProcessingValidation")
+  expect(messages).toStrictEqual([
+    {
+      key: "this contains a ‘utf-8’ value"
+    }
+  ])
+})
