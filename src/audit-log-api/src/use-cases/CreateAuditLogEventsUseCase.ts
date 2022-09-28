@@ -64,6 +64,7 @@ export default class CreateAuditLogEventsUseCase {
       }
     }
 
+    // Remove duplicate events which we aren't going to add
     const deduplicatedInputEvents = []
     for (const event of inputEvents) {
       if (shouldDeduplicate(event) && isDuplicateEvent(event, [...originalEvents, ...deduplicatedInputEvents])) {
@@ -79,6 +80,7 @@ export default class CreateAuditLogEventsUseCase {
       }
     }
 
+    // Store long attribute values in the lookup table
     const preparedEvents: AuditLogEvent[] = []
     const lookupDynamoUpdates = (
       await Promise.all(
@@ -94,6 +96,7 @@ export default class CreateAuditLogEventsUseCase {
       )
     ).flat()
 
+    // Add the events to the audit log table entry
     const auditLogDynamoUpdate = await this.auditLogGateway.prepareEvents(messageId, messageVersion, preparedEvents)
 
     if (isError(auditLogDynamoUpdate)) {

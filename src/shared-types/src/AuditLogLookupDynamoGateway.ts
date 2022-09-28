@@ -5,4 +5,5 @@ export default interface AuditLogLookupDynamoGateway {
   prepare(auditLogLookup: AuditLogLookup): Promise<DynamoUpdate>
   fetchById(id: string): PromiseResult<AuditLogLookup>
   deleteByMessageId(messageId: string): PromiseResult<void>
+  executeTransaction(actions: DynamoUpdate[]): PromiseResult<void>
 }

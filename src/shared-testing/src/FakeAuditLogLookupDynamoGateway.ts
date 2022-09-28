@@ -62,4 +62,13 @@ export default class FakeAuditLogLookupDynamoGateway implements AuditLogLookupDy
     this.error = undefined
     this.items = items ?? []
   }
+
+  executeTransaction(updates: DynamoUpdate[]): PromiseResult<void> {
+    if (this.error) {
+      return Promise.resolve(this.error)
+    }
+
+    this.items = updates.map((update) => update.Put!.Item as AuditLogLookup)
+    return Promise.resolve()
+  }
 }

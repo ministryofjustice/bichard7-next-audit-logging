@@ -266,23 +266,22 @@ export default class AwsAuditLogDynamoGateway extends DynamoGateway implements A
       return currentEvents
     }
 
-    const status = new CalculateMessageStatusUseCase(...events, ...currentEvents).call()
-
-    const lastEventType = maxBy(events, (event) => event.timestamp)?.eventType
-
+    // Add events to the array and set last event type
+    let updateExpression = `
+      set events = list_append(if_not_exists(events, :empty_list), :events),
+      #lastEventType = :lastEventType
+    `
     const expressionAttributeNames: KeyValuePair<string, string> = {
       "#lastEventType": "lastEventType"
     }
+    const lastEventType = maxBy(events, (event) => event.timestamp)?.eventType
     const updateExpressionValues: KeyValuePair<string, unknown> = {
       ":events": events,
       ":empty_list": <AuditLogEvent[]>[],
       ":lastEventType": lastEventType
     }
-    let updateExpression = `
-      set events = list_append(if_not_exists(events, :empty_list), :events),
-      #lastEventType = :lastEventType
-    `
 
+    // Calculate which force owns this message for reports
     const forceOwnerEvents = events.filter((event) => getForceOwnerForAutomationReport(event))
     const forceOwnerEventForAutomationReport = maxBy(forceOwnerEvents, (event) => event.timestamp)
     if (forceOwnerEventForAutomationReport) {
@@ -290,19 +289,21 @@ export default class AwsAuditLogDynamoGateway extends DynamoGateway implements A
       updateExpression += ", automationReport.forceOwner = :forceOwner"
     }
 
+    // Set the status if it changed
+    const status = new CalculateMessageStatusUseCase(...events, ...currentEvents).call()
     if (status) {
       expressionAttributeNames["#status"] = "status"
       updateExpressionValues[":status"] = status
       updateExpression += ", #status = :status"
     }
 
+    // Add events relevant to reports to those arrays
     const topExceptionsReportEvents = events.filter((event) => shouldLogForTopExceptionsReport(event))
     if (topExceptionsReportEvents.length > 0) {
       updateExpressionValues[":topExceptionEvents"] = topExceptionsReportEvents
       updateExpression +=
         ", topExceptionsReport.events = list_append(if_not_exists(topExceptionsReport.events, :empty_list), :topExceptionEvents)"
     }
-
     const automationReportEvents = events.filter((event) => shouldLogForAutomationReport(event))
     if (automationReportEvents.length > 0) {
       updateExpressionValues[":automationReportEvents"] = automationReportEvents
@@ -310,6 +311,7 @@ export default class AwsAuditLogDynamoGateway extends DynamoGateway implements A
         ", automationReport.events = list_append(if_not_exists(automationReport.events, :empty_list), :automationReportEvents)"
     }
 
+    // Mark the message as archived if we're adding an archival event
     const archivalEvents = events.filter((event) => event.eventType === EventType.ErrorRecordArchival)
     if (archivalEvents.length > 0) {
       expressionAttributeNames["#errorRecordArchivalDate"] = "errorRecordArchivalDate"
@@ -317,6 +319,7 @@ export default class AwsAuditLogDynamoGateway extends DynamoGateway implements A
       updateExpression += ", #errorRecordArchivalDate = :errorRecordArchivalDate"
     }
 
+    // Mark the message as sanitised if we're adding an archival event
     const sanitisationEvents = events.filter((event) => event.eventType === EventType.SanitisedMessage)
     if (sanitisationEvents.length > 0) {
       expressionAttributeNames["#isSanitised"] = "isSanitised"
@@ -324,6 +327,7 @@ export default class AwsAuditLogDynamoGateway extends DynamoGateway implements A
       updateExpression += ", #isSanitised = :isSanitised"
     }
 
+    // Increment retry count if we're adding a retry event
     const retryingEvents = events.filter((event) => event.eventType === EventType.Retrying)
     if (retryingEvents.length > 0) {
       updateExpressionValues[":zero"] = 0

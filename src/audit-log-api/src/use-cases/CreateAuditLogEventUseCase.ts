@@ -1,4 +1,4 @@
-import type { AuditLogEvent, AuditLogDynamoGateway, CreateAuditLogEventsResult, DynamoUpdate } from "shared-types"
+import type { AuditLogEvent, AuditLogDynamoGateway, CreateAuditLogEventsResult } from "shared-types"
 import { isError } from "shared-types"
 import type StoreValuesInLookupTableUseCase from "./StoreValuesInLookupTableUseCase"
 import { isConditionalExpressionViolationError } from "shared"
@@ -65,6 +65,7 @@ export default class CreateAuditLogEventUseCase {
         }
       }
 
+      // Nothing to add for duplicate events
       if (isDuplicateEvent(originalEvent, message.events)) {
         return {
           resultType: "success"
@@ -72,20 +73,10 @@ export default class CreateAuditLogEventUseCase {
       }
     }
 
-    const dynamoUpdates: DynamoUpdate[] = []
+    // Store long attribute values in the lookup table
+    const [dynamoUpdates, updatedEvent] = await this.storeValuesInLookupTableUseCase.prepare(originalEvent, messageId)
 
-    const lookupPrepareResult = await this.storeValuesInLookupTableUseCase.prepare(originalEvent, messageId)
-
-    if (isError(lookupPrepareResult)) {
-      return {
-        resultType: "error",
-        resultDescription: `Couldn't save attribute value in lookup table. ${lookupPrepareResult.message}`
-      }
-    }
-
-    const [lookupDynamoUpdates, updatedEvent] = lookupPrepareResult
-    dynamoUpdates.push(...lookupDynamoUpdates)
-
+    // Add the event to the audit log table entry
     const auditLogDynamoUpdate = await this.auditLogGateway.prepare(messageId, messageVersion, updatedEvent)
 
     if (isError(auditLogDynamoUpdate)) {

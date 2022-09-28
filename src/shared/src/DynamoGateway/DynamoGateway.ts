@@ -247,12 +247,15 @@ export default class DynamoGateway {
     return this.client
       .transactWrite({ TransactItems: actions })
       .on("extractError", (response) => {
+        // Error when we perform more actions than dynamodb supports
+        // see https://docs.aws.amazon.com/amazondynamodb/latest/APIReference/API_TransactWriteItems.html
         if (response.error && response.error.message.startsWith("Member must have length less than or equal to")) {
           failureReasons.push({
             Code: "TooManyItems",
             Message: response.error.message
           })
         } else {
+          // Save the returned reasons for the transaction failing as they are not returned
           try {
             failureReasons = JSON.parse(response.httpResponse.body.toString())
               .CancellationReasons as TransactionFailureReason[]
