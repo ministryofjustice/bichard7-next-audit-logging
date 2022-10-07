@@ -1,5 +1,5 @@
 import type { AuditLogEvent } from "shared-types"
-import { AuditLogStatus, EventType } from "shared-types"
+import { AuditLogStatus, EventType, EventTypeV2 } from "shared-types"
 
 export default class CalculateMessageStatusUseCase {
   private readonly events: AuditLogEvent[] = []
@@ -13,8 +13,7 @@ export default class CalculateMessageStatusUseCase {
   call(): string {
     if (
       (this.hasNoTriggers || this.triggersAreResolved) &&
-      (this.hasNoExceptions || this.exceptionsAreResolvedAndResubmitted || this.exceptionsAreManuallyResolved) &&
-      (this.pncIsUpdated || this.recordIsIgnored)
+      (this.exceptionsAreManuallyResolved || this.pncIsUpdated || this.recordIsIgnored)
     ) {
       return AuditLogStatus.completed
     } else if (this.isRetrying) {
@@ -26,16 +25,18 @@ export default class CalculateMessageStatusUseCase {
     return AuditLogStatus.processing
   }
 
-  private hasEventType(eventType: EventType): boolean {
+  private hasEventType(eventType: EventType | EventTypeV2): boolean {
     return !!this.events.find((event) => event.eventType === eventType)
   }
 
   private get hasNoTriggers(): boolean {
-    return !this.hasEventType(EventType.TriggersGenerated)
+    return !this.hasEventType(EventType.TriggersGenerated) && !this.hasEventType(EventTypeV2.TriggersGenerated)
   }
 
   private get triggersAreResolved(): boolean {
-    const triggersGeneratedEvents = this.events.filter((event) => event.eventType === EventType.TriggersGenerated)
+    const triggersGeneratedEvents = this.events.filter(
+      (event) => event.eventType === EventType.TriggersGenerated || event.eventType === EventTypeV2.TriggersGenerated
+    )
     if (triggersGeneratedEvents.length === 0) {
       return false
     }
@@ -63,25 +64,6 @@ export default class CalculateMessageStatusUseCase {
     )
   }
 
-  private get hasNoExceptions(): boolean {
-    return !this.hasEventType(EventType.ExceptionsGenerated)
-  }
-
-  private get exceptionsAreResolvedAndResubmitted(): boolean {
-    const exceptionsGeneratedEvent = this.events
-      .filter((event) => event.eventType === EventType.ExceptionsGenerated)
-      .slice(-1)[0]
-    const amendedAndResubmittedEvent = this.events
-      .filter((event) => event.eventType === EventType.AmendedAndResubmitted)
-      .slice(-1)[0]
-
-    return (
-      exceptionsGeneratedEvent &&
-      amendedAndResubmittedEvent &&
-      amendedAndResubmittedEvent.timestamp > exceptionsGeneratedEvent.timestamp
-    )
-  }
-
   private get exceptionsAreManuallyResolved(): boolean {
     return this.hasEventType(EventType.ExceptionsManuallyResolved)
   }
@@ -93,6 +75,8 @@ export default class CalculateMessageStatusUseCase {
   private get recordIsIgnored(): boolean {
     return (
       this.hasEventType(EventType.InterimHearingWithAncillaryOnlyCourtResults_PncNotUpdated) ||
+      this.hasEventType(EventTypeV2.HearingOutcomeIgnoredCourtDisabled) ||
+      this.hasEventType(EventTypeV2.HearingOutcomeIgnoredAppeal) ||
       this.hasEventType(EventType.StatutoryDeclarationCaseIgnored) ||
       this.hasEventType(EventType.RecordIgnoredNoOffences) ||
       this.hasEventType(EventType.RecordIgnoredNoRecordableOffences)
