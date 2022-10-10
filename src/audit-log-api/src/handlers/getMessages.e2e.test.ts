@@ -1,10 +1,10 @@
 jest.retryTimes(10)
 import type { AxiosError } from "axios"
 import axios from "axios"
-import type { AuditLog } from "shared-types"
-import { isError } from "shared-types"
 import { HttpStatusCode } from "shared"
 import { createMockAuditLog, createMockError } from "shared-testing"
+import type { AuditLog } from "shared-types"
+import { isError } from "shared-types"
 
 describe("Getting Audit Logs", () => {
   it("should return the audit log records", async () => {
@@ -104,5 +104,30 @@ describe("Getting Audit Logs", () => {
     const { attributes } = actualMessage.events[0]
     expect(attributes["Attribute 1"]).toBe(auditLog.events[0].attributes["Attribute 1"])
     expect(attributes["Attribute 2"]).toBe(auditLog.events[0].attributes["Attribute 2"])
+  })
+
+  describe("fetching unsanitised messages", () => {
+    it("should return unsanitised messages", async () => {
+      const unsanitisedAuditLog = await createMockAuditLog({
+        isSanitised: 0,
+        nextSanitiseCheck: new Date("2020-10-10").toISOString()
+      })
+
+      if (isError(unsanitisedAuditLog)) {
+        throw new Error("Unexpected error")
+      }
+      const sanitisedAuditLog = await createMockAuditLog({ isSanitised: 1 })
+      if (isError(sanitisedAuditLog)) {
+        throw new Error("Unexpected error")
+      }
+
+      const result = await axios.get<AuditLog[]>(`http://localhost:3010/messages?unsanitised=true`)
+      expect(result.status).toEqual(HttpStatusCode.ok)
+
+      expect(Array.isArray(result.data)).toBeTruthy()
+      const messageIds = result.data.map((record) => record.messageId)
+      expect(messageIds).toContain(unsanitisedAuditLog.messageId)
+      expect(messageIds).not.toContain(sanitisedAuditLog.messageId)
+    })
   })
 })

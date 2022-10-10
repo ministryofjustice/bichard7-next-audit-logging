@@ -1,10 +1,10 @@
-import { mockAuditLog, mockAuditLogEvent } from "."
 import axios from "axios"
 import type { AuditLog, PromiseResult } from "shared-types"
 import { isError } from "shared-types"
+import { mockAuditLog, mockAuditLogEvent } from "."
 
-export const createMockError = async (date?: Date): PromiseResult<AuditLog> => {
-  const auditLog = mockAuditLog(date)
+export const createMockError = async (overrides: Partial<AuditLog> = {}): PromiseResult<AuditLog> => {
+  const auditLog = mockAuditLog(overrides)
   await axios.post("http://localhost:3010/messages", auditLog)
 
   const event = mockAuditLogEvent("error", "Hearing Outcome Input Queue Failure")
@@ -17,10 +17,10 @@ export const createMockError = async (date?: Date): PromiseResult<AuditLog> => {
   return auditLog
 }
 
-export const createMockErrors = async (count = 1, date?: Date): PromiseResult<AuditLog[]> => {
+export const createMockErrors = async (count = 1, overrides: Partial<AuditLog> = {}): PromiseResult<AuditLog[]> => {
   const output = []
   for (let i = 0; i < count; i++) {
-    const res = await createMockError(date)
+    const res = await createMockError(overrides)
     if (isError(res)) {
       return res
     }
@@ -29,8 +29,8 @@ export const createMockErrors = async (count = 1, date?: Date): PromiseResult<Au
   return output
 }
 
-export const createMockAuditLog = async (): PromiseResult<AuditLog> => {
-  const auditLog = mockAuditLog()
+export const createMockAuditLog = async (overrides: Partial<AuditLog> = {}): PromiseResult<AuditLog> => {
+  const auditLog = mockAuditLog(overrides)
   const res = await axios.post("http://localhost:3010/messages", auditLog)
   if (isError(res)) {
     return res
@@ -38,10 +38,10 @@ export const createMockAuditLog = async (): PromiseResult<AuditLog> => {
   return auditLog
 }
 
-export const createMockAuditLogs = async (count = 1): PromiseResult<AuditLog[]> => {
+export const createMockAuditLogs = async (count = 1, overrides: Partial<AuditLog> = {}): PromiseResult<AuditLog[]> => {
   const output = []
   for (let i = 0; i < count; i++) {
-    const res = await createMockAuditLog()
+    const res = await createMockAuditLog(overrides)
     if (isError(res)) {
       return res
     }
