@@ -1,4 +1,4 @@
-import { S3, Endpoint } from "aws-sdk"
+import { Endpoint, S3 } from "aws-sdk"
 import type { PromiseResult, S3Config } from "shared-types"
 
 export default class S3Gateway {
@@ -43,7 +43,7 @@ export default class S3Gateway {
       .catch((error) => <Error>error)
   }
 
-  upload<T>(fileName: string, content: T): PromiseResult<void> {
+  upload(fileName: string, content: string): PromiseResult<void> {
     const params: S3.Types.PutObjectRequest = {
       Bucket: this.bucketName,
       Key: fileName,

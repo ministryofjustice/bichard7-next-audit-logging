@@ -1,7 +1,6 @@
-import { S3, Endpoint } from "aws-sdk"
+import { Endpoint, S3 } from "aws-sdk"
+import type { PromiseResult, S3Config, S3GatewayInterface } from "shared-types"
 import parseGetObjectResponse from "./parseGetObjectResponse"
-import type { S3Config, PromiseResult } from "shared-types"
-import type { S3GatewayInterface } from "shared-types"
 
 export default class AwsS3Gateway implements S3GatewayInterface {
   private readonly s3: S3
@@ -73,7 +72,7 @@ export default class AwsS3Gateway implements S3GatewayInterface {
       .catch((error) => <Error>error)
   }
 
-  upload<T>(fileName: string, content: T): PromiseResult<void> {
+  upload(fileName: string, content: string): PromiseResult<void> {
     const params: S3.Types.PutObjectRequest = {
       Bucket: this.getBucketName(),
       Key: fileName,
