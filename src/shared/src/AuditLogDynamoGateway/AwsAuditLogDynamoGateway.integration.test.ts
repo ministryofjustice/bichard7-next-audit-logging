@@ -1064,7 +1064,8 @@ describe("AuditLogDynamoGateway", () => {
     it("should add all events to be logged for the automation report", async () => {
       const eventsToBeLogged = [
         createAuditLogEvent("information", new Date(), "Hearing Outcome passed to Error List"),
-        createAuditLogEvent("information", new Date(), "PNC Update added to Error List"),
+        createAuditLogEvent("information", new Date(), "PNC Update added to Error List  (PNC message construction)"),
+        createAuditLogEvent("information", new Date(), "PNC Update added to Error List  (Unexpected PNC response)"),
         createAuditLogEvent("information", new Date(), "Exception marked as resolved by user"),
         createAuditLogEvent("information", new Date(), "PNC Update applied successfully")
       ]
@@ -1101,6 +1102,9 @@ describe("AuditLogDynamoGateway", () => {
       )
       expect(transaction.Update!.ExpressionAttributeValues![":automationReportEvents"]).toContainEqual(
         eventsToBeLogged[3]
+      )
+      expect(transaction.Update!.ExpressionAttributeValues![":automationReportEvents"]).toContainEqual(
+        eventsToBeLogged[4]
       )
     })
 
