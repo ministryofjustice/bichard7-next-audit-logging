@@ -2,18 +2,17 @@ jest.retryTimes(10)
 jest.setTimeout(10_000)
 process.env.API_URL = "dummy"
 process.env.API_KEY = "dummy"
-import getErrorsToRetry from "./getErrorsToRetry"
+import { AuditLogApiClient, TestDynamoGateway } from "shared"
 import {
-  createMockErrors,
-  createMockError,
-  createMockAuditLogs,
+  auditLogDynamoConfig,
   createMockAuditLog,
-  createMockRetriedError,
-  auditLogDynamoConfig
+  createMockAuditLogs,
+  createMockError,
+  createMockErrors,
+  createMockRetriedError
 } from "shared-testing"
-import { TestDynamoGateway } from "shared"
 import { isError } from "shared-types"
-import { AuditLogApiClient } from "shared"
+import getErrorsToRetry from "./getErrorsToRetry"
 const apiClient = new AuditLogApiClient("http://localhost:3010", "DUMMY")
 
 const testDynamoGateway = new TestDynamoGateway(auditLogDynamoConfig)
@@ -25,7 +24,7 @@ describe("getErrorsToRetry", () => {
 
   it("should get all errors, paginating where necessary", async () => {
     const count = 12
-    await createMockErrors(count, new Date(Date.now() - 3600000))
+    await createMockErrors(count, { receivedDate: new Date(Date.now() - 3600000).toISOString() })
     await createMockAuditLogs(1)
     const errors = await getErrorsToRetry(apiClient, 13)
     expect(errors).toHaveLength(count)
@@ -48,7 +47,7 @@ describe("getErrorsToRetry", () => {
   })
 
   it("should only fetch the requested number of errors", async () => {
-    await createMockErrors(2, new Date(Date.now() - 3600000))
+    await createMockErrors(2, { receivedDate: new Date(Date.now() - 3600000).toISOString() })
     const errors = await getErrorsToRetry(apiClient, 1)
     expect(errors).toHaveLength(1)
   })

@@ -1,7 +1,7 @@
 process.env.API_URL = "dummy"
 process.env.API_KEY = "dummy"
-import shouldRetry from "./shouldRetry"
 import { mockAuditLog, mockAuditLogEvent } from "shared-testing"
+import shouldRetry from "./shouldRetry"
 
 const generateDateInThePast = (hours: number, minutes: number, seconds: number) =>
   new Date(Date.now() - hours * 3_600_000 - minutes * 60_000 - seconds * 1_000)
@@ -13,16 +13,16 @@ const moreThanRetryDelay = generateDateInThePast(24, 0, 1)
 
 describe("shouldRetry", () => {
   it("should not retry new messages too early", () => {
-    const receivedDate = lessThanInitialRetryDelay
-    const message = mockAuditLog(receivedDate)
+    const receivedDate = lessThanInitialRetryDelay.toISOString()
+    const message = mockAuditLog({ receivedDate })
     const event = mockAuditLogEvent("error", "Failed event", lessThanInitialRetryDelay)
     message.events.push(event)
     expect(shouldRetry(message)).toBeFalsy()
   })
 
   it("should correctly retry new messages after an initial wait", () => {
-    const receivedDate = moreThanInitialRetryDelay
-    const message = mockAuditLog(receivedDate)
+    const receivedDate = moreThanInitialRetryDelay.toISOString()
+    const message = mockAuditLog({ receivedDate })
     const event = mockAuditLogEvent("error", "Failed event", moreThanInitialRetryDelay)
     message.events.push(event)
     expect(shouldRetry(message)).toBeTruthy()
@@ -38,8 +38,8 @@ describe("shouldRetry", () => {
   })
 
   it("shouldn't retry messages too often that have already been retried", () => {
-    const receivedDate = new Date()
-    const message = mockAuditLog(receivedDate)
+    const receivedDate = new Date().toISOString()
+    const message = mockAuditLog({ receivedDate })
     const errorEvent = mockAuditLogEvent("error", "Failed event", generateDateInThePast(24, 59, 59))
     message.events.push(errorEvent)
     const retryEvent = mockAuditLogEvent("information", "Retrying failed message", lessThanRetryDelay)
@@ -48,8 +48,8 @@ describe("shouldRetry", () => {
   })
 
   it("shouldn't retry messages too many times", () => {
-    const receivedDate = new Date()
-    const message = mockAuditLog(receivedDate)
+    const receivedDate = new Date().toISOString()
+    const message = mockAuditLog({ receivedDate })
     const errorEvent = mockAuditLogEvent("error", "Failed event", generateDateInThePast(28, 0, 0))
     const retryEvent1 = mockAuditLogEvent("information", "Retrying failed message", generateDateInThePast(27, 0, 0))
     const retryEvent2 = mockAuditLogEvent("information", "Retrying failed message", generateDateInThePast(26, 0, 0))

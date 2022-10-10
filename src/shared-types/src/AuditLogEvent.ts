@@ -1,6 +1,6 @@
+import type AuditLogEventOptions from "./AuditLogEventOptions"
 import type EventCategory from "./EventCategory"
 import type KeyValuePair from "./KeyValuePair"
-import type AuditLogEventOptions from "./AuditLogEventOptions"
 
 // TODO: Split this into a type an an implementation
 export default class AuditLogEvent {
