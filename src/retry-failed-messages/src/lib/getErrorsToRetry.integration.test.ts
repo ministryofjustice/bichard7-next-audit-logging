@@ -31,7 +31,7 @@ describe("getErrorsToRetry", () => {
   })
 
   it("should ignore the errors that don't need retrying", async () => {
-    const record = await createMockError(new Date(Date.now() - 3600000))
+    const record = await createMockError({ receivedDate: new Date(Date.now() - 3600000).toISOString() })
     if (isError(record)) {
       throw new Error("Error creating mock error")
     }
