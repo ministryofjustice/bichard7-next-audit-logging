@@ -3,16 +3,16 @@
 exports[`matches snapshot 1`] = `
 <div>
   <div
-    class="MuiPaper-root MuiCard-root Message__Container-sc-12ihk2z-0 jCoPiM MuiPaper-elevation1 MuiPaper-rounded"
+    class="MuiPaper-root MuiCard-root Message__Container-sc-12ihk2z-0 fqxArF MuiPaper-elevation1 MuiPaper-rounded"
   >
     <div
-      class="MuiCardContent-root Message__InnerContainer-sc-12ihk2z-1 kFTIMa"
+      class="MuiCardContent-root Message__InnerContainer-sc-12ihk2z-1 eecSBH"
     >
       <div
-        class="Message__Content-sc-12ihk2z-2 kIKsiJ"
+        class="Message__Content-sc-12ihk2z-2 Drmvc"
       >
         <div
-          class="Message__Block-sc-12ihk2z-3 Message__StatusBlock-sc-12ihk2z-4 dncGYJ ipLlpv"
+          class="Message__Block-sc-12ihk2z-3 Message__StatusBlock-sc-12ihk2z-4 dkCzAw gdkNti"
         >
           <div
             class=""
@@ -43,7 +43,7 @@ exports[`matches snapshot 1`] = `
           </i>
         </div>
         <div
-          class="Message__Block-sc-12ihk2z-3 dncGYJ"
+          class="Message__Block-sc-12ihk2z-3 dkCzAw"
         >
           <h6
             class="MuiTypography-root MuiTypography-h6 MuiTypography-noWrap"
@@ -51,7 +51,7 @@ exports[`matches snapshot 1`] = `
             ExternalCorrelationId
           </h6>
           <span
-            class="MuiTypography-root Message__ReceivedDate-sc-12ihk2z-5 fqafoZ MuiTypography-caption MuiTypography-noWrap"
+            class="MuiTypography-root Message__ReceivedDate-sc-12ihk2z-5 hoMNs MuiTypography-caption MuiTypography-noWrap"
           >
             Received: 
             <time
@@ -62,12 +62,12 @@ exports[`matches snapshot 1`] = `
           </span>
         </div>
         <h6
-          class="MuiTypography-root Message__DaysAgo-sc-12ihk2z-6 ijFoKN MuiTypography-h6"
+          class="MuiTypography-root Message__DaysAgo-sc-12ihk2z-6 dRoSOs MuiTypography-h6"
         >
           23 days old
         </h6>
         <div
-          class="Message__Actions-sc-12ihk2z-7 dTgDfS"
+          class="Message__Actions-sc-12ihk2z-7 exYEqL"
         >
           <span
             class="MuiBadge-root"
@@ -85,7 +85,7 @@ exports[`matches snapshot 1`] = `
               >
                 <svg
                   aria-hidden="true"
-                  class="svg-inline--fa fa-calendar-day fa-w-14 "
+                  class="svg-inline--fa fa-calendar-day "
                   data-icon="calendar-day"
                   data-prefix="fas"
                   focusable="false"
@@ -95,7 +95,7 @@ exports[`matches snapshot 1`] = `
                   xmlns="http://www.w3.org/2000/svg"
                 >
                   <path
-                    d="M0 464c0 26.5 21.5 48 48 48h352c26.5 0 48-21.5 48-48V192H0v272zm64-192c0-8.8 7.2-16 16-16h96c8.8 0 16 7.2 16 16v96c0 8.8-7.2 16-16 16H80c-8.8 0-16-7.2-16-16v-96zM400 64h-48V16c0-8.8-7.2-16-16-16h-32c-8.8 0-16 7.2-16 16v48H160V16c0-8.8-7.2-16-16-16h-32c-8.8 0-16 7.2-16 16v48H48C21.5 64 0 85.5 0 112v48h448v-48c0-26.5-21.5-48-48-48z"
+                    d="M128 0c17.7 0 32 14.3 32 32V64H288V32c0-17.7 14.3-32 32-32s32 14.3 32 32V64h48c26.5 0 48 21.5 48 48v48H0V112C0 85.5 21.5 64 48 64H96V32c0-17.7 14.3-32 32-32zM0 192H448V464c0 26.5-21.5 48-48 48H48c-26.5 0-48-21.5-48-48V192zm80 64c-8.8 0-16 7.2-16 16v96c0 8.8 7.2 16 16 16h96c8.8 0 16-7.2 16-16V272c0-8.8-7.2-16-16-16H80z"
                     fill="currentColor"
                   />
                 </svg>

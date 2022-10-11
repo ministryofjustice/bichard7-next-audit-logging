@@ -1,14 +1,14 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`should format the message XML when the message XML is correct 1`] = `
-"<?xml version=\\"1.0\\" encoding=\\"UTF-8\\"?>
-  <RouteData xmlns=\\"http://schemas.cjse.gov.uk/common/operations\\" xmlns:cjseEntity=\\"http://schemas.cjse.gov.uk/common/businessentities\\" xmlns:cjseType=\\"http://schemas.cjse.gov.uk/common/businesstypes\\" xmlns:xsi=\\"http://www.w3.org/2001/XMLSchema-instance\\" VersionNumber=\\"1.0\\" RequestResponse=\\"Request\\">
-    <RequestFromSystem VersionNumber=\\"1.0\\">
+"<?xml version="1.0" encoding="UTF-8"?>
+  <RouteData xmlns="http://schemas.cjse.gov.uk/common/operations" xmlns:cjseEntity="http://schemas.cjse.gov.uk/common/businessentities" xmlns:cjseType="http://schemas.cjse.gov.uk/common/businesstypes" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" VersionNumber="1.0" RequestResponse="Request">
+    <RequestFromSystem VersionNumber="1.0">
       <CorrelationID>MESSAGE_ID</CorrelationID>
     </RequestFromSystem>
-    <DataStream VersionNumber=\\"1.0\\">
+    <DataStream VersionNumber="1.0">
       <DataStreamContent>
-<DC:ResultedCaseMessage xmlns:DC=\\"http://www.dca.gov.uk/xmlschemas/libra\\" Flow='ResultedCasesForThePolice' Interface='LibraStandardProsecutorPolice' SchemaVersion='0.6g'>
+<DC:ResultedCaseMessage xmlns:DC="http://www.dca.gov.uk/xmlschemas/libra" Flow='ResultedCasesForThePolice' Interface='LibraStandardProsecutorPolice' SchemaVersion='0.6g'>
 	<DC:Session>
 		<DC:Case>
 			<DC:PTIURN>

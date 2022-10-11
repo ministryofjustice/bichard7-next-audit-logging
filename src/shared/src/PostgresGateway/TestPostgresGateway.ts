@@ -22,7 +22,7 @@ export default class TestPostgresGateway extends PostgresGateway {
     await this.query(`DROP TABLE ${this.tableName};`).catch((error) => console.error(error))
   }
 
-  async insertRecords<T>(records: T[]): Promise<void> {
+  async insertRecords(records: object[]): Promise<void> {
     await Promise.all(
       records.map((record) => {
         const keys = Object.keys(record)

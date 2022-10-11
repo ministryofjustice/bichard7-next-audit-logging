@@ -1,8 +1,8 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`formatMessageXml() should format the message 1`] = `
-"<?xml version=\\"1.0\\" encoding=\\"UTF-8\\"?>
-  <DeliverRequest xmlns=\\"http://schemas.cjse.gov.uk/messages/deliver/2006-05\\" xmlns:ex=\\"http://schemas.cjse.gov.uk/messages/exception/2006-06\\" xmlns:mf=\\"http://schemas.cjse.gov.uk/messages/format/2006-05\\" xmlns:mm=\\"http://schemas.cjse.gov.uk/messages/metadata/2006-05\\" xmlns:msg=\\"http://schemas.cjse.gov.uk/messages/messaging/2006-05\\" xmlns:xmime=\\"http://www.w3.org/2005/05/xmlmime\\" xmlns:xsi=\\"http://www.w3.org/2001/XMLSchema-instance\\" xsi:schemaLocation=\\"http://schemas.cjse.gov.uk/messages/deliver/2006-05 C:ClearCasekel-masri_BR7_0_1_intgBR7XML_ConverterSourceClassGenerationschemasReceiveDeliverServiceDeliverService-v1-0.xsd\\">
+"<?xml version="1.0" encoding="UTF-8"?>
+  <DeliverRequest xmlns="http://schemas.cjse.gov.uk/messages/deliver/2006-05" xmlns:ex="http://schemas.cjse.gov.uk/messages/exception/2006-06" xmlns:mf="http://schemas.cjse.gov.uk/messages/format/2006-05" xmlns:mm="http://schemas.cjse.gov.uk/messages/metadata/2006-05" xmlns:msg="http://schemas.cjse.gov.uk/messages/messaging/2006-05" xmlns:xmime="http://www.w3.org/2005/05/xmlmime" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://schemas.cjse.gov.uk/messages/deliver/2006-05 C:ClearCasekel-masri_BR7_0_1_intgBR7XML_ConverterSourceClassGenerationschemasReceiveDeliverServiceDeliverService-v1-0.xsd">
     <msg:MessageIdentifier>MESSAGE_ID</msg:MessageIdentifier>
     <msg:RequestingSystem>
       <msg:Name>CJSE</msg:Name>
@@ -10,7 +10,7 @@ exports[`formatMessageXml() should format the message 1`] = `
       <msg:Environment>Production</msg:Environment>
     </msg:RequestingSystem>
     <msg:AckRequested>1</msg:AckRequested>
-    <mm:MessageMetadata SchemaVersion=\\"1.0\\">
+    <mm:MessageMetadata SchemaVersion="1.0">
       <mm:OriginatingSystem>
         <msg:Name>BICHARD7</msg:Name>
         <msg:OrgUnitCode></msg:OrgUnitCode>
@@ -24,7 +24,7 @@ exports[`formatMessageXml() should format the message 1`] = `
       <mm:ExpiryDateTime>2031-12-17T09:30:47-05:00</mm:ExpiryDateTime>
       <mm:SenderRequestedDestination>String</mm:SenderRequestedDestination>
     </mm:MessageMetadata>
-    <mf:MessageFormat SchemaVersion=\\"1.0\\">
+    <mf:MessageFormat SchemaVersion="1.0">
       <mf:MessageType>
         <msg:Type></msg:Type>
         <msg:Version>1.200</msg:Version>
@@ -35,7 +35,7 @@ exports[`formatMessageXml() should format the message 1`] = `
       </mf:MessageSchema>
     </mf:MessageFormat>
     <Message>
-<DC:ResultedCaseMessage xmlns:DC=\\"http://www.dca.gov.uk/xmlschemas/libra\\" Flow=\\"ResultedCasesForThePolice\\" Interface=\\"LibraStandardProsecutorPolice\\" SchemaVersion=\\"0.6g\\">
+<DC:ResultedCaseMessage xmlns:DC="http://www.dca.gov.uk/xmlschemas/libra" Flow="ResultedCasesForThePolice" Interface="LibraStandardProsecutorPolice" SchemaVersion="0.6g">
             <DC:Session>
               <DC:Case>
                 <DC:PTIURN>
@@ -50,8 +50,8 @@ exports[`formatMessageXml() should format the message 1`] = `
 `;
 
 exports[`formatMessageXml() should format the message with escaped xml 1`] = `
-"<?xml version=\\"1.0\\" encoding=\\"UTF-8\\"?>
-  <DeliverRequest xmlns=\\"http://schemas.cjse.gov.uk/messages/deliver/2006-05\\" xmlns:ex=\\"http://schemas.cjse.gov.uk/messages/exception/2006-06\\" xmlns:mf=\\"http://schemas.cjse.gov.uk/messages/format/2006-05\\" xmlns:mm=\\"http://schemas.cjse.gov.uk/messages/metadata/2006-05\\" xmlns:msg=\\"http://schemas.cjse.gov.uk/messages/messaging/2006-05\\" xmlns:xmime=\\"http://www.w3.org/2005/05/xmlmime\\" xmlns:xsi=\\"http://www.w3.org/2001/XMLSchema-instance\\" xsi:schemaLocation=\\"http://schemas.cjse.gov.uk/messages/deliver/2006-05 C:ClearCasekel-masri_BR7_0_1_intgBR7XML_ConverterSourceClassGenerationschemasReceiveDeliverServiceDeliverService-v1-0.xsd\\">
+"<?xml version="1.0" encoding="UTF-8"?>
+  <DeliverRequest xmlns="http://schemas.cjse.gov.uk/messages/deliver/2006-05" xmlns:ex="http://schemas.cjse.gov.uk/messages/exception/2006-06" xmlns:mf="http://schemas.cjse.gov.uk/messages/format/2006-05" xmlns:mm="http://schemas.cjse.gov.uk/messages/metadata/2006-05" xmlns:msg="http://schemas.cjse.gov.uk/messages/messaging/2006-05" xmlns:xmime="http://www.w3.org/2005/05/xmlmime" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://schemas.cjse.gov.uk/messages/deliver/2006-05 C:ClearCasekel-masri_BR7_0_1_intgBR7XML_ConverterSourceClassGenerationschemasReceiveDeliverServiceDeliverService-v1-0.xsd">
     <msg:MessageIdentifier>MESSAGE_ID</msg:MessageIdentifier>
     <msg:RequestingSystem>
       <msg:Name>CJSE</msg:Name>
@@ -59,7 +59,7 @@ exports[`formatMessageXml() should format the message with escaped xml 1`] = `
       <msg:Environment>Production</msg:Environment>
     </msg:RequestingSystem>
     <msg:AckRequested>1</msg:AckRequested>
-    <mm:MessageMetadata SchemaVersion=\\"1.0\\">
+    <mm:MessageMetadata SchemaVersion="1.0">
       <mm:OriginatingSystem>
         <msg:Name>BICHARD7</msg:Name>
         <msg:OrgUnitCode></msg:OrgUnitCode>
@@ -73,7 +73,7 @@ exports[`formatMessageXml() should format the message with escaped xml 1`] = `
       <mm:ExpiryDateTime>2031-12-17T09:30:47-05:00</mm:ExpiryDateTime>
       <mm:SenderRequestedDestination>String</mm:SenderRequestedDestination>
     </mm:MessageMetadata>
-    <mf:MessageFormat SchemaVersion=\\"1.0\\">
+    <mf:MessageFormat SchemaVersion="1.0">
       <mf:MessageType>
         <msg:Type></msg:Type>
         <msg:Version>1.200</msg:Version>
@@ -84,7 +84,7 @@ exports[`formatMessageXml() should format the message with escaped xml 1`] = `
       </mf:MessageSchema>
     </mf:MessageFormat>
     <Message>
-<DC:ResultedCaseMessage xmlns:DC=\\"http://www.dca.gov.uk/xmlschemas/libra\\" Flow=\\"ResultedCasesForThePolice\\" Interface=\\"LibraStandardProsecutorPolice\\" SchemaVersion=\\"0.6g\\">
+<DC:ResultedCaseMessage xmlns:DC="http://www.dca.gov.uk/xmlschemas/libra" Flow="ResultedCasesForThePolice" Interface="LibraStandardProsecutorPolice" SchemaVersion="0.6g">
         <DC:Session>
           <DC:Case>
             <DC:PTIURN>
@@ -99,8 +99,8 @@ exports[`formatMessageXml() should format the message with escaped xml 1`] = `
 `;
 
 exports[`formatMessageXml() should format the message with escaped xml with a prolog 1`] = `
-"<?xml version=\\"1.0\\" encoding=\\"UTF-8\\"?>
-  <DeliverRequest xmlns=\\"http://schemas.cjse.gov.uk/messages/deliver/2006-05\\" xmlns:ex=\\"http://schemas.cjse.gov.uk/messages/exception/2006-06\\" xmlns:mf=\\"http://schemas.cjse.gov.uk/messages/format/2006-05\\" xmlns:mm=\\"http://schemas.cjse.gov.uk/messages/metadata/2006-05\\" xmlns:msg=\\"http://schemas.cjse.gov.uk/messages/messaging/2006-05\\" xmlns:xmime=\\"http://www.w3.org/2005/05/xmlmime\\" xmlns:xsi=\\"http://www.w3.org/2001/XMLSchema-instance\\" xsi:schemaLocation=\\"http://schemas.cjse.gov.uk/messages/deliver/2006-05 C:ClearCasekel-masri_BR7_0_1_intgBR7XML_ConverterSourceClassGenerationschemasReceiveDeliverServiceDeliverService-v1-0.xsd\\">
+"<?xml version="1.0" encoding="UTF-8"?>
+  <DeliverRequest xmlns="http://schemas.cjse.gov.uk/messages/deliver/2006-05" xmlns:ex="http://schemas.cjse.gov.uk/messages/exception/2006-06" xmlns:mf="http://schemas.cjse.gov.uk/messages/format/2006-05" xmlns:mm="http://schemas.cjse.gov.uk/messages/metadata/2006-05" xmlns:msg="http://schemas.cjse.gov.uk/messages/messaging/2006-05" xmlns:xmime="http://www.w3.org/2005/05/xmlmime" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://schemas.cjse.gov.uk/messages/deliver/2006-05 C:ClearCasekel-masri_BR7_0_1_intgBR7XML_ConverterSourceClassGenerationschemasReceiveDeliverServiceDeliverService-v1-0.xsd">
     <msg:MessageIdentifier>MESSAGE_ID</msg:MessageIdentifier>
     <msg:RequestingSystem>
       <msg:Name>CJSE</msg:Name>
@@ -108,7 +108,7 @@ exports[`formatMessageXml() should format the message with escaped xml with a pr
       <msg:Environment>Production</msg:Environment>
     </msg:RequestingSystem>
     <msg:AckRequested>1</msg:AckRequested>
-    <mm:MessageMetadata SchemaVersion=\\"1.0\\">
+    <mm:MessageMetadata SchemaVersion="1.0">
       <mm:OriginatingSystem>
         <msg:Name>BICHARD7</msg:Name>
         <msg:OrgUnitCode></msg:OrgUnitCode>
@@ -122,7 +122,7 @@ exports[`formatMessageXml() should format the message with escaped xml with a pr
       <mm:ExpiryDateTime>2031-12-17T09:30:47-05:00</mm:ExpiryDateTime>
       <mm:SenderRequestedDestination>String</mm:SenderRequestedDestination>
     </mm:MessageMetadata>
-    <mf:MessageFormat SchemaVersion=\\"1.0\\">
+    <mf:MessageFormat SchemaVersion="1.0">
       <mf:MessageType>
         <msg:Type></msg:Type>
         <msg:Version>1.200</msg:Version>
@@ -134,7 +134,7 @@ exports[`formatMessageXml() should format the message with escaped xml with a pr
     </mf:MessageFormat>
     <Message>
 
-      <DC:ResultedCaseMessage xmlns:DC=\\"http://www.dca.gov.uk/xmlschemas/libra\\" Flow=\\"ResultedCasesForThePolice\\" Interface=\\"LibraStandardProsecutorPolice\\" SchemaVersion=\\"0.6g\\">
+      <DC:ResultedCaseMessage xmlns:DC="http://www.dca.gov.uk/xmlschemas/libra" Flow="ResultedCasesForThePolice" Interface="LibraStandardProsecutorPolice" SchemaVersion="0.6g">
         <DC:Session>
           <DC:Case>
             <DC:PTIURN>
@@ -149,8 +149,8 @@ exports[`formatMessageXml() should format the message with escaped xml with a pr
 `;
 
 exports[`formatMessageXml() should format the message with namespaced xml 1`] = `
-"<?xml version=\\"1.0\\" encoding=\\"UTF-8\\"?>
-  <DeliverRequest xmlns=\\"http://schemas.cjse.gov.uk/messages/deliver/2006-05\\" xmlns:ex=\\"http://schemas.cjse.gov.uk/messages/exception/2006-06\\" xmlns:mf=\\"http://schemas.cjse.gov.uk/messages/format/2006-05\\" xmlns:mm=\\"http://schemas.cjse.gov.uk/messages/metadata/2006-05\\" xmlns:msg=\\"http://schemas.cjse.gov.uk/messages/messaging/2006-05\\" xmlns:xmime=\\"http://www.w3.org/2005/05/xmlmime\\" xmlns:xsi=\\"http://www.w3.org/2001/XMLSchema-instance\\" xsi:schemaLocation=\\"http://schemas.cjse.gov.uk/messages/deliver/2006-05 C:ClearCasekel-masri_BR7_0_1_intgBR7XML_ConverterSourceClassGenerationschemasReceiveDeliverServiceDeliverService-v1-0.xsd\\">
+"<?xml version="1.0" encoding="UTF-8"?>
+  <DeliverRequest xmlns="http://schemas.cjse.gov.uk/messages/deliver/2006-05" xmlns:ex="http://schemas.cjse.gov.uk/messages/exception/2006-06" xmlns:mf="http://schemas.cjse.gov.uk/messages/format/2006-05" xmlns:mm="http://schemas.cjse.gov.uk/messages/metadata/2006-05" xmlns:msg="http://schemas.cjse.gov.uk/messages/messaging/2006-05" xmlns:xmime="http://www.w3.org/2005/05/xmlmime" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://schemas.cjse.gov.uk/messages/deliver/2006-05 C:ClearCasekel-masri_BR7_0_1_intgBR7XML_ConverterSourceClassGenerationschemasReceiveDeliverServiceDeliverService-v1-0.xsd">
     <msg:MessageIdentifier>MESSAGE_ID</msg:MessageIdentifier>
     <msg:RequestingSystem>
       <msg:Name>CJSE</msg:Name>
@@ -158,7 +158,7 @@ exports[`formatMessageXml() should format the message with namespaced xml 1`] = 
       <msg:Environment>Production</msg:Environment>
     </msg:RequestingSystem>
     <msg:AckRequested>1</msg:AckRequested>
-    <mm:MessageMetadata SchemaVersion=\\"1.0\\">
+    <mm:MessageMetadata SchemaVersion="1.0">
       <mm:OriginatingSystem>
         <msg:Name>BICHARD7</msg:Name>
         <msg:OrgUnitCode></msg:OrgUnitCode>
@@ -172,7 +172,7 @@ exports[`formatMessageXml() should format the message with namespaced xml 1`] = 
       <mm:ExpiryDateTime>2031-12-17T09:30:47-05:00</mm:ExpiryDateTime>
       <mm:SenderRequestedDestination>String</mm:SenderRequestedDestination>
     </mm:MessageMetadata>
-    <mf:MessageFormat SchemaVersion=\\"1.0\\">
+    <mf:MessageFormat SchemaVersion="1.0">
       <mf:MessageType>
         <msg:Type></msg:Type>
         <msg:Version>1.200</msg:Version>
@@ -183,7 +183,7 @@ exports[`formatMessageXml() should format the message with namespaced xml 1`] = 
       </mf:MessageSchema>
     </mf:MessageFormat>
     <Message>
-<DC:ResultedCaseMessage xmlns:DC=\\"http://www.dca.gov.uk/xmlschemas/libra\\" Flow=\\"ResultedCasesForThePolice\\" Interface=\\"LibraStandardProsecutorPolice\\" SchemaVersion=\\"0.6g\\">
+<DC:ResultedCaseMessage xmlns:DC="http://www.dca.gov.uk/xmlschemas/libra" Flow="ResultedCasesForThePolice" Interface="LibraStandardProsecutorPolice" SchemaVersion="0.6g">
           <DC:Session>
             <DC:Case>
               <DC:PTIURN>
