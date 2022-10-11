@@ -20,6 +20,10 @@ export default class IndexSearcher<TResult> {
 
   private rangeKeyValue?: unknown
 
+  private betweenKeyStart?: unknown
+
+  private betweenKeyEnd?: unknown
+
   private rangeKeyComparison?: KeyComparison
 
   private filterKeyName?: string
@@ -82,18 +86,22 @@ export default class IndexSearcher<TResult> {
     return this
   }
 
-  setIndexKeys(
-    hashKey: string,
-    hashKeyValue: unknown,
-    rangeKey?: string,
-    rangeKeyValue?: unknown,
-    rangeKeyComparison?: KeyComparison
-  ): IndexSearcher<TResult> {
+  setIndexKeys(hashKey: string, hashKeyValue: unknown, rangeKey?: string): IndexSearcher<TResult> {
     this.hashKey = hashKey
     this.hashKeyValue = hashKeyValue
     this.rangeKey = rangeKey
+    return this
+  }
+
+  setRangeKey(rangeKeyValue: unknown, rangeKeyComparison: KeyComparison): IndexSearcher<TResult> {
     this.rangeKeyValue = rangeKeyValue
     this.rangeKeyComparison = rangeKeyComparison
+    return this
+  }
+
+  setBetweenKey(start: unknown, end: unknown): IndexSearcher<TResult> {
+    this.betweenKeyStart = start
+    this.betweenKeyEnd = end
     return this
   }
 
@@ -134,6 +142,8 @@ export default class IndexSearcher<TResult> {
       hashKeyValue: this.hashKeyValue,
       rangeKeyName: this.rangeKey,
       rangeKeyValue: this.rangeKeyValue,
+      betweenKeyStart: this.betweenKeyStart,
+      betweenKeyEnd: this.betweenKeyEnd,
       rangeKeyComparison: this.rangeKeyComparison,
       filterKeyName: this.filterKeyName,
       filterKeyValue: this.filterKeyValue,

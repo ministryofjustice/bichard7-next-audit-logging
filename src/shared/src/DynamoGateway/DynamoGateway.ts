@@ -150,6 +150,14 @@ export default class DynamoGateway {
       }
     }
 
+    // set query options for between range key
+    if (options.rangeKeyName && options.betweenKeyStart !== undefined && options.betweenKeyEnd !== undefined) {
+      queryOptions.KeyConditionExpression += " AND #rangeKeyName BETWEEN :betweenKeyStart AND :betweenKeyEnd"
+      queryOptions.ExpressionAttributeNames!["#rangeKeyName"] = options.rangeKeyName
+      queryOptions.ExpressionAttributeValues![":betweenKeyStart"] = options.betweenKeyStart
+      queryOptions.ExpressionAttributeValues![":betweenKeyEnd"] = options.betweenKeyEnd
+    }
+
     // set query options for the filter if given
     if (options.filterKeyName && options.filterKeyValue !== undefined && options.filterKeyComparison !== undefined) {
       if (options.filterKeyComparison == KeyComparison.LessThanOrEqual) {
