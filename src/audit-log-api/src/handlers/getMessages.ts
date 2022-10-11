@@ -1,13 +1,13 @@
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda"
-import type { PromiseResult, AuditLog } from "shared-types"
-import { isError } from "shared-types"
 import { AwsAuditLogDynamoGateway, AwsAuditLogLookupDynamoGateway, HttpStatusCode, logger } from "shared"
+import type { AuditLog, PromiseResult } from "shared-types"
+import { isError } from "shared-types"
 import createAuditLogDynamoDbConfig from "../createAuditLogDynamoDbConfig"
-import createMessageFetcher from "../use-cases/createMessageFetcher"
-import { createJsonApiResult } from "../utils"
-import LookupEventValuesUseCase from "../use-cases/LookupEventValuesUseCase"
 import createAuditLogLookupDynamoDbConfig from "../createAuditLogLookupDynamoDbConfig"
+import createMessageFetcher from "../use-cases/createMessageFetcher"
+import LookupEventValuesUseCase from "../use-cases/LookupEventValuesUseCase"
 import LookupMessageValuesUseCase from "../use-cases/LookupMessageValuesUseCase"
+import { createJsonApiResult } from "../utils"
 
 const auditLogConfig = createAuditLogDynamoDbConfig()
 const auditLogLookupConfig = createAuditLogLookupDynamoDbConfig()
@@ -18,6 +18,14 @@ const lookupMessageValuesUseCase = new LookupMessageValuesUseCase(lookupEventVal
 
 export default async function getMessages(event: APIGatewayProxyEvent): PromiseResult<APIGatewayProxyResult> {
   const messageFetcher = createMessageFetcher(event, auditLogGateway)
+  if (isError(messageFetcher)) {
+    logger.error(`Error fetching messages: ${messageFetcher.message}`)
+    return createJsonApiResult({
+      statusCode: HttpStatusCode.badRequest,
+      body: messageFetcher.message
+    })
+  }
+
   const messageFetcherResult = await messageFetcher.fetch()
 
   if (isError(messageFetcherResult)) {
