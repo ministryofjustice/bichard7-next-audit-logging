@@ -130,4 +130,37 @@ describe("Getting Audit Logs", () => {
       expect(messageIds).not.toContain(sanitisedAuditLog.messageId)
     })
   })
+
+  describe("fetching messages with a filter on the events (automationRate)", () => {
+    it.only("should return messages in the correct time range", async () => {
+      const promises = [
+        "2022-01-01T00:00:00Z",
+        "2022-01-02T00:00:00Z",
+        "2022-01-03T00:00:00Z",
+        "2022-01-04T00:00:00Z"
+      ].map((receivedDate) => createMockAuditLog({ receivedDate }))
+      const createResults = await Promise.all(promises)
+
+      if (
+        isError(createResults[0]) ||
+        isError(createResults[1]) ||
+        isError(createResults[2]) ||
+        isError(createResults[3])
+      ) {
+        throw new Error("Unexpected error")
+      }
+
+      const result = await axios.get<AuditLog[]>(
+        `http://localhost:3010/messages?eventsFilter=automationReport&start=2022-01-02&end=2022-01-03`
+      )
+      expect(result.status).toEqual(HttpStatusCode.ok)
+
+      expect(Array.isArray(result.data)).toBeTruthy()
+      const messageIds = result.data.map((record) => record.messageId)
+      expect(messageIds).not.toContain(createResults[0].messageId)
+      expect(messageIds).toContain(createResults[1].messageId)
+      expect(messageIds).toContain(createResults[2].messageId)
+      expect(messageIds).not.toContain(createResults[3].messageId)
+    })
+  })
 })

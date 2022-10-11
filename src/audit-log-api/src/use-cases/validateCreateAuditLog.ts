@@ -1,7 +1,6 @@
-import type { AuditLog, AuditLogDynamoGateway } from "shared-types"
-import { isError } from "shared-types"
-import { AuditLogStatus } from "shared-types"
 import { logger } from "shared"
+import type { AuditLog, AuditLogDynamoGateway } from "shared-types"
+import { AuditLogStatus, isError } from "shared-types"
 import { isIsoDate } from "../utils"
 
 interface ValidationResult {
@@ -15,6 +14,7 @@ export default async (auditLog: AuditLog, dynamoGateway: AuditLogDynamoGateway):
   let formattedReceivedDate = ""
   let formattedNextSanitiseCheck = ""
   const {
+    forceOwner,
     caseId,
     systemId,
     externalCorrelationId,
@@ -101,6 +101,7 @@ export default async (auditLog: AuditLog, dynamoGateway: AuditLogDynamoGateway):
 
   const validatedAuditLog: AuditLog = {
     messageId,
+    forceOwner,
     caseId,
     systemId,
     s3Path,
