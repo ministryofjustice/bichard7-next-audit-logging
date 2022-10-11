@@ -1,7 +1,14 @@
 // @ts-ignore
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable class-methods-use-this */
-import type { AuditLog, AuditLogDynamoGateway, AuditLogEvent, DynamoUpdate, PromiseResult } from "shared-types"
+import type {
+  AuditLog,
+  AuditLogDynamoGateway,
+  AuditLogEvent,
+  DynamoUpdate,
+  PromiseResult,
+  RangeQueryOptions
+} from "shared-types"
 
 export default class FakeAuditLogDynamoGateway implements AuditLogDynamoGateway {
   private messages: AuditLog[] = []
@@ -34,6 +41,14 @@ export default class FakeAuditLogDynamoGateway implements AuditLogDynamoGateway 
 
   // @ts-ignore
   fetchMany(limit?: number, lastMessage?: AuditLog): PromiseResult<AuditLog[]> {
+    if (this.error) {
+      return Promise.resolve(this.error)
+    }
+
+    return Promise.resolve(this.messages)
+  }
+
+  fetchRange(_: RangeQueryOptions): PromiseResult<AuditLog[]> {
     if (this.error) {
       return Promise.resolve(this.error)
     }

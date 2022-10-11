@@ -7,7 +7,8 @@ import type {
   DynamoDbConfig,
   DynamoUpdate,
   KeyValuePair,
-  PromiseResult
+  PromiseResult,
+  RangeQueryOptions
 } from "shared-types"
 import { EventType, isError } from "shared-types"
 import type { UpdateComponent } from "src/utils/updateComponentTypes"
@@ -135,6 +136,21 @@ export default class AwsAuditLogDynamoGateway extends DynamoGateway implements A
     return <AuditLog[]>result
   }
 
+  async fetchRange(options: RangeQueryOptions): PromiseResult<AuditLog[]> {
+    const result = await new IndexSearcher<AuditLog[]>(this, this.tableName, this.tableKey)
+      .useIndex(`${this.sortKey}Index`)
+      .setIndexKeys("_", "_", "receivedDate")
+      .setBetweenKey(options.start.toISOString(), options.end.toISOString())
+      // .paginate(10, options.lastMessageId)
+      .execute()
+
+    if (isError(result)) {
+      return result
+    }
+
+    return <AuditLog[]>result
+  }
+
   async fetchByExternalCorrelationId(externalCorrelationId: string): PromiseResult<AuditLog | null> {
     const options: FetchByIndexOptions = {
       indexName: "externalCorrelationIdIndex",
@@ -196,7 +212,8 @@ export default class AwsAuditLogDynamoGateway extends DynamoGateway implements A
   async fetchUnsanitised(limit = 10, lastMessage?: AuditLog): PromiseResult<AuditLog[]> {
     const result = await new IndexSearcher<AuditLog[]>(this, this.tableName, this.tableKey)
       .useIndex("isSanitisedIndex")
-      .setIndexKeys("isSanitised", 0, "nextSanitiseCheck", new Date().toISOString(), KeyComparison.LessThanOrEqual)
+      .setIndexKeys("isSanitised", 0, "nextSanitiseCheck")
+      .setRangeKey(new Date().toISOString(), KeyComparison.LessThanOrEqual)
       .paginate(limit, lastMessage, true)
       .execute()
 
