@@ -11,6 +11,8 @@ import type {
   RangeQueryOptions
 } from "shared-types"
 import { EventType, isError } from "shared-types"
+import { FetchManyOptions } from "shared-types/build/AuditLogDynamoGateway"
+import { Projection } from "src/DynamoGateway/DynamoGateway"
 import type { UpdateComponent } from "src/utils/updateComponentTypes"
 import type { FetchByIndexOptions, UpdateOptions } from "../DynamoGateway"
 import { DynamoGateway, IndexSearcher, KeyComparison } from "../DynamoGateway"
@@ -32,6 +34,30 @@ export default class AwsAuditLogDynamoGateway extends DynamoGateway implements A
 
   constructor(config: DynamoDbConfig, private readonly tableName: string) {
     super(config)
+  }
+
+  getProjectionExpression(includeColumns: string[] = [], excludeColumns: string[] = []): Projection {
+    const defaultProjection = [
+      "caseId",
+      "events",
+      "externalCorrelationId",
+      "externalId",
+      "forceOwner",
+      "lastEventType",
+      "messageId",
+      "receivedDate",
+      "s3Path",
+      "#status",
+      "systemId"
+    ]
+
+    const excludedProjection = defaultProjection.filter((column) => !excludeColumns.includes(column))
+    const fullProjection = excludedProjection.concat(includeColumns)
+
+    return {
+      expression: fullProjection.join(","),
+      attributeNames: { "#status": "status" }
+    }
   }
 
   async create(message: AuditLog): PromiseResult<AuditLog> {
@@ -122,11 +148,12 @@ export default class AwsAuditLogDynamoGateway extends DynamoGateway implements A
     }
   }
 
-  async fetchMany(limit = 10, lastMessage?: AuditLog): PromiseResult<AuditLog[]> {
+  async fetchMany(limit = 10, options: FetchManyOptions = {}): PromiseResult<AuditLog[]> {
     const result = await new IndexSearcher<AuditLog[]>(this, this.tableName, this.tableKey)
       .useIndex(`${this.sortKey}Index`)
       .setIndexKeys("_", "_", "receivedDate")
-      .paginate(limit, lastMessage)
+      .setProjection(this.getProjectionExpression(options.includeColumns, options.excludeColumns))
+      .paginate(limit, options.lastMessage)
       .execute()
 
     if (isError(result)) {

@@ -22,6 +22,14 @@ const createMessageFetcher = (
   const start = event.queryStringParameters?.start ? new Date(event.queryStringParameters.start) : undefined
   const end = event.queryStringParameters?.end ? new Date(event.queryStringParameters.end) : undefined
 
+  const includeColumns = event.queryStringParameters?.includeColumns
+    ? event.queryStringParameters.includeColumns.split(",")
+    : []
+
+  const excludeColumns = event.queryStringParameters?.excludeColumns
+    ? event.queryStringParameters.excludeColumns.split(",")
+    : []
+
   if (eventsFilter) {
     if (eventsFilter === "automationReport") {
       if (!start || !end) {
@@ -48,7 +56,7 @@ const createMessageFetcher = (
     return new FetchByStatus(auditLogGateway, status, lastMessageId)
   }
 
-  return new FetchAll(auditLogGateway, lastMessageId)
+  return new FetchAll(auditLogGateway, { lastMessageId, includeColumns, excludeColumns })
 }
 
 export default createMessageFetcher

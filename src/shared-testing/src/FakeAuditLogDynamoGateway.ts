@@ -9,6 +9,7 @@ import type {
   PromiseResult,
   RangeQueryOptions
 } from "shared-types"
+import { FetchManyOptions } from "shared-types/build/AuditLogDynamoGateway"
 
 export default class FakeAuditLogDynamoGateway implements AuditLogDynamoGateway {
   private messages: AuditLog[] = []
@@ -40,7 +41,7 @@ export default class FakeAuditLogDynamoGateway implements AuditLogDynamoGateway 
   }
 
   // @ts-ignore
-  fetchMany(limit?: number, lastMessage?: AuditLog): PromiseResult<AuditLog[]> {
+  fetchMany(limit?: number, options: FetchManyOptions = {}): PromiseResult<AuditLog[]> {
     if (this.error) {
       return Promise.resolve(this.error)
     }

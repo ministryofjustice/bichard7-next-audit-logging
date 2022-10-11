@@ -3,6 +3,7 @@ import type { DocumentClient } from "aws-sdk/clients/dynamodb"
 import type { KeyValuePair, PromiseResult, Result } from "shared-types"
 import { isError } from "shared-types"
 import type DynamoGateway from "./DynamoGateway"
+import { Projection } from "./DynamoGateway"
 import type FetchByIndexOptions from "./FetchByIndexOptions"
 import type KeyComparison from "./KeyComparison"
 import type Pagination from "./Pagination"
@@ -35,6 +36,8 @@ export default class IndexSearcher<TResult> {
   private limit = 10
 
   private lastItemForPagination?: KeyValuePair<string, unknown>
+
+  private projection?: Projection
 
   private isAscendingOrder: boolean
 
@@ -123,6 +126,11 @@ export default class IndexSearcher<TResult> {
     return this
   }
 
+  setProjection(projection: Projection): IndexSearcher<TResult> {
+    this.projection = projection
+    return this
+  }
+
   async execute(): PromiseResult<TResult | undefined> {
     const pagination: Pagination = {
       limit: this.limit
@@ -149,7 +157,8 @@ export default class IndexSearcher<TResult> {
       filterKeyValue: this.filterKeyValue,
       filterKeyComparison: this.filterKeyComparison,
       isAscendingOrder: this.isAscendingOrder,
-      pagination
+      pagination,
+      projection: this.projection
     }
 
     const fetchResult = await this.gateway.fetchByIndex(this.tableName, options)

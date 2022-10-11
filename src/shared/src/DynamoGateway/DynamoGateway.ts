@@ -13,7 +13,7 @@ import type GetManyOptions from "./GetManyOptions"
 import KeyComparison from "./KeyComparison"
 import type UpdateOptions from "./UpdateOptions"
 
-type Projection = {
+export type Projection = {
   expression: string
   attributeNames: {
     [key: string]: string
@@ -38,27 +38,6 @@ export default class DynamoGateway {
     this.client = new DocumentClient({
       service: this.service
     })
-  }
-
-  getProjectionExpression(): Projection {
-    const defaultProjection = [
-      "caseId",
-      "events",
-      "externalCorrelationId",
-      "externalId",
-      "forceOwner",
-      "lastEventType",
-      "messageId",
-      "receivedDate",
-      "s3Path",
-      "#status",
-      "systemId"
-    ]
-
-    return {
-      expression: defaultProjection.join(","),
-      attributeNames: { "#status": "status" }
-    }
   }
 
   insertOne<T>(tableName: string, record: T, keyName: string): PromiseResult<void> {
@@ -129,10 +108,10 @@ export default class DynamoGateway {
   }
 
   getMany(tableName: string, options: GetManyOptions): PromiseResult<DocumentClient.QueryOutput> {
-    const { sortKey } = options
+    const { sortKey, projection } = options
     const { limit, lastItemKey } = options.pagination
 
-    const { expression, attributeNames } = this.getProjectionExpression()
+    const { expression, attributeNames } = projection ?? {}
 
     const queryOptions: DynamoDB.DocumentClient.QueryInput = {
       TableName: tableName,
@@ -161,10 +140,16 @@ export default class DynamoGateway {
   }
 
   fetchByIndex(tableName: string, options: FetchByIndexOptions): PromiseResult<DocumentClient.QueryOutput> {
-    const { indexName, hashKeyName: attributeName, hashKeyValue: attributeValue, isAscendingOrder } = options
+    const {
+      indexName,
+      hashKeyName: attributeName,
+      hashKeyValue: attributeValue,
+      isAscendingOrder,
+      projection
+    } = options
     const { limit, lastItemKey } = options.pagination
 
-    const { expression, attributeNames } = this.getProjectionExpression()
+    const { expression, attributeNames } = projection ?? {}
 
     const queryOptions: DynamoDB.DocumentClient.QueryInput = {
       TableName: tableName,
@@ -218,9 +203,10 @@ export default class DynamoGateway {
   getOne(
     tableName: string,
     keyName: string,
-    keyValue: unknown
+    keyValue: unknown,
+    projection?: Projection
   ): PromiseResult<DocumentClient.GetItemOutput | Error | null> {
-    const { expression, attributeNames } = this.getProjectionExpression()
+    const { expression, attributeNames } = projection ?? {}
 
     return this.client
       .get({

@@ -132,7 +132,7 @@ describe("Getting Audit Logs", () => {
   })
 
   describe("fetching messages with a filter on the events (automationRate)", () => {
-    it.only("should return messages in the correct time range", async () => {
+    it("should return messages in the correct time range", async () => {
       const promises = [
         "2022-01-01T00:00:00Z",
         "2022-01-02T00:00:00Z",
@@ -161,6 +161,73 @@ describe("Getting Audit Logs", () => {
       expect(messageIds).toContain(createResults[1].messageId)
       expect(messageIds).toContain(createResults[2].messageId)
       expect(messageIds).not.toContain(createResults[3].messageId)
+    })
+  })
+
+  describe("including and excluding columns", () => {
+    it("should not show excluded columns", async () => {
+      const auditLog = await createMockAuditLog()
+      if (isError(auditLog)) {
+        throw new Error("Unexpected error")
+      }
+
+      const defaultResult = await axios.get<AuditLog[]>(`http://localhost:3010/messages`)
+      expect(defaultResult.status).toEqual(HttpStatusCode.ok)
+      expect(defaultResult.data[0]).toHaveProperty("events")
+      expect(defaultResult.data[0]).toHaveProperty("receivedDate")
+      const defaultKeys = Object.keys(defaultResult.data[0])
+
+      const excludedResult = await axios.get<AuditLog[]>(
+        `http://localhost:3010/messages?excludeColumns=receivedDate,events`
+      )
+      expect(excludedResult.status).toEqual(HttpStatusCode.ok)
+      expect(excludedResult.data[0]).not.toHaveProperty("events")
+      expect(excludedResult.data[0]).not.toHaveProperty("receivedDate")
+      expect(Object.keys(excludedResult.data[0])).toHaveLength(defaultKeys.length - 2)
+    })
+
+    it("should show included columns", async () => {
+      const auditLog = await createMockAuditLog()
+      if (isError(auditLog)) {
+        throw new Error("Unexpected error")
+      }
+
+      const defaultResult = await axios.get<AuditLog[]>(`http://localhost:3010/messages`)
+      expect(defaultResult.status).toEqual(HttpStatusCode.ok)
+      expect(defaultResult.data[0]).not.toHaveProperty("version")
+      expect(defaultResult.data[0]).not.toHaveProperty("messageHash")
+      const defaultKeys = Object.keys(defaultResult.data[0])
+
+      const includedResult = await axios.get<AuditLog[]>(
+        `http://localhost:3010/messages?includeColumns=version,messageHash`
+      )
+      expect(includedResult.status).toEqual(HttpStatusCode.ok)
+      expect(includedResult.data[0]).toHaveProperty("version")
+      expect(includedResult.data[0]).toHaveProperty("messageHash")
+      expect(Object.keys(includedResult.data[0])).toHaveLength(defaultKeys.length + 2)
+    })
+
+    it("should work with excluded and included columns", async () => {
+      const auditLog = await createMockAuditLog()
+      if (isError(auditLog)) {
+        throw new Error("Unexpected error")
+      }
+
+      const defaultResult = await axios.get<AuditLog[]>(`http://localhost:3010/messages`)
+      expect(defaultResult.status).toEqual(HttpStatusCode.ok)
+      expect(defaultResult.data[0]).not.toHaveProperty("version")
+      expect(defaultResult.data[0]).not.toHaveProperty("messageHash")
+      expect(defaultResult.data[0]).toHaveProperty("events")
+      expect(defaultResult.data[0]).toHaveProperty("receivedDate")
+
+      const filteredResult = await axios.get<AuditLog[]>(
+        `http://localhost:3010/messages?includeColumns=version,messageHash&excludeColumns=receivedDate,events`
+      )
+      expect(filteredResult.status).toEqual(HttpStatusCode.ok)
+      expect(filteredResult.data[0]).toHaveProperty("version")
+      expect(filteredResult.data[0]).toHaveProperty("messageHash")
+      expect(filteredResult.data[0]).not.toHaveProperty("events")
+      expect(filteredResult.data[0]).not.toHaveProperty("receivedDate")
     })
   })
 })

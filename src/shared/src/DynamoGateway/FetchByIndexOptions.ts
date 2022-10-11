@@ -1,3 +1,4 @@
+import { Projection } from "./DynamoGateway"
 import type KeyComparison from "./KeyComparison"
 import type Pagination from "./Pagination"
 
@@ -15,4 +16,5 @@ export default interface FetchByIndexOptions {
   filterKeyComparison?: KeyComparison
   isAscendingOrder?: boolean
   pagination: Pagination
+  projection?: Projection
 }

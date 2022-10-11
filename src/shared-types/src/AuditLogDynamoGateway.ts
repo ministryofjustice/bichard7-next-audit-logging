@@ -1,11 +1,17 @@
 import type { AuditLog, AuditLogEvent, DynamoUpdate, PromiseResult, RangeQueryOptions } from "."
 
+export type FetchManyOptions = {
+  lastMessage?: AuditLog
+  includeColumns?: string[]
+  excludeColumns?: string[]
+}
+
 export default interface AuditLogDynamoGateway {
   create(message: AuditLog): PromiseResult<AuditLog>
   createMany(messages: AuditLog[]): PromiseResult<AuditLog[]>
   update(message: AuditLog): PromiseResult<AuditLog>
   updateSanitiseCheck(message: AuditLog, nextSanitiseCheck: Date): PromiseResult<void>
-  fetchMany(limit: number, lastMessage?: AuditLog): PromiseResult<AuditLog[]>
+  fetchMany(limit: number, options: FetchManyOptions): PromiseResult<AuditLog[]>
   fetchRange(options: RangeQueryOptions): PromiseResult<AuditLog[]>
   fetchByExternalCorrelationId(externalCorrelationId: string): PromiseResult<AuditLog | null>
   fetchByHash(hash: string): PromiseResult<AuditLog | null>
