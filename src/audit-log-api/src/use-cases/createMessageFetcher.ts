@@ -30,6 +30,8 @@ const createMessageFetcher = (
     ? event.queryStringParameters.excludeColumns.split(",")
     : []
 
+  const projection = { includeColumns, excludeColumns }
+
   if (eventsFilter) {
     if (eventsFilter === "automationReport") {
       if (!start || !end) {
@@ -41,22 +43,22 @@ const createMessageFetcher = (
   }
 
   if (onlyUnsanitised) {
-    return new FetchUnsanitised(auditLogGateway, limit)
+    return new FetchUnsanitised(auditLogGateway, limit, projection)
   }
 
   if (messageId) {
-    return new FetchById(auditLogGateway, messageId)
+    return new FetchById(auditLogGateway, messageId, projection)
   }
 
   if (externalCorrelationId) {
-    return new FetchByExternalCorrelationId(auditLogGateway, externalCorrelationId)
+    return new FetchByExternalCorrelationId(auditLogGateway, externalCorrelationId, projection)
   }
 
   if (status) {
-    return new FetchByStatus(auditLogGateway, status, lastMessageId)
+    return new FetchByStatus(auditLogGateway, status, { lastMessageId, ...projection })
   }
 
-  return new FetchAll(auditLogGateway, { lastMessageId, includeColumns, excludeColumns })
+  return new FetchAll(auditLogGateway, { lastMessageId, ...projection })
 }
 
 export default createMessageFetcher
