@@ -21,6 +21,9 @@ export default class FetchAutomationReport implements MessageFetcher {
 
       if (record.automationReport) {
         record.events = record.automationReport.events
+        if (!record.forceOwner && record.automationReport.forceOwner) {
+          record.forceOwner = parseForceOwner(record.automationReport.forceOwner)
+        }
         delete record.automationReport
       }
 

@@ -2,8 +2,7 @@ import type { AxiosError } from "axios"
 import axios from "axios"
 import { HttpStatusCode, TestDynamoGateway } from "shared"
 import { auditLogDynamoConfig, createMockAuditLog, createMockAuditLogEvent, createMockError } from "shared-testing"
-import type { AuditLog } from "shared-types"
-import { isError } from "shared-types"
+import { AuditLog, EventType, isError } from "shared-types"
 
 const testDynamoGateway = new TestDynamoGateway(auditLogDynamoConfig)
 
@@ -213,6 +212,28 @@ describe("Getting Audit Logs", () => {
       expect(filteredResult.data[0]).toHaveProperty("events")
       expect(filteredResult.data[0].events).toHaveLength(1)
       expect(filteredResult.data[0].events[0].eventType).toBe(eventInclude.eventType)
+    })
+
+    it("should include force owner at the top level of the response", async () => {
+      const auditLog = await createMockAuditLog()
+      if (isError(auditLog)) {
+        throw new Error("Unexpected error")
+      }
+
+      const event = await createMockAuditLogEvent(auditLog.messageId, {
+        eventType: EventType.InputMessageReceived,
+        attributes: { "Force Owner": "010000" }
+      })
+
+      if (isError(event)) {
+        throw new Error("Unexpected error")
+      }
+
+      const result = await axios.get<AuditLog[]>(
+        "http://localhost:3010/messages?eventsFilter=automationReport&start=2000-01-01&end=2099-01-01"
+      )
+      expect(result.status).toEqual(HttpStatusCode.ok)
+      expect(result.data[0].forceOwner).toBe(1)
     })
   })
 
