@@ -33,7 +33,7 @@ export default class IndexSearcher<TResult> {
 
   private filterKeyComparison?: KeyComparison
 
-  private limit = 10
+  private limit? = 10
 
   private lastItemForPagination?: KeyValuePair<string, unknown>
 
@@ -109,7 +109,7 @@ export default class IndexSearcher<TResult> {
   }
 
   paginate(
-    limit: number,
+    limit?: number,
     lastItemForPagination?: unknown | KeyValuePair<string, unknown>,
     isAscendingOrder = false
   ): IndexSearcher<TResult> {

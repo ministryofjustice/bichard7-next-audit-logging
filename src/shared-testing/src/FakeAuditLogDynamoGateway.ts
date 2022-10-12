@@ -43,7 +43,7 @@ export default class FakeAuditLogDynamoGateway implements AuditLogDynamoGateway 
     return Promise.resolve(message)
   }
 
-  fetchMany(_?: number, __: FetchManyOptions = {}): PromiseResult<AuditLog[]> {
+  fetchMany(_: FetchManyOptions = {}): PromiseResult<AuditLog[]> {
     if (this.error) {
       return Promise.resolve(this.error)
     }
@@ -79,7 +79,7 @@ export default class FakeAuditLogDynamoGateway implements AuditLogDynamoGateway 
     return Promise.resolve(message ?? null)
   }
 
-  fetchByStatus(_: string, __?: number, ___?: FetchByStatusOptions): PromiseResult<AuditLog[]> {
+  fetchByStatus(_: string, __?: FetchByStatusOptions): PromiseResult<AuditLog[]> {
     if (this.error) {
       return Promise.resolve(this.error)
     }
@@ -125,7 +125,7 @@ export default class FakeAuditLogDynamoGateway implements AuditLogDynamoGateway 
     throw new Error("Method not implemented.")
   }
 
-  fetchUnsanitised(_: number, __?: FetchUnsanitisedOptions): PromiseResult<AuditLog[]> {
+  fetchUnsanitised(_?: FetchUnsanitisedOptions): PromiseResult<AuditLog[]> {
     throw new Error("Method not implemented.")
   }
 

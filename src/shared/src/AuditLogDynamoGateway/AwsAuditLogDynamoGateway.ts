@@ -50,7 +50,8 @@ export default class AwsAuditLogDynamoGateway extends DynamoGateway implements A
       "receivedDate",
       "s3Path",
       "#status",
-      "systemId"
+      "systemId",
+      "#dummyKey"
     ]
 
     const excludedProjection = defaultProjection.filter((column) => !excludeColumns.includes(column))
@@ -58,7 +59,7 @@ export default class AwsAuditLogDynamoGateway extends DynamoGateway implements A
 
     return {
       expression: Array.from(fullProjection).join(","),
-      attributeNames: { "#status": "status" }
+      attributeNames: { "#status": "status", "#dummyKey": "_" }
     }
   }
 
@@ -150,12 +151,12 @@ export default class AwsAuditLogDynamoGateway extends DynamoGateway implements A
     }
   }
 
-  async fetchMany(limit = 10, options: FetchManyOptions = {}): PromiseResult<AuditLog[]> {
+  async fetchMany(options: FetchManyOptions = {}): PromiseResult<AuditLog[]> {
     const result = await new IndexSearcher<AuditLog[]>(this, this.tableName, this.tableKey)
       .useIndex(`${this.sortKey}Index`)
       .setIndexKeys("_", "_", "receivedDate")
       .setProjection(this.getProjectionExpression(options.includeColumns, options.excludeColumns))
-      .paginate(limit, options.lastMessage)
+      .paginate(options.limit, options.lastMessage)
       .execute()
 
     if (isError(result)) {
@@ -171,7 +172,7 @@ export default class AwsAuditLogDynamoGateway extends DynamoGateway implements A
       .setIndexKeys("_", "_", "receivedDate")
       .setBetweenKey(options.start.toISOString(), options.end.toISOString())
       .setProjection(this.getProjectionExpression(options.includeColumns, options.excludeColumns))
-      // .paginate(10, options.lastMessageId)
+      .paginate(options.limit, options.lastMessage)
       .execute()
 
     if (isError(result)) {
@@ -229,12 +230,12 @@ export default class AwsAuditLogDynamoGateway extends DynamoGateway implements A
     return items[0]
   }
 
-  async fetchByStatus(status: string, limit = 10, options?: FetchByStatusOptions): PromiseResult<AuditLog[]> {
+  async fetchByStatus(status: string, options?: FetchByStatusOptions): PromiseResult<AuditLog[]> {
     const result = await new IndexSearcher<AuditLog[]>(this, this.tableName, this.tableKey)
       .useIndex("statusIndex")
       .setIndexKeys("status", status, "receivedDate")
       .setProjection(this.getProjectionExpression(options?.includeColumns, options?.excludeColumns))
-      .paginate(limit, options?.lastMessage)
+      .paginate(options?.limit, options?.lastMessage)
       .execute()
 
     if (isError(result)) {
@@ -244,13 +245,13 @@ export default class AwsAuditLogDynamoGateway extends DynamoGateway implements A
     return <AuditLog[]>result
   }
 
-  async fetchUnsanitised(limit = 10, options?: FetchUnsanitisedOptions): PromiseResult<AuditLog[]> {
+  async fetchUnsanitised(options?: FetchUnsanitisedOptions): PromiseResult<AuditLog[]> {
     const result = await new IndexSearcher<AuditLog[]>(this, this.tableName, this.tableKey)
       .useIndex("isSanitisedIndex")
       .setIndexKeys("isSanitised", 0, "nextSanitiseCheck")
       .setRangeKey(new Date().toISOString(), KeyComparison.LessThanOrEqual)
       .setProjection(this.getProjectionExpression(options?.includeColumns, options?.excludeColumns))
-      .paginate(limit, options?.lastMessage, true)
+      .paginate(options?.limit, options?.lastMessage, true)
       .execute()
 
     if (isError(result)) {

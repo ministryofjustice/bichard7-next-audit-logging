@@ -9,7 +9,7 @@ export default class AuditLog {
 
   public readonly receivedDate: string
 
-  public forceOwner: number
+  public forceOwner?: number
 
   public errorRecordArchivalDate?: string
 

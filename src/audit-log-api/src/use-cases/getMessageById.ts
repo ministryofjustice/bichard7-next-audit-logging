@@ -1,5 +1,5 @@
-import { isError } from "shared-types"
 import type { AuditLog, AuditLogDynamoGateway, PromiseResult } from "shared-types"
+import { isError } from "shared-types"
 
 const getMessageById = async (
   gateway: AuditLogDynamoGateway,
@@ -9,7 +9,7 @@ const getMessageById = async (
     return undefined
   }
 
-  const message = await gateway.fetchOne(messageId)
+  const message = await gateway.fetchOne(messageId, { includeColumns: ["isSanitised", "nextSanitiseCheck"] })
 
   if (isError(message)) {
     return message

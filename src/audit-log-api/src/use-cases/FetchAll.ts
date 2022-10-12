@@ -19,8 +19,6 @@ export default class FetchAll implements MessageFetcher {
       return lastMessage
     }
 
-    const { includeColumns, excludeColumns } = this.options
-
-    return this.gateway.fetchMany(10, { lastMessage, includeColumns, excludeColumns })
+    return this.gateway.fetchMany({ lastMessage, ...this.options })
   }
 }

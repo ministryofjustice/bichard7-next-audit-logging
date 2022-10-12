@@ -569,7 +569,7 @@ describe("AuditLogDynamoGateway", () => {
         })
       )
 
-      const result = await gateway.fetchMany(1)
+      const result = await gateway.fetchMany({ limit: 1 })
 
       expect(isError(result)).toBe(false)
       expect(result).toHaveLength(1)
@@ -589,7 +589,7 @@ describe("AuditLogDynamoGateway", () => {
         })
       )
 
-      const result = await gateway.fetchMany(3)
+      const result = await gateway.fetchMany({ limit: 3 })
 
       expect(isError(result)).toBe(false)
       expect(result).toHaveLength(3)

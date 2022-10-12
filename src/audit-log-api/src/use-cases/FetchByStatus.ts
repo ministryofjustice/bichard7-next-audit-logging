@@ -17,6 +17,6 @@ export default class FetchByStatus implements MessageFetcher {
       return lastMessage
     }
 
-    return this.gateway.fetchByStatus(this.status, 10, this.options)
+    return this.gateway.fetchByStatus(this.status, { ...this.options, lastMessage })
   }
 }

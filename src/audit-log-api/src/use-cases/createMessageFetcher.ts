@@ -32,6 +32,7 @@ const createMessageFetcher = (
     : []
 
   const projection = { includeColumns, excludeColumns }
+  const pagination = { limit, lastMessageId }
 
   if (eventsFilter) {
     if (!start || !end) {
@@ -39,15 +40,15 @@ const createMessageFetcher = (
     }
 
     if (eventsFilter === "automationReport") {
-      return new FetchAutomationReport(auditLogGateway, { start, end })
+      return new FetchAutomationReport(auditLogGateway, { start, end, ...pagination })
     } else if (eventsFilter === "topExceptionsReport") {
-      return new FetchTopExceptionsReport(auditLogGateway, { start, end })
+      return new FetchTopExceptionsReport(auditLogGateway, { start, end, ...pagination })
     }
     return new Error("Invalid value for 'eventsFilter' parameter")
   }
 
   if (onlyUnsanitised) {
-    return new FetchUnsanitised(auditLogGateway, limit, projection)
+    return new FetchUnsanitised(auditLogGateway, { ...pagination, ...projection })
   }
 
   if (messageId) {
@@ -59,10 +60,10 @@ const createMessageFetcher = (
   }
 
   if (status) {
-    return new FetchByStatus(auditLogGateway, status, { lastMessageId, ...projection })
+    return new FetchByStatus(auditLogGateway, status, { ...pagination, ...projection })
   }
 
-  return new FetchAll(auditLogGateway, { lastMessageId, ...projection })
+  return new FetchAll(auditLogGateway, { ...pagination, ...projection })
 }
 
 export default createMessageFetcher

@@ -1,8 +1,15 @@
 import type { AxiosError } from "axios"
 import axios from "axios"
 import { HttpStatusCode, TestDynamoGateway } from "shared"
-import { auditLogDynamoConfig, createMockAuditLog, createMockAuditLogEvent, createMockError } from "shared-testing"
-import { AuditLog, EventType, isError } from "shared-types"
+import {
+  auditLogDynamoConfig,
+  createMockAuditLog,
+  createMockAuditLogEvent,
+  createMockAuditLogs,
+  createMockError
+} from "shared-testing"
+import type { AuditLog } from "shared-types"
+import { EventType, isError } from "shared-types"
 
 const testDynamoGateway = new TestDynamoGateway(auditLogDynamoConfig)
 
@@ -266,6 +273,21 @@ describe("Getting Audit Logs", () => {
       expect(filteredResult.data[0].events).toHaveLength(1)
       expect(filteredResult.data[0].events[0].eventType).toBe(eventInclude.eventType)
     })
+
+    it("should paginate the results using the last message ID", async () => {
+      const auditLogs = await createMockAuditLogs(5)
+      if (isError(auditLogs)) {
+        throw new Error("Unexpected error")
+      }
+
+      const result = await axios.get<AuditLog[]>(
+        `http://localhost:3010/messages?eventsFilter=topExceptionsReport&start=2000-01-01&end=2099-01-01&lastMessageId=${auditLogs[2].messageId}`
+      )
+
+      expect(result.data).toHaveLength(2)
+      expect(result.data[0].messageId).toBe(auditLogs[1].messageId)
+      expect(result.data[1].messageId).toBe(auditLogs[0].messageId)
+    })
   })
 
   describe("including and excluding columns", () => {
@@ -348,6 +370,46 @@ describe("Getting Audit Logs", () => {
         expect(filteredResult.data[0]).toHaveProperty("messageHash")
         expect(filteredResult.data[0]).not.toHaveProperty("events")
         expect(filteredResult.data[0]).not.toHaveProperty("receivedDate")
+      })
+    })
+  })
+
+  describe("pagination", () => {
+    describe.each(
+      // prettier-ignore
+      [
+        ["fetchAll",             true,   "http://localhost:3010/messages"],
+        ["fetchUnsanitised",     false,  "http://localhost:3010/messages?unsanitised=true"],
+        ["fetchByStatus",        true,   "http://localhost:3010/messages?status=Processing"],
+        ["fetchTopExceptions",   true,   "http://localhost:3010/messages?eventsFilter=topExceptionsReport&start=2000-01-01&end=2099-01-01"],
+        ["fetchAutomation",      true,   "http://localhost:3010/messages?eventsFilter=automationReport&start=2000-01-01&end=2099-01-01"]
+      ]
+    )("from %s", (_, descending, baseUrl) => {
+      it("should limit the number of records", async () => {
+        const auditLogs = await createMockAuditLogs(2)
+        if (isError(auditLogs)) {
+          throw new Error("Unexpected error")
+        }
+
+        const result = await axios.get<AuditLog[]>(addQueryParams(baseUrl, { limit: "1" }))
+
+        expect(result.data).toHaveLength(1)
+      })
+
+      it("should paginate by last record ID", async () => {
+        const auditLogs = await createMockAuditLogs(5)
+        if (isError(auditLogs)) {
+          throw new Error("Unexpected error")
+        }
+
+        const result = await axios.get<AuditLog[]>(addQueryParams(baseUrl, { lastMessageId: auditLogs[2].messageId }))
+
+        expect(result.data).toHaveLength(2)
+
+        // determine which keys will be returned based on the sort order
+        const keys = descending ? [1, 0] : [3, 4]
+        expect(result.data[0].messageId).toBe(auditLogs[keys[0]].messageId)
+        expect(result.data[1].messageId).toBe(auditLogs[keys[1]].messageId)
       })
     })
   })
