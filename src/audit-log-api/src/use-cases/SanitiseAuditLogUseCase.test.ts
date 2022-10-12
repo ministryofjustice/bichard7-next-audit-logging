@@ -30,6 +30,7 @@ const message = new AuditLog("External Correlation ID", new Date(), "Dummy hash"
 message.events = [createBichardAuditLogEvent()]
 message.automationReport = { events: [] }
 message.automationReport.events = [createBichardAuditLogEvent()]
+message.topExceptionsReport = { events: [] }
 message.topExceptionsReport.events = [createBichardAuditLogEvent()]
 message.nextSanitiseCheck = new Date().toISOString()
 
@@ -50,7 +51,7 @@ it("should remove attributes containing PII", async () => {
   expect(Object.keys(automationReportAttributes)).toHaveLength(1)
   expect(automationReportAttributes["Trigger 2 Details"]).toBe("TRPR0004")
 
-  const topExceptionsReportAttributes = actualMessage?.topExceptionsReport.events[0].attributes ?? {}
+  const topExceptionsReportAttributes = actualMessage?.topExceptionsReport?.events[0].attributes ?? {}
   expect(Object.keys(topExceptionsReportAttributes)).toHaveLength(1)
   expect(topExceptionsReportAttributes["Trigger 2 Details"]).toBe("TRPR0004")
 })

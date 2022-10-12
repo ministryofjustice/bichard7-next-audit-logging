@@ -290,8 +290,8 @@ describe("AuditLogDynamoGateway", () => {
       expect(actualMessage.events).toBeDefined()
       expect(actualMessage.events).toHaveLength(1)
       expect(actualMessage.topExceptionsReport).toBeDefined()
-      expect(actualMessage.topExceptionsReport.events).toBeDefined()
-      expect(actualMessage.topExceptionsReport.events).toHaveLength(1)
+      expect(actualMessage.topExceptionsReport?.events).toBeDefined()
+      expect(actualMessage.topExceptionsReport?.events).toHaveLength(1)
 
       const actualEvent = actualMessage.events[0]
       expect(actualEvent.eventSource).toBe(expectedEvent.eventSource)
@@ -304,16 +304,16 @@ describe("AuditLogDynamoGateway", () => {
       expect(actualEventAttributes["Message Type"]).toBe("SPIResults")
       expect(actualEventAttributes["Error 2 Details"]).toBe("Dummy")
 
-      const actualTopExceptionReportEvent = actualMessage.topExceptionsReport.events[0]
-      expect(actualTopExceptionReportEvent.eventSource).toBe(expectedEvent.eventSource)
-      expect(actualTopExceptionReportEvent.category).toBe(expectedEvent.category)
-      expect(actualTopExceptionReportEvent.timestamp).toBe(expectedEvent.timestamp)
-      expect(actualTopExceptionReportEvent.eventType).toBe(expectedEvent.eventType)
+      const actualTopExceptionReportEvent = actualMessage.topExceptionsReport?.events[0]
+      expect(actualTopExceptionReportEvent?.eventSource).toBe(expectedEvent.eventSource)
+      expect(actualTopExceptionReportEvent?.category).toBe(expectedEvent.category)
+      expect(actualTopExceptionReportEvent?.timestamp).toBe(expectedEvent.timestamp)
+      expect(actualTopExceptionReportEvent?.eventType).toBe(expectedEvent.eventType)
 
-      const actualTopExceptionReportEventAttribute = actualTopExceptionReportEvent.attributes
+      const actualTopExceptionReportEventAttribute = actualTopExceptionReportEvent?.attributes
       expect(actualTopExceptionReportEventAttribute).toBeDefined()
-      expect(actualTopExceptionReportEventAttribute["Message Type"]).toBe("SPIResults")
-      expect(actualTopExceptionReportEventAttribute["Error 2 Details"]).toBe("Dummy")
+      expect(actualTopExceptionReportEventAttribute?.["Message Type"]).toBe("SPIResults")
+      expect(actualTopExceptionReportEventAttribute?.["Error 2 Details"]).toBe("Dummy")
     })
 
     it("should log the event for automation report", async () => {
@@ -415,7 +415,7 @@ describe("AuditLogDynamoGateway", () => {
       expect(actualMessage.events).toBeDefined()
       expect(actualMessage.events).toHaveLength(1)
       expect(actualMessage.topExceptionsReport).toBeDefined()
-      expect(actualMessage.topExceptionsReport.events).toHaveLength(0)
+      expect(actualMessage.topExceptionsReport?.events).toHaveLength(0)
       expect(actualMessage.automationReport).toBeDefined()
       expect(actualMessage.automationReport?.events).toHaveLength(0)
     })

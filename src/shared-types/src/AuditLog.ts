@@ -25,7 +25,7 @@ export default class AuditLog {
 
   public automationReport?: AutomationReport = { events: [] }
 
-  public topExceptionsReport: TopExceptionsReport = { events: [] }
+  public topExceptionsReport?: TopExceptionsReport = { events: [] }
 
   public status = AuditLogStatus.processing
 

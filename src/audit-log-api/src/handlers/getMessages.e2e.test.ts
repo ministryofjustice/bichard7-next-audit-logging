@@ -216,6 +216,37 @@ describe("Getting Audit Logs", () => {
     })
   })
 
+  describe("fetchTopExceptionsReport", () => {
+    it("should only include events for top exceptions report", async () => {
+      const auditLog = await createMockAuditLog()
+      if (isError(auditLog)) {
+        throw new Error("Unexpected error")
+      }
+
+      const eventInclude = await createMockAuditLogEvent(auditLog.messageId, {
+        attributes: { "Message Type": "SPIResults", "Error 1 Details": "HO100300" }
+      })
+      const eventExclude = await createMockAuditLogEvent(auditLog.messageId)
+
+      if (isError(eventInclude) || isError(eventExclude)) {
+        throw new Error("Unexpected error")
+      }
+
+      const allResult = await axios.get<AuditLog[]>("http://localhost:3010/messages")
+      expect(allResult.status).toEqual(HttpStatusCode.ok)
+      expect(allResult.data[0]).toHaveProperty("events")
+      expect(allResult.data[0].events).toHaveLength(2)
+
+      const filteredResult = await axios.get<AuditLog[]>(
+        "http://localhost:3010/messages?eventsFilter=topExceptionsReport&start=2000-01-01&end=2099-01-01"
+      )
+      expect(filteredResult.status).toEqual(HttpStatusCode.ok)
+      expect(filteredResult.data[0]).toHaveProperty("events")
+      expect(filteredResult.data[0].events).toHaveLength(1)
+      expect(filteredResult.data[0].events[0].eventType).toBe(eventInclude.eventType)
+    })
+  })
+
   describe("including and excluding columns", () => {
     describe.each(
       // prettier-ignore

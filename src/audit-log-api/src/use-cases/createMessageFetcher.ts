@@ -5,6 +5,7 @@ import FetchAutomationReport from "./FetchAutomationReport"
 import FetchByExternalCorrelationId from "./FetchByExternalCorrelationId"
 import FetchById from "./FetchById"
 import FetchByStatus from "./FetchByStatus"
+import FetchTopExceptionsReport from "./FetchTopExceptionsReport"
 import FetchUnsanitised from "./FetchUnsanitised"
 import type MessageFetcher from "./MessageFetcher"
 
@@ -33,11 +34,14 @@ const createMessageFetcher = (
   const projection = { includeColumns, excludeColumns }
 
   if (eventsFilter) {
+    if (!start || !end) {
+      return new Error("Start and end dates required for eventsFilter")
+    }
+
     if (eventsFilter === "automationReport") {
-      if (!start || !end) {
-        return new Error("Start and end dates required for eventsFilter")
-      }
       return new FetchAutomationReport(auditLogGateway, { start, end })
+    } else if (eventsFilter === "topExceptionsReport") {
+      return new FetchTopExceptionsReport(auditLogGateway, { start, end })
     }
     return new Error("Invalid value for 'eventsFilter' parameter")
   }
