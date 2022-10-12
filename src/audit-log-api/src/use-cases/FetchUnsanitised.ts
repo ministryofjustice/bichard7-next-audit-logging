@@ -1,5 +1,5 @@
 import type { AuditLog, AuditLogDynamoGateway, PromiseResult } from "shared-types"
-import { ProjectionOptions } from "shared-types/build/AuditLogDynamoGateway"
+import type { ProjectionOptions } from "shared-types/build/AuditLogDynamoGateway"
 import type MessageFetcher from "./MessageFetcher"
 
 export default class FetchUnsanitised implements MessageFetcher {

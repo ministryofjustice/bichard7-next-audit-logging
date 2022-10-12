@@ -47,6 +47,7 @@ module.exports = {
         "@typescript-eslint/ban-ts-comment": "off",
         "@typescript-eslint/consistent-type-imports": ["error"],
         "@typescript-eslint/no-non-null-assertion": "off",
+        "@typescript-eslint/no-unused-vars": ["warn", { argsIgnorePattern: "^_+$", varsIgnorePattern: "^_+$" }],
         "no-plusplus": "off",
         "react/react-in-jsx-scope": "off",
         "react/jsx-curly-brace-presence": ["off"],

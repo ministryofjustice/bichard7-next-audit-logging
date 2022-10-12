@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable class-methods-use-this */
 import type {
   AuditLog,
@@ -9,7 +8,11 @@ import type {
   FetchRangeOptions,
   PromiseResult
 } from "shared-types"
-import { FetchManyOptions, FetchUnsanitisedOptions, ProjectionOptions } from "shared-types/build/AuditLogDynamoGateway"
+import type {
+  FetchManyOptions,
+  FetchUnsanitisedOptions,
+  ProjectionOptions
+} from "shared-types/build/AuditLogDynamoGateway"
 
 export default class FakeAuditLogDynamoGateway implements AuditLogDynamoGateway {
   private messages: AuditLog[] = []
@@ -24,11 +27,11 @@ export default class FakeAuditLogDynamoGateway implements AuditLogDynamoGateway 
     throw new Error("Method not implemented.")
   }
 
-  prepare(_messageId: string, _messageVersion: number, _event: AuditLogEvent): PromiseResult<DynamoUpdate> {
+  prepare(_: string, __: number, ___: AuditLogEvent): PromiseResult<DynamoUpdate> {
     throw new Error("Method not implemented")
   }
 
-  prepareEvents(_messageId: string, _messageVersion: number, _events: AuditLogEvent[]): PromiseResult<DynamoUpdate> {
+  prepareEvents(_: string, __: number, ___: AuditLogEvent[]): PromiseResult<DynamoUpdate> {
     throw new Error("Method not implemented")
   }
 

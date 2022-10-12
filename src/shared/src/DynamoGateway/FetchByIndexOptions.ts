@@ -1,4 +1,4 @@
-import { Projection } from "./DynamoGateway"
+import type { Projection } from "./DynamoGateway"
 import type KeyComparison from "./KeyComparison"
 import type Pagination from "./Pagination"
 

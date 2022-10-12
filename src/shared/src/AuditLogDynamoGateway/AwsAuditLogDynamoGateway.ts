@@ -6,12 +6,15 @@ import type {
   AuditLogEvent,
   DynamoDbConfig,
   DynamoUpdate,
+  FetchByStatusOptions,
+  FetchRangeOptions,
+  FetchUnsanitisedOptions,
   KeyValuePair,
   PromiseResult
 } from "shared-types"
-import { EventType, FetchByStatusOptions, FetchRangeOptions, FetchUnsanitisedOptions, isError } from "shared-types"
-import { FetchManyOptions, ProjectionOptions } from "shared-types/build/AuditLogDynamoGateway"
-import { Projection } from "src/DynamoGateway/DynamoGateway"
+import { EventType, isError } from "shared-types"
+import type { FetchManyOptions, ProjectionOptions } from "shared-types/build/AuditLogDynamoGateway"
+import type { Projection } from "src/DynamoGateway/DynamoGateway"
 import type { UpdateComponent } from "src/utils/updateComponentTypes"
 import type { FetchByIndexOptions, UpdateOptions } from "../DynamoGateway"
 import { DynamoGateway, IndexSearcher, KeyComparison } from "../DynamoGateway"
