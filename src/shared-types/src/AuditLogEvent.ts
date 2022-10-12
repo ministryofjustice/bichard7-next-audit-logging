@@ -19,6 +19,7 @@ export default class AuditLogEvent {
     this.category = options.category
     this.eventType = options.eventType
     this.timestamp = options.timestamp.toISOString()
+    this.attributes = options.attributes ?? {}
   }
 
   addAttribute(name: string, value: unknown): void {

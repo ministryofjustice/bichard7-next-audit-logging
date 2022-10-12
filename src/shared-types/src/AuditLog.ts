@@ -23,7 +23,7 @@ export default class AuditLog {
 
   public events: AuditLogEvent[] = []
 
-  public automationReport: AutomationReport = { events: [] }
+  public automationReport?: AutomationReport = { events: [] }
 
   public topExceptionsReport: TopExceptionsReport = { events: [] }
 

@@ -1,6 +1,6 @@
 import axios from "axios"
-import type { AuditLog, PromiseResult } from "shared-types"
-import { isError } from "shared-types"
+import type { AuditLog, AuditLogEventOptions, PromiseResult } from "shared-types"
+import { AuditLogEvent, isError } from "shared-types"
 import { mockAuditLog, mockAuditLogEvent } from "."
 
 export const createMockError = async (overrides: Partial<AuditLog> = {}): PromiseResult<AuditLog> => {
@@ -48,6 +48,26 @@ export const createMockAuditLogs = async (count = 1, overrides: Partial<AuditLog
     output.push(res)
   }
   return output
+}
+
+export const createMockAuditLogEvent = async (
+  messageId: string,
+  overrides: Partial<AuditLogEventOptions> = {}
+): PromiseResult<AuditLogEvent> => {
+  const auditLogEvent = new AuditLogEvent({
+    eventSource: "test",
+    category: "information",
+    eventType: "Test event",
+    timestamp: new Date(),
+    ...overrides
+  })
+
+  const res = await axios.post(`http://localhost:3010/messages/${messageId}/events`, auditLogEvent)
+  if (isError(res)) {
+    return res
+  }
+
+  return auditLogEvent
 }
 
 export const createMockRetriedError = async (): PromiseResult<AuditLog> => {

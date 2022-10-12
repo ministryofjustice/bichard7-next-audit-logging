@@ -342,8 +342,8 @@ describe("AuditLogDynamoGateway", () => {
       expect(actualMessage.events).toBeDefined()
       expect(actualMessage.events).toHaveLength(1)
       expect(actualMessage.automationReport).toBeDefined()
-      expect(actualMessage.automationReport.events).toBeDefined()
-      expect(actualMessage.automationReport.events).toHaveLength(1)
+      expect(actualMessage.automationReport?.events).toBeDefined()
+      expect(actualMessage.automationReport?.events).toHaveLength(1)
 
       const actualEvent = actualMessage.events[0]
       expect(actualEvent.eventSource).toBe(expectedEvent.eventSource)
@@ -351,11 +351,11 @@ describe("AuditLogDynamoGateway", () => {
       expect(actualEvent.timestamp).toBe(expectedEvent.timestamp)
       expect(actualEvent.eventType).toBe(expectedEvent.eventType)
 
-      const actualAutomationReportEvent = actualMessage.automationReport.events[0]
-      expect(actualAutomationReportEvent.eventSource).toBe(expectedEvent.eventSource)
-      expect(actualAutomationReportEvent.category).toBe(expectedEvent.category)
-      expect(actualAutomationReportEvent.timestamp).toBe(expectedEvent.timestamp)
-      expect(actualAutomationReportEvent.eventType).toBe(expectedEvent.eventType)
+      const actualAutomationReportEvent = actualMessage.automationReport?.events[0]
+      expect(actualAutomationReportEvent?.eventSource).toBe(expectedEvent.eventSource)
+      expect(actualAutomationReportEvent?.category).toBe(expectedEvent.category)
+      expect(actualAutomationReportEvent?.timestamp).toBe(expectedEvent.timestamp)
+      expect(actualAutomationReportEvent?.eventType).toBe(expectedEvent.eventType)
     })
 
     it("should log the force owner", async () => {
@@ -417,7 +417,7 @@ describe("AuditLogDynamoGateway", () => {
       expect(actualMessage.topExceptionsReport).toBeDefined()
       expect(actualMessage.topExceptionsReport.events).toHaveLength(0)
       expect(actualMessage.automationReport).toBeDefined()
-      expect(actualMessage.automationReport.events).toHaveLength(0)
+      expect(actualMessage.automationReport?.events).toHaveLength(0)
     })
 
     it("should increment the retry count for retry message", async () => {

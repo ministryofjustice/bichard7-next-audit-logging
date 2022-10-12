@@ -38,7 +38,6 @@ const sanitiseAuditLogUseCase = new SanitiseAuditLogUseCase(auditLogGateway)
 const deleteAuditLogLookupItems = new DeleteAuditLogLookupItemsUseCase(auditLogLookupDynamoGateway)
 const deleteArchivedErrorsUseCase = new DeleteArchivedErrorsUseCase(awsBichardPostgresGateway)
 
-/* eslint-disable require-await */
 export default async function sanitiseMessage(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
   const messageId = event.pathParameters?.messageId
 
@@ -49,7 +48,9 @@ export default async function sanitiseMessage(event: APIGatewayProxyEvent): Prom
     })
   }
 
-  const messageFetcher = new FetchById(auditLogGateway, messageId)
+  const messageFetcher = new FetchById(auditLogGateway, messageId, {
+    includeColumns: ["automationReport", "topExceptionsReport", "version"]
+  })
   const messageFetcherResult = await messageFetcher.fetch()
 
   if (isError(messageFetcherResult)) {
@@ -70,6 +71,7 @@ export default async function sanitiseMessage(event: APIGatewayProxyEvent): Prom
 
   const deleteMessageObjectsFromS3Result = await deleteMessageObjectsFromS3UseCase.call(message)
   if (isError(deleteMessageObjectsFromS3Result)) {
+    console.log("deleteMessageObjectsFromS3Result error")
     return createJsonApiResult({
       statusCode: HttpStatusCode.internalServerError,
       body: deleteMessageObjectsFromS3Result.message
@@ -79,6 +81,7 @@ export default async function sanitiseMessage(event: APIGatewayProxyEvent): Prom
   const deleteAuditLogLookupResult = await deleteAuditLogLookupItems.call(message.messageId)
 
   if (isError(deleteAuditLogLookupResult)) {
+    console.log("deleteAuditLogLookupResult error")
     return createJsonApiResult({
       statusCode: HttpStatusCode.internalServerError,
       body: deleteAuditLogLookupResult.message
@@ -88,6 +91,7 @@ export default async function sanitiseMessage(event: APIGatewayProxyEvent): Prom
   const deleteArchivedErrorsResult = await deleteArchivedErrorsUseCase.call(message.messageId)
 
   if (isError(deleteArchivedErrorsResult)) {
+    console.log("deleteArchivedErrorsResult error")
     return createJsonApiResult({
       statusCode: HttpStatusCode.internalServerError,
       body: deleteArchivedErrorsResult.message
@@ -96,6 +100,7 @@ export default async function sanitiseMessage(event: APIGatewayProxyEvent): Prom
 
   const sanitiseAuditLogResult = await sanitiseAuditLogUseCase.call(message)
   if (isError(sanitiseAuditLogResult)) {
+    console.log("sanitiseAuditLogResult error")
     return createJsonApiResult({
       statusCode: HttpStatusCode.internalServerError,
       body: sanitiseAuditLogResult.message

@@ -1,8 +1,7 @@
-jest.retryTimes(10)
 import type { AxiosError } from "axios"
 import axios from "axios"
 import { HttpStatusCode, TestDynamoGateway } from "shared"
-import { auditLogDynamoConfig, createMockAuditLog, createMockError } from "shared-testing"
+import { auditLogDynamoConfig, createMockAuditLog, createMockAuditLogEvent, createMockError } from "shared-testing"
 import type { AuditLog } from "shared-types"
 import { isError } from "shared-types"
 
@@ -15,6 +14,10 @@ const addQueryParams = (url: string, params: { [key: string]: string }): string 
 }
 
 describe("Getting Audit Logs", () => {
+  beforeEach(async () => {
+    await testDynamoGateway.deleteAll(auditLogDynamoConfig.TABLE_NAME, "messageId")
+  })
+
   it("should return the audit log records", async () => {
     const auditLog = await createMockAuditLog()
     if (isError(auditLog)) {
@@ -124,8 +127,20 @@ describe("Getting Audit Logs", () => {
       if (isError(unsanitisedAuditLog)) {
         throw new Error("Unexpected error")
       }
-      const sanitisedAuditLog = await createMockAuditLog({ isSanitised: 1 })
+      const sanitisedAuditLog = await createMockAuditLog()
       if (isError(sanitisedAuditLog)) {
+        throw new Error("Unexpected error")
+      }
+
+      const sanitiseResult = await axios.post(
+        `http://localhost:3010/messages/${sanitisedAuditLog.messageId}/sanitise`,
+        null,
+        {
+          validateStatus: undefined
+        }
+      )
+
+      if (isError(sanitiseResult) || sanitiseResult.status != HttpStatusCode.noContent) {
         throw new Error("Unexpected error")
       }
 
@@ -172,11 +187,36 @@ describe("Getting Audit Logs", () => {
     })
   })
 
-  describe("including and excluding columns", () => {
-    beforeEach(async () => {
-      await testDynamoGateway.deleteAll(auditLogDynamoConfig.TABLE_NAME, "messageId")
-    })
+  describe("fetchAutomationReport", () => {
+    it("should only include events for automation report", async () => {
+      const auditLog = await createMockAuditLog()
+      if (isError(auditLog)) {
+        throw new Error("Unexpected error")
+      }
 
+      const eventInclude = await createMockAuditLogEvent(auditLog.messageId, { eventType: "Exceptions generated" })
+      const eventExclude = await createMockAuditLogEvent(auditLog.messageId)
+
+      if (isError(eventInclude) || isError(eventExclude)) {
+        throw new Error("Unexpected error")
+      }
+
+      const allResult = await axios.get<AuditLog[]>("http://localhost:3010/messages")
+      expect(allResult.status).toEqual(HttpStatusCode.ok)
+      expect(allResult.data[0]).toHaveProperty("events")
+      expect(allResult.data[0].events).toHaveLength(2)
+
+      const filteredResult = await axios.get<AuditLog[]>(
+        "http://localhost:3010/messages?eventsFilter=automationReport&start=2000-01-01&end=2099-01-01"
+      )
+      expect(filteredResult.status).toEqual(HttpStatusCode.ok)
+      expect(filteredResult.data[0]).toHaveProperty("events")
+      expect(filteredResult.data[0].events).toHaveLength(1)
+      expect(filteredResult.data[0].events[0].eventType).toBe(eventInclude.eventType)
+    })
+  })
+
+  describe("including and excluding columns", () => {
     describe.each(
       // prettier-ignore
       [
