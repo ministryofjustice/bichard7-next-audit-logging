@@ -1,15 +1,15 @@
 import maxBy from "lodash.maxby"
 import type { AuditLogEvent } from "shared-types"
 import type { UpdateComponentsResult } from "../../utils/updateComponentTypes"
-import getForceOwnerForAutomationReport from "../getForceOwnerForAutomationReport"
+import getForceOwner from "../getForceOwner"
 
 export default (_: AuditLogEvent[], events: AuditLogEvent[]): UpdateComponentsResult => {
-  const forceOwnerEvents = events.filter((event) => getForceOwnerForAutomationReport(event) !== undefined)
-  const forceOwnerEventForAutomationReport = maxBy(forceOwnerEvents, (event) => event.timestamp)
+  const forceOwnerEvents = events.filter((event) => getForceOwner(event) !== undefined)
+  const forceOwnerEvent = maxBy(forceOwnerEvents, (event) => event.timestamp)
 
-  if (forceOwnerEventForAutomationReport) {
+  if (forceOwnerEvent) {
     return {
-      updateExpressionValues: { ":forceOwner": getForceOwnerForAutomationReport(forceOwnerEventForAutomationReport) },
+      updateExpressionValues: { ":forceOwner": getForceOwner(forceOwnerEvent) },
       updateExpression: "forceOwner = :forceOwner"
     }
   }

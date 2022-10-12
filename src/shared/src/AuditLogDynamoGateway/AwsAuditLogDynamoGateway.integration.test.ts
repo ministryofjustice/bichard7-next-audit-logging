@@ -212,7 +212,7 @@ describe("AuditLogDynamoGateway", () => {
       const resultOne = await gateway.addEvent(message.messageId, message.version, expectedEventOne)
       expect(isError(resultOne)).toBe(false)
 
-      message = (await gateway.fetchOne(message.messageId)) as AuditLog
+      message = (await gateway.fetchOne(message.messageId, { includeColumns: ["version"] })) as AuditLog
       const resultTwo = await gateway.addEvent(message.messageId, message.version, expectedEventTwo)
       expect(isError(resultTwo)).toBe(false)
 
@@ -358,9 +358,9 @@ describe("AuditLogDynamoGateway", () => {
       expect(actualAutomationReportEvent.eventType).toBe(expectedEvent.eventType)
     })
 
-    it("should log the force owner for the automated report", async () => {
+    it("should log the force owner", async () => {
       const expectedEvent = createAuditLogEvent("information", new Date(), "Input message received")
-      expectedEvent.addAttribute("Force Owner", "DummyForceOwner")
+      expectedEvent.addAttribute("Force Owner", "010000")
 
       const message = new AuditLog("one", new Date(), "dummy hash")
 
@@ -385,7 +385,7 @@ describe("AuditLogDynamoGateway", () => {
       expect(actualMessage.events).toBeDefined()
       expect(actualMessage.events).toHaveLength(1)
       expect(actualMessage.automationReport).toBeDefined()
-      expect(actualMessage.automationReport.forceOwner).toBe("DummyForceOwner")
+      expect(actualMessage.forceOwner).toBe(1)
     })
 
     it("should not log the event for report", async () => {
@@ -429,7 +429,7 @@ describe("AuditLogDynamoGateway", () => {
 
       await gateway.addEvent(message.messageId, message.version, expectedEvent)
 
-      const actualMessage = await gateway.fetchOne(message.messageId)
+      const actualMessage = await gateway.fetchOne(message.messageId, { includeColumns: ["retryCount"] })
 
       expect(actualMessage).toBeDefined()
       expect(actualMessage).toNotBeError()
@@ -449,7 +449,7 @@ describe("AuditLogDynamoGateway", () => {
       await gateway.addEvent(message.messageId, message.version + 1, retryEvent)
       await gateway.addEvent(message.messageId, message.version + 2, retryEvent)
 
-      const actualMessage = await gateway.fetchOne(message.messageId)
+      const actualMessage = await gateway.fetchOne(message.messageId, { includeColumns: ["retryCount"] })
 
       expect(actualMessage).toBeDefined()
       expect(actualMessage).toNotBeError()
@@ -485,7 +485,7 @@ describe("AuditLogDynamoGateway", () => {
 
       await gateway.addEvent(message.messageId, message.version, expectedEvent)
 
-      const actualMessage = await gateway.fetchOne(message.messageId)
+      const actualMessage = await gateway.fetchOne(message.messageId, { includeColumns: ["errorRecordArchivalDate"] })
 
       expect(actualMessage).toBeDefined()
       expect(actualMessage).toNotBeError()
@@ -504,7 +504,7 @@ describe("AuditLogDynamoGateway", () => {
 
       await gateway.addEvent(message.messageId, message.version, expectedEvent)
 
-      const actualMessage = await gateway.fetchOne(message.messageId)
+      const actualMessage = await gateway.fetchOne(message.messageId, { includeColumns: ["isSanitised"] })
 
       expect(actualMessage).toBeDefined()
       expect(actualMessage).toNotBeError()
@@ -875,7 +875,9 @@ describe("AuditLogDynamoGateway", () => {
       message.events.push(expectedEvent)
       await gateway.update(message)
 
-      const actualMessage = await gateway.fetchOne(message.messageId)
+      const actualMessage = await gateway.fetchOne(message.messageId, {
+        includeColumns: ["errorRecordArchivalDate", "isSanitised", "nextSanitiseCheck"]
+      })
 
       expect(actualMessage).toBeDefined()
       expect(actualMessage).toNotBeError()
@@ -901,7 +903,9 @@ describe("AuditLogDynamoGateway", () => {
       message.events.push(expectedEvent)
       await gateway.update(message)
 
-      const actualMessage = await gateway.fetchOne(message.messageId)
+      const actualMessage = await gateway.fetchOne(message.messageId, {
+        includeColumns: ["isSanitised", "nextSanitiseCheck"]
+      })
 
       expect(actualMessage).toBeDefined()
       expect(actualMessage).toNotBeError()
@@ -926,7 +930,9 @@ describe("AuditLogDynamoGateway", () => {
       message.events.push(expectedEvent)
       await gateway.update(message)
 
-      const actualMessage = await gateway.fetchOne(message.messageId)
+      const actualMessage = await gateway.fetchOne(message.messageId, {
+        includeColumns: ["errorRecordArchivalDate", "isSanitised", "nextSanitisedCheck"]
+      })
 
       expect(actualMessage).toBeDefined()
       expect(actualMessage).toNotBeError()
@@ -1028,17 +1034,17 @@ describe("AuditLogDynamoGateway", () => {
 
     it("should use the latest force owner change event to set the force owner", async () => {
       const forceOwnerChange1 = createAuditLogEvent("information", new Date(), EventType.InputMessageReceived)
-      forceOwnerChange1.addAttribute("Force Owner", "1")
+      forceOwnerChange1.addAttribute("Force Owner", "010000")
       const forceOwnerChange2 = createAuditLogEvent("information", new Date(), EventType.InputMessageReceived)
-      forceOwnerChange2.addAttribute("Force Owner", "2")
+      forceOwnerChange2.addAttribute("Force Owner", "020000")
       const forceOwnerChange3 = createAuditLogEvent(
         "information",
         addDays(new Date(), 1),
         EventType.InputMessageReceived
       )
-      forceOwnerChange3.addAttribute("Force Owner", "3")
+      forceOwnerChange3.addAttribute("Force Owner", "030000")
       const forceOwnerChange4 = createAuditLogEvent("information", new Date(), EventType.InputMessageReceived)
-      forceOwnerChange4.addAttribute("Force Owner", "4")
+      forceOwnerChange4.addAttribute("Force Owner", "040000")
 
       const message = new AuditLog("one", new Date(), "dummy hash")
 
@@ -1056,16 +1062,16 @@ describe("AuditLogDynamoGateway", () => {
       const transaction = result as DynamoUpdate
 
       expect(transaction.Update).toBeDefined()
-      expect(transaction.Update!.UpdateExpression).toContain("automationReport.forceOwner = :forceOwner")
+      expect(transaction.Update!.UpdateExpression).toContain("forceOwner = :forceOwner")
       expect(transaction.Update!.ExpressionAttributeValues).toBeDefined()
-      expect(transaction.Update!.ExpressionAttributeValues![":forceOwner"]).toBe("3")
+      expect(transaction.Update!.ExpressionAttributeValues![":forceOwner"]).toBe(3)
     })
 
     it("should add all events to be logged for the automation report", async () => {
       const eventsToBeLogged = [
         createAuditLogEvent("information", new Date(), "Hearing Outcome passed to Error List"),
-        createAuditLogEvent("information", new Date(), "PNC Update added to Error List  (PNC message construction)"),
-        createAuditLogEvent("information", new Date(), "PNC Update added to Error List  (Unexpected PNC response)"),
+        createAuditLogEvent("information", new Date(), "PNC Update added to Error List (PNC message construction)"),
+        createAuditLogEvent("information", new Date(), "PNC Update added to Error List (Unexpected PNC response)"),
         createAuditLogEvent("information", new Date(), "Exception marked as resolved by user"),
         createAuditLogEvent("information", new Date(), "PNC Update applied successfully")
       ]
@@ -1090,7 +1096,7 @@ describe("AuditLogDynamoGateway", () => {
         "automationReport.events = list_append(if_not_exists(automationReport.events, :empty_list), :automationReportEvents)"
       )
       expect(transaction.Update!.ExpressionAttributeValues).toBeDefined()
-      expect(transaction.Update!.ExpressionAttributeValues![":automationReportEvents"]).toHaveLength(4)
+      expect(transaction.Update!.ExpressionAttributeValues![":automationReportEvents"]).toHaveLength(5)
       expect(transaction.Update!.ExpressionAttributeValues![":automationReportEvents"]).toContainEqual(
         eventsToBeLogged[0]
       )
