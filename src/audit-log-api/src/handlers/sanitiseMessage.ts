@@ -1,4 +1,6 @@
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda"
+import type { Duration } from "date-fns"
+import { add } from "date-fns"
 import {
   AwsAuditLogDynamoGateway,
   AwsAuditLogLookupDynamoGateway,
@@ -17,6 +19,7 @@ import DeleteAuditLogLookupItemsUseCase from "../use-cases/DeleteAuditLogLookupI
 import DeleteMessageObjectsFromS3UseCase from "../use-cases/DeleteMessageObjectsFromS3UseCase"
 import FetchById from "../use-cases/FetchById"
 import SanitiseAuditLogUseCase from "../use-cases/SanitiseAuditLogUseCase"
+import shouldSanitiseMessage from "../use-cases/shouldSanitiseMessage"
 import { createJsonApiResult } from "../utils"
 
 const auditLogDynamoDbConfig = createAuditLogDynamoDbConfig()
@@ -38,7 +41,25 @@ const sanitiseAuditLogUseCase = new SanitiseAuditLogUseCase(auditLogGateway)
 const deleteAuditLogLookupItems = new DeleteAuditLogLookupItemsUseCase(auditLogLookupDynamoGateway)
 const deleteArchivedErrorsUseCase = new DeleteArchivedErrorsUseCase(awsBichardPostgresGateway)
 
+type SanitiseConfig = {
+  checkFrequency: Duration
+  sanitiseAfter: Duration
+}
+
+const getSanitiseConfig = (): SanitiseConfig => {
+  const { SANITISE_AFTER_DAYS, CHECK_FREQUENCY_DAYS } = process.env
+
+  const checkFrequency = CHECK_FREQUENCY_DAYS ? parseInt(CHECK_FREQUENCY_DAYS) : 2
+  const sanitiseAfter = SANITISE_AFTER_DAYS ? parseInt(SANITISE_AFTER_DAYS) : 90
+
+  return {
+    checkFrequency: { days: checkFrequency },
+    sanitiseAfter: { days: sanitiseAfter }
+  }
+}
+
 export default async function sanitiseMessage(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
+  const sanitiseConfig = getSanitiseConfig()
   const messageId = event.pathParameters?.messageId
 
   if (!messageId) {
@@ -68,6 +89,22 @@ export default async function sanitiseMessage(event: APIGatewayProxyEvent): Prom
   }
 
   const message = messageFetcherResult as AuditLog
+
+  const shouldSanitise = await shouldSanitiseMessage(awsBichardPostgresGateway, message, sanitiseConfig.sanitiseAfter)
+  if (isError(shouldSanitise)) {
+    return createJsonApiResult({
+      statusCode: HttpStatusCode.internalServerError,
+      body: shouldSanitise.message
+    })
+  }
+
+  if (!shouldSanitise) {
+    await auditLogGateway.updateSanitiseCheck(message, add(new Date(), sanitiseConfig.checkFrequency))
+    return createJsonApiResult({
+      statusCode: HttpStatusCode.ok,
+      body: "Message not sanitised."
+    })
+  }
 
   const deleteMessageObjectsFromS3Result = await deleteMessageObjectsFromS3UseCase.call(message)
   if (isError(deleteMessageObjectsFromS3Result)) {

@@ -1,5 +1,6 @@
 jest.setTimeout(15000)
 import axios from "axios"
+import { addDays } from "date-fns"
 import {
   AwsBichardPostgresGateway,
   createS3Config,
@@ -18,6 +19,7 @@ const auditLogTableName = "auditLogTable"
 const auditLogLookupTableName = "auditLogLookupTable"
 
 const postgresConfig = createBichardPostgresGatewayConfig()
+const errorListPostgresConfig = { ...postgresConfig, TABLE_NAME: postgresConfig.TABLE_NAME?.replace("archive_", "") }
 const postgresGateway = new AwsBichardPostgresGateway(postgresConfig)
 
 const messagesS3Gateway = new TestAwsS3Gateway(createS3Config("INTERNAL_INCOMING_MESSAGES_BUCKET"))
@@ -25,6 +27,7 @@ const eventsS3Gateway = new TestAwsS3Gateway(createS3Config("AUDIT_LOG_EVENTS_BU
 
 const testDynamoGateway = new TestDynamoGateway(auditLogDynamoConfig)
 const testPostgresGateway = new TestPostgresGateway(postgresConfig)
+const errorListTestPostgresGateway = new TestPostgresGateway(errorListPostgresConfig)
 
 const createBichardAuditLogEvent = (eventS3Path: string): BichardAuditLogEvent => {
   const event = new BichardAuditLogEvent({
@@ -52,20 +55,18 @@ describe("sanitiseMessage", () => {
     await messagesS3Gateway.deleteAll()
     await testDynamoGateway.deleteAll(auditLogTableName, "messageId")
     await testDynamoGateway.deleteAll(auditLogLookupTableName, "id")
-    await testPostgresGateway.dropTable()
-    await testPostgresGateway.createTable({
-      message_id: "varchar(70)",
-      updated_msg: "text"
-    })
+    await testPostgresGateway.truncateTable()
+    await errorListTestPostgresGateway.truncateTable()
   })
 
   afterAll(async () => {
     await testPostgresGateway.dispose()
+    await errorListTestPostgresGateway.dispose()
     await postgresGateway.dispose()
   })
 
   it("should return Ok status when message has been sanitised successfully", async () => {
-    const message = new AuditLog("External Correlation ID", new Date(), "Dummy hash")
+    const message = new AuditLog("External Correlation ID", new Date("2020-01-01"), "Dummy hash")
     message.s3Path = "message.xml"
     const event1 = createBichardAuditLogEvent("event1.xml") as BichardAuditLogEvent & { s3Path: string }
     const event2 = new AuditLogEvent({
@@ -90,9 +91,9 @@ describe("sanitiseMessage", () => {
 
     const otherMessageId = "otherMessageID"
     const records = [
-      { message_id: message.messageId, updated_msg: "Dummy data" },
-      { message_id: message.messageId, updated_msg: "Dummy data" },
-      { message_id: otherMessageId, updated_msg: "Other dummy data" }
+      { message_id: message.messageId },
+      { message_id: message.messageId },
+      { message_id: otherMessageId }
     ]
     await testPostgresGateway.insertRecords(records)
 
@@ -119,7 +120,38 @@ describe("sanitiseMessage", () => {
 
     const allResults = await testPostgresGateway.findAll()
     expect(allResults).toHaveLength(1)
-    expect(allResults).toEqual([{ message_id: otherMessageId, updated_msg: "Other dummy data" }])
+    expect(allResults?.[0]).toHaveProperty("message_id", otherMessageId)
+  })
+
+  it("should not sanitise if the message is under 90 days old", async () => {
+    const expectedNextCheck = addDays(new Date(), 2).toISOString()
+    const message = new AuditLog("External Correlation ID", new Date(), "Dummy hash")
+    await testDynamoGateway.insertOne(auditLogTableName, message, "messageId")
+    const response = await axios.post(`http://localhost:3010/messages/${message.messageId}/sanitise`, null, {
+      validateStatus: undefined
+    })
+    const actualMessage = await testDynamoGateway.getOne<AuditLog>(auditLogTableName, "messageId", message.messageId)
+
+    expect(response.status).toBe(HttpStatusCode.ok)
+    expect(response.data).toBe("Message not sanitised.")
+    expect(actualMessage?.isSanitised).toBe(0)
+    expect(actualMessage?.nextSanitiseCheck).toContain(expectedNextCheck.split("T")[0])
+  })
+
+  it("should not sanitise if the message is in the error_list table", async () => {
+    const expectedNextCheck = addDays(new Date(), 2).toISOString()
+    const message = new AuditLog("External Correlation ID", new Date("2020-01-01"), "Dummy hash")
+    await testDynamoGateway.insertOne(auditLogTableName, message, "messageId")
+    await errorListTestPostgresGateway.insertRecords([{ message_id: message.messageId }])
+    const response = await axios.post(`http://localhost:3010/messages/${message.messageId}/sanitise`, null, {
+      validateStatus: undefined
+    })
+    const actualMessage = await testDynamoGateway.getOne<AuditLog>(auditLogTableName, "messageId", message.messageId)
+
+    expect(response.status).toBe(HttpStatusCode.ok)
+    expect(response.data).toBe("Message not sanitised.")
+    expect(actualMessage?.isSanitised).toBe(0)
+    expect(actualMessage?.nextSanitiseCheck).toContain(expectedNextCheck.split("T")[0])
   })
 
   it("should return Error when the message ID does not exist", async () => {

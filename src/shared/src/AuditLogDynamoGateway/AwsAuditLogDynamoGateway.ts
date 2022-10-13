@@ -14,10 +14,10 @@ import type {
 } from "shared-types"
 import { EventType, isError } from "shared-types"
 import type { FetchManyOptions, ProjectionOptions } from "shared-types/build/AuditLogDynamoGateway"
-import type { Projection } from "src/DynamoGateway/DynamoGateway"
-import type { UpdateComponent } from "src/utils/updateComponentTypes"
 import type { FetchByIndexOptions, UpdateOptions } from "../DynamoGateway"
 import { DynamoGateway, IndexSearcher, KeyComparison } from "../DynamoGateway"
+import type { Projection } from "../DynamoGateway/DynamoGateway"
+import type { UpdateComponent } from "../utils/updateComponentTypes"
 import CalculateMessageStatusUseCase from "./CalculateMessageStatusUseCase"
 import {
   archivalUpdateComponent,

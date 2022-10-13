@@ -4,7 +4,7 @@ import * as https from "https"
 import type { ApiClient, AuditLog, AuditLogEvent, PromiseResult } from "shared-types"
 import { ApplicationError } from "shared-types"
 import type { GetMessageOptions, GetMessagesOptions } from "shared-types/build/ApiClient"
-import { HttpStatusCode, logger } from "../utils"
+import { addQueryParams, HttpStatusCode, logger } from "../utils"
 
 const httpsAgent = new https.Agent({
   rejectUnauthorized: false
@@ -169,6 +169,29 @@ export default class AuditLogApiClient implements ApiClient {
         logger.error(`Error retrying event: ${this.stringify(error.response?.data)}`)
         return new ApplicationError(
           `Error retrying event: ${this.stringify(error.response?.data) ?? error.message}`,
+          error
+        )
+      })
+  }
+
+  fetchUnsanitised(options: GetMessageOptions = {}): PromiseResult<AuditLog[]> {
+    const url = addQueryParams(`${this.apiUrl}/messages`, {
+      limit: options.limit,
+      includeColumns: options.includeColumns?.join(","),
+      excludeColumns: options.excludeColumns?.join(","),
+      unsanitised: true
+    })
+
+    return axios
+      .get(url, {
+        headers: { "X-API-Key": this.apiKey },
+        timeout: this.timeout
+      })
+      .then((response) => response.data)
+      .catch((error: AxiosError) => {
+        logger.error(`Error getting unsanitised messages: ${this.stringify(error.response?.data)}`)
+        return new ApplicationError(
+          `Error getting unsanitised messages: ${this.stringify(error.response?.data) ?? error.message}`,
           error
         )
       })

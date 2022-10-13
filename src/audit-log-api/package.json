@@ -29,6 +29,7 @@
   "dependencies": {
     "aws-lambda": "^1.0.7",
     "axios": "^1.1.2",
+    "date-fns": "^2.29.3",
     "shared": "file:../shared",
     "shared-types": "file:../shared-types",
     "uuid": "^9.0.0"

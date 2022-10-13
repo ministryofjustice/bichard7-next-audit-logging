@@ -1,25 +1,9 @@
-import type { KeyValuePair } from "shared-types"
 import { isError } from "shared-types"
 import PostgresGateway from "./PostgresGateway"
 
 export default class TestPostgresGateway extends PostgresGateway {
-  async createSchema(schema: string): Promise<void> {
-    await this.query(`CREATE SCHEMA ${schema}`).catch((error) => console.error(error))
-  }
-
-  async createTable(columns: KeyValuePair<string, string>): Promise<void> {
-    await this.query(
-      `
-      CREATE TABLE ${this.tableName} (
-        ${Object.keys(columns)
-          .map((key) => `${key} ${columns[key]}`)
-          .join(",")}
-      );`
-    ).catch((error) => console.error(error))
-  }
-
-  async dropTable(): Promise<void> {
-    await this.query(`DROP TABLE ${this.tableName};`).catch((error) => console.error(error))
+  async truncateTable(): Promise<void> {
+    await this.query(`TRUNCATE TABLE ${this.tableName} CASCADE;`).catch((error) => console.error(error))
   }
 
   async insertRecords(records: object[]): Promise<void> {

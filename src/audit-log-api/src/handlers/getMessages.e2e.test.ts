@@ -1,6 +1,6 @@
 import type { AxiosError } from "axios"
 import axios from "axios"
-import { HttpStatusCode, TestDynamoGateway } from "shared"
+import { addQueryParams, HttpStatusCode, TestDynamoGateway } from "shared"
 import {
   auditLogDynamoConfig,
   createMockAuditLog,
@@ -12,12 +12,6 @@ import type { AuditLog } from "shared-types"
 import { EventType, isError } from "shared-types"
 
 const testDynamoGateway = new TestDynamoGateway(auditLogDynamoConfig)
-
-const addQueryParams = (url: string, params: { [key: string]: string }): string => {
-  const u = new URL(url)
-  Object.keys(params).forEach((param) => u.searchParams.append(param, params[param]))
-  return u.href
-}
 
 describe("Getting Audit Logs", () => {
   beforeEach(async () => {
@@ -133,7 +127,7 @@ describe("Getting Audit Logs", () => {
       if (isError(unsanitisedAuditLog)) {
         throw new Error("Unexpected error")
       }
-      const sanitisedAuditLog = await createMockAuditLog()
+      const sanitisedAuditLog = await createMockAuditLog({ receivedDate: new Date("2020-10-10").toISOString() })
       if (isError(sanitisedAuditLog)) {
         throw new Error("Unexpected error")
       }
@@ -147,6 +141,7 @@ describe("Getting Audit Logs", () => {
       )
 
       if (isError(sanitiseResult) || sanitiseResult.status != HttpStatusCode.noContent) {
+        console.log(sanitiseResult)
         throw new Error("Unexpected error")
       }
 

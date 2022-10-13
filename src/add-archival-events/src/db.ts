@@ -28,6 +28,7 @@ export class DatabaseClient {
 
   constructor(
     private host: string,
+    private port: number,
     private user: string,
     private password: string,
     private useSsl: boolean,
@@ -37,6 +38,7 @@ export class DatabaseClient {
   ) {
     this.postgres = new Client({
       host: this.host,
+      port: this.port,
       user: this.user,
       password: this.password,
       ssl: this.useSsl

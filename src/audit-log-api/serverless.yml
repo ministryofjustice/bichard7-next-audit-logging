@@ -24,7 +24,7 @@ provider:
     DYNAMO_AWS_ACCESS_KEY_ID: S3RVER
     DYNAMO_AWS_SECRET_ACCESS_KEY: S3RVER
     DB_HOST: "localhost"
-    DB_PORT: "5432"
+    DB_PORT: "5433"
     DB_USER: "bichard"
     DB_PASSWORD: "password"
     DB_TABLE_NAME: "archive_error_list"

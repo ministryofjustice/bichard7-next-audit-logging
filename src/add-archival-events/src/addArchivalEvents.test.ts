@@ -2,9 +2,9 @@
 import { Client } from "pg"
 import { FakeApiClient, setEnvironmentVariables } from "shared-testing"
 import type { AuditLogEvent, KeyValuePair } from "shared-types"
+import AddArchivalEvents from "./addArchivalEvents"
 import type { BichardRecord, DatabaseRow } from "./db"
 import { DatabaseClient } from "./db"
-import AddArchivalEvents from "./addArchivalEvents"
 
 setEnvironmentVariables()
 
@@ -82,6 +82,7 @@ describe("Add Archival Events integration", () => {
       API_KEY: "testApiKey",
       DB_NAME: "bichard",
       DB_HOST: "localhost",
+      DB_PORT: "5433",
       DB_PASSWORD: "password",
       DB_USER: "bichard",
       DB_SCHEMA: "br7own"
@@ -186,7 +187,7 @@ describe("Add Archival Events integration", () => {
       return Promise.resolve(dbResult)
     })
 
-    const db = new DatabaseClient("", "", "", false, "", "schema", 100)
+    const db = new DatabaseClient("", 5433, "", "", false, "", "schema", 100)
     addArchivalEvents = new AddArchivalEvents(api, db)
 
     await addArchivalEvents.addBichardRecordsToAuditLog()
@@ -211,7 +212,7 @@ describe("Add Archival Events integration", () => {
       return Promise.resolve(dbResult)
     })
 
-    const db = new DatabaseClient("", "", "", false, "", "schema", 100)
+    const db = new DatabaseClient("", 5433, "", "", false, "", "schema", 100)
     api.setErrorReturnedByFunctions(new Error("API failed :("), ["createEvent"])
     addArchivalEvents = new AddArchivalEvents(api, db)
 
@@ -233,7 +234,7 @@ describe("Add Archival Events integration", () => {
       return Promise.resolve(dbResult)
     })
 
-    const db = new DatabaseClient("", "", "", false, "", "schema", 100)
+    const db = new DatabaseClient("", 5433, "", "", false, "", "schema", 100)
     // Each error requires 2 calls: one to getMessage and one to createEvent
     api.setErrorReturnedByFunctionsAfterNCalls(new Error("API quota exceeded"), 4, ["createEvent"])
     addArchivalEvents = new AddArchivalEvents(api, db)
@@ -262,7 +263,7 @@ describe("Add Archival Events integration", () => {
   })
 
   it("Should limit the number of archive log groups to a configured value", async () => {
-    const db = new DatabaseClient("", "", "", false, "", "schema", 50)
+    const db = new DatabaseClient("", 5433, "", "", false, "", "schema", 50)
     addArchivalEvents = new AddArchivalEvents(api, db)
 
     await addArchivalEvents.addBichardRecordsToAuditLog()
@@ -277,7 +278,7 @@ describe("Add Archival Events integration", () => {
       return Promise.resolve(dbResult)
     })
 
-    const db = new DatabaseClient("", "", "", false, "", "schema", 100)
+    const db = new DatabaseClient("", 5433, "", "", false, "", "schema", 100)
     addArchivalEvents = new AddArchivalEvents(api, db)
 
     await addArchivalEvents.addBichardRecordsToAuditLog()
@@ -294,7 +295,7 @@ describe("Add Archival Events integration", () => {
   })
 
   it("Should report failures when the database fails to update", async () => {
-    const db = new DatabaseClient("", "", "", false, "", "schema", 100)
+    const db = new DatabaseClient("", 5433, "", "", false, "", "schema", 100)
 
     client.query.mockImplementation(
       jest.fn().mockRejectedValue(new Error("Database host on fire")).mockResolvedValueOnce(dbResult)
@@ -312,7 +313,7 @@ describe("Add Archival Events integration", () => {
       return Promise.resolve(dbResult)
     })
 
-    const db = new DatabaseClient("", "", "", false, "", "schema", 100)
+    const db = new DatabaseClient("", 5433, "", "", false, "", "schema", 100)
 
     // Add a message with the archived event to the API
     api.addMessage({
