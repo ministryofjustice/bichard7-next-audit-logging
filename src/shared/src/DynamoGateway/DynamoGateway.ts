@@ -1,11 +1,19 @@
 import { DynamoDB } from "aws-sdk"
 import { DocumentClient } from "aws-sdk/clients/dynamodb"
 import type { DynamoDbConfig, DynamoUpdate, PromiseResult, TransactionFailureReason } from "shared-types"
+
 import { isError, TransactionFailedError } from "shared-types"
 import type FetchByIndexOptions from "./FetchByIndexOptions"
 import type GetManyOptions from "./GetManyOptions"
 import KeyComparison from "./KeyComparison"
 import type UpdateOptions from "./UpdateOptions"
+
+export type Projection = {
+  expression: string
+  attributeNames: {
+    [key: string]: string
+  }
+}
 
 export default class DynamoGateway {
   protected readonly service: DynamoDB
@@ -95,8 +103,10 @@ export default class DynamoGateway {
   }
 
   getMany(tableName: string, options: GetManyOptions): PromiseResult<DocumentClient.QueryOutput> {
-    const { sortKey } = options
+    const { sortKey, projection } = options
     const { limit, lastItemKey } = options.pagination
+
+    const { expression, attributeNames } = projection ?? {}
 
     const queryOptions: DynamoDB.DocumentClient.QueryInput = {
       TableName: tableName,
@@ -106,8 +116,10 @@ export default class DynamoGateway {
         ":dummyValue": "_"
       },
       ExpressionAttributeNames: {
-        "#dummyKey": "_"
+        "#dummyKey": "_",
+        ...attributeNames
       },
+      ProjectionExpression: expression,
       Limit: limit,
       ScanIndexForward: false // Descending order
     }
@@ -123,19 +135,29 @@ export default class DynamoGateway {
   }
 
   fetchByIndex(tableName: string, options: FetchByIndexOptions): PromiseResult<DocumentClient.QueryOutput> {
-    const { indexName, hashKeyName: attributeName, hashKeyValue: attributeValue, isAscendingOrder } = options
+    const {
+      indexName,
+      hashKeyName: attributeName,
+      hashKeyValue: attributeValue,
+      isAscendingOrder,
+      projection
+    } = options
     const { limit, lastItemKey } = options.pagination
+
+    const { expression, attributeNames } = projection ?? {}
 
     const queryOptions: DynamoDB.DocumentClient.QueryInput = {
       TableName: tableName,
       IndexName: indexName,
       KeyConditionExpression: "#keyName = :keyValue",
       ExpressionAttributeNames: {
-        "#keyName": attributeName
+        "#keyName": attributeName,
+        ...attributeNames
       },
       ExpressionAttributeValues: {
         ":keyValue": attributeValue
       },
+      ProjectionExpression: expression,
       ScanIndexForward: isAscendingOrder,
       Limit: limit,
       ExclusiveStartKey: lastItemKey
@@ -148,6 +170,14 @@ export default class DynamoGateway {
         queryOptions.ExpressionAttributeNames!["#rangeKeyName"] = options.rangeKeyName
         queryOptions.ExpressionAttributeValues![":rangeKeyValue"] = options.rangeKeyValue
       }
+    }
+
+    // set query options for between range key
+    if (options.rangeKeyName && options.betweenKeyStart !== undefined && options.betweenKeyEnd !== undefined) {
+      queryOptions.KeyConditionExpression += " AND #rangeKeyName BETWEEN :betweenKeyStart AND :betweenKeyEnd"
+      queryOptions.ExpressionAttributeNames!["#rangeKeyName"] = options.rangeKeyName
+      queryOptions.ExpressionAttributeValues![":betweenKeyStart"] = options.betweenKeyStart
+      queryOptions.ExpressionAttributeValues![":betweenKeyEnd"] = options.betweenKeyEnd
     }
 
     // set query options for the filter if given
@@ -168,14 +198,19 @@ export default class DynamoGateway {
   getOne(
     tableName: string,
     keyName: string,
-    keyValue: unknown
+    keyValue: unknown,
+    projection?: Projection
   ): PromiseResult<DocumentClient.GetItemOutput | Error | null> {
+    const { expression, attributeNames } = projection ?? {}
+
     return this.client
       .get({
         TableName: tableName,
         Key: {
           [keyName]: keyValue
-        }
+        },
+        ProjectionExpression: expression,
+        ExpressionAttributeNames: attributeNames
       })
       .promise()
       .catch((error) => <Error>error)

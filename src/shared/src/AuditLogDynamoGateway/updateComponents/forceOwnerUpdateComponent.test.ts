@@ -5,7 +5,7 @@ const forceOwnerChangeEvent = (): AuditLogEvent => {
   return {
     eventType: "Input message received",
     attributes: {
-      "Force Owner": "Dummy"
+      "Force Owner": "010000"
     },
     timestamp: Date.now()
   } as unknown as AuditLogEvent
@@ -29,8 +29,8 @@ describe("forceOwnerUpdateComponent", () => {
     ]
     const forceOwnerDynamoUpdates = forceOwner([], events)
     expect(forceOwnerDynamoUpdates).toStrictEqual({
-      updateExpression: "automationReport.forceOwner = :forceOwner",
-      updateExpressionValues: { ":forceOwner": "Dummy" }
+      updateExpression: "forceOwner = :forceOwner",
+      updateExpressionValues: { ":forceOwner": 1 }
     })
   })
 

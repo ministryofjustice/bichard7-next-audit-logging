@@ -3,12 +3,8 @@ import axios from "axios"
 import * as https from "https"
 import type { ApiClient, AuditLog, AuditLogEvent, PromiseResult } from "shared-types"
 import { ApplicationError } from "shared-types"
+import type { GetMessageOptions, GetMessagesOptions } from "shared-types/build/ApiClient"
 import { HttpStatusCode, logger } from "../utils"
-
-export type GetMessagesOptions = {
-  status?: string
-  lastMessageId?: string
-}
 
 const httpsAgent = new https.Agent({
   rejectUnauthorized: false
@@ -53,9 +49,20 @@ export default class AuditLogApiClient implements ApiClient {
       })
   }
 
-  getMessage(messageId: string): PromiseResult<AuditLog> {
+  getMessage(messageId: string, options: GetMessageOptions = {}): PromiseResult<AuditLog> {
+    const queryParams: string[] = []
+    let queryString = ""
+    if (options?.includeColumns) {
+      queryParams.push(`includeColumns=${options.includeColumns.join(",")}`)
+    }
+    if (options?.excludeColumns) {
+      queryParams.push(`includeColumns=${options.excludeColumns.join(",")}`)
+    }
+    if (queryParams.length > 0) {
+      queryString = `?${queryParams.join("&")}`
+    }
     return axios
-      .get(`${this.apiUrl}/messages/${messageId}`, {
+      .get(`${this.apiUrl}/messages/${messageId}${queryString}`, {
         headers: { "X-API-Key": this.apiKey },
         timeout: this.timeout
       })

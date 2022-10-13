@@ -1,13 +1,15 @@
 jest.retryTimes(10)
+import { TestDynamoGateway, TestS3Gateway } from "shared"
 import "shared-testing"
+import { auditLogDynamoConfig, setEnvironmentVariables } from "shared-testing"
 import { v4 as uuid } from "uuid"
 import format from "xml-formatter"
-import { TestDynamoGateway, TestS3Gateway } from "shared"
 import TestMqGateway from "../gateways/MqGateway/TestMqGateway"
-import { setEnvironmentVariables, auditLogDynamoConfig } from "shared-testing"
+
 process.env.MQ_QUEUE = "INCOMING_MESSAGE_HANDLER_QUEUE"
 process.env.INCOMING_MESSAGE_BUCKET_NAME = "internalIncomingBucket"
 setEnvironmentVariables()
+
 import IncomingMessageSimulator from "./IncomingMessageSimulator"
 import TestApi from "./TestApi"
 
@@ -86,7 +88,6 @@ describe("e2e tests", () => {
     expect(persistedMessage.externalCorrelationId).toBe(expectedExternalCorrelationId)
     expect(persistedMessage.caseId).toBe(expectedCaseId)
     expect(persistedMessage.createdBy).toBe("Incoming message handler")
-    expect(persistedMessage.stepExecutionId).toBe(executionId)
     expect(persistedMessage.externalId).toBe(externalId)
     expect(persistedMessage.s3Path).toBe(fileName)
 

@@ -4,6 +4,7 @@ frameworkVersion: "3"
 provider:
   name: aws
   runtime: nodejs14.x
+  timeout: 200
   environment:
     AWS_URL: http://localhost:8000
     DYNAMO_REGION: eu-west-2

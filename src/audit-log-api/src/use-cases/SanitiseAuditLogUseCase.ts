@@ -5,7 +5,11 @@ export default class SanitiseAuditLogUseCase {
   constructor(private readonly auditLogDynamoGateway: AuditLogDynamoGateway) {}
 
   call(auditLog: AuditLog): PromiseResult<AuditLog> {
-    ;[auditLog.events, auditLog.automationReport.events, auditLog.topExceptionsReport.events].forEach((events) => {
+    ;[auditLog.events, auditLog.automationReport?.events, auditLog.topExceptionsReport?.events].forEach((events) => {
+      if (!events) {
+        return
+      }
+
       for (const auditLogEvent of events) {
         delete auditLogEvent.attributes.AmendedPNCUpdateDataset
         delete auditLogEvent.attributes.AmendedHearingOutcome

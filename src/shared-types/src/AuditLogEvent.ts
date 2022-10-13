@@ -1,6 +1,6 @@
+import type AuditLogEventOptions from "./AuditLogEventOptions"
 import type EventCategory from "./EventCategory"
 import type KeyValuePair from "./KeyValuePair"
-import type AuditLogEventOptions from "./AuditLogEventOptions"
 
 // TODO: Split this into a type an an implementation
 export default class AuditLogEvent {
@@ -19,6 +19,7 @@ export default class AuditLogEvent {
     this.category = options.category
     this.eventType = options.eventType
     this.timestamp = options.timestamp.toISOString()
+    this.attributes = options.attributes ?? {}
   }
 
   addAttribute(name: string, value: unknown): void {

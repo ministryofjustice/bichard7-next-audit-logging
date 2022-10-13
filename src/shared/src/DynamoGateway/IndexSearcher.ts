@@ -3,6 +3,7 @@ import type { DocumentClient } from "aws-sdk/clients/dynamodb"
 import type { KeyValuePair, PromiseResult, Result } from "shared-types"
 import { isError } from "shared-types"
 import type DynamoGateway from "./DynamoGateway"
+import type { Projection } from "./DynamoGateway"
 import type FetchByIndexOptions from "./FetchByIndexOptions"
 import type KeyComparison from "./KeyComparison"
 import type Pagination from "./Pagination"
@@ -20,6 +21,10 @@ export default class IndexSearcher<TResult> {
 
   private rangeKeyValue?: unknown
 
+  private betweenKeyStart?: unknown
+
+  private betweenKeyEnd?: unknown
+
   private rangeKeyComparison?: KeyComparison
 
   private filterKeyName?: string
@@ -28,9 +33,11 @@ export default class IndexSearcher<TResult> {
 
   private filterKeyComparison?: KeyComparison
 
-  private limit = 10
+  private limit? = 10
 
   private lastItemForPagination?: KeyValuePair<string, unknown>
+
+  private projection?: Projection
 
   private isAscendingOrder: boolean
 
@@ -82,23 +89,27 @@ export default class IndexSearcher<TResult> {
     return this
   }
 
-  setIndexKeys(
-    hashKey: string,
-    hashKeyValue: unknown,
-    rangeKey?: string,
-    rangeKeyValue?: unknown,
-    rangeKeyComparison?: KeyComparison
-  ): IndexSearcher<TResult> {
+  setIndexKeys(hashKey: string, hashKeyValue: unknown, rangeKey?: string): IndexSearcher<TResult> {
     this.hashKey = hashKey
     this.hashKeyValue = hashKeyValue
     this.rangeKey = rangeKey
+    return this
+  }
+
+  setRangeKey(rangeKeyValue: unknown, rangeKeyComparison: KeyComparison): IndexSearcher<TResult> {
     this.rangeKeyValue = rangeKeyValue
     this.rangeKeyComparison = rangeKeyComparison
     return this
   }
 
+  setBetweenKey(start: unknown, end: unknown): IndexSearcher<TResult> {
+    this.betweenKeyStart = start
+    this.betweenKeyEnd = end
+    return this
+  }
+
   paginate(
-    limit: number,
+    limit?: number,
     lastItemForPagination?: unknown | KeyValuePair<string, unknown>,
     isAscendingOrder = false
   ): IndexSearcher<TResult> {
@@ -112,6 +123,11 @@ export default class IndexSearcher<TResult> {
     this.filterKeyName = keyName
     this.filterKeyValue = keyValue
     this.filterKeyComparison = comparison
+    return this
+  }
+
+  setProjection(projection: Projection): IndexSearcher<TResult> {
+    this.projection = projection
     return this
   }
 
@@ -134,12 +150,15 @@ export default class IndexSearcher<TResult> {
       hashKeyValue: this.hashKeyValue,
       rangeKeyName: this.rangeKey,
       rangeKeyValue: this.rangeKeyValue,
+      betweenKeyStart: this.betweenKeyStart,
+      betweenKeyEnd: this.betweenKeyEnd,
       rangeKeyComparison: this.rangeKeyComparison,
       filterKeyName: this.filterKeyName,
       filterKeyValue: this.filterKeyValue,
       filterKeyComparison: this.filterKeyComparison,
       isAscendingOrder: this.isAscendingOrder,
-      pagination
+      pagination,
+      projection: this.projection
     }
 
     const fetchResult = await this.gateway.fetchByIndex(this.tableName, options)

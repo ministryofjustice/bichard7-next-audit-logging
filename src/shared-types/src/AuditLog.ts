@@ -9,6 +9,8 @@ export default class AuditLog {
 
   public readonly receivedDate: string
 
+  public forceOwner?: number
+
   public errorRecordArchivalDate?: string
 
   public isSanitised = 0
@@ -21,9 +23,9 @@ export default class AuditLog {
 
   public events: AuditLogEvent[] = []
 
-  public automationReport: AutomationReport = { events: [] }
+  public automationReport?: AutomationReport = { events: [] }
 
-  public topExceptionsReport: TopExceptionsReport = { events: [] }
+  public topExceptionsReport?: TopExceptionsReport = { events: [] }
 
   public status = AuditLogStatus.processing
 

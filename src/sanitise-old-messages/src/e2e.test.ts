@@ -127,7 +127,7 @@ describe("Sanitise Old Messages e2e", () => {
 
     await executeLambda()
 
-    const messageResult = await api.getMessage(messageIds.message_1)
+    const messageResult = await api.getMessage(messageIds.message_1, { includeColumns: ["isSanitised"] })
 
     expect(messageResult).toNotBeError()
     const message = messageResult as AuditLog
@@ -142,7 +142,7 @@ describe("Sanitise Old Messages e2e", () => {
 
     await executeLambda()
 
-    const messageResult = await api.getMessage(messageIds.message_1)
+    const messageResult = await api.getMessage(messageIds.message_1, { includeColumns: ["isSanitised"] })
 
     expect(messageResult).toNotBeError()
     const message = messageResult as AuditLog
@@ -156,7 +156,7 @@ describe("Sanitise Old Messages e2e", () => {
 
     await executeLambda()
 
-    const messageResult = await api.getMessage(messageIds.message_1)
+    const messageResult = await api.getMessage(messageIds.message_1, { includeColumns: ["isSanitised"] })
 
     expect(messageResult).toNotBeError()
     const message = messageResult as AuditLog
@@ -171,7 +171,7 @@ describe("Sanitise Old Messages e2e", () => {
 
     await executeLambda()
 
-    const messageResult = await api.getMessage(messageIds.message_1)
+    const messageResult = await api.getMessage(messageIds.message_1, { includeColumns: ["isSanitised"] })
 
     expect(messageResult).toNotBeError()
     const message = messageResult as AuditLog
@@ -186,7 +186,7 @@ describe("Sanitise Old Messages e2e", () => {
 
     await executeLambda()
 
-    const messageResult = await api.getMessage(messageIds.message_1)
+    const messageResult = await api.getMessage(messageIds.message_1, { includeColumns: ["isSanitised"] })
 
     expect(messageResult).toNotBeError()
     const message = messageResult as AuditLog
@@ -200,7 +200,7 @@ describe("Sanitise Old Messages e2e", () => {
 
     await executeLambda()
 
-    const messageResult = await api.getMessage(messageIds.message_1)
+    const messageResult = await api.getMessage(messageIds.message_1, { includeColumns: ["isSanitised"] })
 
     expect(messageResult).toNotBeError()
     const message = messageResult as AuditLog
@@ -227,7 +227,7 @@ describe("Sanitise Old Messages e2e", () => {
 
     const messages: AuditLog[] = []
     for (const messageId of Object.values(messageIds)) {
-      const messageResult = await api.getMessage(messageId)
+      const messageResult = await api.getMessage(messageId, { includeColumns: ["isSanitised", "nextSanitiseCheck"] })
       expect(messageResult).toNotBeError()
 
       messages.push(messageResult as AuditLog)

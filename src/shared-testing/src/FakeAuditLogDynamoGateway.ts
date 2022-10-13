@@ -1,7 +1,18 @@
-// @ts-ignore
-/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable class-methods-use-this */
-import type { AuditLog, AuditLogDynamoGateway, AuditLogEvent, DynamoUpdate, PromiseResult } from "shared-types"
+import type {
+  AuditLog,
+  AuditLogDynamoGateway,
+  AuditLogEvent,
+  DynamoUpdate,
+  FetchByStatusOptions,
+  FetchRangeOptions,
+  PromiseResult
+} from "shared-types"
+import type {
+  FetchManyOptions,
+  FetchUnsanitisedOptions,
+  ProjectionOptions
+} from "shared-types/build/AuditLogDynamoGateway"
 
 export default class FakeAuditLogDynamoGateway implements AuditLogDynamoGateway {
   private messages: AuditLog[] = []
@@ -16,11 +27,11 @@ export default class FakeAuditLogDynamoGateway implements AuditLogDynamoGateway 
     throw new Error("Method not implemented.")
   }
 
-  prepare(_messageId: string, _messageVersion: number, _event: AuditLogEvent): PromiseResult<DynamoUpdate> {
+  prepare(_: string, __: number, ___: AuditLogEvent): PromiseResult<DynamoUpdate> {
     throw new Error("Method not implemented")
   }
 
-  prepareEvents(_messageId: string, _messageVersion: number, _events: AuditLogEvent[]): PromiseResult<DynamoUpdate> {
+  prepareEvents(_: string, __: number, ___: AuditLogEvent[]): PromiseResult<DynamoUpdate> {
     throw new Error("Method not implemented")
   }
 
@@ -32,8 +43,7 @@ export default class FakeAuditLogDynamoGateway implements AuditLogDynamoGateway 
     return Promise.resolve(message)
   }
 
-  // @ts-ignore
-  fetchMany(limit?: number, lastMessage?: AuditLog): PromiseResult<AuditLog[]> {
+  fetchMany(_: FetchManyOptions = {}): PromiseResult<AuditLog[]> {
     if (this.error) {
       return Promise.resolve(this.error)
     }
@@ -41,7 +51,15 @@ export default class FakeAuditLogDynamoGateway implements AuditLogDynamoGateway 
     return Promise.resolve(this.messages)
   }
 
-  fetchByExternalCorrelationId(externalCorrelationId: string): PromiseResult<AuditLog | null> {
+  fetchRange(_: FetchRangeOptions): PromiseResult<AuditLog[]> {
+    if (this.error) {
+      return Promise.resolve(this.error)
+    }
+
+    return Promise.resolve(this.messages)
+  }
+
+  fetchByExternalCorrelationId(externalCorrelationId: string, _?: ProjectionOptions): PromiseResult<AuditLog | null> {
     if (this.error) {
       return Promise.resolve(this.error)
     }
@@ -61,8 +79,7 @@ export default class FakeAuditLogDynamoGateway implements AuditLogDynamoGateway 
     return Promise.resolve(message ?? null)
   }
 
-  // @ts-ignore
-  fetchByStatus(status: string, limit?: number, lastMessage?: AuditLog): PromiseResult<AuditLog[]> {
+  fetchByStatus(_: string, __?: FetchByStatusOptions): PromiseResult<AuditLog[]> {
     if (this.error) {
       return Promise.resolve(this.error)
     }
@@ -100,23 +117,19 @@ export default class FakeAuditLogDynamoGateway implements AuditLogDynamoGateway 
     return Promise.resolve(sortedEvents)
   }
 
-  // @ts-ignore
-  addEvent(messageId: string, messageVersion: number, event: AuditLogEvent): PromiseResult<void> {
+  addEvent(_: string, __: number, ___: AuditLogEvent): PromiseResult<void> {
     throw new Error("Method not implemented.")
   }
 
-  // @ts-ignore
-  insertOne<T>(tableName: string, record: T, keyName: string): PromiseResult<void> {
+  insertOne<T>(_: string, __: T, ___: string): PromiseResult<void> {
     throw new Error("Method not implemented.")
   }
 
-  // @ts-ignore
-  fetchUnsanitised(limit: number, lastMessage?: AuditLog): PromiseResult<AuditLog[]> {
+  fetchUnsanitised(_?: FetchUnsanitisedOptions): PromiseResult<AuditLog[]> {
     throw new Error("Method not implemented.")
   }
 
-  // @ts-ignore
-  updateSanitiseCheck(message: AuditLog, nextSanitiseCheck: Date): PromiseResult<void> {
+  updateSanitiseCheck(_: AuditLog, __: Date): PromiseResult<void> {
     throw new Error("Method not implemented.")
   }
 

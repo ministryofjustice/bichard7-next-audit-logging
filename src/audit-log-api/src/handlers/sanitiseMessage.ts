@@ -38,7 +38,6 @@ const sanitiseAuditLogUseCase = new SanitiseAuditLogUseCase(auditLogGateway)
 const deleteAuditLogLookupItems = new DeleteAuditLogLookupItemsUseCase(auditLogLookupDynamoGateway)
 const deleteArchivedErrorsUseCase = new DeleteArchivedErrorsUseCase(awsBichardPostgresGateway)
 
-/* eslint-disable require-await */
 export default async function sanitiseMessage(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
   const messageId = event.pathParameters?.messageId
 
@@ -49,7 +48,9 @@ export default async function sanitiseMessage(event: APIGatewayProxyEvent): Prom
     })
   }
 
-  const messageFetcher = new FetchById(auditLogGateway, messageId)
+  const messageFetcher = new FetchById(auditLogGateway, messageId, {
+    includeColumns: ["automationReport", "topExceptionsReport", "version"]
+  })
   const messageFetcherResult = await messageFetcher.fetch()
 
   if (isError(messageFetcherResult)) {
