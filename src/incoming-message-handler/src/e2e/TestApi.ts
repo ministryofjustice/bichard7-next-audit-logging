@@ -1,14 +1,14 @@
 import type { AxiosError } from "axios"
 import axios from "axios"
-import type { AuditLog } from "shared-types"
 import { Poller, PollOptions } from "shared"
+import type { AuditLog } from "shared-types"
 
 export default class TestApi {
   private apiUrl = "http://localhost:3010"
 
   getMessages(): Promise<AuditLog[]> {
     return axios
-      .get(`${this.apiUrl}/messages`, { headers: { "X-API-KEY": "dummydummydummydummy" } })
+      .get(`${this.apiUrl}/messages?includedColumns=createdBy`, { headers: { "X-API-KEY": "dummydummydummydummy" } })
       .then((response) => response.data)
       .catch((error) => <AxiosError>error)
   }
