@@ -1,4 +1,5 @@
 import type { ApiClient, AuditLog, AuditLogEvent, PromiseResult } from "shared-types"
+import type { GetMessagesOptions } from "shared-types/build/ApiClient"
 
 export default class FakeApiClient implements ApiClient {
   private messages: AuditLog[] = []
@@ -77,5 +78,13 @@ export default class FakeApiClient implements ApiClient {
 
   addMessage(message: AuditLog): void {
     this.messages.push(message)
+  }
+
+  getMessages(_?: GetMessagesOptions): PromiseResult<AuditLog[]> {
+    return Promise.resolve(new Error("Unimplemented"))
+  }
+
+  retryEvent(_: string): PromiseResult<void> {
+    return Promise.resolve(new Error("Unimplemented"))
   }
 }
