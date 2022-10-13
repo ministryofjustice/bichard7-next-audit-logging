@@ -227,7 +227,7 @@ describe("Sanitise Old Messages e2e", () => {
 
     const messages: AuditLog[] = []
     for (const messageId of Object.values(messageIds)) {
-      const messageResult = await api.getMessage(messageId)
+      const messageResult = await api.getMessage(messageId, { includeColumns: ["isSanitised", "nextSanitiseCheck"] })
       expect(messageResult).toNotBeError()
 
       messages.push(messageResult as AuditLog)
