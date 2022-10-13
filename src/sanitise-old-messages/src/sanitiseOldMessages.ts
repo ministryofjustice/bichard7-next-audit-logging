@@ -17,7 +17,7 @@ export default class SanitiseOldMessages {
     logger.debug("Fetching messages to sanitise")
 
     // Fetch messages over the configured age threshold from dynamo
-    const messages = await this.dynamo.fetchUnsanitised(this.config.MESSAGE_FETCH_BATCH_NUM)
+    const messages = await this.dynamo.fetchUnsanitised({ limit: this.config.MESSAGE_FETCH_BATCH_NUM })
     if (isError(messages)) {
       logger.error({ message: "Unable to fetch messages from dynamo, exiting", error: messages })
       return
