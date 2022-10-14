@@ -6,6 +6,7 @@ export type GetMessagesOptions = {
 }
 
 export type GetMessageOptions = {
+  limit?: number
   includeColumns?: string[]
   excludeColumns?: string[]
 }
@@ -17,4 +18,5 @@ export default interface ApiClient {
   createEvent(messageId: string, event: AuditLogEvent): PromiseResult<void>
   retryEvent(messageId: string): PromiseResult<void>
   sanitiseMessage(messageId: string): PromiseResult<void>
+  fetchUnsanitised(options?: GetMessageOptions): PromiseResult<AuditLog[]>
 }

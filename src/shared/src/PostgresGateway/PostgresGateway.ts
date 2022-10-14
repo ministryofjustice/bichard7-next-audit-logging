@@ -31,7 +31,7 @@ export default class PostgresGateway {
     return this.client
   }
 
-  protected async query(command: string, values: unknown[] = []): PromiseResult<QueryResult> {
+  async query(command: string, values: unknown[] = []): PromiseResult<QueryResult> {
     await this.getClient()
     return this.client.query(command, values).catch((error) => error)
   }

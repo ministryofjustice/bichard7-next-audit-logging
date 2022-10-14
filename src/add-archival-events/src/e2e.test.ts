@@ -11,32 +11,11 @@ import addArchivalEvents from "."
 
 logger.level = "debug"
 
-const createTableSql = `
-  CREATE SCHEMA br7own;
-  GRANT ALL ON SCHEMA br7own TO bichard;
-
-  CREATE TABLE br7own.archive_log
-  (
-      log_id          SERIAL PRIMARY KEY,
-      archived_at     TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      archived_by     TEXT,
-      audit_logged_at TIMESTAMP
-  );
-
-  CREATE TABLE br7own.archive_error_list
-  (
-      error_id                INTEGER PRIMARY KEY,
-      message_id              VARCHAR(70)   NOT NULL,
-      archive_log_id          INTEGER REFERENCES br7own.archive_log (log_id) ON DELETE CASCADE,
-      audit_logged_at         TIMESTAMP DEFAULT NULL,
-      audit_log_attempts      INTEGER NOT NULL DEFAULT 0
-  );
-`
-
 const lambdaEnvironment = {
   API_URL: "http://localhost:3010",
   API_KEY: "apiKey",
   DB_HOST: "localhost",
+  DB_PORT: "5433",
   DB_USER: "bichard",
   DB_PASSWORD: "password",
   DB_NAME: "bichard"
@@ -59,7 +38,7 @@ describe("Add Error Records e2e", () => {
   beforeAll(async () => {
     pg = new Client({
       host: "localhost",
-      port: 5432,
+      port: 5433,
       user: "bichard",
       password: "password",
       ssl: false,
@@ -84,8 +63,9 @@ describe("Add Error Records e2e", () => {
   })
 
   beforeEach(async () => {
-    await pg.query(`DROP SCHEMA IF EXISTS br7own CASCADE`)
-    await pg.query(createTableSql)
+    await pg.query(`TRUNCATE TABLE br7own.error_list`)
+    await pg.query(`TRUNCATE TABLE br7own.archive_error_list CASCADE`)
+    await pg.query(`DELETE FROM br7own.archive_log`)
 
     await dynamo.deleteAll("auditLogTable", "messageId")
   })

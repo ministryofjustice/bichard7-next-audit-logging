@@ -18,21 +18,6 @@ setEnvironmentVariables({
 
 logger.level = "debug"
 
-const createTableSql = `
-  CREATE SCHEMA br7own;
-  GRANT ALL ON SCHEMA br7own TO bichard;
-  
-  CREATE TABLE br7own.archive_error_list
-  (
-      message_id VARCHAR(70) NOT NULL
-  );
-
-  CREATE TABLE br7own.error_list
-  (
-      message_id VARCHAR(70) NOT NULL
-  );
-`
-
 // Produces the string "($1), ($2), ($3), ..." for the given range
 const sqlPlaceholderForRange = (range: number) => [...Array(range).keys()].map((x) => `($${x + 1})`).join(", ")
 
@@ -109,8 +94,9 @@ describe("Sanitise Old Messages e2e", () => {
   })
 
   beforeEach(async () => {
-    await db.query(`DROP SCHEMA IF EXISTS br7own CASCADE`)
-    await db.query(createTableSql)
+    await db.query(`TRUNCATE TABLE br7own.error_list`)
+    await db.query(`TRUNCATE TABLE br7own.archive_error_list CASCADE`)
+    await db.query(`DELETE FROM br7own.archive_log`)
 
     await gateway.deleteAll("auditLogTable", "messageId")
   })

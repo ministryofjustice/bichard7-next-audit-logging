@@ -1,13 +1,14 @@
 import { AuditLogApiClient, logger } from "shared"
+import AddArchivalEvents from "./addArchivalEvents"
 import getConfig from "./config"
 import { DatabaseClient } from "./db"
-import AddArchivalEvents from "./addArchivalEvents"
 
 export default async function addArchivalEvents(): Promise<void> {
   const config = getConfig()
 
   const db = new DatabaseClient(
     config.dbHost,
+    config.dbPort,
     config.dbUser,
     config.dbPassword,
     config.dbSsl,

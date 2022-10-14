@@ -22,6 +22,7 @@ export default () => {
     apiUrl: process.env.API_URL,
     apiKey: process.env.API_KEY,
     dbHost: process.env.DB_HOST,
+    dbPort: process.env.DB_PORT ? Number(process.env.DB_PORT) : 5432,
     dbUser: process.env.DB_USER,
     dbPassword: process.env.DB_PASSWORD,
     dbSsl: !!process.env.DB_SSL,

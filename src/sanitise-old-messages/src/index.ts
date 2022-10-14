@@ -1,37 +1,31 @@
-import { Client } from "pg"
-import { AuditLogApiClient, AwsAuditLogDynamoGateway, logger } from "shared"
-import { getApiConfig, getDynamoConfig, getPostgresConfig, getSanitiseConfig } from "./config"
-import SanitiseOldMessages from "./sanitiseOldMessages"
+import { AuditLogApiClient, logger } from "shared"
+import { isError } from "shared-types"
+import { getApiConfig, getSanitiseConfig } from "./config"
 
 export default async (): Promise<void> => {
-  const pgConfig = getPostgresConfig()
-  const dynamoConfig = getDynamoConfig()
   const apiConfig = getApiConfig()
   const config = getSanitiseConfig()
 
   const api = new AuditLogApiClient(apiConfig.API_URL, apiConfig.API_KEY)
-  const dynamo = new AwsAuditLogDynamoGateway(dynamoConfig, dynamoConfig.TABLE_NAME)
-  const db = new Client({
-    host: pgConfig.HOST,
-    port: pgConfig.PORT,
-    user: pgConfig.USERNAME,
-    password: pgConfig.PASSWORD,
-    ssl: pgConfig.SSL
-      ? {
-          rejectUnauthorized: false
-        }
-      : false,
-    database: pgConfig.DATABASE_NAME
+
+  logger.debug("Fetching messages to sanitise")
+
+  // Fetch the oldest unsanitised messages up to the limit
+  const messages = await api.fetchUnsanitised({
+    limit: config.MESSAGE_FETCH_BATCH_NUM,
+    includeColumns: ["isSanitised", "nextSanitiseCheck", "version"]
   })
 
-  const s = new SanitiseOldMessages(api, dynamo, db, config)
+  if (isError(messages)) {
+    logger.error({ message: "Unable to fetch messages from api, exiting", error: messages })
+    return
+  }
 
-  try {
-    await db.connect()
-    await s.sanitiseOldMessages()
-  } catch (error) {
-    logger.error(error as Error)
-  } finally {
-    await db.end()
+  // Call the sanitise endpoint for each message
+  for (const message of messages) {
+    const sanitiseResult = await api.sanitiseMessage(message.messageId)
+    if (isError(sanitiseResult)) {
+      logger.error({ message: "Unable to sanitise message", error: sanitiseResult, messageId: message.messageId })
+    }
   }
 }

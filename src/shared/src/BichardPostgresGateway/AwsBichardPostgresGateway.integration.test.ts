@@ -7,7 +7,7 @@ import AwsBichardPostgresGateway from "./AwsBichardPostgresGateway"
 
 const config: PostgresConfig = {
   HOST: "localhost",
-  PORT: 5432,
+  PORT: 5433,
   USERNAME: "bichard",
   PASSWORD: "password",
   DATABASE_NAME: "bichard",
@@ -18,16 +18,8 @@ const config: PostgresConfig = {
 const gateway = new AwsBichardPostgresGateway(config)
 const testGateway = new TestPostgresGateway(config)
 
-beforeAll(async () => {
-  await testGateway.createSchema("br7own")
-})
-
 beforeEach(async () => {
-  await testGateway.dropTable()
-  await testGateway.createTable({
-    message_id: "varchar(70)",
-    updated_msg: "text"
-  })
+  await testGateway.truncateTable()
 })
 
 afterAll(async () => {
@@ -39,11 +31,7 @@ describe("BichardPostgresGateway", () => {
   it("deletes all matching records from the archive table", async () => {
     const messageId = "messageID"
     const otherMessageId = "otherMessageID"
-    const records = [
-      { message_id: messageId, updated_msg: "Dummy data" },
-      { message_id: messageId, updated_msg: "Dummy data" },
-      { message_id: otherMessageId, updated_msg: "Other dummy data" }
-    ]
+    const records = [{ message_id: messageId }, { message_id: messageId }, { message_id: otherMessageId }]
     await testGateway.insertRecords(records)
 
     const result = await gateway.deleteArchivedErrors(messageId)
@@ -51,20 +39,20 @@ describe("BichardPostgresGateway", () => {
 
     const allResults = await testGateway.findAll()
     expect(allResults).toHaveLength(1)
-    expect(allResults).toEqual([{ message_id: otherMessageId, updated_msg: "Other dummy data" }])
+    expect(allResults?.[0]).toHaveProperty("message_id", otherMessageId)
   })
 
   it("deletes no records when there are no matching records", async () => {
     const otherMessageId = "otherMessageID"
-    const otherRecord = [{ message_id: otherMessageId, updated_msg: "Other dummy data" }]
+    const otherRecord = [{ message_id: otherMessageId }]
     await testGateway.insertRecords(otherRecord)
 
     const result = await gateway.deleteArchivedErrors("someMessageId")
     expect(isError(result)).toBe(false)
 
-    const records = await testGateway.findAll()
-    expect(records).toHaveLength(1)
-    expect(records).toEqual([{ message_id: otherMessageId, updated_msg: "Other dummy data" }])
+    const allResults = await testGateway.findAll()
+    expect(allResults).toHaveLength(1)
+    expect(allResults?.[0]).toHaveProperty("message_id", otherMessageId)
   })
 
   it("returns error when Postgres returns error", async () => {
