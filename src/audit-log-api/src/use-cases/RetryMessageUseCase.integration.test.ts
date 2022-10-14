@@ -1,24 +1,16 @@
-jest.retryTimes(10)
+import { AuditLogApiClient, encodeBase64, TestAwsS3Gateway, TestStompitMqGateway } from "shared"
 import "shared-testing"
+import { auditLogEventsS3Config } from "shared-testing"
 import type { MqConfig } from "shared-types"
-import { AuditLog, BichardAuditLogEvent } from "shared-types"
-import {
-  AwsAuditLogDynamoGateway,
-  AwsAuditLogLookupDynamoGateway,
-  TestDynamoGateway,
-  AuditLogApiClient,
-  TestStompitMqGateway,
-  TestAwsS3Gateway
-} from "shared"
-import RetryMessageUseCase from "./RetryMessageUseCase"
-import GetLastFailedMessageEventUseCase from "./GetLastEventUseCase"
-import SendMessageToQueueUseCase from "./SendMessageToQueueUseCase"
+import { AuditLog, AuditLogLookup, BichardAuditLogEvent } from "shared-types"
+import { AwsAuditLogDynamoGateway, AwsAuditLogLookupDynamoGateway } from "../gateways/dynamo"
+import { auditLogDynamoConfig, TestDynamoGateway } from "../test"
 import CreateRetryingEventUseCase from "./CreateRetryingEventUseCase"
-import { AuditLogLookup } from "shared-types"
-import RetrieveEventXmlFromS3UseCase from "./RetrieveEventXmlFromS3UseCase"
+import GetLastFailedMessageEventUseCase from "./GetLastEventUseCase"
 import LookupEventValuesUseCase from "./LookupEventValuesUseCase"
-import { encodeBase64 } from "shared"
-import { auditLogDynamoConfig, auditLogEventsS3Config } from "shared-testing"
+import RetrieveEventXmlFromS3UseCase from "./RetrieveEventXmlFromS3UseCase"
+import RetryMessageUseCase from "./RetryMessageUseCase"
+import SendMessageToQueueUseCase from "./SendMessageToQueueUseCase"
 
 const auditLogTableName = "auditLogTable"
 const auditLogLookupTableName = "auditLogLookupTable"

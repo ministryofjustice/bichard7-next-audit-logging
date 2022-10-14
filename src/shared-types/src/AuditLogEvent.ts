@@ -12,6 +12,10 @@ export default class AuditLogEvent {
 
   public readonly timestamp: string
 
+  public readonly eventSourceQueueName?: string
+
+  public readonly eventXml?: string
+
   public readonly attributes: KeyValuePair<string, unknown> = {}
 
   constructor(options: AuditLogEventOptions) {
@@ -19,6 +23,8 @@ export default class AuditLogEvent {
     this.category = options.category
     this.eventType = options.eventType
     this.timestamp = options.timestamp.toISOString()
+    this.eventSourceQueueName = options.eventSourceQueueName
+    this.eventXml = options.eventXml
     this.attributes = options.attributes ?? {}
   }
 

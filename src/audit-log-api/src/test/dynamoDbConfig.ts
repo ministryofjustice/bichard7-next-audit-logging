@@ -1,4 +1,4 @@
-import type { DynamoDbConfig } from "shared-types"
+import type { DynamoDbConfig } from "../gateways/dynamo"
 
 const auditLogDynamoConfig: DynamoDbConfig = {
   DYNAMO_URL: "http://localhost:8000",

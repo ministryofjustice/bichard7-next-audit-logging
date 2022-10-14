@@ -1,6 +1,6 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable class-methods-use-this */
-import type { AuditLogLookup, AuditLogLookupDynamoGateway, DynamoUpdate, PromiseResult } from "shared-types"
+import type { AuditLogLookup, PromiseResult } from "shared-types"
+import type { AuditLogLookupDynamoGateway, DynamoUpdate } from "../gateways/dynamo"
 
 export default class FakeAuditLogLookupDynamoGateway implements AuditLogLookupDynamoGateway {
   public items: AuditLogLookup[] = []

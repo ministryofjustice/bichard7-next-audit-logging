@@ -1,6 +1,6 @@
 import type { AuditLogEvent } from "shared-types"
-import type { UpdateComponentsResult } from "../../utils/updateComponentTypes"
 import shouldLogForAutomationReport from "../shouldLogForAutomationReport"
+import type { UpdateComponentsResult } from "./types"
 
 export default (_: AuditLogEvent[], events: AuditLogEvent[]): UpdateComponentsResult => {
   const automationReportEvents = events.filter((event) => shouldLogForAutomationReport(event))

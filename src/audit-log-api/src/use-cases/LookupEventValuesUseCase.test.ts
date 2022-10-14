@@ -1,6 +1,6 @@
 import "shared-testing"
-import { FakeAuditLogLookupDynamoGateway } from "shared-testing"
 import { AuditLogLookup, BichardAuditLogEvent } from "shared-types"
+import { FakeAuditLogLookupDynamoGateway } from "../test"
 import LookupEventValuesUseCase from "./LookupEventValuesUseCase"
 
 const dynamoGateway = new FakeAuditLogLookupDynamoGateway()

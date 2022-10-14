@@ -1,16 +1,12 @@
 import { addDays } from "date-fns"
-import type {
-  AuditLogLookup,
-  AuditLogLookupDynamoGateway,
-  DynamoDbConfig,
-  DynamoUpdate,
-  PromiseResult
-} from "shared-types"
+import { compress, decompress } from "shared"
+import type { AuditLogLookup, PromiseResult } from "shared-types"
 import { isError } from "shared-types"
-import { compress, decompress } from ".."
 import { DynamoGateway, IndexSearcher } from "../DynamoGateway"
+import type DynamoDbConfig from "../DynamoGateway/DynamoDbConfig"
+import type DynamoUpdate from "../DynamoGateway/DynamoUpdate"
 
-export default class AwsAuditLogLookupDynamoGateway extends DynamoGateway implements AuditLogLookupDynamoGateway {
+export default class AwsAuditLogLookupDynamoGateway extends DynamoGateway {
   private readonly tableKey: string = "id"
 
   constructor(config: DynamoDbConfig, private readonly tableName: string) {

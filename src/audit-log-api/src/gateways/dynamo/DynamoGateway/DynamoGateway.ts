@@ -1,8 +1,10 @@
 import { DynamoDB } from "aws-sdk"
 import { DocumentClient } from "aws-sdk/clients/dynamodb"
-import type { DynamoDbConfig, DynamoUpdate, PromiseResult, TransactionFailureReason } from "shared-types"
+import type { PromiseResult, TransactionFailureReason } from "shared-types"
 
 import { isError, TransactionFailedError } from "shared-types"
+import type DynamoDbConfig from "./DynamoDbConfig"
+import type DynamoUpdate from "./DynamoUpdate"
 import type FetchByIndexOptions from "./FetchByIndexOptions"
 import type GetManyOptions from "./GetManyOptions"
 import KeyComparison from "./KeyComparison"

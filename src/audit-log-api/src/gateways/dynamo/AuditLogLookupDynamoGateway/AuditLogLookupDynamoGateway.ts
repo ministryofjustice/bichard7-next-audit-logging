@@ -1,4 +1,5 @@
-import type { AuditLogLookup, DynamoUpdate, PromiseResult } from "."
+import type { AuditLogLookup, PromiseResult } from "shared-types"
+import type DynamoUpdate from "../DynamoGateway/DynamoUpdate"
 
 export default interface AuditLogLookupDynamoGateway {
   create(auditLogLookup: AuditLogLookup): PromiseResult<AuditLogLookup>

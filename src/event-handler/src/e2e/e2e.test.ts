@@ -1,15 +1,16 @@
 jest.setTimeout(50000)
 
-import "shared-testing"
-import fs from "fs"
-import { auditLogDynamoConfig, setEnvironmentVariables } from "shared-testing"
-setEnvironmentVariables()
-import type { AmazonMqEventSourceRecordEvent, AuditLogEvent } from "shared-types"
-import { AuditLog } from "shared-types"
-import { AwsAuditLogDynamoGateway, encodeBase64, Poller, PollOptions, TestDynamoGateway, TestS3Gateway } from "shared"
 import type { S3 } from "aws-sdk"
-import EventHandlerSimulator from "./EventHandlerSimulator"
+import fs from "fs"
+import { AuditLogApiClient, encodeBase64, Poller, PollOptions, TestS3Gateway } from "shared"
+import "shared-testing"
+import { clearDynamoTable, createMockAuditLog, setEnvironmentVariables } from "shared-testing"
+import type { AmazonMqEventSourceRecordEvent, AuditLogEvent } from "shared-types"
+import { AuditLog, isError } from "shared-types"
 import { v4 as uuid } from "uuid"
+setEnvironmentVariables()
+
+import EventHandlerSimulator from "./EventHandlerSimulator"
 
 process.env.MESSAGE_FORMAT = "DUMMY"
 process.env.EVENTS_BUCKET_NAME = "auditLogEventsBucket"
@@ -25,17 +26,19 @@ const s3Gateway = new TestS3Gateway({
 })
 const auditLogTableName = "auditLogTable"
 const auditLogLookupTableName = "auditLogLookupTable"
-const auditLogDynamoGateway = new AwsAuditLogDynamoGateway(auditLogDynamoConfig, auditLogDynamoConfig.TABLE_NAME)
-const testDynamoGateway = new TestDynamoGateway(auditLogDynamoConfig)
+const auditLogApi = new AuditLogApiClient("http://localhost:3010", "Api-key")
 const eventHandlerSimulator = new EventHandlerSimulator()
 
 const getEvents = async (messageId1: string, messageId2: string): Promise<DynamoPollResult> => {
-  const actualEvents1 = <AuditLogEvent[]>await auditLogDynamoGateway.fetchEvents(messageId1)
-  const actualEvents2 = <AuditLogEvent[]>await auditLogDynamoGateway.fetchEvents(messageId2)
+  const message1 = await auditLogApi.getMessage(messageId1)
+  const message2 = await auditLogApi.getMessage(messageId2)
+  if (isError(message1) || isError(message2)) {
+    throw new Error("Unexpected error")
+  }
 
   return {
-    actualEvents1,
-    actualEvents2
+    actualEvents1: message1.events,
+    actualEvents2: message2.events
   }
 }
 
@@ -52,8 +55,8 @@ type DynamoPollResult = {
 }
 
 beforeEach(async () => {
-  await testDynamoGateway.deleteAll(auditLogTableName, "messageId")
-  await testDynamoGateway.deleteAll(auditLogLookupTableName, "id")
+  await clearDynamoTable(auditLogTableName, "messageId")
+  await clearDynamoTable(auditLogLookupTableName, "id")
   await s3Gateway.deleteAll()
 })
 
@@ -71,8 +74,8 @@ test.each<TestInput>([
     const auditLog1 = new AuditLog("CorrelationId1", new Date(), "hash-1")
     const auditLog2 = new AuditLog("CorrelationId2", new Date(), "hash-2")
 
-    await auditLogDynamoGateway.create(auditLog1)
-    await auditLogDynamoGateway.create(auditLog2)
+    await createMockAuditLog(auditLog1)
+    await createMockAuditLog(auditLog2)
 
     const rawMessage = fs.readFileSync(`../../events/${eventFilename}.xml`).toString()
     const messageData1 = encodeBase64(rawMessage.replace("{MESSAGE_ID}", auditLog1.messageId))

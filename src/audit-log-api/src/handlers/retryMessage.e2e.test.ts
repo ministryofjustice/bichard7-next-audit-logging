@@ -1,13 +1,12 @@
 jest.setTimeout(15000)
 
-import type { MqConfig } from "shared-types"
-import { AuditLogLookup } from "shared-types"
-import { AuditLog, BichardAuditLogEvent } from "shared-types"
-import { HttpStatusCode, TestDynamoGateway, TestAwsS3Gateway, TestStompitMqGateway } from "shared"
 import axios from "axios"
+import { encodeBase64, HttpStatusCode, TestAwsS3Gateway, TestStompitMqGateway } from "shared"
+import { auditLogEventsS3Config } from "shared-testing"
+import type { MqConfig } from "shared-types"
+import { AuditLog, AuditLogLookup, BichardAuditLogEvent } from "shared-types"
 import { v4 as uuid } from "uuid"
-import { encodeBase64 } from "shared"
-import { auditLogDynamoConfig, auditLogEventsS3Config, auditLogLookupDynamoConfig } from "shared-testing"
+import { auditLogDynamoConfig, auditLogLookupDynamoConfig, TestDynamoGateway } from "../test"
 
 const mqConfig: MqConfig = {
   url: "stomp://localhost:51613",
@@ -90,5 +89,30 @@ describe("retryMessage", () => {
     const msg = await testMqGateway.getMessage("RETRY_DUMMY_QUEUE")
     testMqGateway.dispose()
     expect(msg).toEqual(eventXml)
+  })
+
+  it("should return an error when retrying invalid messages", async () => {
+    const auditLogEvent = {
+      s3Path: "nonexistent.xml",
+      ...new BichardAuditLogEvent({
+        eventSource: "Dummy Event Source",
+        eventSourceArn: "Dummy Event Arn",
+        eventSourceQueueName: "DUMMY_QUEUE",
+        eventType: "Dummy Failed Message",
+        category: "error",
+        timestamp: new Date()
+      })
+    } as unknown as BichardAuditLogEvent
+    const message = new AuditLog("External Correlation ID", new Date(Date.now() - 3_600_000), "dummy hash")
+    message.status = "Error"
+    message.events.push(auditLogEvent)
+
+    await testAuditLogDynamoGateway.insertOne(auditLogDynamoConfig.TABLE_NAME, message, "messageId")
+
+    const { response } = await axios
+      .post(`http://localhost:3010/messages/${message.messageId}/retry`, null)
+      .catch((e) => e)
+
+    expect(response.status).toBe(HttpStatusCode.internalServerError)
   })
 })

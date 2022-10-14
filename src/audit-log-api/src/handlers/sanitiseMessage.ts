@@ -1,19 +1,13 @@
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda"
 import type { Duration } from "date-fns"
 import { add } from "date-fns"
-import {
-  AwsAuditLogDynamoGateway,
-  AwsAuditLogLookupDynamoGateway,
-  AwsBichardPostgresGateway,
-  AwsS3Gateway,
-  createS3Config,
-  HttpStatusCode
-} from "shared"
+import { AwsBichardPostgresGateway, AwsS3Gateway, createS3Config, HttpStatusCode } from "shared"
 import type { AuditLog } from "shared-types"
 import { isError } from "shared-types"
 import createAuditLogDynamoDbConfig from "../createAuditLogDynamoDbConfig"
 import createAuditLogLookupDynamoDbConfig from "../createAuditLogLookupDynamoDbConfig"
 import createBichardPostgresGatewayConfig from "../createBichardPostgresGatewayConfig"
+import { AwsAuditLogDynamoGateway, AwsAuditLogLookupDynamoGateway } from "../gateways/dynamo"
 import DeleteArchivedErrorsUseCase from "../use-cases/DeleteArchivedErrorsUseCase"
 import DeleteAuditLogLookupItemsUseCase from "../use-cases/DeleteAuditLogLookupItemsUseCase"
 import DeleteMessageObjectsFromS3UseCase from "../use-cases/DeleteMessageObjectsFromS3UseCase"

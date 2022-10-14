@@ -1,9 +1,9 @@
 jest.retryTimes(10)
 import { AuditLog } from "shared-types"
-import { AwsAuditLogDynamoGateway } from "shared"
-import { TestDynamoGateway } from "shared"
+import { AwsAuditLogDynamoGateway } from "src/gateways/dynamo"
+import { auditLogDynamoConfig } from "src/test/dynamoDbConfig"
+import { TestDynamoGateway } from "../test"
 import CreateAuditLogsUseCase from "./CreateAuditLogsUseCase"
-import { auditLogDynamoConfig } from "shared-testing"
 
 const testDynamoGateway = new TestDynamoGateway(auditLogDynamoConfig)
 const auditLogDynamoGateway = new AwsAuditLogDynamoGateway(auditLogDynamoConfig, auditLogDynamoConfig.TABLE_NAME)

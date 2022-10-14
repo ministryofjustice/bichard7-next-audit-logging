@@ -1,6 +1,6 @@
 import { AuditLog } from "shared-types"
+import FakeAuditLogDynamoGateway from "src/test/FakeAuditLogDynamoGateway"
 import validateCreateAuditLogs from "./validateCreateAuditLogs"
-import { FakeAuditLogDynamoGateway } from "shared-testing"
 
 const dynamoGateway = new FakeAuditLogDynamoGateway()
 

@@ -1,14 +1,6 @@
-import type {
-  AuditLogEvent,
-  AuditLogLookupDynamoGateway,
-  BichardAuditLogEvent,
-  DynamoUpdate,
-  KeyValuePair,
-  PromiseResult,
-  ValueLookup
-} from "shared-types"
-import { isError } from "shared-types"
-import { AuditLogLookup } from "shared-types"
+import type { AuditLogEvent, BichardAuditLogEvent, KeyValuePair, PromiseResult, ValueLookup } from "shared-types"
+import { AuditLogLookup, isError } from "shared-types"
+import type { AuditLogLookupDynamoGateway, DynamoUpdate } from "../gateways/dynamo"
 
 const maxAttributeValueLength = 1000
 

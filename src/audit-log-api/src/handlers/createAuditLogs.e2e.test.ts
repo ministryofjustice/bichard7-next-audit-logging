@@ -1,9 +1,11 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 jest.retryTimes(10)
 import axios from "axios"
-import { HttpStatusCode, TestDynamoGateway } from "shared"
-import { auditLogDynamoConfig, mockAuditLog } from "shared-testing"
+import { HttpStatusCode } from "shared"
+import { mockAuditLog } from "shared-testing"
 import type { AuditLog } from "shared-types"
+import { auditLogDynamoConfig } from "src/test/dynamoDbConfig"
+import { TestDynamoGateway } from "../test"
 
 const gateway = new TestDynamoGateway(auditLogDynamoConfig)
 

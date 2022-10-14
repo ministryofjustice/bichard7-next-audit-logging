@@ -1,5 +1,6 @@
-import type { AuditLog, AuditLogDynamoGateway, PromiseResult } from "shared-types"
+import type { AuditLog, PromiseResult } from "shared-types"
 import { AuditLogEvent, EventType } from "shared-types"
+import type { AuditLogDynamoGateway } from "../gateways/dynamo"
 
 export default class SanitiseAuditLogUseCase {
   constructor(private readonly auditLogDynamoGateway: AuditLogDynamoGateway) {}

@@ -1,27 +1,27 @@
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda"
+import {
+  AuditLogApiClient,
+  AwsS3Gateway,
+  createMqConfig,
+  createS3Config,
+  HttpStatusCode,
+  logger,
+  StompitMqGateway
+} from "shared"
 import type { PromiseResult } from "shared-types"
 import { isError } from "shared-types"
-import {
-  AwsAuditLogDynamoGateway,
-  HttpStatusCode,
-  StompitMqGateway,
-  createMqConfig,
-  AuditLogApiClient,
-  logger
-} from "shared"
-import getApiUrl from "../getApiUrl"
-import getApiKey from "../getApiKey"
 import createAuditLogDynamoDbConfig from "../createAuditLogDynamoDbConfig"
+import createAuditLogLookupDynamoDbConfig from "../createAuditLogLookupDynamoDbConfig"
+import { AwsAuditLogDynamoGateway, AwsAuditLogLookupDynamoGateway } from "../gateways/dynamo"
+import getApiKey from "../getApiKey"
+import getApiUrl from "../getApiUrl"
 import { parseRetryMessageRequest, RetryMessageUseCase } from "../use-cases"
-import { createJsonApiResult } from "../utils"
-import GetLastFailedMessageEventUseCase from "../use-cases/GetLastEventUseCase"
 import CreateRetryingEventUseCase from "../use-cases/CreateRetryingEventUseCase"
-import SendMessageToQueueUseCase from "../use-cases/SendMessageToQueueUseCase"
+import GetLastFailedMessageEventUseCase from "../use-cases/GetLastEventUseCase"
 import LookupEventValuesUseCase from "../use-cases/LookupEventValuesUseCase"
 import RetrieveEventXmlFromS3UseCase from "../use-cases/RetrieveEventXmlFromS3UseCase"
-import { AwsS3Gateway } from "shared"
-import { createS3Config, AwsAuditLogLookupDynamoGateway } from "shared"
-import createAuditLogLookupDynamoDbConfig from "../createAuditLogLookupDynamoDbConfig"
+import SendMessageToQueueUseCase from "../use-cases/SendMessageToQueueUseCase"
+import { createJsonApiResult } from "../utils"
 
 const auditLogGatewayConfig = createAuditLogDynamoDbConfig()
 const auditLogGateway = new AwsAuditLogDynamoGateway(auditLogGatewayConfig, auditLogGatewayConfig.TABLE_NAME)

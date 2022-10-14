@@ -1,10 +1,10 @@
 import type { APIGatewayProxyEvent } from "aws-lambda"
-import { FakeAuditLogDynamoGateway } from "shared-testing"
-import FetchAll from "./FetchAll"
-import FetchById from "./FetchById"
-import FetchByExternalCorrelationId from "./FetchByExternalCorrelationId"
-import FetchByStatus from "./FetchByStatus"
+import FakeAuditLogDynamoGateway from "src/test/FakeAuditLogDynamoGateway"
 import createMessageFetcher from "./createMessageFetcher"
+import FetchAll from "./FetchAll"
+import FetchByExternalCorrelationId from "./FetchByExternalCorrelationId"
+import FetchById from "./FetchById"
+import FetchByStatus from "./FetchByStatus"
 
 const gateway = new FakeAuditLogDynamoGateway()
 

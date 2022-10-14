@@ -1,13 +1,12 @@
 jest.retryTimes(10)
-import type { AuditLogLookup } from "shared-types"
+import { decompress } from "shared"
+import type { AuditLogLookup, KeyValuePair } from "shared-types"
 import { AuditLog, AuditLogEvent } from "shared-types"
-import { AwsAuditLogDynamoGateway, decompress } from "shared"
-import { TestDynamoGateway } from "shared"
+import { auditLogDynamoConfig, auditLogLookupDynamoConfig } from "src/test/dynamoDbConfig"
+import { AwsAuditLogDynamoGateway, AwsAuditLogLookupDynamoGateway } from "../gateways/dynamo"
+import { TestDynamoGateway } from "../test"
 import CreateAuditLogEventUseCase from "./CreateAuditLogEventUseCase"
-import { AwsAuditLogLookupDynamoGateway } from "shared"
 import StoreValuesInLookupTableUseCase from "./StoreValuesInLookupTableUseCase"
-import type { KeyValuePair } from "shared-types"
-import { auditLogDynamoConfig, auditLogLookupDynamoConfig } from "shared-testing"
 
 const testAuditLogDynamoGateway = new TestDynamoGateway(auditLogDynamoConfig)
 const testAuditLogLookupDynamoGateway = new TestDynamoGateway(auditLogLookupDynamoConfig)

@@ -1,6 +1,7 @@
 import { logger } from "shared"
-import type { AuditLog, AuditLogDynamoGateway } from "shared-types"
+import type { AuditLog } from "shared-types"
 import { AuditLogStatus, isError } from "shared-types"
+import type { AuditLogDynamoGateway } from "../gateways/dynamo"
 import { isIsoDate } from "../utils"
 
 interface ValidationResult {

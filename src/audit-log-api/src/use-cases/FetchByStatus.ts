@@ -1,5 +1,7 @@
-import type { AuditLog, AuditLogDynamoGateway, FetchByStatusOptions, PromiseResult } from "shared-types"
+import type { AuditLog, PromiseResult } from "shared-types"
 import { isError } from "shared-types"
+import type { FetchByStatusOptions } from "src/types/queryParams"
+import type { AuditLogDynamoGateway } from "../gateways/dynamo"
 import getMessageById from "./getMessageById"
 import type MessageFetcher from "./MessageFetcher"
 

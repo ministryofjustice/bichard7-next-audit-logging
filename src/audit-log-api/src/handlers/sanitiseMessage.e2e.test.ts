@@ -6,12 +6,13 @@ import {
   createS3Config,
   HttpStatusCode,
   TestAwsS3Gateway,
-  TestDynamoGateway,
   TestPostgresGateway
 } from "shared"
-import { auditLogDynamoConfig, setEnvironmentVariables } from "shared-testing"
+import { setEnvironmentVariables } from "shared-testing"
 import { AuditLog, AuditLogEvent, AuditLogLookup, BichardAuditLogEvent } from "shared-types"
+import { auditLogDynamoConfig } from "src/test/dynamoDbConfig"
 import createBichardPostgresGatewayConfig from "../createBichardPostgresGatewayConfig"
+import { TestDynamoGateway } from "../test"
 
 setEnvironmentVariables()
 

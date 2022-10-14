@@ -1,18 +1,13 @@
 /* eslint-disable class-methods-use-this */
+import type { AuditLog, AuditLogEvent, PromiseResult } from "shared-types"
 import type {
-  AuditLog,
-  AuditLogDynamoGateway,
-  AuditLogEvent,
-  DynamoUpdate,
   FetchByStatusOptions,
-  FetchRangeOptions,
-  PromiseResult
-} from "shared-types"
-import type {
   FetchManyOptions,
+  FetchRangeOptions,
   FetchUnsanitisedOptions,
   ProjectionOptions
-} from "shared-types/build/AuditLogDynamoGateway"
+} from "src/types/queryParams"
+import type { AuditLogDynamoGateway, DynamoUpdate } from "../gateways/dynamo"
 
 export default class FakeAuditLogDynamoGateway implements AuditLogDynamoGateway {
   private messages: AuditLog[] = []

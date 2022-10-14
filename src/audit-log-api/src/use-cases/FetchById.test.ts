@@ -1,5 +1,5 @@
 import { AuditLog, isError } from "shared-types"
-import { FakeAuditLogDynamoGateway } from "shared-testing"
+import FakeAuditLogDynamoGateway from "src/test/FakeAuditLogDynamoGateway"
 import FetchById from "./FetchById"
 
 const gateway = new FakeAuditLogDynamoGateway()

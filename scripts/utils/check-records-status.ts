@@ -10,11 +10,11 @@
  *
  */
 
-import { Lambda } from "../../src/shared/node_modules/aws-sdk"
-import { AwsAuditLogDynamoGateway } from "../../src/shared/src/AuditLogDynamoGateway"
-import { isError } from "../../src/shared-types/src"
-import CalculateMessageStatusUseCase from "../../src/shared/src/AuditLogDynamoGateway/CalculateMessageStatusUseCase"
 import fs from "fs"
+import { AwsAuditLogDynamoGateway } from "../../src/audit-log-api/src/gateways/dynamo"
+import CalculateMessageStatusUseCase from "../../src/audit-log-api/src/gateways/dynamo/AuditLogDynamoGateway/CalculateMessageStatusUseCase"
+import { isError } from "../../src/shared-types/src"
+import { Lambda } from "../../src/shared/node_modules/aws-sdk"
 
 const { SOURCE_FILE, MESSAGE_ID, WORKSPACE } = process.env
 if (!WORKSPACE) {

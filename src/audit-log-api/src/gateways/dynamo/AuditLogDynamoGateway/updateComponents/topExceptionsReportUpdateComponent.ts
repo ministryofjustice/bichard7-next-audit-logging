@@ -1,6 +1,6 @@
 import type { AuditLogEvent } from "shared-types"
-import type { UpdateComponentsResult } from "../../utils/updateComponentTypes"
 import shouldLogForTopExceptionsReport from "../shouldLogForTopExceptionsReport"
+import type { UpdateComponentsResult } from "./types"
 
 export default (_: AuditLogEvent[], events: AuditLogEvent[]): UpdateComponentsResult => {
   const topExceptionsReportEvents = events.filter((event) => shouldLogForTopExceptionsReport(event))

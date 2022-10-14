@@ -1,11 +1,11 @@
 import type { DocumentClient, GetItemOutput } from "aws-sdk/clients/dynamodb"
-import { auditLogDynamoConfig } from "shared-testing"
 import type { TransactionFailedError } from "shared-types"
 import { isError } from "shared-types"
+import { auditLogDynamoConfig } from "src/test/dynamoDbConfig"
+import TestDynamoGateway from "../../../test/TestDynamoGateway"
 import DynamoGateway from "./DynamoGateway"
 import type FetchByIndexOptions from "./FetchByIndexOptions"
 import type GetManyOptions from "./GetManyOptions"
-import TestDynamoGateway from "./TestDynamoGateway"
 import type UpdateOptions from "./UpdateOptions"
 
 auditLogDynamoConfig.TABLE_NAME = "DynamoGatewayTesting"

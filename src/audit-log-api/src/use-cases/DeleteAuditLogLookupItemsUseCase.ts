@@ -1,4 +1,5 @@
-import type { AuditLogLookupDynamoGateway, PromiseResult } from "shared-types"
+import type { PromiseResult } from "shared-types"
+import type { AuditLogLookupDynamoGateway } from "../gateways/dynamo"
 
 export default class DeleteAuditLogLookupItemsUseCase {
   constructor(private readonly awsAuditLogLookupDynamoGateway: AuditLogLookupDynamoGateway) {}

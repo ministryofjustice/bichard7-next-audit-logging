@@ -1,8 +1,8 @@
 jest.retryTimes(10)
-import { auditLogDynamoConfig } from "shared-testing"
 import { isError } from "shared-types"
+import { auditLogDynamoConfig } from "src/test/dynamoDbConfig"
+import TestDynamoGateway from "../../../test/TestDynamoGateway"
 import IndexSearcher from "./IndexSearcher"
-import TestDynamoGateway from "./TestDynamoGateway"
 
 interface TestRecord {
   id: string

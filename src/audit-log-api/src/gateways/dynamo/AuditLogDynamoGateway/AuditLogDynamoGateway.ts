@@ -1,4 +1,5 @@
-import type { AuditLog, AuditLogEvent, DynamoUpdate, PromiseResult } from "."
+import type { AuditLog, AuditLogEvent, PromiseResult } from "shared-types"
+import type DynamoUpdate from "../DynamoGateway/DynamoUpdate"
 
 export type PaginationOptions = {
   limit?: number

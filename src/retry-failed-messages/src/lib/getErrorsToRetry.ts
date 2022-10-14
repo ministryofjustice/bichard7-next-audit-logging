@@ -1,6 +1,6 @@
+import type { AuditLogApiClient } from "shared"
 import type { AuditLog, PromiseResult } from "shared-types"
 import { isError } from "shared-types"
-import type { AuditLogApiClient } from "shared"
 import shouldRetry from "./shouldRetry"
 
 export default async function (apiClient: AuditLogApiClient, errorCount: number): PromiseResult<AuditLog[]> {

@@ -14,14 +14,14 @@
  *
  */
 
-import { SSM, Lambda } from "../../src/shared/node_modules/aws-sdk"
-import { AwsAuditLogDynamoGateway } from "../../src/shared/src/AuditLogDynamoGateway"
-import { AwsS3Gateway } from "../../src/shared/src/S3"
-import { StompitMqGateway } from "../../src/shared/src/Mq"
+import fs from "fs"
+import { AwsAuditLogDynamoGateway } from "../../src/audit-log-api/src/gateways/dynamo"
+import transformMessageXml from "../../src/incoming-message-handler/src/use-cases/transformMessageXml"
 import type { AuditLog } from "../../src/shared-types/src"
 import { isError } from "../../src/shared-types/src"
-import transformMessageXml from "../../src/incoming-message-handler/src/use-cases/transformMessageXml"
-import fs from "fs"
+import { Lambda, SSM } from "../../src/shared/node_modules/aws-sdk"
+import { StompitMqGateway } from "../../src/shared/src/Mq"
+import { AwsS3Gateway } from "../../src/shared/src/S3"
 
 const { SOURCE_FILE, MESSAGE_ID, SESSION, WORKSPACE } = process.env
 if (!WORKSPACE) {

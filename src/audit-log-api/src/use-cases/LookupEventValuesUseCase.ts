@@ -1,5 +1,6 @@
-import type { AuditLogEvent, AuditLogLookupDynamoGateway, KeyValuePair, PromiseResult, ValueLookup } from "shared-types"
+import type { AuditLogEvent, KeyValuePair, PromiseResult, ValueLookup } from "shared-types"
 import { isError } from "shared-types"
+import type { AuditLogLookupDynamoGateway } from "../gateways/dynamo"
 
 export default class LookupEventValuesUseCase {
   constructor(private lookupGateway: AuditLogLookupDynamoGateway) {}

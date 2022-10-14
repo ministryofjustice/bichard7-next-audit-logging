@@ -1,23 +1,20 @@
 import { addDays } from "date-fns"
 import maxBy from "lodash.maxby"
+import type { AuditLog, AuditLogEvent, KeyValuePair, PromiseResult } from "shared-types"
+import { EventType, isError } from "shared-types"
 import type {
-  AuditLog,
-  AuditLogDynamoGateway,
-  AuditLogEvent,
-  DynamoDbConfig,
-  DynamoUpdate,
   FetchByStatusOptions,
+  FetchManyOptions,
   FetchRangeOptions,
   FetchUnsanitisedOptions,
-  KeyValuePair,
-  PromiseResult
-} from "shared-types"
-import { EventType, isError } from "shared-types"
-import type { FetchManyOptions, ProjectionOptions } from "shared-types/build/AuditLogDynamoGateway"
+  ProjectionOptions
+} from "src/types/queryParams"
 import type { FetchByIndexOptions, UpdateOptions } from "../DynamoGateway"
 import { DynamoGateway, IndexSearcher, KeyComparison } from "../DynamoGateway"
+import type DynamoDbConfig from "../DynamoGateway/DynamoDbConfig"
 import type { Projection } from "../DynamoGateway/DynamoGateway"
-import type { UpdateComponent } from "../utils/updateComponentTypes"
+import type DynamoUpdate from "../DynamoGateway/DynamoUpdate"
+import type AuditLogDynamoGateway from "./AuditLogDynamoGateway"
 import CalculateMessageStatusUseCase from "./CalculateMessageStatusUseCase"
 import {
   archivalUpdateComponent,
@@ -28,6 +25,7 @@ import {
   statusUpdateComponent,
   topExceptionsReportUpdateComponent
 } from "./updateComponents"
+import type { UpdateComponent } from "./updateComponents/types"
 
 export default class AwsAuditLogDynamoGateway extends DynamoGateway implements AuditLogDynamoGateway {
   private readonly tableKey: string = "messageId"

@@ -1,4 +1,5 @@
-import type { AuditLog, AuditLogDynamoGateway } from "shared-types"
+import type { AuditLog } from "shared-types"
+import type { AuditLogDynamoGateway } from "../gateways/dynamo"
 import validateCreateAuditLog from "./validateCreateAuditLog"
 
 interface ValidationResult {

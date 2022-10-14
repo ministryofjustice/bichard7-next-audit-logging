@@ -27,9 +27,14 @@
   },
   "homepage": "https://github.com/ministryofjustice/bichard7-next-services#readme",
   "dependencies": {
+    "@types/lodash.maxby": "^4.6.7",
+    "@types/lodash.minby": "^4.6.7",
     "aws-lambda": "^1.0.7",
+    "aws-sdk": "^2.1232.0",
     "axios": "^1.1.2",
     "date-fns": "^2.29.3",
+    "lodash.maxby": "^4.6.0",
+    "lodash.minby": "^4.6.0",
     "shared": "file:../shared",
     "shared-types": "file:../shared-types",
     "uuid": "^9.0.0"
