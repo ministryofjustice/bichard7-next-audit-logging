@@ -8,7 +8,7 @@ export default class FetchEventsUseCase {
     private readonly lookupEventValuesUseCase: LookupEventValuesUseCase
   ) {}
 
-  async get(messageId: string, largeObjects = true): PromiseResult<AuditLogEvent[]> {
+  async get(messageId: string, fetchLargeObjects = true): PromiseResult<AuditLogEvent[]> {
     const fetchedEvents = await this.gateway.fetchEvents(messageId)
 
     if (isError(fetchedEvents)) {
@@ -17,7 +17,7 @@ export default class FetchEventsUseCase {
 
     const events = []
     for (const fetchedEvent of fetchedEvents) {
-      if (largeObjects) {
+      if (fetchLargeObjects) {
         const lookupEventResult = await this.lookupEventValuesUseCase.execute(fetchedEvent)
 
         if (isError(lookupEventResult)) {

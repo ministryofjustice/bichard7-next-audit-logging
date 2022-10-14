@@ -39,6 +39,10 @@ log1.caseId = "123"
 const log2 = new AuditLog("2", new Date(2021, 10, 13), "Dummy hash 2")
 log2.caseId = "456"
 
+beforeEach(() => {
+  jest.resetAllMocks()
+})
+
 test("should respond with a list of messages", async () => {
   mockCreateMessageFetcher.mockReturnValue(createDummyMessageFetcher([log1, log2]))
 
@@ -144,4 +148,37 @@ test("should return a single message when the externalCorrelationId is given and
   expect(actualMessage.externalCorrelationId).toBe(log1.externalCorrelationId)
   expect(actualMessage.caseId).toBe(log1.caseId)
   expect(actualMessage.receivedDate).toBe(log1.receivedDate)
+})
+
+test("should look up message values if fetchLargeMessages param is true", async () => {
+  mockCreateMessageFetcher.mockReturnValue(createDummyMessageFetcher(log1))
+  const lookupMessageValuesUseCaseSpy = jest.spyOn(LookupMessageValuesUseCase.prototype, "execute")
+
+  const event = createEvent(undefined, { externalCorrelationId: "SomeExternalCorrelationId" })
+  await getMessages(event)
+
+  expect(lookupMessageValuesUseCaseSpy).toHaveBeenCalledTimes(1)
+})
+
+test("should look up message values if fetchLargeMessages param is undefined", async () => {
+  mockCreateMessageFetcher.mockReturnValue(createDummyMessageFetcher(log1))
+  const lookupMessageValuesUseCaseSpy = jest.spyOn(LookupMessageValuesUseCase.prototype, "execute")
+
+  const eventWithLargeObjectsParam = createEvent(undefined, {
+    externalCorrelationId: "SomeExternalCorrelationId",
+    largeObjects: "true"
+  })
+  await getMessages(eventWithLargeObjectsParam)
+
+  expect(lookupMessageValuesUseCaseSpy).toHaveBeenCalledTimes(1)
+})
+
+test("should not look up message values if fetchLargeMessages param is false", async () => {
+  mockCreateMessageFetcher.mockReturnValue(createDummyMessageFetcher(log1))
+  const lookupMessageValuesUseCaseSpy = jest.spyOn(LookupMessageValuesUseCase.prototype, "execute")
+
+  const event = createEvent(undefined, { externalCorrelationId: "SomeExternalCorrelationId", largeObjects: "false" })
+  await getMessages(event)
+
+  expect(lookupMessageValuesUseCaseSpy).toHaveBeenCalledTimes(0)
 })
