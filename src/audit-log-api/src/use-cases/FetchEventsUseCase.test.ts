@@ -42,7 +42,7 @@ describe("FetchEventsUseCase", () => {
     expect(actualEvents[2].eventType).toBe("Event 3")
   })
 
-  it("should lookup the events values", async () => {
+  it("should lookup the events values by default", async () => {
     const message = new AuditLog("External correlation id", new Date(), "Dummy hash")
     const lookupItem = new AuditLogLookup("long value ".repeat(500), message.messageId)
     const eventWithLongAttributeValue = createAuditLogEvent("information", new Date("2021-06-15T10:12:13"), "Event 2")
@@ -74,6 +74,35 @@ describe("FetchEventsUseCase", () => {
     expect(event2Attributes).toStrictEqual({
       attr1: "short value",
       attr2: lookupItem.value
+    })
+  })
+
+  it("should return the lookup id with the events if largeObjects set to false", async () => {
+    const message = new AuditLog("External correlation id", new Date(), "Dummy hash")
+    const lookupItemId = "exp3ct3d-100kup-1d"
+    const eventWithLongAttributeValue = createAuditLogEvent("information", new Date("2021-06-15T10:12:13"), "Event")
+    eventWithLongAttributeValue.addAttribute("attr1", "short value")
+    eventWithLongAttributeValue.addAttribute("attr2", { valueLookup: lookupItemId })
+
+    const expectedEvents = [eventWithLongAttributeValue]
+    message.events = expectedEvents
+
+    auditLogGateway.reset([message])
+
+    const fetchLargeObjects = false
+    const result = await useCase.get(message.messageId, fetchLargeObjects)
+
+    expect(isError(result)).toBe(false)
+
+    const actualEvents = <AuditLogEvent[]>result
+
+    expect(actualEvents).toHaveLength(1)
+    expect(actualEvents[0].eventType).toBe("Event")
+
+    const eventAttributes = actualEvents[0].attributes
+    expect(eventAttributes).toStrictEqual({
+      attr1: "short value",
+      attr2: { valueLookup: lookupItemId }
     })
   })
 

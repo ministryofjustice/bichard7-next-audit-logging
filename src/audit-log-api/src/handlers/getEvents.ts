@@ -16,16 +16,19 @@ const lookupEventValuesUseCase = new LookupEventValuesUseCase(auditLogLookupGate
 const fetchEvents = new FetchEventsUseCase(auditLogGateway, lookupEventValuesUseCase)
 
 export default async function getEvents(event: APIGatewayProxyEvent): PromiseResult<APIGatewayProxyResult> {
-  const messageId = parseGetEventsRequest(event)
+  const getEventsProperties = parseGetEventsRequest(event)
 
-  if (isError(messageId)) {
+  if (isError(getEventsProperties)) {
     return createJsonApiResult({
       statusCode: HttpStatusCode.badRequest,
-      body: String(messageId)
+      body: String(getEventsProperties)
     })
   }
 
-  const result = await fetchEvents.get(messageId)
+  const { messageId, largeObjects } = getEventsProperties
+  const fetchLargeObjects = largeObjects === undefined || largeObjects === "true"
+
+  const result = await fetchEvents.get(messageId, fetchLargeObjects)
 
   if (isError(result)) {
     logger.error("Error creating audit log", result.message)
