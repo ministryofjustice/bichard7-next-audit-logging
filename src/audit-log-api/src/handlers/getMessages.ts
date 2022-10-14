@@ -7,7 +7,7 @@ import createAuditLogLookupDynamoDbConfig from "../createAuditLogLookupDynamoDbC
 import createMessageFetcher from "../use-cases/createMessageFetcher"
 import LookupEventValuesUseCase from "../use-cases/LookupEventValuesUseCase"
 import LookupMessageValuesUseCase from "../use-cases/LookupMessageValuesUseCase"
-import { createJsonApiResult } from "../utils"
+import { createJsonApiResult, shouldFetchLargeObjects } from "../utils"
 
 const auditLogConfig = createAuditLogDynamoDbConfig()
 const auditLogLookupConfig = createAuditLogLookupDynamoDbConfig()
@@ -18,6 +18,8 @@ const lookupMessageValuesUseCase = new LookupMessageValuesUseCase(lookupEventVal
 
 export default async function getMessages(event: APIGatewayProxyEvent): PromiseResult<APIGatewayProxyResult> {
   const messageFetcher = createMessageFetcher(event, auditLogGateway)
+  const fetchLargeObjects = shouldFetchLargeObjects(event.queryStringParameters?.largeObjects)
+
   if (isError(messageFetcher)) {
     logger.error(`Error fetching messages: ${messageFetcher.message}`)
     return createJsonApiResult({
@@ -48,17 +50,19 @@ export default async function getMessages(event: APIGatewayProxyEvent): PromiseR
     messages = [messageFetcherResult as AuditLog]
   }
 
-  for (let index = 0; index < messages.length; index++) {
-    const lookupMessageValuesResult = await lookupMessageValuesUseCase.execute(messages[index])
+  if (fetchLargeObjects) {
+    for (let index = 0; index < messages.length; index++) {
+      const lookupMessageValuesResult = await lookupMessageValuesUseCase.execute(messages[index])
 
-    if (isError(lookupMessageValuesResult)) {
-      return createJsonApiResult({
-        statusCode: HttpStatusCode.internalServerError,
-        body: String(lookupMessageValuesResult)
-      })
+      if (isError(lookupMessageValuesResult)) {
+        return createJsonApiResult({
+          statusCode: HttpStatusCode.internalServerError,
+          body: String(lookupMessageValuesResult)
+        })
+      }
+
+      messages[index] = lookupMessageValuesResult
     }
-
-    messages[index] = lookupMessageValuesResult
   }
 
   return createJsonApiResult({

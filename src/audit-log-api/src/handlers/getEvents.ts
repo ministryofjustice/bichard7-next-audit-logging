@@ -25,8 +25,7 @@ export default async function getEvents(event: APIGatewayProxyEvent): PromiseRes
     })
   }
 
-  const { messageId, largeObjects } = getEventsProperties
-  const fetchLargeObjects = largeObjects === undefined || largeObjects === "true"
+  const { messageId, fetchLargeObjects } = getEventsProperties
 
   const result = await fetchEvents.get(messageId, fetchLargeObjects)
 
