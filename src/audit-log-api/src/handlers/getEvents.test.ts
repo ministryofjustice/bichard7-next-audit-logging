@@ -34,6 +34,8 @@ log.events = [
 
 test("should respond with a list of events when message id exists and message has events", async () => {
   jest.spyOn(FetchEventsUseCase.prototype, "get").mockResolvedValue(log.events)
+  const mockParseGetEventsRequest = parseGetEventsRequest as jest.MockedFunction<typeof parseGetEventsRequest>
+  mockParseGetEventsRequest.mockReturnValue({ messageId: "Message Id" })
 
   const proxyEvent = createProxyEvent("Message Id")
   const response = await getEvents(proxyEvent)
@@ -64,7 +66,7 @@ test("should respond with bad request status when there is a validation error", 
 test("should respond with internal server error status when there is an error with fetching events", async () => {
   const error = new Error("Test Error")
   const mockParseGetEventsRequest = parseGetEventsRequest as jest.MockedFunction<typeof parseGetEventsRequest>
-  mockParseGetEventsRequest.mockReturnValue("Message Id")
+  mockParseGetEventsRequest.mockReturnValue({ messageId: "Message Id" })
   jest.spyOn(FetchEventsUseCase.prototype, "get").mockResolvedValue(error)
 
   const proxyEvent = createProxyEvent()

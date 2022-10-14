@@ -1,5 +1,6 @@
 import { isError } from "shared-types"
 import type { APIGatewayProxyEvent } from "aws-lambda"
+import type { GetEventsProperties } from "shared-types"
 import parseGetEventsRequest from "./parseGetEventsRequest"
 
 describe("parseGetEventsRequest()", () => {
@@ -10,10 +11,10 @@ describe("parseGetEventsRequest()", () => {
         messageId: expectedMessageId
       }
     })
-    const actualMessageId = parseGetEventsRequest(proxyEvent)
+    const eventRequestParams = parseGetEventsRequest(proxyEvent) as GetEventsProperties
 
-    expect(isError(actualMessageId)).toBe(false)
-    expect(actualMessageId).toBe(expectedMessageId)
+    expect(isError(eventRequestParams)).toBe(false)
+    expect(eventRequestParams.messageId).toBe(expectedMessageId)
   })
 
   it("should return error when messageId does not exist in the path", () => {
