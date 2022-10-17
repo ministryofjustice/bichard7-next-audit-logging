@@ -1,7 +1,7 @@
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda"
 import type { Duration } from "date-fns"
 import { add } from "date-fns"
-import { AwsBichardPostgresGateway, S3Gateway, createS3Config, HttpStatusCode } from "shared"
+import { BichardPostgresGateway, createS3Config, HttpStatusCode, S3Gateway } from "shared"
 import type { AuditLog } from "shared-types"
 import { isError } from "shared-types"
 import createAuditLogDynamoDbConfig from "../createAuditLogDynamoDbConfig"
@@ -24,7 +24,7 @@ const auditLogLookupDynamoGateway = new AwsAuditLogLookupDynamoGateway(
   auditLogLookupDynamoDbConfig.TABLE_NAME
 )
 const postgresConfig = createBichardPostgresGatewayConfig()
-const awsBichardPostgresGateway = new AwsBichardPostgresGateway(postgresConfig)
+const awsBichardPostgresGateway = new BichardPostgresGateway(postgresConfig)
 const awsMessagesS3Gateway = new S3Gateway(createS3Config("INTERNAL_INCOMING_MESSAGES_BUCKET"))
 const awsEventsS3Gateway = new S3Gateway(createS3Config("AUDIT_LOG_EVENTS_BUCKET"))
 const deleteMessageObjectsFromS3UseCase = new DeleteMessageObjectsFromS3UseCase(

@@ -1,8 +1,8 @@
-import type { BichardPostgresGateway, PromiseResult } from "shared-types"
+import type { PromiseResult } from "shared-types"
 import { isError } from "shared-types"
 import PostgresGateway from "../PostgresGateway/PostgresGateway"
 
-export default class AwsBichardPostgresGateway extends PostgresGateway implements BichardPostgresGateway {
+export default class BichardPostgresGateway extends PostgresGateway {
   async deleteArchivedErrors(messageId: string): PromiseResult<void> {
     const result = await this.query(`DELETE FROM br7own.archive_error_list WHERE message_id=$1`, [messageId])
     if (isError(result)) {
