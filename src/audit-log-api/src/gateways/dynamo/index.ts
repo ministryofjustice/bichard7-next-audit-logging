@@ -1,6 +1,6 @@
-export * from "./AuditLogDynamoGateway/AuditLogDynamoGateway"
 export { default as AuditLogDynamoGateway } from "./AuditLogDynamoGateway/AuditLogDynamoGateway"
-export { default as AwsAuditLogDynamoGateway } from "./AuditLogDynamoGateway/AwsAuditLogDynamoGateway"
+export * from "./AuditLogDynamoGateway/AuditLogDynamoGatewayInterface"
+export { default as AuditLogDynamoGatewayInterface } from "./AuditLogDynamoGateway/AuditLogDynamoGatewayInterface"
 export { parseForceOwner } from "./AuditLogDynamoGateway/getForceOwner"
 export { default as AuditLogLookupDynamoGateway } from "./AuditLogLookupDynamoGateway/AuditLogLookupDynamoGateway"
 export { default as AwsAuditLogLookupDynamoGateway } from "./AuditLogLookupDynamoGateway/AwsAuditLogLookupDynamoGateway"

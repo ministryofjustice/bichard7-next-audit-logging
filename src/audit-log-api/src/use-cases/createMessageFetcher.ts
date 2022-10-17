@@ -1,5 +1,5 @@
 import type { APIGatewayProxyEvent } from "aws-lambda"
-import type { AuditLogDynamoGateway } from "../gateways/dynamo"
+import type { AuditLogDynamoGatewayInterface } from "../gateways/dynamo"
 import FetchAll from "./FetchAll"
 import FetchAutomationReport from "./FetchAutomationReport"
 import FetchByExternalCorrelationId from "./FetchByExternalCorrelationId"
@@ -11,7 +11,7 @@ import type MessageFetcher from "./MessageFetcher"
 
 const createMessageFetcher = (
   event: APIGatewayProxyEvent,
-  auditLogGateway: AuditLogDynamoGateway
+  auditLogGateway: AuditLogDynamoGatewayInterface
 ): MessageFetcher | Error => {
   const messageId = event.pathParameters?.messageId
   const externalCorrelationId = event.queryStringParameters?.externalCorrelationId

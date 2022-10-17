@@ -9,9 +9,9 @@ import { auditLogDynamoConfig } from "src/test/dynamoDbConfig"
 import TestDynamoGateway from "../../../test/TestDynamoGateway"
 import type DynamoUpdate from "../DynamoGateway/DynamoUpdate"
 import isConditionalExpressionViolationError from "../DynamoGateway/isConditionalExpressionViolationError"
-import AwsAuditLogDynamoGateway from "./AwsAuditLogDynamoGateway"
+import AuditLogDynamoGateway from "./AuditLogDynamoGateway"
 
-const gateway = new AwsAuditLogDynamoGateway(auditLogDynamoConfig, auditLogDynamoConfig.TABLE_NAME)
+const gateway = new AuditLogDynamoGateway(auditLogDynamoConfig, auditLogDynamoConfig.TABLE_NAME)
 const testGateway = new TestDynamoGateway(auditLogDynamoConfig)
 const primaryKey = "messageId"
 const sortKey = "receivedDate"

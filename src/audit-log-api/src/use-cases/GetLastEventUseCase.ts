@@ -1,11 +1,11 @@
 import type { BichardAuditLogEvent, PromiseResult } from "shared-types"
 import { isError } from "shared-types"
-import type { AuditLogDynamoGateway } from "../gateways/dynamo"
+import type { AuditLogDynamoGatewayInterface } from "../gateways/dynamo"
 import type LookupEventValuesUseCase from "./LookupEventValuesUseCase"
 
 export default class GetLastFailedMessageEventUseCase {
   constructor(
-    private readonly auditLogDynamoGateway: AuditLogDynamoGateway,
+    private readonly auditLogDynamoGateway: AuditLogDynamoGatewayInterface,
     private readonly lookupEventValues: LookupEventValuesUseCase
   ) {}
 

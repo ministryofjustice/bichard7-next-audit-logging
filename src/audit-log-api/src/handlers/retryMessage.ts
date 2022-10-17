@@ -1,18 +1,18 @@
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda"
 import {
   AuditLogApiClient,
-  S3Gateway,
   createMqConfig,
   createS3Config,
   HttpStatusCode,
   logger,
+  S3Gateway,
   StompitMqGateway
 } from "shared"
 import type { PromiseResult } from "shared-types"
 import { isError } from "shared-types"
 import createAuditLogDynamoDbConfig from "../createAuditLogDynamoDbConfig"
 import createAuditLogLookupDynamoDbConfig from "../createAuditLogLookupDynamoDbConfig"
-import { AwsAuditLogDynamoGateway, AwsAuditLogLookupDynamoGateway } from "../gateways/dynamo"
+import { AuditLogDynamoGateway, AwsAuditLogLookupDynamoGateway } from "../gateways/dynamo"
 import getApiKey from "../getApiKey"
 import getApiUrl from "../getApiUrl"
 import { parseRetryMessageRequest, RetryMessageUseCase } from "../use-cases"
@@ -24,7 +24,7 @@ import SendMessageToQueueUseCase from "../use-cases/SendMessageToQueueUseCase"
 import { createJsonApiResult } from "../utils"
 
 const auditLogGatewayConfig = createAuditLogDynamoDbConfig()
-const auditLogGateway = new AwsAuditLogDynamoGateway(auditLogGatewayConfig, auditLogGatewayConfig.TABLE_NAME)
+const auditLogGateway = new AuditLogDynamoGateway(auditLogGatewayConfig, auditLogGatewayConfig.TABLE_NAME)
 const auditLogLookupGatewayConfig = createAuditLogLookupDynamoDbConfig()
 const auditLogLookupGateway = new AwsAuditLogLookupDynamoGateway(
   auditLogLookupGatewayConfig,

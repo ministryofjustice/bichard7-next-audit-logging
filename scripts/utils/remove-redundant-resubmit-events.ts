@@ -15,7 +15,7 @@
  */
 
 import fs from "fs"
-import { AwsAuditLogDynamoGateway } from "../../src/audit-log-api/src/gateways/dynamo"
+import { AuditLogDynamoGateway } from "../../src/audit-log-api/src/gateways/dynamo"
 import { isError } from "../../src/shared-types/src"
 import { Lambda } from "../../src/shared/node_modules/aws-sdk"
 
@@ -62,7 +62,7 @@ async function setup() {
 }
 
 async function run() {
-  const dynamo = new AwsAuditLogDynamoGateway(dynamoConfig, dynamoConfig.TABLE_NAME)
+  const dynamo = new AuditLogDynamoGateway(dynamoConfig, dynamoConfig.TABLE_NAME)
 
   try {
     for (const id of messageIds) {

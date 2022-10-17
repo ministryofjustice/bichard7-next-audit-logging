@@ -15,7 +15,7 @@
  */
 
 import fs from "fs"
-import { AwsAuditLogDynamoGateway } from "../../src/audit-log-api/src/gateways/dynamo"
+import { AuditLogDynamoGateway } from "../../src/audit-log-api/src/gateways/dynamo"
 import transformMessageXml from "../../src/incoming-message-handler/src/use-cases/transformMessageXml"
 import type { AuditLog } from "../../src/shared-types/src"
 import { isError } from "../../src/shared-types/src"
@@ -125,7 +125,7 @@ async function setup() {
 }
 
 async function rerunMessages() {
-  const dynamo = new AwsAuditLogDynamoGateway(dynamoConfig, dynamoConfig.TABLE_NAME)
+  const dynamo = new AuditLogDynamoGateway(dynamoConfig, dynamoConfig.TABLE_NAME)
   const s3 = new S3Gateway(s3Config)
   const mq = new StompitMqGateway(mqConfig)
 

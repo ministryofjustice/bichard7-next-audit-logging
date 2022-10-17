@@ -1,9 +1,9 @@
 import type { AuditLog, PromiseResult } from "shared-types"
 import { isError } from "shared-types"
-import type { AuditLogDynamoGateway } from "../gateways/dynamo"
+import type { AuditLogDynamoGatewayInterface } from "../gateways/dynamo"
 
 const getMessageById = async (
-  gateway: AuditLogDynamoGateway,
+  gateway: AuditLogDynamoGatewayInterface,
   messageId?: string
 ): PromiseResult<AuditLog | undefined> => {
   if (!messageId) {

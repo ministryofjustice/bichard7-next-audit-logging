@@ -7,9 +7,9 @@ import type {
   FetchUnsanitisedOptions,
   ProjectionOptions
 } from "src/types/queryParams"
-import type { AuditLogDynamoGateway, DynamoUpdate } from "../gateways/dynamo"
+import type { AuditLogDynamoGatewayInterface, DynamoUpdate } from "../gateways/dynamo"
 
-export default class FakeAuditLogDynamoGateway implements AuditLogDynamoGateway {
+export default class FakeAuditLogDynamoGateway implements AuditLogDynamoGatewayInterface {
   private messages: AuditLog[] = []
 
   private error?: Error

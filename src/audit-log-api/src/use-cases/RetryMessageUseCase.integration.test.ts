@@ -3,7 +3,7 @@ import "shared-testing"
 import { auditLogEventsS3Config } from "shared-testing"
 import type { MqConfig } from "shared-types"
 import { AuditLog, AuditLogLookup, BichardAuditLogEvent } from "shared-types"
-import { AwsAuditLogDynamoGateway, AwsAuditLogLookupDynamoGateway } from "../gateways/dynamo"
+import { AuditLogDynamoGateway, AwsAuditLogLookupDynamoGateway } from "../gateways/dynamo"
 import { auditLogDynamoConfig, TestDynamoGateway } from "../test"
 import CreateRetryingEventUseCase from "./CreateRetryingEventUseCase"
 import GetLastFailedMessageEventUseCase from "./GetLastEventUseCase"
@@ -15,7 +15,7 @@ import SendMessageToQueueUseCase from "./SendMessageToQueueUseCase"
 const auditLogTableName = "auditLogTable"
 const auditLogLookupTableName = "auditLogLookupTable"
 const testDynamoGateway = new TestDynamoGateway(auditLogDynamoConfig)
-const auditLogDynamoGateway = new AwsAuditLogDynamoGateway(auditLogDynamoConfig, auditLogTableName)
+const auditLogDynamoGateway = new AuditLogDynamoGateway(auditLogDynamoConfig, auditLogTableName)
 const auditLogLookupDynamoGateway = new AwsAuditLogLookupDynamoGateway(auditLogDynamoConfig, auditLogLookupTableName)
 const lookupEventValuesUseCase = new LookupEventValuesUseCase(auditLogLookupDynamoGateway)
 const getLastEventUseCase = new GetLastFailedMessageEventUseCase(auditLogDynamoGateway, lookupEventValuesUseCase)

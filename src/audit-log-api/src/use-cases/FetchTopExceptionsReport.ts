@@ -1,12 +1,12 @@
 import type { AuditLog, PromiseResult } from "shared-types"
 import { isError } from "shared-types"
 import type { FetchReportOptions } from "src/types/queryParams"
-import type { AuditLogDynamoGateway } from "../gateways/dynamo"
+import type { AuditLogDynamoGatewayInterface } from "../gateways/dynamo"
 import getMessageById from "./getMessageById"
 import type MessageFetcher from "./MessageFetcher"
 
 export default class FetchTopExceptionsReport implements MessageFetcher {
-  constructor(private readonly gateway: AuditLogDynamoGateway, private readonly options: FetchReportOptions) {}
+  constructor(private readonly gateway: AuditLogDynamoGatewayInterface, private readonly options: FetchReportOptions) {}
 
   async fetch(): PromiseResult<AuditLog[]> {
     const lastMessage = await getMessageById(this.gateway, this.options.lastMessageId)

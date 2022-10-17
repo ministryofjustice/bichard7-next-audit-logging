@@ -2,14 +2,14 @@ import { decompress } from "shared"
 import type { AuditLogLookup, KeyValuePair } from "shared-types"
 import { AuditLog, AuditLogEvent } from "shared-types"
 import { auditLogDynamoConfig, auditLogLookupDynamoConfig } from "src/test/dynamoDbConfig"
-import { AwsAuditLogDynamoGateway, AwsAuditLogLookupDynamoGateway } from "../gateways/dynamo"
+import { AuditLogDynamoGateway, AwsAuditLogLookupDynamoGateway } from "../gateways/dynamo"
 import { TestDynamoGateway } from "../test"
 import CreateAuditLogEventsUseCase from "./CreateAuditLogEventsUseCase"
 import StoreValuesInLookupTableUseCase from "./StoreValuesInLookupTableUseCase"
 
 const testAuditLogDynamoGateway = new TestDynamoGateway(auditLogDynamoConfig)
 const testAuditLogLookupDynamoGateway = new TestDynamoGateway(auditLogLookupDynamoConfig)
-const auditLogDynamoGateway = new AwsAuditLogDynamoGateway(auditLogDynamoConfig, auditLogDynamoConfig.TABLE_NAME)
+const auditLogDynamoGateway = new AuditLogDynamoGateway(auditLogDynamoConfig, auditLogDynamoConfig.TABLE_NAME)
 const auditLogLookupDynamoGateway = new AwsAuditLogLookupDynamoGateway(
   auditLogLookupDynamoConfig,
   auditLogLookupDynamoConfig.TABLE_NAME

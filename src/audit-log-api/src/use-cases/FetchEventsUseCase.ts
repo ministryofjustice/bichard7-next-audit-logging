@@ -1,11 +1,11 @@
 import type { AuditLogEvent, PromiseResult } from "shared-types"
 import { isError } from "shared-types"
-import type { AuditLogDynamoGateway } from "../gateways/dynamo"
+import type { AuditLogDynamoGatewayInterface } from "../gateways/dynamo"
 import type LookupEventValuesUseCase from "./LookupEventValuesUseCase"
 
 export default class FetchEventsUseCase {
   constructor(
-    private readonly gateway: AuditLogDynamoGateway,
+    private readonly gateway: AuditLogDynamoGatewayInterface,
     private readonly lookupEventValuesUseCase: LookupEventValuesUseCase
   ) {}
 

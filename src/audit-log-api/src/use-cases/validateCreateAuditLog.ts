@@ -1,7 +1,7 @@
 import { logger } from "shared"
 import type { AuditLog } from "shared-types"
 import { AuditLogStatus, isError } from "shared-types"
-import type { AuditLogDynamoGateway } from "../gateways/dynamo"
+import type { AuditLogDynamoGatewayInterface } from "../gateways/dynamo"
 import { isIsoDate } from "../utils"
 
 interface ValidationResult {
@@ -10,7 +10,7 @@ interface ValidationResult {
   auditLog: AuditLog
 }
 
-export default async (auditLog: AuditLog, dynamoGateway: AuditLogDynamoGateway): Promise<ValidationResult> => {
+export default async (auditLog: AuditLog, dynamoGateway: AuditLogDynamoGatewayInterface): Promise<ValidationResult> => {
   const errors: string[] = []
   let formattedReceivedDate = ""
   let formattedNextSanitiseCheck = ""

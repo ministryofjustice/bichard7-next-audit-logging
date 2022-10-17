@@ -1,6 +1,6 @@
 import type { AuditLog } from "shared-types"
 import { isError } from "shared-types"
-import type { AuditLogDynamoGateway } from "../gateways/dynamo"
+import type { AuditLogDynamoGatewayInterface } from "../gateways/dynamo"
 import { isConditionalExpressionViolationError } from "../gateways/dynamo"
 
 interface CreateAuditLogResult {
@@ -9,7 +9,7 @@ interface CreateAuditLogResult {
 }
 
 export default class CreateAuditLogUseCase {
-  constructor(private readonly auditLogGateway: AuditLogDynamoGateway) {}
+  constructor(private readonly auditLogGateway: AuditLogDynamoGatewayInterface) {}
 
   async create(auditLog: AuditLog): Promise<CreateAuditLogResult> {
     const result = await this.auditLogGateway.create(auditLog)
