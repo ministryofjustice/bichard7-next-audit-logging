@@ -20,7 +20,7 @@ import transformMessageXml from "../../src/incoming-message-handler/src/use-case
 import type { AuditLog } from "../../src/shared-types/src"
 import { isError } from "../../src/shared-types/src"
 import { Lambda, SSM } from "../../src/shared/node_modules/aws-sdk"
-import { StompitMqGateway } from "../../src/shared/src/Mq"
+import { MqGateway } from "../../src/shared/src/MqGateway"
 import { S3Gateway } from "../../src/shared/src/S3Gateway"
 
 const { SOURCE_FILE, MESSAGE_ID, SESSION, WORKSPACE } = process.env
@@ -127,7 +127,7 @@ async function setup() {
 async function rerunMessages() {
   const dynamo = new AuditLogDynamoGateway(dynamoConfig, dynamoConfig.TABLE_NAME)
   const s3 = new S3Gateway(s3Config)
-  const mq = new StompitMqGateway(mqConfig)
+  const mq = new MqGateway(mqConfig)
 
   const processedMessages = fs.readFileSync(sessionReranFile).toString()
   // get s3 paths from ids

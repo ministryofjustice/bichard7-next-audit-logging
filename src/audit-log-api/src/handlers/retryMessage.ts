@@ -1,13 +1,5 @@
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda"
-import {
-  AuditLogApiClient,
-  createMqConfig,
-  createS3Config,
-  HttpStatusCode,
-  logger,
-  S3Gateway,
-  StompitMqGateway
-} from "shared"
+import { AuditLogApiClient, createMqConfig, createS3Config, HttpStatusCode, logger, MqGateway, S3Gateway } from "shared"
 import type { PromiseResult } from "shared-types"
 import { isError } from "shared-types"
 import createAuditLogDynamoDbConfig from "../createAuditLogDynamoDbConfig"
@@ -32,7 +24,7 @@ const auditLogLookupGateway = new AwsAuditLogLookupDynamoGateway(
 )
 
 const mqGatewayConfig = createMqConfig()
-const mqGateway = new StompitMqGateway(mqGatewayConfig)
+const mqGateway = new MqGateway(mqGatewayConfig)
 const sendMessageToQueueUseCase = new SendMessageToQueueUseCase(mqGateway)
 
 const lookupEventValuesUseCase = new LookupEventValuesUseCase(auditLogLookupGateway)

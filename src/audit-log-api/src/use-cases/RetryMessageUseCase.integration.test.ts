@@ -1,4 +1,4 @@
-import { AuditLogApiClient, encodeBase64, TestS3Gateway, TestStompitMqGateway } from "shared"
+import { AuditLogApiClient, encodeBase64, TestMqGateway, TestS3Gateway } from "shared"
 import "shared-testing"
 import { auditLogEventsS3Config } from "shared-testing"
 import type { MqConfig } from "shared-types"
@@ -26,7 +26,7 @@ const mqConfig: MqConfig = {
   username: "admin",
   password: "admin"
 }
-const mqGateway = new TestStompitMqGateway(mqConfig)
+const mqGateway = new TestMqGateway(mqConfig)
 const sendMessageToQueueUseCase = new SendMessageToQueueUseCase(mqGateway)
 
 const s3Gateway = new TestS3Gateway(auditLogEventsS3Config)

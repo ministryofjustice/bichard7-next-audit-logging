@@ -1,8 +1,7 @@
+import type { MqConfig, MqGatewayInterface, PromiseResult } from "shared-types"
+import { isError } from "shared-types"
 import type { Client, connect } from "stompit"
 import { ConnectFailover } from "stompit"
-import type { PromiseResult } from "shared-types"
-import { isError } from "shared-types"
-import type { MqConfig, MqGateway } from "shared-types"
 import deconstructServers from "./deconstructServers"
 
 const reconnectOptions: ConnectFailover.ConnectFailoverOptions = {
@@ -12,7 +11,7 @@ const reconnectOptions: ConnectFailover.ConnectFailoverOptions = {
   useExponentialBackOff: false
 }
 
-export default class StompitMqGateway implements MqGateway {
+export default class MqGateway implements MqGatewayInterface {
   private readonly connectionOptions: connect.ConnectOptions[]
 
   private client: Client | null

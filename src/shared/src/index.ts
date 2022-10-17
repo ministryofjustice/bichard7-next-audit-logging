@@ -1,6 +1,6 @@
 export * from "./AuditLogApiClient"
 export * from "./BichardPostgresGateway"
-export * from "./Mq"
+export * from "./MqGateway"
 export * from "./PostgresGateway"
 export * from "./S3Gateway"
 export * from "./utils"

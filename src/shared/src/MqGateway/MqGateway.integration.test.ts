@@ -1,8 +1,7 @@
 jest.retryTimes(10)
 import "shared-testing"
 import type { MqConfig } from "shared-types"
-import StompitMqGateway from "./StompitMqGateway"
-import TestStompitMqGateway from "./TestStompitMqGateway"
+import { MqGateway, TestMqGateway } from "."
 
 jest.setTimeout(30000)
 
@@ -13,10 +12,10 @@ const config: MqConfig = {
   password: "admin"
 }
 
-const gateway = new StompitMqGateway(config)
-const testGateway = new TestStompitMqGateway(config)
+const gateway = new MqGateway(config)
+const testGateway = new TestMqGateway(config)
 
-describe("StompitMqGateway", () => {
+describe("MqGateway", () => {
   afterAll(async () => {
     await gateway.dispose()
     await testGateway.dispose()
