@@ -21,7 +21,7 @@ import type { AuditLog } from "../../src/shared-types/src"
 import { isError } from "../../src/shared-types/src"
 import { Lambda, SSM } from "../../src/shared/node_modules/aws-sdk"
 import { StompitMqGateway } from "../../src/shared/src/Mq"
-import { AwsS3Gateway } from "../../src/shared/src/S3"
+import { S3Gateway } from "../../src/shared/src/S3Gateway"
 
 const { SOURCE_FILE, MESSAGE_ID, SESSION, WORKSPACE } = process.env
 if (!WORKSPACE) {
@@ -126,7 +126,7 @@ async function setup() {
 
 async function rerunMessages() {
   const dynamo = new AwsAuditLogDynamoGateway(dynamoConfig, dynamoConfig.TABLE_NAME)
-  const s3 = new AwsS3Gateway(s3Config)
+  const s3 = new S3Gateway(s3Config)
   const mq = new StompitMqGateway(mqConfig)
 
   const processedMessages = fs.readFileSync(sessionReranFile).toString()

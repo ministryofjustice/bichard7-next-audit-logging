@@ -1,15 +1,15 @@
 jest.retryTimes(10)
 import "shared-testing"
 import type { S3 } from "aws-sdk"
-import { AwsS3Gateway, TestAwsS3Gateway } from "shared"
+import { S3Gateway, TestS3Gateway } from "shared"
 
 import TransferMessagesUseCase from "./TransferMessagesUseCase"
 import type { TransferMessagesResult } from "./types"
 import { externalIncomingS3Config, internalIncomingS3Config } from "shared-testing"
 
-const gatewayA = new AwsS3Gateway(externalIncomingS3Config)
-const testGatewayA = new TestAwsS3Gateway(externalIncomingS3Config)
-const testGatewayB = new TestAwsS3Gateway(internalIncomingS3Config)
+const gatewayA = new S3Gateway(externalIncomingS3Config)
+const testGatewayA = new TestS3Gateway(externalIncomingS3Config)
+const testGatewayB = new TestS3Gateway(internalIncomingS3Config)
 const transferMessages = new TransferMessagesUseCase(gatewayA, testGatewayB.getBucketName())
 
 describe("TransferMessagesUseCase", () => {

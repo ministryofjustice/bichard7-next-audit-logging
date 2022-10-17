@@ -1,5 +1,5 @@
 // jest.retryTimes(10)
-import { TestAwsS3Gateway } from "shared"
+import { TestS3Gateway } from "shared"
 import "shared-testing"
 import {
   auditLogEventsS3Config,
@@ -21,7 +21,7 @@ import handler from "./index"
 const auditLogTableName = "auditLogTable"
 const auditLogLookupTableName = "auditLogLookupTable"
 
-const s3Gateway = new TestAwsS3Gateway(auditLogEventsS3Config)
+const s3Gateway = new TestS3Gateway(auditLogEventsS3Config)
 
 describe("Retry Failed Messages", () => {
   beforeEach(async () => {

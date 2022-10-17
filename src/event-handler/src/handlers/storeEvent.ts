@@ -1,6 +1,6 @@
 import { isError } from "shared-types"
 import type { S3PutObjectEvent } from "shared-types"
-import { AuditLogApiClient, AwsS3Gateway, createS3Config } from "shared"
+import { AuditLogApiClient, S3Gateway, createS3Config } from "shared"
 import translateEvent from "src/use-cases/translateEvent"
 import CreateEventUseCase from "src/use-cases/CreateEventUseCase"
 import RetrieveEventFromS3UseCase from "src/use-cases/RetrieveEventFromS3UseCase"
@@ -17,7 +17,7 @@ if (!apiKey) {
   throw new Error("API_KEY environment variable is not set")
 }
 
-const s3Gateway = new AwsS3Gateway(createS3Config())
+const s3Gateway = new S3Gateway(createS3Config())
 const doesS3ObjectExistUseCase = new DoesS3ObjectExist(s3Gateway)
 const retrieveEventFromS3UseCase = new RetrieveEventFromS3UseCase(s3Gateway)
 const api = new AuditLogApiClient(apiUrl, apiKey, 5_000)

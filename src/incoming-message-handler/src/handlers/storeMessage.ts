@@ -1,4 +1,4 @@
-import { AuditLogApiClient, AwsS3Gateway, createS3Config, logger } from "shared"
+import { AuditLogApiClient, S3Gateway, createS3Config, logger } from "shared"
 import type { AuditLog, S3PutObjectEvent } from "shared-types"
 import { isError } from "shared-types"
 import CreateAuditLogUseCase from "src/use-cases/CreateAuditLogUseCase"
@@ -24,7 +24,7 @@ interface StoreMessageValidationResult {
   s3Path: string
 }
 
-const s3Gateway = new AwsS3Gateway(createS3Config())
+const s3Gateway = new S3Gateway(createS3Config())
 const apiClient = new AuditLogApiClient(getApiUrl(), getApiKey())
 const createAuditLogUseCase = new CreateAuditLogUseCase(apiClient)
 

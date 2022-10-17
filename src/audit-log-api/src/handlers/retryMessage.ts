@@ -1,7 +1,7 @@
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda"
 import {
   AuditLogApiClient,
-  AwsS3Gateway,
+  S3Gateway,
   createMqConfig,
   createS3Config,
   HttpStatusCode,
@@ -38,8 +38,8 @@ const sendMessageToQueueUseCase = new SendMessageToQueueUseCase(mqGateway)
 const lookupEventValuesUseCase = new LookupEventValuesUseCase(auditLogLookupGateway)
 const getLastEventUseCase = new GetLastFailedMessageEventUseCase(auditLogGateway, lookupEventValuesUseCase)
 
-const awsS3Gateway = new AwsS3Gateway(createS3Config("AUDIT_LOG_EVENTS_BUCKET"))
-const retrieveEventXmlFromS3UseCase = new RetrieveEventXmlFromS3UseCase(awsS3Gateway)
+const s3Gateway = new S3Gateway(createS3Config("AUDIT_LOG_EVENTS_BUCKET"))
+const retrieveEventXmlFromS3UseCase = new RetrieveEventXmlFromS3UseCase(s3Gateway)
 
 const apiClient = new AuditLogApiClient(getApiUrl(), getApiKey())
 const createRetryingEventUseCase = new CreateRetryingEventUseCase(apiClient)

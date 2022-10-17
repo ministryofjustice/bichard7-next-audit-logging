@@ -1,6 +1,4 @@
-/* eslint-disable import/no-duplicates */
-import type { CreateBucketOutput, ObjectIdentifierList } from "aws-sdk/clients/s3"
-import type S3 from "aws-sdk/clients/s3"
+import type * as S3 from "aws-sdk/clients/s3"
 import S3Gateway from "./S3Gateway"
 
 export default class TestS3Gateway extends S3Gateway {
@@ -9,20 +7,33 @@ export default class TestS3Gateway extends S3Gateway {
     return !!buckets.Buckets?.find((bucket) => bucket.Name === bucketName)
   }
 
-  async createBucket(bucketName: string, skipIfExists = true): Promise<CreateBucketOutput | undefined> {
-    if (skipIfExists && (await this.bucketExists(bucketName))) {
+  async createBucket(skipIfExists = true): Promise<S3.CreateBucketOutput | undefined> {
+    if (skipIfExists && (await this.bucketExists(this.getBucketName()))) {
       return undefined
     }
 
     return this.client
       .createBucket({
-        Bucket: bucketName
+        Bucket: this.getBucketName()
       })
       .promise()
   }
 
+  getBucketName(): string {
+    if (!this.bucketName) {
+      throw new Error("Bucket name does not have value.")
+    }
+
+    return this.bucketName
+  }
+
+  forBucket(bucketName: string): S3Gateway {
+    this.bucketName = bucketName
+    return this
+  }
+
   async getAll(): Promise<S3.ObjectList | undefined> {
-    const { Contents } = await this.client.listObjects({ Bucket: this.bucketName }).promise()
+    const { Contents } = await this.client.listObjects({ Bucket: this.getBucketName() }).promise()
     return Contents
   }
 
@@ -30,9 +41,9 @@ export default class TestS3Gateway extends S3Gateway {
     const contents = await this.getAll()
 
     if (contents && contents.length > 0) {
-      const obj = <ObjectIdentifierList>contents.map(({ Key }) => ({ Key }))
+      const obj = <S3.Types.ObjectIdentifierList>contents.map(({ Key }) => ({ Key }))
       const params: S3.Types.DeleteObjectsRequest = {
-        Bucket: this.bucketName,
+        Bucket: this.getBucketName(),
         Delete: {
           Objects: obj
         }
@@ -53,7 +64,7 @@ export default class TestS3Gateway extends S3Gateway {
   }
 
   async getContent(key: string): Promise<string> {
-    const params: S3.Types.GetObjectRequest = { Bucket: this.bucketName, Key: key }
+    const params: S3.Types.GetObjectRequest = { Bucket: this.getBucketName(), Key: key }
     const content = await this.client.getObject(params).promise()
     return String(content.Body)
   }

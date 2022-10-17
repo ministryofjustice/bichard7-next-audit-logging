@@ -1,7 +1,7 @@
 jest.setTimeout(15000)
 
 import axios from "axios"
-import { encodeBase64, HttpStatusCode, TestAwsS3Gateway, TestStompitMqGateway } from "shared"
+import { encodeBase64, HttpStatusCode, TestS3Gateway, TestStompitMqGateway } from "shared"
 import { auditLogEventsS3Config } from "shared-testing"
 import type { MqConfig } from "shared-types"
 import { AuditLog, AuditLogLookup, BichardAuditLogEvent } from "shared-types"
@@ -16,7 +16,7 @@ const mqConfig: MqConfig = {
 
 const testAuditLogDynamoGateway = new TestDynamoGateway(auditLogDynamoConfig)
 const testAuditLogLookupDynamoGateway = new TestDynamoGateway(auditLogLookupDynamoConfig)
-const s3Gateway = new TestAwsS3Gateway(auditLogEventsS3Config)
+const s3Gateway = new TestS3Gateway(auditLogEventsS3Config)
 const testMqGateway = new TestStompitMqGateway(mqConfig)
 
 describe("retryMessage", () => {

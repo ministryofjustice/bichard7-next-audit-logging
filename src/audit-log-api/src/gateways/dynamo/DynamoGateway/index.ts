@@ -1,4 +1,3 @@
-export { default as TestDynamoGateway } from "../../../test/TestDynamoGateway"
 export { default as DynamoGateway } from "./DynamoGateway"
 export { default as FetchByIndexOptions } from "./FetchByIndexOptions"
 export { default as GetManyOptions } from "./GetManyOptions"

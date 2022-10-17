@@ -1,6 +1,6 @@
 import { isError } from "shared-types"
 import type { AmazonMqEventSourceRecordEvent, MessageFormat } from "shared-types"
-import { AwsS3Gateway, createS3Config } from "shared"
+import { S3Gateway, createS3Config } from "shared"
 import formatMessages from "./formatMessages"
 import StoreInS3UseCase from "./StoreInS3UseCase"
 
@@ -8,7 +8,7 @@ if (!process.env.MESSAGE_FORMAT) {
   throw new Error("MESSAGE_FORMAT is either unset or an unsupported value")
 }
 
-const s3Gateway = new AwsS3Gateway(createS3Config("EVENTS_BUCKET_NAME"))
+const s3Gateway = new S3Gateway(createS3Config("EVENTS_BUCKET_NAME"))
 const useCase = new StoreInS3UseCase(s3Gateway)
 
 export default async (event: AmazonMqEventSourceRecordEvent): Promise<void> => {

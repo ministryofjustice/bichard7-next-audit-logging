@@ -3,7 +3,7 @@ import "shared-testing"
 import { externalIncomingS3Config, internalIncomingS3Config, setEnvironmentVariables } from "shared-testing"
 setEnvironmentVariables()
 import type { S3 } from "aws-sdk"
-import { TestAwsS3Gateway } from "shared"
+import { TestS3Gateway } from "shared"
 import type { TransferMessagesInput, TransferMessagesResult } from "./types"
 
 process.env.EXTERNAL_INCOMING_MESSAGE_BUCKET_NAME = externalIncomingS3Config.bucketName
@@ -11,8 +11,8 @@ process.env.INTERNAL_INCOMING_MESSAGE_BUCKET_NAME = internalIncomingS3Config.buc
 
 import transferMessages from "."
 
-const internalGateway = new TestAwsS3Gateway(internalIncomingS3Config)
-const externalGateway = new TestAwsS3Gateway(externalIncomingS3Config)
+const internalGateway = new TestS3Gateway(internalIncomingS3Config)
+const externalGateway = new TestS3Gateway(externalIncomingS3Config)
 
 describe("Transfer Messages end-to-end", () => {
   beforeAll(async () => {

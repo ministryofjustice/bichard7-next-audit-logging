@@ -1,4 +1,4 @@
-import { AuditLogApiClient, encodeBase64, TestAwsS3Gateway, TestStompitMqGateway } from "shared"
+import { AuditLogApiClient, encodeBase64, TestS3Gateway, TestStompitMqGateway } from "shared"
 import "shared-testing"
 import { auditLogEventsS3Config } from "shared-testing"
 import type { MqConfig } from "shared-types"
@@ -29,7 +29,7 @@ const mqConfig: MqConfig = {
 const mqGateway = new TestStompitMqGateway(mqConfig)
 const sendMessageToQueueUseCase = new SendMessageToQueueUseCase(mqGateway)
 
-const s3Gateway = new TestAwsS3Gateway(auditLogEventsS3Config)
+const s3Gateway = new TestS3Gateway(auditLogEventsS3Config)
 const retrieveEventXmlFromS3UseCase = new RetrieveEventXmlFromS3UseCase(s3Gateway)
 
 const apiClient = new AuditLogApiClient("http://localhost:3010", "DUMMY")
