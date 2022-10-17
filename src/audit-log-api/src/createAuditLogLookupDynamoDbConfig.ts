@@ -1,4 +1,4 @@
-import type { DynamoDbConfig } from "shared-types"
+import type { DynamoDbConfig } from "./gateways/dynamo"
 
 export default function createAuditLogLookupDynamoDbConfig(): DynamoDbConfig {
   const { AWS_URL, AWS_REGION, AUDIT_LOG_LOOKUP_TABLE_NAME, DYNAMO_AWS_ACCESS_KEY_ID, DYNAMO_AWS_SECRET_ACCESS_KEY } =

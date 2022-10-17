@@ -1,30 +1,22 @@
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda"
+import { AuditLogApiClient, createMqConfig, createS3Config, HttpStatusCode, logger, MqGateway, S3Gateway } from "shared"
 import type { PromiseResult } from "shared-types"
 import { isError } from "shared-types"
-import {
-  AwsAuditLogDynamoGateway,
-  HttpStatusCode,
-  StompitMqGateway,
-  createMqConfig,
-  AuditLogApiClient,
-  logger
-} from "shared"
-import getApiUrl from "../getApiUrl"
-import getApiKey from "../getApiKey"
 import createAuditLogDynamoDbConfig from "../createAuditLogDynamoDbConfig"
+import createAuditLogLookupDynamoDbConfig from "../createAuditLogLookupDynamoDbConfig"
+import { AuditLogDynamoGateway, AwsAuditLogLookupDynamoGateway } from "../gateways/dynamo"
+import getApiKey from "../getApiKey"
+import getApiUrl from "../getApiUrl"
 import { parseRetryMessageRequest, RetryMessageUseCase } from "../use-cases"
-import { createJsonApiResult } from "../utils"
-import GetLastFailedMessageEventUseCase from "../use-cases/GetLastEventUseCase"
 import CreateRetryingEventUseCase from "../use-cases/CreateRetryingEventUseCase"
-import SendMessageToQueueUseCase from "../use-cases/SendMessageToQueueUseCase"
+import GetLastFailedMessageEventUseCase from "../use-cases/GetLastEventUseCase"
 import LookupEventValuesUseCase from "../use-cases/LookupEventValuesUseCase"
 import RetrieveEventXmlFromS3UseCase from "../use-cases/RetrieveEventXmlFromS3UseCase"
-import { AwsS3Gateway } from "shared"
-import { createS3Config, AwsAuditLogLookupDynamoGateway } from "shared"
-import createAuditLogLookupDynamoDbConfig from "../createAuditLogLookupDynamoDbConfig"
+import SendMessageToQueueUseCase from "../use-cases/SendMessageToQueueUseCase"
+import { createJsonApiResult } from "../utils"
 
 const auditLogGatewayConfig = createAuditLogDynamoDbConfig()
-const auditLogGateway = new AwsAuditLogDynamoGateway(auditLogGatewayConfig, auditLogGatewayConfig.TABLE_NAME)
+const auditLogGateway = new AuditLogDynamoGateway(auditLogGatewayConfig, auditLogGatewayConfig.TABLE_NAME)
 const auditLogLookupGatewayConfig = createAuditLogLookupDynamoDbConfig()
 const auditLogLookupGateway = new AwsAuditLogLookupDynamoGateway(
   auditLogLookupGatewayConfig,
@@ -32,14 +24,14 @@ const auditLogLookupGateway = new AwsAuditLogLookupDynamoGateway(
 )
 
 const mqGatewayConfig = createMqConfig()
-const mqGateway = new StompitMqGateway(mqGatewayConfig)
+const mqGateway = new MqGateway(mqGatewayConfig)
 const sendMessageToQueueUseCase = new SendMessageToQueueUseCase(mqGateway)
 
 const lookupEventValuesUseCase = new LookupEventValuesUseCase(auditLogLookupGateway)
 const getLastEventUseCase = new GetLastFailedMessageEventUseCase(auditLogGateway, lookupEventValuesUseCase)
 
-const awsS3Gateway = new AwsS3Gateway(createS3Config("AUDIT_LOG_EVENTS_BUCKET"))
-const retrieveEventXmlFromS3UseCase = new RetrieveEventXmlFromS3UseCase(awsS3Gateway)
+const s3Gateway = new S3Gateway(createS3Config("AUDIT_LOG_EVENTS_BUCKET"))
+const retrieveEventXmlFromS3UseCase = new RetrieveEventXmlFromS3UseCase(s3Gateway)
 
 const apiClient = new AuditLogApiClient(getApiUrl(), getApiKey())
 const createRetryingEventUseCase = new CreateRetryingEventUseCase(apiClient)

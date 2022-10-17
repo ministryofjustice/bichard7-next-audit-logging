@@ -1,7 +1,7 @@
+import "shared-testing"
 import type { EventCategory } from "shared-types"
-import { AuditLogLookup } from "shared-types"
-import { isError, AuditLogEvent, AuditLog } from "shared-types"
-import { FakeAuditLogDynamoGateway, FakeAuditLogLookupDynamoGateway } from "shared-testing"
+import { AuditLog, AuditLogEvent, AuditLogLookup, isError } from "shared-types"
+import { FakeAuditLogDynamoGateway, FakeAuditLogLookupDynamoGateway } from "../test"
 import FetchEventsUseCase from "./FetchEventsUseCase"
 import LookupEventValuesUseCase from "./LookupEventValuesUseCase"
 

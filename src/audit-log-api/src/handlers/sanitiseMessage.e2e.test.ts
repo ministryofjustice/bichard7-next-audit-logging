@@ -1,17 +1,12 @@
 jest.setTimeout(15000)
 import axios from "axios"
 import { addDays } from "date-fns"
-import {
-  AwsBichardPostgresGateway,
-  createS3Config,
-  HttpStatusCode,
-  TestAwsS3Gateway,
-  TestDynamoGateway,
-  TestPostgresGateway
-} from "shared"
-import { auditLogDynamoConfig, setEnvironmentVariables } from "shared-testing"
+import { BichardPostgresGateway, createS3Config, HttpStatusCode, TestPostgresGateway, TestS3Gateway } from "shared"
+import { setEnvironmentVariables } from "shared-testing"
 import { AuditLog, AuditLogEvent, AuditLogLookup, BichardAuditLogEvent } from "shared-types"
+import { auditLogDynamoConfig } from "src/test/dynamoDbConfig"
 import createBichardPostgresGatewayConfig from "../createBichardPostgresGatewayConfig"
+import { TestDynamoGateway } from "../test"
 
 setEnvironmentVariables()
 
@@ -20,10 +15,10 @@ const auditLogLookupTableName = "auditLogLookupTable"
 
 const postgresConfig = createBichardPostgresGatewayConfig()
 const errorListPostgresConfig = { ...postgresConfig, TABLE_NAME: postgresConfig.TABLE_NAME?.replace("archive_", "") }
-const postgresGateway = new AwsBichardPostgresGateway(postgresConfig)
+const postgresGateway = new BichardPostgresGateway(postgresConfig)
 
-const messagesS3Gateway = new TestAwsS3Gateway(createS3Config("INTERNAL_INCOMING_MESSAGES_BUCKET"))
-const eventsS3Gateway = new TestAwsS3Gateway(createS3Config("AUDIT_LOG_EVENTS_BUCKET"))
+const messagesS3Gateway = new TestS3Gateway(createS3Config("INTERNAL_INCOMING_MESSAGES_BUCKET"))
+const eventsS3Gateway = new TestS3Gateway(createS3Config("AUDIT_LOG_EVENTS_BUCKET"))
 
 const testDynamoGateway = new TestDynamoGateway(auditLogDynamoConfig)
 const testPostgresGateway = new TestPostgresGateway(postgresConfig)

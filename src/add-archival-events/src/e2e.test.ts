@@ -4,7 +4,8 @@ jest.setTimeout(60_000)
 import { execute } from "lambda-local"
 import partition from "lodash.partition"
 import { Client } from "pg"
-import { AuditLogApiClient, logger, TestDynamoGateway } from "shared"
+import { AuditLogApiClient, logger } from "shared"
+import { clearDynamoTable } from "shared-testing"
 import type { ApiClient } from "shared-types"
 import { AuditLog, AuditLogEvent, isSuccess } from "shared-types"
 import addArchivalEvents from "."
@@ -31,7 +32,6 @@ const executeLambda = (environment?: any): Promise<unknown> =>
   })
 
 describe("Add Error Records e2e", () => {
-  let dynamo: any
   let pg: Client
   let api: ApiClient
 
@@ -47,14 +47,6 @@ describe("Add Error Records e2e", () => {
 
     await pg.connect()
 
-    dynamo = new TestDynamoGateway({
-      DYNAMO_URL: "http://localhost:8000",
-      DYNAMO_REGION: "eu-west-2",
-      TABLE_NAME: "auditLogTable",
-      AWS_ACCESS_KEY_ID: "DUMMY",
-      AWS_SECRET_ACCESS_KEY: "DUMMY"
-    })
-
     api = new AuditLogApiClient("http://localhost:3010", "apiKey")
   })
 
@@ -67,7 +59,12 @@ describe("Add Error Records e2e", () => {
     await pg.query(`TRUNCATE TABLE br7own.archive_error_list CASCADE`)
     await pg.query(`DELETE FROM br7own.archive_log`)
 
-    await dynamo.deleteAll("auditLogTable", "messageId")
+    await clearDynamoTable("auditLogTable", "messageId", {
+      endpoint: "http://localhost:8000",
+      region: "eu-west-2",
+      accessKeyId: "DUMMY",
+      secretAccessKey: "DUMMY"
+    })
   })
 
   it("should audit log single error records successfully", async () => {

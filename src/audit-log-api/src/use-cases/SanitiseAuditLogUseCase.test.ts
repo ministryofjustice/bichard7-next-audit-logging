@@ -1,7 +1,7 @@
 import MockDate from "mockdate"
 import "shared-testing"
-import { FakeAuditLogDynamoGateway } from "shared-testing"
 import { AuditLog, AuditLogEvent, BichardAuditLogEvent } from "shared-types"
+import FakeAuditLogDynamoGateway from "src/test/FakeAuditLogDynamoGateway"
 import SanitiseAuditLogUseCase from "./SanitiseAuditLogUseCase"
 
 const fakeAuditLogDynamoGateway = new FakeAuditLogDynamoGateway()

@@ -1,19 +1,13 @@
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda"
 import type { Duration } from "date-fns"
 import { add } from "date-fns"
-import {
-  AwsAuditLogDynamoGateway,
-  AwsAuditLogLookupDynamoGateway,
-  AwsBichardPostgresGateway,
-  AwsS3Gateway,
-  createS3Config,
-  HttpStatusCode
-} from "shared"
+import { BichardPostgresGateway, createS3Config, HttpStatusCode, S3Gateway } from "shared"
 import type { AuditLog } from "shared-types"
 import { isError } from "shared-types"
 import createAuditLogDynamoDbConfig from "../createAuditLogDynamoDbConfig"
 import createAuditLogLookupDynamoDbConfig from "../createAuditLogLookupDynamoDbConfig"
 import createBichardPostgresGatewayConfig from "../createBichardPostgresGatewayConfig"
+import { AuditLogDynamoGateway, AwsAuditLogLookupDynamoGateway } from "../gateways/dynamo"
 import DeleteArchivedErrorsUseCase from "../use-cases/DeleteArchivedErrorsUseCase"
 import DeleteAuditLogLookupItemsUseCase from "../use-cases/DeleteAuditLogLookupItemsUseCase"
 import DeleteMessageObjectsFromS3UseCase from "../use-cases/DeleteMessageObjectsFromS3UseCase"
@@ -23,16 +17,16 @@ import shouldSanitiseMessage from "../use-cases/shouldSanitiseMessage"
 import { createJsonApiResult } from "../utils"
 
 const auditLogDynamoDbConfig = createAuditLogDynamoDbConfig()
-const auditLogGateway = new AwsAuditLogDynamoGateway(auditLogDynamoDbConfig, auditLogDynamoDbConfig.TABLE_NAME)
+const auditLogGateway = new AuditLogDynamoGateway(auditLogDynamoDbConfig, auditLogDynamoDbConfig.TABLE_NAME)
 const auditLogLookupDynamoDbConfig = createAuditLogLookupDynamoDbConfig()
 const auditLogLookupDynamoGateway = new AwsAuditLogLookupDynamoGateway(
   auditLogLookupDynamoDbConfig,
   auditLogLookupDynamoDbConfig.TABLE_NAME
 )
 const postgresConfig = createBichardPostgresGatewayConfig()
-const awsBichardPostgresGateway = new AwsBichardPostgresGateway(postgresConfig)
-const awsMessagesS3Gateway = new AwsS3Gateway(createS3Config("INTERNAL_INCOMING_MESSAGES_BUCKET"))
-const awsEventsS3Gateway = new AwsS3Gateway(createS3Config("AUDIT_LOG_EVENTS_BUCKET"))
+const awsBichardPostgresGateway = new BichardPostgresGateway(postgresConfig)
+const awsMessagesS3Gateway = new S3Gateway(createS3Config("INTERNAL_INCOMING_MESSAGES_BUCKET"))
+const awsEventsS3Gateway = new S3Gateway(createS3Config("AUDIT_LOG_EVENTS_BUCKET"))
 const deleteMessageObjectsFromS3UseCase = new DeleteMessageObjectsFromS3UseCase(
   awsMessagesS3Gateway,
   awsEventsS3Gateway

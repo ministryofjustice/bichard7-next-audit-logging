@@ -1,6 +1,6 @@
 import "shared-testing"
-import { FakeAuditLogLookupDynamoGateway } from "shared-testing"
 import { AuditLog, AuditLogEvent, AuditLogLookup } from "shared-types"
+import { FakeAuditLogLookupDynamoGateway } from "../test"
 import LookupEventValuesUseCase from "./LookupEventValuesUseCase"
 import LookupMessageValuesUseCase from "./LookupMessageValuesUseCase"
 

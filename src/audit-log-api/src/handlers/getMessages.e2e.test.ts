@@ -1,15 +1,11 @@
 import type { AxiosError } from "axios"
 import axios from "axios"
-import { addQueryParams, HttpStatusCode, TestDynamoGateway } from "shared"
-import {
-  auditLogDynamoConfig,
-  createMockAuditLog,
-  createMockAuditLogEvent,
-  createMockAuditLogs,
-  createMockError
-} from "shared-testing"
+import { addQueryParams, HttpStatusCode } from "shared"
+import { createMockAuditLog, createMockAuditLogEvent, createMockAuditLogs, createMockError } from "shared-testing"
 import type { AuditLog, BichardAuditLogEvent } from "shared-types"
 import { EventType, isError } from "shared-types"
+import { auditLogDynamoConfig } from "src/test/dynamoDbConfig"
+import { TestDynamoGateway } from "../test"
 
 const testDynamoGateway = new TestDynamoGateway(auditLogDynamoConfig)
 

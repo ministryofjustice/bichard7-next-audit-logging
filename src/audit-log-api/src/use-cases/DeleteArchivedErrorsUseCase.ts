@@ -1,4 +1,5 @@
-import type { BichardPostgresGateway, PromiseResult } from "shared-types"
+import type { BichardPostgresGateway } from "shared"
+import type { PromiseResult } from "shared-types"
 
 export default class DeleteArchivedErrorsUseCase {
   constructor(private readonly gateway: BichardPostgresGateway) {}

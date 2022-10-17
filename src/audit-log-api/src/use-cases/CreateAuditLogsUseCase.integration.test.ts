@@ -1,12 +1,12 @@
 jest.retryTimes(10)
 import { AuditLog } from "shared-types"
-import { AwsAuditLogDynamoGateway } from "shared"
-import { TestDynamoGateway } from "shared"
+import { AuditLogDynamoGateway } from "src/gateways/dynamo"
+import { auditLogDynamoConfig } from "src/test/dynamoDbConfig"
+import { TestDynamoGateway } from "../test"
 import CreateAuditLogsUseCase from "./CreateAuditLogsUseCase"
-import { auditLogDynamoConfig } from "shared-testing"
 
 const testDynamoGateway = new TestDynamoGateway(auditLogDynamoConfig)
-const auditLogDynamoGateway = new AwsAuditLogDynamoGateway(auditLogDynamoConfig, auditLogDynamoConfig.TABLE_NAME)
+const auditLogDynamoGateway = new AuditLogDynamoGateway(auditLogDynamoConfig, auditLogDynamoConfig.TABLE_NAME)
 const createAuditLogsUseCase = new CreateAuditLogsUseCase(auditLogDynamoGateway)
 
 const createAuditLog = (correlationId = "CorrelationId"): AuditLog =>
@@ -31,7 +31,7 @@ describe("CreateAuditLogsUseCase", () => {
   })
 
   it("should return an error result when an unknown error occurs within the database", async () => {
-    const gateway = new AwsAuditLogDynamoGateway(auditLogDynamoConfig, "Invalid Table Name")
+    const gateway = new AuditLogDynamoGateway(auditLogDynamoConfig, "Invalid Table Name")
     const useCase = new CreateAuditLogsUseCase(gateway)
 
     const auditLog = createAuditLog()

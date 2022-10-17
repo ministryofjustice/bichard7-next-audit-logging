@@ -1,6 +1,7 @@
-import type { AuditLogEvent, AuditLogDynamoGateway, CreateAuditLogEventsResult, DynamoUpdate } from "shared-types"
+import type { AuditLogEvent, CreateAuditLogEventsResult } from "shared-types"
 import { isError } from "shared-types"
-import { isConditionalExpressionViolationError, isTooManyEventsError } from "shared"
+import type { AuditLogDynamoGatewayInterface, DynamoUpdate } from "../gateways/dynamo"
+import { isConditionalExpressionViolationError, isTooManyEventsError } from "../gateways/dynamo"
 import type StoreValuesInLookupTableUseCase from "./StoreValuesInLookupTableUseCase"
 
 const shouldDeduplicate = (event: AuditLogEvent): boolean =>
@@ -34,7 +35,7 @@ const isDuplicateEvent = (event: AuditLogEvent, existingEvents: AuditLogEvent[])
 
 export default class CreateAuditLogEventsUseCase {
   constructor(
-    private readonly auditLogGateway: AuditLogDynamoGateway,
+    private readonly auditLogGateway: AuditLogDynamoGatewayInterface,
     private readonly storeValuesInLookupTableUseCase: StoreValuesInLookupTableUseCase
   ) {}
 

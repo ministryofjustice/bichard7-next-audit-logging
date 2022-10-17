@@ -6,5 +6,7 @@ export default interface AuditLogEventOptions {
   category: EventCategory
   eventType: string
   timestamp: Date
+  eventSourceQueueName?: string
+  eventXml?: string
   attributes?: KeyValuePair<string, unknown>
 }

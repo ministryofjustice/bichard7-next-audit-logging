@@ -1,7 +1,7 @@
 jest.retryTimes(10)
-import { TestDynamoGateway, TestS3Gateway } from "shared"
+import { TestS3Gateway } from "shared"
 import "shared-testing"
-import { auditLogDynamoConfig, setEnvironmentVariables } from "shared-testing"
+import { clearDynamoTable, setEnvironmentVariables } from "shared-testing"
 import { v4 as uuid } from "uuid"
 import format from "xml-formatter"
 import TestMqGateway from "../gateways/MqGateway/TestMqGateway"
@@ -42,8 +42,6 @@ const originalXml = formatXml(`
   </RouteData>
 `)
 
-const dynamoGateway = new TestDynamoGateway(auditLogDynamoConfig)
-
 const s3Gateway = new TestS3Gateway({
   url: "http://localhost:4569",
   region: "eu-west-2",
@@ -64,7 +62,7 @@ const testMqGateway = new TestMqGateway({
 
 describe("e2e tests", () => {
   beforeEach(async () => {
-    await dynamoGateway.deleteAll(auditLogDynamoConfig.TABLE_NAME, "messageId")
+    await clearDynamoTable("auditLogTable", "messageId")
     await s3Gateway.deleteAll()
   })
 

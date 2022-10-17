@@ -1,10 +1,10 @@
 import { auditLogEventsS3Config, setEnvironmentVariables } from "shared-testing"
 setEnvironmentVariables()
 import type { EventMessage } from "shared-types"
-import { TestAwsS3Gateway } from "shared"
+import { TestS3Gateway } from "shared"
 import DoesS3ObjectExist from "./DoesS3ObjectExist"
 
-const gateway = new TestAwsS3Gateway(auditLogEventsS3Config)
+const gateway = new TestS3Gateway(auditLogEventsS3Config)
 const useCase = new DoesS3ObjectExist(gateway)
 
 const bucketName = auditLogEventsS3Config.bucketName || "auditLogEventsBucket"

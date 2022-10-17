@@ -1,13 +1,13 @@
 import { auditLogEventsS3Config, setEnvironmentVariables } from "shared-testing"
 setEnvironmentVariables()
 import type { EventMessage } from "shared-types"
-import { TestAwsS3Gateway } from "shared"
+import { TestS3Gateway } from "shared"
 import type { EventInput } from "../types"
 import RetrieveEventFromS3UseCase from "./RetrieveEventFromS3UseCase"
 
 const bucketName = "auditLogEventsBucket"
 
-const gateway = new TestAwsS3Gateway(auditLogEventsS3Config)
+const gateway = new TestS3Gateway(auditLogEventsS3Config)
 const useCase = new RetrieveEventFromS3UseCase(gateway)
 
 describe("Retrieve event from S3 end-to-end", () => {

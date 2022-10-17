@@ -1,16 +1,17 @@
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda"
-import type { PromiseResult, AuditLogEvent } from "shared-types"
+import { HttpStatusCode, logger } from "shared"
+import type { AuditLogEvent, PromiseResult } from "shared-types"
 import { isError } from "shared-types"
-import { AwsAuditLogDynamoGateway, AwsAuditLogLookupDynamoGateway, HttpStatusCode, logger } from "shared"
 import createAuditLogDynamoDbConfig from "../createAuditLogDynamoDbConfig"
-import { FetchEventsUseCase, parseGetEventsRequest } from "../use-cases"
-import { createJsonApiResult } from "../utils"
 import createAuditLogLookupDynamoDbConfig from "../createAuditLogLookupDynamoDbConfig"
+import { AuditLogDynamoGateway, AwsAuditLogLookupDynamoGateway } from "../gateways/dynamo"
+import { FetchEventsUseCase, parseGetEventsRequest } from "../use-cases"
 import LookupEventValuesUseCase from "../use-cases/LookupEventValuesUseCase"
+import { createJsonApiResult } from "../utils"
 
 const auditLogConfig = createAuditLogDynamoDbConfig()
 const auditLogLookupConfig = createAuditLogLookupDynamoDbConfig()
-const auditLogGateway = new AwsAuditLogDynamoGateway(auditLogConfig, auditLogConfig.TABLE_NAME)
+const auditLogGateway = new AuditLogDynamoGateway(auditLogConfig, auditLogConfig.TABLE_NAME)
 const auditLogLookupGateway = new AwsAuditLogLookupDynamoGateway(auditLogLookupConfig, auditLogLookupConfig.TABLE_NAME)
 const lookupEventValuesUseCase = new LookupEventValuesUseCase(auditLogLookupGateway)
 const fetchEvents = new FetchEventsUseCase(auditLogGateway, lookupEventValuesUseCase)

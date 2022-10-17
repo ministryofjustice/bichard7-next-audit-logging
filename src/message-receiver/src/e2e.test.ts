@@ -1,7 +1,7 @@
 jest.retryTimes(10)
 import "shared-testing"
 import type { AmazonMqEventSourceRecordEvent } from "shared-types"
-import { TestAwsS3Gateway, createS3Config, encodeBase64 } from "shared"
+import { TestS3Gateway, createS3Config, encodeBase64 } from "shared"
 import { setEnvironmentVariables } from "shared-testing"
 setEnvironmentVariables()
 process.env.MESSAGE_FORMAT = "AuditEvent"
@@ -9,7 +9,7 @@ process.env.EVENTS_BUCKET_NAME = "auditLogEventsBucket"
 import messageReceiver from "."
 
 const s3Config = createS3Config("EVENTS_BUCKET_NAME")
-const s3Gateway = new TestAwsS3Gateway(s3Config)
+const s3Gateway = new TestS3Gateway(s3Config)
 
 describe("Message receiver e2e test", () => {
   beforeEach(async () => {

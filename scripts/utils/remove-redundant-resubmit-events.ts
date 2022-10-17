@@ -14,10 +14,10 @@
  *
  */
 
-import { Lambda } from "../../src/shared/node_modules/aws-sdk"
-import { AwsAuditLogDynamoGateway } from "../../src/shared/src/AuditLogDynamoGateway"
-import { isError } from "../../src/shared-types/src"
 import fs from "fs"
+import { AuditLogDynamoGateway } from "../../src/audit-log-api/src/gateways/dynamo"
+import { isError } from "../../src/shared-types/src"
+import { Lambda } from "../../src/shared/node_modules/aws-sdk"
 
 const { SOURCE_FILE, MESSAGE_ID, WORKSPACE } = process.env
 if (!WORKSPACE) {
@@ -62,7 +62,7 @@ async function setup() {
 }
 
 async function run() {
-  const dynamo = new AwsAuditLogDynamoGateway(dynamoConfig, dynamoConfig.TABLE_NAME)
+  const dynamo = new AuditLogDynamoGateway(dynamoConfig, dynamoConfig.TABLE_NAME)
 
   try {
     for (const id of messageIds) {

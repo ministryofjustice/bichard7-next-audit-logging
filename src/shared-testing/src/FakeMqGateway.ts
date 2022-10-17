@@ -1,6 +1,6 @@
-import type { PromiseResult, MqGateway } from "shared-types"
+import type { MqGatewayInterface, PromiseResult } from "shared-types"
 
-export default class FakeMqGateway implements MqGateway {
+export default class FakeMqGateway implements MqGatewayInterface {
   private error?: Error
 
   // @ts-ignore

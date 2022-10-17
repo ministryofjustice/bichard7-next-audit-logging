@@ -1,24 +1,21 @@
 import { Endpoint, S3 } from "aws-sdk"
-import type { PromiseResult, S3Config } from "shared-types"
+import type { PromiseResult, S3Config, S3GatewayInterface } from "shared-types"
+import parseGetObjectResponse from "./parseGetObjectResponse"
 
-export default class S3Gateway {
+export default class S3Gateway implements S3GatewayInterface {
   private readonly s3: S3
 
-  protected readonly bucketName: string
+  protected bucketName?: string
 
   constructor(config: S3Config) {
     const { url, region, bucketName, accessKeyId, secretAccessKey } = config
-
-    if (!url) {
-      throw Error("bucketName and url must have value.")
-    }
 
     if (bucketName) {
       this.bucketName = bucketName
     }
 
     this.s3 = new S3({
-      endpoint: new Endpoint(url),
+      ...(url ? { endpoint: new Endpoint(url) } : {}),
       region,
       s3ForcePathStyle: true,
       accessKeyId,
@@ -30,28 +27,100 @@ export default class S3Gateway {
     return this.s3
   }
 
-  getItem(bucketName: string, key: string): PromiseResult<string> {
-    const params = {
-      Bucket: bucketName,
+  getBucketName(): string {
+    if (!this.bucketName) {
+      throw new Error("Bucket name does not have value")
+    }
+
+    return this.bucketName
+  }
+
+  forBucket(bucketName: string): S3GatewayInterface {
+    this.bucketName = bucketName
+    return this
+  }
+
+  getItem(key: string): PromiseResult<string> {
+    const params: S3.GetObjectRequest = {
+      Bucket: this.getBucketName(),
       Key: key
     }
 
     return this.s3
       .getObject(params)
       .promise()
-      .then((response) => response.Body?.toString("utf-8") ?? Error(`Content is empty for key ${key}.`))
+      .then((response) => parseGetObjectResponse(response, key))
+      .catch((error) => <Error>error)
+  }
+
+  doesItemExist(key: string): PromiseResult<boolean> {
+    return this.s3
+      .headObject({
+        Bucket: this.getBucketName(),
+        Key: key
+      })
+      .promise()
+      .then(
+        () => true,
+        (error: AWS.AWSError) => {
+          if (error.code === "NotFound") {
+            return false
+          }
+          return error
+        }
+      )
       .catch((error) => <Error>error)
   }
 
   upload(fileName: string, content: string): PromiseResult<void> {
     const params: S3.Types.PutObjectRequest = {
-      Bucket: this.bucketName,
+      Bucket: this.getBucketName(),
       Key: fileName,
       Body: content
     }
 
     return this.client
       .upload(params)
+      .promise()
+      .then(() => undefined)
+      .catch((error) => <Error>error)
+  }
+
+  list(): PromiseResult<S3.ObjectList> {
+    const params: S3.Types.ListObjectsV2Request = {
+      Bucket: this.getBucketName()
+    }
+
+    return this.client
+      .listObjectsV2(params)
+      .promise()
+      .then((result) => result.Contents || [])
+      .catch((error) => <Error>error)
+  }
+
+  copyItemTo(key: string, destinationBucketName: string): PromiseResult<void> {
+    const params: S3.Types.CopyObjectRequest = {
+      CopySource: `${this.bucketName}/${key}`,
+      Bucket: destinationBucketName,
+      Key: key
+    }
+
+    return this.client
+      .copyObject(params)
+      .promise()
+      .then(() => undefined)
+      .catch((error) => <Error>error)
+  }
+
+  deleteItem(key: string, version?: string): PromiseResult<void> {
+    const params: S3.Types.DeleteObjectRequest = {
+      Bucket: this.getBucketName(),
+      Key: key,
+      ...(version ? { VersionId: version } : {})
+    }
+
+    return this.client
+      .deleteObject(params)
       .promise()
       .then(() => undefined)
       .catch((error) => <Error>error)

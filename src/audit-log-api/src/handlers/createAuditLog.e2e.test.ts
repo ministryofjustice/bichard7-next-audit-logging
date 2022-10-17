@@ -1,8 +1,10 @@
 jest.retryTimes(10)
 import axios from "axios"
+import { HttpStatusCode } from "shared"
+import { mockAuditLog } from "shared-testing"
 import type { AuditLog } from "shared-types"
-import { HttpStatusCode, TestDynamoGateway } from "shared"
-import { mockAuditLog, auditLogDynamoConfig } from "shared-testing"
+import { auditLogDynamoConfig } from "src/test/dynamoDbConfig"
+import { TestDynamoGateway } from "../test"
 
 describe("Creating Audit Log", () => {
   it("should create a new audit log record", async () => {

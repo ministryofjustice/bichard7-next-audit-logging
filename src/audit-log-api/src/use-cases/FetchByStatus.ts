@@ -1,11 +1,13 @@
-import type { AuditLog, AuditLogDynamoGateway, FetchByStatusOptions, PromiseResult } from "shared-types"
+import type { AuditLog, PromiseResult } from "shared-types"
 import { isError } from "shared-types"
+import type { FetchByStatusOptions } from "src/types/queryParams"
+import type { AuditLogDynamoGatewayInterface } from "../gateways/dynamo"
 import getMessageById from "./getMessageById"
 import type MessageFetcher from "./MessageFetcher"
 
 export default class FetchByStatus implements MessageFetcher {
   constructor(
-    private readonly gateway: AuditLogDynamoGateway,
+    private readonly gateway: AuditLogDynamoGatewayInterface,
     private status: string,
     private readonly options?: FetchByStatusOptions
   ) {}

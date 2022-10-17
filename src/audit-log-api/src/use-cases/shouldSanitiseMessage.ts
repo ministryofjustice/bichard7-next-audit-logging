@@ -1,5 +1,6 @@
 import { add } from "date-fns"
-import type { AuditLog, BichardPostgresGateway, PromiseResult } from "shared-types"
+import type { BichardPostgresGateway } from "shared"
+import type { AuditLog, PromiseResult } from "shared-types"
 import { isError } from "shared-types"
 
 const shouldSanitiseMessage = async (

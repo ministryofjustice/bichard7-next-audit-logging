@@ -4,9 +4,9 @@ jest.setTimeout(30_000)
 import { addDays } from "date-fns"
 import { execute } from "lambda-local"
 import { Client } from "pg"
-import { AuditLogApiClient, logger, TestDynamoGateway } from "shared"
+import { AuditLogApiClient, logger } from "shared"
 import "shared-testing"
-import { setEnvironmentVariables } from "shared-testing"
+import { clearDynamoTable, createMockAuditLog, setEnvironmentVariables } from "shared-testing"
 import type { ApiClient, KeyValuePair } from "shared-types"
 import { AuditLog } from "shared-types"
 import sanitiseOldMessages from "./index"
@@ -42,14 +42,13 @@ const insertDbRecords = async (
 
 // Returns a mapping of externalCorrelationId => messageId
 const insertAuditLogRecords = async (
-  gateway: TestDynamoGateway,
   records: { externalCorrelationId: string; receivedAt: Date }[]
 ): Promise<KeyValuePair<string, string>> => {
   const messageIds: KeyValuePair<string, string> = {}
 
   for (const record of records) {
     const auditLog = new AuditLog(record.externalCorrelationId, record.receivedAt, record.externalCorrelationId)
-    await gateway.insertOne(process.env.AUDIT_LOG_TABLE_NAME!, auditLog, record.externalCorrelationId)
+    await createMockAuditLog(auditLog)
     messageIds[record.externalCorrelationId] = auditLog.messageId
   }
 
@@ -67,7 +66,6 @@ const executeLambda = (environment?: any): Promise<unknown> => {
 }
 
 describe("Sanitise Old Messages e2e", () => {
-  let gateway: TestDynamoGateway
   let api: ApiClient
   let db: Client
 
@@ -82,14 +80,6 @@ describe("Sanitise Old Messages e2e", () => {
     })
     await db.connect()
 
-    gateway = new TestDynamoGateway({
-      DYNAMO_URL: process.env.AWS_URL!,
-      DYNAMO_REGION: process.env.AWS_REGION!,
-      TABLE_NAME: process.env.AUDIT_LOG_TABLE_NAME!,
-      AWS_ACCESS_KEY_ID: process.env.DYNAMO_AWS_ACCESS_KEY_ID,
-      AWS_SECRET_ACCESS_KEY: process.env.DYNAMO_AWS_SECRET_ACCESS_KEY
-    })
-
     api = new AuditLogApiClient(process.env.API_URL!, process.env.API_KEY!)
   })
 
@@ -98,7 +88,7 @@ describe("Sanitise Old Messages e2e", () => {
     await db.query(`TRUNCATE TABLE br7own.archive_error_list CASCADE`)
     await db.query(`DELETE FROM br7own.archive_log`)
 
-    await gateway.deleteAll("auditLogTable", "messageId")
+    await clearDynamoTable("auditLogTable", "messageId")
   })
 
   afterAll(async () => {
@@ -106,7 +96,7 @@ describe("Sanitise Old Messages e2e", () => {
   })
 
   it("should sanitise a single message older than the configured threshold which has been archived", async () => {
-    const messageIds = await insertAuditLogRecords(gateway, [
+    const messageIds = await insertAuditLogRecords([
       { externalCorrelationId: "message_1", receivedAt: new Date("2022-01-01T09:00:00") }
     ])
     await insertDbRecords(db, [], [messageIds.message_1])
@@ -121,7 +111,7 @@ describe("Sanitise Old Messages e2e", () => {
   })
 
   it("shouldn't sanitise a single message older than the configured threshold which is unarchived", async () => {
-    const messageIds = await insertAuditLogRecords(gateway, [
+    const messageIds = await insertAuditLogRecords([
       { externalCorrelationId: "message_1", receivedAt: new Date("2022-01-01T09:00:00") }
     ])
     await insertDbRecords(db, [messageIds.message_1], [])
@@ -136,7 +126,7 @@ describe("Sanitise Old Messages e2e", () => {
   })
 
   it("should sanitise a single message older than the configured threshold which isn't in the database", async () => {
-    const messageIds = await insertAuditLogRecords(gateway, [
+    const messageIds = await insertAuditLogRecords([
       { externalCorrelationId: "message_1", receivedAt: new Date("2022-01-01T09:00:00") }
     ])
 
@@ -150,9 +140,7 @@ describe("Sanitise Old Messages e2e", () => {
   })
 
   it("shouldn't sanitise a single message newer than the configured threshold which has been archived", async () => {
-    const messageIds = await insertAuditLogRecords(gateway, [
-      { externalCorrelationId: "message_1", receivedAt: new Date() }
-    ])
+    const messageIds = await insertAuditLogRecords([{ externalCorrelationId: "message_1", receivedAt: new Date() }])
     await insertDbRecords(db, [], [messageIds.message_1])
 
     await executeLambda()
@@ -165,9 +153,7 @@ describe("Sanitise Old Messages e2e", () => {
   })
 
   it("shouldn't sanitise a single message newer than the configured threshold which is unarchived", async () => {
-    const messageIds = await insertAuditLogRecords(gateway, [
-      { externalCorrelationId: "message_1", receivedAt: new Date() }
-    ])
+    const messageIds = await insertAuditLogRecords([{ externalCorrelationId: "message_1", receivedAt: new Date() }])
     await insertDbRecords(db, [messageIds.message_1], [messageIds.message_1])
 
     await executeLambda()
@@ -180,9 +166,7 @@ describe("Sanitise Old Messages e2e", () => {
   })
 
   it("shouldn't sanitise a single message newer than the configured threshold which isn't in the database", async () => {
-    const messageIds = await insertAuditLogRecords(gateway, [
-      { externalCorrelationId: "message_1", receivedAt: new Date() }
-    ])
+    const messageIds = await insertAuditLogRecords([{ externalCorrelationId: "message_1", receivedAt: new Date() }])
 
     await executeLambda()
 
@@ -194,7 +178,7 @@ describe("Sanitise Old Messages e2e", () => {
   })
 
   it("should schedule the nextSanitiseCheck date of every message we check for 2 days time", async () => {
-    const messageIds = await insertAuditLogRecords(gateway, [
+    const messageIds = await insertAuditLogRecords([
       { externalCorrelationId: "message_1", receivedAt: new Date("2022-01-01T09:00:00") },
       { externalCorrelationId: "message_2", receivedAt: new Date("2022-01-02T09:00:00") },
       { externalCorrelationId: "message_3", receivedAt: new Date("2022-01-03T09:00:00") },

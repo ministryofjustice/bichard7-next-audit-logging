@@ -1,8 +1,9 @@
-import type { AuditLog, AuditLogDynamoGateway, PromiseResult } from "shared-types"
+import type { AuditLog, PromiseResult } from "shared-types"
 import { AuditLogEvent, EventType } from "shared-types"
+import type { AuditLogDynamoGatewayInterface } from "../gateways/dynamo"
 
 export default class SanitiseAuditLogUseCase {
-  constructor(private readonly auditLogDynamoGateway: AuditLogDynamoGateway) {}
+  constructor(private readonly auditLogDynamoGateway: AuditLogDynamoGatewayInterface) {}
 
   call(auditLog: AuditLog): PromiseResult<AuditLog> {
     ;[auditLog.events, auditLog.automationReport?.events, auditLog.topExceptionsReport?.events].forEach((events) => {

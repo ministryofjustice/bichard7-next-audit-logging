@@ -1,5 +1,5 @@
-import { AuditLogStatus, AuditLog, isError } from "shared-types"
-import { FakeAuditLogDynamoGateway } from "shared-testing"
+import { AuditLog, AuditLogStatus, isError } from "shared-types"
+import FakeAuditLogDynamoGateway from "src/test/FakeAuditLogDynamoGateway"
 import FetchByStatus from "./FetchByStatus"
 
 const gateway = new FakeAuditLogDynamoGateway()

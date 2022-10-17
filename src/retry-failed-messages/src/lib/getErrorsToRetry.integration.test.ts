@@ -2,9 +2,9 @@ jest.retryTimes(10)
 jest.setTimeout(10_000)
 process.env.API_URL = "dummy"
 process.env.API_KEY = "dummy"
-import { AuditLogApiClient, TestDynamoGateway } from "shared"
+import { AuditLogApiClient } from "shared"
 import {
-  auditLogDynamoConfig,
+  clearDynamoTable,
   createMockAuditLog,
   createMockAuditLogs,
   createMockError,
@@ -15,11 +15,9 @@ import { isError } from "shared-types"
 import getErrorsToRetry from "./getErrorsToRetry"
 const apiClient = new AuditLogApiClient("http://localhost:3010", "DUMMY")
 
-const testDynamoGateway = new TestDynamoGateway(auditLogDynamoConfig)
-
 describe("getErrorsToRetry", () => {
   beforeEach(async () => {
-    await testDynamoGateway.deleteAll(auditLogDynamoConfig.TABLE_NAME, "messageId")
+    await clearDynamoTable("auditLogTable", "messageId")
   })
 
   it("should get all errors, paginating where necessary", async () => {

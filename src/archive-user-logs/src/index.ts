@@ -1,12 +1,12 @@
 import { gunzip } from "zlib"
 import { promisify } from "util"
 import { isError } from "shared-types"
-import { AwsS3Gateway, createS3Config } from "shared"
+import { S3Gateway, createS3Config } from "shared"
 import type { Event } from "./types"
 import { ValidEvent, ValidInput } from "./types"
 import { uploadToS3 } from "./utils/uploadToS3"
 
-const s3Gateway = new AwsS3Gateway(createS3Config())
+const s3Gateway = new S3Gateway(createS3Config())
 
 export default async (input: unknown): Promise<void> => {
   const parsedInput = ValidInput.safeParse(input)

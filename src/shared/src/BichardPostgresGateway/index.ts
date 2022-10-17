@@ -1,1 +1,1 @@
-export { default as AwsBichardPostgresGateway } from "./AwsBichardPostgresGateway"
+export { default as BichardPostgresGateway } from "./BichardPostgresGateway"

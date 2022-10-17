@@ -1,5 +1,5 @@
-import { FakeAuditLogLookupDynamoGateway } from "shared-testing"
 import { isError } from "shared-types"
+import { FakeAuditLogLookupDynamoGateway } from "../test"
 import DeleteAuditLogLookupItemsUseCase from "./DeleteAuditLogLookupItemsUseCase"
 
 const fakeAuditLogLookupDynamoGateway = new FakeAuditLogLookupDynamoGateway()

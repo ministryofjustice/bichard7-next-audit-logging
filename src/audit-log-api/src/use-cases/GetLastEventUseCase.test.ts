@@ -1,6 +1,9 @@
-import { FakeAuditLogDynamoGateway } from "shared-testing"
-import type { EventCategory, BichardAuditLogEvent, AuditLogLookupDynamoGateway } from "shared-types"
+import "shared-testing"
+import type { BichardAuditLogEvent, EventCategory } from "shared-types"
 import { AuditLog, AuditLogEvent } from "shared-types"
+import FakeAuditLogDynamoGateway from "src/test/FakeAuditLogDynamoGateway"
+import type { AuditLogLookupDynamoGateway } from "../gateways/dynamo"
+
 import GetLastFailedMessageEventUseCase from "./GetLastEventUseCase"
 import LookupEventValuesUseCase from "./LookupEventValuesUseCase"
 

@@ -1,9 +1,11 @@
-import type { AuditLog, AuditLogDynamoGateway, ProjectionOptions, PromiseResult } from "shared-types"
+import type { AuditLog, PromiseResult } from "shared-types"
+import type { ProjectionOptions } from "src/types/queryParams"
+import type { AuditLogDynamoGatewayInterface } from "../gateways/dynamo"
 import type MessageFetcher from "./MessageFetcher"
 
 export default class FetchByExternalCorrelationId implements MessageFetcher {
   constructor(
-    private readonly gateway: AuditLogDynamoGateway,
+    private readonly gateway: AuditLogDynamoGatewayInterface,
     private externalCorrelationId: string,
     private readonly options?: ProjectionOptions
   ) {}

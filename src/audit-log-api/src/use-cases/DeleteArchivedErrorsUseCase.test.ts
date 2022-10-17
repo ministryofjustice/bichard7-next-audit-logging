@@ -1,13 +1,13 @@
+import { BichardPostgresGateway } from "shared"
 import "shared-testing"
 import { setEnvironmentVariables } from "shared-testing"
-setEnvironmentVariables()
-import { AwsBichardPostgresGateway } from "shared"
 import { isError } from "shared-types"
-import DeleteArchivedErrorsUseCase from "./DeleteArchivedErrorsUseCase"
 import createBichardPostgresGatewayConfig from "../createBichardPostgresGatewayConfig"
+import DeleteArchivedErrorsUseCase from "./DeleteArchivedErrorsUseCase"
+setEnvironmentVariables()
 
 const postgresConfig = createBichardPostgresGatewayConfig()
-const postgresGateway = new AwsBichardPostgresGateway(postgresConfig)
+const postgresGateway = new BichardPostgresGateway(postgresConfig)
 const useCase = new DeleteArchivedErrorsUseCase(postgresGateway)
 
 it("should call the #deleteArchivedErrors on postgres gateway with the given messageId", async () => {

@@ -1,29 +1,21 @@
-jest.retryTimes(10)
+import { AuditLogApiClient, encodeBase64, TestMqGateway, TestS3Gateway } from "shared"
 import "shared-testing"
+import { auditLogEventsS3Config } from "shared-testing"
 import type { MqConfig } from "shared-types"
-import { AuditLog, BichardAuditLogEvent } from "shared-types"
-import {
-  AwsAuditLogDynamoGateway,
-  AwsAuditLogLookupDynamoGateway,
-  TestDynamoGateway,
-  AuditLogApiClient,
-  TestStompitMqGateway,
-  TestAwsS3Gateway
-} from "shared"
-import RetryMessageUseCase from "./RetryMessageUseCase"
-import GetLastFailedMessageEventUseCase from "./GetLastEventUseCase"
-import SendMessageToQueueUseCase from "./SendMessageToQueueUseCase"
+import { AuditLog, AuditLogLookup, BichardAuditLogEvent } from "shared-types"
+import { AuditLogDynamoGateway, AwsAuditLogLookupDynamoGateway } from "../gateways/dynamo"
+import { auditLogDynamoConfig, TestDynamoGateway } from "../test"
 import CreateRetryingEventUseCase from "./CreateRetryingEventUseCase"
-import { AuditLogLookup } from "shared-types"
-import RetrieveEventXmlFromS3UseCase from "./RetrieveEventXmlFromS3UseCase"
+import GetLastFailedMessageEventUseCase from "./GetLastEventUseCase"
 import LookupEventValuesUseCase from "./LookupEventValuesUseCase"
-import { encodeBase64 } from "shared"
-import { auditLogDynamoConfig, auditLogEventsS3Config } from "shared-testing"
+import RetrieveEventXmlFromS3UseCase from "./RetrieveEventXmlFromS3UseCase"
+import RetryMessageUseCase from "./RetryMessageUseCase"
+import SendMessageToQueueUseCase from "./SendMessageToQueueUseCase"
 
 const auditLogTableName = "auditLogTable"
 const auditLogLookupTableName = "auditLogLookupTable"
 const testDynamoGateway = new TestDynamoGateway(auditLogDynamoConfig)
-const auditLogDynamoGateway = new AwsAuditLogDynamoGateway(auditLogDynamoConfig, auditLogTableName)
+const auditLogDynamoGateway = new AuditLogDynamoGateway(auditLogDynamoConfig, auditLogTableName)
 const auditLogLookupDynamoGateway = new AwsAuditLogLookupDynamoGateway(auditLogDynamoConfig, auditLogLookupTableName)
 const lookupEventValuesUseCase = new LookupEventValuesUseCase(auditLogLookupDynamoGateway)
 const getLastEventUseCase = new GetLastFailedMessageEventUseCase(auditLogDynamoGateway, lookupEventValuesUseCase)
@@ -34,10 +26,10 @@ const mqConfig: MqConfig = {
   username: "admin",
   password: "admin"
 }
-const mqGateway = new TestStompitMqGateway(mqConfig)
+const mqGateway = new TestMqGateway(mqConfig)
 const sendMessageToQueueUseCase = new SendMessageToQueueUseCase(mqGateway)
 
-const s3Gateway = new TestAwsS3Gateway(auditLogEventsS3Config)
+const s3Gateway = new TestS3Gateway(auditLogEventsS3Config)
 const retrieveEventXmlFromS3UseCase = new RetrieveEventXmlFromS3UseCase(s3Gateway)
 
 const apiClient = new AuditLogApiClient("http://localhost:3010", "DUMMY")
