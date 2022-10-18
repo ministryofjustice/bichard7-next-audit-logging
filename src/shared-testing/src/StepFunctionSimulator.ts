@@ -1,5 +1,7 @@
 /* eslint-disable @typescript-eslint/ban-types, @typescript-eslint/no-explicit-any */
 
+const flatten = (input: any): any => JSON.parse(JSON.stringify(input))
+
 export default class StepFunctionSimulator {
   private steps: Function[]
 
@@ -17,7 +19,7 @@ export default class StepFunctionSimulator {
       if (log) {
         console.log(step, inputValue)
       }
-      inputValue = await step(inputValue)
+      inputValue = await step(flatten(inputValue))
       this.outputs.push(inputValue)
     }
     return inputValue

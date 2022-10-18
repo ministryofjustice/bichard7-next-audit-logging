@@ -19,7 +19,7 @@ export default async function sendToBichard({
   messageXml
 }: SendToBichardInput): Promise<SendToBichardOutput> {
   const transformedXml = transformMessageXml(auditLog, messageXml)
-  const sentAt = new Date()
+  const sentAt = new Date().toISOString()
   const result = await sendMessageUseCase.send(transformedXml)
 
   if (isError(result)) {

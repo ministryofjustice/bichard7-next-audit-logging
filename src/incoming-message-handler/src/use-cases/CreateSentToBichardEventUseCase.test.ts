@@ -4,7 +4,7 @@ import { AuditLog, isError } from "shared-types"
 import CreateSentToBichardEventUseCase from "./CreateSentToBichardEventUseCase"
 
 const message = {
-  sentAt: new Date(),
+  sentAt: new Date().toISOString(),
   auditLog: new AuditLog("b5edf595-16a9-450f-a52b-40628cd58c29", new Date(), "dummy hash")
 }
 const useCase = new CreateSentToBichardEventUseCase("http://localhost", "dummydummydummydummy")
