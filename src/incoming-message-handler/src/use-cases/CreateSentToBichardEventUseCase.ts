@@ -1,6 +1,6 @@
 import type { AxiosError } from "axios"
 import axios from "axios"
-import type { AuditLog, PromiseResult } from "shared-types"
+import type { SendToBichardOutput, PromiseResult } from "shared-types"
 import { AuditLogEvent } from "shared-types"
 import { HttpStatusCode } from "shared"
 import * as https from "https"
@@ -12,16 +12,16 @@ const httpsAgent = new https.Agent({
 export default class CreateSentToBichardEventUseCase {
   constructor(private readonly apiUrl: string, private readonly apiKey: string) {}
 
-  create(message: AuditLog): PromiseResult<void> {
+  create(message: SendToBichardOutput): PromiseResult<void> {
     const event = new AuditLogEvent({
       category: "information",
-      timestamp: new Date(),
+      timestamp: message.sentAt,
       eventType: "Message Sent to Bichard",
       eventSource: "Incoming Message Handler"
     })
 
     return axios
-      .post(`${this.apiUrl}/messages/${message.messageId}/events`, event, {
+      .post(`${this.apiUrl}/messages/${message.auditLog.messageId}/events`, event, {
         httpsAgent,
         headers: { "X-API-KEY": this.apiKey }
       })
@@ -30,7 +30,7 @@ export default class CreateSentToBichardEventUseCase {
           case HttpStatusCode.created:
             return undefined
           case HttpStatusCode.notFound:
-            return Error(`The message with Id ${message.messageId} does not exist.`)
+            return Error(`The message with Id ${message.auditLog.messageId} does not exist.`)
           default:
             return Error(`Error ${result.status}: Could not create audit log event.`)
         }
