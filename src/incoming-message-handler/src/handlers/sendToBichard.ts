@@ -1,4 +1,4 @@
-import type { AuditLog } from "shared-types"
+import type { AuditLog, SendToBichardOutput } from "shared-types"
 import { isError } from "shared-types"
 import { createMqConfig } from "../configs"
 import MqGateway from "../gateways/MqGateway"
@@ -14,13 +14,17 @@ const config = createMqConfig()
 const gateway = new MqGateway(config)
 const sendMessageUseCase = new SendMessageUseCase(gateway)
 
-export default async function sendToBichard({ auditLog, messageXml }: SendToBichardInput): Promise<AuditLog> {
+export default async function sendToBichard({
+  auditLog,
+  messageXml
+}: SendToBichardInput): Promise<SendToBichardOutput> {
   const transformedXml = transformMessageXml(auditLog, messageXml)
+  const sentAt = new Date()
   const result = await sendMessageUseCase.send(transformedXml)
 
   if (isError(result)) {
     throw result
   }
 
-  return auditLog
+  return { sentAt, auditLog }
 }

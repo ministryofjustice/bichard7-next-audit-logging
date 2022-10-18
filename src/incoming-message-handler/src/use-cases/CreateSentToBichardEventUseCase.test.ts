@@ -3,7 +3,10 @@ import axios from "axios"
 import { AuditLog, isError } from "shared-types"
 import CreateSentToBichardEventUseCase from "./CreateSentToBichardEventUseCase"
 
-const message = new AuditLog("b5edf595-16a9-450f-a52b-40628cd58c29", new Date(), "dummy hash")
+const message = {
+  sentAt: new Date(),
+  auditLog: new AuditLog("b5edf595-16a9-450f-a52b-40628cd58c29", new Date(), "dummy hash")
+}
 const useCase = new CreateSentToBichardEventUseCase("http://localhost", "dummydummydummydummy")
 
 describe("createSentToBichardEvent()", () => {
@@ -21,7 +24,7 @@ describe("createSentToBichardEvent()", () => {
     const result = await useCase.create(message)
 
     expect(isError(result)).toBe(true)
-    expect((<Error>result).message).toBe(`The message with Id ${message.messageId} does not exist.`)
+    expect((<Error>result).message).toBe(`The message with Id ${message.auditLog.messageId} does not exist.`)
   })
 
   it("should fail when the error is unknown", async () => {
