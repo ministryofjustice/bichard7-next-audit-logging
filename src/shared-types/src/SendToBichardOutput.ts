@@ -1,6 +1,6 @@
 import type AuditLog from "./AuditLog"
 
 export default interface SendToBichardOutput {
-  sentAt: Date
+  sentAt: string
   auditLog: AuditLog
 }

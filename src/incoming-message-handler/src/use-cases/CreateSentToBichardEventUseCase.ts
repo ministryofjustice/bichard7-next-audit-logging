@@ -1,9 +1,9 @@
 import type { AxiosError } from "axios"
 import axios from "axios"
-import type { SendToBichardOutput, PromiseResult } from "shared-types"
-import { AuditLogEvent } from "shared-types"
-import { HttpStatusCode } from "shared"
 import * as https from "https"
+import { HttpStatusCode } from "shared"
+import type { PromiseResult, SendToBichardOutput } from "shared-types"
+import { AuditLogEvent } from "shared-types"
 
 const httpsAgent = new https.Agent({
   rejectUnauthorized: false
@@ -15,7 +15,7 @@ export default class CreateSentToBichardEventUseCase {
   create(message: SendToBichardOutput): PromiseResult<void> {
     const event = new AuditLogEvent({
       category: "information",
-      timestamp: message.sentAt,
+      timestamp: new Date(message.sentAt),
       eventType: "Message Sent to Bichard",
       eventSource: "Incoming Message Handler"
     })
