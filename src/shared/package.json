@@ -11,7 +11,7 @@
   "devDependencies": {
     "@types/jest": "^29.1.2",
     "@types/pg": "^8.6.5",
-    "@types/pino": "^7.0.4",
+    "@types/pino": "^6.0.0",
     "@types/stompit": "^0.26.3",
     "@types/uuid": "^8.3.4",
     "@types/xml2js": "^0.4.11",
@@ -35,7 +35,7 @@
     "lodash.minby": "^4.6.0",
     "pg": "^8.8.0",
     "pg-native": "^3.0.1",
-    "pino": "^8.6.1",
+    "pino": "^6.13.0",
     "shared-types": "file:../shared-types",
     "stompit": "^1.0.0",
     "uuid": "^9.0.0",
