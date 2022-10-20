@@ -1,9 +1,15 @@
 import type { AxiosError } from "axios"
 import axios from "axios"
 import { addQueryParams, HttpStatusCode } from "shared"
-import { createMockAuditLog, createMockAuditLogEvent, createMockAuditLogs, createMockError } from "shared-testing"
+import {
+  createMockAuditLog,
+  createMockAuditLogEvent,
+  createMockAuditLogs,
+  createMockError,
+  mockAuditLog
+} from "shared-testing"
 import type { AuditLog, BichardAuditLogEvent } from "shared-types"
-import { EventType, isError } from "shared-types"
+import { isError } from "shared-types"
 import { auditLogDynamoConfig } from "src/test/dynamoDbConfig"
 import { TestDynamoGateway } from "../test"
 
@@ -237,19 +243,9 @@ describe("Getting Audit Logs", () => {
     })
 
     it("should include force owner at the top level of the response", async () => {
-      const auditLog = await createMockAuditLog()
-      if (isError(auditLog)) {
-        throw new Error("Unexpected error")
-      }
-
-      const event = await createMockAuditLogEvent(auditLog.messageId, {
-        eventType: EventType.InputMessageReceived,
-        attributes: { "Force Owner": "010000" }
-      })
-
-      if (isError(event)) {
-        throw new Error("Unexpected error")
-      }
+      const auditLog: AuditLog = mockAuditLog()
+      auditLog.automationReport = { forceOwner: "010000", events: [] }
+      await testDynamoGateway.insertOne(auditLogDynamoConfig.TABLE_NAME, auditLog, "messageId")
 
       const result = await axios.get<AuditLog[]>(
         "http://localhost:3010/messages?eventsFilter=automationReport&start=2000-01-01&end=2099-01-01"
@@ -302,6 +298,18 @@ describe("Getting Audit Logs", () => {
       expect(result.data).toHaveLength(2)
       expect(result.data[0].messageId).toBe(auditLogs[1].messageId)
       expect(result.data[1].messageId).toBe(auditLogs[0].messageId)
+    })
+
+    it("should include force owner from the automation report at the top level of the response", async () => {
+      const auditLog: AuditLog = mockAuditLog()
+      auditLog.automationReport = { forceOwner: "010000", events: [] }
+      await testDynamoGateway.insertOne(auditLogDynamoConfig.TABLE_NAME, auditLog, "messageId")
+
+      const result = await axios.get<AuditLog[]>(
+        "http://localhost:3010/messages?eventsFilter=topExceptionsReport&start=2000-01-01&end=2099-01-01"
+      )
+      expect(result.status).toEqual(HttpStatusCode.ok)
+      expect(result.data[0].forceOwner).toBe(1)
     })
   })
 

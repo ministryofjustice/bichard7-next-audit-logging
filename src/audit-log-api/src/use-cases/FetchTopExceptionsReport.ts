@@ -2,6 +2,7 @@ import type { AuditLog, PromiseResult } from "shared-types"
 import { isError } from "shared-types"
 import type { FetchReportOptions } from "src/types/queryParams"
 import type { AuditLogDynamoGatewayInterface } from "../gateways/dynamo"
+import { parseForceOwner } from "../gateways/dynamo"
 import getMessageById from "./getMessageById"
 import type MessageFetcher from "./MessageFetcher"
 
@@ -16,7 +17,7 @@ export default class FetchTopExceptionsReport implements MessageFetcher {
 
     const records = await this.gateway.fetchRange({
       ...this.options,
-      includeColumns: ["topExceptionsReport"],
+      includeColumns: ["topExceptionsReport", "automationReport"],
       excludeColumns: ["events"],
       lastMessage
     })
@@ -31,6 +32,13 @@ export default class FetchTopExceptionsReport implements MessageFetcher {
       if (record.topExceptionsReport) {
         record.events = record.topExceptionsReport.events
         delete record.topExceptionsReport
+      }
+
+      if (record.automationReport) {
+        if (!record.forceOwner && record.automationReport.forceOwner) {
+          record.forceOwner = parseForceOwner(record.automationReport.forceOwner)
+        }
+        delete record.automationReport
       }
 
       return record
