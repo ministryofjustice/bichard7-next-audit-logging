@@ -18,20 +18,10 @@ export default class AuditLogApiClient implements ApiClient {
   }
 
   getMessages(options?: GetMessagesOptions): PromiseResult<AuditLog[]> {
-    let queryString = ""
-    const queries = []
-    if (options && options.lastMessageId) {
-      queries.push(`lastMessageId=${options.lastMessageId}`)
-    }
-    if (options && options.status) {
-      queries.push(`status=${options.status}`)
-    }
-    if (queries.length > 0) {
-      queryString = `?${queries.join("&")}`
-    }
+    const url = addQueryParams(`${this.apiUrl}/messages`, options)
 
     return axios
-      .get(`${this.apiUrl}/messages${queryString}`, {
+      .get(url, {
         headers: { "X-API-Key": this.apiKey },
         timeout: this.timeout
       })

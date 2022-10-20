@@ -8,7 +8,7 @@ export default async function (apiClient: AuditLogApiClient, errorCount: number)
   let lastMessageId: string | undefined
 
   while (errors.length < errorCount) {
-    const errorBatch = await apiClient.getMessages({ status: "Error", lastMessageId })
+    const errorBatch = await apiClient.getMessages({ status: "Error", lastMessageId, limit: 100, largeObjects: false })
 
     if (isError(errorBatch)) {
       return errorBatch
