@@ -39,7 +39,7 @@ export default class CreateAuditLogEventUseCase {
     private readonly storeValuesInLookupTableUseCase: StoreValuesInLookupTableUseCase
   ) {}
 
-  async create(messageId: string, originalEvent: AuditLogEvent): Promise<CreateAuditLogEventsResult> {
+  async create(messageId: string, originalEvent: AuditLogEvent, attempts = 5): Promise<CreateAuditLogEventsResult> {
     const messageVersion = await this.auditLogGateway.fetchVersion(messageId)
 
     if (isError(messageVersion)) {
@@ -93,9 +93,14 @@ export default class CreateAuditLogEventUseCase {
 
     if (isError(transactionResult)) {
       if (isConditionalExpressionViolationError(transactionResult)) {
+        if (attempts > 1) {
+          // Wait 250ms and try again
+          await new Promise((resolve) => setTimeout(resolve, 250))
+          return this.create(messageId, originalEvent, attempts - 1)
+        }
         return {
           resultType: "invalidVersion",
-          resultDescription: `Message with Id ${messageId} has a different version in the database.`
+          resultDescription: `Message with Id ${messageId} has a different version in the database. Tried 5 times`
         }
       }
       return {
