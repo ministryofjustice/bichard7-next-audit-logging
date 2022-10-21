@@ -265,7 +265,7 @@ describe("AuditLogDynamoGateway", () => {
     it("should log the event for top exceptions report", async () => {
       const expectedEvent = createAuditLogEvent("information", new Date(), "Event for top exceptions report")
 
-      expectedEvent.addAttribute("Message Type", "SPIResults")
+      expectedEvent.addAttribute("eventCode", "exceptions.generated")
       expectedEvent.addAttribute("Error 2 Details", "Dummy")
 
       const message = new AuditLog("one", new Date(), "dummy hash")
@@ -302,7 +302,7 @@ describe("AuditLogDynamoGateway", () => {
 
       const actualEventAttributes = actualEvent.attributes
       expect(actualEventAttributes).toBeDefined()
-      expect(actualEventAttributes["Message Type"]).toBe("SPIResults")
+      expect(actualEventAttributes.eventCode).toBe("exceptions.generated")
       expect(actualEventAttributes["Error 2 Details"]).toBe("Dummy")
 
       const actualTopExceptionReportEvent = actualMessage.topExceptionsReport?.events[0]
@@ -313,7 +313,7 @@ describe("AuditLogDynamoGateway", () => {
 
       const actualTopExceptionReportEventAttribute = actualTopExceptionReportEvent?.attributes
       expect(actualTopExceptionReportEventAttribute).toBeDefined()
-      expect(actualTopExceptionReportEventAttribute?.["Message Type"]).toBe("SPIResults")
+      expect(actualTopExceptionReportEventAttribute?.eventCode).toBe("exceptions.generated")
       expect(actualTopExceptionReportEventAttribute?.["Error 2 Details"]).toBe("Dummy")
     })
 
@@ -1123,7 +1123,7 @@ describe("AuditLogDynamoGateway", () => {
         createAuditLogEvent("information", new Date(), "SPIResults")
       ]
       eventsToBeLogged.forEach((event) => {
-        event.addAttribute("Message Type", "SPIResults")
+        event.addAttribute("eventCode", "exceptions.generated")
         event.addAttribute("Error Details", "An error occured")
       })
       const eventsNotToBeLogged = [

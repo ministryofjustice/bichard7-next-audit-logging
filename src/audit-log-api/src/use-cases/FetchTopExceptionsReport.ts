@@ -17,8 +17,7 @@ export default class FetchTopExceptionsReport implements MessageFetcher {
 
     const records = await this.gateway.fetchRange({
       ...this.options,
-      includeColumns: ["topExceptionsReport", "automationReport"],
-      excludeColumns: ["events"],
+      includeColumns: ["automationReport"],
       lastMessage
     })
 
@@ -27,12 +26,7 @@ export default class FetchTopExceptionsReport implements MessageFetcher {
     }
 
     return records.map((record) => {
-      record.events = []
-
-      if (record.topExceptionsReport) {
-        record.events = record.topExceptionsReport.events
-        delete record.topExceptionsReport
-      }
+      record.events = record.events.filter((e) => e.attributes && "Error 1 Details" in e.attributes)
 
       if (record.automationReport) {
         if (!record.forceOwner && record.automationReport.forceOwner) {
