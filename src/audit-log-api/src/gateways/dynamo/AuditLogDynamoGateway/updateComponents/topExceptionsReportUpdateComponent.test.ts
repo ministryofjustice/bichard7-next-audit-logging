@@ -5,7 +5,7 @@ const topExceptionEvent = (): AuditLogEvent => {
   return {
     eventType: "top exception event",
     attributes: {
-      "Message Type": "SPIResults",
+      eventCode: "exceptions.generated",
       "Error Details": "error"
     }
   } as unknown as AuditLogEvent
