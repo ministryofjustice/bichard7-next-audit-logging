@@ -1,7 +1,7 @@
 jest.retryTimes(10)
 import { decompress } from "shared"
 import type { AuditLogLookup, KeyValuePair } from "shared-types"
-import { AuditLog, AuditLogEvent } from "shared-types"
+import { AuditLog, AuditLogEvent, TransactionFailedError } from "shared-types"
 import { auditLogDynamoConfig, auditLogLookupDynamoConfig } from "src/test/dynamoDbConfig"
 import { AuditLogDynamoGateway, AwsAuditLogLookupDynamoGateway } from "../gateways/dynamo"
 import { TestDynamoGateway } from "../test"
@@ -217,6 +217,59 @@ describe("CreateAuditLogEventUseCase", () => {
 
     expect(result.resultType).toBe("transactionFailed")
 
+    const actualAuditLog = await getAuditLog(auditLog.messageId)
+    expect(actualAuditLog).toBeDefined()
+    expect(actualAuditLog?.events).toHaveLength(0)
+
+    const lookupResult = await lookupMessageId(auditLog.messageId)
+    expect(lookupResult).toBeNull()
+  })
+
+  it("should try 5 times to add the event if there is a version conflict", async () => {
+    const auditLog = createAuditLog()
+    await auditLogDynamoGateway.create(auditLog)
+
+    const event = createAuditLogEvent()
+    event.addAttribute("reallyLongAttribute", "X".repeat(10_000))
+
+    const returnedError = new TransactionFailedError([
+      { Code: "ConditionalCheckFailed", Message: "Conditional check failed" }
+    ])
+    const spy = jest
+      .spyOn(auditLogDynamoGateway, "executeTransaction")
+      .mockResolvedValueOnce(returnedError)
+      .mockResolvedValueOnce(returnedError)
+      .mockResolvedValueOnce(returnedError)
+      .mockResolvedValueOnce(returnedError)
+
+    const result = await createAuditLogEventUseCase.create(auditLog.messageId, event)
+
+    expect(result.resultType).toBe("success")
+
+    expect(spy).toHaveBeenCalledTimes(5)
+    const actualAuditLog = await getAuditLog(auditLog.messageId)
+    expect(actualAuditLog).toBeDefined()
+    expect(actualAuditLog?.events).toHaveLength(1)
+  })
+
+  it("should still return an error if there is a version conflict after 5 attempts", async () => {
+    const auditLog = createAuditLog()
+    await auditLogDynamoGateway.create(auditLog)
+
+    const event = createAuditLogEvent()
+    event.addAttribute("reallyLongAttribute", "X".repeat(10_000))
+
+    const spy = jest
+      .spyOn(auditLogDynamoGateway, "executeTransaction")
+      .mockResolvedValue(
+        new TransactionFailedError([{ Code: "ConditionalCheckFailed", Message: "Conditional check failed" }])
+      )
+
+    const result = await createAuditLogEventUseCase.create(auditLog.messageId, event)
+
+    expect(result.resultType).toBe("invalidVersion")
+
+    expect(spy).toHaveBeenCalledTimes(5)
     const actualAuditLog = await getAuditLog(auditLog.messageId)
     expect(actualAuditLog).toBeDefined()
     expect(actualAuditLog?.events).toHaveLength(0)
