@@ -3,6 +3,8 @@ import type { AuditLog, AuditLogEvent, PromiseResult } from "."
 export type GetMessagesOptions = {
   status?: string
   lastMessageId?: string
+  limit?: number
+  largeObjects?: boolean
 }
 
 export type GetMessageOptions = {

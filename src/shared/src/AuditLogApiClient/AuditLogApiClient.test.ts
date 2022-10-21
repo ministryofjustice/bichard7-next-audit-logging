@@ -70,7 +70,17 @@ describe("getMessages()", () => {
 
     expect(result).toNotBeError()
     expect(result).toEqual([message, message2])
-    expect(getRequest.mock.calls[0][0]).toBe(`http://localhost/messages?lastMessageId=12345&status=Error`)
+    expect(getRequest.mock.calls[0][0]).toBe(`http://localhost/messages?status=Error&lastMessageId=12345`)
+  })
+
+  it("should pass through largeObjects and limit", async () => {
+    const getRequest = jest.spyOn(axios, "get").mockResolvedValue({ status: 200, data: [message, message2] })
+
+    const result = await apiClient.getMessages({ limit: 99, largeObjects: false })
+
+    expect(result).toNotBeError()
+    expect(result).toEqual([message, message2])
+    expect(getRequest.mock.calls[0][0]).toBe(`http://localhost/messages?limit=99&largeObjects=false`)
   })
 })
 

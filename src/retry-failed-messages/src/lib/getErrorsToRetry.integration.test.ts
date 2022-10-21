@@ -21,10 +21,10 @@ describe("getErrorsToRetry", () => {
   })
 
   it("should get all errors, paginating where necessary", async () => {
-    const count = 12
+    const count = 102
     await createMockErrors(count, { receivedDate: new Date(Date.now() - 3600000).toISOString() })
     await createMockAuditLogs(1)
-    const errors = await getErrorsToRetry(apiClient, 13)
+    const errors = await getErrorsToRetry(apiClient, 103)
     expect(errors).toHaveLength(count)
   })
 
