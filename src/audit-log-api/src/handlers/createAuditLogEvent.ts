@@ -7,6 +7,7 @@ import { AuditLogDynamoGateway, AwsAuditLogLookupDynamoGateway } from "../gatewa
 import { CreateAuditLogEventUseCase, parseCreateAuditLogEventRequest, validateCreateAuditLogEvent } from "../use-cases"
 import StoreValuesInLookupTableUseCase from "../use-cases/StoreValuesInLookupTableUseCase"
 import { createJsonApiResult } from "../utils"
+import transformAuditLogEvent from "../utils/transformAuditLogEvent"
 
 const auditLogConfig = createAuditLogDynamoDbConfig()
 const auditLogLookupConfig = createAuditLogLookupDynamoDbConfig()
@@ -34,7 +35,8 @@ export default async function createAuditLogEvent(event: APIGatewayProxyEvent): 
     })
   }
 
-  const result = await createAuditLogEventUseCase.create(request.messageId, auditLogEvent)
+  const transformedAuditLogEvent = transformAuditLogEvent(auditLogEvent)
+  const result = await createAuditLogEventUseCase.create(request.messageId, transformedAuditLogEvent)
 
   if (result.resultType === "notFound") {
     return createJsonApiResult({

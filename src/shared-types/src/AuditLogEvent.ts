@@ -10,6 +10,14 @@ export default class AuditLogEvent {
 
   public readonly eventType: string
 
+  public eventCode?: string
+
+  public user?: string
+
+  public automationReport?: boolean
+
+  public topExceptionsReport?: boolean
+
   public readonly timestamp: string
 
   public readonly eventSourceQueueName?: string
@@ -22,6 +30,10 @@ export default class AuditLogEvent {
     this.eventSource = options.eventSource
     this.category = options.category
     this.eventType = options.eventType
+    this.eventCode = options.eventCode
+    this.user = options.user
+    this.automationReport = options.automationReport
+    this.topExceptionsReport = options.topExceptionsReport
     this.timestamp = options.timestamp.toISOString()
     this.eventSourceQueueName = options.eventSourceQueueName
     this.eventXml = options.eventXml
