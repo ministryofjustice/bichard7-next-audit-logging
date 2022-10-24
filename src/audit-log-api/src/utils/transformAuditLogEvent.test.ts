@@ -43,7 +43,7 @@ describe("transformAuditLogEvent", () => {
   it("should not mark the record as being for the automation report if not required", () => {
     const event = createLog({ eventType: "Other event type" })
     const result = transformAuditLogEvent(event)
-    expect(result.automationReport).toBeUndefined()
+    expect(result.automationReport).toBe(false)
   })
 
   it("should mark the record as being for the top exception report if required", () => {
@@ -55,6 +55,6 @@ describe("transformAuditLogEvent", () => {
   it("should not mark the record as being for the top exception report if not required", () => {
     const event = createLog()
     const result = transformAuditLogEvent(event)
-    expect(result.topExceptionsReport).toBeUndefined()
+    expect(result.topExceptionsReport).toBe(false)
   })
 })

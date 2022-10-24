@@ -32,7 +32,12 @@ describe("Creating Audit Log event", () => {
 
     actualEvent.attributes["Attribute 1"] = event.attributes["Attribute 1"]
     expect(actualEvent.eventXml).toHaveProperty("valueLookup")
-    expect({ ...actualEvent, eventXml: undefined }).toEqual({ ...event, eventXml: undefined })
+    expect({ ...actualEvent, eventXml: undefined }).toEqual({
+      ...event,
+      eventXml: undefined,
+      automationReport: false,
+      topExceptionsReport: false
+    })
   })
 
   it("should transform the audit log event before saving", async () => {

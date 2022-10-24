@@ -17,7 +17,7 @@ describe("Getting Audit Log events", () => {
     const result3 = await axios.get<AuditLogEvent[]>(`http://localhost:3010/messages/${auditLog.messageId}/events`)
     expect(result3.status).toEqual(HttpStatusCode.ok)
 
-    expect(result3.data).toEqual([event])
+    expect(result3.data).toEqual([{ ...event, automationReport: false, topExceptionsReport: false }])
   })
 
   it("should not look up large objects when largeObjects parameter set to false", async () => {

@@ -15,13 +15,8 @@ const transformAuditLogEvent = (event: AuditLogEvent): AuditLogEvent => {
     delete event.attributes.User
   }
 
-  if (shouldLogForAutomationReport(event)) {
-    event.automationReport = true
-  }
-
-  if (shouldLogForTopExceptionsReport(event)) {
-    event.topExceptionsReport = true
-  }
+  event.automationReport = shouldLogForAutomationReport(event)
+  event.topExceptionsReport = shouldLogForTopExceptionsReport(event)
 
   return event
 }
