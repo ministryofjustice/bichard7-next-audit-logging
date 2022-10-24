@@ -8,7 +8,7 @@ import type {
   FetchRangeOptions,
   FetchUnsanitisedOptions,
   ProjectionOptions
-} from "src/types/queryParams"
+} from "../../../types/queryParams"
 import type { FetchByIndexOptions, UpdateOptions } from "../DynamoGateway"
 import { DynamoGateway, IndexSearcher, KeyComparison } from "../DynamoGateway"
 import type DynamoDbConfig from "../DynamoGateway/DynamoDbConfig"

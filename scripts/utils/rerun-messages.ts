@@ -51,6 +51,7 @@ const messageIds = MESSAGE_ID
       .toString()
       .split("\n")
       .filter((x) => !!x?.trim())
+      .map((x) => x.trim())
 
 const dynamoConfig = {
   DYNAMO_REGION: "eu-west-2",
@@ -132,6 +133,7 @@ async function rerunMessages() {
   const processedMessages = fs.readFileSync(sessionReranFile).toString()
   // get s3 paths from ids
   for (const id of messageIds) {
+    console.log(`Processing message: ${id}`)
     const result = await dynamo.fetchOne(id)
 
     if (isError(result)) {
