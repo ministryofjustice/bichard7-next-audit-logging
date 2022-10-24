@@ -4,6 +4,8 @@ import type { AuditLogDynamoGatewayInterface } from "../gateways/dynamo"
 import { isConditionalExpressionViolationError } from "../gateways/dynamo"
 import type StoreValuesInLookupTableUseCase from "./StoreValuesInLookupTableUseCase"
 
+const retryAttempts = 10
+
 const shouldDeduplicate = (event: AuditLogEvent): boolean =>
   event.category === "error" &&
   event.attributes &&
@@ -39,7 +41,11 @@ export default class CreateAuditLogEventUseCase {
     private readonly storeValuesInLookupTableUseCase: StoreValuesInLookupTableUseCase
   ) {}
 
-  async create(messageId: string, originalEvent: AuditLogEvent, attempts = 5): Promise<CreateAuditLogEventsResult> {
+  async create(
+    messageId: string,
+    originalEvent: AuditLogEvent,
+    attempts = retryAttempts
+  ): Promise<CreateAuditLogEventsResult> {
     const messageVersion = await this.auditLogGateway.fetchVersion(messageId)
 
     if (isError(messageVersion)) {
@@ -94,13 +100,14 @@ export default class CreateAuditLogEventUseCase {
     if (isError(transactionResult)) {
       if (isConditionalExpressionViolationError(transactionResult)) {
         if (attempts > 1) {
-          // Wait 250ms and try again
-          await new Promise((resolve) => setTimeout(resolve, 250))
+          // Wait 250 - 750ms and try again
+          const delay = Math.floor(250 + Math.random() * 500)
+          await new Promise((resolve) => setTimeout(resolve, delay))
           return this.create(messageId, originalEvent, attempts - 1)
         }
         return {
           resultType: "invalidVersion",
-          resultDescription: `Message with Id ${messageId} has a different version in the database. Tried 5 times`
+          resultDescription: `Message with Id ${messageId} has a different version in the database. Tried ${retryAttempts} times`
         }
       }
       return {
