@@ -225,7 +225,7 @@ describe("CreateAuditLogEventUseCase", () => {
     expect(lookupResult).toBeNull()
   })
 
-  it("should try 5 times to add the event if there is a version conflict", async () => {
+  it("should try 10 times to add the event if there is a version conflict", async () => {
     const auditLog = createAuditLog()
     await auditLogDynamoGateway.create(auditLog)
 
@@ -241,18 +241,23 @@ describe("CreateAuditLogEventUseCase", () => {
       .mockResolvedValueOnce(returnedError)
       .mockResolvedValueOnce(returnedError)
       .mockResolvedValueOnce(returnedError)
+      .mockResolvedValueOnce(returnedError)
+      .mockResolvedValueOnce(returnedError)
+      .mockResolvedValueOnce(returnedError)
+      .mockResolvedValueOnce(returnedError)
+      .mockResolvedValueOnce(returnedError)
 
     const result = await createAuditLogEventUseCase.create(auditLog.messageId, event)
 
     expect(result.resultType).toBe("success")
 
-    expect(spy).toHaveBeenCalledTimes(5)
+    expect(spy).toHaveBeenCalledTimes(10)
     const actualAuditLog = await getAuditLog(auditLog.messageId)
     expect(actualAuditLog).toBeDefined()
     expect(actualAuditLog?.events).toHaveLength(1)
   })
 
-  it("should still return an error if there is a version conflict after 5 attempts", async () => {
+  it("should still return an error if there is a version conflict after 10 attempts", async () => {
     const auditLog = createAuditLog()
     await auditLogDynamoGateway.create(auditLog)
 
@@ -269,7 +274,7 @@ describe("CreateAuditLogEventUseCase", () => {
 
     expect(result.resultType).toBe("invalidVersion")
 
-    expect(spy).toHaveBeenCalledTimes(5)
+    expect(spy).toHaveBeenCalledTimes(10)
     const actualAuditLog = await getAuditLog(auditLog.messageId)
     expect(actualAuditLog).toBeDefined()
     expect(actualAuditLog?.events).toHaveLength(0)
