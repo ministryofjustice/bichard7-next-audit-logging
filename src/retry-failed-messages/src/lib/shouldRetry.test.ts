@@ -15,7 +15,11 @@ describe("shouldRetry", () => {
   it("should not retry new messages too early", () => {
     const receivedDate = lessThanInitialRetryDelay.toISOString()
     const message = mockAuditLog({ receivedDate })
-    const event = mockAuditLogEvent("error", "Failed event", lessThanInitialRetryDelay)
+    const event = mockAuditLogEvent({
+      category: "error",
+      eventType: "Failed event",
+      timestamp: lessThanInitialRetryDelay
+    })
     message.events.push(event)
     expect(shouldRetry(message)).toBeFalsy()
   })
@@ -23,16 +27,28 @@ describe("shouldRetry", () => {
   it("should correctly retry new messages after an initial wait", () => {
     const receivedDate = moreThanInitialRetryDelay.toISOString()
     const message = mockAuditLog({ receivedDate })
-    const event = mockAuditLogEvent("error", "Failed event", moreThanInitialRetryDelay)
+    const event = mockAuditLogEvent({
+      category: "error",
+      eventType: "Failed event",
+      timestamp: moreThanInitialRetryDelay
+    })
     message.events.push(event)
     expect(shouldRetry(message)).toBeTruthy()
   })
 
   it("should correctly handle messages that have already been retried", () => {
     const message = mockAuditLog()
-    const errorEvent = mockAuditLogEvent("error", "Failed event", generateDateInThePast(24, 0, 40))
+    const errorEvent = mockAuditLogEvent({
+      category: "error",
+      eventType: "Failed event",
+      timestamp: generateDateInThePast(24, 0, 40)
+    })
     message.events.push(errorEvent)
-    const retryEvent = mockAuditLogEvent("information", "Retrying failed message", moreThanRetryDelay)
+    const retryEvent = mockAuditLogEvent({
+      category: "information",
+      eventType: "Retrying failed message",
+      timestamp: moreThanRetryDelay
+    })
     message.events.push(retryEvent)
     expect(shouldRetry(message)).toBeTruthy()
   })
@@ -40,9 +56,17 @@ describe("shouldRetry", () => {
   it("shouldn't retry messages too often that have already been retried", () => {
     const receivedDate = new Date().toISOString()
     const message = mockAuditLog({ receivedDate })
-    const errorEvent = mockAuditLogEvent("error", "Failed event", generateDateInThePast(24, 59, 59))
+    const errorEvent = mockAuditLogEvent({
+      category: "error",
+      eventType: "Failed event",
+      timestamp: generateDateInThePast(24, 59, 59)
+    })
     message.events.push(errorEvent)
-    const retryEvent = mockAuditLogEvent("information", "Retrying failed message", lessThanRetryDelay)
+    const retryEvent = mockAuditLogEvent({
+      category: "information",
+      eventType: "Retrying failed message",
+      timestamp: lessThanRetryDelay
+    })
     message.events.push(retryEvent)
     expect(shouldRetry(message)).toBeFalsy()
   })
@@ -50,10 +74,26 @@ describe("shouldRetry", () => {
   it("shouldn't retry messages too many times", () => {
     const receivedDate = new Date().toISOString()
     const message = mockAuditLog({ receivedDate })
-    const errorEvent = mockAuditLogEvent("error", "Failed event", generateDateInThePast(28, 0, 0))
-    const retryEvent1 = mockAuditLogEvent("information", "Retrying failed message", generateDateInThePast(27, 0, 0))
-    const retryEvent2 = mockAuditLogEvent("information", "Retrying failed message", generateDateInThePast(26, 0, 0))
-    const retryEvent3 = mockAuditLogEvent("information", "Retrying failed message", moreThanRetryDelay)
+    const errorEvent = mockAuditLogEvent({
+      category: "error",
+      eventType: "Failed event",
+      timestamp: generateDateInThePast(28, 0, 0)
+    })
+    const retryEvent1 = mockAuditLogEvent({
+      category: "information",
+      eventType: "Retrying failed message",
+      timestamp: generateDateInThePast(27, 0, 0)
+    })
+    const retryEvent2 = mockAuditLogEvent({
+      category: "information",
+      eventType: "Retrying failed message",
+      timestamp: generateDateInThePast(26, 0, 0)
+    })
+    const retryEvent3 = mockAuditLogEvent({
+      category: "information",
+      eventType: "Retrying failed message",
+      timestamp: moreThanRetryDelay
+    })
     message.events.push(errorEvent)
     message.events.push(retryEvent1)
     message.events.push(retryEvent2)

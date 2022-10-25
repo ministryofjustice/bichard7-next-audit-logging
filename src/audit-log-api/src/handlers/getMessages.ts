@@ -1,6 +1,6 @@
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda"
 import { HttpStatusCode, logger } from "shared"
-import type { AuditLog, PromiseResult } from "shared-types"
+import type { PromiseResult } from "shared-types"
 import { isError } from "shared-types"
 import createAuditLogDynamoDbConfig from "../createAuditLogDynamoDbConfig"
 import createAuditLogLookupDynamoDbConfig from "../createAuditLogLookupDynamoDbConfig"
@@ -8,7 +8,7 @@ import { AuditLogDynamoGateway, AwsAuditLogLookupDynamoGateway } from "../gatewa
 import createMessageFetcher from "../use-cases/createMessageFetcher"
 import LookupEventValuesUseCase from "../use-cases/LookupEventValuesUseCase"
 import LookupMessageValuesUseCase from "../use-cases/LookupMessageValuesUseCase"
-import { createJsonApiResult, shouldFetchLargeObjects } from "../utils"
+import { createJsonApiResult, shouldFetchLargeObjects, transformAuditLogEventAttributes } from "../utils"
 
 const auditLogConfig = createAuditLogDynamoDbConfig()
 const auditLogLookupConfig = createAuditLogLookupDynamoDbConfig()
@@ -46,10 +46,12 @@ export default async function getMessages(event: APIGatewayProxyEvent): PromiseR
     })
   }
 
-  let messages = messageFetcherResult as AuditLog[]
-  if (!!messages && !Array.isArray(messages)) {
-    messages = [messageFetcherResult as AuditLog]
-  }
+  const messages = Array.isArray(messageFetcherResult) ? messageFetcherResult : [messageFetcherResult]
+  messages.forEach((m) => {
+    if (m.events) {
+      m.events = m.events.map(transformAuditLogEventAttributes)
+    }
+  })
 
   if (fetchLargeObjects) {
     for (let index = 0; index < messages.length; index++) {

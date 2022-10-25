@@ -2,4 +2,6 @@
 export { default as createJsonApiResult } from "./createJsonApiResult"
 export { default as isIsoDate } from "./isIsoDate"
 export { default as shouldFetchLargeObjects } from "./shouldFetchLargeObjects"
+export { default as transformAuditLogEvent } from "./transformAuditLogEvent"
+export { default as transformAuditLogEventAttributes } from "./transformAuditLogEventAttributes"
 export { default as validateAuditLogEvent } from "./validateAuditLogEvent"

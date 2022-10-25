@@ -6,8 +6,7 @@ import createAuditLogLookupDynamoDbConfig from "../createAuditLogLookupDynamoDbC
 import { AuditLogDynamoGateway, AwsAuditLogLookupDynamoGateway } from "../gateways/dynamo"
 import { CreateAuditLogEventUseCase, parseCreateAuditLogEventRequest, validateCreateAuditLogEvent } from "../use-cases"
 import StoreValuesInLookupTableUseCase from "../use-cases/StoreValuesInLookupTableUseCase"
-import { createJsonApiResult } from "../utils"
-import transformAuditLogEvent from "../utils/transformAuditLogEvent"
+import { createJsonApiResult, transformAuditLogEvent } from "../utils"
 
 const auditLogConfig = createAuditLogDynamoDbConfig()
 const auditLogLookupConfig = createAuditLogLookupDynamoDbConfig()

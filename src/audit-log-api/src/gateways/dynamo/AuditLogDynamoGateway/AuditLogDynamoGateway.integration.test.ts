@@ -264,6 +264,7 @@ describe("AuditLogDynamoGateway", () => {
 
     it("should log the event for top exceptions report", async () => {
       const expectedEvent = createAuditLogEvent("information", new Date(), "Event for top exceptions report")
+      expectedEvent.eventCode = "exceptions.generated"
 
       expectedEvent.addAttribute("eventCode", "exceptions.generated")
       expectedEvent.addAttribute("Error 2 Details", "Dummy")
@@ -1123,7 +1124,7 @@ describe("AuditLogDynamoGateway", () => {
         createAuditLogEvent("information", new Date(), "SPIResults")
       ]
       eventsToBeLogged.forEach((event) => {
-        event.addAttribute("eventCode", "exceptions.generated")
+        event.eventCode = "exceptions.generated"
         event.addAttribute("Error Details", "An error occured")
       })
       const eventsNotToBeLogged = [

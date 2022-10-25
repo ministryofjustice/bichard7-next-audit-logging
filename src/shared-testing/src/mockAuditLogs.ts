@@ -1,5 +1,4 @@
-import type { EventCategory } from "shared-types"
-import { AuditLog, BichardAuditLogEvent } from "shared-types"
+import { AuditLog, BichardAuditLogEvent, BichardAuditLogEventOptions, EventCategory } from "shared-types"
 import { v4 as uuid } from "uuid"
 
 export function mockAuditLog(overrides: Partial<AuditLog> = {}): AuditLog {
@@ -14,26 +13,20 @@ export function mockAuditLog(overrides: Partial<AuditLog> = {}): AuditLog {
   return { ...auditLog, ...overrides }
 }
 
-export function mockAuditLogEvent(
-  category?: EventCategory,
-  eventType?: string,
-  date?: Date,
-  eventSourceArn?: string,
-  eventSourceQueueName?: string,
-  eventXml?: string
-): BichardAuditLogEvent {
-  const event = new BichardAuditLogEvent({
-    category: category ?? "information",
-    timestamp: date ?? new Date(),
-    eventType: eventType ?? "Test event",
+export function mockAuditLogEvent(overrides: Partial<BichardAuditLogEventOptions> = {}): BichardAuditLogEvent {
+  const defaults: BichardAuditLogEventOptions = {
+    category: "information" as EventCategory,
+    timestamp: new Date(),
+    eventType: "Test event",
     eventSource: "Test",
-    eventSourceArn: eventSourceArn ?? "Test event source ARN",
-    eventSourceQueueName: eventSourceQueueName ?? "Test event source queue name",
-    eventXml: eventXml ?? "Test event xml".repeat(500)
-  })
+    eventSourceArn: "Test event source ARN",
+    eventSourceQueueName: "Test event source queue name",
+    eventXml: "Test event xml".repeat(500),
+    attributes: {
+      "Attribute 1": "Attribute 1 data".repeat(500),
+      "Attribute 2": "Attribute 2 data"
+    }
+  }
 
-  event.addAttribute("Attribute 1", "Attribute 1 data".repeat(500))
-  event.addAttribute("Attribute 2", "Attribute 2 data")
-
-  return event
+  return new BichardAuditLogEvent({ ...defaults, ...overrides })
 }

@@ -1,13 +1,13 @@
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda"
 import { HttpStatusCode, logger } from "shared"
-import type { AuditLogEvent, PromiseResult } from "shared-types"
+import type { PromiseResult } from "shared-types"
 import { isError } from "shared-types"
 import createAuditLogDynamoDbConfig from "../createAuditLogDynamoDbConfig"
 import createAuditLogLookupDynamoDbConfig from "../createAuditLogLookupDynamoDbConfig"
 import { AuditLogDynamoGateway, AwsAuditLogLookupDynamoGateway } from "../gateways/dynamo"
 import { FetchEventsUseCase, parseGetEventsRequest } from "../use-cases"
 import LookupEventValuesUseCase from "../use-cases/LookupEventValuesUseCase"
-import { createJsonApiResult } from "../utils"
+import { createJsonApiResult, transformAuditLogEventAttributes } from "../utils"
 
 const auditLogConfig = createAuditLogDynamoDbConfig()
 const auditLogLookupConfig = createAuditLogLookupDynamoDbConfig()
@@ -38,7 +38,7 @@ export default async function getEvents(event: APIGatewayProxyEvent): PromiseRes
     })
   }
 
-  const events = result as AuditLogEvent[]
+  const events = result.map(transformAuditLogEventAttributes)
   return createJsonApiResult({
     statusCode: HttpStatusCode.ok,
     body: events
