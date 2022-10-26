@@ -37,24 +37,24 @@ describe("transformAuditLogEvent", () => {
   it("should mark the record as being for the automation report if required", () => {
     const event = createLog({ eventType: "Hearing Outcome passed to Error List" })
     const result = transformAuditLogEvent(event)
-    expect(result.automationReport).toBe(true)
+    expect(result._automationReport).toBe(true)
   })
 
   it("should not mark the record as being for the automation report if not required", () => {
     const event = createLog({ eventType: "Other event type" })
     const result = transformAuditLogEvent(event)
-    expect(result.automationReport).toBe(false)
+    expect(result._automationReport).toBe(false)
   })
 
   it("should mark the record as being for the top exception report if required", () => {
     const event = createLog({ attributes: { eventCode: "exceptions.generated" } })
     const result = transformAuditLogEvent(event)
-    expect(result.topExceptionsReport).toBe(true)
+    expect(result._topExceptionsReport).toBe(true)
   })
 
   it("should not mark the record as being for the top exception report if not required", () => {
     const event = createLog()
     const result = transformAuditLogEvent(event)
-    expect(result.topExceptionsReport).toBe(false)
+    expect(result._topExceptionsReport).toBe(false)
   })
 })

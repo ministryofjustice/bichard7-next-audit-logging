@@ -6,8 +6,8 @@ import transformAuditLogEventAttributes from "./transformAuditLogEventAttributes
 const transformAuditLogEvent = (event: AuditLogEvent): AuditLogEvent => {
   const transformedEvent = transformAuditLogEventAttributes(event)
 
-  transformedEvent.automationReport = shouldLogForAutomationReport(transformedEvent)
-  transformedEvent.topExceptionsReport = shouldLogForTopExceptionsReport(transformedEvent)
+  transformedEvent._automationReport = shouldLogForAutomationReport(transformedEvent)
+  transformedEvent._topExceptionsReport = shouldLogForTopExceptionsReport(transformedEvent)
 
   return transformedEvent
 }
