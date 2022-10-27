@@ -20,12 +20,14 @@ const createAuditLogEvent = (
   category: EventCategory,
   timestamp: Date,
   eventType: string,
+  eventCode: string = "dummy.event.code",
   eventSource?: string
 ): AuditLogEvent =>
   new AuditLogEvent({
     category,
     timestamp,
     eventType,
+    eventCode,
     eventSource: eventSource || "Test"
   })
 
@@ -201,10 +203,22 @@ describe("AuditLogDynamoGateway", () => {
     })
 
     it("should add two events to the audit log and update the message status to the latest event type", async () => {
-      const expectedEventOne = createAuditLogEvent("information", new Date(), "Test event one", "Event source one")
+      const expectedEventOne = createAuditLogEvent(
+        "information",
+        new Date(),
+        "Test event one",
+        "dummy.event.code",
+        "Event source one"
+      )
       expectedEventOne.addAttribute("EventOneAttribute", "Event one attribute")
 
-      const expectedEventTwo = createAuditLogEvent("error", new Date(), "PNC Response not received", "Event source two")
+      const expectedEventTwo = createAuditLogEvent(
+        "error",
+        new Date(),
+        "PNC Response not received",
+        "dummy.event.code",
+        "Event source two"
+      )
       expectedEventTwo.addAttribute("EventTwoAttribute", "Event two attribute")
 
       let message = new AuditLog("one", new Date(), "dummy hash")
@@ -319,7 +333,12 @@ describe("AuditLogDynamoGateway", () => {
     })
 
     it("should log the event for automation report", async () => {
-      const expectedEvent = createAuditLogEvent("information", new Date(), "Hearing Outcome passed to Error List")
+      const expectedEvent = createAuditLogEvent(
+        "information",
+        new Date(),
+        "Hearing Outcome passed to Error List",
+        "exceptions.generated"
+      )
 
       const message = new AuditLog("one", new Date(), "dummy hash")
 
@@ -1071,11 +1090,21 @@ describe("AuditLogDynamoGateway", () => {
 
     it("should add all events to be logged for the automation report", async () => {
       const eventsToBeLogged = [
-        createAuditLogEvent("information", new Date(), "Hearing Outcome passed to Error List"),
-        createAuditLogEvent("information", new Date(), "PNC Update added to Error List (PNC message construction)"),
-        createAuditLogEvent("information", new Date(), "PNC Update added to Error List (Unexpected PNC response)"),
-        createAuditLogEvent("information", new Date(), "Exception marked as resolved by user"),
-        createAuditLogEvent("information", new Date(), "PNC Update applied successfully")
+        createAuditLogEvent("information", new Date(), "Hearing Outcome passed to Error List", "exceptions.generated"),
+        createAuditLogEvent(
+          "information",
+          new Date(),
+          "PNC Update added to Error List (PNC message construction)",
+          "exceptions.generated"
+        ),
+        createAuditLogEvent(
+          "information",
+          new Date(),
+          "PNC Update added to Error List (Unexpected PNC response)",
+          "exceptions.generated"
+        ),
+        createAuditLogEvent("information", new Date(), "Exception marked as resolved by user", "exceptions.resolved"),
+        createAuditLogEvent("information", new Date(), "PNC Update applied successfully", "pnc.updated")
       ]
       const eventsNotToBeLogged = [
         createAuditLogEvent("information", new Date(), "Some other event"),
@@ -1118,13 +1147,12 @@ describe("AuditLogDynamoGateway", () => {
 
     it("should add all events to be logged for the top exceptions report", async () => {
       const eventsToBeLogged = [
-        createAuditLogEvent("information", new Date(), "SPIResults"),
-        createAuditLogEvent("information", new Date(), "SPIResults"),
-        createAuditLogEvent("information", new Date(), "SPIResults"),
-        createAuditLogEvent("information", new Date(), "SPIResults")
+        createAuditLogEvent("information", new Date(), "SPIResults", "exceptions.generated"),
+        createAuditLogEvent("information", new Date(), "SPIResults", "exceptions.generated"),
+        createAuditLogEvent("information", new Date(), "SPIResults", "exceptions.generated"),
+        createAuditLogEvent("information", new Date(), "SPIResults", "exceptions.generated")
       ]
       eventsToBeLogged.forEach((event) => {
-        event.eventCode = "exceptions.generated"
         event.addAttribute("Error Details", "An error occured")
       })
       const eventsNotToBeLogged = [

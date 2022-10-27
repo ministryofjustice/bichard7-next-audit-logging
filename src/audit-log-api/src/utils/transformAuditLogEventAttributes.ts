@@ -6,8 +6,6 @@ const transformAuditLogEventAttributes = (event: AuditLogEvent): AuditLogEvent =
     delete event.attributes.eventCode
   }
 
-  // TODO: Map description => event code for old events
-
   const user = event.attributes.user ?? event.attributes.User
   if (typeof user === "string") {
     event.user = user

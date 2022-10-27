@@ -17,6 +17,7 @@ export function mockAuditLogEvent(overrides: Partial<BichardAuditLogEventOptions
   const defaults: BichardAuditLogEventOptions = {
     category: "information" as EventCategory,
     timestamp: new Date(),
+    eventCode: "dummy.event.code",
     eventType: "Test event",
     eventSource: "Test",
     eventSourceArn: "Test event source ARN",

@@ -35,8 +35,8 @@ describe("Creating Audit Log event", () => {
     expect({ ...actualEvent, eventXml: undefined }).toEqual({
       ...event,
       eventXml: undefined,
-      automationReport: false,
-      topExceptionsReport: false
+      _automationReport: false,
+      _topExceptionsReport: false
     })
   })
 
