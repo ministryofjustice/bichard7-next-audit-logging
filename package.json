@@ -45,5 +45,8 @@
     "hooks": {
       "pre-commit": "lint-staged"
     }
+  },
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.192.0"
   }
 }

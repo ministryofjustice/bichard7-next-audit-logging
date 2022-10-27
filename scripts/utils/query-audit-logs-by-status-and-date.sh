@@ -21,7 +21,7 @@ if [[ -z "${TO}" ]]; then
 fi
 
 if [[ -z "${PROJECTION}" ]]; then
-  PROJECTION="messageId,#status,receivedDate"
+  PROJECTION="messageId,#status,receivedDate,events"
 fi
 
  aws dynamodb query \

@@ -1,0 +1,265 @@
+519
+do not have pnc update successfully 43
+hasTriggers 28
+triggersNotResolved 23
+hasExceptions but no triggers 8
+[
+  {
+    events: { L: [Array] },
+    messageId: { S: '37e9e616-ed1e-4201-98b7-c5f6cb793eef' },
+    receivedDate: { S: '2022-10-19T14:02:00.000Z' },
+    status: { S: 'Processing' }
+  },
+  {
+    events: { L: [Array] },
+    messageId: { S: '1a9d618f-b9ab-4d35-9547-e0ae06a0c6bc' },
+    receivedDate: { S: '2022-10-19T14:11:00.000Z' },
+    status: { S: 'Processing' }
+  },
+  {
+    events: { L: [Array] },
+    messageId: { S: '2eeaff73-013c-4ace-a691-13baf7464b9f' },
+    receivedDate: { S: '2022-10-19T14:16:00.000Z' },
+    status: { S: 'Processing' }
+  },
+  {
+    events: { L: [Array] },
+    messageId: { S: '7798cb6a-2fea-4225-86da-43451c9a2a0a' },
+    receivedDate: { S: '2022-10-19T14:22:00.000Z' },
+    status: { S: 'Processing' }
+  },
+  {
+    events: { L: [Array] },
+    messageId: { S: 'c6dbde7f-12b6-4f20-8923-60b84d295ca7' },
+    receivedDate: { S: '2022-10-19T14:29:00.000Z' },
+    status: { S: 'Processing' }
+  },
+  {
+    events: { L: [Array] },
+    messageId: { S: '29c484fe-eaf8-479c-bfba-3b87e2ecfffe' },
+    receivedDate: { S: '2022-10-19T14:30:00.000Z' },
+    status: { S: 'Processing' }
+  },
+  {
+    events: { L: [Array] },
+    messageId: { S: 'c2e91d85-68cc-4bbe-8afb-aed907a42e34' },
+    receivedDate: { S: '2022-10-19T14:31:00.000Z' },
+    status: { S: 'Processing' }
+  },
+  {
+    events: { L: [Array] },
+    messageId: { S: '17ad19fb-b3a5-49e4-be3d-ef6d0a953a17' },
+    receivedDate: { S: '2022-10-19T14:32:00.000Z' },
+    status: { S: 'Processing' }
+  },
+  {
+    events: { L: [Array] },
+    messageId: { S: '3df99ff3-42a9-427b-aecb-32163b4b1edb' },
+    receivedDate: { S: '2022-10-19T14:35:00.000Z' },
+    status: { S: 'Processing' }
+  },
+  {
+    events: { L: [Array] },
+    messageId: { S: 'fc480bfa-75cd-4480-8b98-adf2533ddf82' },
+    receivedDate: { S: '2022-10-19T14:40:00.000Z' },
+    status: { S: 'Processing' }
+  },
+  {
+    events: { L: [Array] },
+    messageId: { S: '4ba2c244-4f5a-4644-9dd8-aa09d14d6cc1' },
+    receivedDate: { S: '2022-10-19T14:40:00.000Z' },
+    status: { S: 'Processing' }
+  },
+  {
+    events: { L: [Array] },
+    messageId: { S: 'ce632ac3-e5c4-4f4f-a8ff-13d670e8a17a' },
+    receivedDate: { S: '2022-10-19T14:51:00.000Z' },
+    status: { S: 'Processing' }
+  },
+  {
+    events: { L: [Array] },
+    messageId: { S: '781e9e5b-7d5f-4771-929c-9b978159b72b' },
+    receivedDate: { S: '2022-10-19T14:59:00.000Z' },
+    status: { S: 'Processing' }
+  },
+  {
+    events: { L: [Array] },
+    messageId: { S: '8fd8a173-ad4a-4545-8581-8d5a9c8c3e0e' },
+    receivedDate: { S: '2022-10-19T15:01:00.000Z' },
+    status: { S: 'Processing' }
+  },
+  {
+    events: { L: [Array] },
+    messageId: { S: '47ab4403-b833-4fb4-ab91-a0af4340f653' },
+    receivedDate: { S: '2022-10-19T15:02:00.000Z' },
+    status: { S: 'Processing' }
+  },
+  {
+    events: { L: [Array] },
+    messageId: { S: 'd784a3cc-a8ed-4704-8123-bfac33065e60' },
+    receivedDate: { S: '2022-10-19T15:02:00.000Z' },
+    status: { S: 'Processing' }
+  },
+  {
+    events: { L: [Array] },
+    messageId: { S: 'ee189729-765a-4745-a73d-52383d42f6a1' },
+    receivedDate: { S: '2022-10-19T15:04:00.000Z' },
+    status: { S: 'Processing' }
+  },
+  {
+    events: { L: [Array] },
+    messageId: { S: '4ca23ddf-09f8-4d5b-8555-0a73eb2942a2' },
+    receivedDate: { S: '2022-10-19T15:05:00.000Z' },
+    status: { S: 'Processing' }
+  },
+  {
+    events: { L: [Array] },
+    messageId: { S: '18be2cca-21f0-47c8-b383-29a84abe04fc' },
+    receivedDate: { S: '2022-10-19T15:07:00.000Z' },
+    status: { S: 'Processing' }
+  },
+  {
+    events: { L: [Array] },
+    messageId: { S: '74bda509-ff27-4f1d-8e94-e88d2acba939' },
+    receivedDate: { S: '2022-10-19T15:10:00.000Z' },
+    status: { S: 'Processing' }
+  },
+  {
+    events: { L: [Array] },
+    messageId: { S: '5dbc9221-807d-4d4c-9e9c-6e9481076d28' },
+    receivedDate: { S: '2022-10-19T15:10:00.000Z' },
+    status: { S: 'Processing' }
+  },
+  {
+    events: { L: [Array] },
+    messageId: { S: 'c4d5dc8c-a73f-4dd9-93c5-c68c3d773f7e' },
+    receivedDate: { S: '2022-10-19T15:18:00.000Z' },
+    status: { S: 'Processing' }
+  },
+  {
+    events: { L: [Array] },
+    messageId: { S: 'e6486ca1-dbe7-48d2-9c1b-6f21cdda3d98' },
+    receivedDate: { S: '2022-10-19T15:21:00.000Z' },
+    status: { S: 'Processing' }
+  },
+  {
+    events: { L: [Array] },
+    messageId: { S: '27bcdc13-936b-40de-904e-e155eb799d89' },
+    receivedDate: { S: '2022-10-19T15:21:00.000Z' },
+    status: { S: 'Processing' }
+  },
+  {
+    events: { L: [Array] },
+    messageId: { S: 'c69308e4-e7e9-48ae-bbd0-3716ba8e5ada' },
+    receivedDate: { S: '2022-10-19T15:23:00.000Z' },
+    status: { S: 'Processing' }
+  },
+  {
+    events: { L: [Array] },
+    messageId: { S: '2be4ec1b-bc90-4aab-87b3-5966d999c85c' },
+    receivedDate: { S: '2022-10-19T15:32:00.000Z' },
+    status: { S: 'Processing' }
+  },
+  {
+    events: { L: [Array] },
+    messageId: { S: '34347782-e616-41be-abb5-0c370ed554fb' },
+    receivedDate: { S: '2022-10-19T15:34:00.000Z' },
+    status: { S: 'Processing' }
+  },
+  {
+    events: { L: [Array] },
+    messageId: { S: '57181ccc-f742-4c2c-a9ef-41f5bc825232' },
+    receivedDate: { S: '2022-10-19T15:41:00.000Z' },
+    status: { S: 'Processing' }
+  },
+  {
+    events: { L: [Array] },
+    messageId: { S: '2e6323aa-c7af-4276-9e7b-939325d82ded' },
+    receivedDate: { S: '2022-10-19T15:45:00.000Z' },
+    status: { S: 'Processing' }
+  },
+  {
+    events: { L: [Array] },
+    messageId: { S: '89e51453-a00c-4181-9e97-d0070e8c4848' },
+    receivedDate: { S: '2022-10-19T15:48:00.000Z' },
+    status: { S: 'Processing' }
+  },
+  {
+    events: { L: [Array] },
+    messageId: { S: '1c195f0e-40aa-4bcc-a889-92c03f9713f3' },
+    receivedDate: { S: '2022-10-19T15:51:00.000Z' },
+    status: { S: 'Processing' }
+  },
+  {
+    events: { L: [Array] },
+    messageId: { S: '7e49b2ef-c332-497c-97f4-bc3b8f649493' },
+    receivedDate: { S: '2022-10-19T15:56:00.000Z' },
+    status: { S: 'Processing' }
+  },
+  {
+    events: { L: [Array] },
+    messageId: { S: '1e4219ba-bc07-4582-adde-867f234ff68b' },
+    receivedDate: { S: '2022-10-19T15:57:00.000Z' },
+    status: { S: 'Processing' }
+  },
+  {
+    events: { L: [Array] },
+    messageId: { S: '7a560992-b446-438d-a224-7328f5779c5c' },
+    receivedDate: { S: '2022-10-19T15:59:00.000Z' },
+    status: { S: 'Processing' }
+  },
+  {
+    events: { L: [Array] },
+    messageId: { S: '85ba4884-7119-4fee-8a1c-12bf3a2d1aa3' },
+    receivedDate: { S: '2022-10-19T16:17:00.000Z' },
+    status: { S: 'Processing' }
+  },
+  {
+    events: { L: [Array] },
+    messageId: { S: 'aef93523-a14d-4017-a4b7-ea9b91aaa694' },
+    receivedDate: { S: '2022-10-19T16:30:00.000Z' },
+    status: { S: 'Processing' }
+  },
+  {
+    events: { L: [Array] },
+    messageId: { S: '5c0bef66-ec8e-4454-97ba-4d31863a8d14' },
+    receivedDate: { S: '2022-10-19T16:56:00.000Z' },
+    status: { S: 'Processing' }
+  },
+  {
+    events: { L: [Array] },
+    messageId: { S: '99da342b-8481-40a8-9c02-736709915cdf' },
+    receivedDate: { S: '2022-10-19T17:00:00.000Z' },
+    status: { S: 'Processing' }
+  },
+  {
+    events: { L: [Array] },
+    messageId: { S: '862e5391-317b-4af4-b3ed-6e346e40ced2' },
+    receivedDate: { S: '2022-10-19T17:02:00.000Z' },
+    status: { S: 'Processing' }
+  },
+  {
+    events: { L: [Array] },
+    messageId: { S: '07db5a97-f6f8-40a8-a4d2-331734c78fc4' },
+    receivedDate: { S: '2022-10-19T17:06:00.000Z' },
+    status: { S: 'Processing' }
+  },
+  {
+    events: { L: [Array] },
+    messageId: { S: '62211937-074c-4aea-8392-0c65746ce5de' },
+    receivedDate: { S: '2022-10-19T17:26:00.000Z' },
+    status: { S: 'Processing' }
+  },
+  {
+    events: { L: [Array] },
+    messageId: { S: 'f3299a37-cff3-44d6-9950-135db9c76ed7' },
+    receivedDate: { S: '2022-10-19T17:32:00.000Z' },
+    status: { S: 'Processing' }
+  },
+  {
+    events: { L: [Array] },
+    messageId: { S: '71c9d926-398e-49a5-9b02-9f77957339b7' },
+    receivedDate: { S: '2022-10-19T18:06:00.000Z' },
+    status: { S: 'Processing' }
+  }
+]
