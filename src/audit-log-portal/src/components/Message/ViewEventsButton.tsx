@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { Badge, IconButton, Tooltip } from "@material-ui/core"
+import { Badge, IconButton, Tooltip } from '@material-core/ui';
 import type { AuditLog } from "shared-types"
 import EventIcon from "icons/EventIcon"
 

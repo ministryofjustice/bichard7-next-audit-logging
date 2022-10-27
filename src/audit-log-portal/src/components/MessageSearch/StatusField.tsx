@@ -1,4 +1,4 @@
-import { InputLabel, Select, FormControl, MenuItem } from "@material-ui/core"
+import { InputLabel, MenuItem, FormControl, Select } from '@material-core/ui';
 import styled from "styled-components"
 
 const StatusFormControl = styled(FormControl)`

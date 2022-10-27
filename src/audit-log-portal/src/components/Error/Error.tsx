@@ -1,4 +1,4 @@
-import { Alert } from "@material-ui/lab"
+import { Alert } from '@material-core/ui'
 import If from "components/If"
 
 interface Props {

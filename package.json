@@ -34,7 +34,7 @@
   "scripts": {
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "update-deps": "ncu -u --deep -x react -x react-dom -x @material-ui/core -x @testing-library/react && make install"
+    "update-deps": "ncu -u --deep -x react -x react-dom -x @material-core/ui -x @testing-library/react && make install"
   },
   "lint-staged": {
     "*.{js,ts,tsx}": [

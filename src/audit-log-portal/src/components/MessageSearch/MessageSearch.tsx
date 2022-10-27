@@ -1,5 +1,5 @@
 import { memo, useState } from "react"
-import { IconButton, TextField } from "@material-ui/core"
+import { IconButton, TextField } from '@material-core/ui';
 import styled from "styled-components"
 import SearchIcon from "icons/SearchIcon"
 import type MessageSearchModel from "types/MessageSearchModel"

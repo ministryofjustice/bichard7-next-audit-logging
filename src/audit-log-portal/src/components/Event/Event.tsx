@@ -1,4 +1,4 @@
-import { Card, CardContent, Typography } from "@material-ui/core"
+import { CardContent, Typography, Card } from '@material-core/ui';
 import styled from "styled-components"
 import type { AuditLogEvent } from "shared-types"
 import DateTime from "components/DateTime"

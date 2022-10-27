@@ -1,4 +1,4 @@
-import { Tooltip } from "@material-ui/core"
+import { Tooltip } from '@material-core/ui'
 import type { AuditLog } from "shared-types"
 import getStatusIcon from "./getStatusIcon"
 
