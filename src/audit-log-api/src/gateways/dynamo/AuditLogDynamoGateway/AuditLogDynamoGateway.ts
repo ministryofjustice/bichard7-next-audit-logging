@@ -1,7 +1,7 @@
 import { addDays } from "date-fns"
 import maxBy from "lodash.maxby"
 import type { AuditLog, AuditLogEvent, KeyValuePair, PromiseResult } from "shared-types"
-import { EventType, isError } from "shared-types"
+import { EventCode, isError } from "shared-types"
 import type {
   FetchByStatusOptions,
   FetchManyOptions,
@@ -100,8 +100,8 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
 
     message.errorRecordArchivalDate =
       message.errorRecordArchivalDate ??
-      message.events.find((event) => event.eventType === EventType.ErrorRecordArchival)?.timestamp
-    message.isSanitised = message.events.find((event) => event.eventType === EventType.SanitisedMessage) ? 1 : 0
+      message.events.find((event) => event.eventCode === EventCode.ErrorRecordArchived)?.timestamp
+    message.isSanitised = message.events.find((event) => event.eventCode === EventCode.Sanitised) ? 1 : 0
 
     const updateResult = await this.updateOne(this.tableName, message, "messageId", message.version)
     if (isError(updateResult)) {

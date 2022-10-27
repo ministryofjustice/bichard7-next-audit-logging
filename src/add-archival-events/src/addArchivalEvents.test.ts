@@ -2,6 +2,7 @@
 import { Client } from "pg"
 import { FakeApiClient, setEnvironmentVariables } from "shared-testing"
 import type { AuditLogEvent, KeyValuePair } from "shared-types"
+import { EventCode } from "shared-types"
 import AddArchivalEvents from "./addArchivalEvents"
 import type { BichardRecord, DatabaseRow } from "./db"
 import { DatabaseClient } from "./db"
@@ -323,6 +324,7 @@ describe("Add Archival Events integration", () => {
         <AuditLogEvent>{
           eventSource: "Error archiver process 1",
           category: "information",
+          eventCode: EventCode.ErrorRecordArchived,
           eventType: "Error record archival",
           timestamp: new Date().toISOString(),
           attributes: { "Record ID": 2 } as KeyValuePair<string, number>

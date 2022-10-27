@@ -3,8 +3,8 @@ import type { DocumentClient } from "aws-sdk/clients/dynamodb"
 import { addDays, subDays } from "date-fns"
 import { shuffle } from "lodash"
 import "shared-testing"
-import type { EventCategory } from "shared-types"
-import { AuditLog, AuditLogEvent, AuditLogStatus, EventType, isError } from "shared-types"
+import type { AuditLogEventOptions } from "shared-types"
+import { AuditLog, AuditLogEvent, AuditLogStatus, EventCode, isError } from "shared-types"
 import { auditLogDynamoConfig } from "src/test/dynamoDbConfig"
 import TestDynamoGateway from "../../../test/TestDynamoGateway"
 import type DynamoUpdate from "../DynamoGateway/DynamoUpdate"
@@ -16,19 +16,13 @@ const testGateway = new TestDynamoGateway(auditLogDynamoConfig)
 const primaryKey = "messageId"
 const sortKey = "receivedDate"
 
-const createAuditLogEvent = (
-  category: EventCategory,
-  timestamp: Date,
-  eventType: string,
-  eventCode: string = "dummy.event.code",
-  eventSource?: string
-): AuditLogEvent =>
+const createAuditLogEvent = (options: Partial<AuditLogEventOptions> = {}) =>
   new AuditLogEvent({
-    category,
-    timestamp,
-    eventType,
-    eventCode,
-    eventSource: eventSource || "Test"
+    category: options.category ?? "information",
+    timestamp: options.timestamp ?? new Date(),
+    eventType: options.eventType ?? "Dummy Event Type",
+    eventCode: options.eventCode ?? "dummy.event.code",
+    eventSource: options.eventSource ?? "Test"
   })
 
 describe("AuditLogDynamoGateway", () => {
@@ -155,7 +149,7 @@ describe("AuditLogDynamoGateway", () => {
 
   describe("addEvent()", () => {
     it("should only add an event to and update the status of the specified audit log", async () => {
-      const expectedEvent = createAuditLogEvent("information", new Date(), EventType.RecordIgnoredNoOffences)
+      const expectedEvent = createAuditLogEvent({ eventCode: EventCode.IgnoredNoOffences })
 
       expectedEvent.addAttribute("Attribute one", "Some value")
       expectedEvent.addAttribute("Attribute two", 2)
@@ -203,22 +197,10 @@ describe("AuditLogDynamoGateway", () => {
     })
 
     it("should add two events to the audit log and update the message status to the latest event type", async () => {
-      const expectedEventOne = createAuditLogEvent(
-        "information",
-        new Date(),
-        "Test event one",
-        "dummy.event.code",
-        "Event source one"
-      )
+      const expectedEventOne = createAuditLogEvent({ eventType: "Dummy event one" })
       expectedEventOne.addAttribute("EventOneAttribute", "Event one attribute")
 
-      const expectedEventTwo = createAuditLogEvent(
-        "error",
-        new Date(),
-        "PNC Response not received",
-        "dummy.event.code",
-        "Event source two"
-      )
+      const expectedEventTwo = createAuditLogEvent({ eventType: "Dummy event two", category: "error" })
       expectedEventTwo.addAttribute("EventTwoAttribute", "Event two attribute")
 
       let message = new AuditLog("one", new Date(), "dummy hash")
@@ -246,21 +228,21 @@ describe("AuditLogDynamoGateway", () => {
       expect(actualMessage.status).toBe(AuditLogStatus.error)
       expect(actualMessage.lastEventType).toBe(expectedEventTwo.eventType)
 
-      const actualEventOne = actualMessage.events.find((e) => e.eventSource === expectedEventOne.eventSource)
+      const actualEventOne = actualMessage.events.find((e) => e.eventType === expectedEventOne.eventType)
       expect(actualEventOne?.eventSource).toBe(expectedEventOne.eventSource)
       expect(actualEventOne?.category).toBe(expectedEventOne.category)
       expect(actualEventOne?.timestamp).toBe(expectedEventOne.timestamp)
-      expect(actualEventOne?.eventType).toBe(expectedEventOne.eventType)
+      expect(actualEventOne?.eventCode).toBe(expectedEventOne.eventCode)
 
       const actualEventOneAttributes = actualEventOne?.attributes
       expect(actualEventOneAttributes).toBeDefined()
       expect(actualEventOneAttributes?.EventOneAttribute).toBe(expectedEventOne.attributes.EventOneAttribute)
 
-      const actualEventTwo = actualMessage.events.find((e) => e.eventSource === expectedEventTwo.eventSource)
+      const actualEventTwo = actualMessage.events.find((e) => e.eventType === expectedEventTwo.eventType)
       expect(actualEventTwo?.eventSource).toBe(expectedEventTwo.eventSource)
       expect(actualEventTwo?.category).toBe(expectedEventTwo.category)
       expect(actualEventTwo?.timestamp).toBe(expectedEventTwo.timestamp)
-      expect(actualEventTwo?.eventType).toBe(expectedEventTwo.eventType)
+      expect(actualEventTwo?.eventCode).toBe(expectedEventTwo.eventCode)
 
       const actualEventTwoAttributes = actualEventTwo?.attributes
       expect(actualEventTwoAttributes).toBeDefined()
@@ -268,7 +250,7 @@ describe("AuditLogDynamoGateway", () => {
     })
 
     it("should return error when audit log does not exist", async () => {
-      const event = createAuditLogEvent("information", new Date(), "Test event one")
+      const event = createAuditLogEvent()
       const { messageId, version } = new AuditLog("External correlation id", new Date(), "dummy hash")
 
       const resultOne = await gateway.addEvent(messageId, version, event)
@@ -277,10 +259,8 @@ describe("AuditLogDynamoGateway", () => {
     })
 
     it("should log the event for top exceptions report", async () => {
-      const expectedEvent = createAuditLogEvent("information", new Date(), "Event for top exceptions report")
-      expectedEvent.eventCode = "exceptions.generated"
+      const expectedEvent = createAuditLogEvent({ eventCode: EventCode.ExceptionsGenerated })
 
-      expectedEvent.addAttribute("eventCode", "exceptions.generated")
       expectedEvent.addAttribute("Error 2 Details", "Dummy")
 
       const message = new AuditLog("one", new Date(), "dummy hash")
@@ -314,10 +294,10 @@ describe("AuditLogDynamoGateway", () => {
       expect(actualEvent.category).toBe(expectedEvent.category)
       expect(actualEvent.timestamp).toBe(expectedEvent.timestamp)
       expect(actualEvent.eventType).toBe(expectedEvent.eventType)
+      expect(actualEvent.eventCode).toBe(expectedEvent.eventCode)
 
       const actualEventAttributes = actualEvent.attributes
       expect(actualEventAttributes).toBeDefined()
-      expect(actualEventAttributes.eventCode).toBe("exceptions.generated")
       expect(actualEventAttributes["Error 2 Details"]).toBe("Dummy")
 
       const actualTopExceptionReportEvent = actualMessage.topExceptionsReport?.events[0]
@@ -328,17 +308,11 @@ describe("AuditLogDynamoGateway", () => {
 
       const actualTopExceptionReportEventAttribute = actualTopExceptionReportEvent?.attributes
       expect(actualTopExceptionReportEventAttribute).toBeDefined()
-      expect(actualTopExceptionReportEventAttribute?.eventCode).toBe("exceptions.generated")
       expect(actualTopExceptionReportEventAttribute?.["Error 2 Details"]).toBe("Dummy")
     })
 
     it("should log the event for automation report", async () => {
-      const expectedEvent = createAuditLogEvent(
-        "information",
-        new Date(),
-        "Hearing Outcome passed to Error List",
-        "exceptions.generated"
-      )
+      const expectedEvent = createAuditLogEvent({ eventCode: EventCode.ExceptionsGenerated })
 
       const message = new AuditLog("one", new Date(), "dummy hash")
 
@@ -380,7 +354,7 @@ describe("AuditLogDynamoGateway", () => {
     })
 
     it("should log the force owner", async () => {
-      const expectedEvent = createAuditLogEvent("information", new Date(), "Input message received")
+      const expectedEvent = createAuditLogEvent({ eventCode: EventCode.HearingOutcomeDetails })
       expectedEvent.addAttribute("Force Owner", "010000")
 
       const message = new AuditLog("one", new Date(), "dummy hash")
@@ -410,7 +384,7 @@ describe("AuditLogDynamoGateway", () => {
     })
 
     it("should not log the event for report", async () => {
-      const expectedEvent = createAuditLogEvent("information", new Date(), "Dummy event type")
+      const expectedEvent = createAuditLogEvent()
 
       const message = new AuditLog("one", new Date(), "dummy hash")
 
@@ -442,7 +416,7 @@ describe("AuditLogDynamoGateway", () => {
     })
 
     it("should increment the retry count for retry message", async () => {
-      const expectedEvent = createAuditLogEvent("information", new Date(), "Retrying failed message")
+      const expectedEvent = createAuditLogEvent({ eventCode: EventCode.RetryingMessage })
 
       const message = new AuditLog("one", new Date(), `dummy hash`)
 
@@ -460,7 +434,7 @@ describe("AuditLogDynamoGateway", () => {
     })
 
     it("should increment the retry count after several retry messages", async () => {
-      const retryEvent = createAuditLogEvent("information", new Date(), "Retrying failed message")
+      const retryEvent = createAuditLogEvent({ eventCode: EventCode.RetryingMessage })
 
       const message = new AuditLog("one", new Date(), `dummy hash`)
 
@@ -480,7 +454,7 @@ describe("AuditLogDynamoGateway", () => {
     })
 
     it("should update the message status", async () => {
-      const expectedEvent = createAuditLogEvent("information", new Date(), EventType.Retrying)
+      const expectedEvent = createAuditLogEvent({ eventCode: EventCode.RetryingMessage })
 
       const message = new AuditLog("one", new Date(), `dummy hash`)
 
@@ -498,7 +472,7 @@ describe("AuditLogDynamoGateway", () => {
     })
 
     it("should not change the status and should set error record archival date", async () => {
-      const expectedEvent = createAuditLogEvent("information", new Date(), EventType.ErrorRecordArchival)
+      const expectedEvent = createAuditLogEvent({ eventCode: EventCode.ErrorRecordArchived })
 
       const message = new AuditLog("one", new Date(), `dummy hash`)
 
@@ -517,7 +491,7 @@ describe("AuditLogDynamoGateway", () => {
     })
 
     it("should not change the status and should set sanitised date", async () => {
-      const expectedEvent = createAuditLogEvent("information", new Date(), EventType.SanitisedMessage)
+      const expectedEvent = createAuditLogEvent({ eventCode: EventCode.Sanitised })
 
       const message = new AuditLog("one", new Date(), `dummy hash`)
 
@@ -789,9 +763,9 @@ describe("AuditLogDynamoGateway", () => {
     it("should return AuditLogEvents when message id exists in the table", async () => {
       const auditLog = new AuditLog(`External correlation id 1`, new Date(), "dummy hash")
       auditLog.events = [
-        createAuditLogEvent("information", new Date("2021-06-10T10:12:13"), "Event 1"),
-        createAuditLogEvent("information", new Date("2021-06-15T10:12:13"), "Event 2"),
-        createAuditLogEvent("information", new Date("2021-06-13T10:12:13"), "Event 3")
+        createAuditLogEvent({ eventType: "Event 1", timestamp: new Date("2021-06-10T10:12:13") }),
+        createAuditLogEvent({ eventType: "Event 2", timestamp: new Date("2021-06-15T10:12:13") }),
+        createAuditLogEvent({ eventType: "Event 3", timestamp: new Date("2021-06-13T10:12:13") })
       ]
       await gateway.create(auditLog)
 
@@ -833,7 +807,7 @@ describe("AuditLogDynamoGateway", () => {
 
   describe("update()", () => {
     it("should calculate the status and update the record", async () => {
-      const event = createAuditLogEvent("information", new Date(), EventType.RecordIgnoredNoOffences)
+      const event = createAuditLogEvent({ eventCode: EventCode.IgnoredNoOffences })
 
       event.addAttribute("Attribute one", "Some value")
       event.addAttribute("Attribute two", 2)
@@ -886,7 +860,7 @@ describe("AuditLogDynamoGateway", () => {
     })
 
     it("should not change the status and should set error record archival date", async () => {
-      const expectedEvent = createAuditLogEvent("information", new Date(), EventType.ErrorRecordArchival)
+      const expectedEvent = createAuditLogEvent({ eventCode: EventCode.ErrorRecordArchived })
 
       const now = new Date()
       const message = new AuditLog("one", now, `dummy hash`)
@@ -913,7 +887,7 @@ describe("AuditLogDynamoGateway", () => {
     })
 
     it("should not change the status and should set nextSanitiseCheck if unsanitised", async () => {
-      const expectedEvent = createAuditLogEvent("information", new Date(), EventType.ErrorRecordArchival)
+      const expectedEvent = createAuditLogEvent({ eventCode: EventCode.ErrorRecordArchived })
 
       const now = new Date()
       const message = new AuditLog("one", now, `dummy hash`)
@@ -940,7 +914,7 @@ describe("AuditLogDynamoGateway", () => {
     })
 
     it("should not change the status and should set nextSanitiseCheck if sanitised", async () => {
-      const expectedEvent = createAuditLogEvent("information", new Date(), EventType.SanitisedMessage)
+      const expectedEvent = createAuditLogEvent({ eventCode: EventCode.Sanitised })
 
       const now = new Date()
       const message = new AuditLog("one", now, `dummy hash`)
@@ -974,7 +948,7 @@ describe("AuditLogDynamoGateway", () => {
 
   describe("prepare()", () => {
     it("should only add an event to and update the status of the specified audit log", async () => {
-      const expectedEvent = createAuditLogEvent("information", new Date(), EventType.RecordIgnoredNoOffences)
+      const expectedEvent = createAuditLogEvent({ eventCode: EventCode.IgnoredNoOffences })
 
       expectedEvent.addAttribute("Attribute one", "Some value")
       expectedEvent.addAttribute("Attribute two", 2)
@@ -1000,7 +974,7 @@ describe("AuditLogDynamoGateway", () => {
           ExpressionAttributeValues: {
             ":events": [expectedEvent],
             ":empty_list": [],
-            ":lastEventType": "Hearing Outcome ignored as it contains no offences",
+            ":lastEventType": "Dummy Event Type",
             ":status": "Completed",
             ":version": 0,
             ":version_increment": 1
@@ -1015,7 +989,7 @@ describe("AuditLogDynamoGateway", () => {
 
   describe("prepareEvents()", () => {
     it("should only add an event to and update the status of the specified audit log", async () => {
-      const expectedEvent = createAuditLogEvent("information", new Date(), EventType.RecordIgnoredNoOffences)
+      const expectedEvent = createAuditLogEvent({ eventCode: EventCode.IgnoredNoOffences })
 
       expectedEvent.addAttribute("Attribute one", "Some value")
       expectedEvent.addAttribute("Attribute two", 2)
@@ -1041,7 +1015,7 @@ describe("AuditLogDynamoGateway", () => {
           ExpressionAttributeValues: {
             ":events": [expectedEvent],
             ":empty_list": [],
-            ":lastEventType": "Hearing Outcome ignored as it contains no offences",
+            ":lastEventType": "Dummy Event Type",
             ":status": "Completed",
             ":version": 0,
             ":version_increment": 1
@@ -1054,17 +1028,16 @@ describe("AuditLogDynamoGateway", () => {
     })
 
     it("should use the latest force owner change event to set the force owner", async () => {
-      const forceOwnerChange1 = createAuditLogEvent("information", new Date(), EventType.InputMessageReceived)
+      const forceOwnerChange1 = createAuditLogEvent({ eventCode: EventCode.HearingOutcomeDetails })
       forceOwnerChange1.addAttribute("Force Owner", "010000")
-      const forceOwnerChange2 = createAuditLogEvent("information", new Date(), EventType.InputMessageReceived)
+      const forceOwnerChange2 = createAuditLogEvent({ eventCode: EventCode.HearingOutcomeDetails })
       forceOwnerChange2.addAttribute("Force Owner", "020000")
-      const forceOwnerChange3 = createAuditLogEvent(
-        "information",
-        addDays(new Date(), 1),
-        EventType.InputMessageReceived
-      )
+      const forceOwnerChange3 = createAuditLogEvent({
+        timestamp: addDays(new Date(), 1),
+        eventCode: EventCode.HearingOutcomeDetails
+      })
       forceOwnerChange3.addAttribute("Force Owner", "030000")
-      const forceOwnerChange4 = createAuditLogEvent("information", new Date(), EventType.InputMessageReceived)
+      const forceOwnerChange4 = createAuditLogEvent({ eventCode: EventCode.HearingOutcomeDetails })
       forceOwnerChange4.addAttribute("Force Owner", "040000")
 
       const message = new AuditLog("one", new Date(), "dummy hash")
@@ -1090,26 +1063,11 @@ describe("AuditLogDynamoGateway", () => {
 
     it("should add all events to be logged for the automation report", async () => {
       const eventsToBeLogged = [
-        createAuditLogEvent("information", new Date(), "Hearing Outcome passed to Error List", "exceptions.generated"),
-        createAuditLogEvent(
-          "information",
-          new Date(),
-          "PNC Update added to Error List (PNC message construction)",
-          "exceptions.generated"
-        ),
-        createAuditLogEvent(
-          "information",
-          new Date(),
-          "PNC Update added to Error List (Unexpected PNC response)",
-          "exceptions.generated"
-        ),
-        createAuditLogEvent("information", new Date(), "Exception marked as resolved by user", "exceptions.resolved"),
-        createAuditLogEvent("information", new Date(), "PNC Update applied successfully", "pnc.updated")
+        createAuditLogEvent({ eventCode: EventCode.ExceptionsGenerated }),
+        createAuditLogEvent({ eventCode: EventCode.ExceptionsResolved }),
+        createAuditLogEvent({ eventCode: EventCode.PncUpdated })
       ]
-      const eventsNotToBeLogged = [
-        createAuditLogEvent("information", new Date(), "Some other event"),
-        createAuditLogEvent("information", new Date(), "Some other other event")
-      ]
+      const eventsNotToBeLogged = [createAuditLogEvent(), createAuditLogEvent()]
       const allEvents = shuffle([...eventsToBeLogged, ...eventsNotToBeLogged])
 
       const message = new AuditLog("one", new Date(), "dummy hash")
@@ -1127,7 +1085,7 @@ describe("AuditLogDynamoGateway", () => {
         "automationReport.events = list_append(if_not_exists(automationReport.events, :empty_list), :automationReportEvents)"
       )
       expect(transaction.Update!.ExpressionAttributeValues).toBeDefined()
-      expect(transaction.Update!.ExpressionAttributeValues![":automationReportEvents"]).toHaveLength(5)
+      expect(transaction.Update!.ExpressionAttributeValues![":automationReportEvents"]).toHaveLength(3)
       expect(transaction.Update!.ExpressionAttributeValues![":automationReportEvents"]).toContainEqual(
         eventsToBeLogged[0]
       )
@@ -1137,28 +1095,19 @@ describe("AuditLogDynamoGateway", () => {
       expect(transaction.Update!.ExpressionAttributeValues![":automationReportEvents"]).toContainEqual(
         eventsToBeLogged[2]
       )
-      expect(transaction.Update!.ExpressionAttributeValues![":automationReportEvents"]).toContainEqual(
-        eventsToBeLogged[3]
-      )
-      expect(transaction.Update!.ExpressionAttributeValues![":automationReportEvents"]).toContainEqual(
-        eventsToBeLogged[4]
-      )
     })
 
     it("should add all events to be logged for the top exceptions report", async () => {
       const eventsToBeLogged = [
-        createAuditLogEvent("information", new Date(), "SPIResults", "exceptions.generated"),
-        createAuditLogEvent("information", new Date(), "SPIResults", "exceptions.generated"),
-        createAuditLogEvent("information", new Date(), "SPIResults", "exceptions.generated"),
-        createAuditLogEvent("information", new Date(), "SPIResults", "exceptions.generated")
+        createAuditLogEvent({ eventCode: EventCode.ExceptionsGenerated }),
+        createAuditLogEvent({ eventCode: EventCode.ExceptionsGenerated }),
+        createAuditLogEvent({ eventCode: EventCode.ExceptionsGenerated }),
+        createAuditLogEvent({ eventCode: EventCode.ExceptionsGenerated })
       ]
       eventsToBeLogged.forEach((event) => {
         event.addAttribute("Error Details", "An error occured")
       })
-      const eventsNotToBeLogged = [
-        createAuditLogEvent("information", new Date(), "Some other event"),
-        createAuditLogEvent("information", new Date(), "Some other other event")
-      ]
+      const eventsNotToBeLogged = [createAuditLogEvent(), createAuditLogEvent()]
       const allEvents = shuffle([...eventsToBeLogged, ...eventsNotToBeLogged])
 
       const message = new AuditLog("one", new Date(), "dummy hash")
@@ -1185,11 +1134,14 @@ describe("AuditLogDynamoGateway", () => {
 
     it("should set the archival date to the earliest archival event timestamp", async () => {
       const events = [
-        createAuditLogEvent("information", new Date(), EventType.ErrorRecordArchival),
-        createAuditLogEvent("information", new Date(), EventType.ErrorRecordArchival),
-        createAuditLogEvent("information", new Date(), EventType.ErrorRecordArchival)
+        createAuditLogEvent({ eventCode: EventCode.ErrorRecordArchived }),
+        createAuditLogEvent({ eventCode: EventCode.ErrorRecordArchived }),
+        createAuditLogEvent({ eventCode: EventCode.ErrorRecordArchived })
       ]
-      const earliestEvent = createAuditLogEvent("information", subDays(new Date(), 1), EventType.ErrorRecordArchival)
+      const earliestEvent = createAuditLogEvent({
+        timestamp: subDays(new Date(), 1),
+        eventCode: EventCode.ErrorRecordArchived
+      })
       events.splice(2, 0, earliestEvent)
 
       const message = new AuditLog("one", new Date(), "dummy hash")
@@ -1212,9 +1164,9 @@ describe("AuditLogDynamoGateway", () => {
 
     it("should set the sanitised flag when one of the events is a sanitisation event", async () => {
       const events = [
-        createAuditLogEvent("information", new Date(), EventType.ErrorRecordArchival),
-        createAuditLogEvent("information", new Date(), EventType.SanitisedMessage),
-        createAuditLogEvent("information", new Date(), "SPIResults")
+        createAuditLogEvent({ eventCode: EventCode.ErrorRecordArchived }),
+        createAuditLogEvent({ eventCode: EventCode.Sanitised }),
+        createAuditLogEvent()
       ]
 
       const message = new AuditLog("one", new Date(), "dummy hash")
@@ -1237,9 +1189,9 @@ describe("AuditLogDynamoGateway", () => {
 
     it("should update the retry count when there are retry events", async () => {
       const events = [
-        createAuditLogEvent("information", new Date(), EventType.ErrorRecordArchival),
-        createAuditLogEvent("information", new Date(), EventType.Retrying),
-        createAuditLogEvent("information", new Date(), "SPIResults")
+        createAuditLogEvent({ eventCode: EventCode.ErrorRecordArchived }),
+        createAuditLogEvent({ eventCode: EventCode.RetryingMessage }),
+        createAuditLogEvent()
       ]
 
       const message = new AuditLog("one", new Date(), "dummy hash")
@@ -1267,9 +1219,9 @@ describe("AuditLogDynamoGateway", () => {
   describe("prepare() and execute()", () => {
     it("should give an appropriate error when adding many events to an audit log which has been updated in the background", async () => {
       const events = [
-        createAuditLogEvent("information", new Date(), EventType.ErrorRecordArchival),
-        createAuditLogEvent("information", new Date(), EventType.PncUpdated),
-        createAuditLogEvent("information", new Date(), "SPIResults")
+        createAuditLogEvent({ eventCode: EventCode.ErrorRecordArchived }),
+        createAuditLogEvent({ eventCode: EventCode.PncUpdated }),
+        createAuditLogEvent()
       ]
       const message = new AuditLog("one", new Date(), "dummy hash")
 
@@ -1279,11 +1231,7 @@ describe("AuditLogDynamoGateway", () => {
       expect(isError(prepareResult)).toBe(false)
 
       // Update audit log with additional messages before executing the prepared updates
-      const updateResult = await gateway.addEvent(
-        message.messageId,
-        message.version,
-        createAuditLogEvent("information", new Date(), "SPIResults")
-      )
+      const updateResult = await gateway.addEvent(message.messageId, message.version, createAuditLogEvent())
       expect(isError(updateResult)).toBe(false)
 
       const executeResult = await gateway.executeTransaction([prepareResult as DynamoUpdate])

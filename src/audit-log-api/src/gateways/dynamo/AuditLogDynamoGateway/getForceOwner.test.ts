@@ -1,9 +1,10 @@
 import type { AuditLogEvent } from "shared-types"
+import { EventCode } from "shared-types"
 import getForceOwner from "./getForceOwner"
 
 it("should return the force owner when message type is correct", () => {
   const event = {
-    eventType: "Input message received",
+    eventCode: EventCode.HearingOutcomeDetails,
     attributes: {
       "Force Owner": "010000"
     }
@@ -16,7 +17,7 @@ it("should return the force owner when message type is correct", () => {
 
 it("should return the force owner for the correct V2 message type", () => {
   const event = {
-    eventType: "Hearing outcome details",
+    eventCode: EventCode.HearingOutcomeDetails,
     attributes: {
       "Force Owner": "010000"
     }

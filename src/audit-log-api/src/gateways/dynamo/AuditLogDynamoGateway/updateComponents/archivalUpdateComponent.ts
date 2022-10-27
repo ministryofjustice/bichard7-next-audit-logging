@@ -1,10 +1,10 @@
 import minBy from "lodash.minby"
 import type { AuditLogEvent } from "shared-types"
-import { EventType } from "shared-types"
+import { EventCode } from "shared-types"
 import type { UpdateComponentsResult } from "./types"
 
 export default (_: AuditLogEvent[], events: AuditLogEvent[]): UpdateComponentsResult => {
-  const archivalEvents = events.filter((event) => event.eventType === EventType.ErrorRecordArchival)
+  const archivalEvents = events.filter((event) => event.eventCode === EventCode.ErrorRecordArchived)
   if (archivalEvents.length > 0) {
     return {
       updateExpression: "#errorRecordArchivalDate = :errorRecordArchivalDate",

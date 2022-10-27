@@ -1,5 +1,5 @@
 import type { AuditLogEvent } from "shared-types"
-import { AuditLogStatus, EventType, EventTypeV2 } from "shared-types"
+import { AuditLogStatus, EventCode } from "shared-types"
 
 export default class CalculateMessageStatusUseCase {
   private readonly events: AuditLogEvent[] = []
@@ -10,7 +10,7 @@ export default class CalculateMessageStatusUseCase {
       .sort((eventA, eventB) => (eventA.timestamp > eventB.timestamp ? 1 : -1))
   }
 
-  call(): string {
+  call(): AuditLogStatus {
     if (
       (this.hasNoTriggers || this.triggersAreResolved) &&
       (this.exceptionsAreManuallyResolved || this.pncIsUpdated || this.recordIsIgnored)
@@ -25,23 +25,21 @@ export default class CalculateMessageStatusUseCase {
     return AuditLogStatus.processing
   }
 
-  private hasEventType(eventType: EventType | EventTypeV2): boolean {
-    return !!this.events.find((event) => event.eventType === eventType)
+  private hasEventCode(eventCode: EventCode): boolean {
+    return !!this.events.find((event) => event.eventCode === eventCode)
   }
 
   private get hasNoTriggers(): boolean {
-    return !this.hasEventType(EventType.TriggersGenerated) && !this.hasEventType(EventTypeV2.TriggersGenerated)
+    return !this.hasEventCode(EventCode.TriggersGenerated)
   }
 
   private get triggersAreResolved(): boolean {
-    const triggersGeneratedEvents = this.events.filter(
-      (event) => event.eventType === EventType.TriggersGenerated || event.eventType === EventTypeV2.TriggersGenerated
-    )
+    const triggersGeneratedEvents = this.events.filter((event) => event.eventCode === EventCode.TriggersGenerated)
     if (triggersGeneratedEvents.length === 0) {
       return false
     }
 
-    const triggerResolvedEvents = this.events.filter((event) => event.eventType === EventType.TriggerInstancesResolved)
+    const triggerResolvedEvents = this.events.filter((event) => event.eventCode === EventCode.TriggersResolved)
     if (!triggerResolvedEvents) {
       return false
     }
@@ -65,40 +63,39 @@ export default class CalculateMessageStatusUseCase {
   }
 
   private get exceptionsAreManuallyResolved(): boolean {
-    return this.hasEventType(EventType.ExceptionsManuallyResolved)
+    return this.hasEventCode(EventCode.ExceptionsResolved)
   }
 
   private get pncIsUpdated(): boolean {
-    return this.hasEventType(EventType.PncUpdated)
+    return this.hasEventCode(EventCode.PncUpdated)
   }
 
   private get recordIsIgnored(): boolean {
     return (
-      this.hasEventType(EventType.InterimHearingWithAncillaryOnlyCourtResults_PncNotUpdated) ||
-      this.hasEventType(EventTypeV2.HearingOutcomeIgnoredCourtDisabled) ||
-      this.hasEventType(EventTypeV2.HearingOutcomeIgnoredAppeal) ||
-      this.hasEventType(EventType.StatutoryDeclarationCaseIgnored) ||
-      this.hasEventType(EventType.RecordIgnoredNoOffences) ||
-      this.hasEventType(EventType.RecordIgnoredNoRecordableOffences)
+      this.hasEventCode(EventCode.IgnoredAncillary) ||
+      this.hasEventCode(EventCode.IgnoredDisabled) ||
+      this.hasEventCode(EventCode.IgnoredAppeal) ||
+      this.hasEventCode(EventCode.IgnoredReopened) ||
+      this.hasEventCode(EventCode.IgnoredNoOffences) ||
+      this.hasEventCode(EventCode.IgnoredNonrecordable)
     )
   }
 
   private get isRetrying(): boolean {
-    return this.events[this.events.length - 1]?.eventType === EventType.Retrying
+    return this.events[this.events.length - 1]?.eventCode === EventCode.RetryingMessage
   }
 
   private get hasErrorEvent(): boolean {
     const errorEvent = this.events.filter((event) => event.category === "error").slice(-1)[0]
-    const retryingEvent = this.events.filter((event) => event.eventType === EventType.Retrying).slice(-1)[0]
+    const retryingEvent = this.events.filter((event) => event.eventCode === EventCode.RetryingMessage).slice(-1)[0]
     const otherEvent = this.events
       .filter(
         (event) =>
-          event.eventType === EventType.PncUpdated ||
-          event.eventType.includes("added to Error List") ||
-          event.eventType.includes("passed to Error List") ||
-          event.eventType === EventType.RecordIgnoredNoRecordableOffences ||
-          event.eventType === EventType.TriggerInstancesResolved ||
-          event.eventType === EventType.TriggersGenerated
+          event.eventCode === EventCode.PncUpdated ||
+          event.eventCode === EventCode.ExceptionsGenerated ||
+          event.eventCode === EventCode.IgnoredNonrecordable ||
+          event.eventCode === EventCode.TriggersResolved ||
+          event.eventCode === EventCode.TriggersGenerated
       )
       .slice(-1)[0]
 
@@ -106,7 +103,7 @@ export default class CalculateMessageStatusUseCase {
       errorEvent &&
       (!retryingEvent || errorEvent.timestamp > retryingEvent.timestamp) &&
       (!otherEvent || errorEvent.timestamp > otherEvent.timestamp) &&
-      (errorEvent.eventType !== EventType.FailedToUpdatePnc || !this.pncIsUpdated)
+      (errorEvent.eventCode !== EventCode.MessageRejected || !this.pncIsUpdated)
     )
   }
 }

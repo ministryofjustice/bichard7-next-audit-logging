@@ -1,5 +1,5 @@
 import type { ApiClient, PromiseResult } from "shared-types"
-import { AuditLogEvent } from "shared-types"
+import { AuditLogEvent, EventCode } from "shared-types"
 
 export default class CreateRetryingEventUseCase {
   constructor(private readonly apiClient: ApiClient) {}
@@ -9,6 +9,7 @@ export default class CreateRetryingEventUseCase {
       category: "information",
       timestamp: new Date(),
       eventType: "Retrying failed message",
+      eventCode: EventCode.RetryingMessage,
       eventSource: "Audit Log Api"
     })
 

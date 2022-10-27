@@ -10,7 +10,7 @@ import {
   mockAuditLogEvent
 } from "shared-testing"
 import type { AuditLog, BichardAuditLogEvent } from "shared-types"
-import { isError } from "shared-types"
+import { EventCode, isError } from "shared-types"
 import { auditLogDynamoConfig } from "src/test/dynamoDbConfig"
 import { TestDynamoGateway } from "../test"
 
@@ -222,7 +222,9 @@ describe("Getting Audit Logs", () => {
         throw new Error("Unexpected error")
       }
 
-      const eventInclude = await createMockAuditLogEvent(auditLog.messageId, { eventType: "Exceptions generated" })
+      const eventInclude = await createMockAuditLogEvent(auditLog.messageId, {
+        eventCode: EventCode.ExceptionsGenerated
+      })
       const eventExclude = await createMockAuditLogEvent(auditLog.messageId)
 
       if (isError(eventInclude) || isError(eventExclude)) {
@@ -438,7 +440,7 @@ describe("Getting Audit Logs", () => {
     })
   })
 
-  describe.only("transformation for old-style events", () => {
+  describe("transformation for old-style events", () => {
     let auditLog: AuditLog
 
     beforeEach(async () => {

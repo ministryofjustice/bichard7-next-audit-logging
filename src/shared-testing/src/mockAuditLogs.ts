@@ -1,4 +1,5 @@
-import { AuditLog, BichardAuditLogEvent, BichardAuditLogEventOptions, EventCategory } from "shared-types"
+import type { BichardAuditLogEventOptions, EventCategory } from "shared-types"
+import { AuditLog, BichardAuditLogEvent } from "shared-types"
 import { v4 as uuid } from "uuid"
 
 export function mockAuditLog(overrides: Partial<AuditLog> = {}): AuditLog {
