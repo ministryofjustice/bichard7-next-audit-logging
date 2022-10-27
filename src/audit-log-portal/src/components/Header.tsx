@@ -1,4 +1,4 @@
-import { Typography } from '@material-core/ui';
+import { Typography } from '@material-ui/core';
 
 interface Props {
   text: string

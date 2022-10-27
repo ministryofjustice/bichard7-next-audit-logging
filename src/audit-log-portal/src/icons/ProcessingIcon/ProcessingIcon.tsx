@@ -1,4 +1,4 @@
-import { CircularProgress } from '@material-core/ui'
+import { CircularProgress } from '@material-ui/core'
 
 const ProcessingIcon = () => <CircularProgress />
 

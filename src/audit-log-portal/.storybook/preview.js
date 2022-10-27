@@ -1,4 +1,4 @@
-import { MuiThemeProvider, CssBaseline } from "@material-core/ui"
+import { MuiThemeProvider, CssBaseline } from "@material-ui/core"
 import { ThemeProvider } from "styled-components"
 import theme from "styles/theme"
 import "styles/globals.css"

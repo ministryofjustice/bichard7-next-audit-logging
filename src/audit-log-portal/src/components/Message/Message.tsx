@@ -1,5 +1,5 @@
 import styled from "styled-components"
-import { Typography, Card, CardContent } from '@material-core/ui';
+import { Typography, Card, CardContent } from '@material-ui/core';
 import type { AuditLog } from "shared-types"
 import { AuditLogStatus } from "shared-types"
 import DateTime from "components/DateTime"

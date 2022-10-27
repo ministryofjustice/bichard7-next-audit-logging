@@ -1,6 +1,6 @@
 import styled from "styled-components"
-import { CircularProgress } from '@material-core/ui'
-import Backdrop from '@material-core/ui/Backdrop';
+import { CircularProgress } from '@material-ui/core'
+import Backdrop from '@material-ui/core/Backdrop';
 import If from "components/If"
 
 interface Props {
