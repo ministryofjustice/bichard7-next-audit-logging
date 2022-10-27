@@ -13,7 +13,7 @@ function upload_to_s3 {
 
   sourceHash=$(openssl dgst -binary -sha256 "$sourceFilename" | openssl base64)
   aws s3 cp "$sourceFilename" \
-    "s3://$ARTIFACT_BUCKET/audit-logging/$destinationFilename" \
+    "s3://$ARTIFACT_BUCKET/audit-logging/$CODEBUILD_RESOLVED_SOURCE_VERSION/$destinationFilename" \
     --content-type "$contentType" \
     --acl bucket-owner-full-control \
     --metadata hash="$sourceHash"
