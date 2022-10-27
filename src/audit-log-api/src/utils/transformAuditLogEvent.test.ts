@@ -34,30 +34,6 @@ describe("transformAuditLogEvent", () => {
     expect(result.attributes.User).toBeUndefined()
   })
 
-  it("should mark the record as being for the automation report if required", () => {
-    const event = createLogEvent({ eventCode: "exceptions.generated" })
-    const result = transformAuditLogEvent(event)
-    expect(result._automationReport).toBe(true)
-  })
-
-  it("should not mark the record as being for the automation report if not required", () => {
-    const event = createLogEvent({ eventCode: "exeptions.not.generated" })
-    const result = transformAuditLogEvent(event)
-    expect(result._automationReport).toBe(false)
-  })
-
-  it("should mark the record as being for the top exception report if required", () => {
-    const event = createLogEvent({ eventCode: "exceptions.generated" })
-    const result = transformAuditLogEvent(event)
-    expect(result._topExceptionsReport).toBe(true)
-  })
-
-  it("should not mark the record as being for the top exception report if not required", () => {
-    const event = createLogEvent()
-    const result = transformAuditLogEvent(event)
-    expect(result._topExceptionsReport).toBe(false)
-  })
-
   it("should not return a user if the user attribute is not set", () => {
     const event = createLogEvent()
     const result = transformAuditLogEvent(event)

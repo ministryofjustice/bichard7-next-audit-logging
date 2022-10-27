@@ -8,7 +8,7 @@ import { AuditLogDynamoGateway, AwsAuditLogLookupDynamoGateway } from "../gatewa
 import createMessageFetcher from "../use-cases/createMessageFetcher"
 import LookupEventValuesUseCase from "../use-cases/LookupEventValuesUseCase"
 import LookupMessageValuesUseCase from "../use-cases/LookupMessageValuesUseCase"
-import { createJsonApiResult, shouldFetchLargeObjects, transformAuditLogEventAttributes } from "../utils"
+import { createJsonApiResult, shouldFetchLargeObjects, transformAuditLogEvent } from "../utils"
 
 const auditLogConfig = createAuditLogDynamoDbConfig()
 const auditLogLookupConfig = createAuditLogLookupDynamoDbConfig()
@@ -49,7 +49,7 @@ export default async function getMessages(event: APIGatewayProxyEvent): PromiseR
   const messages = Array.isArray(messageFetcherResult) ? messageFetcherResult : [messageFetcherResult]
   messages.forEach((m) => {
     if (m.events) {
-      m.events = m.events.map(transformAuditLogEventAttributes)
+      m.events = m.events.map(transformAuditLogEvent)
     }
   })
 

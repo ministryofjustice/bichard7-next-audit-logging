@@ -7,7 +7,7 @@ import createAuditLogLookupDynamoDbConfig from "../createAuditLogLookupDynamoDbC
 import { AuditLogDynamoGateway, AwsAuditLogLookupDynamoGateway } from "../gateways/dynamo"
 import { FetchEventsUseCase, parseGetEventsRequest } from "../use-cases"
 import LookupEventValuesUseCase from "../use-cases/LookupEventValuesUseCase"
-import { createJsonApiResult, transformAuditLogEventAttributes } from "../utils"
+import { createJsonApiResult, transformAuditLogEvent } from "../utils"
 
 const auditLogConfig = createAuditLogDynamoDbConfig()
 const auditLogLookupConfig = createAuditLogLookupDynamoDbConfig()
@@ -38,7 +38,7 @@ export default async function getEvents(event: APIGatewayProxyEvent): PromiseRes
     })
   }
 
-  const events = result.map(transformAuditLogEventAttributes)
+  const events = result.map(transformAuditLogEvent)
   return createJsonApiResult({
     statusCode: HttpStatusCode.ok,
     body: events
