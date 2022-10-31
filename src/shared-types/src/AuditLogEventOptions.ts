@@ -2,11 +2,15 @@ import type EventCategory from "./EventCategory"
 import type KeyValuePair from "./KeyValuePair"
 
 export default interface AuditLogEventOptions {
-  eventSource: string
-  category: EventCategory
-  eventType: string
-  timestamp: Date
-  eventSourceQueueName?: string
-  eventXml?: string
+  _automationReport?: boolean
+  _topExceptionsReport?: boolean
   attributes?: KeyValuePair<string, unknown>
+  category: EventCategory
+  eventCode?: string
+  eventSource: string
+  eventSourceQueueName?: string
+  eventType: string
+  eventXml?: string
+  timestamp: Date
+  user?: string
 }

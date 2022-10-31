@@ -1,12 +1,12 @@
 import type { AuditLogEvent } from "shared-types"
-import { EventType } from "shared-types"
+import { EventCode } from "shared-types"
 import archivalUpdateComponent from "./archivalUpdateComponent"
 
 const archivalTime = Date.now()
 
 const archivalEvent = (): AuditLogEvent => {
   return {
-    eventType: EventType.ErrorRecordArchival,
+    eventCode: EventCode.ErrorRecordArchived,
     attributes: {},
     timestamp: archivalTime
   } as unknown as AuditLogEvent

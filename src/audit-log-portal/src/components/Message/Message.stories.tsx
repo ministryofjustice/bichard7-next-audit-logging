@@ -13,7 +13,7 @@ export default {
   }
 } as Meta
 
-const createMessage = (status: string) => {
+const createMessage = (status: AuditLogStatus) => {
   const message = new AuditLog("LIBRA-EXISS-0001", new Date(), "70358a45-b9d7-44c6-8bdf-8364b7a07d67")
   message.status = status
 

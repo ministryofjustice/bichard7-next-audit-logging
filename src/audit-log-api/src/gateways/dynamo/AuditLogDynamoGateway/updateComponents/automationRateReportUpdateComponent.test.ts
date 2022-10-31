@@ -3,6 +3,7 @@ import automationRateReportUpdateComponent from "./automationRateReportUpdateCom
 
 const automationRateEvent = (): AuditLogEvent => {
   return {
+    eventCode: "exceptions.resolved",
     eventType: "Exception marked as resolved by user",
     attributes: {}
   } as unknown as AuditLogEvent
@@ -10,6 +11,7 @@ const automationRateEvent = (): AuditLogEvent => {
 
 const nonAutomationRateEvent = (): AuditLogEvent => {
   return {
+    eventCode: "something.else",
     eventType: "Something else",
     attributes: {}
   } as unknown as AuditLogEvent

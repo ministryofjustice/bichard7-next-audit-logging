@@ -1,6 +1,6 @@
 import MockDate from "mockdate"
 import "shared-testing"
-import { AuditLog, AuditLogEvent, BichardAuditLogEvent } from "shared-types"
+import { AuditLog, AuditLogEvent, BichardAuditLogEvent, EventCode } from "shared-types"
 import FakeAuditLogDynamoGateway from "src/test/FakeAuditLogDynamoGateway"
 import SanitiseAuditLogUseCase from "./SanitiseAuditLogUseCase"
 
@@ -63,6 +63,7 @@ it("should add a new event when the audit log successfully sanitised", async () 
   const expectedAuditLogEvent = new AuditLogEvent({
     category: "information",
     timestamp: currentDateTime,
+    eventCode: EventCode.Sanitised,
     eventType: "Sanitised message",
     eventSource: "Audit Log Api"
   })

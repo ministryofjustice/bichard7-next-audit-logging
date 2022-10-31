@@ -3,8 +3,8 @@ import shouldLogForTopExceptionsReport from "./shouldLogForTopExceptionsReport"
 
 it("should return true when event has correct event code attribute", () => {
   const event = {
+    eventCode: "exceptions.generated",
     attributes: {
-      eventCode: "exceptions.generated",
       "Error 1 Details": "Dummy"
     }
   } as unknown as AuditLogEvent
@@ -16,9 +16,7 @@ it("should return true when event has correct event code attribute", () => {
 
 it("should return false when event has incorrect event code attribute", () => {
   const event = {
-    attributes: {
-      eventCode: "dummy"
-    }
+    eventCode: "dummy"
   } as unknown as AuditLogEvent
 
   const result = shouldLogForTopExceptionsReport(event)

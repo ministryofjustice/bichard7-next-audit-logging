@@ -1,10 +1,10 @@
 import type { AuditLogEvent } from "shared-types"
-import { EventType } from "shared-types"
+import { EventCode } from "shared-types"
 import retryCountUpdateComponent from "./retryCountUpdateComponent"
 
 const retryEvent = (): AuditLogEvent => {
   return {
-    eventType: EventType.Retrying,
+    eventCode: EventCode.RetryingMessage,
     attributes: {}
   } as unknown as AuditLogEvent
 }

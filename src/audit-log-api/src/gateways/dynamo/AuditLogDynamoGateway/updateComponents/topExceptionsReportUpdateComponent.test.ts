@@ -4,8 +4,8 @@ import topExceptionsReportUpdateComponent from "./topExceptionsReportUpdateCompo
 const topExceptionEvent = (): AuditLogEvent => {
   return {
     eventType: "top exception event",
+    eventCode: "exceptions.generated",
     attributes: {
-      eventCode: "exceptions.generated",
       "Error Details": "error"
     }
   } as unknown as AuditLogEvent

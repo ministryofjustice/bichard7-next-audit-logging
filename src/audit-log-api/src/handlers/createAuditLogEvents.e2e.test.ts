@@ -36,7 +36,12 @@ describe("Creating Audit Log events", () => {
 
     actualEvent.attributes["Attribute 1"] = event.attributes["Attribute 1"]
     expect(actualEvent.eventXml).toHaveProperty("valueLookup")
-    expect({ ...actualEvent, eventXml: undefined }).toEqual({ ...event, eventXml: undefined })
+    expect({ ...actualEvent, eventXml: undefined }).toEqual({
+      ...event,
+      _automationReport: false,
+      _topExceptionsReport: false,
+      eventXml: undefined
+    })
   })
 
   it("should create many new audit log events for an existing audit log record", async () => {
@@ -62,7 +67,12 @@ describe("Creating Audit Log events", () => {
 
       actualEvent.attributes["Attribute 1"] = event.attributes["Attribute 1"]
       expect(actualEvent.eventXml).toHaveProperty("valueLookup")
-      expect({ ...actualEvent, eventXml: undefined }).toEqual({ ...event, eventXml: undefined })
+      expect({ ...actualEvent, eventXml: undefined }).toEqual({
+        ...event,
+        _automationReport: false,
+        _topExceptionsReport: false,
+        eventXml: undefined
+      })
     })
   })
 })

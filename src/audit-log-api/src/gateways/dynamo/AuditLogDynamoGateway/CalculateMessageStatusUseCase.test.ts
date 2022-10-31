@@ -1,43 +1,43 @@
 import type { AuditLogEvent, KeyValuePair } from "shared-types"
-import { AuditLogStatus, EventType } from "shared-types"
+import { AuditLogStatus, EventCode } from "shared-types"
 import CalculateMessageStatusUseCase from "./CalculateMessageStatusUseCase"
 
 let eventIndex = 0
-const createEvent = (eventType: string, category = "information", attributes?: KeyValuePair<string, string>) =>
+const createEvent = (eventCode: EventCode, category = "information", attributes?: KeyValuePair<string, string>) =>
   ({
-    eventType,
+    eventCode,
     category,
     attributes,
     timestamp: new Date(new Date().getTime() + 1000 * eventIndex++)
   } as unknown as AuditLogEvent)
-const sanitisedEvent = () => createEvent(EventType.SanitisedMessage)
-const archivedRecordEvent = () => createEvent(EventType.ErrorRecordArchival)
-const errorEvent = () => createEvent("Dummy error event", "error")
-const retryingEvent = () => createEvent(EventType.Retrying)
-const pncUpdatedEvent = () => createEvent(EventType.PncUpdated)
-const recordIgnoredNoRecordableOffencesEvent = () => createEvent(EventType.RecordIgnoredNoRecordableOffences)
-const recordIgnoredNoOffencesEvent = () => createEvent(EventType.RecordIgnoredNoOffences)
+const sanitisedEvent = () => createEvent(EventCode.Sanitised)
+const archivedRecordEvent = () => createEvent(EventCode.ErrorRecordArchived)
+const errorEvent = () => createEvent(EventCode.MessageRejected, "error")
+const retryingEvent = () => createEvent(EventCode.RetryingMessage)
+const pncUpdatedEvent = () => createEvent(EventCode.PncUpdated)
+const recordIgnoredNoRecordableOffencesEvent = () => createEvent(EventCode.IgnoredNonrecordable)
+const recordIgnoredNoOffencesEvent = () => createEvent(EventCode.IgnoredNoOffences)
 const prePNCUpdateTriggersGeneratedEvent = () =>
-  createEvent(EventType.TriggersGenerated, "information", {
+  createEvent(EventCode.TriggersGenerated, "information", {
     "Trigger 1 Details": "TRPR0004",
     "Trigger 2 Details": "TRPR0004",
     "Trigger 3 Details": "TRPR0006"
   })
 const postPNCUpdateTriggersGeneratedEvent = () =>
-  createEvent(EventType.TriggersGenerated, "information", { "Trigger 1 Details": "TRPS0003" })
+  createEvent(EventCode.TriggersGenerated, "information", { "Trigger 1 Details": "TRPS0003" })
 const triggerInstancesResolvedEvent = () =>
-  createEvent(EventType.TriggerInstancesResolved, "information", {
+  createEvent(EventCode.TriggersResolved, "information", {
     "Trigger Code 01": "TRPR0004",
     "Trigger Code 02": "TRPR0004",
     "Trigger Code 03": "TRPR0006",
     "Trigger Code 04": "TRPS0003"
   })
 const triggerInstancesPartiallyResolvedEvent = () =>
-  createEvent(EventType.TriggerInstancesResolved, "information", {
+  createEvent(EventCode.TriggersResolved, "information", {
     "Trigger Code 01": "TRPR0004",
     "Trigger Code 02": "TRPR0004"
   })
-const exceptionsManuallyResolvedEvent = () => createEvent(EventType.ExceptionsManuallyResolved)
+const exceptionsManuallyResolvedEvent = () => createEvent(EventCode.ExceptionsResolved)
 
 describe("CalculateMessageStatusUseCase", () => {
   it("should not affect the status calculation when message has sanitised event", () => {

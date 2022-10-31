@@ -8,8 +8,18 @@ type ValidationResult = {
 
 export default (auditLogEvent: AuditLogEvent): ValidationResult => {
   const errors: string[] = []
-  const { attributes, category, eventSource, eventSourceArn, eventSourceQueueName, eventType, eventXml, timestamp } =
-    auditLogEvent as BichardAuditLogEvent
+  const {
+    attributes,
+    category,
+    eventCode,
+    eventSource,
+    eventSourceArn,
+    eventSourceQueueName,
+    eventType,
+    eventXml,
+    timestamp,
+    user
+  } = auditLogEvent as BichardAuditLogEvent
 
   if (attributes && (typeof attributes !== "object" || Array.isArray(attributes))) {
     errors.push("Attributes must be key/value object")
@@ -19,6 +29,10 @@ export default (auditLogEvent: AuditLogEvent): ValidationResult => {
     errors.push("Category is mandatory")
   } else if (!["information", "error", "warning"].includes(category)) {
     errors.push("Category can be either information, error, or warning")
+  }
+
+  if (eventCode && typeof eventCode !== "string") {
+    errors.push("Event code must be string")
   }
 
   if (!eventSource) {
@@ -51,15 +65,21 @@ export default (auditLogEvent: AuditLogEvent): ValidationResult => {
     errors.push("Timestamp must be ISO format")
   }
 
+  if (user && typeof user !== "string") {
+    errors.push("User must be string")
+  }
+
   let validatedAuditLogEvent = {
     attributes,
     category,
+    eventCode,
     eventSource,
     eventSourceArn,
     eventSourceQueueName,
     eventType,
     eventXml,
-    timestamp
+    timestamp,
+    user
   } as BichardAuditLogEvent
 
   if (!validatedAuditLogEvent.attributes) {

@@ -32,6 +32,38 @@ describe("Creating Audit Log event", () => {
 
     actualEvent.attributes["Attribute 1"] = event.attributes["Attribute 1"]
     expect(actualEvent.eventXml).toHaveProperty("valueLookup")
-    expect({ ...actualEvent, eventXml: undefined }).toEqual({ ...event, eventXml: undefined })
+    expect({ ...actualEvent, eventXml: undefined }).toEqual({
+      ...event,
+      eventXml: undefined,
+      _automationReport: false,
+      _topExceptionsReport: false
+    })
+  })
+
+  it("should transform the audit log event before saving", async () => {
+    const gateway = new TestDynamoGateway(auditLogDynamoConfig)
+
+    const auditLog = mockAuditLog()
+    const result1 = await axios.post("http://localhost:3010/messages", auditLog)
+    expect(result1.status).toEqual(HttpStatusCode.created)
+
+    const event = mockAuditLogEvent()
+    event.addAttribute("user", "Test User")
+    event.addAttribute("eventCode", "test.event")
+    const result2 = await axios.post(`http://localhost:3010/messages/${auditLog.messageId}/events`, event)
+    expect(result2.status).toEqual(HttpStatusCode.created)
+
+    const record = await gateway.getOne<AuditLog>(auditLogDynamoConfig.TABLE_NAME, "messageId", auditLog.messageId)
+
+    expect(record).not.toBeNull()
+
+    const { messageId, events } = record!
+    expect(messageId).toEqual(auditLog.messageId)
+
+    expect(events).toHaveLength(1)
+
+    const actualEvent = events[0] as BichardAuditLogEvent
+    expect(actualEvent.user).toBe("Test User")
+    expect(actualEvent.eventCode).toBe("test.event")
   })
 })

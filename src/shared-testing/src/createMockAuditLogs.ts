@@ -8,7 +8,7 @@ export const createMockError = async (overrides: Partial<AuditLog> = {}): Promis
   const auditLog = mockAuditLog(overrides)
   await axios.post("http://localhost:3010/messages", auditLog)
 
-  const event = mockAuditLogEvent("error", "Hearing Outcome Input Queue Failure")
+  const event = mockAuditLogEvent({ category: "error", eventType: "Hearing Outcome Input Queue Failure" })
   const res = await axios.post(`http://localhost:3010/messages/${auditLog.messageId}/events`, event)
   if (isError(res)) {
     return res
@@ -77,14 +77,14 @@ export const createMockRetriedError = async (): PromiseResult<AuditLog> => {
   const auditLog = mockAuditLog()
   await axios.post("http://localhost:3010/messages", auditLog)
 
-  const event = mockAuditLogEvent("error", "Hearing Outcome Input Queue Failure")
+  const event = mockAuditLogEvent({ category: "error", eventType: "Hearing Outcome Input Queue Failure" })
   const res = await axios.post(`http://localhost:3010/messages/${auditLog.messageId}/events`, event)
   if (isError(res)) {
     return res
   }
 
   for (let i = 0; i < 3; i++) {
-    const retryEvent = mockAuditLogEvent("information", "Retrying failed message")
+    const retryEvent = mockAuditLogEvent({ category: "information", eventType: "Retrying failed message" })
     const retryRes = await axios.post(`http://localhost:3010/messages/${auditLog.messageId}/events`, retryEvent)
     if (isError(retryRes)) {
       return retryRes

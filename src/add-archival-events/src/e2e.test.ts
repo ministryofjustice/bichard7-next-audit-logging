@@ -7,7 +7,7 @@ import { Client } from "pg"
 import { AuditLogApiClient, logger } from "shared"
 import { clearDynamoTable } from "shared-testing"
 import type { ApiClient } from "shared-types"
-import { AuditLog, AuditLogEvent, isSuccess } from "shared-types"
+import { AuditLog, AuditLogEvent, EventCode, isSuccess } from "shared-types"
 import addArchivalEvents from "."
 
 logger.level = "debug"
@@ -97,8 +97,11 @@ describe("Add Error Records e2e", () => {
 
     expect(message.events).toHaveLength(1)
     expect(message.events[0]).toStrictEqual({
+      _automationReport: false,
+      _topExceptionsReport: false,
       eventSource: "me",
       attributes: { "Record ID": 1 },
+      eventCode: EventCode.ErrorRecordArchived,
       eventType: "Error record archival",
       category: "information",
       timestamp: "2022-04-26T12:53:55.000Z"
@@ -154,8 +157,11 @@ describe("Add Error Records e2e", () => {
 
     expect(message.events).toHaveLength(1)
     expect(message.events[0]).toStrictEqual({
+      _automationReport: false,
+      _topExceptionsReport: false,
       eventSource: "me",
       attributes: { "Record ID": 1 },
+      eventCode: EventCode.ErrorRecordArchived,
       eventType: "Error record archival",
       category: "information",
       timestamp: "2022-04-26T12:53:55.000Z"
@@ -536,8 +542,11 @@ describe("Add Error Records e2e", () => {
 
     expect(message.events).toHaveLength(1)
     expect(message.events[0]).toStrictEqual({
+      _automationReport: false,
+      _topExceptionsReport: false,
       eventSource: "me",
       attributes: { "Record ID": 1 },
+      eventCode: EventCode.ErrorRecordArchived,
       eventType: "Error record archival",
       category: "information",
       timestamp: "2022-04-26T12:53:55.000Z"

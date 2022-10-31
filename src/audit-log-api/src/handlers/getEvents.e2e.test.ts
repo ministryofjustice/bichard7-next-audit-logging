@@ -1,8 +1,8 @@
 jest.retryTimes(10)
 import axios from "axios"
-import type { AuditLogEvent, BichardAuditLogEvent } from "shared-types"
 import { HttpStatusCode } from "shared"
 import { mockAuditLog, mockAuditLogEvent } from "shared-testing"
+import type { AuditLogEvent, BichardAuditLogEvent } from "shared-types"
 
 describe("Getting Audit Log events", () => {
   it("should return the audit log events for an existing audit log record", async () => {
@@ -17,7 +17,7 @@ describe("Getting Audit Log events", () => {
     const result3 = await axios.get<AuditLogEvent[]>(`http://localhost:3010/messages/${auditLog.messageId}/events`)
     expect(result3.status).toEqual(HttpStatusCode.ok)
 
-    expect(result3.data).toEqual([event])
+    expect(result3.data).toEqual([{ ...event, _automationReport: false, _topExceptionsReport: false }])
   })
 
   it("should not look up large objects when largeObjects parameter set to false", async () => {

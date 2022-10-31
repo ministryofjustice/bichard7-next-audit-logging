@@ -1,5 +1,5 @@
 import type { AuditLogEvent } from "shared-types"
-import { EventType, EventTypeV2 } from "shared-types"
+import { EventCode } from "shared-types"
 
 export const parseForceOwner = (forceOwner: string): number | undefined => {
   if (forceOwner.match(/^\d{2}/)) {
@@ -9,7 +9,7 @@ export const parseForceOwner = (forceOwner: string): number | undefined => {
 }
 
 export default (event: AuditLogEvent): number | undefined => {
-  if (event.eventType === EventType.InputMessageReceived || event.eventType === EventTypeV2.HearingOutcomeDetails) {
+  if (event.eventCode === EventCode.HearingOutcomeDetails) {
     const forceOwner = event.attributes["Force Owner"] as string
     return parseForceOwner(forceOwner)
   }

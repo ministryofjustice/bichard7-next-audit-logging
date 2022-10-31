@@ -1,5 +1,5 @@
 import type { AuditLog, PromiseResult } from "shared-types"
-import { AuditLogEvent, EventType } from "shared-types"
+import { AuditLogEvent, EventCode } from "shared-types"
 import type { AuditLogDynamoGatewayInterface } from "../gateways/dynamo"
 
 export default class SanitiseAuditLogUseCase {
@@ -25,7 +25,8 @@ export default class SanitiseAuditLogUseCase {
       new AuditLogEvent({
         category: "information",
         timestamp: new Date(),
-        eventType: EventType.SanitisedMessage,
+        eventCode: EventCode.Sanitised,
+        eventType: "Sanitised message",
         eventSource: "Audit Log Api"
       })
     )

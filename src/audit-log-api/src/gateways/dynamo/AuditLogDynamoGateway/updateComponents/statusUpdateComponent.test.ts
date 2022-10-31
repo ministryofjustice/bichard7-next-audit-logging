@@ -1,6 +1,5 @@
 import type { AuditLogEvent } from "shared-types"
-import { EventType } from "shared-types"
-import { AuditLogStatus } from "shared-types"
+import { AuditLogStatus, EventCode } from "shared-types"
 import status from "./statusUpdateComponent"
 
 const auditLogEvent = (): AuditLogEvent => {
@@ -12,7 +11,7 @@ const auditLogEvent = (): AuditLogEvent => {
 
 const processingCompleteEvent = (): AuditLogEvent => {
   return {
-    eventType: EventType.PncUpdated,
+    eventCode: EventCode.PncUpdated,
     attributes: {}
   } as unknown as AuditLogEvent
 }

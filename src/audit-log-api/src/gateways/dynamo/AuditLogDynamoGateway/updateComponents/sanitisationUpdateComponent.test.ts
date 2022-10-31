@@ -1,10 +1,10 @@
 import type { AuditLogEvent } from "shared-types"
-import { EventType } from "shared-types"
+import { EventCode } from "shared-types"
 import sanitisationUpdateComponent from "./sanitisationUpdateComponent"
 
 const sanitisationEvent = (): AuditLogEvent => {
   return {
-    eventType: EventType.SanitisedMessage,
+    eventCode: EventCode.Sanitised,
     attributes: {}
   } as unknown as AuditLogEvent
 }

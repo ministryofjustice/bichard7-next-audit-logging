@@ -4,7 +4,7 @@ import axios from "axios"
 import { encodeBase64, HttpStatusCode, TestMqGateway, TestS3Gateway } from "shared"
 import { auditLogEventsS3Config } from "shared-testing"
 import type { MqConfig } from "shared-types"
-import { AuditLog, AuditLogLookup, BichardAuditLogEvent } from "shared-types"
+import { AuditLog, AuditLogLookup, AuditLogStatus, BichardAuditLogEvent } from "shared-types"
 import { v4 as uuid } from "uuid"
 import { auditLogDynamoConfig, auditLogLookupDynamoConfig, TestDynamoGateway } from "../test"
 
@@ -104,7 +104,7 @@ describe("retryMessage", () => {
       })
     } as unknown as BichardAuditLogEvent
     const message = new AuditLog("External Correlation ID", new Date(Date.now() - 3_600_000), "dummy hash")
-    message.status = "Error"
+    message.status = AuditLogStatus.error
     message.events.push(auditLogEvent)
 
     await testAuditLogDynamoGateway.insertOne(auditLogDynamoConfig.TABLE_NAME, message, "messageId")

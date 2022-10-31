@@ -1,6 +1,6 @@
 import { logger } from "shared"
 import type { ApiClient } from "shared-types"
-import { AuditLog, AuditLogEvent, isError, EventType } from "shared-types"
+import { AuditLog, AuditLogEvent, EventCode, isError } from "shared-types"
 import type { BichardRecord } from "./db"
 
 export default class ArchivalEventsApiClient {
@@ -35,7 +35,8 @@ export default class ArchivalEventsApiClient {
     const auditLogEvent = new AuditLogEvent({
       eventSource: bichardRecord.archivedBy,
       category: "information",
-      eventType: EventType.ErrorRecordArchival,
+      eventType: "Error record archival",
+      eventCode: EventCode.ErrorRecordArchived,
       timestamp: bichardRecord.archivedAt
     })
     auditLogEvent.addAttribute("Record ID", bichardRecord.recordId)
@@ -73,7 +74,7 @@ export default class ArchivalEventsApiClient {
   private hasArchivalEvent = (auditLog: AuditLog, recordId: number): boolean =>
     auditLog.events.filter((event: AuditLogEvent) => {
       return (
-        event.eventType === EventType.ErrorRecordArchival &&
+        event.eventCode === EventCode.ErrorRecordArchived &&
         event.category === "information" &&
         (event.attributes["Record ID"] || "") === recordId
       )

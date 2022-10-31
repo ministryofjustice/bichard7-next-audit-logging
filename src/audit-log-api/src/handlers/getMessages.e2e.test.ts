@@ -6,10 +6,11 @@ import {
   createMockAuditLogEvent,
   createMockAuditLogs,
   createMockError,
-  mockAuditLog
+  mockAuditLog,
+  mockAuditLogEvent
 } from "shared-testing"
 import type { AuditLog, BichardAuditLogEvent } from "shared-types"
-import { isError } from "shared-types"
+import { EventCode, isError } from "shared-types"
 import { auditLogDynamoConfig } from "src/test/dynamoDbConfig"
 import { TestDynamoGateway } from "../test"
 
@@ -221,7 +222,9 @@ describe("Getting Audit Logs", () => {
         throw new Error("Unexpected error")
       }
 
-      const eventInclude = await createMockAuditLogEvent(auditLog.messageId, { eventType: "Exceptions generated" })
+      const eventInclude = await createMockAuditLogEvent(auditLog.messageId, {
+        eventCode: EventCode.ExceptionsGenerated
+      })
       const eventExclude = await createMockAuditLogEvent(auditLog.messageId)
 
       if (isError(eventInclude) || isError(eventExclude)) {
@@ -434,6 +437,43 @@ describe("Getting Audit Logs", () => {
         expect(result.data[0].messageId).toBe(auditLogs[keys[0]].messageId)
         expect(result.data[1].messageId).toBe(auditLogs[keys[1]].messageId)
       })
+    })
+  })
+
+  describe("transformation for old-style events", () => {
+    let auditLog: AuditLog
+
+    beforeEach(async () => {
+      auditLog = mockAuditLog({
+        events: [
+          mockAuditLogEvent({
+            attributes: {
+              eventCode: "dummy.event",
+              user: "dummy.user"
+            }
+          })
+        ]
+      })
+
+      await testDynamoGateway.insertOne(auditLogDynamoConfig.TABLE_NAME, auditLog, "messageId")
+    })
+
+    it("should add user and event code when retrieving old-style event if they're set in the attributes for multiple messages", async () => {
+      const result = await axios.get<AuditLog[]>("http://localhost:3010/messages")
+
+      expect(result.data).toHaveLength(1)
+      expect(result.data[0].events[0].eventCode).toBe("dummy.event")
+      expect(result.data[0].events[0].user).toBe("dummy.user")
+    })
+
+    it("should add user and event code when retrieving old-style event if they're set in attributes for single message", async () => {
+      const result = await axios.get<AuditLog[]>(`http://localhost:3010/messages/${auditLog.messageId}`)
+
+      expect(result.data).toHaveLength(1)
+
+      console.log(JSON.stringify(result.data, null, 2))
+      expect(result.data[0].events[0].eventCode).toBe("dummy.event")
+      expect(result.data[0].events[0].user).toBe("dummy.user")
     })
   })
 })

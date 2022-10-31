@@ -1,9 +1,10 @@
 import type { AuditLogEvent } from "shared-types"
+import { EventCode } from "shared-types"
 import forceOwner from "./forceOwnerUpdateComponent"
 
 const forceOwnerChangeEvent = (): AuditLogEvent => {
   return {
-    eventType: "Input message received",
+    eventCode: EventCode.HearingOutcomeDetails,
     attributes: {
       "Force Owner": "010000"
     },
