@@ -1,15 +1,14 @@
-jest.retryTimes(10)
 import axios from "axios"
 import { HttpStatusCode } from "shared"
 import { mockAuditLog, mockAuditLogEvent } from "shared-testing"
 import type { AuditLog, BichardAuditLogEvent } from "shared-types"
+import { EventCode } from "shared-types"
 import { auditLogDynamoConfig } from "src/test/dynamoDbConfig"
 import { TestDynamoGateway } from "../test"
+const gateway = new TestDynamoGateway(auditLogDynamoConfig)
 
 describe("Creating Audit Log event", () => {
   it("should create a new audit log event for an existing audit log record", async () => {
-    const gateway = new TestDynamoGateway(auditLogDynamoConfig)
-
     const auditLog = mockAuditLog()
     const result1 = await axios.post("http://localhost:3010/messages", auditLog)
     expect(result1.status).toEqual(HttpStatusCode.created)
@@ -41,8 +40,6 @@ describe("Creating Audit Log event", () => {
   })
 
   it("should transform the audit log event before saving", async () => {
-    const gateway = new TestDynamoGateway(auditLogDynamoConfig)
-
     const auditLog = mockAuditLog()
     const result1 = await axios.post("http://localhost:3010/messages", auditLog)
     expect(result1.status).toEqual(HttpStatusCode.created)
@@ -65,5 +62,73 @@ describe("Creating Audit Log event", () => {
     const actualEvent = events[0] as BichardAuditLogEvent
     expect(actualEvent.user).toBe("Test User")
     expect(actualEvent.eventCode).toBe("test.event")
+  })
+
+  describe("updating the PNC status", () => {
+    const getPncStatus = async (messageId: string): Promise<string | undefined> => {
+      const record = await gateway.getOne<AuditLog>(auditLogDynamoConfig.TABLE_NAME, "messageId", messageId)
+      return record?.pncStatus
+    }
+
+    it("should update the status with each event", async () => {
+      const auditLog = mockAuditLog()
+      await axios.post("http://localhost:3010/messages", auditLog)
+
+      let pncStatus = await getPncStatus(auditLog.messageId)
+      expect(pncStatus).toBe("Processing")
+
+      let event = mockAuditLogEvent({ eventCode: EventCode.ExceptionsGenerated })
+      await axios.post(`http://localhost:3010/messages/${auditLog.messageId}/events`, event)
+
+      pncStatus = await getPncStatus(auditLog.messageId)
+      expect(pncStatus).toBe("Exceptions")
+
+      event = mockAuditLogEvent({ eventCode: EventCode.ExceptionsResolved })
+      await axios.post(`http://localhost:3010/messages/${auditLog.messageId}/events`, event)
+
+      pncStatus = await getPncStatus(auditLog.messageId)
+      expect(pncStatus).toBe("ManuallyResolved")
+
+      event = mockAuditLogEvent({ eventCode: EventCode.IgnoredAppeal })
+      await axios.post(`http://localhost:3010/messages/${auditLog.messageId}/events`, event)
+
+      pncStatus = await getPncStatus(auditLog.messageId)
+      expect(pncStatus).toBe("Ignored")
+
+      event = mockAuditLogEvent({ eventCode: EventCode.PncUpdated })
+      await axios.post(`http://localhost:3010/messages/${auditLog.messageId}/events`, event)
+
+      pncStatus = await getPncStatus(auditLog.messageId)
+      expect(pncStatus).toBe("Updated")
+    })
+  })
+
+  describe("updating the Trigger status", () => {
+    const getTriggerStatus = async (messageId: string): Promise<string | undefined> => {
+      const record = await gateway.getOne<AuditLog>(auditLogDynamoConfig.TABLE_NAME, "messageId", messageId)
+      return record?.triggerStatus
+    }
+
+    it("should update the status with each event", async () => {
+      const auditLog = mockAuditLog()
+      await axios.post("http://localhost:3010/messages", auditLog)
+
+      let triggerStatus = await getTriggerStatus(auditLog.messageId)
+      expect(triggerStatus).toBe("NoTriggers")
+
+      let event = mockAuditLogEvent({ eventCode: EventCode.TriggersGenerated })
+      event.addAttribute("Trigger 1 Details", "TRPR0001")
+      await axios.post(`http://localhost:3010/messages/${auditLog.messageId}/events`, event)
+
+      triggerStatus = await getTriggerStatus(auditLog.messageId)
+      expect(triggerStatus).toBe("Generated")
+
+      event = mockAuditLogEvent({ eventCode: EventCode.TriggersResolved })
+      event.addAttribute("Trigger Code", "TRPR0001")
+      await axios.post(`http://localhost:3010/messages/${auditLog.messageId}/events`, event)
+
+      triggerStatus = await getTriggerStatus(auditLog.messageId)
+      expect(triggerStatus).toBe("Resolved")
+    })
   })
 })

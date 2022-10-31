@@ -29,6 +29,10 @@ export default class AuditLog {
 
   public status = AuditLogStatus.processing
 
+  public pncStatus?: string
+
+  public triggerStatus?: string
+
   public lastEventType: string
 
   public createdBy: string

@@ -1,5 +1,5 @@
 import type { AuditLogEvent } from "shared-types"
-import { AuditLogStatus, EventCode } from "shared-types"
+import { AuditLogStatus, EventCode, PncStatus, TriggerStatus } from "shared-types"
 import status from "./statusUpdateComponent"
 
 const auditLogEvent = (): AuditLogEvent => {
@@ -21,9 +21,13 @@ describe("statusUpdateComponent", () => {
     const events = [auditLogEvent(), auditLogEvent(), processingCompleteEvent()]
     const forceOwnerDynamoUpdates = status([], events)
     expect(forceOwnerDynamoUpdates).toStrictEqual({
-      updateExpression: "#status = :status",
-      updateExpressionValues: { ":status": AuditLogStatus.completed },
-      expressionAttributeNames: { "#status": "status" }
+      updateExpression: "#status = :status, #pncStatus = :pncStatus, #triggerStatus = :triggerStatus",
+      updateExpressionValues: {
+        ":status": AuditLogStatus.completed,
+        ":pncStatus": PncStatus.Updated,
+        ":triggerStatus": TriggerStatus.NoTriggers
+      },
+      expressionAttributeNames: { "#status": "status", "#pncStatus": "pncStatus", "#triggerStatus": "triggerStatus" }
     })
   })
 
@@ -31,9 +35,13 @@ describe("statusUpdateComponent", () => {
     const events = [auditLogEvent(), auditLogEvent(), auditLogEvent()]
     const forceOwnerDynamoUpdates = status([], events)
     expect(forceOwnerDynamoUpdates).toStrictEqual({
-      updateExpression: "#status = :status",
-      updateExpressionValues: { ":status": AuditLogStatus.processing },
-      expressionAttributeNames: { "#status": "status" }
+      updateExpression: "#status = :status, #pncStatus = :pncStatus, #triggerStatus = :triggerStatus",
+      updateExpressionValues: {
+        ":status": AuditLogStatus.processing,
+        ":pncStatus": PncStatus.Processing,
+        ":triggerStatus": TriggerStatus.NoTriggers
+      },
+      expressionAttributeNames: { "#status": "status", "#pncStatus": "pncStatus", "#triggerStatus": "triggerStatus" }
     })
   })
 })

@@ -1,6 +1,6 @@
 import { logger } from "shared"
 import type { AuditLog } from "shared-types"
-import { AuditLogStatus, isError } from "shared-types"
+import { AuditLogStatus, isError, PncStatus, TriggerStatus } from "shared-types"
 import type { AuditLogDynamoGatewayInterface } from "../gateways/dynamo"
 import { isIsoDate } from "../utils"
 
@@ -112,6 +112,8 @@ export default async (auditLog: AuditLog, dynamoGateway: AuditLogDynamoGatewayIn
     receivedDate: formattedReceivedDate,
     createdBy,
     status: AuditLogStatus.processing,
+    pncStatus: PncStatus.Processing,
+    triggerStatus: TriggerStatus.NoTriggers,
     lastEventType: "",
     version: 0,
     retryCount: 0,

@@ -1,5 +1,5 @@
 import type { AuditLogEventOptions } from "shared-types"
-import { AuditLogEvent } from "shared-types"
+import { AuditLogEvent, EventCode } from "shared-types"
 import transformAuditLogEvent from "./transformAuditLogEvent"
 
 const createLogEvent = (options: Partial<AuditLogEventOptions> = {}): AuditLogEvent => {
@@ -38,5 +38,11 @@ describe("transformAuditLogEvent", () => {
     const event = createLogEvent()
     const result = transformAuditLogEvent(event)
     expect(result.user).toBeUndefined()
+  })
+
+  it("should add the eventCode for a valid event", () => {
+    const event = createLogEvent({ eventType: "Trigger generated" })
+    const result = transformAuditLogEvent(event)
+    expect(result.eventCode).toBe(EventCode.TriggersGenerated)
   })
 })
