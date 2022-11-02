@@ -1,5 +1,5 @@
 import { createS3Config, decodeBase64, S3Gateway } from "shared"
-import type { AmazonMqEventSourceRecordEvent, JmsTextMessage, MessageFormat } from "shared-types"
+import type { AmazonMqEventSourceRecordEvent, EventMessage, MessageFormat } from "shared-types"
 import { isError } from "shared-types"
 import formatMessages from "./formatMessages"
 import StoreInS3UseCase from "./StoreInS3UseCase"
@@ -24,14 +24,15 @@ const extractEventType = (input: string): string | void => {
   }
 }
 
-const logEvent = (message: JmsTextMessage): void => {
+const logEvent = (message: EventMessage): void => {
   try {
-    const decodedMessage = decodeBase64(message.data)
+    const decodedMessage = decodeBase64(message.messageData)
     const messageId = extractCorrelationId(decodedMessage)
     const eventType = extractEventType(decodedMessage)
     console.log(`[${messageId}] - Logging event - ${eventType}`)
   } catch (e) {
-    console.log("Error logging message")
+    console.log("Error logging message", e)
+    console.log("Message: ", message)
   }
 }
 
@@ -46,7 +47,7 @@ export default async (event: AmazonMqEventSourceRecordEvent): Promise<void> => {
   const messages = formatMessages(event, messageFormat)
 
   if (process.env.MESSAGE_FORMAT === "GeneralEvent") {
-    messages.forEach((m) => logEvent(m as JmsTextMessage))
+    messages.forEach((m) => logEvent(m as EventMessage))
   }
 
   await Promise.all(
