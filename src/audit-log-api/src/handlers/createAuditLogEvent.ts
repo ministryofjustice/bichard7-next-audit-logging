@@ -36,6 +36,9 @@ export default async function createAuditLogEvent(event: APIGatewayProxyEvent): 
 
   const transformedAuditLogEvent = transformAuditLogEvent(auditLogEvent)
   const indexedAuditLogEvent = addAuditLogEventIndices(transformedAuditLogEvent)
+  logger.info(
+    `[${request.messageId}] - Logging event - ${indexedAuditLogEvent.eventType} (${indexedAuditLogEvent.eventCode})`
+  )
   const result = await createAuditLogEventUseCase.create(request.messageId, indexedAuditLogEvent)
 
   if (result.resultType === "notFound") {

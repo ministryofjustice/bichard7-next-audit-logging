@@ -1,11 +1,10 @@
-import { isError } from "shared-types"
+import { AuditLogApiClient, createS3Config, logger, S3Gateway } from "shared"
 import type { S3PutObjectEvent } from "shared-types"
-import { AuditLogApiClient, S3Gateway, createS3Config } from "shared"
-import translateEvent from "src/use-cases/translateEvent"
+import { isError } from "shared-types"
 import CreateEventUseCase from "src/use-cases/CreateEventUseCase"
-import RetrieveEventFromS3UseCase from "src/use-cases/RetrieveEventFromS3UseCase"
 import DoesS3ObjectExist from "src/use-cases/DoesS3ObjectExist"
-import { logger } from "shared"
+import RetrieveEventFromS3UseCase from "src/use-cases/RetrieveEventFromS3UseCase"
+import translateEvent from "src/use-cases/translateEvent"
 
 const apiUrl = process.env.API_URL
 if (!apiUrl) {
@@ -62,6 +61,7 @@ export default async function storeEvent(
   }
 
   const { messageId, event: messageEvent } = translateEventResult
+  logger.info(`[${messageId}] - Logging event - ${messageEvent.eventType} (${messageEvent.eventCode})`)
 
   const createEventResult = await createEventUseCase.execute(messageId, messageEvent)
 
