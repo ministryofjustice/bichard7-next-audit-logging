@@ -14,7 +14,9 @@ enum EventCode {
   ErrorRecordArchived = "error-record.archived",
   ExceptionsGenerated = "exceptions.generated",
   Sanitised = "sanitised",
-  HearingOutcomeDetails = "hearing-outcome.details"
+  HearingOutcomeDetails = "hearing-outcome.details",
+  PncResponseReceived = "pnc.response-received",
+  PncResponseNotReceived = "pnc.response-not-received"
 }
 
 export default EventCode
