@@ -969,13 +969,20 @@ describe("AuditLogDynamoGateway", () => {
             "\n" +
             "      set events = list_append(if_not_exists(events, :empty_list), :events),\n" +
             "      #lastEventType = :lastEventType\n" +
-            "    , #status = :status ADD version :version_increment",
-          ExpressionAttributeNames: { "#lastEventType": "lastEventType", "#status": "status" },
+            "    , #status = :status, #pncStatus = :pncStatus, #triggerStatus = :triggerStatus ADD version :version_increment",
+          ExpressionAttributeNames: {
+            "#lastEventType": "lastEventType",
+            "#status": "status",
+            "#pncStatus": "pncStatus",
+            "#triggerStatus": "triggerStatus"
+          },
           ExpressionAttributeValues: {
             ":events": [expectedEvent],
             ":empty_list": [],
             ":lastEventType": "Dummy Event Type",
             ":status": "Completed",
+            ":pncStatus": "Ignored",
+            ":triggerStatus": "NoTriggers",
             ":version": 0,
             ":version_increment": 1
           },
@@ -1010,13 +1017,20 @@ describe("AuditLogDynamoGateway", () => {
             "\n" +
             "      set events = list_append(if_not_exists(events, :empty_list), :events),\n" +
             "      #lastEventType = :lastEventType\n" +
-            "    , #status = :status ADD version :version_increment",
-          ExpressionAttributeNames: { "#lastEventType": "lastEventType", "#status": "status" },
+            "    , #status = :status, #pncStatus = :pncStatus, #triggerStatus = :triggerStatus ADD version :version_increment",
+          ExpressionAttributeNames: {
+            "#lastEventType": "lastEventType",
+            "#status": "status",
+            "#pncStatus": "pncStatus",
+            "#triggerStatus": "triggerStatus"
+          },
           ExpressionAttributeValues: {
             ":events": [expectedEvent],
             ":empty_list": [],
             ":lastEventType": "Dummy Event Type",
             ":status": "Completed",
+            ":pncStatus": "Ignored",
+            ":triggerStatus": "NoTriggers",
             ":version": 0,
             ":version_increment": 1
           },

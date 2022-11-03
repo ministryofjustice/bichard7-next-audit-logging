@@ -21,11 +21,15 @@ const eventCodeLookup: { [k: string]: EventCode } = {
   "Error record archival": EventCode.ErrorRecordArchived,
   "Input message received": EventCode.HearingOutcomeDetails,
   "Hearing Outcome passed to Error List": EventCode.ExceptionsGenerated,
-  "Sanitised message": EventCode.Sanitised
+  "Sanitised message": EventCode.Sanitised,
+  "PNC Response received": EventCode.PncResponseReceived,
+  "PNC Response not received": EventCode.PncResponseNotReceived,
+  "PNC Update added to Error List (Unexpected PNC response)": EventCode.ExceptionsGenerated,
+  "PNC Update added to Error List (PNC message construction)": EventCode.ExceptionsGenerated
 }
 
 const transformAuditLogEvent = (event: AuditLogEvent): AuditLogEvent => {
-  if (event.attributes.eventCode && typeof event.attributes.eventCode === "string") {
+  if (event.attributes?.eventCode && typeof event.attributes.eventCode === "string") {
     event.eventCode = event.attributes.eventCode
     delete event.attributes.eventCode
   }
@@ -34,7 +38,7 @@ const transformAuditLogEvent = (event: AuditLogEvent): AuditLogEvent => {
     event.eventCode = eventCodeLookup[event.eventType]
   }
 
-  const user = event.attributes.user ?? event.attributes.User
+  const user = event.attributes?.user ?? event.attributes?.User
   if (typeof user === "string") {
     event.user = user
     delete event.attributes.user

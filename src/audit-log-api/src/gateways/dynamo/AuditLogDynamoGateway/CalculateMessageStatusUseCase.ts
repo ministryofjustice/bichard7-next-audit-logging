@@ -1,5 +1,11 @@
 import type { AuditLogEvent } from "shared-types"
-import { AuditLogStatus, EventCode } from "shared-types"
+import { AuditLogStatus, EventCode, PncStatus, TriggerStatus } from "shared-types"
+
+export type MessageStatus = {
+  status: AuditLogStatus
+  pncStatus: PncStatus
+  triggerStatus: TriggerStatus
+}
 
 export default class CalculateMessageStatusUseCase {
   private readonly events: AuditLogEvent[] = []
@@ -10,9 +16,13 @@ export default class CalculateMessageStatusUseCase {
       .sort((eventA, eventB) => (eventA.timestamp > eventB.timestamp ? 1 : -1))
   }
 
-  call(): AuditLogStatus {
+  call(): MessageStatus {
+    return { status: this.status, pncStatus: this.pncStatus, triggerStatus: this.triggerStatus }
+  }
+
+  private get status(): AuditLogStatus {
     if (
-      (this.hasNoTriggers || this.triggersAreResolved) &&
+      (!this.hasTriggers || this.triggersAreResolved) &&
       (this.exceptionsAreManuallyResolved || this.pncIsUpdated || this.recordIsIgnored)
     ) {
       return AuditLogStatus.completed
@@ -25,12 +35,38 @@ export default class CalculateMessageStatusUseCase {
     return AuditLogStatus.processing
   }
 
+  private get pncStatus(): PncStatus {
+    if (this.pncIsUpdated) {
+      return PncStatus.Updated
+    } else if (this.recordIsIgnored) {
+      return PncStatus.Ignored
+    } else if (this.exceptionsAreManuallyResolved) {
+      return PncStatus.ManuallyResolved
+    } else if (this.hasExceptions) {
+      return PncStatus.Exceptions
+    }
+    return PncStatus.Processing
+  }
+
+  private get triggerStatus(): TriggerStatus {
+    if (this.triggersAreResolved) {
+      return TriggerStatus.Resolved
+    } else if (this.hasTriggers) {
+      return TriggerStatus.Generated
+    }
+    return TriggerStatus.NoTriggers
+  }
+
+  private get hasExceptions(): boolean {
+    return this.hasEventCode(EventCode.ExceptionsGenerated)
+  }
+
   private hasEventCode(eventCode: EventCode): boolean {
     return !!this.events.find((event) => event.eventCode === eventCode)
   }
 
-  private get hasNoTriggers(): boolean {
-    return !this.hasEventCode(EventCode.TriggersGenerated)
+  private get hasTriggers(): boolean {
+    return this.hasEventCode(EventCode.TriggersGenerated)
   }
 
   private get triggersAreResolved(): boolean {

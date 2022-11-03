@@ -96,7 +96,10 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
   }
 
   async update(message: AuditLog): PromiseResult<AuditLog> {
-    message.status = new CalculateMessageStatusUseCase(message.events).call()
+    const { status, pncStatus, triggerStatus } = new CalculateMessageStatusUseCase(message.events).call()
+    message.status = status
+    message.pncStatus = pncStatus
+    message.triggerStatus = triggerStatus
 
     message.errorRecordArchivalDate =
       message.errorRecordArchivalDate ??
