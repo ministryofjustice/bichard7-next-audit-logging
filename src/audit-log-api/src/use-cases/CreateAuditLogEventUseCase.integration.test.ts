@@ -257,7 +257,37 @@ describe("CreateAuditLogEventUseCase", () => {
     expect(actualAuditLog?.events).toHaveLength(1)
   })
 
-  it("should still return an error if there is a version conflict after 10 attempts", async () => {
+  it("should try 10 times to add the event if there is a transaction conflict", async () => {
+    const auditLog = createAuditLog()
+    await auditLogDynamoGateway.create(auditLog)
+
+    const event = createAuditLogEvent()
+    event.addAttribute("reallyLongAttribute", "X".repeat(10_000))
+
+    const returnedError = new TransactionFailedError([{ Code: "TransactionConflict", Message: "Transaction Conflict" }])
+    const spy = jest
+      .spyOn(auditLogDynamoGateway, "executeTransaction")
+      .mockResolvedValueOnce(returnedError)
+      .mockResolvedValueOnce(returnedError)
+      .mockResolvedValueOnce(returnedError)
+      .mockResolvedValueOnce(returnedError)
+      .mockResolvedValueOnce(returnedError)
+      .mockResolvedValueOnce(returnedError)
+      .mockResolvedValueOnce(returnedError)
+      .mockResolvedValueOnce(returnedError)
+      .mockResolvedValueOnce(returnedError)
+
+    const result = await createAuditLogEventUseCase.create(auditLog.messageId, event)
+
+    expect(result.resultType).toBe("success")
+
+    expect(spy).toHaveBeenCalledTimes(10)
+    const actualAuditLog = await getAuditLog(auditLog.messageId)
+    expect(actualAuditLog).toBeDefined()
+    expect(actualAuditLog?.events).toHaveLength(1)
+  })
+
+  it("should still return an error if there is a conflict after 10 attempts", async () => {
     const auditLog = createAuditLog()
     await auditLogDynamoGateway.create(auditLog)
 
@@ -272,7 +302,7 @@ describe("CreateAuditLogEventUseCase", () => {
 
     const result = await createAuditLogEventUseCase.create(auditLog.messageId, event)
 
-    expect(result.resultType).toBe("invalidVersion")
+    expect(result.resultType).toBe("transactionFailed")
 
     expect(spy).toHaveBeenCalledTimes(10)
     const actualAuditLog = await getAuditLog(auditLog.messageId)
