@@ -1,7 +1,7 @@
 import type { AuditLogEvent, CreateAuditLogEventsResult } from "shared-types"
 import { isError } from "shared-types"
 import type { AuditLogDynamoGatewayInterface } from "../gateways/dynamo"
-import { isConditionalExpressionViolationError } from "../gateways/dynamo"
+import { isConditionalExpressionViolationError, isTransactionConflictError } from "../gateways/dynamo"
 import type StoreValuesInLookupTableUseCase from "./StoreValuesInLookupTableUseCase"
 
 const retryAttempts = 10
@@ -98,7 +98,7 @@ export default class CreateAuditLogEventUseCase {
     const transactionResult = await this.auditLogGateway.executeTransaction(dynamoUpdates)
 
     if (isError(transactionResult)) {
-      if (isConditionalExpressionViolationError(transactionResult)) {
+      if (isConditionalExpressionViolationError(transactionResult) || isTransactionConflictError(transactionResult)) {
         if (attempts > 1) {
           // Wait 250 - 750ms and try again
           const delay = Math.floor(250 + Math.random() * 500)
@@ -106,8 +106,8 @@ export default class CreateAuditLogEventUseCase {
           return this.create(messageId, originalEvent, attempts - 1)
         }
         return {
-          resultType: "invalidVersion",
-          resultDescription: `Message with Id ${messageId} has a different version in the database. Tried ${retryAttempts} times`
+          resultType: "transactionFailed",
+          resultDescription: `Conflict writing event to message with Id ${messageId}. Tried ${retryAttempts} times`
         }
       }
       return {
