@@ -10,7 +10,7 @@ import {
   validateCreateAuditLogEvents
 } from "../use-cases"
 import StoreValuesInLookupTableUseCase from "../use-cases/StoreValuesInLookupTableUseCase"
-import { addAuditLogEventIndices, createJsonApiResult, transformAuditLogEvent } from "../utils"
+import { addAuditLogEventIndices, createJsonApiResult, statusCodeLookup, transformAuditLogEvent } from "../utils"
 
 const auditLogConfig = createAuditLogDynamoDbConfig()
 const auditLogLookupConfig = createAuditLogLookupDynamoDbConfig()
@@ -45,39 +45,16 @@ export default async function createAuditLogEvents(event: APIGatewayProxyEvent):
   const indexedAuditLogEvents = transformedAuditLogEvents.map(addAuditLogEventIndices)
   const result = await createAuditLogEventUseCase.create(request.messageId, indexedAuditLogEvents)
 
-  if (result.resultType === "notFound") {
+  if (result.resultType === "success") {
     return createJsonApiResult({
-      statusCode: HttpStatusCode.notFound,
-      body: result.resultDescription
+      statusCode: HttpStatusCode.created,
+      body: "Created"
     })
   }
 
-  if (result.resultType === "invalidVersion") {
-    logger.error(`Message version is invalid: ${result.resultDescription}`)
-    return createJsonApiResult({
-      statusCode: HttpStatusCode.conflict,
-      body: result.resultDescription
-    })
-  }
-
-  if (result.resultType === "transactionFailed") {
-    logger.error(`Transaction failed: ${result.resultDescription}`)
-    return createJsonApiResult({
-      statusCode: HttpStatusCode.conflict,
-      body: result.resultDescription
-    })
-  }
-
-  if (result.resultType === "error") {
-    logger.error(`Error creating audit log: ${result.resultDescription}`)
-    return createJsonApiResult({
-      statusCode: HttpStatusCode.internalServerError,
-      body: result.resultDescription
-    })
-  }
-
+  logger.error(result.resultDescription ?? `Unexpected error (${result.resultType})`)
   return createJsonApiResult({
-    statusCode: HttpStatusCode.created,
-    body: "Created"
+    statusCode: statusCodeLookup[result.resultType] ?? HttpStatusCode.internalServerError,
+    body: result.resultDescription
   })
 }
