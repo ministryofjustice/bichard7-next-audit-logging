@@ -1,7 +1,7 @@
-import "testing/mockUseFetch"
 import { screen } from "@testing-library/react"
-import { AuditLog } from "shared-types"
+import "testing/mockUseFetch"
 import { render } from "testing/render"
+import AuditLog from "types/AuditLog"
 import Messages from "./Messages"
 
 test("should render 'No Messages' when no messages are given", () => {

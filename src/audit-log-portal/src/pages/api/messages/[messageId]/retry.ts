@@ -1,6 +1,6 @@
-import type { NextApiRequest, NextApiResponse } from "next"
 import config from "config"
-import { logger } from "shared"
+import type { NextApiRequest, NextApiResponse } from "next"
+import logger from "utils/logger"
 
 interface JWT {
   username: string

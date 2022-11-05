@@ -1,8 +1,8 @@
-import { useState } from "react"
-import RetryIcon from "icons/RetryIcon"
 import { IconButton, Tooltip } from "@material-ui/core"
-import type { AuditLog } from "shared-types"
 import If from "components/If"
+import RetryIcon from "icons/RetryIcon"
+import { useState } from "react"
+import type AuditLog from "types/AuditLog"
 import RetryConfirmationDialog from "./RetryConfirmationDialog"
 
 interface Props {

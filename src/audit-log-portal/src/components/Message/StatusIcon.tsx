@@ -1,5 +1,5 @@
 import { Tooltip } from "@material-ui/core"
-import type { AuditLog } from "shared-types"
+import type AuditLog from "types/AuditLog"
 import getStatusIcon from "./getStatusIcon"
 
 interface Props {

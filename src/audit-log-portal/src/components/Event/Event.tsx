@@ -1,7 +1,7 @@
 import { Card, CardContent, Typography } from "@material-ui/core"
-import styled from "styled-components"
-import type { AuditLogEvent } from "shared-types"
 import DateTime from "components/DateTime"
+import styled from "styled-components"
+import type AuditLogEvent from "types/AuditLogEvent"
 import getCategoryIcon from "./getCategoryIcon"
 
 interface Props {

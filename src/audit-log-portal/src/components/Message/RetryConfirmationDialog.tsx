@@ -1,7 +1,7 @@
-import styled from "styled-components"
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle } from "@material-ui/core"
-import type { AuditLog } from "shared-types"
 import InformationIcon from "icons/InformationIcon"
+import styled from "styled-components"
+import type AuditLog from "types/AuditLog"
 
 interface Props {
   open: boolean

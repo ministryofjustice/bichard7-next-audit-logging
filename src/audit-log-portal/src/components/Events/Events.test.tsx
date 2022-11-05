@@ -1,15 +1,17 @@
 import { screen } from "@testing-library/react"
-import type { AuditLogEvent, EventCategory } from "shared-types"
 import { render } from "testing/render"
+import type AuditLogEvent from "types/AuditLogEvent"
+import type EventCategory from "types/EventCategory"
 import Events from "./Events"
 
-const createAuditLogEvent = (category: EventCategory, date: Date): AuditLogEvent => ({
-  attributes: {},
-  category,
-  eventSource: "UI Test",
-  eventType: "Test Event",
-  timestamp: date.toISOString()
-})
+const createAuditLogEvent = (category: EventCategory, date: Date): AuditLogEvent =>
+  ({
+    attributes: {},
+    category,
+    eventSource: "UI Test",
+    eventType: "Test Event",
+    timestamp: date.toISOString()
+  } as AuditLogEvent)
 
 test("should render 'No Events' when no events are given", () => {
   render(<Events events={[]} />)

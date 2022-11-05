@@ -11,28 +11,6 @@ commands:
                 command: bash ./scripts/hash-package-locks.sh
             - restore_cache:
                 key: v1-npm-deps-{{ checksum "package-lock.json.md5" }}
-            - restore_cache:
-                key: v1-npm-deps-{{ checksum "src/shared/package-lock.json.md5" }}
-            - restore_cache:
-                key: v1-npm-deps-{{ checksum "src/shared-types/package-lock.json.md5" }}
-            - restore_cache:
-                key: v1-npm-deps-{{ checksum "src/shared-testing/package-lock.json.md5" }}
-            - restore_cache:
-                key: v1-npm-deps-{{ checksum "src/message-receiver/package-lock.json.md5" }}
-            - restore_cache:
-                key: v1-npm-deps-{{ checksum "src/transfer-messages/package-lock.json.md5" }}
-            - restore_cache:
-                key: v1-npm-deps-{{ checksum "src/event-handler/package-lock.json.md5" }}
-            - restore_cache:
-                key: v1-npm-deps-{{ checksum "src/incoming-message-handler/package-lock.json.md5" }}
-            - restore_cache:
-                key: v1-npm-deps-{{ checksum "src/audit-log-api/package-lock.json.md5" }}
-            - restore_cache:
-                key: v1-npm-deps-{{ checksum "src/audit-log-portal/package-lock.json.md5" }}
-            - restore_cache:
-                key: v1-npm-deps-{{ checksum "src/add-archival-events/package-lock.json.md5" }}
-            - restore_cache:
-                key: v1-npm-deps-{{ checksum "src/sanitise-old-messages/package-lock.json.md5" }}
 
     save_all_caches:
         description: Save all of the node_modules directories
@@ -40,39 +18,6 @@ commands:
             - save_cache:
                 key: v1-npm-deps-{{ checksum "package-lock.json.md5" }}
                 paths: node_modules
-            - save_cache:
-                key: v1-npm-deps-{{ checksum "src/shared/package-lock.json.md5" }}
-                paths: src/shared/node_modules
-            - save_cache:
-                key: v1-npm-deps-{{ checksum "src/shared-types/package-lock.json.md5" }}
-                paths: src/shared-types/node_modules
-            - save_cache:
-                key: v1-npm-deps-{{ checksum "src/shared-testing/package-lock.json.md5" }}
-                paths: src/shared-testing/node_modules
-            - save_cache:
-                key: v1-npm-deps-{{ checksum "src/message-receiver/package-lock.json.md5" }}
-                paths: src/message-receiver/node_modules
-            - save_cache:
-                key: v1-npm-deps-{{ checksum "src/transfer-messages/package-lock.json.md5" }}
-                paths: src/transfer-messages/node_modules
-            - save_cache:
-                key: v1-npm-deps-{{ checksum "src/event-handler/package-lock.json.md5" }}
-                paths: src/event-handler/node_modules
-            - save_cache:
-                key: v1-npm-deps-{{ checksum "src/incoming-message-handler/package-lock.json.md5" }}
-                paths: src/incoming-message-handler/node_modules
-            - save_cache:
-                key: v1-npm-deps-{{ checksum "src/audit-log-api/package-lock.json.md5" }}
-                paths: src/audit-log-api/node_modules
-            - save_cache:
-                key: v1-npm-deps-{{ checksum "src/audit-log-portal/package-lock.json.md5" }}
-                paths: src/audit-log-portal/node_modules
-            - save_cache:
-                key: v1-npm-deps-{{ checksum "src/add-archival-events/package-lock.json.md5" }}
-                paths: src/add-archival-events/node_modules
-            - save_cache:
-                key: v1-npm-deps-{{ checksum "src/sanitise-old-messages/package-lock.json.md5" }}
-                paths: src/sanitise-old-messages/node_modules
 
     persist_build_dirs:
         description: Save all of the build directories
@@ -80,34 +25,13 @@ commands:
             - persist_to_workspace:
                 root: .
                 paths:
-                    - src/*/build
-                    - src/lambda/*/build
+                    - build
 
     store_results:
         description: "Store the test output"
         steps:
             - store_test_results:
-                path: ./src/shared-types/test-results/jest/
-            - store_test_results:
-                path: ./src/shared/test-results/jest/
-            - store_test_results:
-                path: ./src/shared-testing/test-results/jest/
-            - store_test_results:
-                path: ./src/message-receiver/test-results/jest/
-            - store_test_results:
-                path: ./src/transfer-messages/test-results/jest/
-            - store_test_results:
-                path: ./src/event-handler/test-results/jest/
-            - store_test_results:
-                path: ./src/incoming-message-handler/test-results/jest/
-            - store_test_results:
-                path: ./src/audit-log-api/test-results/jest/
-            - store_test_results:
-                path: ./src/audit-log-portal/test-results/jest/
-            - store_test_results:
-                path: ./src/add-archival-events/test-results/jest/
-            - store_test_results:
-                path: ./src/sanitise-old-messages/test-results/jest/
+                path: ./test-results/jest/
 
 jobs:
   build:
@@ -118,16 +42,13 @@ jobs:
     steps:
       - checkout
       - restore_all_caches
-      - run: make install
-      - run: make validate
-      - run: make build
-      - run:
-          name: Build Portal Stories
-          command: cd src/audit-log-portal && npm run build-storybook && cd -
+      - run: npm install
       - save_all_caches
+      - run: npm run lint
+      - run: npm run build
       - persist_build_dirs
 
-  test:
+  build-test-lambdas:
     machine:
       image: ubuntu-2004:202104-01
       docker_layer_caching: true
@@ -143,30 +64,33 @@ jobs:
           command: nvm install
       - run:
           name: Install all
-          command: nvm use && ./scripts/install-all.sh
+          command: nvm use && npm install
       - run:
           name: Install Java
           command: sudo apt-get update && sudo apt-get install openjdk-17-jre
       - run:
-          name: Start postgres
-          command: make run-pg
-      - run:
           name: Install Dynamo
-          command: make -C ./src/audit-log-api install-dynamo
+          command: npm run install-dynamo
       - run:
           name: Start Audit Log API
-          command: nvm use && make run-api
+          command: nvm use && npm run start-api
           background: true
       - run:
           name: Wait for Audit Log API
-          command: cd src/audit-log-api && npm run wait-for-api
+          command: npm run wait-for-api
       - run:
-          name: Running unit, integration, and end-to-end tests
-          command: nvm use && make test
+          name: Running unit tests
+          command: nvm use && npm run test:unit
+      - run:
+          name: Running integration tests
+          command: nvm use && npm run test:integration
+      - run:
+          name: Running end-to-end tests
+          command: nvm use && npm run test:e2e
       - store_results
 
 
-  cypress-test:
+  build-test-portal:
     machine:
       image: ubuntu-2004:202104-01
       docker_layer_caching: true
@@ -176,13 +100,18 @@ jobs:
       - checkout
       - attach_workspace:
           at: .
-      - restore_all_caches
+      - run:
+          name: Build Portal Stories
+          command: cd src/audit-log-portal && npm install && npm run build-storybook && cd -
       - run:
           name: Install Nodejs version in .nvmrc
           command: nvm install
       - run:
-          name: Install all
-          command: nvm use && ./scripts/install-all.sh
+          name: Install
+          command: nvm use && cd src/audit-log-portal && npm install
+      - run:
+          name: Build
+          command: nvm use && cd src/audit-log-portal && npm run build
       - run:
           name: Install Cypress
           command: ./.circleci/scripts/install-cypress.sh
@@ -198,10 +127,5 @@ workflows:
   version: 2
   build-and-test:
     jobs:
-      - build
-      - test:
-          requires:
-            - build
-      - cypress-test:
-          requires:
-            - build
+      - build-test-lambdas
+      - build-test-portal

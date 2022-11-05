@@ -13,7 +13,7 @@ phases:
       - dockerd &> dockerd-logfile &
   build:
     commands:
-      - scripts/install-all.sh
-      - make build-all
-      - scripts/codebuild-artifacts.sh
+      - npm install
+      - npm run build
+      - scripts/upload-codebuild-artifacts.sh
 ...

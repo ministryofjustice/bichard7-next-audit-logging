@@ -1,5 +1,5 @@
-import type { EventCategory } from "shared-types"
-import { AuditLogEvent } from "shared-types"
+import AuditLogEvent from "types/AuditLogEvent"
+import type EventCategory from "types/EventCategory"
 import Events from "./Events"
 
 export default {

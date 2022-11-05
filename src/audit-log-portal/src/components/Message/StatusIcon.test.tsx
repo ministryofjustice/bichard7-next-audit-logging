@@ -1,5 +1,6 @@
 import { render } from "testing/render"
-import { AuditLog, AuditLogStatus } from "shared-types"
+import AuditLog from "types/AuditLog"
+import AuditLogStatus from "types/AuditLogStatus"
 import StatusIcon from "./StatusIcon"
 
 test.each<string>([AuditLogStatus.processing, AuditLogStatus.completed, AuditLogStatus.error])(
