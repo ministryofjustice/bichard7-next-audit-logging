@@ -50,7 +50,7 @@ export default async function createAuditLogEvent(event: APIGatewayProxyEvent): 
 
   logger.error(result.resultDescription ?? `Unexpected error (${result.resultType})`)
   return createJsonApiResult({
-    statusCode: statusCodeLookup[result.resultType] ?? HttpStatusCode.internalServerError,
+    statusCode: statusCodeLookup[result.resultType] ?? (HttpStatusCode.internalServerError as never),
     body: result.resultDescription
   })
 }

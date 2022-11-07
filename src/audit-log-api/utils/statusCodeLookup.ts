@@ -1,6 +1,6 @@
 import { HttpStatusCode } from "src/shared"
 
-const statusCodeLookup: { [k: string]: number } = {
+const statusCodeLookup = {
   success: HttpStatusCode.ok,
   notFound: HttpStatusCode.notFound,
   invalidVersion: HttpStatusCode.conflict,
