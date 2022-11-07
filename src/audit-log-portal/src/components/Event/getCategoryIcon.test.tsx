@@ -1,7 +1,7 @@
-import type { EventCategory } from "shared-types"
 import ErrorIcon from "icons/ErrorIcon"
-import WarningIcon from "icons/WarningIcon"
 import InformationIcon from "icons/InformationIcon"
+import WarningIcon from "icons/WarningIcon"
+import type EventCategory from "types/EventCategory"
 import getCategoryIcon from "./getCategoryIcon"
 
 interface TestInput {

@@ -1,4 +1,4 @@
-import { AuditLogEvent } from "shared-types"
+import AuditLogEvent from "types/AuditLogEvent"
 import Event from "./Event"
 
 export default {

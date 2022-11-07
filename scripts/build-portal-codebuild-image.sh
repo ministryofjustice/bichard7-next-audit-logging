@@ -12,6 +12,8 @@ readonly SOURCE_IMAGE_PREFIX="${REPOSITORY}/${SOURCE_REPOSITORY_NAME}"
 
 echo "Build ${REPOSITORY_NAME} image on `date`"
 
+cd src/audit-log-portal
+
 aws ecr get-login-password --region eu-west-2 | docker login \
   --username AWS \
   --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.eu-west-2.amazonaws.com

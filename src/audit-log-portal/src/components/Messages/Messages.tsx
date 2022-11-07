@@ -1,7 +1,7 @@
-import type { ReactNode } from "react"
-import type { AuditLog } from "shared-types"
-import Message from "components/Message"
 import If from "components/If"
+import Message from "components/Message"
+import type { ReactNode } from "react"
+import type AuditLog from "types/AuditLog"
 import NoMessages from "./NoMessages"
 
 interface Props {

@@ -1,7 +1,7 @@
-import Link from "next/link"
 import { Badge, IconButton, Tooltip } from "@material-ui/core"
-import type { AuditLog } from "shared-types"
 import EventIcon from "icons/EventIcon"
+import Link from "next/link"
+import type AuditLog from "types/AuditLog"
 
 interface Props {
   message: AuditLog

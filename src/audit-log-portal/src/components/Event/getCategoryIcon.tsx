@@ -1,8 +1,8 @@
-import type { ComponentType } from "react"
-import type { EventCategory } from "shared-types"
+import ErrorIcon from "icons/ErrorIcon"
 import InformationIcon from "icons/InformationIcon"
 import WarningIcon from "icons/WarningIcon"
-import ErrorIcon from "icons/ErrorIcon"
+import type { ComponentType } from "react"
+import type EventCategory from "types/EventCategory"
 
 export default function getCategoryIcon(category: EventCategory): ComponentType {
   switch (category) {

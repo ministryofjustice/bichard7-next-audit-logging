@@ -1,6 +1,6 @@
-import useSWRInfinite from "swr/infinite"
 import type { KeyLoader } from "swr/dist/types"
-import type { AuditLog } from "shared-types"
+import useSWRInfinite from "swr/infinite"
+import type AuditLog from "types/AuditLog"
 import fetcher from "./fetcher"
 
 interface MessagesResult {

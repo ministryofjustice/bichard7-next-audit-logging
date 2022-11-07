@@ -1,15 +1,15 @@
-import styled from "styled-components"
 import { Card, CardContent, Typography } from "@material-ui/core"
-import type { AuditLog } from "shared-types"
-import { AuditLogStatus } from "shared-types"
 import DateTime from "components/DateTime"
-import If from "components/If"
-import useFetch from "use-http"
 import Error from "components/Error"
+import If from "components/If"
+import styled from "styled-components"
+import type AuditLog from "types/AuditLog"
+import AuditLogStatus from "types/AuditLogStatus"
+import useFetch from "use-http"
 import getDaysOld from "./getDaysOld"
+import RetryButton from "./RetryButton"
 import StatusIcon from "./StatusIcon"
 import ViewEventsButton from "./ViewEventsButton"
-import RetryButton from "./RetryButton"
 
 interface Props {
   message: AuditLog

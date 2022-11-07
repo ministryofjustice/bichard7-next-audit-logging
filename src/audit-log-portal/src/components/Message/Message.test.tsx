@@ -1,7 +1,7 @@
+import MockDate from "mockdate"
 import "testing/mockUseFetch"
 import { render } from "testing/render"
-import { AuditLog } from "shared-types"
-import MockDate from "mockdate"
+import AuditLog from "types/AuditLog"
 import Message from "./Message"
 
 test("matches snapshot", () => {

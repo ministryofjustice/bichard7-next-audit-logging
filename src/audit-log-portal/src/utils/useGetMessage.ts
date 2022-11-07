@@ -1,5 +1,5 @@
 import useSWR, { useSWRConfig } from "swr"
-import type { AuditLog } from "shared-types"
+import type AuditLog from "types/AuditLog"
 import fetcher from "./fetcher"
 
 interface MessagesResult {

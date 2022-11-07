@@ -2,10 +2,10 @@
 
 set -e
 
-readonly DOCKER_REFERENCE="nginx-nodejs-supervisord"
+readonly DOCKER_REFERENCE="nginx-nodejs-supervisord:arm"
 
 function has_local_image() {
-  IMAGES=$(docker images --filter=reference="${DOCKER_REFERENCE}:*" -q | wc -l)
+  IMAGES=$(docker images --filter=reference="${DOCKER_REFERENCE}" -q | wc -l)
   echo "${IMAGES}"
 }
 
@@ -43,8 +43,9 @@ function pull_and_build_from_aws() {
   docker build --build-arg "NODE_IMAGE=$DOCKER_IMAGE_HASH" -t audit-log-portal:latest .
 }
 
+cd src/audit-log-portal
 if [[ "$(has_local_image)" -gt 0 ]]; then
-  docker build -t audit-log-portal:latest .
+  docker build --build-arg "NODE_IMAGE=$DOCKER_REFERENCE" -t audit-log-portal:latest .
 else
   pull_and_build_from_aws
 fi

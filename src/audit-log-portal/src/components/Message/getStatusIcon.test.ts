@@ -1,7 +1,7 @@
 import ErrorIcon from "icons/ErrorIcon"
-import SuccessIcon from "icons/SuccessIcon"
 import ProcessingIcon from "icons/ProcessingIcon"
-import { AuditLogStatus } from "shared-types"
+import SuccessIcon from "icons/SuccessIcon"
+import AuditLogStatus from "types/AuditLogStatus"
 import getStatusIcon from "./getStatusIcon"
 
 interface TestInput {

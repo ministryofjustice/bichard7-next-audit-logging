@@ -1,7 +1,7 @@
-import type { ReactNode } from "react"
-import type { AuditLogEvent } from "shared-types"
 import Event from "components/Event"
 import If from "components/If"
+import type { ReactNode } from "react"
+import type AuditLogEvent from "types/AuditLogEvent"
 
 interface Props {
   events: AuditLogEvent[]
