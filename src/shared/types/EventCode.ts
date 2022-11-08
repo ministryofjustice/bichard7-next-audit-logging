@@ -1,6 +1,7 @@
 enum EventCode {
   TriggersGenerated = "triggers.generated",
   TriggersResolved = "triggers.resolved",
+  AllTriggersResolved = "triggers.all-resolved",
   ExceptionsResolved = "exceptions.resolved",
   PncUpdated = "pnc.updated",
   IgnoredNonrecordable = "hearing-outcome.ignored.nonrecordable",

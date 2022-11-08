@@ -70,6 +70,10 @@ export default class CalculateMessageStatusUseCase {
   }
 
   private get triggersAreResolved(): boolean {
+    if (this.events.some((event) => event.eventCode === EventCode.AllTriggersResolved)) {
+      return true
+    }
+
     const triggersGeneratedEvents = this.events.filter((event) => event.eventCode === EventCode.TriggersGenerated)
     if (triggersGeneratedEvents.length === 0) {
       return false
@@ -82,14 +86,15 @@ export default class CalculateMessageStatusUseCase {
 
     const generatedTriggers = triggersGeneratedEvents.flatMap((event) =>
       Object.keys(event.attributes ?? {})
-        .filter((key) => /Trigger.*Details/i.test(key))
-        .map((key) => event.attributes[key])
+        .filter((key) => /Trigger \d+ Details/i.test(key))
+        .map((key) => String(event.attributes[key]))
     )
 
     const resolvedTriggers = triggerResolvedEvents.flatMap((event) =>
       Object.keys(event.attributes ?? {})
-        .filter((key) => /Trigger Code.*/i.test(key))
-        .map((key) => event.attributes[key])
+        .filter((key) => /Trigger \d+ Details.*/i.test(key))
+        .map((key) => String(event.attributes[key]).match(/(TRP[RS]\d{4})/)?.[1])
+        .filter((value) => value)
     )
 
     return (
