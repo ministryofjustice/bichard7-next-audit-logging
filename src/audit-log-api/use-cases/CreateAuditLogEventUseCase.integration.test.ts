@@ -61,6 +61,9 @@ describe("CreateAuditLogEventUseCase", () => {
   beforeEach(async () => {
     await testAuditLogDynamoGateway.deleteAll(auditLogDynamoConfig.TABLE_NAME, "messageId")
     await testAuditLogLookupDynamoGateway.deleteAll(auditLogLookupDynamoConfig.TABLE_NAME, "id")
+  })
+
+  afterEach(() => {
     jest.clearAllMocks()
   })
 
@@ -208,7 +211,7 @@ describe("CreateAuditLogEventUseCase", () => {
     const event = createAuditLogEvent()
     event.addAttribute("reallyLongAttribute", "X".repeat(10_000))
 
-    jest
+    const spy = jest
       .spyOn(auditLogDynamoGateway, "executeTransaction")
       .mockResolvedValueOnce(new Error("Failed to create audit log table entry"))
 
@@ -222,6 +225,7 @@ describe("CreateAuditLogEventUseCase", () => {
 
     const lookupResult = await lookupMessageId(auditLog.messageId)
     expect(lookupResult).toBeNull()
+    spy.mockRestore()
   })
 
   it("should try 10 times to add the event if there is a version conflict", async () => {
@@ -254,6 +258,7 @@ describe("CreateAuditLogEventUseCase", () => {
     const actualAuditLog = await getAuditLog(auditLog.messageId)
     expect(actualAuditLog).toBeDefined()
     expect(actualAuditLog?.events).toHaveLength(1)
+    spy.mockRestore()
   })
 
   it("should try 10 times to add the event if there is a transaction conflict", async () => {
@@ -284,6 +289,7 @@ describe("CreateAuditLogEventUseCase", () => {
     const actualAuditLog = await getAuditLog(auditLog.messageId)
     expect(actualAuditLog).toBeDefined()
     expect(actualAuditLog?.events).toHaveLength(1)
+    spy.mockRestore()
   })
 
   it("should still return an error if there is a conflict after 10 attempts", async () => {
@@ -310,5 +316,6 @@ describe("CreateAuditLogEventUseCase", () => {
 
     const lookupResult = await lookupMessageId(auditLog.messageId)
     expect(lookupResult).toBeNull()
+    spy.mockRestore()
   })
 })
