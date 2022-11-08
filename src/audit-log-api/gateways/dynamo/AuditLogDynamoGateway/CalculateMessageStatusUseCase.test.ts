@@ -29,15 +29,15 @@ const postPNCUpdateTriggersGeneratedEvent = () =>
 const allTriggersResolvedEvent = () => createEvent(EventCode.AllTriggersResolved, "information")
 const triggerInstancesResolvedEvent = () =>
   createEvent(EventCode.TriggersResolved, "information", {
-    "Trigger 1 Details": "TRPR0004",
-    "Trigger 2 Details": "TRPR0004",
+    "Trigger 1 Details": "TRPR0004 (1)",
+    "Trigger 2 Details": "TRPR0004 (2)",
     "Trigger 3 Details": "TRPR0006",
     "Trigger 4 Details": "TRPS0003"
   })
 const triggerInstancesPartiallyResolvedEvent = () =>
   createEvent(EventCode.TriggersResolved, "information", {
-    "Trigger 1 Details": "TRPR0004",
-    "Trigger 2 Details": "TRPR0004"
+    "Trigger 1 Details": "TRPR0004 (1)",
+    "Trigger 2 Details": "TRPR0004 (2)"
   })
 const exceptionsManuallyResolvedEvent = () => createEvent(EventCode.ExceptionsResolved)
 
@@ -163,7 +163,10 @@ describe("CalculateMessageStatusUseCase", () => {
     })
 
     it("should return Completed status when exceptions are manually resolved, there are no triggers, and PNC is updated", () => {
-      const { status, pncStatus, triggerStatus } = new CalculateMessageStatusUseCase(exceptionsManuallyResolvedEvent(), pncUpdatedEvent()).call()
+      const { status, pncStatus, triggerStatus } = new CalculateMessageStatusUseCase(
+        exceptionsManuallyResolvedEvent(),
+        pncUpdatedEvent()
+      ).call()
 
       expect(status).toBe(AuditLogStatus.completed)
       expect(pncStatus).toBe(PncStatus.Updated)
@@ -252,7 +255,9 @@ describe("CalculateMessageStatusUseCase", () => {
     })
 
     it("should return Processing status when triggers are not resolved", () => {
-      const { status, pncStatus, triggerStatus } = new CalculateMessageStatusUseCase(prePNCUpdateTriggersGeneratedEvent()).call()
+      const { status, pncStatus, triggerStatus } = new CalculateMessageStatusUseCase(
+        prePNCUpdateTriggersGeneratedEvent()
+      ).call()
 
       expect(status).toBe(AuditLogStatus.processing)
       expect(pncStatus).toBe(PncStatus.Processing)
