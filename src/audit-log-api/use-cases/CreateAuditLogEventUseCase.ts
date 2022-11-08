@@ -1,5 +1,6 @@
 import type { AuditLogEvent, CreateAuditLogEventsResult } from "src/shared/types"
 import { isError } from "src/shared/types"
+import { NotFoundError } from "src/shared/types/ApplicationError"
 import type { AuditLogDynamoGatewayInterface } from "../gateways/dynamo"
 import { isConditionalExpressionViolationError, isTransactionConflictError } from "../gateways/dynamo"
 import type StoreValuesInLookupTableUseCase from "./StoreValuesInLookupTableUseCase"
@@ -46,21 +47,21 @@ export default class CreateAuditLogEventUseCase {
     originalEvent: AuditLogEvent,
     attempts = retryAttempts
   ): Promise<CreateAuditLogEventsResult> {
-    const messageVersion = await this.auditLogGateway.fetchVersion(messageId)
+    // const messageVersion = await this.auditLogGateway.fetchVersion(messageId)
 
-    if (isError(messageVersion)) {
-      return {
-        resultType: "error",
-        resultDescription: messageVersion.message
-      }
-    }
+    // if (isError(messageVersion)) {
+    //   return {
+    //     resultType: "error",
+    //     resultDescription: messageVersion.message
+    //   }
+    // }
 
-    if (messageVersion === null) {
-      return {
-        resultType: "notFound",
-        resultDescription: `A message with Id ${messageId} does not exist in the database`
-      }
-    }
+    // if (messageVersion === null) {
+    //   return {
+    //     resultType: "notFound",
+    //     resultDescription: `A message with Id ${messageId} does not exist in the database`
+    //   }
+    // }
 
     if (shouldDeduplicate(originalEvent)) {
       const message = await this.auditLogGateway.fetchOne(messageId)
@@ -80,22 +81,23 @@ export default class CreateAuditLogEventUseCase {
       }
     }
 
-    // Store long attribute values in the lookup table
-    const [dynamoUpdates, updatedEvent] = await this.storeValuesInLookupTableUseCase.prepare(originalEvent, messageId)
+    const transactionResult = await this.auditLogGateway.addEvent(messageId, originalEvent)
+    // // Store long attribute values in the lookup table
+    // const [dynamoUpdates, updatedEvent] = await this.storeValuesInLookupTableUseCase.prepare(originalEvent, messageId)
 
-    // Add the event to the audit log table entry
-    const auditLogDynamoUpdate = await this.auditLogGateway.prepare(messageId, messageVersion, updatedEvent)
+    // // Add the event to the audit log table entry
+    // const auditLogDynamoUpdate = await this.auditLogGateway.prepare(messageId, messageVersion, updatedEvent)
 
-    if (isError(auditLogDynamoUpdate)) {
-      return {
-        resultType: "error",
-        resultDescription: auditLogDynamoUpdate.message
-      }
-    } else {
-      dynamoUpdates.push(auditLogDynamoUpdate)
-    }
+    // if (isError(auditLogDynamoUpdate)) {
+    //   return {
+    //     resultType: "error",
+    //     resultDescription: auditLogDynamoUpdate.message
+    //   }
+    // } else {
+    //   dynamoUpdates.push(auditLogDynamoUpdate)
+    // }
 
-    const transactionResult = await this.auditLogGateway.executeTransaction(dynamoUpdates)
+    // const transactionResult = await this.auditLogGateway.executeTransaction(dynamoUpdates)
 
     if (isError(transactionResult)) {
       if (isConditionalExpressionViolationError(transactionResult) || isTransactionConflictError(transactionResult)) {
@@ -109,7 +111,13 @@ export default class CreateAuditLogEventUseCase {
           resultType: "transactionFailed",
           resultDescription: `Conflict writing event to message with Id ${messageId}. Tried ${retryAttempts} times`
         }
+      } else if (transactionResult instanceof NotFoundError) {
+        return {
+          resultType: "notFound",
+          resultDescription: `A message with Id ${messageId} does not exist in the database`
+        }
       }
+
       return {
         resultType: "transactionFailed",
         resultDescription: transactionResult.message

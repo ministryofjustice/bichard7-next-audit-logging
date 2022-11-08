@@ -25,8 +25,8 @@ export default interface AuditLogDynamoGateway {
   fetchOne(messageId: string, options?: ProjectionOptions): PromiseResult<AuditLog>
   fetchVersion(messageId: string): PromiseResult<number | null>
   fetchEvents(messageId: string): PromiseResult<AuditLogEvent[]>
-  addEvent(messageId: string, messageVersion: number, event: AuditLogEvent): PromiseResult<void>
-  prepare(messageId: string, messageVersion: number, event: AuditLogEvent): PromiseResult<DynamoUpdate>
+  addEvent(messageId: string, event: AuditLogEvent): PromiseResult<void>
+  prepare(messageId: string, messageVersion: number, event: AuditLogEvent): PromiseResult<DynamoUpdate[]>
   prepareEvents(messageId: string, messageVersion: number, events: AuditLogEvent[]): PromiseResult<DynamoUpdate>
   executeTransaction(actions: DynamoUpdate[]): PromiseResult<void>
 }

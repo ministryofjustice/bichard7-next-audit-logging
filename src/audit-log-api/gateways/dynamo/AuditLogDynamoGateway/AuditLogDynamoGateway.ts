@@ -1,7 +1,9 @@
 import { addDays } from "date-fns"
 import maxBy from "lodash.maxby"
-import type { AuditLog, AuditLogEvent, KeyValuePair, PromiseResult } from "src/shared/types"
+import { ApplicationError, AuditLog, AuditLogEvent, AuditLogLookup, BichardAuditLogEvent, KeyValuePair, PromiseResult, ValueLookup } from "src/shared/types"
 import { EventCode, isError } from "src/shared/types"
+import { NotFoundError } from "src/shared/types/ApplicationError"
+import { compress } from "src/shared/utils"
 import type {
   FetchByStatusOptions,
   FetchManyOptions,
@@ -26,6 +28,8 @@ import {
   topExceptionsReportUpdateComponent
 } from "./updateComponents"
 import type { UpdateComponent } from "./updateComponents/types"
+
+const maxAttributeValueLength = 1000
 
 export default class AuditLogDynamoGateway extends DynamoGateway implements AuditLogDynamoGatewayInterface {
   private readonly tableKey: string = "messageId"
@@ -307,13 +311,22 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
     return result.events
   }
 
-  async addEvent(messageId: string, messageVersion: number, event: AuditLogEvent): PromiseResult<void> {
+  async addEvent(messageId: string, event: AuditLogEvent): PromiseResult<void> {
+    const messageVersion = await this.fetchVersion(messageId)
+    if (isError(messageVersion)) {
+      return messageVersion
+    }
+
+    if (messageVersion === null) {
+      return new NotFoundError()
+    }
+
     const dynamoUpdate = await this.prepare(messageId, messageVersion, event)
     if (isError(dynamoUpdate)) {
       return dynamoUpdate
     }
 
-    const result = await this.executeTransaction([dynamoUpdate])
+    const result = await this.executeTransaction(dynamoUpdate)
 
     if (isError(result)) {
       return result
@@ -322,8 +335,14 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
     return undefined
   }
 
-  prepare(messageId: string, messageVersion: number, event: AuditLogEvent): PromiseResult<DynamoUpdate> {
-    return this.prepareEvents(messageId, messageVersion, [event])
+  async prepare(messageId: string, messageVersion: number, event: AuditLogEvent): PromiseResult<DynamoUpdate[]> {
+    const [lookupItemsDynamoUpdate, updatedEvent] = await this.prepareLookupItems(event, messageId)
+    const eventsDynamoUpdate = await this.prepareEvents(messageId, messageVersion, [updatedEvent])
+    if (isError(eventsDynamoUpdate)) {
+      return eventsDynamoUpdate
+    }
+
+    return lookupItemsDynamoUpdate.concat(eventsDynamoUpdate)
   }
 
   async prepareEvents(messageId: string, messageVersion: number, events: AuditLogEvent[]): PromiseResult<DynamoUpdate> {
@@ -383,6 +402,61 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
         ExpressionAttributeNames: expressionAttributeNames,
         ExpressionAttributeValues: { ...updateExpressionValues, ":version": messageVersion, ":version_increment": 1 },
         ConditionExpression: `attribute_exists(${this.tableKey}) AND version = :version`
+      }
+    }
+  }
+
+  async prepareLookupItems(event: AuditLogEvent, messageId: string): Promise<[DynamoUpdate[], AuditLogEvent]> {
+    const attributes: KeyValuePair<string, unknown> = {}
+    const dynamoUpdates: DynamoUpdate[] = []
+
+    const attributeKeys = Object.keys(event.attributes)
+
+    for (const attributeKey of attributeKeys) {
+      const attributeValue = event.attributes[attributeKey]
+      if (attributeValue && typeof attributeValue === "string" && attributeValue.length > maxAttributeValueLength) {
+        const lookupItem = new AuditLogLookup(attributeValue, messageId)
+        const lookupDynamoUpdate = await this.prepareLookupItem(lookupItem)
+
+        dynamoUpdates.push(lookupDynamoUpdate)
+        attributes[attributeKey] = { valueLookup: lookupItem.id } as ValueLookup
+      } else {
+        attributes[attributeKey] = attributeValue
+      }
+    }
+
+    let eventXml: string | undefined | ValueLookup =
+      "eventXml" in event ? (event as BichardAuditLogEvent).eventXml : undefined
+    if (eventXml) {
+      const lookupItem = new AuditLogLookup(eventXml, messageId)
+      const lookupDynamoUpdates = await this.prepareLookupItem(lookupItem)
+
+      dynamoUpdates.push(lookupDynamoUpdates)
+      eventXml = { valueLookup: lookupItem.id }
+    }
+
+    const updatedEvent = {
+      ...event,
+      attributes,
+      ...(eventXml ? { eventXml } : {})
+    } as AuditLogEvent
+    return [dynamoUpdates, updatedEvent]
+  }
+
+  async prepareLookupItem(lookupItem: AuditLogLookup): Promise<DynamoUpdate> {
+    if (process.env.IS_E2E) {
+      lookupItem.expiryTime = Math.round(
+        addDays(new Date(), parseInt(process.env.EXPIRY_DAYS || "7")).getTime() / 1000
+      ).toString()
+    }
+
+    const itemToSave = { ...lookupItem, value: await compress(lookupItem.value), isCompressed: true }
+
+    return {
+      Put: {
+        Item: itemToSave,
+        TableName: this.tableName,
+        ConditionExpression: `attribute_not_exists(${this.tableKey})`
       }
     }
   }
