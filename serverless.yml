@@ -10,6 +10,7 @@ provider:
     DYNAMO_REGION: eu-west-2
     AUDIT_LOG_TABLE_NAME: auditLogTable
     AUDIT_LOG_LOOKUP_TABLE_NAME: auditLogLookupTable
+    AUDIT_LOG_EVENTS_TABLE_NAME: auditLogEventsTable
     MQ_USER: admin
     MQ_PASSWORD: admin
     MQ_URL: failover:(stomp://localhost:51613)
@@ -80,6 +81,100 @@ resources:
       Type: AWS::S3::Bucket
       Properties:
         BucketName: internalIncomingBucket
+    auditLogEventsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: auditLogEventsTable
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+          - AttributeName: messageId
+            AttributeType: S
+          - AttributeName: user
+            AttributeType: S
+          - AttributeName: timestamp
+            AttributeType: S
+          - AttributeName: _automationReport
+            AttributeType: N
+          - AttributeName: _topExceptionsReport
+            AttributeType: N
+          - AttributeName: eventCode
+            AttributeType: S
+          - AttributeName: category
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        GlobalSecondaryIndexes:
+          - IndexName: messageIdIndex
+            KeySchema:
+              - AttributeName: messageId
+                KeyType: HASH
+              - AttributeName: timestamp
+                KeyType: RANGE
+            Projection:
+              ProjectionType: "ALL"
+            ProvisionedThroughput:
+              ReadCapacityUnits: 1
+              WriteCapacityUnits: 1
+          - IndexName: userIndex
+            KeySchema:
+              - AttributeName: user
+                KeyType: HASH
+              - AttributeName: timestamp
+                KeyType: RANGE
+            Projection:
+              ProjectionType: "ALL"
+            ProvisionedThroughput:
+              ReadCapacityUnits: 1
+              WriteCapacityUnits: 1
+          - IndexName: eventCodeIndex
+            KeySchema:
+              - AttributeName: eventCode
+                KeyType: HASH
+              - AttributeName: timestamp
+                KeyType: RANGE
+            Projection:
+              ProjectionType: "ALL"
+            ProvisionedThroughput:
+              ReadCapacityUnits: 1
+              WriteCapacityUnits: 1
+          - IndexName: category
+            KeySchema:
+              - AttributeName: category
+                KeyType: HASH
+              - AttributeName: timestamp
+                KeyType: RANGE
+            Projection:
+              ProjectionType: "ALL"
+            ProvisionedThroughput:
+              ReadCapacityUnits: 1
+              WriteCapacityUnits: 1
+          - IndexName: automationReport
+            KeySchema:
+              - AttributeName: _automationReport
+                KeyType: HASH
+              - AttributeName: messageId
+                KeyType: RANGE
+            Projection:
+              ProjectionType: "ALL"
+            ProvisionedThroughput:
+              ReadCapacityUnits: 1
+              WriteCapacityUnits: 1
+          - IndexName: topExceptionsIndex
+            KeySchema:
+              - AttributeName: _topExceptionsReport
+                KeyType: HASH
+              - AttributeName: messageId
+                KeyType: RANGE
+            Projection:
+              ProjectionType: "ALL"
+            ProvisionedThroughput:
+              ReadCapacityUnits: 1
+              WriteCapacityUnits: 1
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
     auditLogTable:
       Type: AWS::DynamoDB::Table
       Properties:
