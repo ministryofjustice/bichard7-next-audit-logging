@@ -123,7 +123,7 @@ describe("Creating Audit Log event", () => {
       expect(triggerStatus).toBe("Generated")
 
       event = mockAuditLogEvent({ eventCode: EventCode.TriggersResolved })
-      event.addAttribute("Trigger Code", "TRPR0001")
+      event.addAttribute("Trigger 1 Details", "TRPR0001")
       await axios.post(`http://localhost:3010/messages/${auditLog.messageId}/events`, event)
 
       triggerStatus = await getTriggerStatus(auditLog.messageId)
