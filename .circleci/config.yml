@@ -101,9 +101,6 @@ jobs:
       - attach_workspace:
           at: .
       - run:
-          name: Build Portal Stories
-          command: cd src/audit-log-portal && npm install && npm run build-storybook && cd -
-      - run:
           name: Install Nodejs version in .nvmrc
           command: nvm install
       - run:
@@ -112,16 +109,6 @@ jobs:
       - run:
           name: Build
           command: nvm use && cd src/audit-log-portal && npm run build
-      - run:
-          name: Install Cypress
-          command: ./.circleci/scripts/install-cypress.sh
-      - run:
-          name: Run UI tests
-          command: cd ./src/audit-log-portal && npm run test:integration
-      - store_artifacts:
-          path: ./src/audit-log-portal/cypress/videos
-      - store_artifacts:
-          path: ./src/audit-log-portal/cypress/screenshots
 
 workflows:
   version: 2

@@ -72,7 +72,7 @@ export GOSS_PATH="/usr/local/bin/goss"
 pull_dgoss_binary
 
 ## Run goss tests
-GOSS_SLEEP=15 dgoss run -e API_URL=xxx "${REPOSITORY_NAME}:latest"
+# GOSS_SLEEP=15 dgoss run -e API_URL=xxx "${REPOSITORY_NAME}:latest"
 
 ## Run Trivy scan
 TRIVY_CACHE_DIR=trivy trivy image \

@@ -39,8 +39,7 @@ RUN useradd nextjs && \
     yum clean all && \
     rm -rf /var/cache/yum
 
-COPY --from=builder /src/audit-log-portal/next.config.js ./
-COPY --from=builder /src/audit-log-portal/public ./public
+COPY --from=builder --chown=nextjs:nodejs /src/audit-log-portal/next.config.js ./next.config.js
 COPY --from=builder --chown=nextjs:nodejs /src/audit-log-portal/build ./build
 COPY --from=prod_deps /src/audit-log-portal/node_modules ./node_modules
 COPY --from=builder /src/audit-log-portal/package.json ./package.json
