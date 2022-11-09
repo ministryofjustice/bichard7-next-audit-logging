@@ -11,14 +11,13 @@ import {
 } from "src/shared/testing"
 import type { AuditLog, AuditLogEvent } from "src/shared/types"
 import { EventCode, isError } from "src/shared/types"
-import { TestDynamoGateway } from "../test"
-import { auditLogDynamoConfig } from "../test/dynamoDbConfig"
+import { auditLogDynamoConfig, TestDynamoGateway } from "../test"
 
 const testDynamoGateway = new TestDynamoGateway(auditLogDynamoConfig)
 
 describe("Getting Audit Logs", () => {
   beforeEach(async () => {
-    await testDynamoGateway.deleteAll(auditLogDynamoConfig.TABLE_NAME, "messageId")
+    await testDynamoGateway.deleteAll(auditLogDynamoConfig.auditLogTableName, "messageId")
   })
 
   it("should return the audit log records", async () => {
@@ -248,7 +247,7 @@ describe("Getting Audit Logs", () => {
     it("should include force owner at the top level of the response", async () => {
       const auditLog: AuditLog = mockAuditLog()
       auditLog.automationReport = { forceOwner: "010000", events: [] }
-      await testDynamoGateway.insertOne(auditLogDynamoConfig.TABLE_NAME, auditLog, "messageId")
+      await testDynamoGateway.insertOne(auditLogDynamoConfig.auditLogTableName, auditLog, "messageId")
 
       const result = await axios.get<AuditLog[]>(
         "http://localhost:3010/messages?eventsFilter=automationReport&start=2000-01-01&end=2099-01-01"
@@ -306,7 +305,7 @@ describe("Getting Audit Logs", () => {
     it("should include force owner from the automation report at the top level of the response", async () => {
       const auditLog: AuditLog = mockAuditLog()
       auditLog.automationReport = { forceOwner: "010000", events: [] }
-      await testDynamoGateway.insertOne(auditLogDynamoConfig.TABLE_NAME, auditLog, "messageId")
+      await testDynamoGateway.insertOne(auditLogDynamoConfig.auditLogTableName, auditLog, "messageId")
 
       const result = await axios.get<AuditLog[]>(
         "http://localhost:3010/messages?eventsFilter=topExceptionsReport&start=2000-01-01&end=2099-01-01"
@@ -455,7 +454,7 @@ describe("Getting Audit Logs", () => {
         ]
       })
 
-      await testDynamoGateway.insertOne(auditLogDynamoConfig.TABLE_NAME, auditLog, "messageId")
+      await testDynamoGateway.insertOne(auditLogDynamoConfig.auditLogTableName, auditLog, "messageId")
     })
 
     it("should add user and event code when retrieving old-style event if they're set in the attributes for multiple messages", async () => {

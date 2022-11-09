@@ -1,9 +1,14 @@
 import { addDays } from "date-fns"
-import maxBy from "lodash.maxby"
-import { ApplicationError, AuditLog, AuditLogEvent, AuditLogLookup, BichardAuditLogEvent, KeyValuePair, PromiseResult, ValueLookup } from "src/shared/types"
-import { EventCode, isError } from "src/shared/types"
-import { NotFoundError } from "src/shared/types/ApplicationError"
-import { compress } from "src/shared/utils"
+import { compress } from "src/shared"
+import type {
+  AuditLog,
+  AuditLogEvent,
+  BichardAuditLogEvent,
+  KeyValuePair,
+  PromiseResult,
+  ValueLookup
+} from "src/shared/types"
+import { AuditLogLookup, isError } from "src/shared/types"
 import type {
   FetchByStatusOptions,
   FetchManyOptions,
@@ -17,26 +22,14 @@ import type DynamoDbConfig from "../DynamoGateway/DynamoDbConfig"
 import type { Projection } from "../DynamoGateway/DynamoGateway"
 import type DynamoUpdate from "../DynamoGateway/DynamoUpdate"
 import type AuditLogDynamoGatewayInterface from "./AuditLogDynamoGatewayInterface"
-import CalculateMessageStatusUseCase from "./CalculateMessageStatusUseCase"
-import {
-  archivalUpdateComponent,
-  automationRateReportUpdateComponent,
-  forceOwnerUpdateComponent,
-  retryCountUpdateComponent,
-  sanitisationUpdateComponent,
-  statusUpdateComponent,
-  topExceptionsReportUpdateComponent
-} from "./updateComponents"
-import type { UpdateComponent } from "./updateComponents/types"
 
 const maxAttributeValueLength = 1000
 
 export default class AuditLogDynamoGateway extends DynamoGateway implements AuditLogDynamoGatewayInterface {
-  private readonly tableKey: string = "messageId"
+  readonly auditLogTableKey: string = "messageId"
+  readonly auditLogSortKey: string = "receivedDate"
 
-  private readonly sortKey: string = "receivedDate"
-
-  constructor(config: DynamoDbConfig, private readonly tableName: string) {
+  constructor(private readonly config: DynamoDbConfig) {
     super(config)
   }
 
@@ -72,7 +65,7 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
       ).toString()
     }
 
-    const result = await this.insertOne(this.tableName, message, this.tableKey)
+    const result = await this.insertOne(this.config.auditLogTableName, message, this.auditLogTableKey)
 
     if (isError(result)) {
       return result
@@ -90,7 +83,7 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
       })
     }
 
-    const result = await this.insertMany(this.tableName, messages, "messageId")
+    const result = await this.insertMany(this.config.auditLogTableName, messages, "messageId")
 
     if (isError(result)) {
       return result
@@ -99,66 +92,23 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
     return messages
   }
 
-  async update(message: AuditLog): PromiseResult<AuditLog> {
-    const { status, pncStatus, triggerStatus } = new CalculateMessageStatusUseCase(message.events).call()
-    message.status = status
-    message.pncStatus = pncStatus
-    message.triggerStatus = triggerStatus
-
-    message.errorRecordArchivalDate =
-      message.errorRecordArchivalDate ??
-      message.events.find((event) => event.eventCode === EventCode.ErrorRecordArchived)?.timestamp
-    message.isSanitised = message.events.find((event) => event.eventCode === EventCode.Sanitised) ? 1 : 0
-
-    const updateResult = await this.updateOne(this.tableName, message, "messageId", message.version)
-    if (isError(updateResult)) {
-      return updateResult
-    }
-
-    const newVersionResult = await this.fetchVersion(message.messageId)
-    if (isError(newVersionResult)) {
-      return newVersionResult
-    }
-    if (newVersionResult === null) {
-      return Error(`Message with id ${message.messageId} was not found in the database`)
-    }
-
-    // Remove nextSanitiseCheck if the message is already sanitised
-    if (message.isSanitised) {
-      const options: UpdateOptions = {
-        keyName: this.tableKey,
-        keyValue: message.messageId,
-        updateExpression: "REMOVE nextSanitiseCheck",
-        updateExpressionValues: {},
-        currentVersion: newVersionResult
-      }
-
-      const removeSanitiseCheckResult = await this.updateEntry(this.tableName, options)
-      if (isError(removeSanitiseCheckResult)) {
-        return removeSanitiseCheckResult
-      }
-    }
-
-    return message
-  }
-
   async updateSanitiseCheck(message: AuditLog, nextSanitiseCheck: Date): PromiseResult<void> {
     const options: UpdateOptions = {
-      keyName: this.tableKey,
+      keyName: this.auditLogTableKey,
       keyValue: message.messageId,
       updateExpression: "SET nextSanitiseCheck = :value",
       updateExpressionValues: { ":value": nextSanitiseCheck.toISOString() },
       currentVersion: message.version
     }
-    const result = await this.updateEntry(this.tableName, options)
+    const result = await this.updateEntry(this.config.auditLogTableName, options)
     if (isError(result)) {
       return result
     }
   }
 
   async fetchMany(options: FetchManyOptions = {}): PromiseResult<AuditLog[]> {
-    const result = await new IndexSearcher<AuditLog[]>(this, this.tableName, this.tableKey)
-      .useIndex(`${this.sortKey}Index`)
+    const result = await new IndexSearcher<AuditLog[]>(this, this.config.auditLogTableName, this.auditLogTableKey)
+      .useIndex(`${this.auditLogSortKey}Index`)
       .setIndexKeys("_", "_", "receivedDate")
       .setProjection(this.getProjectionExpression(options.includeColumns, options.excludeColumns))
       .paginate(options.limit, options.lastMessage)
@@ -172,8 +122,8 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
   }
 
   async fetchRange(options: FetchRangeOptions): PromiseResult<AuditLog[]> {
-    const result = await new IndexSearcher<AuditLog[]>(this, this.tableName, this.tableKey)
-      .useIndex(`${this.sortKey}Index`)
+    const result = await new IndexSearcher<AuditLog[]>(this, this.config.auditLogTableName, this.auditLogTableKey)
+      .useIndex(`${this.auditLogSortKey}Index`)
       .setIndexKeys("_", "_", "receivedDate")
       .setBetweenKey(options.start.toISOString(), options.end.toISOString())
       .setProjection(this.getProjectionExpression(options.includeColumns, options.excludeColumns))
@@ -199,7 +149,7 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
       projection: this.getProjectionExpression(options?.includeColumns, options?.excludeColumns)
     }
 
-    const result = await this.fetchByIndex(this.tableName, fetchByIndexOptions)
+    const result = await this.fetchByIndex(this.config.auditLogTableName, fetchByIndexOptions)
 
     if (isError(result)) {
       return result
@@ -221,7 +171,7 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
       pagination: { limit: 1 }
     }
 
-    const result = await this.fetchByIndex(this.tableName, options)
+    const result = await this.fetchByIndex(this.config.auditLogTableName, options)
 
     if (isError(result)) {
       return result
@@ -236,7 +186,7 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
   }
 
   async fetchByStatus(status: string, options?: FetchByStatusOptions): PromiseResult<AuditLog[]> {
-    const result = await new IndexSearcher<AuditLog[]>(this, this.tableName, this.tableKey)
+    const result = await new IndexSearcher<AuditLog[]>(this, this.config.auditLogTableName, this.auditLogTableKey)
       .useIndex("statusIndex")
       .setIndexKeys("status", status, "receivedDate")
       .setProjection(this.getProjectionExpression(options?.includeColumns, options?.excludeColumns))
@@ -251,7 +201,7 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
   }
 
   async fetchUnsanitised(options?: FetchUnsanitisedOptions): PromiseResult<AuditLog[]> {
-    const result = await new IndexSearcher<AuditLog[]>(this, this.tableName, this.tableKey)
+    const result = await new IndexSearcher<AuditLog[]>(this, this.config.auditLogTableName, this.auditLogTableKey)
       .useIndex("isSanitisedIndex")
       .setIndexKeys("isSanitised", 0, "nextSanitiseCheck")
       .setRangeKey(new Date().toISOString(), KeyComparison.LessThanOrEqual)
@@ -266,10 +216,10 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
     return <AuditLog[]>result
   }
 
-  async fetchOne(messageId: string, options?: ProjectionOptions): PromiseResult<AuditLog> {
+  async fetchOne(messageId: string, options?: ProjectionOptions): PromiseResult<AuditLog | undefined> {
     const result = await this.getOne(
-      this.tableName,
-      this.tableKey,
+      this.config.auditLogTableName,
+      this.auditLogTableKey,
       messageId,
       this.getProjectionExpression(options?.includeColumns, options?.excludeColumns)
     )
@@ -282,7 +232,7 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
   }
 
   async fetchVersion(messageId: string): PromiseResult<number | null> {
-    const result = await this.getRecordVersion(this.tableName, this.tableKey, messageId)
+    const result = await this.getRecordVersion(this.config.auditLogTableName, this.auditLogTableKey, messageId)
 
     if (isError(result)) {
       return result
@@ -311,99 +261,92 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
     return result.events
   }
 
-  async addEvent(messageId: string, event: AuditLogEvent): PromiseResult<void> {
-    const messageVersion = await this.fetchVersion(messageId)
-    if (isError(messageVersion)) {
-      return messageVersion
-    }
+  async update(existing: AuditLog, updates: Partial<AuditLog>): PromiseResult<void> {
+    const updateExpression = []
+    const expressionAttributeNames: KeyValuePair<string, string> = {}
+    const updateExpressionValues: KeyValuePair<string, unknown> = {}
 
-    if (messageVersion === null) {
-      return new NotFoundError()
-    }
+    const replacedEvents: AuditLogEvent[] = []
+    const dynamoUpdates: DynamoUpdate[] = []
 
-    const dynamoUpdate = await this.prepare(messageId, messageVersion, event)
-    if (isError(dynamoUpdate)) {
-      return dynamoUpdate
-    }
+    if (updates.events) {
+      for (const event of updates.events) {
+        const [lookupItemsDynamoUpdate, updatedEvent] = await this.prepareLookupItems(event, existing.messageId)
+        replacedEvents.push(updatedEvent)
+        dynamoUpdates.push(...lookupItemsDynamoUpdate)
+      }
+      updateExpression.push("events = list_append(if_not_exists(events, :empty_list), :events)")
 
-    const result = await this.executeTransaction(dynamoUpdate)
+      updateExpressionValues[":events"] = replacedEvents
+      updateExpressionValues[":empty_list"] = []
 
-    if (isError(result)) {
-      return result
-    }
-
-    return undefined
-  }
-
-  async prepare(messageId: string, messageVersion: number, event: AuditLogEvent): PromiseResult<DynamoUpdate[]> {
-    const [lookupItemsDynamoUpdate, updatedEvent] = await this.prepareLookupItems(event, messageId)
-    const eventsDynamoUpdate = await this.prepareEvents(messageId, messageVersion, [updatedEvent])
-    if (isError(eventsDynamoUpdate)) {
-      return eventsDynamoUpdate
-    }
-
-    return lookupItemsDynamoUpdate.concat(eventsDynamoUpdate)
-  }
-
-  async prepareEvents(messageId: string, messageVersion: number, events: AuditLogEvent[]): PromiseResult<DynamoUpdate> {
-    const currentEvents = await this.fetchEvents(messageId)
-    if (isError(currentEvents)) {
-      return currentEvents
-    }
-
-    // Add events to the array and set last event type
-    let updateExpression = `
-      set events = list_append(if_not_exists(events, :empty_list), :events),
-      #lastEventType = :lastEventType
-    `
-    let expressionAttributeNames: KeyValuePair<string, string> = {
-      "#lastEventType": "lastEventType"
-    }
-    const lastEventType = maxBy(events, (event) => event.timestamp)?.eventType
-    let updateExpressionValues: KeyValuePair<string, unknown> = {
-      ":events": events,
-      ":empty_list": <AuditLogEvent[]>[],
-      ":lastEventType": lastEventType
-    }
-
-    const updateComponents: UpdateComponent[] = [
-      forceOwnerUpdateComponent,
-      statusUpdateComponent,
-      topExceptionsReportUpdateComponent,
-      automationRateReportUpdateComponent,
-      archivalUpdateComponent,
-      sanitisationUpdateComponent,
-      retryCountUpdateComponent
-    ]
-
-    for (const updateComponent of updateComponents) {
-      const updateComponentResult = updateComponent(currentEvents, events)
-
-      if (updateComponentResult.updateExpression) {
-        updateExpression += ", " + updateComponentResult.updateExpression
+      const automationReportEvents = replacedEvents.filter((event) => event._automationReport)
+      if (automationReportEvents.length > 0) {
+        updateExpressionValues[":automationReportEvents"] = automationReportEvents
+        updateExpression.push(
+          "automationReport.events = list_append(if_not_exists(automationReport.events, :empty_list), :automationReportEvents)"
+        )
       }
 
-      if (updateComponentResult.expressionAttributeNames) {
-        expressionAttributeNames = { ...expressionAttributeNames, ...updateComponentResult.expressionAttributeNames }
-      }
-
-      if (updateComponentResult.updateExpressionValues) {
-        updateExpressionValues = { ...updateExpressionValues, ...updateComponentResult.updateExpressionValues }
+      const topExceptionsReportEvents = replacedEvents.filter((event) => event._topExceptionsReport)
+      if (topExceptionsReportEvents.length > 0) {
+        updateExpressionValues[":topExceptionEvents"] = topExceptionsReportEvents
+        updateExpression.push(
+          "topExceptionsReport.events = list_append(if_not_exists(topExceptionsReport.events, :empty_list), :topExceptionEvents)"
+        )
       }
     }
 
-    return {
+    if (updates.forceOwner) {
+      updateExpressionValues[":forceOwner"] = updates.forceOwner
+      updateExpression.push("forceOwner = :forceOwner")
+    }
+
+    if (updates.status) {
+      expressionAttributeNames["#status"] = "status"
+      updateExpressionValues[":status"] = updates.status
+      updateExpression.push("#status = :status")
+    }
+
+    if (updates.pncStatus) {
+      updateExpressionValues[":pncStatus"] = updates.pncStatus
+      updateExpression.push("pncStatus = :pncStatus")
+    }
+
+    if (updates.triggerStatus) {
+      updateExpressionValues[":triggerStatus"] = updates.triggerStatus
+      updateExpression.push("triggerStatus = :triggerStatus")
+    }
+
+    if (updates.errorRecordArchivalDate) {
+      updateExpression.push("errorRecordArchivalDate = :errorRecordArchivalDate")
+      updateExpressionValues[":errorRecordArchivalDate"] = updates.errorRecordArchivalDate
+    }
+
+    if (updates.isSanitised) {
+      updateExpression.push("isSanitised = :isSanitised")
+      updateExpressionValues[":isSanitised"] = updates.isSanitised
+    }
+
+    if (updates.retryCount) {
+      updateExpression.push("retryCount = :retryCount")
+      updateExpressionValues[":retryCount"] = updates.retryCount
+    }
+
+    dynamoUpdates.push({
       Update: {
-        TableName: this.tableName,
+        TableName: this.config.auditLogTableName,
         Key: {
-          messageId: messageId
+          messageId: existing.messageId
         },
-        UpdateExpression: updateExpression + " ADD version :version_increment",
+        UpdateExpression: `SET ${updateExpression.join(",")} ADD version :version_increment`,
         ExpressionAttributeNames: expressionAttributeNames,
-        ExpressionAttributeValues: { ...updateExpressionValues, ":version": messageVersion, ":version_increment": 1 },
-        ConditionExpression: `attribute_exists(${this.tableKey}) AND version = :version`
+        ExpressionAttributeValues: { ...updateExpressionValues, ":version": existing.version, ":version_increment": 1 },
+        ConditionExpression: `attribute_exists(${this.auditLogTableKey}) AND version = :version`
       }
-    }
+    })
+
+    return this.executeTransaction(dynamoUpdates)
   }
 
   async prepareLookupItems(event: AuditLogEvent, messageId: string): Promise<[DynamoUpdate[], AuditLogEvent]> {
@@ -455,9 +398,14 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
     return {
       Put: {
         Item: itemToSave,
-        TableName: this.tableName,
-        ConditionExpression: `attribute_not_exists(${this.tableKey})`
+        TableName: this.config.lookupTableName,
+        ConditionExpression: `attribute_not_exists(${this.auditLogTableKey})`
       }
     }
+  }
+
+  async replaceAuditLog(auditLog: AuditLog, version: number): PromiseResult<void> {
+    const replacement = { ...auditLog, version: version + 1 }
+    this.replaceOne(this.config.auditLogTableName, replacement, this.auditLogTableKey, version)
   }
 }

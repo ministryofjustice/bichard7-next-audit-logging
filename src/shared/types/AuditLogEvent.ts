@@ -1,14 +1,9 @@
-import { v4 as uuid } from "uuid"
 import type AuditLogEventOptions from "./AuditLogEventOptions"
 import type EventCategory from "./EventCategory"
 import type KeyValuePair from "./KeyValuePair"
 
 // TODO: Split this into a type an an implementation
 export default class AuditLogEvent {
-  public readonly id: string
-
-  public readonly messageId: string
-
   public readonly attributes: KeyValuePair<string, unknown> = {}
 
   public readonly category: EventCategory
@@ -32,8 +27,6 @@ export default class AuditLogEvent {
   public user?: string
 
   constructor(options: AuditLogEventOptions) {
-    this.id = options.id ?? uuid()
-    this.messageId = options.messageId
     this.eventSource = options.eventSource
     this.category = options.category
     this.eventType = options.eventType

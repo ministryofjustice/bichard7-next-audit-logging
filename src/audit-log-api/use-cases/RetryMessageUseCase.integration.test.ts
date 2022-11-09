@@ -12,10 +12,9 @@ import RetrieveEventXmlFromS3UseCase from "./RetrieveEventXmlFromS3UseCase"
 import RetryMessageUseCase from "./RetryMessageUseCase"
 import SendMessageToQueueUseCase from "./SendMessageToQueueUseCase"
 
-const auditLogTableName = "auditLogTable"
 const auditLogLookupTableName = "auditLogLookupTable"
 const testDynamoGateway = new TestDynamoGateway(auditLogDynamoConfig)
-const auditLogDynamoGateway = new AuditLogDynamoGateway(auditLogDynamoConfig, auditLogTableName)
+const auditLogDynamoGateway = new AuditLogDynamoGateway(auditLogDynamoConfig)
 const auditLogLookupDynamoGateway = new AwsAuditLogLookupDynamoGateway(auditLogDynamoConfig, auditLogLookupTableName)
 const lookupEventValuesUseCase = new LookupEventValuesUseCase(auditLogLookupDynamoGateway)
 const getLastEventUseCase = new GetLastFailedMessageEventUseCase(auditLogDynamoGateway, lookupEventValuesUseCase)
@@ -46,7 +45,7 @@ const eventXml = "Test Xml"
 
 describe("RetryMessageUseCase", () => {
   beforeEach(async () => {
-    await testDynamoGateway.deleteAll(auditLogTableName, "messageId")
+    await testDynamoGateway.deleteAll(auditLogDynamoConfig.auditLogTableName, "messageId")
     await testDynamoGateway.deleteAll(auditLogLookupTableName, "id")
     await s3Gateway.createBucket(true)
     await s3Gateway.deleteAll()
@@ -69,7 +68,7 @@ describe("RetryMessageUseCase", () => {
     })
     message.events.push(event)
 
-    await testDynamoGateway.insertOne(auditLogTableName, message, "messageId")
+    await testDynamoGateway.insertOne(auditLogDynamoConfig.auditLogTableName, message, "messageId")
     await testDynamoGateway.insertOne(auditLogLookupTableName, auditLogLookupItem, "id")
 
     const result = await useCase.retry(message.messageId)
@@ -110,7 +109,7 @@ describe("RetryMessageUseCase", () => {
     message.events.push(event)
 
     await s3Gateway.upload(eventS3Path, JSON.stringify({ messageData: encodeBase64(eventXml) }))
-    await testDynamoGateway.insertOne(auditLogTableName, message, "messageId")
+    await testDynamoGateway.insertOne(auditLogDynamoConfig.auditLogTableName, message, "messageId")
     await testDynamoGateway.insertOne(auditLogLookupTableName, auditLogLookupItem, "id")
 
     const result = await useCase.retry(message.messageId)

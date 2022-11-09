@@ -1,8 +1,8 @@
 import type { AuditLog, PromiseResult } from "src/shared/types"
 import { isError } from "src/shared/types"
 import type { AuditLogDynamoGatewayInterface } from "../gateways/dynamo"
-import { parseForceOwner } from "../gateways/dynamo"
 import type { FetchReportOptions } from "../types/queryParams"
+import { parseForceOwner } from "../utils"
 import getMessageById from "./getMessageById"
 import type MessageFetcher from "./MessageFetcher"
 

@@ -23,14 +23,7 @@ export default class DynamoGateway {
   protected readonly client: DocumentClient
 
   constructor(config: DynamoDbConfig) {
-    const conf: DynamoDB.ClientConfiguration = {
-      endpoint: config.DYNAMO_URL,
-      region: config.DYNAMO_REGION,
-      accessKeyId: config.AWS_ACCESS_KEY_ID,
-      secretAccessKey: config.AWS_SECRET_ACCESS_KEY
-    }
-
-    this.service = new DynamoDB(conf)
+    this.service = new DynamoDB(config)
 
     this.client = new DocumentClient({
       service: this.service
@@ -87,7 +80,7 @@ export default class DynamoGateway {
       })
   }
 
-  updateOne<T>(tableName: string, record: T, keyName: string, version: number): PromiseResult<void> {
+  replaceOne<T>(tableName: string, record: T, keyName: string, version: number): PromiseResult<void> {
     const params: DocumentClient.PutItemInput = {
       TableName: tableName,
       Item: { _: "_", ...record },

@@ -1,23 +1,15 @@
+jest.setTimeout(9999999)
 import { decompress } from "src/shared"
 import type { AuditLogLookup, KeyValuePair } from "src/shared/types"
 import { AuditLog, AuditLogEvent } from "src/shared/types"
-import { AuditLogDynamoGateway, AwsAuditLogLookupDynamoGateway } from "../gateways/dynamo"
-import { auditLogDynamoConfig, auditLogLookupDynamoConfig, TestDynamoGateway } from "../test"
-import CreateAuditLogEventsUseCase from "./CreateAuditLogEventsUseCase"
-import StoreValuesInLookupTableUseCase from "./StoreValuesInLookupTableUseCase"
+import { AuditLogDynamoGateway } from "../gateways/dynamo"
+import { auditLogDynamoConfig, TestDynamoGateway } from "../test"
+import CreateAuditLogEventsUseCase from "./CreateAuditLogEventsUseCase/CreateAuditLogEventsUseCase"
 
 const testAuditLogDynamoGateway = new TestDynamoGateway(auditLogDynamoConfig)
-const testAuditLogLookupDynamoGateway = new TestDynamoGateway(auditLogLookupDynamoConfig)
-const auditLogDynamoGateway = new AuditLogDynamoGateway(auditLogDynamoConfig, auditLogDynamoConfig.TABLE_NAME)
-const auditLogLookupDynamoGateway = new AwsAuditLogLookupDynamoGateway(
-  auditLogLookupDynamoConfig,
-  auditLogLookupDynamoConfig.TABLE_NAME
-)
-const storeValuesInLookupTableUseCase = new StoreValuesInLookupTableUseCase(auditLogLookupDynamoGateway)
-const createAuditLogEventsUseCase = new CreateAuditLogEventsUseCase(
-  auditLogDynamoGateway,
-  storeValuesInLookupTableUseCase
-)
+const testAuditLogLookupDynamoGateway = new TestDynamoGateway(auditLogDynamoConfig)
+const auditLogDynamoGateway = new AuditLogDynamoGateway(auditLogDynamoConfig)
+const createAuditLogEventsUseCase = new CreateAuditLogEventsUseCase(auditLogDynamoGateway)
 
 const createAuditLog = (): AuditLog => new AuditLog("CorrelationId", new Date(), "Dummy hash")
 const createAuditLogEvent = (): AuditLogEvent =>
@@ -43,14 +35,14 @@ const createStacktraceAuditLogEvent = (): AuditLogEvent => {
 }
 
 const getAuditLog = (messageId: string): Promise<AuditLog | null> =>
-  testAuditLogDynamoGateway.getOne(auditLogDynamoConfig.TABLE_NAME, "messageId", messageId)
+  testAuditLogDynamoGateway.getOne(auditLogDynamoConfig.auditLogTableName, "messageId", messageId)
 
 const lookupValue = (lookupId: string): Promise<AuditLogLookup | null> =>
-  testAuditLogLookupDynamoGateway.getOne(auditLogLookupDynamoConfig.TABLE_NAME, "id", lookupId)
+  testAuditLogLookupDynamoGateway.getOne(auditLogDynamoConfig.lookupTableName, "id", lookupId)
 
 const lookupMessageId = (messageId: string): Promise<AuditLogLookup[] | null> =>
   testAuditLogLookupDynamoGateway.getManyById(
-    auditLogLookupDynamoConfig.TABLE_NAME,
+    auditLogDynamoConfig.lookupTableName,
     "messageIdIndex",
     "messageId",
     messageId
@@ -58,8 +50,8 @@ const lookupMessageId = (messageId: string): Promise<AuditLogLookup[] | null> =>
 
 describe("CreateAuditLogEventsUseCase", () => {
   beforeEach(async () => {
-    await testAuditLogDynamoGateway.deleteAll(auditLogDynamoConfig.TABLE_NAME, "messageId")
-    await testAuditLogLookupDynamoGateway.deleteAll(auditLogLookupDynamoConfig.TABLE_NAME, "id")
+    await testAuditLogDynamoGateway.deleteAll(auditLogDynamoConfig.auditLogTableName, "messageId")
+    await testAuditLogLookupDynamoGateway.deleteAll(auditLogDynamoConfig.auditLogTableName, "id")
     jest.clearAllMocks()
   })
 
@@ -155,7 +147,33 @@ describe("CreateAuditLogEventsUseCase", () => {
     expect(actualEvent?.eventSource).toBe(event1.eventSource)
   })
 
-  it("should deduplicate stacktrace logs in the same batch", async () => {
+  it("should deduplicate stacktrace logs in multiple operations", async () => {
+    const auditLog = createAuditLog()
+    await auditLogDynamoGateway.create(auditLog)
+
+    const event1 = createStacktraceAuditLogEvent()
+    const result1 = await createAuditLogEventsUseCase.create(auditLog.messageId, event1)
+
+    expect(result1.resultType).toBe("success")
+
+    const event2 = createStacktraceAuditLogEvent()
+    const result2 = await createAuditLogEventsUseCase.create(auditLog.messageId, event2)
+
+    expect(result2.resultType).toBe("success")
+
+    const actualAuditLog = await getAuditLog(auditLog.messageId)
+    expect(actualAuditLog).toBeDefined()
+    expect(actualAuditLog?.events).toBeDefined()
+    expect(actualAuditLog?.events).toHaveLength(1)
+
+    const actualEvent = actualAuditLog?.events[0]
+    expect(actualEvent?.category).toBe(event1.category)
+    expect(actualEvent?.timestamp).toBe(event1.timestamp)
+    expect(actualEvent?.eventType).toBe(event1.eventType)
+    expect(actualEvent?.eventSource).toBe(event1.eventSource)
+  })
+
+  it("should deduplicate stacktrace logs in the same operation", async () => {
     const auditLog = createAuditLog()
     await auditLogDynamoGateway.create(auditLog)
 
@@ -177,7 +195,32 @@ describe("CreateAuditLogEventsUseCase", () => {
     expect(actualEvent?.eventSource).toBe(event1.eventSource)
   })
 
-  it("should only deduplicate stacktrace logs if they are sequential", async () => {
+  it("should not deduplicate stacktrace logs if they are not sequential in multiple operations", async () => {
+    const auditLog = createAuditLog()
+    await auditLogDynamoGateway.create(auditLog)
+
+    const event1 = createStacktraceAuditLogEvent()
+    const result1 = await createAuditLogEventsUseCase.create(auditLog.messageId, event1)
+
+    expect(result1.resultType).toBe("success")
+
+    const event2 = createAuditLogEvent()
+    const result2 = await createAuditLogEventsUseCase.create(auditLog.messageId, event2)
+
+    expect(result2.resultType).toBe("success")
+
+    const event3 = createStacktraceAuditLogEvent()
+    const result3 = await createAuditLogEventsUseCase.create(auditLog.messageId, event3)
+
+    expect(result3.resultType).toBe("success")
+
+    const actualAuditLog = await getAuditLog(auditLog.messageId)
+    expect(actualAuditLog).toBeDefined()
+    expect(actualAuditLog?.events).toBeDefined()
+    expect(actualAuditLog?.events).toHaveLength(3)
+  })
+
+  it("should not deduplicate stacktrace logs if they are not sequential in a single operation", async () => {
     const auditLog = createAuditLog()
     await auditLogDynamoGateway.create(auditLog)
 

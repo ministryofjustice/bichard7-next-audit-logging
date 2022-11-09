@@ -9,7 +9,7 @@ describe("Creating Audit Log events", () => {
   const gateway = new TestDynamoGateway(auditLogDynamoConfig)
 
   beforeEach(async () => {
-    await gateway.deleteAll(auditLogDynamoConfig.TABLE_NAME, "messageId")
+    await gateway.deleteAll(auditLogDynamoConfig.auditLogTableName, "messageId")
   })
 
   it("should create a single new audit log event for an existing audit log record", async () => {
@@ -21,7 +21,11 @@ describe("Creating Audit Log events", () => {
     const result2 = await axios.post(`http://localhost:3010/messages/${auditLog.messageId}/manyEvents`, [event])
     expect(result2.status).toEqual(HttpStatusCode.created)
 
-    const record = await gateway.getOne<AuditLog>(auditLogDynamoConfig.TABLE_NAME, "messageId", auditLog.messageId)
+    const record = await gateway.getOne<AuditLog>(
+      auditLogDynamoConfig.auditLogTableName,
+      "messageId",
+      auditLog.messageId
+    )
 
     expect(record).not.toBeNull()
 
@@ -52,7 +56,11 @@ describe("Creating Audit Log events", () => {
     const result2 = await axios.post(`http://localhost:3010/messages/${auditLog.messageId}/manyEvents`, events)
     expect(result2.status).toEqual(HttpStatusCode.created)
 
-    const record = await gateway.getOne<AuditLog>(auditLogDynamoConfig.TABLE_NAME, "messageId", auditLog.messageId)
+    const record = await gateway.getOne<AuditLog>(
+      auditLogDynamoConfig.auditLogTableName,
+      "messageId",
+      auditLog.messageId
+    )
 
     expect(record).not.toBeNull()
 

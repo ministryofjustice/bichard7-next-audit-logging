@@ -10,7 +10,7 @@ const gateway = new TestDynamoGateway(auditLogDynamoConfig)
 
 describe("Creating Audit Log", () => {
   beforeEach(async () => {
-    await gateway.deleteAll(auditLogDynamoConfig.TABLE_NAME, "messageId")
+    await gateway.deleteAll(auditLogDynamoConfig.auditLogTableName, "messageId")
   })
 
   it("should create a new audit log record", async () => {
@@ -19,7 +19,11 @@ describe("Creating Audit Log", () => {
     const result = await axios.post("http://localhost:3010/manyMessages", [auditLog])
     expect(result.status).toEqual(HttpStatusCode.created)
 
-    const record = await gateway.getOne<AuditLog>(auditLogDynamoConfig.TABLE_NAME, "messageId", auditLog.messageId)
+    const record = await gateway.getOne<AuditLog>(
+      auditLogDynamoConfig.auditLogTableName,
+      "messageId",
+      auditLog.messageId
+    )
 
     expect(record).not.toBeNull()
     expect(record?.messageId).toEqual(auditLog.messageId)
@@ -32,7 +36,11 @@ describe("Creating Audit Log", () => {
     expect(result.status).toEqual(HttpStatusCode.created)
 
     auditLogs.forEach(async (auditLog) => {
-      const record = await gateway.getOne<AuditLog>(auditLogDynamoConfig.TABLE_NAME, "messageId", auditLog.messageId)
+      const record = await gateway.getOne<AuditLog>(
+        auditLogDynamoConfig.auditLogTableName,
+        "messageId",
+        auditLog.messageId
+      )
 
       expect(record).not.toBeNull()
       expect(record?.messageId).toEqual(auditLog.messageId)
@@ -44,7 +52,7 @@ describe("Creating Audit Log", () => {
 
     const result = await axios.post("http://localhost:3010/manyMessages", auditLogs, { validateStatus: (_) => true })
     expect(result.status).toEqual(HttpStatusCode.created)
-    expect((await gateway.getAll(auditLogDynamoConfig.TABLE_NAME)).Items).toHaveLength(25)
+    expect((await gateway.getAll(auditLogDynamoConfig.auditLogTableName)).Items).toHaveLength(25)
   })
 
   it("should give an appropriate error when attempting to create too many audit logs", async () => {
@@ -53,6 +61,6 @@ describe("Creating Audit Log", () => {
     const result = await axios.post("http://localhost:3010/manyMessages", auditLogs, { validateStatus: (_) => true })
     expect(result.status).toEqual(HttpStatusCode.badRequest)
 
-    expect((await gateway.getAll(auditLogDynamoConfig.TABLE_NAME)).Items).toHaveLength(0)
+    expect((await gateway.getAll(auditLogDynamoConfig.auditLogTableName)).Items).toHaveLength(0)
   })
 })

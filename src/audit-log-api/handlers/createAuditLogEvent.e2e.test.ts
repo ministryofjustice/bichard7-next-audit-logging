@@ -16,7 +16,11 @@ describe("Creating Audit Log event", () => {
     const result2 = await axios.post(`http://localhost:3010/messages/${auditLog.messageId}/events`, event)
     expect(result2.status).toEqual(HttpStatusCode.created)
 
-    const record = await gateway.getOne<AuditLog>(auditLogDynamoConfig.TABLE_NAME, "messageId", auditLog.messageId)
+    const record = await gateway.getOne<AuditLog>(
+      auditLogDynamoConfig.auditLogTableName,
+      "messageId",
+      auditLog.messageId
+    )
 
     expect(record).not.toBeNull()
 
@@ -49,7 +53,11 @@ describe("Creating Audit Log event", () => {
     const result2 = await axios.post(`http://localhost:3010/messages/${auditLog.messageId}/events`, event)
     expect(result2.status).toEqual(HttpStatusCode.created)
 
-    const record = await gateway.getOne<AuditLog>(auditLogDynamoConfig.TABLE_NAME, "messageId", auditLog.messageId)
+    const record = await gateway.getOne<AuditLog>(
+      auditLogDynamoConfig.auditLogTableName,
+      "messageId",
+      auditLog.messageId
+    )
 
     expect(record).not.toBeNull()
 
@@ -65,7 +73,7 @@ describe("Creating Audit Log event", () => {
 
   describe("updating the PNC status", () => {
     const getPncStatus = async (messageId: string): Promise<string | undefined> => {
-      const record = await gateway.getOne<AuditLog>(auditLogDynamoConfig.TABLE_NAME, "messageId", messageId)
+      const record = await gateway.getOne<AuditLog>(auditLogDynamoConfig.auditLogTableName, "messageId", messageId)
       return record?.pncStatus
     }
 
@@ -104,7 +112,7 @@ describe("Creating Audit Log event", () => {
 
   describe("updating the Trigger status", () => {
     const getTriggerStatus = async (messageId: string): Promise<string | undefined> => {
-      const record = await gateway.getOne<AuditLog>(auditLogDynamoConfig.TABLE_NAME, "messageId", messageId)
+      const record = await gateway.getOne<AuditLog>(auditLogDynamoConfig.auditLogTableName, "messageId", messageId)
       return record?.triggerStatus
     }
 

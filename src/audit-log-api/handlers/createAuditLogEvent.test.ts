@@ -2,7 +2,7 @@ import type { APIGatewayProxyEvent } from "aws-lambda"
 import { HttpStatusCode } from "src/shared"
 import { AuditLogEvent } from "src/shared/types"
 import "../testConfig"
-import { CreateAuditLogEventUseCase } from "../use-cases"
+import { CreateAuditLogEventsUseCase } from "../use-cases"
 import createAuditLogEvent from "./createAuditLogEvent"
 
 const createHandlerEvent = (auditLogEvent?: AuditLogEvent): APIGatewayProxyEvent => {
@@ -25,7 +25,7 @@ const createHandlerEvent = (auditLogEvent?: AuditLogEvent): APIGatewayProxyEvent
 
 describe("createAuditLogEvent()", () => {
   it("should return Created status when event is added to the audit log in the database", async () => {
-    jest.spyOn(CreateAuditLogEventUseCase.prototype, "create").mockReturnValue(
+    jest.spyOn(CreateAuditLogEventsUseCase.prototype, "create").mockReturnValue(
       Promise.resolve({
         resultType: "success"
       })
@@ -50,7 +50,7 @@ describe("createAuditLogEvent()", () => {
 
   it("should respond with an Not Found status when message id does not exist", async () => {
     const expectedMessage = "Expected Message"
-    jest.spyOn(CreateAuditLogEventUseCase.prototype, "create").mockReturnValue(
+    jest.spyOn(CreateAuditLogEventsUseCase.prototype, "create").mockReturnValue(
       Promise.resolve({
         resultType: "notFound",
         resultDescription: expectedMessage
@@ -66,7 +66,7 @@ describe("createAuditLogEvent()", () => {
 
   it("should respond with an Internal Server Error status when an unhandled error occurs", async () => {
     const expectedMessage = "Expected Message"
-    jest.spyOn(CreateAuditLogEventUseCase.prototype, "create").mockReturnValue(
+    jest.spyOn(CreateAuditLogEventsUseCase.prototype, "create").mockReturnValue(
       Promise.resolve({
         resultType: "error",
         resultDescription: expectedMessage
@@ -82,7 +82,7 @@ describe("createAuditLogEvent()", () => {
 
   it("should respond with a Conflict status when an the message version is different", async () => {
     const expectedMessage = "Expected Message"
-    jest.spyOn(CreateAuditLogEventUseCase.prototype, "create").mockReturnValue(
+    jest.spyOn(CreateAuditLogEventsUseCase.prototype, "create").mockReturnValue(
       Promise.resolve({
         resultType: "invalidVersion",
         resultDescription: expectedMessage

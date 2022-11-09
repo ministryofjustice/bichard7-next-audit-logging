@@ -10,7 +10,7 @@ export default class FetchById implements MessageFetcher {
     private readonly options?: ProjectionOptions
   ) {}
 
-  fetch(): PromiseResult<AuditLog> {
+  fetch(): PromiseResult<AuditLog | undefined> {
     return this.gateway.fetchOne(this.messageId, this.options)
   }
 }

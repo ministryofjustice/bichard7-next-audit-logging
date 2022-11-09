@@ -14,7 +14,11 @@ describe("Creating Audit Log", () => {
     const result = await axios.post("http://localhost:3010/messages", auditLog)
     expect(result.status).toEqual(HttpStatusCode.created)
 
-    const record = await gateway.getOne<AuditLog>(auditLogDynamoConfig.TABLE_NAME, "messageId", auditLog.messageId)
+    const record = await gateway.getOne<AuditLog>(
+      auditLogDynamoConfig.auditLogTableName,
+      "messageId",
+      auditLog.messageId
+    )
 
     expect(record).not.toBeNull()
     expect(record?.messageId).toEqual(auditLog.messageId)

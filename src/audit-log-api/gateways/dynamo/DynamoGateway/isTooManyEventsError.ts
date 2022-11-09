@@ -1,14 +1,13 @@
 import isTransactionFailedError from "./isTransactionFailedError"
 
-export default function isTooManyEventsError(error: Error): [boolean, string] {
+export default function isTooManyEventsError(error: Error): boolean {
   if (isTransactionFailedError(error)) {
-    return [
+    return (
       error.failureReasons &&
-        error.failureReasons.length > 0 &&
-        error.failureReasons.some((reason) => reason.Code == "TooManyItems"),
-      error.failureReasons[0].Message
-    ]
-  } else {
-    return [false, ""]
+      error.failureReasons.length > 0 &&
+      error.failureReasons.some((reason) => reason.Code == "TooManyItems")
+    )
   }
+
+  return false
 }

@@ -13,7 +13,10 @@ const auditLogTableName = "auditLogTable"
 const auditLogLookupTableName = "auditLogLookupTable"
 
 const postgresConfig = createBichardPostgresGatewayConfig()
-const errorListPostgresConfig = { ...postgresConfig, TABLE_NAME: postgresConfig.TABLE_NAME?.replace("archive_", "") }
+const errorListPostgresConfig = {
+  ...postgresConfig,
+  TABLE_NAME: postgresConfig.TABLE_NAME?.replace("archive_", "")
+}
 const postgresGateway = new BichardPostgresGateway(postgresConfig)
 
 const messagesS3Gateway = new TestS3Gateway(createS3Config("INTERNAL_INCOMING_MESSAGES_BUCKET"))

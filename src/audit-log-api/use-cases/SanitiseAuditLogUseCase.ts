@@ -1,11 +1,11 @@
 import type { AuditLog, PromiseResult } from "src/shared/types"
 import { AuditLogEvent, EventCode } from "src/shared/types"
-import type { AuditLogDynamoGatewayInterface } from "../gateways/dynamo"
+import { AuditLogDynamoGatewayInterface } from "../gateways/dynamo"
 
 export default class SanitiseAuditLogUseCase {
   constructor(private readonly auditLogDynamoGateway: AuditLogDynamoGatewayInterface) {}
 
-  call(auditLog: AuditLog): PromiseResult<AuditLog> {
+  call(auditLog: AuditLog): PromiseResult<void> {
     ;[auditLog.events, auditLog.automationReport?.events, auditLog.topExceptionsReport?.events].forEach((events) => {
       if (!events) {
         return
@@ -31,6 +31,9 @@ export default class SanitiseAuditLogUseCase {
       })
     )
 
-    return this.auditLogDynamoGateway.update(auditLog)
+    auditLog.isSanitised = 1
+    delete auditLog.nextSanitiseCheck
+
+    return this.auditLogDynamoGateway.replaceAuditLog(auditLog, auditLog.version)
   }
 }

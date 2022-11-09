@@ -11,8 +11,6 @@ export default interface AuditLogEventOptions {
   eventSourceQueueName?: string
   eventType: string
   eventXml?: string
-  id: string
-  messageId: string
   timestamp: Date
   user?: string
 }

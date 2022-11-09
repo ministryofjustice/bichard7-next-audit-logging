@@ -3,7 +3,6 @@ import { HttpStatusCode, logger } from "src/shared"
 import type { PromiseResult } from "src/shared/types"
 import { isError } from "src/shared/types"
 import createAuditLogDynamoDbConfig from "../createAuditLogDynamoDbConfig"
-import createAuditLogLookupDynamoDbConfig from "../createAuditLogLookupDynamoDbConfig"
 import { AuditLogDynamoGateway, AwsAuditLogLookupDynamoGateway } from "../gateways/dynamo"
 import createMessageFetcher from "../use-cases/createMessageFetcher"
 import LookupEventValuesUseCase from "../use-cases/LookupEventValuesUseCase"
@@ -11,9 +10,8 @@ import LookupMessageValuesUseCase from "../use-cases/LookupMessageValuesUseCase"
 import { createJsonApiResult, shouldFetchLargeObjects, transformAuditLogEvent } from "../utils"
 
 const auditLogConfig = createAuditLogDynamoDbConfig()
-const auditLogLookupConfig = createAuditLogLookupDynamoDbConfig()
-const auditLogGateway = new AuditLogDynamoGateway(auditLogConfig, auditLogConfig.TABLE_NAME)
-const auditLogLookupGateway = new AwsAuditLogLookupDynamoGateway(auditLogLookupConfig, auditLogLookupConfig.TABLE_NAME)
+const auditLogGateway = new AuditLogDynamoGateway(auditLogConfig)
+const auditLogLookupGateway = new AwsAuditLogLookupDynamoGateway(auditLogConfig, auditLogConfig.lookupTableName)
 const lookupEventValuesUseCase = new LookupEventValuesUseCase(auditLogLookupGateway)
 const lookupMessageValuesUseCase = new LookupMessageValuesUseCase(lookupEventValuesUseCase)
 

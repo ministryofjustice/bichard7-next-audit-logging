@@ -1,6 +1,6 @@
 import type { AuditLogEvent } from "src/shared/types"
 import { EventCode } from "src/shared/types"
-import forceOwner from "./forceOwnerUpdateComponent"
+import calculateForceOwner from "./calculateForceOwner"
 
 const forceOwnerChangeEvent = (): AuditLogEvent => {
   return {
@@ -20,7 +20,7 @@ const nonForceOwnerChangeEvent = (): AuditLogEvent => {
   } as unknown as AuditLogEvent
 }
 
-describe("forceOwnerUpdateComponent", () => {
+describe("calculateForceOwner", () => {
   it("should give the correct force owner when it changes", () => {
     const events = [
       nonForceOwnerChangeEvent(),
@@ -28,16 +28,13 @@ describe("forceOwnerUpdateComponent", () => {
       forceOwnerChangeEvent(),
       nonForceOwnerChangeEvent()
     ]
-    const forceOwnerDynamoUpdates = forceOwner([], events)
-    expect(forceOwnerDynamoUpdates).toStrictEqual({
-      updateExpression: "forceOwner = :forceOwner",
-      updateExpressionValues: { ":forceOwner": 1 }
-    })
+    const forceOwner = calculateForceOwner(events)
+    expect(forceOwner).toStrictEqual({ forceOwner: 1 })
   })
 
   it("shouldn't change anything in dynamodb when the force owner doesn't change", () => {
     const events = [nonForceOwnerChangeEvent(), nonForceOwnerChangeEvent(), nonForceOwnerChangeEvent()]
-    const forceOwnerDynamoUpdates = forceOwner([], events)
-    expect(forceOwnerDynamoUpdates).toStrictEqual({})
+    const forceOwner = calculateForceOwner(events)
+    expect(forceOwner).toStrictEqual({})
   })
 })
