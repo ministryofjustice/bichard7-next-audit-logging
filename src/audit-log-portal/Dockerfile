@@ -7,7 +7,7 @@ FROM ${NODE_IMAGE} as builder
 
 WORKDIR /src/audit-log-portal
 
-COPY ./* ./
+COPY ./ ./
 
 RUN npm i && \
     npm run build

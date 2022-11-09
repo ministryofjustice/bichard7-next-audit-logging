@@ -25,6 +25,8 @@ echo "Building from ${DOCKER_IMAGE_HASH}"
 
 docker build --build-arg "NODE_IMAGE=${DOCKER_IMAGE_HASH}" -t ${REPOSITORY_NAME} .
 
+cd -
+
 install_trivy() {
   echo "Pulling trivy binary from s3"
   aws s3 cp \
