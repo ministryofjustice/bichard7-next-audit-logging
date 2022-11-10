@@ -4,6 +4,7 @@ const auditLogDynamoConfig: DynamoDbConfig = {
   endpoint: "http://localhost:8000",
   region: "eu-west-2",
   auditLogTableName: "auditLogTable",
+  eventsTableName: "auditLogEventsTable",
   lookupTableName: "auditLogLookupTable",
   accessKeyId: "DUMMY",
   secretAccessKey: "DUMMY"

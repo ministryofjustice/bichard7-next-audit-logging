@@ -1,14 +1,15 @@
 import { addDays } from "date-fns"
 import { compress } from "src/shared"
-import type {
+import {
   AuditLog,
   AuditLogEvent,
+  AuditLogLookup,
   BichardAuditLogEvent,
+  isError,
   KeyValuePair,
   PromiseResult,
   ValueLookup
 } from "src/shared/types"
-import { AuditLogLookup, isError } from "src/shared/types"
 import type {
   FetchByStatusOptions,
   FetchManyOptions,
@@ -28,6 +29,7 @@ const maxAttributeValueLength = 1000
 export default class AuditLogDynamoGateway extends DynamoGateway implements AuditLogDynamoGatewayInterface {
   readonly auditLogTableKey: string = "messageId"
   readonly auditLogSortKey: string = "receivedDate"
+  readonly eventsTableKey: string = "_id"
 
   constructor(private readonly config: DynamoDbConfig) {
     super(config)
@@ -266,35 +268,10 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
     const expressionAttributeNames: KeyValuePair<string, string> = {}
     const updateExpressionValues: KeyValuePair<string, unknown> = {}
 
-    const replacedEvents: AuditLogEvent[] = []
     const dynamoUpdates: DynamoUpdate[] = []
 
     if (updates.events) {
-      for (const event of updates.events) {
-        const [lookupItemsDynamoUpdate, updatedEvent] = await this.prepareLookupItems(event, existing.messageId)
-        replacedEvents.push(updatedEvent)
-        dynamoUpdates.push(...lookupItemsDynamoUpdate)
-      }
-      updateExpression.push("events = list_append(if_not_exists(events, :empty_list), :events)")
-
-      updateExpressionValues[":events"] = replacedEvents
-      updateExpressionValues[":empty_list"] = []
-
-      const automationReportEvents = replacedEvents.filter((event) => event._automationReport)
-      if (automationReportEvents.length > 0) {
-        updateExpressionValues[":automationReportEvents"] = automationReportEvents
-        updateExpression.push(
-          "automationReport.events = list_append(if_not_exists(automationReport.events, :empty_list), :automationReportEvents)"
-        )
-      }
-
-      const topExceptionsReportEvents = replacedEvents.filter((event) => event._topExceptionsReport)
-      if (topExceptionsReportEvents.length > 0) {
-        updateExpressionValues[":topExceptionEvents"] = topExceptionsReportEvents
-        updateExpression.push(
-          "topExceptionsReport.events = list_append(if_not_exists(topExceptionsReport.events, :empty_list), :topExceptionEvents)"
-        )
-      }
+      dynamoUpdates.push(...(await this.prepareStoreEvents(existing.messageId, updates.events)))
     }
 
     if (updates.forceOwner) {
@@ -333,18 +310,30 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
       updateExpressionValues[":retryCount"] = updates.retryCount
     }
 
-    dynamoUpdates.push({
-      Update: {
-        TableName: this.config.auditLogTableName,
-        Key: {
-          messageId: existing.messageId
-        },
-        UpdateExpression: `SET ${updateExpression.join(",")} ADD version :version_increment`,
-        ExpressionAttributeNames: expressionAttributeNames,
-        ExpressionAttributeValues: { ...updateExpressionValues, ":version": existing.version, ":version_increment": 1 },
-        ConditionExpression: `attribute_exists(${this.auditLogTableKey}) AND version = :version`
-      }
-    })
+    if (updateExpression.length > 0) {
+      dynamoUpdates.push({
+        Update: {
+          TableName: this.config.auditLogTableName,
+          Key: {
+            messageId: existing.messageId
+          },
+          UpdateExpression: `SET ${updateExpression.join(",")} ADD version :version_increment`,
+          ...(Object.keys(expressionAttributeNames).length > 0
+            ? { ExpressionAttributeNames: expressionAttributeNames }
+            : {}),
+          ExpressionAttributeValues: {
+            ...updateExpressionValues,
+            ":version": existing.version,
+            ":version_increment": 1
+          },
+          ConditionExpression: `attribute_exists(${this.auditLogTableKey}) AND version = :version`
+        }
+      })
+    }
+
+    if (dynamoUpdates.length === 0) {
+      return
+    }
 
     return this.executeTransaction(dynamoUpdates)
   }
@@ -407,5 +396,20 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
   async replaceAuditLog(auditLog: AuditLog, version: number): PromiseResult<void> {
     const replacement = { ...auditLog, version: version + 1 }
     this.replaceOne(this.config.auditLogTableName, replacement, this.auditLogTableKey, version)
+  }
+
+  private async prepareStoreEvents(messageId: string, events: AuditLogEvent[]): Promise<DynamoUpdate[]> {
+    return events.map((event) => {
+      const eventToInsert = new AuditLogEvent({ ...event, _messageId: messageId })
+
+      return {
+        Put: {
+          Item: { ...eventToInsert, _: "_" },
+          TableName: this.config.eventsTableName,
+          ExpressionAttributeNames: { "#id": this.eventsTableKey },
+          ConditionExpression: `attribute_not_exists(#id)`
+        }
+      }
+    })
   }
 }

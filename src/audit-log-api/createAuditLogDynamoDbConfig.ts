@@ -5,6 +5,7 @@ export default function createAdutiLogDynamoDbConfig(): DynamoDbConfig {
     AWS_URL,
     AWS_REGION,
     AUDIT_LOG_TABLE_NAME,
+    AUDIT_LOG_EVENTS_TABLE_NAME,
     AUDIT_LOG_LOOKUP_TABLE_NAME,
     DYNAMO_AWS_ACCESS_KEY_ID,
     DYNAMO_AWS_SECRET_ACCESS_KEY
@@ -22,6 +23,10 @@ export default function createAdutiLogDynamoDbConfig(): DynamoDbConfig {
     throw Error("AUDIT_LOG_TABLE_NAME environment variable must have value.")
   }
 
+  if (!AUDIT_LOG_EVENTS_TABLE_NAME) {
+    throw Error("AUDIT_LOG_EVENTS_TABLE_NAME environment variable must have value.")
+  }
+
   if (!AUDIT_LOG_LOOKUP_TABLE_NAME) {
     throw Error("AUDIT_LOG_LOOKUP_TABLE_NAME environment variable must have value.")
   }
@@ -30,6 +35,7 @@ export default function createAdutiLogDynamoDbConfig(): DynamoDbConfig {
     endpoint: AWS_URL,
     region: AWS_REGION,
     auditLogTableName: AUDIT_LOG_TABLE_NAME,
+    eventsTableName: AUDIT_LOG_EVENTS_TABLE_NAME,
     lookupTableName: AUDIT_LOG_LOOKUP_TABLE_NAME
   }
 

@@ -1,8 +1,10 @@
 jest.retryTimes(10)
+import { DocumentClient } from "aws-sdk/clients/dynamodb"
 import { addDays } from "date-fns"
 import { auditLogDynamoConfig } from "src/audit-log-api/test"
 import "src/shared/testing"
-import type { AuditLogEventOptions } from "src/shared/types"
+import { createMockAuditLog, mockAuditLogEvent } from "src/shared/testing"
+import type { AuditLogEventOptions, KeyValuePair } from "src/shared/types"
 import { AuditLog, AuditLogEvent, AuditLogStatus, isError } from "src/shared/types"
 import TestDynamoGateway from "../../../test/TestDynamoGateway"
 import AuditLogDynamoGateway from "./AuditLogDynamoGateway"
@@ -45,6 +47,7 @@ describe("AuditLogDynamoGateway", () => {
 
   beforeEach(async () => {
     await testGateway.deleteAll(auditLogDynamoConfig.auditLogTableName, primaryKey)
+    await testGateway.deleteAll(auditLogDynamoConfig.eventsTableName, "_id")
   })
 
   describe("create()", () => {
@@ -435,6 +438,109 @@ describe("AuditLogDynamoGateway", () => {
 
       const error = <Error>result
       expect(error.message).toBe(`Couldn't get events for message '${messageId}'.`)
+    })
+  })
+
+  describe.only("update()", () => {
+    let auditLog: AuditLog
+
+    beforeEach(async () => {
+      auditLog = (await createMockAuditLog()) as AuditLog
+    })
+
+    it("should not update if an empty object is passed in", async () => {
+      const before = await gateway.getOne(
+        auditLogDynamoConfig.auditLogTableName,
+        gateway.auditLogTableKey,
+        auditLog.messageId
+      )
+
+      const result = await gateway.update(auditLog, {})
+      expect(result).toNotBeError()
+
+      const after = await gateway.getOne(
+        auditLogDynamoConfig.auditLogTableName,
+        gateway.auditLogTableKey,
+        auditLog.messageId
+      )
+
+      expect(after).toStrictEqual(before)
+    })
+
+    it.each([
+      ["forceOwner", { forceOwner: 10 }],
+      ["status", { status: AuditLogStatus.completed }],
+      ["pncStatus", { pncStatus: "Processing" }],
+      ["triggerStatus", { triggerStatus: "NoTriggers" }],
+      ["errorRecordArchivalDate", { errorRecordArchivalDate: "2020-01-01" }],
+      ["isSanitised", { isSanitised: 1 }],
+      ["retryCount", { retryCount: 10 }]
+    ] as [string, Partial<AuditLog>][])(
+      "should update the %s if it is passed in",
+      async (key: string, updates: Partial<AuditLog>) => {
+        const result = await gateway.update(auditLog, updates)
+        expect(result).toNotBeError()
+
+        const updated = (
+          (await gateway.getOne(
+            auditLogDynamoConfig.auditLogTableName,
+            gateway.auditLogTableKey,
+            auditLog.messageId
+          )) as DocumentClient.GetItemOutput
+        ).Item!
+
+        const expected = updates as KeyValuePair<string, any>
+        expect(updated[key]).toBe(expected[key])
+      }
+    )
+
+    it("should update multiple values if multiple values are passed in", async () => {
+      const result = await gateway.update(auditLog, {
+        errorRecordArchivalDate: "2020-01-02",
+        forceOwner: 22,
+        isSanitised: 1,
+        pncStatus: "Processing",
+        retryCount: 55,
+        status: AuditLogStatus.completed,
+        triggerStatus: "NoTriggers"
+      })
+
+      expect(result).toNotBeError()
+
+      const updated = (
+        (await gateway.getOne(
+          auditLogDynamoConfig.auditLogTableName,
+          gateway.auditLogTableKey,
+          auditLog.messageId
+        )) as DocumentClient.GetItemOutput
+      ).Item!
+
+      expect(updated.errorRecordArchivalDate).toBe("2020-01-02")
+      expect(updated.forceOwner).toBe(22)
+      expect(updated.isSanitised).toBe(1)
+      expect(updated.pncStatus).toBe("Processing")
+      expect(updated.retryCount).toBe(55)
+      expect(updated.status).toBe("Completed")
+      expect(updated.triggerStatus).toBe("NoTriggers")
+    })
+
+    it.only("should add events to the events table if they are passed in", async () => {
+      const events = [mockAuditLogEvent()]
+      const result = await gateway.update(auditLog, { events })
+      expect(result).toNotBeError()
+
+      const updated = (
+        (await gateway.getOne(
+          auditLogDynamoConfig.auditLogTableName,
+          gateway.auditLogTableKey,
+          auditLog.messageId
+        )) as DocumentClient.GetItemOutput
+      ).Item!
+
+      expect(updated.events).toHaveLength(0)
+
+      const allEvents = await (await testGateway.getAll(auditLogDynamoConfig.eventsTableName)).Items
+      expect(allEvents).toHaveLength(1)
     })
   })
 })

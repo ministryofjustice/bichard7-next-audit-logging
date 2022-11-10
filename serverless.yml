@@ -86,9 +86,9 @@ resources:
       Properties:
         TableName: auditLogEventsTable
         AttributeDefinitions:
-          - AttributeName: id
+          - AttributeName: _id
             AttributeType: S
-          - AttributeName: messageId
+          - AttributeName: _messageId
             AttributeType: S
           - AttributeName: user
             AttributeType: S
@@ -103,12 +103,12 @@ resources:
           - AttributeName: category
             AttributeType: S
         KeySchema:
-          - AttributeName: id
+          - AttributeName: _id
             KeyType: HASH
         GlobalSecondaryIndexes:
           - IndexName: messageIdIndex
             KeySchema:
-              - AttributeName: messageId
+              - AttributeName: _messageId
                 KeyType: HASH
               - AttributeName: timestamp
                 KeyType: RANGE
@@ -154,7 +154,7 @@ resources:
             KeySchema:
               - AttributeName: _automationReport
                 KeyType: HASH
-              - AttributeName: messageId
+              - AttributeName: _messageId
                 KeyType: RANGE
             Projection:
               ProjectionType: "ALL"
@@ -165,7 +165,7 @@ resources:
             KeySchema:
               - AttributeName: _topExceptionsReport
                 KeyType: HASH
-              - AttributeName: messageId
+              - AttributeName: _messageId
                 KeyType: RANGE
             Projection:
               ProjectionType: "ALL"
