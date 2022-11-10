@@ -129,7 +129,9 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
       return result
     }
 
-    await this.addEvents(result as AuditLog[])
+    if (!options.excludeColumns || !options.excludeColumns.includes("events")) {
+      await this.addEvents(result as AuditLog[])
+    }
 
     return result as AuditLog[]
   }
@@ -145,6 +147,10 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
 
     if (isError(result)) {
       return result
+    }
+
+    if (!options.excludeColumns || !options.excludeColumns.includes("events")) {
+      await this.addEvents(result as AuditLog[])
     }
 
     return <AuditLog[]>result
@@ -274,7 +280,7 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
     return result.events
   }
 
-  async update(existing: AuditLog, updates: Partial<AuditLog>): PromiseResult<void> {
+  update(existing: AuditLog, updates: Partial<AuditLog>): PromiseResult<void> {
     const updateExpression = []
     const expressionAttributeNames: KeyValuePair<string, string> = {}
     const updateExpressionValues: KeyValuePair<string, unknown> = {}
@@ -282,7 +288,7 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
     const dynamoUpdates: DynamoUpdate[] = []
 
     if (updates.events) {
-      dynamoUpdates.push(...(await this.prepareStoreEvents(existing.messageId, updates.events)))
+      dynamoUpdates.push(...this.prepareStoreEvents(existing.messageId, updates.events))
     }
 
     if (updates.forceOwner) {
@@ -343,7 +349,7 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
     }
 
     if (dynamoUpdates.length === 0) {
-      return
+      return Promise.resolve()
     }
 
     return this.executeTransaction(dynamoUpdates)
@@ -404,12 +410,12 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
     }
   }
 
-  async replaceAuditLog(auditLog: AuditLog, version: number): PromiseResult<void> {
+  replaceAuditLog(auditLog: AuditLog, version: number): PromiseResult<void> {
     const replacement = { ...auditLog, version: version + 1 }
-    this.replaceOne(this.config.auditLogTableName, replacement, this.auditLogTableKey, version)
+    return this.replaceOne(this.config.auditLogTableName, replacement, this.auditLogTableKey, version)
   }
 
-  private async prepareStoreEvents(messageId: string, events: AuditLogEvent[]): Promise<DynamoUpdate[]> {
+  private prepareStoreEvents(messageId: string, events: AuditLogEvent[]): DynamoUpdate[] {
     return events.map((event) => {
       const eventToInsert = new AuditLogEvent({ ...event, _messageId: messageId })
 

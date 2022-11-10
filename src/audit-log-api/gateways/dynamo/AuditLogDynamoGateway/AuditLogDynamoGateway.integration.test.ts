@@ -263,6 +263,165 @@ describe("AuditLogDynamoGateway", () => {
       expect(actualAuditLogs[2].events[0].eventType).toBe("Main event type 0")
       expect(actualAuditLogs[2].events[1].eventType).toBe("External event type 0")
     })
+
+    it("should not merge events if the column was excluded", async () => {
+      const auditLog = new AuditLog("External correlation id 1", new Date(), "hash-1")
+      auditLog.events.push(mockAuditLogEvent({ eventType: "Type 1" }))
+      await testGateway.insertOne(auditLogDynamoConfig.auditLogTableName, auditLog, gateway.auditLogTableKey)
+      const externalEvent = { ...mockAuditLogEvent(), eventType: "Type 2", _messageId: auditLog.messageId }
+      await testGateway.insertOne(auditLogDynamoConfig.eventsTableName, externalEvent, gateway.eventsTableKey)
+
+      const result = await gateway.fetchMany({ limit: 1, excludeColumns: ["events"] })
+
+      expect(result).toNotBeError()
+
+      const actualAuditLogs = result as AuditLog[]
+      expect(actualAuditLogs).toHaveLength(1)
+      expect(actualAuditLogs[0].events).toBeUndefined()
+    })
+  })
+
+  describe("fetchRange", () => {
+    it("should return limited amount of AuditLogs", async () => {
+      await Promise.allSettled(
+        [...Array(3).keys()].map(async (i: number) => {
+          const auditLog = new AuditLog(`External correlation id ${i}`, new Date(), `hash-${i}`)
+          await gateway.create(auditLog)
+        })
+      )
+
+      const result = await gateway.fetchRange({ limit: 1, start: new Date("2020-01-01"), end: new Date("2100-01-01") })
+
+      expect(isError(result)).toBe(false)
+      expect(result).toHaveLength(1)
+    })
+
+    it("should return AuditLogs ordered by receivedDate", async () => {
+      const receivedDates = ["2021-06-01T10:11:12", "2021-06-05T10:11:12", "2021-06-03T10:11:12"]
+      const expectedReceivedDates = receivedDates
+        .map((dateString: string) => new Date(dateString).toISOString())
+        .sort()
+        .reverse()
+
+      await Promise.allSettled(
+        receivedDates.map(async (dateString: string, i: number) => {
+          const auditLog = new AuditLog(`External correlation id ${i}`, new Date(dateString), `hash-${i}`)
+          await gateway.create(auditLog)
+        })
+      )
+
+      const result = await gateway.fetchRange({ start: new Date("2020-01-01"), end: new Date("2100-01-01") })
+
+      expect(isError(result)).toBe(false)
+      expect(result).toHaveLength(3)
+
+      const actualAuditLogs = <AuditLog[]>result
+
+      expect(actualAuditLogs).toBeDefined()
+      expect(actualAuditLogs[0].receivedDate).toBe(expectedReceivedDates[0])
+      expect(actualAuditLogs[1].receivedDate).toBe(expectedReceivedDates[1])
+      expect(actualAuditLogs[2].receivedDate).toBe(expectedReceivedDates[2])
+    })
+
+    it("should filter based on start and end date", async () => {
+      const receivedDates = ["2021-06-01T10:11:12", "2021-06-05T10:11:12", "2021-06-03T10:11:12"]
+      const expectedReceivedDates = receivedDates
+        .map((dateString: string) => new Date(dateString).toISOString())
+        .sort()
+        .reverse()
+
+      await Promise.allSettled(
+        receivedDates.map(async (dateString: string, i: number) => {
+          const auditLog = new AuditLog(`External correlation id ${i}`, new Date(dateString), `hash-${i}`)
+          await gateway.create(auditLog)
+        })
+      )
+
+      const result = await gateway.fetchRange({ start: new Date("2021-06-02"), end: new Date("2021-06-04") })
+
+      expect(isError(result)).toBe(false)
+      expect(result).toHaveLength(1)
+
+      const actualAuditLogs = <AuditLog[]>result
+
+      expect(actualAuditLogs).toBeDefined()
+      expect(actualAuditLogs[0].receivedDate).toBe(expectedReceivedDates[1])
+    })
+
+    it("should merge events from both tables for one message", async () => {
+      const auditLog = new AuditLog("External correlation id 1", new Date(), "hash-1")
+      auditLog.events.push(mockAuditLogEvent({ eventType: "Type 1" }))
+      await testGateway.insertOne(auditLogDynamoConfig.auditLogTableName, auditLog, gateway.auditLogTableKey)
+      const externalEvent = { ...mockAuditLogEvent(), eventType: "Type 2", _messageId: auditLog.messageId }
+      await testGateway.insertOne(auditLogDynamoConfig.eventsTableName, externalEvent, gateway.eventsTableKey)
+
+      const result = await gateway.fetchRange({ limit: 1, start: new Date("2020-01-01"), end: new Date("2100-01-01") })
+
+      expect(result).toNotBeError()
+
+      const actualAuditLogs = result as AuditLog[]
+      expect(actualAuditLogs).toHaveLength(1)
+      expect(actualAuditLogs[0].events).toHaveLength(2)
+
+      const actualEvents = actualAuditLogs[0].events
+      expect(actualEvents[0].eventType).toBe("Type 1")
+      expect(actualEvents[1].eventType).toBe("Type 2")
+    })
+
+    it("should merge events from both tables for multiple messages", async () => {
+      await Promise.allSettled(
+        [...Array(3).keys()].map(async (i: number) => {
+          const auditLog = new AuditLog(`External correlation id ${i}`, new Date(`2021-06-01T10:11:0${i}`), `hash-${i}`)
+          auditLog.events.push(mockAuditLogEvent({ eventType: `Main event type ${i}` }))
+          await testGateway.insertOne(auditLogDynamoConfig.auditLogTableName, auditLog, gateway.auditLogTableKey)
+          const externalEvent = {
+            ...mockAuditLogEvent(),
+            eventType: `External event type ${i}`,
+            _messageId: auditLog.messageId
+          }
+          await testGateway.insertOne(auditLogDynamoConfig.eventsTableName, externalEvent, gateway.eventsTableKey)
+        })
+      )
+
+      const result = await gateway.fetchRange({ start: new Date("2020-01-01"), end: new Date("2100-01-01") })
+
+      expect(result).toNotBeError()
+
+      const actualAuditLogs = result as AuditLog[]
+      expect(actualAuditLogs).toHaveLength(3)
+      expect(actualAuditLogs[0].events).toHaveLength(2)
+      expect(actualAuditLogs[0].events[0].eventType).toBe("Main event type 2")
+      expect(actualAuditLogs[0].events[1].eventType).toBe("External event type 2")
+
+      expect(actualAuditLogs[1].events).toHaveLength(2)
+      expect(actualAuditLogs[1].events[0].eventType).toBe("Main event type 1")
+      expect(actualAuditLogs[1].events[1].eventType).toBe("External event type 1")
+
+      expect(actualAuditLogs[2].events).toHaveLength(2)
+      expect(actualAuditLogs[2].events[0].eventType).toBe("Main event type 0")
+      expect(actualAuditLogs[2].events[1].eventType).toBe("External event type 0")
+    })
+
+    it("should not merge events if the column was excluded", async () => {
+      const auditLog = new AuditLog("External correlation id 1", new Date(), "hash-1")
+      auditLog.events.push(mockAuditLogEvent({ eventType: "Type 1" }))
+      await testGateway.insertOne(auditLogDynamoConfig.auditLogTableName, auditLog, gateway.auditLogTableKey)
+      const externalEvent = { ...mockAuditLogEvent(), eventType: "Type 2", _messageId: auditLog.messageId }
+      await testGateway.insertOne(auditLogDynamoConfig.eventsTableName, externalEvent, gateway.eventsTableKey)
+
+      const result = await gateway.fetchRange({
+        limit: 1,
+        excludeColumns: ["events"],
+        start: new Date("2020-01-01"),
+        end: new Date("2100-01-01")
+      })
+
+      expect(result).toNotBeError()
+
+      const actualAuditLogs = result as AuditLog[]
+      expect(actualAuditLogs).toHaveLength(1)
+      expect(actualAuditLogs[0].events).toBeUndefined()
+    })
   })
 
   describe("fetchByExternalCorrelationId", () => {
