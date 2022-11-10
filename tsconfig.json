@@ -21,5 +21,8 @@
   },
   "compileOnSave": true,
   "include": ["src/**/*.ts"],
-  "exclude": ["src/audit-log-portal/**/*"]
+  "exclude": ["src/audit-log-portal/**/*"],
+  "ts-node": {
+    "require": ["tsconfig-paths/register"]
+  }
 }
