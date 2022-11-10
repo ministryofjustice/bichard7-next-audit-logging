@@ -34,7 +34,8 @@ export default class DynamoGateway {
     const params: DocumentClient.PutItemInput = {
       TableName: tableName,
       Item: { _: "_", ...record },
-      ConditionExpression: `attribute_not_exists(${keyName})`
+      ExpressionAttributeNames: { "#keyName": keyName },
+      ConditionExpression: `attribute_not_exists(#keyName)`
     }
 
     return this.client

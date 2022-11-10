@@ -1,15 +1,7 @@
 import { addDays } from "date-fns"
 import { compress } from "src/shared"
-import {
-  AuditLog,
-  AuditLogEvent,
-  AuditLogLookup,
-  BichardAuditLogEvent,
-  isError,
-  KeyValuePair,
-  PromiseResult,
-  ValueLookup
-} from "src/shared/types"
+import type { AuditLog, BichardAuditLogEvent, KeyValuePair, PromiseResult, ValueLookup } from "src/shared/types"
+import { AuditLogEvent, AuditLogLookup, isError } from "src/shared/types"
 import type {
   FetchByStatusOptions,
   FetchManyOptions,
@@ -28,7 +20,9 @@ const maxAttributeValueLength = 1000
 
 export default class AuditLogDynamoGateway extends DynamoGateway implements AuditLogDynamoGatewayInterface {
   readonly auditLogTableKey: string = "messageId"
+
   readonly auditLogSortKey: string = "receivedDate"
+
   readonly eventsTableKey: string = "_id"
 
   constructor(private readonly config: DynamoDbConfig) {
@@ -108,6 +102,21 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
     }
   }
 
+  private async addEvents(auditLogs: AuditLog[]): PromiseResult<void> {
+    for (const auditLog of auditLogs) {
+      const events = await new IndexSearcher<AuditLogEvent[]>(this, this.config.eventsTableName, this.eventsTableKey)
+        .useIndex("messageIdIndex")
+        .setIndexKeys("_messageId", auditLog.messageId, "timestamp")
+        .execute()
+
+      if (isError(events)) {
+        return events
+      }
+
+      auditLog.events = auditLog.events.concat(events ?? [])
+    }
+  }
+
   async fetchMany(options: FetchManyOptions = {}): PromiseResult<AuditLog[]> {
     const result = await new IndexSearcher<AuditLog[]>(this, this.config.auditLogTableName, this.auditLogTableKey)
       .useIndex(`${this.auditLogSortKey}Index`)
@@ -120,7 +129,9 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
       return result
     }
 
-    return <AuditLog[]>result
+    await this.addEvents(result as AuditLog[])
+
+    return result as AuditLog[]
   }
 
   async fetchRange(options: FetchRangeOptions): PromiseResult<AuditLog[]> {
