@@ -1,4 +1,3 @@
-jest.retryTimes(10)
 import { TestS3Gateway } from "src/shared"
 import "src/shared/testing"
 import { clearDynamoTable, setEnvironmentVariables } from "src/shared/testing"

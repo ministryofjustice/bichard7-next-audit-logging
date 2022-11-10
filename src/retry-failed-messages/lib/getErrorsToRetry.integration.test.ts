@@ -1,4 +1,3 @@
-jest.retryTimes(10)
 jest.setTimeout(10_000)
 process.env.API_URL = "dummy"
 process.env.API_KEY = "dummy"

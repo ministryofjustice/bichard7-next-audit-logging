@@ -109,6 +109,7 @@ export default class CreateAuditLogEventsUseCase {
     if (isError(transactionResult)) {
       if (isConditionalExpressionViolationError(transactionResult) || isTransactionConflictError(transactionResult)) {
         if (attempts > 1) {
+          console.log("Retrying ", attempts)
           // Wait 250 - 750ms and try again
           const delay = Math.floor(250 + Math.random() * 500)
           await new Promise((resolve) => setTimeout(resolve, delay))

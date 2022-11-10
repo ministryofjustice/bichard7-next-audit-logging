@@ -1,13 +1,9 @@
-jest.setTimeout(9999999)
-import { decompress } from "src/shared"
-import type { AuditLogLookup, KeyValuePair } from "src/shared/types"
 import { AuditLog, AuditLogEvent } from "src/shared/types"
 import { AuditLogDynamoGateway } from "../gateways/dynamo"
 import { auditLogDynamoConfig, TestDynamoGateway } from "../test"
-import CreateAuditLogEventsUseCase from "./CreateAuditLogEventsUseCase/CreateAuditLogEventsUseCase"
+import { CreateAuditLogEventsUseCase } from "./CreateAuditLogEventsUseCase"
 
 const testAuditLogDynamoGateway = new TestDynamoGateway(auditLogDynamoConfig)
-const testAuditLogLookupDynamoGateway = new TestDynamoGateway(auditLogDynamoConfig)
 const auditLogDynamoGateway = new AuditLogDynamoGateway(auditLogDynamoConfig)
 const createAuditLogEventsUseCase = new CreateAuditLogEventsUseCase(auditLogDynamoGateway)
 
@@ -34,24 +30,12 @@ const createStacktraceAuditLogEvent = (): AuditLogEvent => {
   return event
 }
 
-const getAuditLog = (messageId: string): Promise<AuditLog | null> =>
-  testAuditLogDynamoGateway.getOne(auditLogDynamoConfig.auditLogTableName, "messageId", messageId)
-
-const lookupValue = (lookupId: string): Promise<AuditLogLookup | null> =>
-  testAuditLogLookupDynamoGateway.getOne(auditLogDynamoConfig.lookupTableName, "id", lookupId)
-
-const lookupMessageId = (messageId: string): Promise<AuditLogLookup[] | null> =>
-  testAuditLogLookupDynamoGateway.getManyById(
-    auditLogDynamoConfig.lookupTableName,
-    "messageIdIndex",
-    "messageId",
-    messageId
-  )
+const getAuditLog = async (messageId: string): Promise<AuditLog | undefined> =>
+  (await auditLogDynamoGateway.fetchOne(messageId)) as AuditLog
 
 describe("CreateAuditLogEventsUseCase", () => {
   beforeEach(async () => {
     await testAuditLogDynamoGateway.deleteAll(auditLogDynamoConfig.auditLogTableName, "messageId")
-    await testAuditLogLookupDynamoGateway.deleteAll(auditLogDynamoConfig.auditLogTableName, "id")
     jest.clearAllMocks()
   })
 
@@ -74,43 +58,6 @@ describe("CreateAuditLogEventsUseCase", () => {
     expect(actualEvent?.timestamp).toBe(event.timestamp)
     expect(actualEvent?.eventType).toBe(event.eventType)
     expect(actualEvent?.eventSource).toBe(event.eventSource)
-  })
-
-  it("should store long attribute values in lookup table", async () => {
-    const auditLog = createAuditLog()
-    await auditLogDynamoGateway.create(auditLog)
-
-    const event = createAuditLogEvent()
-    event.addAttribute("attribute1", "test".repeat(500))
-    const result = await createAuditLogEventsUseCase.create(auditLog.messageId, [event])
-
-    expect(result.resultType).toBe("success")
-
-    const actualAuditLog = await getAuditLog(auditLog.messageId)
-    expect(actualAuditLog).toBeDefined()
-    expect(actualAuditLog?.events).toBeDefined()
-    expect(actualAuditLog?.events).toHaveLength(1)
-
-    const actualEvent = actualAuditLog!.events[0]
-    expect(actualEvent.category).toBe(event.category)
-    expect(actualEvent.timestamp).toBe(event.timestamp)
-    expect(actualEvent.eventType).toBe(event.eventType)
-    expect(actualEvent.eventSource).toBe(event.eventSource)
-    expect(actualEvent.attributes).toBeDefined()
-
-    const { attribute1 } = actualEvent.attributes
-    expect(attribute1).toBeDefined()
-    expect(typeof attribute1).toBe("object")
-
-    const { valueLookup } = attribute1 as KeyValuePair<string, string>
-    expect(valueLookup).toBeDefined()
-
-    const lookupResult = await lookupValue(valueLookup)
-    expect(lookupResult).toBeDefined()
-
-    const { value: attributeValue } = lookupResult as AuditLogLookup
-    const decompressedAttributeValue = await decompress(attributeValue)
-    expect(decompressedAttributeValue).toBe(event.attributes.attribute1)
   })
 
   it("should return not found result when audit log does not exist", async () => {
@@ -244,6 +191,7 @@ describe("CreateAuditLogEventsUseCase", () => {
     const event1 = createAuditLogEvent()
     const event2 = createAuditLogEvent()
     const result2 = await createAuditLogEventsUseCase.create(auditLog.messageId, [event1, event2])
+    console.log(result2)
 
     expect(result2.resultType).toBe("success")
 
@@ -271,9 +219,6 @@ describe("CreateAuditLogEventsUseCase", () => {
     const actualAuditLog = await getAuditLog(auditLog.messageId)
     expect(actualAuditLog).toBeDefined()
     expect(actualAuditLog?.events).toHaveLength(0)
-
-    const lookupResult = await lookupMessageId(auditLog.messageId)
-    expect(lookupResult).toBeNull()
   })
 
   it("should give an error when attempting to create more events than is supported by dynamodb transactions", async () => {

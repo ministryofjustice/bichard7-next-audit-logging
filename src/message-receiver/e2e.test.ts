@@ -1,4 +1,3 @@
-jest.retryTimes(10)
 import { createS3Config, encodeBase64, TestS3Gateway } from "src/shared"
 import "src/shared/testing"
 import { setEnvironmentVariables } from "src/shared/testing"
@@ -133,9 +132,10 @@ describe("Message receiver e2e test", () => {
 
     const s3Objects = await s3Gateway.getAll()
     const rawMessages = await Promise.all(s3Objects!.map((s3Object) => s3Gateway.getItem(s3Object.Key!)))
-    const actualMessages = rawMessages.map((rawMessage) => JSON.parse(rawMessage as string)).sort()
+    const actualMessageFields = rawMessages.map((rawMessage) => JSON.parse(rawMessage as string).incomingMessage)
 
-    expect(actualMessages).toEqual(expectedMessages)
+    expect(actualMessageFields).toContain(expectedMessages[0].incomingMessage)
+    expect(actualMessageFields).toContain(expectedMessages[1].incomingMessage)
 
     process.env.MESSAGE_FORMAT = originalMessageFormat
   })

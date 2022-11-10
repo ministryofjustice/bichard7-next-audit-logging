@@ -1,4 +1,3 @@
-jest.retryTimes(10)
 import { TestS3Gateway } from "src/shared"
 import { auditLogEventsS3Config } from "src/shared/testing"
 import type { EventMessage } from "src/shared/types"

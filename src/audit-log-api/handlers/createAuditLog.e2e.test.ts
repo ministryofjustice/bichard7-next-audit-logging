@@ -1,4 +1,3 @@
-jest.retryTimes(10)
 import axios from "axios"
 import { HttpStatusCode } from "src/shared"
 import { mockAuditLog } from "src/shared/testing"

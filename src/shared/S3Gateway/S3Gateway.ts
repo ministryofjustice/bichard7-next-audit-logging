@@ -45,12 +45,16 @@ export default class S3Gateway implements S3GatewayInterface {
       Bucket: this.getBucketName(),
       Key: key
     }
-
-    return this.s3
-      .getObject(params)
-      .promise()
-      .then((response) => parseGetObjectResponse(response, key))
-      .catch((error) => <Error>error)
+    try {
+      return this.s3
+        .getObject(params)
+        .promise()
+        .then((response) => parseGetObjectResponse(response, key))
+        .catch((error) => <Error>error)
+    } catch (e: unknown) {
+      console.error(e)
+    }
+    return Promise.resolve("foo")
   }
 
   doesItemExist(key: string): PromiseResult<boolean> {

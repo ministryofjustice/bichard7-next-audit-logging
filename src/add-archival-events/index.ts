@@ -17,13 +17,13 @@ export default async function addArchivalEvents(): Promise<void> {
     config.archiveGroupLimit
   )
   const auditLogApi = new AuditLogApiClient(config.apiUrl, config.apiKey)
-  const addArchialEvents = new AddArchivalEvents(auditLogApi, db)
+  const addEvents = new AddArchivalEvents(auditLogApi, db)
 
   await db.connect()
 
   try {
     await db.markUnmarkedGroupsCompleted()
-    await addArchialEvents.addBichardRecordsToAuditLog()
+    await addEvents.addBichardRecordsToAuditLog()
   } catch (error) {
     logger.error(error as Error)
   } finally {

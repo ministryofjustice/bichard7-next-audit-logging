@@ -9,7 +9,7 @@ import {
   mockAuditLog,
   mockAuditLogEvent
 } from "src/shared/testing"
-import type { AuditLog, AuditLogEvent } from "src/shared/types"
+import type { AuditLog } from "src/shared/types"
 import { EventCode, isError } from "src/shared/types"
 import { auditLogDynamoConfig, TestDynamoGateway } from "../test"
 
@@ -98,6 +98,7 @@ describe("Getting Audit Logs", () => {
   })
 
   it("should get message and lookup attribute values", async () => {
+    //TODO: manually put the records in the lookup table
     const auditLog = await createMockError()
     if (isError(auditLog)) {
       throw new Error("Unexpected error")
@@ -117,30 +118,6 @@ describe("Getting Audit Logs", () => {
     const { attributes } = actualMessage.events[0]
     expect(attributes["Attribute 1"]).toBe(auditLog.events[0].attributes["Attribute 1"])
     expect(attributes["Attribute 2"]).toBe(auditLog.events[0].attributes["Attribute 2"])
-  })
-
-  it("should not look up attribute values when largeObjects set to false", async () => {
-    const auditLog = await createMockError()
-    if (isError(auditLog)) {
-      throw new Error("Unexpected error")
-    }
-
-    const result = await axios.get<AuditLog[]>(
-      `http://localhost:3010/messages?externalCorrelationId=${auditLog.externalCorrelationId}&largeObjects=false`
-    )
-    expect(result.status).toEqual(HttpStatusCode.ok)
-
-    expect(Array.isArray(result.data)).toBeTruthy()
-    const actualMessage = result.data[0]
-
-    expect(actualMessage.messageId).toEqual(auditLog.messageId)
-    expect(actualMessage.events).toHaveLength(1)
-
-    const { attributes } = actualMessage.events[0]
-    const { eventXml } = actualMessage.events[0] as AuditLogEvent
-    expect(attributes["Attribute 1"]).toHaveProperty("valueLookup")
-    expect(attributes["Attribute 2"]).toBe(auditLog.events[0].attributes["Attribute 2"])
-    expect(eventXml).toHaveProperty("valueLookup")
   })
 
   describe("fetching unsanitised messages", () => {
@@ -470,7 +447,6 @@ describe("Getting Audit Logs", () => {
 
       expect(result.data).toHaveLength(1)
 
-      console.log(JSON.stringify(result.data, null, 2))
       expect(result.data[0].events[0].eventCode).toBe("dummy.event")
       expect(result.data[0].events[0].user).toBe("dummy.user")
     })

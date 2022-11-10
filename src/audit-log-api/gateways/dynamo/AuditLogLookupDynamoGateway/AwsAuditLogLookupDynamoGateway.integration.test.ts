@@ -1,4 +1,3 @@
-jest.retryTimes(10)
 import { decompress } from "src/shared"
 import "src/shared/testing"
 import { AuditLogLookup, isError } from "src/shared/types"

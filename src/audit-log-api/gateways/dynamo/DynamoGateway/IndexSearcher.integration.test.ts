@@ -1,4 +1,3 @@
-jest.retryTimes(10)
 import { isError } from "src/shared/types"
 import { auditLogDynamoConfig } from "../../../test"
 import TestDynamoGateway from "../../../test/TestDynamoGateway"

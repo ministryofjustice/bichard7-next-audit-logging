@@ -41,6 +41,8 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
       "receivedDate",
       "s3Path",
       "#status",
+      "pncStatus",
+      "triggerStatus",
       "systemId",
       "#dummyKey"
     ]
@@ -107,13 +109,20 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
       const events = await new IndexSearcher<AuditLogEvent[]>(this, this.config.eventsTableName, this.eventsTableKey)
         .useIndex("messageIdIndex")
         .setIndexKeys("_messageId", auditLog.messageId, "timestamp")
+        .setProjection({
+          expression:
+            "attributes,category,eventSource,eventSourceQueueName,eventType,eventXml,#timestamp,eventCode,#user",
+          attributeNames: { "#timestamp": "timestamp", "#user": "user" }
+        })
         .execute()
 
       if (isError(events)) {
         return events
       }
 
-      auditLog.events = auditLog.events.concat(events ?? [])
+      auditLog.events = (auditLog.events ?? [])
+        .concat(events ?? [])
+        .sort((a, b) => (a.timestamp > b.timestamp ? 1 : b.timestamp > a.timestamp ? -1 : 0))
     }
   }
 
@@ -158,7 +167,7 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
 
   async fetchByExternalCorrelationId(
     externalCorrelationId: string,
-    options?: ProjectionOptions
+    options: ProjectionOptions = {}
   ): PromiseResult<AuditLog | null> {
     const fetchByIndexOptions: FetchByIndexOptions = {
       indexName: "externalCorrelationIdIndex",
@@ -179,6 +188,10 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
     }
 
     const items = <AuditLog[]>result?.Items
+    if (!options.excludeColumns || !options.excludeColumns.includes("events")) {
+      await this.addEvents(items as AuditLog[])
+    }
+
     return items[0]
   }
 
@@ -201,10 +214,12 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
     }
 
     const items = <AuditLog[]>result?.Items
+    await this.addEvents(items as AuditLog[])
+
     return items[0]
   }
 
-  async fetchByStatus(status: string, options?: FetchByStatusOptions): PromiseResult<AuditLog[]> {
+  async fetchByStatus(status: string, options: FetchByStatusOptions = {}): PromiseResult<AuditLog[]> {
     const result = await new IndexSearcher<AuditLog[]>(this, this.config.auditLogTableName, this.auditLogTableKey)
       .useIndex("statusIndex")
       .setIndexKeys("status", status, "receivedDate")
@@ -216,10 +231,14 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
       return result
     }
 
+    if (!options.excludeColumns || !options.excludeColumns.includes("events")) {
+      await this.addEvents(result as AuditLog[])
+    }
+
     return <AuditLog[]>result
   }
 
-  async fetchUnsanitised(options?: FetchUnsanitisedOptions): PromiseResult<AuditLog[]> {
+  async fetchUnsanitised(options: FetchUnsanitisedOptions = {}): PromiseResult<AuditLog[]> {
     const result = await new IndexSearcher<AuditLog[]>(this, this.config.auditLogTableName, this.auditLogTableKey)
       .useIndex("isSanitisedIndex")
       .setIndexKeys("isSanitised", 0, "nextSanitiseCheck")
@@ -232,10 +251,14 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
       return result
     }
 
+    if (!options.excludeColumns || !options.excludeColumns.includes("events")) {
+      await this.addEvents(result as AuditLog[])
+    }
+
     return <AuditLog[]>result
   }
 
-  async fetchOne(messageId: string, options?: ProjectionOptions): PromiseResult<AuditLog | undefined> {
+  async fetchOne(messageId: string, options: ProjectionOptions = {}): PromiseResult<AuditLog | undefined> {
     const result = await this.getOne(
       this.config.auditLogTableName,
       this.auditLogTableKey,
@@ -247,7 +270,12 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
       return result
     }
 
-    return result?.Item as AuditLog
+    const item = result?.Item as AuditLog
+    if (item && (!options.excludeColumns || !options.excludeColumns.includes("events"))) {
+      await this.addEvents([item])
+    }
+
+    return item
   }
 
   async fetchVersion(messageId: string): PromiseResult<number | null> {

@@ -1,4 +1,3 @@
-jest.retryTimes(10)
 import { AuditLog } from "src/shared/types"
 import { AuditLogDynamoGateway } from "../gateways/dynamo"
 import { auditLogDynamoConfig, TestDynamoGateway } from "../test"

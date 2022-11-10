@@ -21,9 +21,9 @@ export default class AuditLogEvent {
 
   public readonly timestamp: string
 
-  public _automationReport?: boolean
+  public _automationReport?: number
 
-  public _topExceptionsReport?: boolean
+  public _topExceptionsReport?: number
 
   public eventCode?: string
 
