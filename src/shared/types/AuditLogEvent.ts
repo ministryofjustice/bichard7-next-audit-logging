@@ -1,11 +1,29 @@
 import { v4 as uuid } from "uuid"
 import type AuditLogEventOptions from "./AuditLogEventOptions"
 import type EventCategory from "./EventCategory"
-import type KeyValuePair from "./KeyValuePair"
+
+export type AuditLogEventAttributeLookupValue = { valueLookup: string }
+
+export type AuditLogEventAttributeCompressedValue = { _compressedValue: string }
+
+export type AuditLogEventDecompressedAttributeValue = string | number | boolean
+
+export type AuditLogEventAttributes = {
+  [key: string]: AuditLogEventAttributeValue
+}
+
+export type AuditLogEventDecompressedAttributes = {
+  [key: string]: AuditLogEventDecompressedAttributeValue
+}
+
+export type AuditLogEventAttributeValue =
+  | AuditLogEventDecompressedAttributeValue
+  | AuditLogEventAttributeCompressedValue
+  | AuditLogEventAttributeLookupValue
 
 // TODO: Split this into a type an an implementation
 export default class AuditLogEvent {
-  public readonly attributes: KeyValuePair<string, unknown> = {}
+  public attributes: AuditLogEventAttributes = {}
 
   public readonly category: EventCategory
 
@@ -47,7 +65,7 @@ export default class AuditLogEvent {
     this.user = options.user
   }
 
-  addAttribute(name: string, value: unknown): void {
+  addAttribute(name: string, value: AuditLogEventAttributeValue): void {
     this.attributes[name] = value
   }
 }

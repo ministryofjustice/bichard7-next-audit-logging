@@ -1,6 +1,7 @@
 import type { DocumentClient } from "aws-sdk/clients/dynamodb"
 import { addDays } from "date-fns"
 import { auditLogDynamoConfig } from "src/audit-log-api/test"
+import { compress, decompress } from "src/shared"
 import "src/shared/testing"
 import { createMockAuditLog, mockAuditLogEvent } from "src/shared/testing"
 import type { AuditLogEventOptions, KeyValuePair } from "src/shared/types"
@@ -1001,6 +1002,64 @@ describe("AuditLogDynamoGateway", () => {
 
       const allEvents = await (await testGateway.getAll(auditLogDynamoConfig.eventsTableName)).Items
       expect(allEvents).toHaveLength(1)
+    })
+  })
+
+  describe("Compress and decompress attribute value", () => {
+    let auditLog: AuditLog
+
+    beforeEach(async () => {
+      auditLog = (await createMockAuditLog()) as AuditLog
+    })
+
+    it("should compress attribute values", async () => {
+      const events = [mockAuditLogEvent()]
+      const result = await gateway.update(auditLog, { events })
+      expect(result).toNotBeError()
+
+      const updated = (
+        (await gateway.getOne(
+          auditLogDynamoConfig.auditLogTableName,
+          gateway.auditLogTableKey,
+          auditLog.messageId
+        )) as DocumentClient.GetItemOutput
+      ).Item!
+
+      expect(updated.events).toHaveLength(0)
+
+      const allEvents = (await (
+        await testGateway.getAll(auditLogDynamoConfig.eventsTableName)
+      ).Items) as AuditLogEvent[]
+
+      expect(allEvents).toHaveLength(1)
+      const attribute1 = allEvents[0].attributes["Attribute 1"]
+      expect(attribute1).toHaveProperty("_compressedValue")
+
+      const decompressedValue = (await decompress(
+        (attribute1 as { _compressedValue: string })._compressedValue
+      )) as string
+      expect(decompressedValue).toBe("Attribute 1 data".repeat(500))
+    })
+
+    it("should decompress attribute values", async () => {
+      await testGateway.insertOne(auditLogDynamoConfig.auditLogTableName, auditLog, gateway.auditLogTableKey)
+      const externalEvent = { ...mockAuditLogEvent(), eventType: "Type 1", _messageId: auditLog.messageId }
+      externalEvent.attributes["Attribute 1"] = {
+        _compressedValue: (await compress(externalEvent.attributes["Attribute 1"] as string)) as string
+      }
+      await testGateway.insertOne(auditLogDynamoConfig.eventsTableName, externalEvent, gateway.eventsTableKey)
+
+      const result = await gateway.fetchMany({ limit: 1 })
+
+      expect(result).toNotBeError()
+
+      const actualAuditLogs = result as AuditLog[]
+      expect(actualAuditLogs).toHaveLength(1)
+      expect(actualAuditLogs[0].events).toHaveLength(1)
+
+      const actualEvents = actualAuditLogs[0].events
+      expect(actualEvents[0].eventType).toBe("Type 1")
+      expect(actualEvents[0].attributes).toHaveProperty("Attribute 1", "Attribute 1 data".repeat(500))
     })
   })
 })

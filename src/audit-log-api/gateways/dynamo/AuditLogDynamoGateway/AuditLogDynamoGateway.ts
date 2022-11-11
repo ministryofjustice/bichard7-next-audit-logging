@@ -1,7 +1,8 @@
 import { addDays } from "date-fns"
-import { compress } from "src/shared"
+import { compress, decompress } from "src/shared"
 import type { AuditLog, BichardAuditLogEvent, KeyValuePair, PromiseResult, ValueLookup } from "src/shared/types"
 import { AuditLogEvent, AuditLogLookup, isError } from "src/shared/types"
+import type { AuditLogEventAttributes } from "src/shared/types/AuditLogEvent"
 import type {
   EventsFilterOptions,
   FetchByStatusOptions,
@@ -105,7 +106,10 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
     }
   }
 
-  private async addEvents(auditLogs: AuditLog[], options: EventsFilterOptions = {}): PromiseResult<void> {
+  private async mergeEventsFromEventsTable(
+    auditLogs: AuditLog[],
+    options: EventsFilterOptions = {}
+  ): PromiseResult<void> {
     for (const auditLog of auditLogs) {
       const indexSearcher = new IndexSearcher<AuditLogEvent[]>(
         this,
@@ -132,6 +136,15 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
         return events
       }
 
+      for (const event of events ?? []) {
+        const attributes = await this.decompressEventAttributes(event.attributes)
+        if (isError(attributes)) {
+          return attributes
+        }
+
+        event.attributes = attributes
+      }
+
       auditLog.events = (auditLog.events ?? [])
         .concat(events ?? [])
         .sort((a, b) => (a.timestamp > b.timestamp ? 1 : b.timestamp > a.timestamp ? -1 : 0))
@@ -151,7 +164,7 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
     }
 
     if (!options.excludeColumns || !options.excludeColumns.includes("events")) {
-      await this.addEvents(result as AuditLog[])
+      await this.mergeEventsFromEventsTable(result as AuditLog[])
     }
 
     return result as AuditLog[]
@@ -171,7 +184,7 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
     }
 
     if (!options.excludeColumns || !options.excludeColumns.includes("events")) {
-      await this.addEvents(result as AuditLog[], { eventsFilter: options.eventsFilter })
+      await this.mergeEventsFromEventsTable(result as AuditLog[], { eventsFilter: options.eventsFilter })
     }
 
     return <AuditLog[]>result
@@ -201,7 +214,7 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
 
     const items = <AuditLog[]>result?.Items
     if (!options.excludeColumns || !options.excludeColumns.includes("events")) {
-      await this.addEvents(items as AuditLog[])
+      await this.mergeEventsFromEventsTable(items as AuditLog[])
     }
 
     return items[0]
@@ -226,7 +239,7 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
     }
 
     const items = <AuditLog[]>result?.Items
-    await this.addEvents(items as AuditLog[])
+    await this.mergeEventsFromEventsTable(items as AuditLog[])
 
     return items[0]
   }
@@ -244,7 +257,7 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
     }
 
     if (!options.excludeColumns || !options.excludeColumns.includes("events")) {
-      await this.addEvents(result as AuditLog[])
+      await this.mergeEventsFromEventsTable(result as AuditLog[])
     }
 
     return <AuditLog[]>result
@@ -264,7 +277,7 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
     }
 
     if (!options.excludeColumns || !options.excludeColumns.includes("events")) {
-      await this.addEvents(result as AuditLog[])
+      await this.mergeEventsFromEventsTable(result as AuditLog[])
     }
 
     return <AuditLog[]>result
@@ -284,7 +297,7 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
 
     const item = result?.Item as AuditLog
     if (item && (!options.excludeColumns || !options.excludeColumns.includes("events"))) {
-      await this.addEvents([item])
+      await this.mergeEventsFromEventsTable([item])
     }
 
     return item
@@ -320,7 +333,7 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
     return result.events
   }
 
-  update(existing: AuditLog, updates: Partial<AuditLog>): PromiseResult<void> {
+  async update(existing: AuditLog, updates: Partial<AuditLog>): PromiseResult<void> {
     const updateExpression = []
     const expressionAttributeNames: KeyValuePair<string, string> = {}
     const updateExpressionValues: KeyValuePair<string, unknown> = {}
@@ -328,7 +341,12 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
     const dynamoUpdates: DynamoUpdate[] = []
 
     if (updates.events) {
-      dynamoUpdates.push(...this.prepareStoreEvents(existing.messageId, updates.events))
+      const events = await this.prepareStoreEvents(existing.messageId, updates.events)
+      if (isError(events)) {
+        return events
+      }
+
+      dynamoUpdates.push(...events)
     }
 
     if (updates.forceOwner) {
@@ -455,18 +473,66 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
     return this.replaceOne(this.config.auditLogTableName, replacement, this.auditLogTableKey, version)
   }
 
-  private prepareStoreEvents(messageId: string, events: AuditLogEvent[]): DynamoUpdate[] {
-    return events.map((event) => {
-      const eventToInsert = new AuditLogEvent({ ...event, _messageId: messageId })
+  private async prepareStoreEvents(messageId: string, events: AuditLogEvent[]): PromiseResult<DynamoUpdate[]> {
+    const dynamoUpdates: DynamoUpdate[] = []
+    for (const event of events) {
+      const attributes = await this.compressEventAttributes(event.attributes)
+      if (isError(attributes)) {
+        return attributes
+      }
 
-      return {
+      const eventToInsert = new AuditLogEvent({ ...event, _messageId: messageId, attributes })
+      dynamoUpdates.push({
         Put: {
           Item: { ...eventToInsert, _: "_" },
           TableName: this.config.eventsTableName,
           ExpressionAttributeNames: { "#id": this.eventsTableKey },
           ConditionExpression: `attribute_not_exists(#id)`
         }
+      })
+    }
+
+    return dynamoUpdates
+  }
+
+  private async compressEventAttributes(attributes: AuditLogEventAttributes): PromiseResult<AuditLogEventAttributes> {
+    const result: AuditLogEventAttributes = {}
+
+    const attributeKeys = Object.keys(attributes)
+
+    for (const attributeKey of attributeKeys) {
+      const attributeValue = attributes[attributeKey]
+      if (attributeValue && typeof attributeValue === "string" && attributeValue.length > maxAttributeValueLength) {
+        const compressedValue = await compress(attributeValue)
+        if (isError(compressedValue)) {
+          return compressedValue
+        }
+
+        result[attributeKey] = { _compressedValue: compressedValue }
+      } else {
+        result[attributeKey] = attributeValue
       }
-    })
+    }
+    return result
+  }
+
+  private async decompressEventAttributes(attributes: AuditLogEventAttributes): PromiseResult<AuditLogEventAttributes> {
+    const result: AuditLogEventAttributes = {}
+
+    for (const [attributeKey, attributeValue] of Object.entries(attributes)) {
+      if (attributeValue && typeof attributeValue === "object" && "_compressedValue" in attributeValue) {
+        const compressedValue = (attributeValue as { _compressedValue: string })._compressedValue
+        const decompressedValue = await decompress(compressedValue)
+        if (isError(decompressedValue)) {
+          return decompressedValue
+        }
+
+        result[attributeKey] = decompressedValue
+      } else {
+        result[attributeKey] = attributeValue
+      }
+    }
+
+    return result
   }
 }

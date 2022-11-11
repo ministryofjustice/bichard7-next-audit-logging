@@ -1,8 +1,8 @@
 import type { AuditLogEvent, CreateAuditLogEventsResult } from "src/shared/types"
 import { isError } from "src/shared/types"
 import { NotFoundError } from "src/shared/types/ApplicationError"
+import type { AuditLogDynamoGatewayInterface } from "../../gateways/dynamo"
 import {
-  AuditLogDynamoGatewayInterface,
   isConditionalExpressionViolationError,
   isTooManyEventsError,
   isTransactionConflictError

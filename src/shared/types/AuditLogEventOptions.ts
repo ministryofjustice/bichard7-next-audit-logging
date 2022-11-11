@@ -1,12 +1,12 @@
+import type { AuditLogEventAttributes } from "./AuditLogEvent"
 import type EventCategory from "./EventCategory"
-import type KeyValuePair from "./KeyValuePair"
 
 export default interface AuditLogEventOptions {
   _automationReport?: number
   _id?: string
   _messageId?: string
   _topExceptionsReport?: number
-  attributes?: KeyValuePair<string, unknown>
+  attributes?: AuditLogEventAttributes
   category: EventCategory
   eventCode?: string
   eventSource: string
