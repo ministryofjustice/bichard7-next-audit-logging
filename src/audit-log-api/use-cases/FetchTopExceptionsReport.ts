@@ -18,7 +18,8 @@ export default class FetchTopExceptionsReport implements MessageFetcher {
     const records = await this.gateway.fetchRange({
       ...this.options,
       includeColumns: ["automationReport"],
-      lastMessage
+      lastMessage,
+      eventsFilter: "topExceptionsReport"
     })
 
     if (isError(records)) {

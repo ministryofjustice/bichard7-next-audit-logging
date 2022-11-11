@@ -3,6 +3,7 @@ import { compress } from "src/shared"
 import type { AuditLog, BichardAuditLogEvent, KeyValuePair, PromiseResult, ValueLookup } from "src/shared/types"
 import { AuditLogEvent, AuditLogLookup, isError } from "src/shared/types"
 import type {
+  EventsFilterOptions,
   FetchByStatusOptions,
   FetchManyOptions,
   FetchRangeOptions,
@@ -104,17 +105,28 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
     }
   }
 
-  private async addEvents(auditLogs: AuditLog[]): PromiseResult<void> {
+  private async addEvents(auditLogs: AuditLog[], options: EventsFilterOptions = {}): PromiseResult<void> {
     for (const auditLog of auditLogs) {
-      const events = await new IndexSearcher<AuditLogEvent[]>(this, this.config.eventsTableName, this.eventsTableKey)
-        .useIndex("messageIdIndex")
-        .setIndexKeys("_messageId", auditLog.messageId, "timestamp")
-        .setProjection({
-          expression:
-            "attributes,category,eventSource,eventSourceQueueName,eventType,eventXml,#timestamp,eventCode,#user",
-          attributeNames: { "#timestamp": "timestamp", "#user": "user" }
-        })
-        .execute()
+      const indexSearcher = new IndexSearcher<AuditLogEvent[]>(
+        this,
+        this.config.eventsTableName,
+        this.eventsTableKey
+      ).setProjection({
+        expression:
+          "attributes,category,eventSource,eventSourceQueueName,eventType,eventXml,#timestamp,eventCode,#user",
+        attributeNames: { "#timestamp": "timestamp", "#user": "user" }
+      })
+
+      if (options.eventsFilter) {
+        indexSearcher
+          .useIndex(`${options.eventsFilter}Index`)
+          .setIndexKeys("_messageId", auditLog.messageId, `_${options.eventsFilter}`)
+          .setRangeKey(1, KeyComparison.Equals)
+      } else {
+        indexSearcher.useIndex("messageIdIndex").setIndexKeys("_messageId", auditLog.messageId, "timestamp")
+      }
+
+      const events = await indexSearcher.execute()
 
       if (isError(events)) {
         return events
@@ -159,7 +171,7 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
     }
 
     if (!options.excludeColumns || !options.excludeColumns.includes("events")) {
-      await this.addEvents(result as AuditLog[])
+      await this.addEvents(result as AuditLog[], { eventsFilter: options.eventsFilter })
     }
 
     return <AuditLog[]>result

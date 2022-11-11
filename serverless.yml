@@ -139,7 +139,7 @@ resources:
             ProvisionedThroughput:
               ReadCapacityUnits: 1
               WriteCapacityUnits: 1
-          - IndexName: category
+          - IndexName: categoryIndex
             KeySchema:
               - AttributeName: category
                 KeyType: HASH
@@ -150,22 +150,22 @@ resources:
             ProvisionedThroughput:
               ReadCapacityUnits: 1
               WriteCapacityUnits: 1
-          - IndexName: automationReport
+          - IndexName: automationReportIndex
             KeySchema:
-              - AttributeName: _automationReport
-                KeyType: HASH
               - AttributeName: _messageId
+                KeyType: HASH
+              - AttributeName: _automationReport
                 KeyType: RANGE
             Projection:
               ProjectionType: "ALL"
             ProvisionedThroughput:
               ReadCapacityUnits: 1
               WriteCapacityUnits: 1
-          - IndexName: topExceptionsIndex
+          - IndexName: topExceptionsReportIndex
             KeySchema:
-              - AttributeName: _topExceptionsReport
-                KeyType: HASH
               - AttributeName: _messageId
+                KeyType: HASH
+              - AttributeName: _topExceptionsReport
                 KeyType: RANGE
             Projection:
               ProjectionType: "ALL"

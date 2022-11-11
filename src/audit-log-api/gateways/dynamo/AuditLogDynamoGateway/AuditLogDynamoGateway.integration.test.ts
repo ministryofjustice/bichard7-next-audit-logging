@@ -458,6 +458,39 @@ describe("AuditLogDynamoGateway", () => {
       expect(actualAuditLogs).toHaveLength(1)
       expect(actualAuditLogs[0].events).toBeUndefined()
     })
+
+    it("should allow events to be filtered for the automation report", async () => {
+      const auditLog = new AuditLog("External correlation id 1", new Date(), "hash-1")
+      await testGateway.insertOne(auditLogDynamoConfig.auditLogTableName, auditLog, gateway.auditLogTableKey)
+      const externalEvent1 = {
+        ...mockAuditLogEvent(),
+        eventType: "Type 1",
+        _messageId: auditLog.messageId,
+        _automationReport: 0
+      }
+      await testGateway.insertOne(auditLogDynamoConfig.eventsTableName, externalEvent1, gateway.eventsTableKey)
+      const externalEvent2 = {
+        ...mockAuditLogEvent(),
+        eventType: "Type 2",
+        _messageId: auditLog.messageId,
+        _automationReport: 1
+      }
+      await testGateway.insertOne(auditLogDynamoConfig.eventsTableName, externalEvent2, gateway.eventsTableKey)
+
+      const result = await gateway.fetchRange({
+        limit: 1,
+        start: new Date("2020-01-01"),
+        end: new Date("2100-01-01"),
+        eventsFilter: "automationReport"
+      })
+
+      expect(result).toNotBeError()
+
+      const actualAuditLogs = result as AuditLog[]
+      expect(actualAuditLogs).toHaveLength(1)
+      expect(actualAuditLogs[0].events).toHaveLength(1)
+      expect(actualAuditLogs[0].events[0].eventType).toBe("Type 2")
+    })
   })
 
   describe("fetchByExternalCorrelationId", () => {

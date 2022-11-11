@@ -16,8 +16,12 @@ export type RangeQueryOptions = {
   end: Date
 }
 
+export type EventsFilterOptions = {
+  eventsFilter?: "automationReport" | "topExceptionsReport"
+}
+
 export type FetchManyOptions = PaginationOptions & ProjectionOptions
 export type FetchUnsanitisedOptions = PaginationOptions & ProjectionOptions
 export type FetchByStatusOptions = PaginationOptions & ProjectionOptions
-export type FetchRangeOptions = PaginationOptions & ProjectionOptions & RangeQueryOptions
+export type FetchRangeOptions = PaginationOptions & ProjectionOptions & RangeQueryOptions & EventsFilterOptions
 export type FetchReportOptions = PaginationOptions & RangeQueryOptions

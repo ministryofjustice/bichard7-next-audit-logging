@@ -1,5 +1,6 @@
 enum KeyComparison {
-  LessThanOrEqual
+  LessThanOrEqual,
+  Equals
 }
 
 export default KeyComparison

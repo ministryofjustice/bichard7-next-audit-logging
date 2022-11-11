@@ -18,6 +18,7 @@ const testDynamoGateway = new TestDynamoGateway(auditLogDynamoConfig)
 describe("Getting Audit Logs", () => {
   beforeEach(async () => {
     await testDynamoGateway.deleteAll(auditLogDynamoConfig.auditLogTableName, "messageId")
+    await testDynamoGateway.deleteAll(auditLogDynamoConfig.eventsTableName, "_id")
   })
 
   it("should return the audit log records", async () => {
@@ -242,6 +243,7 @@ describe("Getting Audit Logs", () => {
       }
 
       const eventInclude = await createMockAuditLogEvent(auditLog.messageId, {
+        eventCode: EventCode.ExceptionsGenerated,
         attributes: { "Message Type": "SPIResults", "Error 1 Details": "HO100300" }
       })
       const eventExclude = await createMockAuditLogEvent(auditLog.messageId)

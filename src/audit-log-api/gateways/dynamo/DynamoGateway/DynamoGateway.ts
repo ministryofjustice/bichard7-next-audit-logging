@@ -166,6 +166,11 @@ export default class DynamoGateway {
         queryOptions.ExpressionAttributeNames!["#rangeKeyName"] = options.rangeKeyName
         queryOptions.ExpressionAttributeValues![":rangeKeyValue"] = options.rangeKeyValue
       }
+      if (options.rangeKeyComparison == KeyComparison.Equals) {
+        queryOptions.KeyConditionExpression += " AND #rangeKeyName = :rangeKeyValue"
+        queryOptions.ExpressionAttributeNames!["#rangeKeyName"] = options.rangeKeyName
+        queryOptions.ExpressionAttributeValues![":rangeKeyValue"] = options.rangeKeyValue
+      }
     }
 
     // set query options for between range key
