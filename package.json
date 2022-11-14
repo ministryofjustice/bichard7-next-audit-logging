@@ -58,7 +58,7 @@
     "test:unit:watch": "jest --watchAll --testPathIgnorePatterns='integration' 'e2e' 'src/audit-log-portal/*'",
     "test:unit": "jest --testPathIgnorePatterns='integration' 'e2e' 'src/audit-log-portal/*'",
     "test": "jest --runInBand  --testPathIgnorePatterns='src/audit-log-portal/*' --namePattern=",
-    "update-deps": "ncu -u --deep -x react -x react-dom -x @material-ui/core -x @testing-library/react && make install",
+    "update-deps": "ncu -u && npm install",
     "wait-for-api": "wait-on tcp:3010"
   },
   "lint-staged": {
