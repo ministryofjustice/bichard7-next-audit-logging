@@ -191,7 +191,6 @@ describe("CreateAuditLogEventsUseCase", () => {
     const event1 = createAuditLogEvent()
     const event2 = createAuditLogEvent()
     const result2 = await createAuditLogEventsUseCase.create(auditLog.messageId, [event1, event2])
-    console.log(result2)
 
     expect(result2.resultType).toBe("success")
 

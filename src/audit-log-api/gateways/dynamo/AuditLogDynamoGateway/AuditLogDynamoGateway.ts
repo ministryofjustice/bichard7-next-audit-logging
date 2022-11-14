@@ -1,6 +1,6 @@
 import { addDays } from "date-fns"
 import { compress, decompress } from "src/shared"
-import type { AuditLog, BichardAuditLogEvent, KeyValuePair, PromiseResult, ValueLookup } from "src/shared/types"
+import type { AuditLog, KeyValuePair, PromiseResult, ValueLookup } from "src/shared/types"
 import { AuditLogEvent, AuditLogLookup, isError } from "src/shared/types"
 import type { AuditLogEventAttributes } from "src/shared/types/AuditLogEvent"
 import type {
@@ -432,8 +432,7 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
       }
     }
 
-    let eventXml: string | undefined | ValueLookup =
-      "eventXml" in event ? (event as BichardAuditLogEvent).eventXml : undefined
+    let eventXml: string | undefined | ValueLookup = "eventXml" in event ? (event as AuditLogEvent).eventXml : undefined
     if (eventXml) {
       const lookupItem = new AuditLogLookup(eventXml, messageId)
       const lookupDynamoUpdates = await this.prepareLookupItem(lookupItem)
