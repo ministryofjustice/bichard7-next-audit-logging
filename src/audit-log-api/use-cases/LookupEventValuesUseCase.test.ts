@@ -1,5 +1,5 @@
 import "src/shared/testing"
-import { AuditLogLookup, BichardAuditLogEvent } from "src/shared/types"
+import { AuditLogEvent, AuditLogLookup } from "src/shared/types"
 import { FakeAuditLogLookupDynamoGateway } from "../test"
 import LookupEventValuesUseCase from "./LookupEventValuesUseCase"
 
@@ -9,12 +9,11 @@ const useCase = new LookupEventValuesUseCase(dynamoGateway)
 describe("lookupEventValues", () => {
   it("should retrieve values from lookup table", async () => {
     const lookupItemForEventXml = new AuditLogLookup("a".repeat(2000), "dummy message ID")
-    const event = new BichardAuditLogEvent({
+    const event = new AuditLogEvent({
       category: "information",
       eventSource: "event source",
       eventType: "event type",
       timestamp: new Date(),
-      eventSourceArn: "event source arn",
       eventSourceQueueName: "event source queue name",
       eventXml: { valueLookup: lookupItemForEventXml.id } as unknown as string
     })
@@ -30,7 +29,7 @@ describe("lookupEventValues", () => {
 
     expect(actualEvent).toNotBeError()
 
-    const { category, eventSource, eventType, timestamp, attributes, eventXml } = actualEvent as BichardAuditLogEvent
+    const { category, eventSource, eventType, timestamp, attributes, eventXml } = actualEvent as AuditLogEvent
     expect(category).toBe(event.category)
     expect(eventSource).toBe(event.eventSource)
     expect(eventType).toBe(event.eventType)
@@ -45,12 +44,11 @@ describe("lookupEventValues", () => {
   })
 
   it("should return error if it cannot save into lookup table", async () => {
-    const event = new BichardAuditLogEvent({
+    const event = new AuditLogEvent({
       category: "information",
       eventSource: "event source",
       eventType: "event type",
       timestamp: new Date(),
-      eventSourceArn: "event source arn",
       eventSourceQueueName: "event source queue name",
       eventXml: { valueLookup: "dummy ID" } as unknown as string
     })

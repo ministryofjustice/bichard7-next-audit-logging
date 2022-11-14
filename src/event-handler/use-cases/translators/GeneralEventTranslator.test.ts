@@ -26,5 +26,4 @@ test("parses the message data and returns an AuditLogEvent", async () => {
   expect(event.eventType).toBe("Message Received")
   expect(event.timestamp).toBe("2021-06-29T08:35:36.031Z")
   expect(event.eventXml).toBeUndefined()
-  expect(event.eventSourceArn).toBe("DummyArn")
 })

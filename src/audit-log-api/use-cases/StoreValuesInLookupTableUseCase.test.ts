@@ -1,5 +1,5 @@
 import "src/shared/testing"
-import { AuditLogEvent, BichardAuditLogEvent } from "src/shared/types"
+import { AuditLogEvent } from "src/shared/types"
 import { FakeAuditLogLookupDynamoGateway } from "../test"
 import StoreValuesInLookupTableUseCase from "./StoreValuesInLookupTableUseCase"
 
@@ -8,12 +8,11 @@ const useCase = new StoreValuesInLookupTableUseCase(dynamoGateway)
 
 describe("StoreValuesInLookupTableUseCase", () => {
   it("should save eventXml and long attribute values in lookup table", async () => {
-    const event = new BichardAuditLogEvent({
+    const event = new AuditLogEvent({
       category: "information",
       eventSource: "event source",
       eventType: "event type",
       timestamp: new Date(),
-      eventSourceArn: "event source arn",
       eventSourceQueueName: "event source queue name",
       eventXml: "Event XML should be saved in lookup table"
     })
@@ -28,7 +27,7 @@ describe("StoreValuesInLookupTableUseCase", () => {
 
     expect(actualEvent).toNotBeError()
 
-    const { category, eventSource, eventType, timestamp, attributes, eventXml } = actualEvent as BichardAuditLogEvent
+    const { category, eventSource, eventType, timestamp, attributes, eventXml } = actualEvent as AuditLogEvent
     expect(category).toBe(event.category)
     expect(eventSource).toBe(event.eventSource)
     expect(eventType).toBe(event.eventType)

@@ -5,7 +5,6 @@ import type CreateRetryingEventUseCase from "./CreateRetryingEventUseCase"
 import type GetLastFailedMessageEventUseCase from "./GetLastEventUseCase"
 import type RetrieveEventXmlFromS3 from "./RetrieveEventXmlFromS3UseCase"
 import type SendMessageToQueueUseCase from "./SendMessageToQueueUseCase"
-import validateEventForRetry from "./validateEventForRetry"
 
 export default class RetryMessageUseCase {
   constructor(
@@ -23,16 +22,14 @@ export default class RetryMessageUseCase {
       return event
     }
 
-    const eventValidationResult = validateEventForRetry(event)
-
-    if (isError(eventValidationResult)) {
-      return eventValidationResult
+    const { s3Path } = event as unknown as { s3Path: string }
+    if (!event.eventXml && !s3Path) {
+      return new Error("Failed to retrieve the source event, so unable to retry")
     }
 
     let eventXml: string | undefined = event.eventXml
 
     if (!eventXml) {
-      const { s3Path } = event as unknown as { s3Path: string }
       const eventContent = await this.retrieveEventXmlFromS3UseCase.retrieve(s3Path)
 
       if (isError(eventContent)) {

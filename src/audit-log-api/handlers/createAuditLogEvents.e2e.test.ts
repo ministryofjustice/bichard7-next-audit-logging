@@ -2,7 +2,7 @@ jest.retryTimes(10)
 import axios from "axios"
 import { HttpStatusCode } from "src/shared"
 import { mockAuditLog, mockAuditLogEvent } from "src/shared/testing"
-import type { AuditLog, BichardAuditLogEvent } from "src/shared/types"
+import type { AuditLog, AuditLogEvent } from "src/shared/types"
 import { auditLogDynamoConfig, TestDynamoGateway } from "../test"
 
 describe("Creating Audit Log events", () => {
@@ -30,7 +30,7 @@ describe("Creating Audit Log events", () => {
 
     expect(events).toHaveLength(1)
 
-    const actualEvent = events[0] as BichardAuditLogEvent
+    const actualEvent = events[0] as AuditLogEvent
     expect(actualEvent.attributes?.["Attribute 1"]).toHaveProperty("valueLookup")
 
     actualEvent.attributes["Attribute 1"] = event.attributes["Attribute 1"]
@@ -61,7 +61,7 @@ describe("Creating Audit Log events", () => {
 
     expect(dynamoEvents).toHaveLength(10)
     dynamoEvents.forEach((event) => {
-      const actualEvent = event as BichardAuditLogEvent
+      const actualEvent = event as AuditLogEvent
       expect(actualEvent.attributes?.["Attribute 1"]).toHaveProperty("valueLookup")
 
       actualEvent.attributes["Attribute 1"] = event.attributes["Attribute 1"]

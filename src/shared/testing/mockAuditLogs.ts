@@ -1,5 +1,5 @@
-import type { BichardAuditLogEventOptions, EventCategory } from "src/shared/types"
-import { AuditLog, BichardAuditLogEvent } from "src/shared/types"
+import type { AuditLogEventOptions, EventCategory } from "src/shared/types"
+import { AuditLog, AuditLogEvent } from "src/shared/types"
 import { v4 as uuid } from "uuid"
 
 export function mockAuditLog(overrides: Partial<AuditLog> = {}): AuditLog {
@@ -14,14 +14,13 @@ export function mockAuditLog(overrides: Partial<AuditLog> = {}): AuditLog {
   return { ...auditLog, ...overrides }
 }
 
-export function mockAuditLogEvent(overrides: Partial<BichardAuditLogEventOptions> = {}): BichardAuditLogEvent {
-  const defaults: BichardAuditLogEventOptions = {
+export function mockAuditLogEvent(overrides: Partial<AuditLogEventOptions> = {}): AuditLogEvent {
+  const defaults: AuditLogEventOptions = {
     category: "information" as EventCategory,
     timestamp: new Date(),
     eventCode: "dummy.event.code",
     eventType: "Test event",
     eventSource: "Test",
-    eventSourceArn: "Test event source ARN",
     eventSourceQueueName: "Test event source queue name",
     eventXml: "Test event xml".repeat(500),
     attributes: {
@@ -30,5 +29,5 @@ export function mockAuditLogEvent(overrides: Partial<BichardAuditLogEventOptions
     }
   }
 
-  return new BichardAuditLogEvent({ ...defaults, ...overrides })
+  return new AuditLogEvent({ ...defaults, ...overrides })
 }

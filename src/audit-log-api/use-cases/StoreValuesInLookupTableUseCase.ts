@@ -1,4 +1,4 @@
-import type { AuditLogEvent, BichardAuditLogEvent, KeyValuePair, PromiseResult, ValueLookup } from "src/shared/types"
+import type { AuditLogEvent, KeyValuePair, PromiseResult, ValueLookup } from "src/shared/types"
 import { AuditLogLookup, isError } from "src/shared/types"
 import type { AuditLogLookupDynamoGateway, DynamoUpdate } from "../gateways/dynamo"
 
@@ -34,8 +34,7 @@ export default class StoreValuesInLookupTableUseCase {
       }
     }
 
-    let eventXml: string | undefined | ValueLookup =
-      "eventXml" in event ? (event as BichardAuditLogEvent).eventXml : undefined
+    let eventXml: string | undefined | ValueLookup = "eventXml" in event ? (event as AuditLogEvent).eventXml : undefined
     if (eventXml) {
       const lookupItem = new AuditLogLookup(eventXml, messageId)
       const lookupDynamoUpdates = await this.lookupGateway.prepare(lookupItem)

@@ -1,5 +1,5 @@
 import { FakeS3Gateway } from "src/shared/testing"
-import { AuditLog, BichardAuditLogEvent, isError } from "src/shared/types"
+import { AuditLog, AuditLogEvent, isError } from "src/shared/types"
 import DeleteMessageObjectsFromS3UseCase from "./DeleteMessageObjectsFromS3UseCase"
 
 const fakeEventsS3Gateway = new FakeS3Gateway()
@@ -11,15 +11,14 @@ const createAuditLog = (s3Path: string, eventS3Path: string) => {
   auditLog.s3Path = s3Path
   const event = {
     s3Path: eventS3Path,
-    ...new BichardAuditLogEvent({
-      eventSourceArn: "dummy event source arn",
+    ...new AuditLogEvent({
       eventSourceQueueName: "dummy event source queue name",
       eventSource: "dummy event source",
       category: "information",
       eventType: "dummy event type",
       timestamp: new Date()
     })
-  } as unknown as BichardAuditLogEvent
+  } as unknown as AuditLogEvent
   auditLog.events = [event]
 
   return auditLog

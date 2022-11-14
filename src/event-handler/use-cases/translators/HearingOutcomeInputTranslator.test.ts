@@ -30,5 +30,4 @@ test("parses the message data and returns an AuditLogEvent", async () => {
   expect(eventTimestamp).toBeBetween(beforeDate, afterDate)
 
   expect(event.eventXml).toBe(decodeBase64(messageData))
-  expect(event.eventSourceArn).toBe("DummyArn")
 })

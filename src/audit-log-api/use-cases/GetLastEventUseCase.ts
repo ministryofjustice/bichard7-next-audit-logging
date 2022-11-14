@@ -1,5 +1,6 @@
-import type { BichardAuditLogEvent, PromiseResult } from "src/shared/types"
+import type { AuditLogEvent, PromiseResult } from "src/shared/types"
 import { isError } from "src/shared/types"
+import AuditLogErrorEvent from "src/shared/types/AuditLogErrorEvent"
 import type { AuditLogDynamoGatewayInterface } from "../gateways/dynamo"
 import type LookupEventValuesUseCase from "./LookupEventValuesUseCase"
 
@@ -9,8 +10,8 @@ export default class GetLastFailedMessageEventUseCase {
     private readonly lookupEventValues: LookupEventValuesUseCase
   ) {}
 
-  async get(messageId: string): PromiseResult<BichardAuditLogEvent> {
-    const events = (await this.auditLogDynamoGateway.fetchEvents(messageId)) as BichardAuditLogEvent[]
+  async get(messageId: string): PromiseResult<AuditLogErrorEvent> {
+    const events = (await this.auditLogDynamoGateway.fetchEvents(messageId)) as AuditLogEvent[]
 
     if (isError(events)) {
       return events
@@ -26,6 +27,6 @@ export default class GetLastFailedMessageEventUseCase {
 
     const failedEvent = failedEvents.slice(-1)[0]
 
-    return this.lookupEventValues.execute(failedEvent) as PromiseResult<BichardAuditLogEvent>
+    return this.lookupEventValues.execute(failedEvent) as PromiseResult<AuditLogErrorEvent>
   }
 }

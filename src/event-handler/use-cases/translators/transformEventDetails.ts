@@ -1,5 +1,5 @@
 import type { EventCategory } from "src/shared/types"
-import { BichardAuditLogEvent } from "src/shared/types"
+import { AuditLogEvent } from "src/shared/types"
 import type { EventDetails } from "../../types"
 
 const mapEventCategory = (category: string): EventCategory => {
@@ -15,22 +15,16 @@ const mapEventCategory = (category: string): EventCategory => {
   }
 }
 
-export default (
-  eventDetails: EventDetails,
-  eventXml: string,
-  eventSourceArn: string,
-  eventSourceQueueName: string
-): BichardAuditLogEvent => {
+export default (eventDetails: EventDetails, eventXml: string, eventSourceQueueName: string): AuditLogEvent => {
   const { eventCategory, eventDateTime, eventType, componentID, nameValuePairs } = eventDetails
   const category = mapEventCategory(eventCategory)
   const timestamp = new Date(eventDateTime)
 
-  const event = new BichardAuditLogEvent({
+  const event = new AuditLogEvent({
     eventSource: componentID,
     category,
     eventType,
     timestamp,
-    eventSourceArn,
     eventSourceQueueName,
     ...(category === "error" ? { eventXml } : {})
   })

@@ -6,7 +6,7 @@ import type TranslationResult from "./TranslationResult"
 import type Translator from "./Translator"
 
 const GeneralEventTranslator: Translator = async (input: EventInput): PromiseResult<TranslationResult> => {
-  const { messageData, eventSourceArn, eventSourceQueueName } = input
+  const { messageData, eventSourceQueueName } = input
   // General events are in base64 encoded XML
   const xml = decodeBase64(messageData)
   const logItem = await parseXml<GeneralEventLogItem>(xml)
@@ -15,7 +15,7 @@ const GeneralEventTranslator: Translator = async (input: EventInput): PromiseRes
     return new Error("Failed to parse the General Event")
   }
 
-  const event = transformEventDetails(logItem.logEvent, xml, eventSourceArn, eventSourceQueueName)
+  const event = transformEventDetails(logItem.logEvent, xml, eventSourceQueueName)
   return {
     messageId: logItem.logEvent.correlationID,
     event
