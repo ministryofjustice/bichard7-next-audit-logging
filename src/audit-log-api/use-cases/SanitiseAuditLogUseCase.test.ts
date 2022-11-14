@@ -1,14 +1,13 @@
 import MockDate from "mockdate"
 import "src/shared/testing"
-import { AuditLog, AuditLogEvent, BichardAuditLogEvent, EventCode } from "src/shared/types"
+import { AuditLog, AuditLogEvent, EventCode } from "src/shared/types"
 import { FakeAuditLogDynamoGateway } from "../test"
 import SanitiseAuditLogUseCase from "./SanitiseAuditLogUseCase"
 
 const fakeAuditLogDynamoGateway = new FakeAuditLogDynamoGateway()
 const sanitiseAuditLogUseCase = new SanitiseAuditLogUseCase(fakeAuditLogDynamoGateway)
-const createBichardAuditLogEvent = () => {
-  const event = new BichardAuditLogEvent({
-    eventSourceArn: "dummy event source arn",
+const createAuditLogEvent = () => {
+  const event = new AuditLogEvent({
     eventSourceQueueName: "dummy event source queue name",
     eventSource: "dummy event source",
     category: "information",
@@ -27,11 +26,11 @@ const createBichardAuditLogEvent = () => {
 }
 
 const message = new AuditLog("External Correlation ID", new Date(), "Dummy hash")
-message.events = [createBichardAuditLogEvent()]
+message.events = [createAuditLogEvent()]
 message.automationReport = { events: [] }
-message.automationReport.events = [createBichardAuditLogEvent()]
+message.automationReport.events = [createAuditLogEvent()]
 message.topExceptionsReport = { events: [] }
-message.topExceptionsReport.events = [createBichardAuditLogEvent()]
+message.topExceptionsReport.events = [createAuditLogEvent()]
 message.nextSanitiseCheck = new Date().toISOString()
 
 afterAll(() => {

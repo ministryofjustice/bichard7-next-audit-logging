@@ -4,7 +4,7 @@ import axios from "axios"
 import { encodeBase64, HttpStatusCode, TestMqGateway, TestS3Gateway } from "src/shared"
 import { auditLogEventsS3Config } from "src/shared/testing"
 import type { MqConfig } from "src/shared/types"
-import { AuditLog, AuditLogLookup, AuditLogStatus, BichardAuditLogEvent } from "src/shared/types"
+import { AuditLog, AuditLogEvent, AuditLogLookup, AuditLogStatus } from "src/shared/types"
 import { v4 as uuid } from "uuid"
 import { auditLogDynamoConfig, auditLogLookupDynamoConfig, TestDynamoGateway } from "../test"
 
@@ -31,9 +31,8 @@ describe("retryMessage", () => {
     const message = new AuditLog("External Correlation ID", new Date(), "Dummy hash")
     const lookupItem = new AuditLogLookup(eventXml, message.messageId)
     message.events.push(
-      new BichardAuditLogEvent({
+      new AuditLogEvent({
         eventSource: "Dummy Event Source",
-        eventSourceArn: "Dummy Event Arn",
         eventSourceQueueName: "RETRY_DUMMY_QUEUE",
         eventType: "Dummy Failed Message",
         category: "error",
@@ -62,15 +61,14 @@ describe("retryMessage", () => {
     const eventS3Path = "event.xml"
     const messageEvent = {
       s3Path: eventS3Path,
-      ...new BichardAuditLogEvent({
+      ...new AuditLogEvent({
         eventSource: "Dummy Event Source",
-        eventSourceArn: "Dummy Event Arn",
         eventSourceQueueName: "RETRY_DUMMY_QUEUE",
         eventType: "Dummy Failed Message",
         category: "error",
         timestamp: new Date()
       })
-    } as unknown as BichardAuditLogEvent
+    } as unknown as AuditLogEvent
     message.events.push(messageEvent)
 
     const eventObjectInS3 = {
@@ -94,15 +92,14 @@ describe("retryMessage", () => {
   it("should return an error when retrying invalid messages", async () => {
     const auditLogEvent = {
       s3Path: "nonexistent.xml",
-      ...new BichardAuditLogEvent({
+      ...new AuditLogEvent({
         eventSource: "Dummy Event Source",
-        eventSourceArn: "Dummy Event Arn",
         eventSourceQueueName: "DUMMY_QUEUE",
         eventType: "Dummy Failed Message",
         category: "error",
         timestamp: new Date()
       })
-    } as unknown as BichardAuditLogEvent
+    } as unknown as AuditLogEvent
     const message = new AuditLog("External Correlation ID", new Date(Date.now() - 3_600_000), "dummy hash")
     message.status = AuditLogStatus.error
     message.events.push(auditLogEvent)

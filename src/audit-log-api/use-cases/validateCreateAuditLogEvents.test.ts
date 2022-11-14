@@ -1,4 +1,4 @@
-import type { BichardAuditLogEvent, EventCategory } from "src/shared/types"
+import type { EventCategory } from "src/shared/types"
 import { AuditLogEvent } from "src/shared/types"
 import validateCreateAuditLogEvents from "./validateCreateAuditLogEvents"
 
@@ -99,12 +99,11 @@ it("should be invalid when a single audit log event fields have incorrect format
     attributes: "attributes",
     category: 1,
     eventSource: 2,
-    eventSourceArn: 3,
     eventSourceQueueName: 4,
     eventType: 5,
     eventXml: 6,
     timestamp: "2021-10-05 12:13:14"
-  } as unknown as BichardAuditLogEvent
+  } as unknown as AuditLogEvent
 
   const { isValid, eventValidationResults } = validateCreateAuditLogEvents([event])
 
@@ -113,11 +112,10 @@ it("should be invalid when a single audit log event fields have incorrect format
   expect(eventValidationResults).toHaveLength(1)
 
   const errors = eventValidationResults[0].errors
-  expect(errors).toHaveLength(8)
+  expect(errors).toHaveLength(7)
   expect(errors).toContain("Attributes must be key/value object")
   expect(errors).toContain("Category can be either information, error, or warning")
   expect(errors).toContain("Event source must be string")
-  expect(errors).toContain("event source ARN must be string")
   expect(errors).toContain("Event source queue name must be string")
   expect(errors).toContain("Event type must be string")
   expect(errors).toContain("Event XML must be string")

@@ -2,7 +2,7 @@ import { AuditLogApiClient, encodeBase64, TestMqGateway, TestS3Gateway } from "s
 import "src/shared/testing"
 import { auditLogEventsS3Config } from "src/shared/testing"
 import type { MqConfig } from "src/shared/types"
-import { AuditLog, AuditLogLookup, BichardAuditLogEvent } from "src/shared/types"
+import { AuditLog, AuditLogEvent, AuditLogLookup } from "src/shared/types"
 import { AuditLogDynamoGateway, AwsAuditLogLookupDynamoGateway } from "../gateways/dynamo"
 import { auditLogDynamoConfig, TestDynamoGateway } from "../test"
 import CreateRetryingEventUseCase from "./CreateRetryingEventUseCase"
@@ -59,9 +59,8 @@ describe("RetryMessageUseCase", () => {
   it("should retry message using eventXml field when last event is error", async () => {
     const message = new AuditLog("External Correlation ID", new Date(), "Dummy hash")
     const auditLogLookupItem = new AuditLogLookup(eventXml, message.messageId)
-    const event = new BichardAuditLogEvent({
+    const event = new AuditLogEvent({
       eventSource: "Dummy Event Source",
-      eventSourceArn: "Dummy Event Arn",
       eventSourceQueueName: queueName,
       eventType: "Dummy Failed Message",
       category: "error",
@@ -100,15 +99,14 @@ describe("RetryMessageUseCase", () => {
     const eventS3Path = "event.xml"
     const event = {
       s3Path: eventS3Path,
-      ...new BichardAuditLogEvent({
+      ...new AuditLogEvent({
         eventSource: "Dummy Event Source",
-        eventSourceArn: "Dummy Event Arn",
         eventSourceQueueName: queueName,
         eventType: "Dummy Failed Message",
         category: "error",
         timestamp: new Date()
       })
-    } as unknown as BichardAuditLogEvent
+    } as unknown as AuditLogEvent
     message.events.push(event)
 
     await s3Gateway.upload(eventS3Path, JSON.stringify({ messageData: encodeBase64(eventXml) }))

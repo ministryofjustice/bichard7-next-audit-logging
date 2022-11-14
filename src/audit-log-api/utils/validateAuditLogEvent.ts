@@ -1,4 +1,4 @@
-import type { AuditLogEvent, BichardAuditLogEvent } from "src/shared/types"
+import type { AuditLogEvent } from "src/shared/types"
 import isIsoDate from "./isIsoDate"
 
 type ValidationResult = {
@@ -6,20 +6,18 @@ type ValidationResult = {
   auditLogEvent: AuditLogEvent
 }
 
-export default (auditLogEvent: AuditLogEvent): ValidationResult => {
+export default ({
+  attributes,
+  category,
+  eventCode,
+  eventSource,
+  eventSourceQueueName,
+  eventType,
+  eventXml,
+  timestamp,
+  user
+}: AuditLogEvent): ValidationResult => {
   const errors: string[] = []
-  const {
-    attributes,
-    category,
-    eventCode,
-    eventSource,
-    eventSourceArn,
-    eventSourceQueueName,
-    eventType,
-    eventXml,
-    timestamp,
-    user
-  } = auditLogEvent as BichardAuditLogEvent
 
   if (attributes && (typeof attributes !== "object" || Array.isArray(attributes))) {
     errors.push("Attributes must be key/value object")
@@ -39,10 +37,6 @@ export default (auditLogEvent: AuditLogEvent): ValidationResult => {
     errors.push("Event source is mandatory")
   } else if (typeof eventSource !== "string") {
     errors.push("Event source must be string")
-  }
-
-  if (eventSourceArn && typeof eventSourceArn !== "string") {
-    errors.push("event source ARN must be string")
   }
 
   if (eventSourceQueueName && typeof eventSourceQueueName !== "string") {
@@ -74,16 +68,15 @@ export default (auditLogEvent: AuditLogEvent): ValidationResult => {
     category,
     eventCode,
     eventSource,
-    eventSourceArn,
     eventSourceQueueName,
     eventType,
     eventXml,
     timestamp,
     user
-  } as BichardAuditLogEvent
+  } as AuditLogEvent
 
   if (!validatedAuditLogEvent.attributes) {
-    validatedAuditLogEvent = { ...validatedAuditLogEvent, attributes: {} } as BichardAuditLogEvent
+    validatedAuditLogEvent = { ...validatedAuditLogEvent, attributes: {} } as AuditLogEvent
   }
 
   Object.keys(validatedAuditLogEvent).forEach(

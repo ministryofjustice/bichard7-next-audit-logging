@@ -6,7 +6,7 @@ import type TranslationResult from "./TranslationResult"
 import type Translator from "./Translator"
 
 const AuditEventTranslator: Translator = async (input: EventInput): PromiseResult<TranslationResult> => {
-  const { messageData, eventSourceArn, eventSourceQueueName } = input
+  const { messageData, eventSourceQueueName } = input
   // Audit events are in base64 encoded XML
   const xml = decodeBase64(messageData)
   const logItem = await parseXml<AuditEvent>(xml)
@@ -15,7 +15,7 @@ const AuditEventTranslator: Translator = async (input: EventInput): PromiseResul
     return new Error("Failed to parse the Audit Event")
   }
 
-  const event = transformEventDetails(logItem.auditEvent, xml, eventSourceArn, eventSourceQueueName)
+  const event = transformEventDetails(logItem.auditEvent, xml, eventSourceQueueName)
   return {
     messageId: logItem.auditEvent.correlationID,
     event

@@ -102,7 +102,6 @@ test.each<TestInput>([
   expect(event.category).toBe(input.category)
   expect(event.eventSource).toBe(input.eventSource)
   expect(event.eventType).toBe(input.eventType)
-  expect(event.eventSourceArn).toBe(payload.eventSourceArn)
   expect(event.eventXml).toBe(event.category === "error" ? decodeBase64(payload.messageData) : undefined)
   expect(event.eventSourceQueueName).toBe(payload.eventSourceQueueName)
 })

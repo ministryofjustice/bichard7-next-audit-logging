@@ -3,7 +3,7 @@ import axios from "axios"
 import { addDays } from "date-fns"
 import { BichardPostgresGateway, createS3Config, HttpStatusCode, TestPostgresGateway, TestS3Gateway } from "src/shared"
 import { setEnvironmentVariables } from "src/shared/testing"
-import { AuditLog, AuditLogEvent, AuditLogLookup, BichardAuditLogEvent } from "src/shared/types"
+import { AuditLog, AuditLogEvent, AuditLogLookup } from "src/shared/types"
 import createBichardPostgresGatewayConfig from "../createBichardPostgresGatewayConfig"
 import { auditLogDynamoConfig, TestDynamoGateway } from "../test"
 
@@ -23,9 +23,8 @@ const testDynamoGateway = new TestDynamoGateway(auditLogDynamoConfig)
 const testPostgresGateway = new TestPostgresGateway(postgresConfig)
 const errorListTestPostgresGateway = new TestPostgresGateway(errorListPostgresConfig)
 
-const createBichardAuditLogEvent = (eventS3Path: string): BichardAuditLogEvent => {
-  const event = new BichardAuditLogEvent({
-    eventSourceArn: "dummy event source arn",
+const createAuditLogEvent = (eventS3Path: string): AuditLogEvent => {
+  const event = new AuditLogEvent({
     eventSourceQueueName: "dummy event source queue name",
     eventSource: "dummy event source",
     category: "information",
@@ -40,7 +39,7 @@ const createBichardAuditLogEvent = (eventS3Path: string): BichardAuditLogEvent =
   event.addAttribute("AmendedHearingOutcome", "<?xml><dummy></dummy>")
   event.addAttribute("AmendedPNCUpdateDataset", "<?xml><dummy></dummy>")
 
-  return { ...event, s3Path: eventS3Path } as unknown as BichardAuditLogEvent
+  return { ...event, s3Path: eventS3Path } as unknown as AuditLogEvent
 }
 
 describe("sanitiseMessage", () => {
@@ -62,7 +61,7 @@ describe("sanitiseMessage", () => {
   it("should return Ok status when message has been sanitised successfully", async () => {
     const message = new AuditLog("External Correlation ID", new Date("2020-01-01"), "Dummy hash")
     message.s3Path = "message.xml"
-    const event1 = createBichardAuditLogEvent("event1.xml") as BichardAuditLogEvent & { s3Path: string }
+    const event1 = createAuditLogEvent("event1.xml") as AuditLogEvent & { s3Path: string }
     const event2 = new AuditLogEvent({
       eventSource: "dummy event source",
       category: "information",

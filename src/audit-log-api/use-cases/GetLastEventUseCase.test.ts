@@ -1,5 +1,5 @@
 import "src/shared/testing"
-import type { BichardAuditLogEvent, EventCategory } from "src/shared/types"
+import type { EventCategory } from "src/shared/types"
 import { AuditLog, AuditLogEvent } from "src/shared/types"
 import type { AuditLogLookupDynamoGateway } from "../gateways/dynamo"
 import { FakeAuditLogDynamoGateway } from "../test"
@@ -21,15 +21,14 @@ const createEvent = (date: string, category: EventCategory): AuditLogEvent => {
     eventSource: "Dummy Event Source"
   })
 }
-const createBichardEvent = (date: string, category: EventCategory): BichardAuditLogEvent => {
+const createFailureEvent = (date: string, category: EventCategory): AuditLogEvent => {
   const event = createEvent(date, category)
 
   return {
     ...event,
     eventXml: "Expected Event XML",
-    eventSourceArn: "Expected Event Source ARN",
     eventSourceQueueName: "Expected Queue Name"
-  } as BichardAuditLogEvent
+  } as AuditLogEvent
 }
 
 it("should return the last event when message exists and has events", async () => {
@@ -38,7 +37,7 @@ it("should return the last event when message exists and has events", async () =
     .mockImplementation((event) => Promise.resolve(event))
   const message = createAuditLog()
   message.events.push(createEvent("2021-07-22T09:10:10", "information"))
-  message.events.push(createBichardEvent("2021-07-22T12:10:10", "error"))
+  message.events.push(createFailureEvent("2021-07-22T12:10:10", "error"))
   message.events.push(createEvent("2021-07-22T10:10:10", "information"))
 
   auditLogDynamoGateway.reset([message])
@@ -46,9 +45,8 @@ it("should return the last event when message exists and has events", async () =
 
   expect(result).toNotBeError()
 
-  const event = result as BichardAuditLogEvent
+  const event = result as AuditLogEvent
   expect(event.eventXml).toBe("Expected Event XML")
-  expect(event.eventSourceArn).toBe("Expected Event Source ARN")
   expect(event.eventSourceQueueName).toBe("Expected Queue Name")
   expect(lookupEventValuesUseCaseSpy).toHaveBeenCalledTimes(1)
 })

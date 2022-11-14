@@ -1,7 +1,7 @@
 import axios from "axios"
 import { HttpStatusCode } from "src/shared"
 import { mockAuditLog, mockAuditLogEvent } from "src/shared/testing"
-import type { AuditLog, BichardAuditLogEvent } from "src/shared/types"
+import type { AuditLog, AuditLogEvent } from "src/shared/types"
 import { EventCode } from "src/shared/types"
 import { auditLogDynamoConfig, TestDynamoGateway } from "../test"
 const gateway = new TestDynamoGateway(auditLogDynamoConfig)
@@ -25,7 +25,7 @@ describe("Creating Audit Log event", () => {
 
     expect(events).toHaveLength(1)
 
-    const actualEvent = events[0] as BichardAuditLogEvent
+    const actualEvent = events[0] as AuditLogEvent
     expect(actualEvent.attributes?.["Attribute 1"]).toHaveProperty("valueLookup")
 
     actualEvent.attributes["Attribute 1"] = event.attributes["Attribute 1"]
@@ -58,7 +58,7 @@ describe("Creating Audit Log event", () => {
 
     expect(events).toHaveLength(1)
 
-    const actualEvent = events[0] as BichardAuditLogEvent
+    const actualEvent = events[0] as AuditLogEvent
     expect(actualEvent.user).toBe("Test User")
     expect(actualEvent.eventCode).toBe("test.event")
   })

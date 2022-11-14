@@ -9,7 +9,7 @@ import {
   mockAuditLog,
   mockAuditLogEvent
 } from "src/shared/testing"
-import type { AuditLog, BichardAuditLogEvent } from "src/shared/types"
+import type { AuditLog, AuditLogEvent } from "src/shared/types"
 import { EventCode, isError } from "src/shared/types"
 import { TestDynamoGateway } from "../test"
 import { auditLogDynamoConfig } from "../test/dynamoDbConfig"
@@ -138,7 +138,7 @@ describe("Getting Audit Logs", () => {
     expect(actualMessage.events).toHaveLength(1)
 
     const { attributes } = actualMessage.events[0]
-    const { eventXml } = actualMessage.events[0] as BichardAuditLogEvent
+    const { eventXml } = actualMessage.events[0] as AuditLogEvent
     expect(attributes["Attribute 1"]).toHaveProperty("valueLookup")
     expect(attributes["Attribute 2"]).toBe(auditLog.events[0].attributes["Attribute 2"])
     expect(eventXml).toHaveProperty("valueLookup")

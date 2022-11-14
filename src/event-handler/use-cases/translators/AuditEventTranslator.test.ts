@@ -26,5 +26,4 @@ test("parses the message data and returns an AuditLogEvent", async () => {
   expect(event.eventType).toBe("Trigger Instances resolved")
   expect(event.timestamp).toBe("2021-06-29T08:34:22.789Z")
   expect(event.eventXml).toBeUndefined()
-  expect(event.eventSourceArn).toBe("DummyArn")
 })

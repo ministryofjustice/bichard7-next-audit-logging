@@ -2,7 +2,7 @@ jest.retryTimes(10)
 import axios from "axios"
 import { HttpStatusCode } from "src/shared"
 import { mockAuditLog, mockAuditLogEvent } from "src/shared/testing"
-import type { AuditLogEvent, BichardAuditLogEvent } from "src/shared/types"
+import type { AuditLogEvent } from "src/shared/types"
 
 describe("Getting Audit Log events", () => {
   it("should return the audit log events for an existing audit log record", async () => {
@@ -36,7 +36,7 @@ describe("Getting Audit Log events", () => {
 
     expect(resultWithValueLookup.status).toEqual(HttpStatusCode.ok)
 
-    const eventsWithValueLookup = resultWithValueLookup.data as unknown as BichardAuditLogEvent[]
+    const eventsWithValueLookup = resultWithValueLookup.data as unknown as AuditLogEvent[]
     expect(eventsWithValueLookup[0].eventXml).toMatch(/(?:Test event xml)*/)
     expect(eventsWithValueLookup[0].attributes["Attribute 1"]).toMatch(/(?:Attribute 1 dataAttribute)*/)
     expect(eventsWithValueLookup[0].attributes["Attribute 2"]).toBe("Attribute 2 data")
@@ -46,7 +46,7 @@ describe("Getting Audit Log events", () => {
     )
     expect(resultWithoutValueLookup.status).toEqual(HttpStatusCode.ok)
 
-    const eventsWithoutValueLookup = resultWithoutValueLookup.data as unknown as BichardAuditLogEvent[]
+    const eventsWithoutValueLookup = resultWithoutValueLookup.data as unknown as AuditLogEvent[]
     expect(eventsWithoutValueLookup[0].eventXml).toHaveProperty("valueLookup")
     expect(eventsWithoutValueLookup[0].attributes["Attribute 1"]).toHaveProperty("valueLookup")
     expect(eventsWithoutValueLookup[0].attributes["Attribute 2"]).toBe("Attribute 2 data")
