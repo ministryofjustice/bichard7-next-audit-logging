@@ -2,9 +2,9 @@ jest.setTimeout(15000)
 
 import axios from "axios"
 import { encodeBase64, HttpStatusCode, TestMqGateway, TestS3Gateway } from "src/shared"
-import { auditLogEventsS3Config } from "src/shared/testing"
+import { auditLogEventsS3Config, mockDynamoAuditLog } from "src/shared/testing"
 import type { MqConfig } from "src/shared/types"
-import { AuditLog, AuditLogEvent, AuditLogLookup, AuditLogStatus } from "src/shared/types"
+import { AuditLogEvent, AuditLogLookup, AuditLogStatus } from "src/shared/types"
 import { v4 as uuid } from "uuid"
 import { auditLogDynamoConfig, TestDynamoGateway } from "../test"
 
@@ -28,7 +28,7 @@ describe("retryMessage", () => {
 
   it("should return Ok status when message contains eventXml and has been retried successfully", async () => {
     const eventXml = `<Xml>${uuid()}</Xml>`
-    const message = new AuditLog("External Correlation ID", new Date(), "Dummy hash")
+    const message = mockDynamoAuditLog()
     const lookupItem = new AuditLogLookup(eventXml, message.messageId)
     message.events.push(
       new AuditLogEvent({
@@ -56,7 +56,7 @@ describe("retryMessage", () => {
 
   it("should return Ok status when message constains s3Path for the event and has been retried successfully", async () => {
     const eventXml = `<Xml>${uuid()}< /Xml>`
-    const message = new AuditLog("External Correlation ID", new Date(), "Dummy hash")
+    const message = mockDynamoAuditLog()
     const lookupItem = new AuditLogLookup(eventXml, message.messageId)
     const eventS3Path = "event.xml"
     const messageEvent = {
@@ -100,7 +100,7 @@ describe("retryMessage", () => {
         timestamp: new Date()
       })
     } as unknown as AuditLogEvent
-    const message = new AuditLog("External Correlation ID", new Date(Date.now() - 3_600_000), "dummy hash")
+    const message = mockDynamoAuditLog({ receivedDate: new Date(Date.now() - 3_600_000).toISOString() })
     message.status = AuditLogStatus.error
     message.events.push(auditLogEvent)
 

@@ -1,6 +1,7 @@
 import type { APIGatewayProxyEvent } from "aws-lambda"
 import { HttpStatusCode } from "src/shared"
-import { AuditLog } from "src/shared/types"
+import { mockInputApiAuditLog } from "src/shared/testing"
+import { InputApiAuditLog } from "src/shared/types"
 import "../testConfig"
 import { validateCreateAuditLogs } from "../use-cases"
 import CreateAuditLogsUseCase from "../use-cases/CreateAuditLogsUseCase"
@@ -10,23 +11,15 @@ jest.mock("../use-cases/validateCreateAuditLogs")
 
 const mockedValidateCreateAuditLog = validateCreateAuditLogs as jest.MockedFunction<typeof validateCreateAuditLogs>
 
-const createHandlerEvent = (items?: AuditLog[]): APIGatewayProxyEvent => {
-  let auditLogs = items
-  if (!auditLogs) {
-    const auditLog = new AuditLog("1", new Date(), "Dummy hash")
-    auditLog.caseId = "Case ID"
-    auditLog.createdBy = "Create audit log test"
-    auditLogs = [auditLog]
-  }
-
+const createHandlerEvent = (items?: InputApiAuditLog[]): APIGatewayProxyEvent => {
   return <APIGatewayProxyEvent>{
-    body: JSON.stringify(auditLogs)
+    body: JSON.stringify(items ?? [mockInputApiAuditLog()])
   }
 }
 
 describe("createAuditlog()", () => {
   it("should return 201 Created status code when Audit Log Id does not exist in the database", async () => {
-    mockedValidateCreateAuditLog.mockResolvedValue({ isValid: true, errors: [], auditLogs: [{}] as AuditLog[] })
+    mockedValidateCreateAuditLog.mockResolvedValue({ isValid: true, errors: [], auditLogs: [{}] as InputApiAuditLog[] })
     jest.spyOn(CreateAuditLogsUseCase.prototype, "create").mockReturnValue(
       Promise.resolve({
         resultType: "success"
@@ -44,9 +37,9 @@ describe("createAuditlog()", () => {
     mockedValidateCreateAuditLog.mockResolvedValue({
       isValid: false,
       errors: ["Dummy error 1", "Dummy error 2"],
-      auditLogs: [{}] as AuditLog[]
+      auditLogs: [{}] as InputApiAuditLog[]
     })
-    const event = createHandlerEvent([{}] as AuditLog[])
+    const event = createHandlerEvent([{}] as InputApiAuditLog[])
     const actualResponse = await createAuditLogs(event)
 
     expect(actualResponse.statusCode).toBe(HttpStatusCode.badRequest)
@@ -54,7 +47,7 @@ describe("createAuditlog()", () => {
   })
 
   it("should respond with 400 Conflict status code when there is a log with the same Audit Log Id in the database", async () => {
-    mockedValidateCreateAuditLog.mockResolvedValue({ isValid: true, errors: [], auditLogs: [{}] as AuditLog[] })
+    mockedValidateCreateAuditLog.mockResolvedValue({ isValid: true, errors: [], auditLogs: [{}] as InputApiAuditLog[] })
     const expectedMessage = "Expected Message"
     jest.spyOn(CreateAuditLogsUseCase.prototype, "create").mockReturnValue(
       Promise.resolve({
@@ -71,7 +64,7 @@ describe("createAuditlog()", () => {
   })
 
   it("should respond with a 500 Internal Server Error status code when an unhandled error occurs", async () => {
-    mockedValidateCreateAuditLog.mockResolvedValue({ isValid: true, errors: [], auditLogs: [{}] as AuditLog[] })
+    mockedValidateCreateAuditLog.mockResolvedValue({ isValid: true, errors: [], auditLogs: [{}] as InputApiAuditLog[] })
     const expectedMessage = "Expected Message"
     jest.spyOn(CreateAuditLogsUseCase.prototype, "create").mockReturnValue(
       Promise.resolve({

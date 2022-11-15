@@ -1,4 +1,4 @@
-import type { AuditLog } from "src/shared/types"
+import type { InputApiAuditLog } from "src/shared/types"
 import getXmlElementContent from "../utils/getXmlElementContent"
 
 const unescape = (input: string) =>
@@ -11,7 +11,7 @@ const unescape = (input: string) =>
 
 const removeProlog = (input: string) => input.replace(/<\?xml[^?]*\?>/g, "")
 
-const transformMessageXml = (auditlog: AuditLog, messageXml: string): string => {
+const transformMessageXml = (auditlog: InputApiAuditLog, messageXml: string): string => {
   const organizationalUnitId = getXmlElementContent(messageXml, "OrganizationalUnitID") ?? ""
   const messageType = getXmlElementContent(messageXml, "DataStreamType") ?? ""
   const messageContent = removeProlog(unescape(getXmlElementContent(messageXml, "DataStreamContent") ?? ""))

@@ -2,8 +2,8 @@ jest.setTimeout(15000)
 import axios from "axios"
 import { addDays } from "date-fns"
 import { BichardPostgresGateway, createS3Config, HttpStatusCode, TestPostgresGateway, TestS3Gateway } from "src/shared"
-import { setEnvironmentVariables } from "src/shared/testing"
-import { AuditLog, AuditLogEvent, AuditLogLookup } from "src/shared/types"
+import { mockDynamoAuditLog, setEnvironmentVariables } from "src/shared/testing"
+import { AuditLogEvent, AuditLogLookup, DynamoAuditLog } from "src/shared/types"
 import createBichardPostgresGatewayConfig from "../createBichardPostgresGatewayConfig"
 import { auditLogDynamoConfig, TestDynamoGateway } from "../test"
 
@@ -62,7 +62,7 @@ describe("sanitiseMessage", () => {
   })
 
   it("should return Ok status when message has been sanitised successfully", async () => {
-    const message = new AuditLog("External Correlation ID", new Date("2020-01-01"), "Dummy hash")
+    const message = mockDynamoAuditLog({ receivedDate: new Date("2020-01-01").toISOString() })
     message.s3Path = "message.xml"
     const event1 = createAuditLogEvent("event1.xml") as AuditLogEvent & { s3Path: string }
     const event2 = new AuditLogEvent({
@@ -105,7 +105,11 @@ describe("sanitiseMessage", () => {
     const actualEventS3Objects = await eventsS3Gateway.getAll()
     expect(actualEventS3Objects).toEqual([])
 
-    const actualMessage = await testDynamoGateway.getOne<AuditLog>(auditLogTableName, "messageId", message.messageId)
+    const actualMessage = await testDynamoGateway.getOne<DynamoAuditLog>(
+      auditLogTableName,
+      "messageId",
+      message.messageId
+    )
 
     const attributes = actualMessage?.events.find((event) => "s3Path" in event)?.attributes ?? {}
     expect(Object.keys(attributes)).toHaveLength(1)
@@ -121,12 +125,16 @@ describe("sanitiseMessage", () => {
 
   it("should not sanitise if the message is under 90 days old", async () => {
     const expectedNextCheck = addDays(new Date(), 2).toISOString()
-    const message = new AuditLog("External Correlation ID", new Date(), "Dummy hash")
+    const message = mockDynamoAuditLog()
     await testDynamoGateway.insertOne(auditLogTableName, message, "messageId")
     const response = await axios.post(`http://localhost:3010/messages/${message.messageId}/sanitise`, null, {
       validateStatus: undefined
     })
-    const actualMessage = await testDynamoGateway.getOne<AuditLog>(auditLogTableName, "messageId", message.messageId)
+    const actualMessage = await testDynamoGateway.getOne<DynamoAuditLog>(
+      auditLogTableName,
+      "messageId",
+      message.messageId
+    )
 
     expect(response.status).toBe(HttpStatusCode.ok)
     expect(response.data).toBe("Message not sanitised.")
@@ -136,13 +144,17 @@ describe("sanitiseMessage", () => {
 
   it("should not sanitise if the message is in the error_list table", async () => {
     const expectedNextCheck = addDays(new Date(), 2).toISOString()
-    const message = new AuditLog("External Correlation ID", new Date("2020-01-01"), "Dummy hash")
+    const message = mockDynamoAuditLog({ receivedDate: new Date("2020-01-01").toISOString() })
     await testDynamoGateway.insertOne(auditLogTableName, message, "messageId")
     await errorListTestPostgresGateway.insertRecords([{ message_id: message.messageId }])
     const response = await axios.post(`http://localhost:3010/messages/${message.messageId}/sanitise`, null, {
       validateStatus: undefined
     })
-    const actualMessage = await testDynamoGateway.getOne<AuditLog>(auditLogTableName, "messageId", message.messageId)
+    const actualMessage = await testDynamoGateway.getOne<DynamoAuditLog>(
+      auditLogTableName,
+      "messageId",
+      message.messageId
+    )
 
     expect(response.status).toBe(HttpStatusCode.ok)
     expect(response.data).toBe("Message not sanitised.")

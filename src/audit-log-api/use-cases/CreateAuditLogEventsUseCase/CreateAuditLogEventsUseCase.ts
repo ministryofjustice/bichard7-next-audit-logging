@@ -100,11 +100,10 @@ export default class CreateAuditLogEventsUseCase {
       ...calculateStatuses(allEvents),
       ...calculateErrorRecordArchivalDate(allEvents),
       ...calculateIsSanitised(allEvents),
-      ...calculateRetryCount(allEvents),
-      events: deduplicatedNewEvents
+      ...calculateRetryCount(allEvents)
     }
 
-    const transactionResult = await this.auditLogGateway.update(message, updates)
+    const transactionResult = await this.auditLogGateway.update(message, updates, deduplicatedNewEvents)
 
     if (isError(transactionResult)) {
       if (isConditionalExpressionViolationError(transactionResult) || isTransactionConflictError(transactionResult)) {

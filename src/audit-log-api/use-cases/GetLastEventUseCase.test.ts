@@ -1,6 +1,7 @@
 import "src/shared/testing"
+import { mockDynamoAuditLog } from "src/shared/testing"
 import type { EventCategory } from "src/shared/types"
-import { AuditLog, AuditLogEvent } from "src/shared/types"
+import { AuditLogEvent } from "src/shared/types"
 import type { AuditLogLookupDynamoGateway } from "../gateways/dynamo"
 import { FakeAuditLogDynamoGateway } from "../test"
 
@@ -11,8 +12,6 @@ const auditLogDynamoGateway = new FakeAuditLogDynamoGateway()
 const lookupEventValuesUseCase = new LookupEventValuesUseCase({} as unknown as AuditLogLookupDynamoGateway)
 const useCase = new GetLastFailedMessageEventUseCase(auditLogDynamoGateway, lookupEventValuesUseCase)
 
-const createAuditLog = (): AuditLog =>
-  new AuditLog("External Correlation Id", new Date("2021-07-22T08:10:10"), "Dummy hash")
 const createEvent = (date: string, category: EventCategory): AuditLogEvent => {
   return new AuditLogEvent({
     category,
@@ -35,7 +34,7 @@ it("should return the last event when message exists and has events", async () =
   const lookupEventValuesUseCaseSpy = jest
     .spyOn(lookupEventValuesUseCase, "execute")
     .mockImplementation((event) => Promise.resolve(event))
-  const message = createAuditLog()
+  const message = mockDynamoAuditLog({ receivedDate: "2021-07-22T08:10:10Z" })
   message.events.push(createEvent("2021-07-22T09:10:10", "information"))
   message.events.push(createFailureEvent("2021-07-22T12:10:10", "error"))
   message.events.push(createEvent("2021-07-22T10:10:10", "information"))
@@ -52,7 +51,7 @@ it("should return the last event when message exists and has events", async () =
 })
 
 it("should return error when there are no events against the message", async () => {
-  const message = createAuditLog()
+  const message = mockDynamoAuditLog({ receivedDate: "2021-07-22T08:10:10Z" })
 
   auditLogDynamoGateway.reset([message])
   const result = await useCase.get(message.messageId)

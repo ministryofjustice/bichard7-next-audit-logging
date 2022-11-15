@@ -1,8 +1,8 @@
 import type { APIGatewayProxyEvent } from "aws-lambda"
-import type { AuditLog, Result } from "src/shared/types"
+import type { InputApiAuditLog, Result } from "src/shared/types"
 import { isError } from "src/shared/types"
 
-export default function parseCreateAuditLogRequest(event: APIGatewayProxyEvent): Result<AuditLog> {
+export default function parseCreateAuditLogRequest(event: APIGatewayProxyEvent): Result<InputApiAuditLog> {
   const { body } = event
 
   if (!body) {
@@ -10,7 +10,7 @@ export default function parseCreateAuditLogRequest(event: APIGatewayProxyEvent):
   }
 
   try {
-    return <AuditLog>JSON.parse(body)
+    return <InputApiAuditLog>JSON.parse(body)
   } catch (error) {
     return isError(error) ? error : Error("Error parsing JSON")
   }

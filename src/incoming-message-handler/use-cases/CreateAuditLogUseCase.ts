@@ -1,11 +1,11 @@
-import type { ApiClient, AuditLog, PromiseResult } from "src/shared/types"
+import type { ApiClient, InputApiAuditLog, PromiseResult } from "src/shared/types"
 import { isError } from "src/shared/types"
 import type { ValidationResult } from "../handlers/storeMessage"
 
 export default class {
   constructor(private apiClient: ApiClient) {}
 
-  async execute(auditLog: AuditLog): PromiseResult<ValidationResult> {
+  async execute(auditLog: InputApiAuditLog): PromiseResult<ValidationResult> {
     const result = await this.apiClient.createAuditLog(auditLog)
 
     if (result && isError(result)) {

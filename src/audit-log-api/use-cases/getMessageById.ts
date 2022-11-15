@@ -1,11 +1,11 @@
-import type { AuditLog, PromiseResult } from "src/shared/types"
+import type { OutputApiAuditLog, PromiseResult } from "src/shared/types"
 import { isError } from "src/shared/types"
 import type { AuditLogDynamoGatewayInterface } from "../gateways/dynamo"
 
 const getMessageById = async (
   gateway: AuditLogDynamoGatewayInterface,
   messageId?: string
-): PromiseResult<AuditLog | undefined> => {
+): PromiseResult<OutputApiAuditLog | undefined> => {
   if (!messageId) {
     return undefined
   }
@@ -15,6 +15,8 @@ const getMessageById = async (
   if (isError(message)) {
     return message
   }
+
+  // TODO: explicitly remove fields to convert to OutputApiAuditLog
 
   return message
 }

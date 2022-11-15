@@ -1,6 +1,6 @@
 import { logger } from "src/shared"
-import type { ApiClient, AuditLogEvent, PromiseResult } from "src/shared/types"
-import { AuditLog, isError } from "src/shared/types"
+import type { ApiClient, AuditLogEvent, InputApiAuditLog, PromiseResult } from "src/shared/types"
+import { isError } from "src/shared/types"
 
 export default class {
   constructor(private readonly api: ApiClient) {}
@@ -13,12 +13,15 @@ export default class {
 
     // Create a message if message ID doesn't exist in the database
     // If message ID already exists, the API returns 409 error
-    const message = {
-      ...new AuditLog(messageId, new Date("1970-01-01T00:00:00.000Z"), messageId), // We don't have the message XML to compute the message hash
-      messageId,
+    const message: InputApiAuditLog = {
       caseId: "Unknown",
       createdBy: "Event handler",
-      nextSanitiseCheck: new Date().toISOString()
+      externalCorrelationId: messageId,
+      externalId: messageId,
+      isSanitised: 0,
+      messageHash: messageId,
+      messageId,
+      receivedDate: "1970-01-01T00:00:00.000Z"
     }
     const createAuditLogResult = await this.api.createAuditLog(message)
 

@@ -1,5 +1,5 @@
-import { FakeS3Gateway } from "src/shared/testing"
-import { AuditLog, AuditLogEvent, isError } from "src/shared/types"
+import { FakeS3Gateway, mockDynamoAuditLog } from "src/shared/testing"
+import { AuditLogEvent, isError } from "src/shared/types"
 import DeleteMessageObjectsFromS3UseCase from "./DeleteMessageObjectsFromS3UseCase"
 
 const fakeEventsS3Gateway = new FakeS3Gateway()
@@ -7,8 +7,7 @@ const fakeMessagesS3Gateway = new FakeS3Gateway()
 const useCase = new DeleteMessageObjectsFromS3UseCase(fakeMessagesS3Gateway, fakeEventsS3Gateway)
 
 const createAuditLog = (s3Path: string, eventS3Path: string) => {
-  const auditLog = new AuditLog("dummy correlation id", new Date(), "dummy hash")
-  auditLog.s3Path = s3Path
+  const auditLog = mockDynamoAuditLog({ s3Path })
   const event = {
     s3Path: eventS3Path,
     ...new AuditLogEvent({

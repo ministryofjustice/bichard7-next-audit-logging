@@ -1,4 +1,5 @@
-import { AuditLog, AuditLogEvent } from "src/shared/types"
+import { mockDynamoAuditLog } from "src/shared/testing"
+import { AuditLogEvent, DynamoAuditLog } from "src/shared/types"
 import { AuditLogDynamoGateway } from "../gateways/dynamo"
 import { auditLogDynamoConfig, TestDynamoGateway } from "../test"
 import { CreateAuditLogEventsUseCase } from "./CreateAuditLogEventsUseCase"
@@ -7,7 +8,6 @@ const testAuditLogDynamoGateway = new TestDynamoGateway(auditLogDynamoConfig)
 const auditLogDynamoGateway = new AuditLogDynamoGateway(auditLogDynamoConfig)
 const createAuditLogEventsUseCase = new CreateAuditLogEventsUseCase(auditLogDynamoGateway)
 
-const createAuditLog = (): AuditLog => new AuditLog("CorrelationId", new Date(), "Dummy hash")
 const createAuditLogEvent = (): AuditLogEvent =>
   new AuditLogEvent({
     category: "information",
@@ -15,6 +15,7 @@ const createAuditLogEvent = (): AuditLogEvent =>
     eventType: "Create audit log event test",
     eventSource: "Integration Test"
   })
+
 const createStacktraceAuditLogEvent = (): AuditLogEvent => {
   const event = new AuditLogEvent({
     eventSource: "CourtResultBean",
@@ -30,8 +31,8 @@ const createStacktraceAuditLogEvent = (): AuditLogEvent => {
   return event
 }
 
-const getAuditLog = async (messageId: string): Promise<AuditLog | undefined> =>
-  (await auditLogDynamoGateway.fetchOne(messageId)) as AuditLog
+const getAuditLog = async (messageId: string): Promise<DynamoAuditLog | undefined> =>
+  (await auditLogDynamoGateway.fetchOne(messageId)) as DynamoAuditLog
 
 describe("CreateAuditLogEventsUseCase", () => {
   beforeEach(async () => {
@@ -40,7 +41,7 @@ describe("CreateAuditLogEventsUseCase", () => {
   })
 
   it("should return success result when event is added to the audit log", async () => {
-    const auditLog = createAuditLog()
+    const auditLog = mockDynamoAuditLog()
     await auditLogDynamoGateway.create(auditLog)
 
     const event = createAuditLogEvent()
@@ -69,7 +70,7 @@ describe("CreateAuditLogEventsUseCase", () => {
   })
 
   it("should deduplicate stacktrace logs added separately", async () => {
-    const auditLog = createAuditLog()
+    const auditLog = mockDynamoAuditLog()
     await auditLogDynamoGateway.create(auditLog)
 
     const event1 = createStacktraceAuditLogEvent()
@@ -95,7 +96,7 @@ describe("CreateAuditLogEventsUseCase", () => {
   })
 
   it("should deduplicate stacktrace logs in multiple operations", async () => {
-    const auditLog = createAuditLog()
+    const auditLog = mockDynamoAuditLog()
     await auditLogDynamoGateway.create(auditLog)
 
     const event1 = createStacktraceAuditLogEvent()
@@ -121,7 +122,7 @@ describe("CreateAuditLogEventsUseCase", () => {
   })
 
   it("should deduplicate stacktrace logs in the same operation", async () => {
-    const auditLog = createAuditLog()
+    const auditLog = mockDynamoAuditLog()
     await auditLogDynamoGateway.create(auditLog)
 
     const event1 = createStacktraceAuditLogEvent()
@@ -143,7 +144,7 @@ describe("CreateAuditLogEventsUseCase", () => {
   })
 
   it("should not deduplicate stacktrace logs if they are not sequential in multiple operations", async () => {
-    const auditLog = createAuditLog()
+    const auditLog = mockDynamoAuditLog()
     await auditLogDynamoGateway.create(auditLog)
 
     const event1 = createStacktraceAuditLogEvent()
@@ -168,7 +169,7 @@ describe("CreateAuditLogEventsUseCase", () => {
   })
 
   it("should not deduplicate stacktrace logs if they are not sequential in a single operation", async () => {
-    const auditLog = createAuditLog()
+    const auditLog = mockDynamoAuditLog()
     await auditLogDynamoGateway.create(auditLog)
 
     const event1 = createStacktraceAuditLogEvent()
@@ -185,7 +186,7 @@ describe("CreateAuditLogEventsUseCase", () => {
   })
 
   it("should not deduplicate non-stacktrace logs", async () => {
-    const auditLog = createAuditLog()
+    const auditLog = mockDynamoAuditLog()
     await auditLogDynamoGateway.create(auditLog)
 
     const event1 = createAuditLogEvent()
@@ -201,7 +202,7 @@ describe("CreateAuditLogEventsUseCase", () => {
   })
 
   it("shouldn't add events when creating the transaction fails", async () => {
-    const auditLog = createAuditLog()
+    const auditLog = mockDynamoAuditLog()
     await auditLogDynamoGateway.create(auditLog)
 
     const event = createAuditLogEvent()
@@ -221,7 +222,7 @@ describe("CreateAuditLogEventsUseCase", () => {
   })
 
   it("should give an error when attempting to create more events than is supported by dynamodb transactions", async () => {
-    const auditLog = createAuditLog()
+    const auditLog = mockDynamoAuditLog()
     await auditLogDynamoGateway.create(auditLog)
 
     const events = new Array(250).fill(0).map(() => {

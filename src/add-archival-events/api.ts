@@ -1,6 +1,6 @@
 import { logger } from "src/shared"
-import type { ApiClient } from "src/shared/types"
-import { AuditLog, AuditLogEvent, EventCode, isError } from "src/shared/types"
+import type { ApiClient, InputApiAuditLog, OutputApiAuditLog } from "src/shared/types"
+import { AuditLogEvent, EventCode, isError } from "src/shared/types"
 import type { BichardRecord } from "./db"
 
 export default class ArchivalEventsApiClient {
@@ -57,12 +57,16 @@ export default class ArchivalEventsApiClient {
   }
 
   private createAuditLog = async (messageId: string, archivedAt: Date): Promise<boolean> => {
-    const message = {
-      ...new AuditLog(messageId, archivedAt, messageId, messageId), // We don't have the message XML to compute the message hash
-      messageId,
+    const message: InputApiAuditLog = {
       caseId: "Unknown",
-      createdBy: "Add Archival Events"
+      createdBy: "Add Archival Events",
+      externalCorrelationId: messageId,
+      isSanitised: 0,
+      messageHash: messageId,
+      messageId,
+      receivedDate: archivedAt.toISOString()
     }
+
     const createEventResult = await this.api.createAuditLog(message)
     if (isError(createEventResult)) {
       logger.error({ message: "Failed to create audit log for record", messageId: messageId })
@@ -71,7 +75,7 @@ export default class ArchivalEventsApiClient {
     return isError(createEventResult)
   }
 
-  private hasArchivalEvent = (auditLog: AuditLog, recordId: number): boolean =>
+  private hasArchivalEvent = (auditLog: OutputApiAuditLog, recordId: number): boolean =>
     auditLog.events.filter((event: AuditLogEvent) => {
       return (
         event.eventCode === EventCode.ErrorRecordArchived &&

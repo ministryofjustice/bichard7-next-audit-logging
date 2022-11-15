@@ -1,10 +1,13 @@
-import { AuditLog } from "src/shared/types"
+import { mockInputApiAuditLog } from "src/shared/testing"
 import transformMessageXml from "./transformMessageXml"
 
-const createAuditLog = () => ({
-  ...new AuditLog("EXTERNAL_CORRELATION_ID", new Date("2021-10-13T10:12:13"), "duplicate hash"),
-  messageId: "MESSAGE_ID"
-})
+const createAuditLog = () =>
+  mockInputApiAuditLog({
+    externalCorrelationId: "EXTERNAL_CORRELATION_ID",
+    receivedDate: "2021-10-13T10:12:13",
+    messageHash: "duplicate hash",
+    messageId: "MESSAGE_ID"
+  })
 
 describe("formatMessageXml()", () => {
   const messageXml = `

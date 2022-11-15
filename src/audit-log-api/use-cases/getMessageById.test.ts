@@ -1,4 +1,5 @@
-import { AuditLog, isError } from "src/shared/types"
+import { mockDynamoAuditLog } from "src/shared/testing"
+import { isError, OutputApiAuditLog } from "src/shared/types"
 import { FakeAuditLogDynamoGateway } from "../test"
 import getMessageById from "./getMessageById"
 
@@ -16,14 +17,14 @@ it("returns undefined when messageId does not have value", async () => {
 })
 
 it("returns the message when messageId exists in the database", async () => {
-  const expectedMessage = new AuditLog("External correlation id", new Date(), "Dummy hash")
+  const expectedMessage = mockDynamoAuditLog()
   gateway.reset([expectedMessage])
   const result = await getMessageById(gateway, expectedMessage.messageId)
 
   expect(isError(result)).toBe(false)
   expect(result).toBeDefined()
 
-  const actualMessage = <AuditLog>result
+  const actualMessage = <OutputApiAuditLog>result
   expect(actualMessage.messageId).toBe(expectedMessage.messageId)
 })
 

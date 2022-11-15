@@ -1,5 +1,12 @@
-import type { AuditLog, TransactionFailureReason } from "src/shared/types"
-import { isError } from "src/shared/types"
+import {
+  AuditLogStatus,
+  DynamoAuditLog,
+  InputApiAuditLog,
+  isError,
+  PncStatus,
+  TransactionFailureReason,
+  TriggerStatus
+} from "src/shared/types"
 import type { AuditLogDynamoGatewayInterface } from "../gateways/dynamo"
 import { isConditionalExpressionViolationError, isTransactionFailedError } from "../gateways/dynamo"
 
@@ -9,11 +16,20 @@ interface CreateAuditLogsResult {
   failureReasons?: TransactionFailureReason[]
 }
 
+const transformInput = (input: InputApiAuditLog): DynamoAuditLog => ({
+  events: [],
+  pncStatus: PncStatus.Processing,
+  status: AuditLogStatus.processing,
+  triggerStatus: TriggerStatus.NoTriggers,
+  version: 0,
+  ...input
+})
+
 export default class CreateAuditLogsUseCase {
   constructor(private readonly auditLogGateway: AuditLogDynamoGatewayInterface) {}
 
-  async create(auditLogs: AuditLog[]): Promise<CreateAuditLogsResult> {
-    const result = await this.auditLogGateway.createMany(auditLogs)
+  async create(auditLogs: InputApiAuditLog[]): Promise<CreateAuditLogsResult> {
+    const result = await this.auditLogGateway.createMany(auditLogs.map(transformInput))
 
     let toReturn: CreateAuditLogsResult = {
       resultType: "success"

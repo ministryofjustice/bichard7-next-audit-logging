@@ -1,62 +1,34 @@
-import { v4 as uuid } from "uuid"
 import type AuditLogEvent from "./AuditLogEvent"
-import AuditLogStatus from "./AuditLogStatus"
-import type AutomationReport from "./AutomationReport"
-import type TopExceptionsReport from "./TopExceptionsReport"
+import type AuditLogStatus from "./AuditLogStatus"
 
-export default class AuditLog {
-  public readonly messageId: string
+export type InputApiAuditLog = {
+  caseId: string
+  createdBy: string
+  externalId?: string
+  externalCorrelationId: string
+  isSanitised: number // TODO: Move into the Dynamo type and make the tests use the Gateway instead of the API
+  messageHash: string
+  messageId: string //TODO: Move into the Output type and make the create handler return the ID
+  nextSanitiseCheck?: string // TODO: Move into the Dynamo type and make the tests use the Gateway instead of the API
+  receivedDate: string
+  s3Path?: string
+  stepExecutionId?: string
+  systemId?: string
+}
 
-  public readonly receivedDate: string
+export type OutputApiAuditLog = InputApiAuditLog & {
+  events: AuditLogEvent[]
+  forceOwner?: number
+  pncStatus: string
+  status: AuditLogStatus
+  triggerStatus: string
+}
 
-  public forceOwner?: number
-
-  public errorRecordArchivalDate?: string
-
-  public isSanitised = 0
-
-  public nextSanitiseCheck?: string
-
-  public caseId: string
-
-  public systemId: string
-
-  public events: AuditLogEvent[] = []
-
-  public automationReport?: AutomationReport = { events: [] }
-
-  public topExceptionsReport?: TopExceptionsReport = { events: [] }
-
-  public status = AuditLogStatus.processing
-
-  public pncStatus?: string
-
-  public triggerStatus?: string
-
-  public lastEventType: string
-
-  public createdBy: string
-
-  public s3Path: string
-
-  public externalId: string
-
-  public stepExecutionId: string
-
-  public retryCount?: number
-
-  public readonly version = 0
-
-  public expiryTime?: string
-
-  constructor(
-    public readonly externalCorrelationId: string,
-    receivedDate: Date,
-    public readonly messageHash: string,
-    messageId?: string
-  ) {
-    this.messageId = messageId ?? uuid()
-    this.receivedDate = receivedDate.toISOString()
-    this.nextSanitiseCheck = this.receivedDate
-  }
+export type DynamoAuditLog = OutputApiAuditLog & {
+  errorRecordArchivalDate?: string
+  expiryTime?: string
+  retryCount?: number
+  version: number
+  automationReport?: { events: AuditLogEvent[]; forceOwner: string }
+  topExceptionsReport?: { events: AuditLogEvent[] }
 }

@@ -1,32 +1,34 @@
 import { logger } from "src/shared"
-import type { AuditLog } from "src/shared/types"
-import { AuditLogStatus, isError, PncStatus, TriggerStatus } from "src/shared/types"
+import type { InputApiAuditLog } from "src/shared/types"
+import { isError } from "src/shared/types"
 import type { AuditLogDynamoGatewayInterface } from "../gateways/dynamo"
 import { isIsoDate } from "../utils"
 
 interface ValidationResult {
   isValid: boolean
   errors: string[]
-  auditLog: AuditLog
+  auditLog: InputApiAuditLog
 }
 
-export default async (auditLog: AuditLog, dynamoGateway: AuditLogDynamoGatewayInterface): Promise<ValidationResult> => {
+export default async (
+  auditLog: InputApiAuditLog,
+  dynamoGateway: AuditLogDynamoGatewayInterface
+): Promise<ValidationResult> => {
   const errors: string[] = []
   let formattedReceivedDate = ""
   let formattedNextSanitiseCheck = ""
   const {
-    forceOwner,
     caseId,
     systemId,
     externalCorrelationId,
     messageId,
+    nextSanitiseCheck,
     receivedDate,
     createdBy,
     s3Path,
     stepExecutionId,
     externalId,
-    messageHash,
-    nextSanitiseCheck
+    messageHash
   } = auditLog
 
   if (!caseId) {
@@ -100,29 +102,19 @@ export default async (auditLog: AuditLog, dynamoGateway: AuditLogDynamoGatewayIn
     errors.push("Step execution ID must be string")
   }
 
-  const validatedAuditLog: AuditLog = {
-    messageId,
-    forceOwner,
+  const validatedAuditLog: InputApiAuditLog = {
     caseId,
-    systemId,
-    s3Path,
-    externalId,
-    stepExecutionId,
-    externalCorrelationId,
-    receivedDate: formattedReceivedDate,
     createdBy,
-    status: AuditLogStatus.processing,
-    pncStatus: PncStatus.Processing,
-    triggerStatus: TriggerStatus.NoTriggers,
-    lastEventType: "",
-    version: 0,
-    retryCount: 0,
-    events: [],
-    automationReport: { events: [] },
-    topExceptionsReport: { events: [] },
-    messageHash,
+    externalCorrelationId,
+    externalId,
     isSanitised: 0,
-    nextSanitiseCheck: formattedNextSanitiseCheck
+    messageHash,
+    messageId,
+    nextSanitiseCheck: formattedNextSanitiseCheck,
+    receivedDate: formattedReceivedDate,
+    s3Path,
+    stepExecutionId,
+    systemId
   }
 
   return {

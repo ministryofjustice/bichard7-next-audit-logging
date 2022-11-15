@@ -3,9 +3,9 @@ import { addDays } from "date-fns"
 import { auditLogDynamoConfig } from "src/audit-log-api/test"
 import { compress, decompress } from "src/shared"
 import "src/shared/testing"
-import { createMockAuditLog, mockAuditLogEvent } from "src/shared/testing"
-import type { AuditLogEventOptions, KeyValuePair } from "src/shared/types"
-import { AuditLog, AuditLogEvent, AuditLogStatus, isError } from "src/shared/types"
+import { createMockAuditLog, mockAuditLogEvent, mockDynamoAuditLog } from "src/shared/testing"
+import type { AuditLogEventOptions, DynamoAuditLog, KeyValuePair } from "src/shared/types"
+import { AuditLogEvent, AuditLogStatus, isError } from "src/shared/types"
 import TestDynamoGateway from "../../../test/TestDynamoGateway"
 import AuditLogDynamoGateway from "./AuditLogDynamoGateway"
 
@@ -30,20 +30,20 @@ describe("AuditLogDynamoGateway", () => {
 
   describe("create()", () => {
     it("should insert the given message", async () => {
-      const expectedMessage = new AuditLog("ExpectedMessage", new Date(), "dummy hash")
+      const expectedMessage = mockDynamoAuditLog()
 
       const result = await gateway.create(expectedMessage)
 
       expect(isError(result)).toBe(false)
 
-      const actualMessage = <AuditLog>result
+      const actualMessage = <DynamoAuditLog>result
       expect(actualMessage.messageId).toBe(expectedMessage.messageId)
       expect(actualMessage.receivedDate).toBe(expectedMessage.receivedDate)
       expect(actualMessage.expiryTime).toBeUndefined()
     })
 
     it("should return an error when the given message already exists", async () => {
-      const message = new AuditLog("one", new Date(), "dummy hash")
+      const message = mockDynamoAuditLog()
       await gateway.create(message)
 
       const result = await gateway.create(message)
@@ -55,7 +55,7 @@ describe("AuditLogDynamoGateway", () => {
     })
 
     it("should set an expiry time of ~1 week in the E2E environment", async () => {
-      const expectedMessage = new AuditLog("E2EMessage", new Date(), "dummy hash")
+      const expectedMessage = mockDynamoAuditLog()
 
       process.env.IS_E2E = "true"
       const result = await gateway.create(expectedMessage)
@@ -63,7 +63,7 @@ describe("AuditLogDynamoGateway", () => {
 
       expect(isError(result)).toBe(false)
 
-      const actualMessage = <AuditLog>result
+      const actualMessage = <DynamoAuditLog>result
       expect(actualMessage.messageId).toBe(expectedMessage.messageId)
 
       expect(actualMessage.expiryTime).toBeDefined()
@@ -77,13 +77,13 @@ describe("AuditLogDynamoGateway", () => {
 
   describe("createMany()", () => {
     it("should insert the given message", async () => {
-      const expectedMessage = new AuditLog("ExpectedMessage", new Date(), "dummy hash")
+      const expectedMessage = mockDynamoAuditLog()
 
       const result = await gateway.createMany([expectedMessage])
 
       expect(isError(result)).toBe(false)
 
-      const actualMessages = <AuditLog[]>result
+      const actualMessages = <DynamoAuditLog[]>result
       expect(actualMessages).toHaveLength(1)
       expect(actualMessages[0].messageId).toBe(expectedMessage.messageId)
       expect(actualMessages[0].receivedDate).toBe(expectedMessage.receivedDate)
@@ -91,7 +91,7 @@ describe("AuditLogDynamoGateway", () => {
     })
 
     it("should return an error when the given message already exists", async () => {
-      const messages = new Array(10).fill(0).map(() => new AuditLog("one", new Date(), "dummy hash"))
+      const messages = new Array(10).fill(0).map(() => mockDynamoAuditLog())
       await gateway.create(messages[4])
 
       const result = await gateway.createMany(messages)
@@ -103,7 +103,7 @@ describe("AuditLogDynamoGateway", () => {
     })
 
     it("should set an expiry time of ~1 week in the E2E environment", async () => {
-      const expectedMessage = new AuditLog("E2EMessage", new Date(), "dummy hash")
+      const expectedMessage = mockDynamoAuditLog()
 
       process.env.IS_E2E = "true"
       const result = await gateway.createMany([expectedMessage])
@@ -111,7 +111,7 @@ describe("AuditLogDynamoGateway", () => {
 
       expect(isError(result)).toBe(false)
 
-      const actualMessages = <AuditLog[]>result
+      const actualMessages = <DynamoAuditLog[]>result
       expect(actualMessages).toHaveLength(1)
       expect(actualMessages[0].messageId).toBe(expectedMessage.messageId)
 
@@ -126,14 +126,14 @@ describe("AuditLogDynamoGateway", () => {
 
   describe("fetchOne", () => {
     it("should return the matching AuditLog", async () => {
-      const expectedAuditLog = new AuditLog("ExternalCorrelationId", new Date(), `dummy hash`)
+      const expectedAuditLog = mockDynamoAuditLog()
       await gateway.create(expectedAuditLog)
 
       const result = await gateway.fetchOne(expectedAuditLog.messageId)
 
       expect(isError(result)).toBe(false)
 
-      const actualAuditLog = <AuditLog>result
+      const actualAuditLog = <DynamoAuditLog>result
       expect(actualAuditLog.caseId).toBe(expectedAuditLog.caseId)
       expect(actualAuditLog.externalCorrelationId).toBe(expectedAuditLog.externalCorrelationId)
       expect(actualAuditLog.messageId).toBe(expectedAuditLog.messageId)
@@ -145,11 +145,11 @@ describe("AuditLogDynamoGateway", () => {
       const result = await gateway.fetchOne("InvalidMessageId")
 
       expect(isError(result)).toBe(false)
-      expect(result as AuditLog).toBeUndefined()
+      expect(result as DynamoAuditLog).toBeUndefined()
     })
 
     it("should merge events from both tables for one message", async () => {
-      const auditLog = new AuditLog("External correlation id 1", new Date(), "hash-1")
+      const auditLog = mockDynamoAuditLog()
       auditLog.events.push(mockAuditLogEvent({ eventType: "Type 1" }))
       await testGateway.insertOne(auditLogDynamoConfig.auditLogTableName, auditLog, gateway.auditLogTableKey)
       const externalEvent = { ...mockAuditLogEvent(), eventType: "Type 2", _messageId: auditLog.messageId }
@@ -159,7 +159,7 @@ describe("AuditLogDynamoGateway", () => {
 
       expect(result).toNotBeError()
 
-      const actualAuditLogs = result as AuditLog
+      const actualAuditLogs = result as DynamoAuditLog
       expect(actualAuditLogs.events).toHaveLength(2)
 
       const actualEvents = actualAuditLogs.events
@@ -168,7 +168,7 @@ describe("AuditLogDynamoGateway", () => {
     })
 
     it("should not merge events if the column was excluded", async () => {
-      const auditLog = new AuditLog("External correlation id 1", new Date(), "hash-1")
+      const auditLog = mockDynamoAuditLog()
       auditLog.events.push(mockAuditLogEvent({ eventType: "Type 1" }))
       await testGateway.insertOne(auditLogDynamoConfig.auditLogTableName, auditLog, gateway.auditLogTableKey)
       const externalEvent = { ...mockAuditLogEvent(), eventType: "Type 2", _messageId: auditLog.messageId }
@@ -178,14 +178,14 @@ describe("AuditLogDynamoGateway", () => {
 
       expect(result).toNotBeError()
 
-      const actualAuditLogs = result as AuditLog
+      const actualAuditLogs = result as DynamoAuditLog
       expect(actualAuditLogs.events).toBeUndefined()
     })
   })
 
   describe("fetchVersion", () => {
     it("should return the version of the matching AuditLog", async () => {
-      const expectedAuditLog = new AuditLog("ExternalCorrelationId", new Date(), `dummy hash`)
+      const expectedAuditLog = mockDynamoAuditLog()
       await gateway.create(expectedAuditLog)
 
       const result = await gateway.fetchVersion(expectedAuditLog.messageId)
@@ -206,9 +206,8 @@ describe("AuditLogDynamoGateway", () => {
   describe("fetchMany", () => {
     it("should return limited amount of AuditLogs", async () => {
       await Promise.allSettled(
-        [...Array(3).keys()].map(async (i: number) => {
-          const auditLog = new AuditLog(`External correlation id ${i}`, new Date(), `hash-${i}`)
-          await gateway.create(auditLog)
+        [...Array(3).keys()].map(async () => {
+          await gateway.create(mockDynamoAuditLog())
         })
       )
 
@@ -226,9 +225,8 @@ describe("AuditLogDynamoGateway", () => {
         .reverse()
 
       await Promise.allSettled(
-        receivedDates.map(async (dateString: string, i: number) => {
-          const auditLog = new AuditLog(`External correlation id ${i}`, new Date(dateString), `hash-${i}`)
-          await gateway.create(auditLog)
+        receivedDates.map(async (receivedDate: string) => {
+          await gateway.create(mockDynamoAuditLog({ receivedDate }))
         })
       )
 
@@ -237,7 +235,7 @@ describe("AuditLogDynamoGateway", () => {
       expect(isError(result)).toBe(false)
       expect(result).toHaveLength(3)
 
-      const actualAuditLogs = <AuditLog[]>result
+      const actualAuditLogs = <DynamoAuditLog[]>result
 
       expect(actualAuditLogs).toBeDefined()
       expect(actualAuditLogs[0].receivedDate).toBe(expectedReceivedDates[0])
@@ -246,7 +244,7 @@ describe("AuditLogDynamoGateway", () => {
     })
 
     it("should merge events from both tables for one message", async () => {
-      const auditLog = new AuditLog("External correlation id 1", new Date(), "hash-1")
+      const auditLog = mockDynamoAuditLog()
       auditLog.events.push(mockAuditLogEvent({ eventType: "Type 1" }))
       await testGateway.insertOne(auditLogDynamoConfig.auditLogTableName, auditLog, gateway.auditLogTableKey)
       const externalEvent = { ...mockAuditLogEvent(), eventType: "Type 2", _messageId: auditLog.messageId }
@@ -256,7 +254,7 @@ describe("AuditLogDynamoGateway", () => {
 
       expect(result).toNotBeError()
 
-      const actualAuditLogs = result as AuditLog[]
+      const actualAuditLogs = result as DynamoAuditLog[]
       expect(actualAuditLogs).toHaveLength(1)
       expect(actualAuditLogs[0].events).toHaveLength(2)
 
@@ -268,7 +266,7 @@ describe("AuditLogDynamoGateway", () => {
     it("should merge events from both tables for multiple messages", async () => {
       await Promise.allSettled(
         [...Array(3).keys()].map(async (i: number) => {
-          const auditLog = new AuditLog(`External correlation id ${i}`, new Date(`2021-06-01T10:11:0${i}`), `hash-${i}`)
+          const auditLog = mockDynamoAuditLog({ receivedDate: `2021-06-01T10:11:0${i}` })
           auditLog.events.push(
             mockAuditLogEvent({ eventType: `Main event type ${i}`, timestamp: new Date(`2021-06-01T10:11:01`) })
           )
@@ -286,7 +284,7 @@ describe("AuditLogDynamoGateway", () => {
 
       expect(result).toNotBeError()
 
-      const actualAuditLogs = result as AuditLog[]
+      const actualAuditLogs = result as DynamoAuditLog[]
       expect(actualAuditLogs).toHaveLength(3)
       expect(actualAuditLogs[0].events).toHaveLength(2)
       expect(actualAuditLogs[0].events[0].eventType).toBe("Main event type 2")
@@ -302,7 +300,7 @@ describe("AuditLogDynamoGateway", () => {
     })
 
     it("should not merge events if the column was excluded", async () => {
-      const auditLog = new AuditLog("External correlation id 1", new Date(), "hash-1")
+      const auditLog = mockDynamoAuditLog()
       auditLog.events.push(mockAuditLogEvent({ eventType: "Type 1" }))
       await testGateway.insertOne(auditLogDynamoConfig.auditLogTableName, auditLog, gateway.auditLogTableKey)
       const externalEvent = { ...mockAuditLogEvent(), eventType: "Type 2", _messageId: auditLog.messageId }
@@ -312,7 +310,7 @@ describe("AuditLogDynamoGateway", () => {
 
       expect(result).toNotBeError()
 
-      const actualAuditLogs = result as AuditLog[]
+      const actualAuditLogs = result as DynamoAuditLog[]
       expect(actualAuditLogs).toHaveLength(1)
       expect(actualAuditLogs[0].events).toBeUndefined()
     })
@@ -321,9 +319,8 @@ describe("AuditLogDynamoGateway", () => {
   describe("fetchRange", () => {
     it("should return limited amount of AuditLogs", async () => {
       await Promise.allSettled(
-        [...Array(3).keys()].map(async (i: number) => {
-          const auditLog = new AuditLog(`External correlation id ${i}`, new Date(), `hash-${i}`)
-          await gateway.create(auditLog)
+        [...Array(3).keys()].map(async () => {
+          await gateway.create(mockDynamoAuditLog())
         })
       )
 
@@ -341,9 +338,8 @@ describe("AuditLogDynamoGateway", () => {
         .reverse()
 
       await Promise.allSettled(
-        receivedDates.map(async (dateString: string, i: number) => {
-          const auditLog = new AuditLog(`External correlation id ${i}`, new Date(dateString), `hash-${i}`)
-          await gateway.create(auditLog)
+        receivedDates.map(async (receivedDate: string) => {
+          await gateway.create(mockDynamoAuditLog({ receivedDate }))
         })
       )
 
@@ -352,7 +348,7 @@ describe("AuditLogDynamoGateway", () => {
       expect(isError(result)).toBe(false)
       expect(result).toHaveLength(3)
 
-      const actualAuditLogs = <AuditLog[]>result
+      const actualAuditLogs = <DynamoAuditLog[]>result
 
       expect(actualAuditLogs).toBeDefined()
       expect(actualAuditLogs[0].receivedDate).toBe(expectedReceivedDates[0])
@@ -368,9 +364,8 @@ describe("AuditLogDynamoGateway", () => {
         .reverse()
 
       await Promise.allSettled(
-        receivedDates.map(async (dateString: string, i: number) => {
-          const auditLog = new AuditLog(`External correlation id ${i}`, new Date(dateString), `hash-${i}`)
-          await gateway.create(auditLog)
+        receivedDates.map(async (receivedDate: string) => {
+          await gateway.create(mockDynamoAuditLog({ receivedDate }))
         })
       )
 
@@ -379,14 +374,14 @@ describe("AuditLogDynamoGateway", () => {
       expect(isError(result)).toBe(false)
       expect(result).toHaveLength(1)
 
-      const actualAuditLogs = <AuditLog[]>result
+      const actualAuditLogs = <DynamoAuditLog[]>result
 
       expect(actualAuditLogs).toBeDefined()
       expect(actualAuditLogs[0].receivedDate).toBe(expectedReceivedDates[1])
     })
 
     it("should merge events from both tables for one message", async () => {
-      const auditLog = new AuditLog("External correlation id 1", new Date(), "hash-1")
+      const auditLog = mockDynamoAuditLog()
       auditLog.events.push(mockAuditLogEvent({ eventType: "Type 1" }))
       await testGateway.insertOne(auditLogDynamoConfig.auditLogTableName, auditLog, gateway.auditLogTableKey)
       const externalEvent = { ...mockAuditLogEvent(), eventType: "Type 2", _messageId: auditLog.messageId }
@@ -396,7 +391,7 @@ describe("AuditLogDynamoGateway", () => {
 
       expect(result).toNotBeError()
 
-      const actualAuditLogs = result as AuditLog[]
+      const actualAuditLogs = result as DynamoAuditLog[]
       expect(actualAuditLogs).toHaveLength(1)
       expect(actualAuditLogs[0].events).toHaveLength(2)
 
@@ -408,7 +403,7 @@ describe("AuditLogDynamoGateway", () => {
     it("should merge events from both tables for multiple messages", async () => {
       await Promise.allSettled(
         [...Array(3).keys()].map(async (i: number) => {
-          const auditLog = new AuditLog(`External correlation id ${i}`, new Date(`2021-06-01T10:11:0${i}`), `hash-${i}`)
+          const auditLog = mockDynamoAuditLog({ receivedDate: `2021-06-01T10:11:0${i}` })
           auditLog.events.push(mockAuditLogEvent({ eventType: `Main event type ${i}` }))
           await testGateway.insertOne(auditLogDynamoConfig.auditLogTableName, auditLog, gateway.auditLogTableKey)
           const externalEvent = {
@@ -424,7 +419,7 @@ describe("AuditLogDynamoGateway", () => {
 
       expect(result).toNotBeError()
 
-      const actualAuditLogs = result as AuditLog[]
+      const actualAuditLogs = result as DynamoAuditLog[]
       expect(actualAuditLogs).toHaveLength(3)
       expect(actualAuditLogs[0].events).toHaveLength(2)
       expect(actualAuditLogs[0].events[0].eventType).toBe("Main event type 2")
@@ -440,7 +435,7 @@ describe("AuditLogDynamoGateway", () => {
     })
 
     it("should not merge events if the column was excluded", async () => {
-      const auditLog = new AuditLog("External correlation id 1", new Date(), "hash-1")
+      const auditLog = mockDynamoAuditLog()
       auditLog.events.push(mockAuditLogEvent({ eventType: "Type 1" }))
       await testGateway.insertOne(auditLogDynamoConfig.auditLogTableName, auditLog, gateway.auditLogTableKey)
       const externalEvent = { ...mockAuditLogEvent(), eventType: "Type 2", _messageId: auditLog.messageId }
@@ -455,13 +450,13 @@ describe("AuditLogDynamoGateway", () => {
 
       expect(result).toNotBeError()
 
-      const actualAuditLogs = result as AuditLog[]
+      const actualAuditLogs = result as DynamoAuditLog[]
       expect(actualAuditLogs).toHaveLength(1)
       expect(actualAuditLogs[0].events).toBeUndefined()
     })
 
     it("should allow events to be filtered for the automation report", async () => {
-      const auditLog = new AuditLog("External correlation id 1", new Date(), "hash-1")
+      const auditLog = mockDynamoAuditLog()
       await testGateway.insertOne(auditLogDynamoConfig.auditLogTableName, auditLog, gateway.auditLogTableKey)
       const externalEvent1 = {
         ...mockAuditLogEvent(),
@@ -487,7 +482,7 @@ describe("AuditLogDynamoGateway", () => {
 
       expect(result).toNotBeError()
 
-      const actualAuditLogs = result as AuditLog[]
+      const actualAuditLogs = result as DynamoAuditLog[]
       expect(actualAuditLogs).toHaveLength(1)
       expect(actualAuditLogs[0].events).toHaveLength(1)
       expect(actualAuditLogs[0].events[0].eventType).toBe("Type 2")
@@ -498,8 +493,7 @@ describe("AuditLogDynamoGateway", () => {
     it("should return one AuditLog when external correlation id exists in the table", async () => {
       await Promise.allSettled(
         [...Array(3).keys()].map(async (i: number) => {
-          const auditLog = new AuditLog(`External correlation id ${i}`, new Date(), `hash-${i}`)
-          await gateway.create(auditLog)
+          await gateway.create(mockDynamoAuditLog({ externalCorrelationId: `External correlation id ${i}` }))
         })
       )
 
@@ -509,15 +503,14 @@ describe("AuditLogDynamoGateway", () => {
       expect(isError(result)).toBe(false)
       expect(result).toBeDefined()
 
-      const item = <AuditLog>result
+      const item = <DynamoAuditLog>result
       expect(item.externalCorrelationId).toBe(correlationId)
     })
 
     it("should throw error when external correlation id does not exist in the table", async () => {
       await Promise.allSettled(
-        [...Array(3).keys()].map(async (i: number) => {
-          const auditLog = new AuditLog(`External correlation id ${i}`, new Date(), `hash-${i}`)
-          await gateway.create(auditLog)
+        [...Array(3).keys()].map(async () => {
+          await gateway.create(mockDynamoAuditLog())
         })
       )
 
@@ -525,11 +518,11 @@ describe("AuditLogDynamoGateway", () => {
       const result = await gateway.fetchByExternalCorrelationId(externalCorrelationId)
 
       expect(isError(result)).toBe(false)
-      expect(<AuditLog>result).toBeNull()
+      expect(<DynamoAuditLog>result).toBeNull()
     })
 
     it("should merge events from both tables", async () => {
-      const auditLog = new AuditLog("External correlation id 1", new Date(), "hash-1")
+      const auditLog = mockDynamoAuditLog()
       auditLog.events.push(mockAuditLogEvent({ eventType: "Type 1" }))
       await testGateway.insertOne(auditLogDynamoConfig.auditLogTableName, auditLog, gateway.auditLogTableKey)
       const externalEvent = { ...mockAuditLogEvent(), eventType: "Type 2", _messageId: auditLog.messageId }
@@ -539,7 +532,7 @@ describe("AuditLogDynamoGateway", () => {
 
       expect(result).toNotBeError()
 
-      const actualAuditLogs = result as AuditLog
+      const actualAuditLogs = result as DynamoAuditLog
       expect(actualAuditLogs.events).toHaveLength(2)
 
       const actualEvents = actualAuditLogs.events
@@ -548,7 +541,7 @@ describe("AuditLogDynamoGateway", () => {
     })
 
     it("should not merge events if the column was excluded", async () => {
-      const auditLog = new AuditLog("External correlation id 1", new Date(), "hash-1")
+      const auditLog = mockDynamoAuditLog()
       auditLog.events.push(mockAuditLogEvent({ eventType: "Type 1" }))
       await testGateway.insertOne(auditLogDynamoConfig.auditLogTableName, auditLog, gateway.auditLogTableKey)
       const externalEvent = { ...mockAuditLogEvent(), eventType: "Type 2", _messageId: auditLog.messageId }
@@ -560,7 +553,7 @@ describe("AuditLogDynamoGateway", () => {
 
       expect(result).toNotBeError()
 
-      const actualAuditLogs = result as AuditLog
+      const actualAuditLogs = result as DynamoAuditLog
       expect(actualAuditLogs.events).toBeUndefined()
     })
   })
@@ -569,8 +562,7 @@ describe("AuditLogDynamoGateway", () => {
     it("should return one AuditLog when hash exists in the table", async () => {
       await Promise.allSettled(
         [...Array(3).keys()].map(async (i: number) => {
-          const auditLog = new AuditLog(`External correlation id ${i}`, new Date(), `hash-${i}`)
-          await gateway.create(auditLog)
+          await gateway.create(mockDynamoAuditLog({ messageHash: `hash-${i}` }))
         })
       )
 
@@ -580,15 +572,14 @@ describe("AuditLogDynamoGateway", () => {
       expect(isError(result)).toBe(false)
       expect(result).toBeDefined()
 
-      const item = <AuditLog>result
+      const item = <DynamoAuditLog>result
       expect(item.messageHash).toBe(hash)
     })
 
     it("should return null when hash does not exist in the table", async () => {
       await Promise.allSettled(
-        [...Array(3).keys()].map(async (i: number) => {
-          const auditLog = new AuditLog(`External correlation id ${i}`, new Date(), `hash-${i}`)
-          await gateway.create(auditLog)
+        [...Array(3).keys()].map(async () => {
+          await gateway.create(mockDynamoAuditLog())
         })
       )
 
@@ -596,11 +587,11 @@ describe("AuditLogDynamoGateway", () => {
       const result = await gateway.fetchByHash(hash)
 
       expect(isError(result)).toBe(false)
-      expect(<AuditLog>result).toBeNull()
+      expect(<DynamoAuditLog>result).toBeNull()
     })
 
     it("should merge events from both tables", async () => {
-      const auditLog = new AuditLog("External correlation id 1", new Date(), "hash-1")
+      const auditLog = mockDynamoAuditLog()
       auditLog.events.push(mockAuditLogEvent({ eventType: "Type 1" }))
       await testGateway.insertOne(auditLogDynamoConfig.auditLogTableName, auditLog, gateway.auditLogTableKey)
       const externalEvent = { ...mockAuditLogEvent(), eventType: "Type 2", _messageId: auditLog.messageId }
@@ -610,7 +601,7 @@ describe("AuditLogDynamoGateway", () => {
 
       expect(result).toNotBeError()
 
-      const actualAuditLogs = result as AuditLog
+      const actualAuditLogs = result as DynamoAuditLog
       expect(actualAuditLogs.events).toHaveLength(2)
 
       const actualEvents = actualAuditLogs.events
@@ -622,13 +613,11 @@ describe("AuditLogDynamoGateway", () => {
   describe("fetchByStatus", () => {
     it("should return one AuditLog when there is a record with Completed status", async () => {
       await Promise.allSettled(
-        [...Array(3).keys()].map(async (i: number) => {
-          const auditLog = new AuditLog(`External correlation id ${i}`, new Date(), "dummy hash")
-          await gateway.create(auditLog)
+        [...Array(3).keys()].map(async () => {
+          await gateway.create(mockDynamoAuditLog())
         })
       )
-      const expectedAuditLog = new AuditLog(`External correlation id`, new Date(), "dummy hash")
-      expectedAuditLog.status = AuditLogStatus.completed
+      const expectedAuditLog = mockDynamoAuditLog({ status: AuditLogStatus.completed })
       await gateway.create(expectedAuditLog)
 
       const result = await gateway.fetchByStatus(AuditLogStatus.completed)
@@ -636,7 +625,7 @@ describe("AuditLogDynamoGateway", () => {
       expect(isError(result)).toBe(false)
       expect(result).toBeDefined()
 
-      const items = <AuditLog[]>result
+      const items = <DynamoAuditLog[]>result
       expect(items).toHaveLength(1)
 
       const item = items[0]
@@ -644,7 +633,7 @@ describe("AuditLogDynamoGateway", () => {
     })
 
     it("should merge events from both tables for one message", async () => {
-      const auditLog = new AuditLog("External correlation id 1", new Date(), "hash-1")
+      const auditLog = mockDynamoAuditLog()
       auditLog.status = AuditLogStatus.completed
       auditLog.events.push(mockAuditLogEvent({ eventType: "Type 1" }))
       await testGateway.insertOne(auditLogDynamoConfig.auditLogTableName, auditLog, gateway.auditLogTableKey)
@@ -655,7 +644,7 @@ describe("AuditLogDynamoGateway", () => {
 
       expect(result).toNotBeError()
 
-      const actualAuditLogs = result as AuditLog[]
+      const actualAuditLogs = result as DynamoAuditLog[]
       expect(actualAuditLogs).toHaveLength(1)
       expect(actualAuditLogs[0].events).toHaveLength(2)
 
@@ -667,7 +656,7 @@ describe("AuditLogDynamoGateway", () => {
     it("should merge events from both tables for multiple messages", async () => {
       await Promise.allSettled(
         [...Array(3).keys()].map(async (i: number) => {
-          const auditLog = new AuditLog(`External correlation id ${i}`, new Date(`2021-06-01T10:11:0${i}`), `hash-${i}`)
+          const auditLog = mockDynamoAuditLog({ status: AuditLogStatus.completed })
           auditLog.status = AuditLogStatus.completed
           auditLog.events.push(mockAuditLogEvent({ eventType: `Main event type ${i}` }))
           await testGateway.insertOne(auditLogDynamoConfig.auditLogTableName, auditLog, gateway.auditLogTableKey)
@@ -684,7 +673,7 @@ describe("AuditLogDynamoGateway", () => {
 
       expect(result).toNotBeError()
 
-      const actualAuditLogs = result as AuditLog[]
+      const actualAuditLogs = result as DynamoAuditLog[]
       expect(actualAuditLogs).toHaveLength(3)
       expect(actualAuditLogs[0].events).toHaveLength(2)
       expect(actualAuditLogs[0].events[0].eventType).toBe("Main event type 2")
@@ -700,7 +689,7 @@ describe("AuditLogDynamoGateway", () => {
     })
 
     it("should not merge events if the column was excluded", async () => {
-      const auditLog = new AuditLog("External correlation id 1", new Date(), "hash-1")
+      const auditLog = mockDynamoAuditLog()
       auditLog.status = AuditLogStatus.completed
       auditLog.events.push(mockAuditLogEvent({ eventType: "Type 1" }))
       await testGateway.insertOne(auditLogDynamoConfig.auditLogTableName, auditLog, gateway.auditLogTableKey)
@@ -711,7 +700,7 @@ describe("AuditLogDynamoGateway", () => {
 
       expect(result).toNotBeError()
 
-      const actualAuditLogs = result as AuditLog[]
+      const actualAuditLogs = result as DynamoAuditLog[]
       expect(actualAuditLogs).toHaveLength(1)
       expect(actualAuditLogs[0].events).toBeUndefined()
     })
@@ -720,23 +709,14 @@ describe("AuditLogDynamoGateway", () => {
   describe("fetchUnsanitised", () => {
     it("should return one AuditLog when there is an unsanitised record to check", async () => {
       await Promise.allSettled(
-        [...Array(3).keys()].map(async (i: number) => {
-          const auditLog = new AuditLog(
-            `External correlation id ${i}`,
-            new Date("2021-05-06T06:13:27+0000"),
-            "dummy hash"
-          )
+        [...Array(3).keys()].map(async () => {
+          const auditLog = mockDynamoAuditLog({ isSanitised: 1 })
           auditLog.isSanitised = 1
           await gateway.create(auditLog)
         })
       )
 
-      const expectedAuditLog = new AuditLog(
-        `External correlation id 4`,
-        new Date("2021-05-06T06:13:27+0000"),
-        "dummy hash"
-      )
-      expectedAuditLog.status = AuditLogStatus.completed
+      const expectedAuditLog = mockDynamoAuditLog({ status: AuditLogStatus.completed })
       await gateway.create(expectedAuditLog)
 
       const result = await gateway.fetchUnsanitised()
@@ -744,7 +724,7 @@ describe("AuditLogDynamoGateway", () => {
       expect(isError(result)).toBe(false)
       expect(result).toBeDefined()
 
-      const items = <AuditLog[]>result
+      const items = <DynamoAuditLog[]>result
       expect(items).toHaveLength(1)
 
       const item = items[0]
@@ -754,23 +734,13 @@ describe("AuditLogDynamoGateway", () => {
 
     it("shouldn't return any AuditLogs with unsanitised records not due to be checked", async () => {
       await Promise.allSettled(
-        [...Array(3).keys()].map(async (i: number) => {
-          const auditLog = new AuditLog(
-            `External correlation id ${i}`,
-            new Date("2021-05-06T06:13:27+0000"),
-            "dummy hash"
-          )
-          auditLog.isSanitised = 1
+        [...Array(3).keys()].map(async () => {
+          const auditLog = mockDynamoAuditLog({ isSanitised: 1 })
           await gateway.create(auditLog)
         })
       )
 
-      const expectedAuditLog = new AuditLog(
-        `External correlation id 4`,
-        new Date("2021-05-06T06:13:27+0000"),
-        "dummy hash"
-      )
-      expectedAuditLog.nextSanitiseCheck = addDays(new Date(), 1).toISOString()
+      const expectedAuditLog = mockDynamoAuditLog({ nextSanitiseCheck: addDays(new Date(), 1).toISOString() })
       await gateway.create(expectedAuditLog)
 
       const result = await gateway.fetchUnsanitised()
@@ -778,12 +748,12 @@ describe("AuditLogDynamoGateway", () => {
       expect(isError(result)).toBe(false)
       expect(result).toBeDefined()
 
-      const items = <AuditLog[]>result
+      const items = <DynamoAuditLog[]>result
       expect(items).toHaveLength(0)
     })
 
     it("should merge events from both tables for one message", async () => {
-      const auditLog = new AuditLog("External correlation id 1", new Date(), "hash-1")
+      const auditLog = mockDynamoAuditLog()
       auditLog.isSanitised = 0
       auditLog.events.push(mockAuditLogEvent({ eventType: "Type 1" }))
       await testGateway.insertOne(auditLogDynamoConfig.auditLogTableName, auditLog, gateway.auditLogTableKey)
@@ -794,7 +764,7 @@ describe("AuditLogDynamoGateway", () => {
 
       expect(result).toNotBeError()
 
-      const actualAuditLogs = result as AuditLog[]
+      const actualAuditLogs = result as DynamoAuditLog[]
       expect(actualAuditLogs).toHaveLength(1)
       expect(actualAuditLogs[0].events).toHaveLength(2)
 
@@ -806,7 +776,11 @@ describe("AuditLogDynamoGateway", () => {
     it("should merge events from both tables for multiple messages", async () => {
       await Promise.allSettled(
         [...Array(3).keys()].map(async (i: number) => {
-          const auditLog = new AuditLog(`External correlation id ${i}`, new Date(`2021-06-01T10:11:0${i}`), `hash-${i}`)
+          const auditLog = mockDynamoAuditLog({
+            externalCorrelationId: `External correlation id ${i}`,
+            receivedDate: `2021-06-01T10:11:0${i}`,
+            messageHash: `hash-${i}`
+          })
           auditLog.isSanitised = 0
           auditLog.events.push(mockAuditLogEvent({ eventType: `Main event type ${i}` }))
           await testGateway.insertOne(auditLogDynamoConfig.auditLogTableName, auditLog, gateway.auditLogTableKey)
@@ -823,7 +797,7 @@ describe("AuditLogDynamoGateway", () => {
 
       expect(result).toNotBeError()
 
-      const actualAuditLogs = result as AuditLog[]
+      const actualAuditLogs = result as DynamoAuditLog[]
       expect(actualAuditLogs).toHaveLength(3)
       expect(actualAuditLogs[2].events).toHaveLength(2)
       expect(actualAuditLogs[2].events[0].eventType).toBe("Main event type 2")
@@ -839,7 +813,7 @@ describe("AuditLogDynamoGateway", () => {
     })
 
     it("should not merge events if the column was excluded", async () => {
-      const auditLog = new AuditLog("External correlation id 1", new Date(), "hash-1")
+      const auditLog = mockDynamoAuditLog()
       auditLog.isSanitised = 0
       auditLog.events.push(mockAuditLogEvent({ eventType: "Type 1" }))
       await testGateway.insertOne(auditLogDynamoConfig.auditLogTableName, auditLog, gateway.auditLogTableKey)
@@ -850,7 +824,7 @@ describe("AuditLogDynamoGateway", () => {
 
       expect(result).toNotBeError()
 
-      const actualAuditLogs = result as AuditLog[]
+      const actualAuditLogs = result as DynamoAuditLog[]
       expect(actualAuditLogs).toHaveLength(1)
       expect(actualAuditLogs[0].events).toBeUndefined()
     })
@@ -858,7 +832,7 @@ describe("AuditLogDynamoGateway", () => {
 
   describe("fetchEvents", () => {
     it("should return AuditLogEvents when message id exists in the table", async () => {
-      const auditLog = new AuditLog(`External correlation id 1`, new Date(), "dummy hash")
+      const auditLog = mockDynamoAuditLog()
       auditLog.events = [
         createAuditLogEvent({ eventType: "Event 1", timestamp: new Date("2021-06-10T10:12:13") }),
         createAuditLogEvent({ eventType: "Event 2", timestamp: new Date("2021-06-15T10:12:13") }),
@@ -879,7 +853,7 @@ describe("AuditLogDynamoGateway", () => {
     })
 
     it("should return an empty array when message does not have events", async () => {
-      const auditLog = new AuditLog(`External correlation id 1`, new Date(), "dummy hash")
+      const auditLog = mockDynamoAuditLog()
       await gateway.create(auditLog)
 
       const result = await gateway.fetchEvents(auditLog.messageId)
@@ -903,10 +877,10 @@ describe("AuditLogDynamoGateway", () => {
   })
 
   describe("update()", () => {
-    let auditLog: AuditLog
+    let auditLog: DynamoAuditLog
 
     beforeEach(async () => {
-      auditLog = (await createMockAuditLog()) as AuditLog
+      auditLog = (await createMockAuditLog()) as DynamoAuditLog
     })
 
     it("should not update if an empty object is passed in", async () => {
@@ -936,9 +910,9 @@ describe("AuditLogDynamoGateway", () => {
       ["errorRecordArchivalDate", { errorRecordArchivalDate: "2020-01-01" }],
       ["isSanitised", { isSanitised: 1 }],
       ["retryCount", { retryCount: 10 }]
-    ] as [string, Partial<AuditLog>][])(
+    ] as [string, Partial<DynamoAuditLog>][])(
       "should update the %s if it is passed in",
-      async (key: string, updates: Partial<AuditLog>) => {
+      async (key: string, updates: Partial<DynamoAuditLog>) => {
         const result = await gateway.update(auditLog, updates)
         expect(result).toNotBeError()
 
@@ -1006,10 +980,10 @@ describe("AuditLogDynamoGateway", () => {
   })
 
   describe("Compress and decompress attribute value", () => {
-    let auditLog: AuditLog
+    let auditLog: DynamoAuditLog
 
     beforeEach(async () => {
-      auditLog = (await createMockAuditLog()) as AuditLog
+      auditLog = (await createMockAuditLog()) as DynamoAuditLog
     })
 
     it("should compress attribute values", async () => {
@@ -1053,7 +1027,7 @@ describe("AuditLogDynamoGateway", () => {
 
       expect(result).toNotBeError()
 
-      const actualAuditLogs = result as AuditLog[]
+      const actualAuditLogs = result as DynamoAuditLog[]
       expect(actualAuditLogs).toHaveLength(1)
       expect(actualAuditLogs[0].events).toHaveLength(1)
 

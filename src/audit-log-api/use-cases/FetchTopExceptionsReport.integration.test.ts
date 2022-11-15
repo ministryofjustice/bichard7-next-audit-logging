@@ -1,5 +1,5 @@
-import { mockAuditLogEvent } from "src/shared/testing"
-import { AuditLog } from "src/shared/types"
+import { mockAuditLogEvent, mockDynamoAuditLog } from "src/shared/testing"
+import { DynamoAuditLog } from "src/shared/types"
 import { AuditLogDynamoGateway } from "../gateways/dynamo"
 import { auditLogDynamoConfig, TestDynamoGateway } from "../test"
 import FetchTopExceptionsReport from "./FetchTopExceptionsReport"
@@ -17,7 +17,7 @@ describe("FetchTopExceptionsReport", () => {
   })
 
   it("should merge events for the top exceptions report", async () => {
-    const auditLog = new AuditLog("External correlation id 1", new Date(), "hash-1")
+    const auditLog = mockDynamoAuditLog()
     auditLog.events.push(
       mockAuditLogEvent({
         eventType: "Internal Type 1",
@@ -47,7 +47,7 @@ describe("FetchTopExceptionsReport", () => {
 
     expect(result).toNotBeError()
 
-    const actualAuditLogs = result as AuditLog[]
+    const actualAuditLogs = result as DynamoAuditLog[]
     expect(actualAuditLogs).toHaveLength(1)
     expect(actualAuditLogs[0].events).toHaveLength(2)
     expect(actualAuditLogs[0].events[0].eventType).toBe("Internal Type 1")

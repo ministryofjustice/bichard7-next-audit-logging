@@ -1,4 +1,4 @@
-import type { AuditLog, SendToBichardOutput } from "src/shared/types"
+import type { InputApiAuditLog, SendToBichardOutput } from "src/shared/types"
 import { isError } from "src/shared/types"
 import { createMqConfig } from "../configs"
 import MqGateway from "../gateways/MqGateway"
@@ -6,7 +6,7 @@ import SendMessageUseCase from "../use-cases/SendMessageUseCase"
 import transformMessageXml from "../use-cases/transformMessageXml"
 
 interface SendToBichardInput {
-  auditLog: AuditLog
+  auditLog: InputApiAuditLog
   messageXml: string
 }
 

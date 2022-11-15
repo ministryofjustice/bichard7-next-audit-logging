@@ -7,8 +7,7 @@ import { Client } from "pg"
 import { AuditLogApiClient, logger } from "src/shared"
 import "src/shared/testing"
 import { clearDynamoTable, createMockAuditLog, setEnvironmentVariables } from "src/shared/testing"
-import type { ApiClient, KeyValuePair } from "src/shared/types"
-import { AuditLog } from "src/shared/types"
+import { ApiClient, isError, KeyValuePair, OutputApiAuditLog } from "src/shared/types"
 import sanitiseOldMessages from "./index"
 
 setEnvironmentVariables({
@@ -47,8 +46,14 @@ const insertAuditLogRecords = async (
   const messageIds: KeyValuePair<string, string> = {}
 
   for (const record of records) {
-    const auditLog = new AuditLog(record.externalCorrelationId, record.receivedAt, record.externalCorrelationId)
-    await createMockAuditLog(auditLog)
+    const auditLog = await createMockAuditLog({
+      externalCorrelationId: record.externalCorrelationId,
+      receivedDate: record.receivedAt.toISOString(),
+      messageId: record.externalCorrelationId
+    })
+    if (isError(auditLog)) {
+      throw auditLog
+    }
     messageIds[record.externalCorrelationId] = auditLog.messageId
   }
 
@@ -106,7 +111,7 @@ describe("Sanitise Old Messages e2e", () => {
     const messageResult = await api.getMessage(messageIds.message_1, { includeColumns: ["isSanitised"] })
 
     expect(messageResult).toNotBeError()
-    const message = messageResult as AuditLog
+    const message = messageResult as OutputApiAuditLog
     expect(message.isSanitised).toBeTruthy()
   })
 
@@ -121,7 +126,7 @@ describe("Sanitise Old Messages e2e", () => {
     const messageResult = await api.getMessage(messageIds.message_1, { includeColumns: ["isSanitised"] })
 
     expect(messageResult).toNotBeError()
-    const message = messageResult as AuditLog
+    const message = messageResult as OutputApiAuditLog
     expect(message.isSanitised).toBeFalsy()
   })
 
@@ -135,7 +140,7 @@ describe("Sanitise Old Messages e2e", () => {
     const messageResult = await api.getMessage(messageIds.message_1, { includeColumns: ["isSanitised"] })
 
     expect(messageResult).toNotBeError()
-    const message = messageResult as AuditLog
+    const message = messageResult as OutputApiAuditLog
     expect(message.isSanitised).toBeTruthy()
   })
 
@@ -148,7 +153,7 @@ describe("Sanitise Old Messages e2e", () => {
     const messageResult = await api.getMessage(messageIds.message_1, { includeColumns: ["isSanitised"] })
 
     expect(messageResult).toNotBeError()
-    const message = messageResult as AuditLog
+    const message = messageResult as OutputApiAuditLog
     expect(message.isSanitised).toBeFalsy()
   })
 
@@ -161,7 +166,7 @@ describe("Sanitise Old Messages e2e", () => {
     const messageResult = await api.getMessage(messageIds.message_1, { includeColumns: ["isSanitised"] })
 
     expect(messageResult).toNotBeError()
-    const message = messageResult as AuditLog
+    const message = messageResult as OutputApiAuditLog
     expect(message.isSanitised).toBeFalsy()
   })
 
@@ -173,7 +178,7 @@ describe("Sanitise Old Messages e2e", () => {
     const messageResult = await api.getMessage(messageIds.message_1, { includeColumns: ["isSanitised"] })
 
     expect(messageResult).toNotBeError()
-    const message = messageResult as AuditLog
+    const message = messageResult as OutputApiAuditLog
     expect(message.isSanitised).toBeFalsy()
   })
 
@@ -195,12 +200,12 @@ describe("Sanitise Old Messages e2e", () => {
 
     await executeLambda()
 
-    const messages: AuditLog[] = []
+    const messages: OutputApiAuditLog[] = []
     for (const messageId of Object.values(messageIds)) {
       const messageResult = await api.getMessage(messageId, { includeColumns: ["isSanitised", "nextSanitiseCheck"] })
       expect(messageResult).toNotBeError()
 
-      messages.push(messageResult as AuditLog)
+      messages.push(messageResult as OutputApiAuditLog)
     }
 
     const expectedNextCheck = addDays(new Date(), 2).toISOString()

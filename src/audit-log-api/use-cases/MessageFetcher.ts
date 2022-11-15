@@ -1,5 +1,5 @@
-import type { AuditLog, PromiseResult } from "src/shared/types"
+import type { DynamoAuditLog, PromiseResult } from "src/shared/types"
 
 export default interface MessageFetcher {
-  fetch: () => PromiseResult<AuditLog | AuditLog[] | null | undefined>
+  fetch: () => PromiseResult<DynamoAuditLog | DynamoAuditLog[] | null | undefined>
 }

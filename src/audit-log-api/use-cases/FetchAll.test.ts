@@ -1,23 +1,20 @@
-import { AuditLog, isError } from "src/shared/types"
+import { mockDynamoAuditLog } from "src/shared/testing"
+import { isError } from "src/shared/types"
 import { FakeAuditLogDynamoGateway } from "../test"
 import FetchAll from "./FetchAll"
 
 const gateway = new FakeAuditLogDynamoGateway()
 
 it("should return all messages", async () => {
-  const expectedMessages = [
-    new AuditLog("1", new Date(), "Dummy hash 1"),
-    new AuditLog("2", new Date(), "Dummy hash 2"),
-    new AuditLog("3", new Date(), "Dummy hash 3")
-  ]
+  const expectedMessages = [mockDynamoAuditLog(), mockDynamoAuditLog(), mockDynamoAuditLog()]
   gateway.reset(expectedMessages)
 
   const messageFetcher = new FetchAll(gateway)
   const result = await messageFetcher.fetch()
 
-  expect(isError(result)).toBe(false)
+  expect(result).toNotBeError()
 
-  const actualMessages = <AuditLog[]>result
+  const actualMessages = result
   expect(actualMessages).toBeDefined()
   expect(actualMessages).toHaveLength(3)
 })

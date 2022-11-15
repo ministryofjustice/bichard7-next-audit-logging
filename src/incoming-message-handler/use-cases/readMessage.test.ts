@@ -1,4 +1,4 @@
-import type { ApplicationError, AuditLog } from "src/shared/types"
+import type { ApplicationError, InputApiAuditLog } from "src/shared/types"
 import { isError } from "src/shared/types"
 import { v4 as uuid } from "uuid"
 import format from "xml-formatter"
@@ -77,7 +77,7 @@ describe("handleMessage", () => {
   it("should read the message and return the message data", async () => {
     message.messageXml = expectedMessage
 
-    const result = (await readMessage(message)) as AuditLog
+    const result = (await readMessage(message)) as InputApiAuditLog
     const { messageId, externalCorrelationId, caseId, systemId, createdBy } = result
 
     expect(messageId).toBeDefined()
@@ -90,7 +90,7 @@ describe("handleMessage", () => {
   it("should read the message and return the message data when system ID does not exist", async () => {
     message.messageXml = expectedMessageWithoutSystemId
 
-    const result = (await readMessage(message)) as AuditLog
+    const result = (await readMessage(message)) as InputApiAuditLog
     const { messageId, externalCorrelationId, caseId, systemId, createdBy } = result
 
     expect(messageId).toBeDefined()

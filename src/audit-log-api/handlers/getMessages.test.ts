@@ -7,8 +7,8 @@ import type {
   APIGatewayProxyResult
 } from "aws-lambda"
 import { HttpStatusCode } from "src/shared"
-import type { Result } from "src/shared/types"
-import { AuditLog } from "src/shared/types"
+import { mockDynamoAuditLog } from "src/shared/testing"
+import type { DynamoAuditLog, OutputApiAuditLog, Result } from "src/shared/types"
 import "../testConfig"
 import { createMessageFetcher } from "../use-cases"
 import LookupMessageValuesUseCase from "../use-cases/LookupMessageValuesUseCase"
@@ -17,7 +17,7 @@ import getMessages from "./getMessages"
 
 const mockCreateMessageFetcher = createMessageFetcher as jest.MockedFunction<typeof createMessageFetcher>
 
-const createDummyMessageFetcher = (returnValue: Result<AuditLog | AuditLog[] | null>): MessageFetcher => ({
+const createDummyMessageFetcher = (returnValue: Result<DynamoAuditLog | DynamoAuditLog[] | null>): MessageFetcher => ({
   fetch: () => Promise.resolve(returnValue)
 })
 
@@ -33,10 +33,19 @@ const createEvent = (
   )
 }
 
-const log1 = new AuditLog("1", new Date(2021, 10, 12), "Dummy hash 1")
+const log1 = mockDynamoAuditLog({
+  externalCorrelationId: "1",
+  receivedDate: new Date(2021, 10, 12).toISOString(),
+  messageHash: "Dummy hash 1"
+})
 log1.caseId = "123"
 
-const log2 = new AuditLog("2", new Date(2021, 10, 13), "Dummy hash 2")
+const log2 = mockDynamoAuditLog({
+  externalCorrelationId: "2",
+  receivedDate: new Date(2021, 10, 13).toISOString(),
+  messageHash: "Dummy hash 2"
+})
+
 log2.caseId = "456"
 
 beforeEach(() => {
@@ -52,7 +61,7 @@ test("should respond with a list of messages", async () => {
 
   expect(actualResponse.statusCode).toBe(HttpStatusCode.ok)
 
-  const actualMessages: AuditLog[] = JSON.parse(actualResponse.body)
+  const actualMessages: OutputApiAuditLog[] = JSON.parse(actualResponse.body)
   expect(actualMessages).toHaveLength(2)
 
   const actualMessage1 = actualMessages[0]
@@ -105,7 +114,7 @@ test("should return a single message when the message Id is given", async () => 
   const actualResponse = <APIGatewayProxyResult>messages
   expect(actualResponse.statusCode).toBe(HttpStatusCode.ok)
 
-  const actualMessages: AuditLog[] = JSON.parse(actualResponse.body)
+  const actualMessages: OutputApiAuditLog[] = JSON.parse(actualResponse.body)
   expect(actualMessages).toBeDefined()
   expect(actualMessages).toHaveLength(1)
 
@@ -125,7 +134,7 @@ test("should return an empty array when externalCorrelationId is specified and n
   const actualResponse = <APIGatewayProxyResult>messages
   expect(actualResponse.statusCode).toBe(HttpStatusCode.notFound)
 
-  const actualMessages: AuditLog[] = JSON.parse(actualResponse.body)
+  const actualMessages: OutputApiAuditLog[] = JSON.parse(actualResponse.body)
   expect(actualMessages).toBeDefined()
   expect(actualMessages).toHaveLength(0)
 })
@@ -139,7 +148,7 @@ test("should return a single message when the externalCorrelationId is given and
   const actualResponse = <APIGatewayProxyResult>messages
   expect(actualResponse.statusCode).toBe(HttpStatusCode.ok)
 
-  const actualMessages: AuditLog[] = JSON.parse(actualResponse.body)
+  const actualMessages: OutputApiAuditLog[] = JSON.parse(actualResponse.body)
   expect(actualMessages).toBeDefined()
   expect(actualMessages).toHaveLength(1)
 

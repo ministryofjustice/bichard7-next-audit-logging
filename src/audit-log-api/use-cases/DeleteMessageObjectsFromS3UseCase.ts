@@ -1,4 +1,4 @@
-import type { AuditLog, PromiseResult, S3GatewayInterface } from "src/shared/types"
+import type { DynamoAuditLog, PromiseResult, S3GatewayInterface } from "src/shared/types"
 import { isError } from "src/shared/types"
 
 export default class DeleteMessageObjectsFromS3UseCase {
@@ -7,7 +7,7 @@ export default class DeleteMessageObjectsFromS3UseCase {
     private readonly eventsGateway: S3GatewayInterface
   ) {}
 
-  async call(message: AuditLog): PromiseResult<void> {
+  async call(message: DynamoAuditLog): PromiseResult<void> {
     const s3Path = message?.s3Path
 
     if (s3Path) {

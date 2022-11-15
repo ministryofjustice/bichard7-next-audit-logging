@@ -1,4 +1,5 @@
-import { AuditLog } from "src/shared/types"
+import { mockDynamoAuditLog } from "src/shared/testing"
+import { DynamoAuditLog } from "src/shared/types"
 import { AuditLogDynamoGateway } from "../gateways/dynamo"
 import { auditLogDynamoConfig, TestDynamoGateway } from "../test"
 import CreateAuditLogsUseCase from "./CreateAuditLogsUseCase"
@@ -7,10 +8,7 @@ const testDynamoGateway = new TestDynamoGateway(auditLogDynamoConfig)
 const auditLogDynamoGateway = new AuditLogDynamoGateway(auditLogDynamoConfig)
 const createAuditLogsUseCase = new CreateAuditLogsUseCase(auditLogDynamoGateway)
 
-const createAuditLog = (correlationId = "CorrelationId"): AuditLog =>
-  new AuditLog(correlationId, new Date(), "Dummy hash")
-
-const getAuditLog = (messageId: string): Promise<AuditLog | null> =>
+const getAuditLog = (messageId: string): Promise<DynamoAuditLog | null> =>
   testDynamoGateway.getOne(auditLogDynamoConfig.auditLogTableName, "messageId", messageId)
 
 describe("CreateAuditLogsUseCase", () => {
@@ -19,7 +17,7 @@ describe("CreateAuditLogsUseCase", () => {
   })
 
   it("should return a conflict result when an Audit Log record exists with the same messageId", async () => {
-    const auditLog = createAuditLog()
+    const auditLog = mockDynamoAuditLog()
     await auditLogDynamoGateway.create(auditLog)
 
     const result = await createAuditLogsUseCase.create([auditLog])
@@ -32,7 +30,7 @@ describe("CreateAuditLogsUseCase", () => {
     const gateway = new AuditLogDynamoGateway({ ...auditLogDynamoConfig, auditLogTableName: "Invalid Table Name" })
     const useCase = new CreateAuditLogsUseCase(gateway)
 
-    const auditLog = createAuditLog()
+    const auditLog = mockDynamoAuditLog()
 
     const result = await useCase.create([auditLog])
 
@@ -44,7 +42,7 @@ describe("CreateAuditLogsUseCase", () => {
   })
 
   it("should return a success result when the record is stored in the database", async () => {
-    const expectedAuditLog = createAuditLog()
+    const expectedAuditLog = mockDynamoAuditLog()
 
     const result = await createAuditLogsUseCase.create([expectedAuditLog])
 
@@ -59,12 +57,12 @@ describe("CreateAuditLogsUseCase", () => {
   })
 
   it("should return a conflict result when one audit log in a batch is a duplicate", async () => {
-    const expectedAuditLog = createAuditLog("id0")
+    const expectedAuditLog = mockDynamoAuditLog({ messageId: "id0" })
     const initialResult = await createAuditLogsUseCase.create([expectedAuditLog])
     expect(initialResult.resultType).toBe("success")
     expect(initialResult.resultDescription).toBeUndefined()
 
-    const expectedAuditLogs = new Array(10).fill(0).map((_, idx) => createAuditLog(`id${idx}`))
+    const expectedAuditLogs = new Array(10).fill(0).map((_, idx) => mockDynamoAuditLog({ messageId: `id${idx}` }))
     Object.assign(expectedAuditLogs[0], { messageId: expectedAuditLog.messageId })
     const result = await createAuditLogsUseCase.create(expectedAuditLogs)
 

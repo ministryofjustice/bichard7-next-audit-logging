@@ -1,8 +1,8 @@
 import { AuditLogApiClient, encodeBase64, TestMqGateway, TestS3Gateway } from "src/shared"
 import "src/shared/testing"
-import { auditLogEventsS3Config } from "src/shared/testing"
-import type { MqConfig } from "src/shared/types"
-import { AuditLog, AuditLogEvent, AuditLogLookup } from "src/shared/types"
+import { auditLogEventsS3Config, mockDynamoAuditLog } from "src/shared/testing"
+import type { DynamoAuditLog, MqConfig } from "src/shared/types"
+import { AuditLogEvent, AuditLogLookup } from "src/shared/types"
 import { AuditLogDynamoGateway, AwsAuditLogLookupDynamoGateway } from "../gateways/dynamo"
 import { auditLogDynamoConfig, TestDynamoGateway } from "../test"
 import CreateRetryingEventUseCase from "./CreateRetryingEventUseCase"
@@ -56,7 +56,7 @@ describe("RetryMessageUseCase", () => {
   })
 
   it("should retry message using eventXml field when last event is error", async () => {
-    const message = new AuditLog("External Correlation ID", new Date(), "Dummy hash")
+    const message = mockDynamoAuditLog()
     const auditLogLookupItem = new AuditLogLookup(eventXml, message.messageId)
     const event = new AuditLogEvent({
       eventSource: "Dummy Event Source",
@@ -84,7 +84,7 @@ describe("RetryMessageUseCase", () => {
     expect(actualAuditLogRecordResult).toNotBeError()
     expect(actualAuditLogRecordResult).toBeDefined()
 
-    const actualAuditLogRecord = <AuditLog>actualAuditLogRecordResult
+    const actualAuditLogRecord = <DynamoAuditLog>actualAuditLogRecordResult
     expect(actualAuditLogRecord.status).toBe("Retrying")
 
     const retryingEvents = actualAuditLogRecord.events.filter((x) => x.eventType === "Retrying failed message")
@@ -93,7 +93,7 @@ describe("RetryMessageUseCase", () => {
   })
 
   it("should retry message using event s3Path field when last event is error", async () => {
-    const message = new AuditLog("External Correlation ID", new Date(), "Dummy hash")
+    const message = mockDynamoAuditLog()
     const auditLogLookupItem = new AuditLogLookup(eventXml, message.messageId)
     const eventS3Path = "event.xml"
     const event = {
@@ -125,7 +125,7 @@ describe("RetryMessageUseCase", () => {
     expect(actualAuditLogRecordResult).toNotBeError()
     expect(actualAuditLogRecordResult).toBeDefined()
 
-    const actualAuditLogRecord = <AuditLog>actualAuditLogRecordResult
+    const actualAuditLogRecord = <DynamoAuditLog>actualAuditLogRecordResult
     expect(actualAuditLogRecord.status).toBe("Retrying")
 
     const retryingEvents = actualAuditLogRecord.events.filter((x) => x.eventType === "Retrying failed message")

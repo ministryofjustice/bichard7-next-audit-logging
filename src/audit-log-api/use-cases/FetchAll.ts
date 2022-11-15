@@ -1,7 +1,6 @@
-import type { AuditLog, PromiseResult } from "src/shared/types"
+import type { DynamoAuditLog, PromiseResult } from "src/shared/types"
 import { isError } from "src/shared/types"
 import type { AuditLogDynamoGatewayInterface } from "../gateways/dynamo"
-import getMessageById from "./getMessageById"
 import type MessageFetcher from "./MessageFetcher"
 
 type FetchAllOptions = {
@@ -16,8 +15,18 @@ export default class FetchAll implements MessageFetcher {
     private readonly options: FetchAllOptions = {}
   ) {}
 
-  async fetch(): PromiseResult<AuditLog[]> {
-    const lastMessage = await getMessageById(this.gateway, this.options.lastMessageId)
+  async fetch(): PromiseResult<DynamoAuditLog[]> {
+    let lastMessage: DynamoAuditLog | undefined
+
+    if (this.options.lastMessageId) {
+      const result = await this.gateway.fetchOne(this.options.lastMessageId)
+
+      if (isError(result)) {
+        return result
+      }
+
+      lastMessage = result
+    }
 
     if (isError(lastMessage)) {
       return lastMessage

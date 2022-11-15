@@ -1,5 +1,6 @@
 import "src/shared/testing"
-import { AuditLog, AuditLogEvent, AuditLogLookup } from "src/shared/types"
+import { mockDynamoAuditLog } from "src/shared/testing"
+import { AuditLogEvent, AuditLogLookup, DynamoAuditLog } from "src/shared/types"
 import { FakeAuditLogLookupDynamoGateway } from "../test"
 import LookupEventValuesUseCase from "./LookupEventValuesUseCase"
 import LookupMessageValuesUseCase from "./LookupMessageValuesUseCase"
@@ -10,15 +11,17 @@ const useCase = new LookupMessageValuesUseCase(lookupEventValuesUseCase)
 
 describe("lookupEventValues", () => {
   it("should retrieve values from lookup table", async () => {
-    const message = new AuditLog("dummy external correlation ID", new Date(), "dummy hash")
+    const message = mockDynamoAuditLog()
+
+    const lookupItem1 = new AuditLogLookup("a".repeat(2000), "dummy message ID")
+    const lookupItem2 = new AuditLogLookup("b".repeat(3000), "dummy message ID")
+
     const event = new AuditLogEvent({
       category: "information",
       eventSource: "event source",
       eventType: "event type",
       timestamp: new Date()
     })
-    const lookupItem1 = new AuditLogLookup("a".repeat(2000), "dummy message ID")
-    const lookupItem2 = new AuditLogLookup("b".repeat(3000), "dummy message ID")
     event.addAttribute("attr1", { valueLookup: lookupItem1.id })
     event.addAttribute("attr2", "short value")
     event.addAttribute("attr3", 123)
@@ -31,7 +34,7 @@ describe("lookupEventValues", () => {
 
     expect(result).toNotBeError()
 
-    const actualMessage = result as AuditLog
+    const actualMessage = result as DynamoAuditLog
     const { category, eventSource, eventType, timestamp, attributes } = actualMessage.events[0]
     expect(category).toBe(event.category)
     expect(eventSource).toBe(event.eventSource)
@@ -46,7 +49,7 @@ describe("lookupEventValues", () => {
   })
 
   it("should return error if it cannot save into lookup table", async () => {
-    const message = new AuditLog("dummy external correlation ID", new Date(), "dummy hash")
+    const message = mockDynamoAuditLog()
     const event = new AuditLogEvent({
       category: "information",
       eventSource: "event source",

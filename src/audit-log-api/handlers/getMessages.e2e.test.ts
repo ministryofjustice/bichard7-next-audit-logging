@@ -6,12 +6,10 @@ import {
   createMockAuditLogEvent,
   createMockAuditLogs,
   createMockError,
-  mockAuditLog,
-  mockAuditLogEvent
+  mockAuditLogEvent,
+  mockDynamoAuditLog
 } from "src/shared/testing"
-import type { AuditLog } from "src/shared/types"
-import { AuditLogLookup } from "src/shared/types"
-import { EventCode, isError } from "src/shared/types"
+import { AuditLogLookup, DynamoAuditLog, EventCode, isError, OutputApiAuditLog } from "src/shared/types"
 import { auditLogDynamoConfig, TestDynamoGateway } from "../test"
 
 const testDynamoGateway = new TestDynamoGateway(auditLogDynamoConfig)
@@ -28,7 +26,7 @@ describe("Getting Audit Logs", () => {
       throw new Error("Unexpected error")
     }
 
-    const result2 = await axios.get<AuditLog[]>(`http://localhost:3010/messages`)
+    const result2 = await axios.get<OutputApiAuditLog[]>(`http://localhost:3010/messages`)
     expect(result2.status).toEqual(HttpStatusCode.ok)
 
     expect(Array.isArray(result2.data)).toBeTruthy()
@@ -51,7 +49,7 @@ describe("Getting Audit Logs", () => {
       throw new Error("Unexpected error")
     }
 
-    const result2 = await axios.get<AuditLog[]>(`http://localhost:3010/messages/${auditLog.messageId}`)
+    const result2 = await axios.get<OutputApiAuditLog[]>(`http://localhost:3010/messages/${auditLog.messageId}`)
     expect(result2.status).toEqual(HttpStatusCode.ok)
 
     expect(Array.isArray(result2.data)).toBeTruthy()
@@ -70,7 +68,7 @@ describe("Getting Audit Logs", () => {
       throw new Error("Unexpected error")
     }
 
-    const result = await axios.get<AuditLog[]>(`http://localhost:3010/messages?status=Error`)
+    const result = await axios.get<OutputApiAuditLog[]>(`http://localhost:3010/messages?status=Error`)
     expect(result.status).toEqual(HttpStatusCode.ok)
 
     expect(Array.isArray(result.data)).toBeTruthy()
@@ -89,7 +87,7 @@ describe("Getting Audit Logs", () => {
       throw new Error("Unexpected error")
     }
 
-    const result = await axios.get<AuditLog[]>(
+    const result = await axios.get<OutputApiAuditLog[]>(
       `http://localhost:3010/messages?externalCorrelationId=${auditLog2.externalCorrelationId}`
     )
     expect(result.status).toEqual(HttpStatusCode.ok)
@@ -108,7 +106,7 @@ describe("Getting Audit Logs", () => {
     ["automationReport", "?eventsFilter=automationReport&start=2020-10-10&end=2100-10-10"],
     ["topExceptionsReport", "?eventsFilter=topExceptionsReport&start=2020-10-10&end=2100-10-10"]
   ])("should get message by %s and lookup attribute values for old events", async (_, queryParams) => {
-    const auditLog = await mockAuditLog({
+    const auditLog = await mockDynamoAuditLog({
       externalCorrelationId: "exid1",
       messageId: "msgid1"
     })
@@ -130,7 +128,7 @@ describe("Getting Audit Logs", () => {
       throw new Error("Unexpected error")
     }
 
-    const result = await axios.get<AuditLog[]>(`http://localhost:3010/messages${queryParams}`)
+    const result = await axios.get<OutputApiAuditLog[]>(`http://localhost:3010/messages${queryParams}`)
     expect(result.status).toEqual(HttpStatusCode.ok)
 
     expect(Array.isArray(result.data)).toBeTruthy()
@@ -174,7 +172,7 @@ describe("Getting Audit Logs", () => {
         throw new Error("Unexpected error")
       }
 
-      const result = await axios.get<AuditLog[]>(`http://localhost:3010/messages?unsanitised=true`)
+      const result = await axios.get<OutputApiAuditLog[]>(`http://localhost:3010/messages?unsanitised=true`)
       expect(result.status).toEqual(HttpStatusCode.ok)
 
       expect(Array.isArray(result.data)).toBeTruthy()
@@ -203,7 +201,7 @@ describe("Getting Audit Logs", () => {
         throw new Error("Unexpected error")
       }
 
-      const result = await axios.get<AuditLog[]>(
+      const result = await axios.get<OutputApiAuditLog[]>(
         `http://localhost:3010/messages?eventsFilter=automationReport&start=2022-01-02&end=2022-01-03`
       )
       expect(result.status).toEqual(HttpStatusCode.ok)
@@ -233,12 +231,12 @@ describe("Getting Audit Logs", () => {
         throw new Error("Unexpected error")
       }
 
-      const allResult = await axios.get<AuditLog[]>("http://localhost:3010/messages")
+      const allResult = await axios.get<OutputApiAuditLog[]>("http://localhost:3010/messages")
       expect(allResult.status).toEqual(HttpStatusCode.ok)
       expect(allResult.data[0]).toHaveProperty("events")
       expect(allResult.data[0].events).toHaveLength(2)
 
-      const filteredResult = await axios.get<AuditLog[]>(
+      const filteredResult = await axios.get<OutputApiAuditLog[]>(
         "http://localhost:3010/messages?eventsFilter=automationReport&start=2000-01-01&end=2099-01-01"
       )
       expect(filteredResult.status).toEqual(HttpStatusCode.ok)
@@ -248,11 +246,11 @@ describe("Getting Audit Logs", () => {
     })
 
     it("should include force owner at the top level of the response", async () => {
-      const auditLog: AuditLog = mockAuditLog()
+      const auditLog: DynamoAuditLog = mockDynamoAuditLog()
       auditLog.automationReport = { forceOwner: "010000", events: [] }
       await testDynamoGateway.insertOne(auditLogDynamoConfig.auditLogTableName, auditLog, "messageId")
 
-      const result = await axios.get<AuditLog[]>(
+      const result = await axios.get<OutputApiAuditLog[]>(
         "http://localhost:3010/messages?eventsFilter=automationReport&start=2000-01-01&end=2099-01-01"
       )
       expect(result.status).toEqual(HttpStatusCode.ok)
@@ -277,12 +275,12 @@ describe("Getting Audit Logs", () => {
         throw new Error("Unexpected error")
       }
 
-      const allResult = await axios.get<AuditLog[]>("http://localhost:3010/messages")
+      const allResult = await axios.get<OutputApiAuditLog[]>("http://localhost:3010/messages")
       expect(allResult.status).toEqual(HttpStatusCode.ok)
       expect(allResult.data[0]).toHaveProperty("events")
       expect(allResult.data[0].events).toHaveLength(2)
 
-      const filteredResult = await axios.get<AuditLog[]>(
+      const filteredResult = await axios.get<OutputApiAuditLog[]>(
         "http://localhost:3010/messages?eventsFilter=topExceptionsReport&start=2000-01-01&end=2099-01-01"
       )
       expect(filteredResult.status).toEqual(HttpStatusCode.ok)
@@ -297,7 +295,7 @@ describe("Getting Audit Logs", () => {
         throw new Error("Unexpected error")
       }
 
-      const result = await axios.get<AuditLog[]>(
+      const result = await axios.get<OutputApiAuditLog[]>(
         `http://localhost:3010/messages?eventsFilter=topExceptionsReport&start=2000-01-01&end=2099-01-01&lastMessageId=${auditLogs[2].messageId}`
       )
 
@@ -307,11 +305,11 @@ describe("Getting Audit Logs", () => {
     })
 
     it("should include force owner from the automation report at the top level of the response", async () => {
-      const auditLog: AuditLog = mockAuditLog()
+      const auditLog: DynamoAuditLog = mockDynamoAuditLog()
       auditLog.automationReport = { forceOwner: "010000", events: [] }
       await testDynamoGateway.insertOne(auditLogDynamoConfig.auditLogTableName, auditLog, "messageId")
 
-      const result = await axios.get<AuditLog[]>(
+      const result = await axios.get<OutputApiAuditLog[]>(
         "http://localhost:3010/messages?eventsFilter=topExceptionsReport&start=2000-01-01&end=2099-01-01"
       )
       expect(result.status).toEqual(HttpStatusCode.ok)
@@ -323,11 +321,11 @@ describe("Getting Audit Logs", () => {
     describe.each(
       // prettier-ignore
       [
-        ["fetchAll",                     createMockAuditLog, (_: AuditLog) => "http://localhost:3010/messages"],
-        ["fetchUnsanitised",             createMockAuditLog, (_: AuditLog) => "http://localhost:3010/messages?unsanitised=true"],
-        ["fetchById",                    createMockAuditLog, (l: AuditLog) => `http://localhost:3010/messages/${l.messageId}`],
-        ["fetchByExternalCorrelationId", createMockAuditLog, (l: AuditLog) => `http://localhost:3010/messages?externalCorrelationId=${l.externalCorrelationId}`],
-        ["fetchByStatus",                createMockError,    (_: AuditLog) => "http://localhost:3010/messages?status=Error"]
+        ["fetchAll",                     createMockAuditLog, (_: OutputApiAuditLog) => "http://localhost:3010/messages"],
+        ["fetchUnsanitised",             createMockAuditLog, (_: OutputApiAuditLog) => "http://localhost:3010/messages?unsanitised=true"],
+        ["fetchById",                    createMockAuditLog, (l: OutputApiAuditLog) => `http://localhost:3010/messages/${l.messageId}`],
+        ["fetchByExternalCorrelationId", createMockAuditLog, (l: OutputApiAuditLog) => `http://localhost:3010/messages?externalCorrelationId=${l.externalCorrelationId}`],
+        ["fetchByStatus",                createMockError,    (_: OutputApiAuditLog) => "http://localhost:3010/messages?status=Error"]
       ]
     )("from %s", (_, newAuditLog, baseUrl) => {
       it("should not show excluded columns", async () => {
@@ -336,13 +334,13 @@ describe("Getting Audit Logs", () => {
           throw new Error("Unexpected error")
         }
 
-        const defaultResult = await axios.get<AuditLog[]>(baseUrl(auditLog))
+        const defaultResult = await axios.get<OutputApiAuditLog[]>(baseUrl(auditLog))
         expect(defaultResult.status).toEqual(HttpStatusCode.ok)
         expect(defaultResult.data[0]).toHaveProperty("events")
         expect(defaultResult.data[0]).toHaveProperty("receivedDate")
         const defaultKeys = Object.keys(defaultResult.data[0])
 
-        const excludedResult = await axios.get<AuditLog[]>(
+        const excludedResult = await axios.get<OutputApiAuditLog[]>(
           addQueryParams(baseUrl(auditLog), { excludeColumns: "receivedDate,events" })
         )
 
@@ -358,13 +356,13 @@ describe("Getting Audit Logs", () => {
           throw new Error("Unexpected error")
         }
 
-        const defaultResult = await axios.get<AuditLog[]>(baseUrl(auditLog))
+        const defaultResult = await axios.get<OutputApiAuditLog[]>(baseUrl(auditLog))
         expect(defaultResult.status).toEqual(HttpStatusCode.ok)
         expect(defaultResult.data[0]).not.toHaveProperty("version")
         expect(defaultResult.data[0]).not.toHaveProperty("messageHash")
         const defaultKeys = Object.keys(defaultResult.data[0])
 
-        const includedResult = await axios.get<AuditLog[]>(
+        const includedResult = await axios.get<OutputApiAuditLog[]>(
           addQueryParams(baseUrl(auditLog), { includeColumns: "version,messageHash" })
         )
 
@@ -380,14 +378,14 @@ describe("Getting Audit Logs", () => {
           throw new Error("Unexpected error")
         }
 
-        const defaultResult = await axios.get<AuditLog[]>(baseUrl(auditLog))
+        const defaultResult = await axios.get<OutputApiAuditLog[]>(baseUrl(auditLog))
         expect(defaultResult.status).toEqual(HttpStatusCode.ok)
         expect(defaultResult.data[0]).not.toHaveProperty("version")
         expect(defaultResult.data[0]).not.toHaveProperty("messageHash")
         expect(defaultResult.data[0]).toHaveProperty("events")
         expect(defaultResult.data[0]).toHaveProperty("receivedDate")
 
-        const filteredResult = await axios.get<AuditLog[]>(
+        const filteredResult = await axios.get<OutputApiAuditLog[]>(
           addQueryParams(baseUrl(auditLog), {
             includeColumns: "version,messageHash",
             excludeColumns: "receivedDate,events"
@@ -420,7 +418,7 @@ describe("Getting Audit Logs", () => {
           throw new Error("Unexpected error")
         }
 
-        const result = await axios.get<AuditLog[]>(addQueryParams(baseUrl, { limit: "1" }))
+        const result = await axios.get<OutputApiAuditLog[]>(addQueryParams(baseUrl, { limit: "1" }))
 
         expect(result.data).toHaveLength(1)
       })
@@ -431,7 +429,9 @@ describe("Getting Audit Logs", () => {
           throw new Error("Unexpected error")
         }
 
-        const result = await axios.get<AuditLog[]>(addQueryParams(baseUrl, { lastMessageId: auditLogs[2].messageId }))
+        const result = await axios.get<OutputApiAuditLog[]>(
+          addQueryParams(baseUrl, { lastMessageId: auditLogs[2].messageId })
+        )
 
         expect(result.data).toHaveLength(2)
 
@@ -444,10 +444,10 @@ describe("Getting Audit Logs", () => {
   })
 
   describe("transformation for old-style events", () => {
-    let auditLog: AuditLog
+    let auditLog: DynamoAuditLog
 
     beforeEach(async () => {
-      auditLog = mockAuditLog({
+      auditLog = mockDynamoAuditLog({
         events: [
           mockAuditLogEvent({
             attributes: {
@@ -462,7 +462,7 @@ describe("Getting Audit Logs", () => {
     })
 
     it("should add user and event code when retrieving old-style event if they're set in the attributes for multiple messages", async () => {
-      const result = await axios.get<AuditLog[]>("http://localhost:3010/messages")
+      const result = await axios.get<OutputApiAuditLog[]>("http://localhost:3010/messages")
 
       expect(result.data).toHaveLength(1)
       expect(result.data[0].events[0].eventCode).toBe("dummy.event")
@@ -470,7 +470,7 @@ describe("Getting Audit Logs", () => {
     })
 
     it("should add user and event code when retrieving old-style event if they're set in attributes for single message", async () => {
-      const result = await axios.get<AuditLog[]>(`http://localhost:3010/messages/${auditLog.messageId}`)
+      const result = await axios.get<OutputApiAuditLog[]>(`http://localhost:3010/messages/${auditLog.messageId}`)
 
       expect(result.data).toHaveLength(1)
 

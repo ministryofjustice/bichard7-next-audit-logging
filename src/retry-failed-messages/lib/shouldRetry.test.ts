@@ -1,6 +1,6 @@
 process.env.API_URL = "dummy"
 process.env.API_KEY = "dummy"
-import { mockAuditLog, mockAuditLogEvent } from "src/shared/testing"
+import { mockAuditLogEvent, mockOutputApiAuditLog } from "src/shared/testing"
 import shouldRetry from "./shouldRetry"
 
 const generateDateInThePast = (hours: number, minutes: number, seconds: number) =>
@@ -14,7 +14,7 @@ const moreThanRetryDelay = generateDateInThePast(24, 0, 1)
 describe("shouldRetry", () => {
   it("should not retry new messages too early", () => {
     const receivedDate = lessThanInitialRetryDelay.toISOString()
-    const message = mockAuditLog({ receivedDate })
+    const message = mockOutputApiAuditLog({ receivedDate })
     const event = mockAuditLogEvent({
       category: "error",
       eventType: "Failed event",
@@ -26,7 +26,7 @@ describe("shouldRetry", () => {
 
   it("should correctly retry new messages after an initial wait", () => {
     const receivedDate = moreThanInitialRetryDelay.toISOString()
-    const message = mockAuditLog({ receivedDate })
+    const message = mockOutputApiAuditLog({ receivedDate })
     const event = mockAuditLogEvent({
       category: "error",
       eventType: "Failed event",
@@ -37,7 +37,7 @@ describe("shouldRetry", () => {
   })
 
   it("should correctly handle messages that have already been retried", () => {
-    const message = mockAuditLog()
+    const message = mockOutputApiAuditLog()
     const errorEvent = mockAuditLogEvent({
       category: "error",
       eventType: "Failed event",
@@ -55,7 +55,7 @@ describe("shouldRetry", () => {
 
   it("shouldn't retry messages too often that have already been retried", () => {
     const receivedDate = new Date().toISOString()
-    const message = mockAuditLog({ receivedDate })
+    const message = mockOutputApiAuditLog({ receivedDate })
     const errorEvent = mockAuditLogEvent({
       category: "error",
       eventType: "Failed event",
@@ -73,7 +73,7 @@ describe("shouldRetry", () => {
 
   it("shouldn't retry messages too many times", () => {
     const receivedDate = new Date().toISOString()
-    const message = mockAuditLog({ receivedDate })
+    const message = mockOutputApiAuditLog({ receivedDate })
     const errorEvent = mockAuditLogEvent({
       category: "error",
       eventType: "Failed event",

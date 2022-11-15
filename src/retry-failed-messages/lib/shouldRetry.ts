@@ -1,7 +1,7 @@
-import type { AuditLog, AuditLogEvent, Result } from "src/shared/types"
+import type { AuditLogEvent, OutputApiAuditLog, Result } from "src/shared/types"
 import config from "../config"
 
-export default (message: AuditLog): Result<boolean> => {
+export default (message: OutputApiAuditLog): Result<boolean> => {
   let retryTime: number
 
   const hasFailedEvent = (message.events as AuditLogEvent[]).some(

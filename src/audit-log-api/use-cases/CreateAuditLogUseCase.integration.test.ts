@@ -1,4 +1,5 @@
-import { AuditLog } from "src/shared/types"
+import { mockDynamoAuditLog } from "src/shared/testing"
+import { DynamoAuditLog } from "src/shared/types"
 import { AuditLogDynamoGateway } from "../gateways/dynamo"
 import { auditLogDynamoConfig, TestDynamoGateway } from "../test"
 import CreateAuditLogUseCase from "./CreateAuditLogUseCase"
@@ -7,9 +8,7 @@ const testDynamoGateway = new TestDynamoGateway(auditLogDynamoConfig)
 const auditLogDynamoGateway = new AuditLogDynamoGateway(auditLogDynamoConfig)
 const createAuditLogUseCase = new CreateAuditLogUseCase(auditLogDynamoGateway)
 
-const createAuditLog = (): AuditLog => new AuditLog("CorrelationId", new Date(), "Dummy hash")
-
-const getAuditLog = (messageId: string): Promise<AuditLog | null> =>
+const getAuditLog = (messageId: string): Promise<DynamoAuditLog | null> =>
   testDynamoGateway.getOne(auditLogDynamoConfig.auditLogTableName, "messageId", messageId)
 
 describe("CreateAuditLogUseCase", () => {
@@ -18,7 +17,7 @@ describe("CreateAuditLogUseCase", () => {
   })
 
   it("should return a conflict result when an Audit Log record exists with the same messageId", async () => {
-    const auditLog = createAuditLog()
+    const auditLog = mockDynamoAuditLog()
     await auditLogDynamoGateway.create(auditLog)
 
     const result = await createAuditLogUseCase.create(auditLog)
@@ -31,7 +30,7 @@ describe("CreateAuditLogUseCase", () => {
     const gateway = new AuditLogDynamoGateway({ ...auditLogDynamoConfig, auditLogTableName: "Invalid Table Name" })
     const useCase = new CreateAuditLogUseCase(gateway)
 
-    const auditLog = createAuditLog()
+    const auditLog = mockDynamoAuditLog()
 
     const result = await useCase.create(auditLog)
 
@@ -43,7 +42,7 @@ describe("CreateAuditLogUseCase", () => {
   })
 
   it("should return a success result when the record is stored in the database", async () => {
-    const expectedAuditLog = createAuditLog()
+    const expectedAuditLog = mockDynamoAuditLog()
 
     const result = await createAuditLogUseCase.create(expectedAuditLog)
 

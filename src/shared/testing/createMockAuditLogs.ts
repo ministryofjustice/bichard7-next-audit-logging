@@ -1,11 +1,11 @@
 import type { AxiosError } from "axios"
 import axios from "axios"
-import type { AuditLog, AuditLogEventOptions, PromiseResult } from "src/shared/types"
-import { AuditLogEvent, isError } from "src/shared/types"
-import { mockAuditLog, mockAuditLogEvent } from "."
+import type { AuditLogEventOptions, InputApiAuditLog, OutputApiAuditLog, PromiseResult } from "src/shared/types"
+import { AuditLogEvent, AuditLogStatus, isError, PncStatus, TriggerStatus } from "src/shared/types"
+import { mockAuditLogEvent, mockInputApiAuditLog } from "."
 
-export const createMockError = async (overrides: Partial<AuditLog> = {}): PromiseResult<AuditLog> => {
-  const auditLog = mockAuditLog(overrides)
+export const createMockError = async (overrides: Partial<InputApiAuditLog> = {}): PromiseResult<OutputApiAuditLog> => {
+  const auditLog = mockInputApiAuditLog(overrides)
   await axios.post("http://localhost:3010/messages", auditLog)
 
   const event = mockAuditLogEvent({ category: "error", eventType: "Hearing Outcome Input Queue Failure" })
@@ -14,11 +14,19 @@ export const createMockError = async (overrides: Partial<AuditLog> = {}): Promis
     return res
   }
 
-  auditLog.events.push(event)
-  return auditLog
+  return {
+    ...auditLog,
+    events: [event],
+    pncStatus: PncStatus.Processing,
+    triggerStatus: TriggerStatus.NoTriggers,
+    status: AuditLogStatus.processing
+  }
 }
 
-export const createMockErrors = async (count = 1, overrides: Partial<AuditLog> = {}): PromiseResult<AuditLog[]> => {
+export const createMockErrors = async (
+  count = 1,
+  overrides: Partial<InputApiAuditLog> = {}
+): PromiseResult<OutputApiAuditLog[]> => {
   const output = []
   for (let i = 0; i < count; i++) {
     const res = await createMockError(overrides)
@@ -30,16 +38,27 @@ export const createMockErrors = async (count = 1, overrides: Partial<AuditLog> =
   return output
 }
 
-export const createMockAuditLog = async (overrides: Partial<AuditLog> = {}): PromiseResult<AuditLog> => {
-  const auditLog = mockAuditLog(overrides)
+export const createMockAuditLog = async (
+  overrides: Partial<InputApiAuditLog> = {}
+): PromiseResult<OutputApiAuditLog> => {
+  const auditLog = mockInputApiAuditLog(overrides)
   const res = await axios.post("http://localhost:3010/messages", auditLog).catch((error: AxiosError) => error)
   if (isError(res)) {
     return res
   }
-  return auditLog
+  return {
+    ...auditLog,
+    events: [],
+    pncStatus: PncStatus.Processing,
+    triggerStatus: TriggerStatus.NoTriggers,
+    status: AuditLogStatus.processing
+  }
 }
 
-export const createMockAuditLogs = async (count = 1, overrides: Partial<AuditLog> = {}): PromiseResult<AuditLog[]> => {
+export const createMockAuditLogs = async (
+  count = 1,
+  overrides: Partial<InputApiAuditLog> = {}
+): PromiseResult<OutputApiAuditLog[]> => {
   const output = []
   for (let i = 0; i < count; i++) {
     const res = await createMockAuditLog(overrides)
@@ -73,8 +92,9 @@ export const createMockAuditLogEvent = async (
   return auditLogEvent
 }
 
-export const createMockRetriedError = async (): PromiseResult<AuditLog> => {
-  const auditLog = mockAuditLog()
+export const createMockRetriedError = async (): PromiseResult<OutputApiAuditLog> => {
+  const events: AuditLogEvent[] = []
+  const auditLog = mockInputApiAuditLog()
   await axios.post("http://localhost:3010/messages", auditLog)
 
   const event = mockAuditLogEvent({ category: "error", eventType: "Hearing Outcome Input Queue Failure" })
@@ -82,6 +102,7 @@ export const createMockRetriedError = async (): PromiseResult<AuditLog> => {
   if (isError(res)) {
     return res
   }
+  events.push(event)
 
   for (let i = 0; i < 3; i++) {
     const retryEvent = mockAuditLogEvent({ category: "information", eventType: "Retrying failed message" })
@@ -89,6 +110,14 @@ export const createMockRetriedError = async (): PromiseResult<AuditLog> => {
     if (isError(retryRes)) {
       return retryRes
     }
+    events.push(retryEvent)
   }
-  return auditLog
+
+  return {
+    ...auditLog,
+    events,
+    pncStatus: PncStatus.Processing,
+    triggerStatus: TriggerStatus.NoTriggers,
+    status: AuditLogStatus.processing
+  }
 }
