@@ -19,7 +19,7 @@ export const createMockError = async (overrides: Partial<InputApiAuditLog> = {})
     events: [event],
     pncStatus: PncStatus.Processing,
     triggerStatus: TriggerStatus.NoTriggers,
-    status: AuditLogStatus.processing
+    status: AuditLogStatus.error
   }
 }
 

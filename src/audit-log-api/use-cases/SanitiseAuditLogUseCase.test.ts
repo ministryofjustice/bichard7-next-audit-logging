@@ -1,7 +1,8 @@
 import MockDate from "mockdate"
 import "src/shared/testing"
 import { mockDynamoAuditLog } from "src/shared/testing"
-import { AuditLogEvent, DynamoAuditLog, EventCode } from "src/shared/types"
+import type { DynamoAuditLog } from "src/shared/types"
+import { AuditLogEvent, EventCode } from "src/shared/types"
 import { FakeAuditLogDynamoGateway } from "../test"
 import SanitiseAuditLogUseCase from "./SanitiseAuditLogUseCase"
 

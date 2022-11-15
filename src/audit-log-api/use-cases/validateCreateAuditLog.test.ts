@@ -85,12 +85,11 @@ describe("validateCreateAuditLog", () => {
     const { errors, isValid } = await validateCreateAuditLog(item, dynamoGateway)
 
     expect(isValid).toBe(false)
-    expect(errors).toHaveLength(7)
+    expect(errors).toHaveLength(6)
     expect(errors).toContain("Case ID is mandatory")
     expect(errors).toContain("External Correlation ID is mandatory")
     expect(errors).toContain("Message ID is mandatory")
     expect(errors).toContain("Received date is mandatory")
-    expect(errors).toContain("Next sanitise check is mandatory")
     expect(errors).toContain("Created by is mandatory")
     expect(errors).toContain("Message hash is mandatory")
   })

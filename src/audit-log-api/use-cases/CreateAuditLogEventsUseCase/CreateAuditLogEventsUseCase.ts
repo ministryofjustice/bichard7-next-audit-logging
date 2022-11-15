@@ -100,7 +100,8 @@ export default class CreateAuditLogEventsUseCase {
       ...calculateStatuses(allEvents),
       ...calculateErrorRecordArchivalDate(allEvents),
       ...calculateIsSanitised(allEvents),
-      ...calculateRetryCount(allEvents)
+      ...calculateRetryCount(allEvents),
+      events: deduplicatedNewEvents
     }
 
     const transactionResult = await this.auditLogGateway.update(message, updates, deduplicatedNewEvents)

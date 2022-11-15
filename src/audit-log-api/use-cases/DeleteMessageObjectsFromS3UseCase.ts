@@ -18,7 +18,7 @@ export default class DeleteMessageObjectsFromS3UseCase {
     }
 
     // Delete event objects from S3
-    for (const auditLogEvent of message.events) {
+    for (const auditLogEvent of message.events ?? []) {
       const { s3Path: eventS3Path } = auditLogEvent as unknown as { s3Path: string }
       if (eventS3Path) {
         const deleteEventObjectFromS3Result = await this.eventsGateway.deleteItem(eventS3Path)

@@ -218,7 +218,7 @@ describe("AuditLogDynamoGateway", () => {
     })
 
     it("should return AuditLogs ordered by receivedDate", async () => {
-      const receivedDates = ["2021-06-01T10:11:12", "2021-06-05T10:11:12", "2021-06-03T10:11:12"]
+      const receivedDates = ["2021-06-01T10:11:12.000Z", "2021-06-05T10:11:12.000Z", "2021-06-03T10:11:12.000Z"]
       const expectedReceivedDates = receivedDates
         .map((dateString: string) => new Date(dateString).toISOString())
         .sort()
@@ -272,7 +272,7 @@ describe("AuditLogDynamoGateway", () => {
           )
           await testGateway.insertOne(auditLogDynamoConfig.auditLogTableName, auditLog, gateway.auditLogTableKey)
           const externalEvent = {
-            ...mockAuditLogEvent(),
+            ...mockAuditLogEvent({ timestamp: new Date(`2021-06-01T10:11:02`) }),
             eventType: `External event type ${i}`,
             _messageId: auditLog.messageId
           }
@@ -331,7 +331,7 @@ describe("AuditLogDynamoGateway", () => {
     })
 
     it("should return AuditLogs ordered by receivedDate", async () => {
-      const receivedDates = ["2021-06-01T10:11:12", "2021-06-05T10:11:12", "2021-06-03T10:11:12"]
+      const receivedDates = ["2021-06-01T10:11:12.000Z", "2021-06-05T10:11:12.000Z", "2021-06-03T10:11:12.000Z"]
       const expectedReceivedDates = receivedDates
         .map((dateString: string) => new Date(dateString).toISOString())
         .sort()
@@ -357,7 +357,7 @@ describe("AuditLogDynamoGateway", () => {
     })
 
     it("should filter based on start and end date", async () => {
-      const receivedDates = ["2021-06-01T10:11:12", "2021-06-05T10:11:12", "2021-06-03T10:11:12"]
+      const receivedDates = ["2021-06-01T10:11:12.000Z", "2021-06-05T10:11:12.000Z", "2021-06-03T10:11:12.000Z"]
       const expectedReceivedDates = receivedDates
         .map((dateString: string) => new Date(dateString).toISOString())
         .sort()
@@ -656,7 +656,10 @@ describe("AuditLogDynamoGateway", () => {
     it("should merge events from both tables for multiple messages", async () => {
       await Promise.allSettled(
         [...Array(3).keys()].map(async (i: number) => {
-          const auditLog = mockDynamoAuditLog({ status: AuditLogStatus.completed })
+          const auditLog = mockDynamoAuditLog({
+            status: AuditLogStatus.completed,
+            receivedDate: `2021-06-01T10:11:0${i}`
+          })
           auditLog.status = AuditLogStatus.completed
           auditLog.events.push(mockAuditLogEvent({ eventType: `Main event type ${i}` }))
           await testGateway.insertOne(auditLogDynamoConfig.auditLogTableName, auditLog, gateway.auditLogTableKey)
@@ -729,7 +732,7 @@ describe("AuditLogDynamoGateway", () => {
 
       const item = items[0]
       expect(item.isSanitised).toBeFalsy()
-      expect(item.externalCorrelationId).toBe("External correlation id 4")
+      expect(item.externalCorrelationId).toBe(expectedAuditLog.externalCorrelationId)
     })
 
     it("shouldn't return any AuditLogs with unsanitised records not due to be checked", async () => {
@@ -782,12 +785,15 @@ describe("AuditLogDynamoGateway", () => {
             messageHash: `hash-${i}`
           })
           auditLog.isSanitised = 0
-          auditLog.events.push(mockAuditLogEvent({ eventType: `Main event type ${i}` }))
+          auditLog.events.push(
+            mockAuditLogEvent({ eventType: `Main event type ${i}`, timestamp: "2021-06-01T10:11:01" })
+          )
           await testGateway.insertOne(auditLogDynamoConfig.auditLogTableName, auditLog, gateway.auditLogTableKey)
           const externalEvent = {
             ...mockAuditLogEvent(),
             eventType: `External event type ${i}`,
-            _messageId: auditLog.messageId
+            _messageId: auditLog.messageId,
+            timestamp: "2021-06-01T10:11:02"
           }
           await testGateway.insertOne(auditLogDynamoConfig.eventsTableName, externalEvent, gateway.eventsTableKey)
         })
@@ -797,19 +803,20 @@ describe("AuditLogDynamoGateway", () => {
 
       expect(result).toNotBeError()
 
-      const actualAuditLogs = result as DynamoAuditLog[]
+      const actualAuditLogs = (result as DynamoAuditLog[]).sort((a, b) => a.receivedDate.localeCompare(b.receivedDate))
       expect(actualAuditLogs).toHaveLength(3)
-      expect(actualAuditLogs[2].events).toHaveLength(2)
-      expect(actualAuditLogs[2].events[0].eventType).toBe("Main event type 2")
-      expect(actualAuditLogs[2].events[1].eventType).toBe("External event type 2")
+
+      expect(actualAuditLogs[0].events).toHaveLength(2)
+      expect(actualAuditLogs[0].events[0].eventType).toBe("Main event type 0")
+      expect(actualAuditLogs[0].events[1].eventType).toBe("External event type 0")
 
       expect(actualAuditLogs[1].events).toHaveLength(2)
       expect(actualAuditLogs[1].events[0].eventType).toBe("Main event type 1")
       expect(actualAuditLogs[1].events[1].eventType).toBe("External event type 1")
 
-      expect(actualAuditLogs[0].events).toHaveLength(2)
-      expect(actualAuditLogs[0].events[0].eventType).toBe("Main event type 0")
-      expect(actualAuditLogs[0].events[1].eventType).toBe("External event type 0")
+      expect(actualAuditLogs[2].events).toHaveLength(2)
+      expect(actualAuditLogs[2].events[0].eventType).toBe("Main event type 2")
+      expect(actualAuditLogs[2].events[1].eventType).toBe("External event type 2")
     })
 
     it("should not merge events if the column was excluded", async () => {
@@ -838,7 +845,7 @@ describe("AuditLogDynamoGateway", () => {
         createAuditLogEvent({ eventType: "Event 2", timestamp: new Date("2021-06-15T10:12:13") }),
         createAuditLogEvent({ eventType: "Event 3", timestamp: new Date("2021-06-13T10:12:13") })
       ]
-      await gateway.create(auditLog)
+      await gateway.insertOne(auditLogDynamoConfig.auditLogTableName, auditLog, gateway.auditLogTableKey)
 
       const result = await gateway.fetchEvents(auditLog.messageId)
 
@@ -880,7 +887,8 @@ describe("AuditLogDynamoGateway", () => {
     let auditLog: DynamoAuditLog
 
     beforeEach(async () => {
-      auditLog = (await createMockAuditLog()) as DynamoAuditLog
+      auditLog = mockDynamoAuditLog()
+      await gateway.create(auditLog)
     })
 
     it("should not update if an empty object is passed in", async () => {
@@ -972,7 +980,7 @@ describe("AuditLogDynamoGateway", () => {
         )) as DocumentClient.GetItemOutput
       ).Item!
 
-      expect(updated.events).toHaveLength(0)
+      expect(updated.events).toBeUndefined()
 
       const allEvents = await (await testGateway.getAll(auditLogDynamoConfig.eventsTableName)).Items
       expect(allEvents).toHaveLength(1)
@@ -999,7 +1007,7 @@ describe("AuditLogDynamoGateway", () => {
         )) as DocumentClient.GetItemOutput
       ).Item!
 
-      expect(updated.events).toHaveLength(0)
+      expect(updated.events).toBeUndefined()
 
       const allEvents = (await (
         await testGateway.getAll(auditLogDynamoConfig.eventsTableName)

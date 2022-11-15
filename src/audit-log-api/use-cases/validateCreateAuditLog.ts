@@ -62,8 +62,8 @@ export default async (
   }
 
   if (!nextSanitiseCheck) {
-    errors.push("Next sanitise check is mandatory")
-  } else if (!isIsoDate(nextSanitiseCheck)) {
+    formattedNextSanitiseCheck = receivedDate
+  } else if (nextSanitiseCheck && !isIsoDate(nextSanitiseCheck)) {
     errors.push("Next sanitise check must be ISO format")
   } else {
     formattedNextSanitiseCheck = new Date(nextSanitiseCheck).toISOString()

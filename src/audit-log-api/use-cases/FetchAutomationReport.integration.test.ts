@@ -18,10 +18,12 @@ describe("FetchAutomationReport", () => {
 
   it("should merge events for the automation report", async () => {
     const auditLog = mockDynamoAuditLog()
-    auditLog.automationReport?.events.push(
-      mockAuditLogEvent({ eventType: "Internal Type 1", timestamp: "2022-11-11T10:00:00" })
-    )
+    auditLog.automationReport = {
+      events: [mockAuditLogEvent({ eventType: "Internal Type 1", timestamp: "2022-11-11T10:00:00" })],
+      forceOwner: "010000"
+    }
     await testGateway.insertOne(auditLogDynamoConfig.auditLogTableName, auditLog, gateway.auditLogTableKey)
+
     const externalEvent1 = {
       ...mockAuditLogEvent(),
       eventType: "Type 1",
@@ -29,6 +31,7 @@ describe("FetchAutomationReport", () => {
       _automationReport: 0
     }
     await testGateway.insertOne(auditLogDynamoConfig.eventsTableName, externalEvent1, gateway.eventsTableKey)
+
     const externalEvent2 = {
       ...mockAuditLogEvent(),
       eventType: "Type 2",
