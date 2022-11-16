@@ -6,7 +6,7 @@ import { auditLogEventsS3Config } from "src/shared/testing"
 import type { MqConfig } from "src/shared/types"
 import { AuditLog, AuditLogEvent, AuditLogLookup, AuditLogStatus } from "src/shared/types"
 import { v4 as uuid } from "uuid"
-import { auditLogDynamoConfig, auditLogLookupDynamoConfig, TestDynamoGateway } from "../test"
+import { auditLogDynamoConfig, TestDynamoGateway } from "../test"
 
 const mqConfig: MqConfig = {
   url: "stomp://localhost:51613",
@@ -15,14 +15,14 @@ const mqConfig: MqConfig = {
 }
 
 const testAuditLogDynamoGateway = new TestDynamoGateway(auditLogDynamoConfig)
-const testAuditLogLookupDynamoGateway = new TestDynamoGateway(auditLogLookupDynamoConfig)
+const testAuditLogLookupDynamoGateway = new TestDynamoGateway(auditLogDynamoConfig)
 const s3Gateway = new TestS3Gateway(auditLogEventsS3Config)
 const testMqGateway = new TestMqGateway(mqConfig)
 
 describe("retryMessage", () => {
   beforeEach(async () => {
-    await testAuditLogDynamoGateway.deleteAll(auditLogDynamoConfig.TABLE_NAME, "messageId")
-    await testAuditLogLookupDynamoGateway.deleteAll(auditLogLookupDynamoConfig.TABLE_NAME, "id")
+    await testAuditLogDynamoGateway.deleteAll(auditLogDynamoConfig.auditLogTableName, "messageId")
+    await testAuditLogLookupDynamoGateway.deleteAll(auditLogDynamoConfig.auditLogTableName, "id")
     await s3Gateway.deleteAll()
   })
 
@@ -41,8 +41,8 @@ describe("retryMessage", () => {
       })
     )
 
-    await testAuditLogDynamoGateway.insertOne(auditLogDynamoConfig.TABLE_NAME, message, "messageId")
-    await testAuditLogLookupDynamoGateway.insertOne(auditLogLookupDynamoConfig.TABLE_NAME, lookupItem, "id")
+    await testAuditLogDynamoGateway.insertOne(auditLogDynamoConfig.auditLogTableName, message, "messageId")
+    await testAuditLogLookupDynamoGateway.insertOne(auditLogDynamoConfig.lookupTableName, lookupItem, "id")
 
     const response = await axios.post(`http://localhost:3010/messages/${message.messageId}/retry`, null)
 
@@ -76,8 +76,8 @@ describe("retryMessage", () => {
     }
     await s3Gateway.upload(eventS3Path, JSON.stringify(eventObjectInS3))
 
-    await testAuditLogDynamoGateway.insertOne(auditLogDynamoConfig.TABLE_NAME, message, "messageId")
-    await testAuditLogLookupDynamoGateway.insertOne(auditLogLookupDynamoConfig.TABLE_NAME, lookupItem, "id")
+    await testAuditLogDynamoGateway.insertOne(auditLogDynamoConfig.auditLogTableName, message, "messageId")
+    await testAuditLogLookupDynamoGateway.insertOne(auditLogDynamoConfig.lookupTableName, lookupItem, "id")
 
     const response = await axios.post(`http://localhost:3010/messages/${message.messageId}/retry`, null)
 
@@ -104,7 +104,7 @@ describe("retryMessage", () => {
     message.status = AuditLogStatus.error
     message.events.push(auditLogEvent)
 
-    await testAuditLogDynamoGateway.insertOne(auditLogDynamoConfig.TABLE_NAME, message, "messageId")
+    await testAuditLogDynamoGateway.insertOne(auditLogDynamoConfig.auditLogTableName, message, "messageId")
 
     const { response } = await axios
       .post(`http://localhost:3010/messages/${message.messageId}/retry`, null)

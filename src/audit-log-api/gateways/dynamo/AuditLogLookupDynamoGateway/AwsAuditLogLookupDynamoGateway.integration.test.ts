@@ -1,15 +1,14 @@
-jest.retryTimes(10)
 import { decompress } from "src/shared"
 import "src/shared/testing"
 import { AuditLogLookup, isError } from "src/shared/types"
 import { v4 as uuid } from "uuid"
-import { auditLogLookupDynamoConfig } from "../../../test"
+import { auditLogDynamoConfig } from "../../../test"
 import TestDynamoGateway from "../../../test/TestDynamoGateway"
 import { IndexSearcher } from "../DynamoGateway"
 import AwsAuditLogLookupDynamoGateway from "./AwsAuditLogLookupDynamoGateway"
 
-const gateway = new AwsAuditLogLookupDynamoGateway(auditLogLookupDynamoConfig, auditLogLookupDynamoConfig.TABLE_NAME)
-const testGateway = new TestDynamoGateway(auditLogLookupDynamoConfig)
+const gateway = new AwsAuditLogLookupDynamoGateway(auditLogDynamoConfig, auditLogDynamoConfig.lookupTableName)
+const testGateway = new TestDynamoGateway(auditLogDynamoConfig)
 const primaryKey = "id"
 
 describe("AuditLogLookupDynamoGateway", () => {
@@ -25,11 +24,11 @@ describe("AuditLogLookupDynamoGateway", () => {
       skipIfExists: true
     }
 
-    await testGateway.createTable(auditLogLookupDynamoConfig.TABLE_NAME, options)
+    await testGateway.createTable(auditLogDynamoConfig.lookupTableName, options)
   })
 
   beforeEach(async () => {
-    await testGateway.deleteAll(auditLogLookupDynamoConfig.TABLE_NAME, primaryKey)
+    await testGateway.deleteAll(auditLogDynamoConfig.lookupTableName, primaryKey)
   })
 
   afterEach(() => {
@@ -101,7 +100,7 @@ describe("AuditLogLookupDynamoGateway", () => {
 
     it("should return the matching lookup item when the value is not compressed", async () => {
       const expectedLookupItem = new AuditLogLookup("Value 1", "MessageID")
-      await testGateway.insertOne(auditLogLookupDynamoConfig.TABLE_NAME, expectedLookupItem, "id")
+      await testGateway.insertOne(auditLogDynamoConfig.lookupTableName, expectedLookupItem, "id")
 
       const result = await gateway.fetchById(expectedLookupItem.id)
 
@@ -127,7 +126,7 @@ describe("AuditLogLookupDynamoGateway", () => {
       const anotherLookupItem = new AuditLogLookup("Expected value 2", "Dummy message ID")
 
       await gateway.create(expectedLookupItem)
-      await testGateway.insertOne(auditLogLookupDynamoConfig.TABLE_NAME, anotherLookupItem, "id")
+      await testGateway.insertOne(auditLogDynamoConfig.lookupTableName, anotherLookupItem, "id")
 
       const result = await gateway.fetchByMessageId(expectedLookupItem.messageId)
 
@@ -143,8 +142,8 @@ describe("AuditLogLookupDynamoGateway", () => {
       const expectedLookupItem = new AuditLogLookup("Expected value 1", "Expected message ID")
       const anotherLookupItem = new AuditLogLookup("Expected value 2", "Dummy message ID")
 
-      await testGateway.insertOne(auditLogLookupDynamoConfig.TABLE_NAME, expectedLookupItem, "id")
-      await testGateway.insertOne(auditLogLookupDynamoConfig.TABLE_NAME, anotherLookupItem, "id")
+      await testGateway.insertOne(auditLogDynamoConfig.lookupTableName, expectedLookupItem, "id")
+      await testGateway.insertOne(auditLogDynamoConfig.lookupTableName, anotherLookupItem, "id")
 
       const result = await gateway.fetchByMessageId(expectedLookupItem.messageId)
 
@@ -161,11 +160,11 @@ describe("AuditLogLookupDynamoGateway", () => {
       await Promise.all(
         [...Array(10).keys()].map((index) => {
           const item = new AuditLogLookup(`Expected value ${index}`, expectedMessageId)
-          return testGateway.insertOne(auditLogLookupDynamoConfig.TABLE_NAME, { ...item, id: `ID-${index}` }, "id")
+          return testGateway.insertOne(auditLogDynamoConfig.lookupTableName, { ...item, id: `ID-${index}` }, "id")
         })
       )
 
-      const insertedItems = (await testGateway.getAll(auditLogLookupDynamoConfig.TABLE_NAME)).Items as AuditLogLookup[]
+      const insertedItems = (await testGateway.getAll(auditLogDynamoConfig.lookupTableName)).Items as AuditLogLookup[]
 
       expect(insertedItems).toHaveLength(10)
 
@@ -203,7 +202,7 @@ describe("AuditLogLookupDynamoGateway", () => {
       await Promise.all(expectedItems.map((item) => gateway.create(item)))
 
       const insertedItems = await Promise.all(
-        ((await testGateway.getAll(auditLogLookupDynamoConfig.TABLE_NAME)).Items as AuditLogLookup[]).map(
+        ((await testGateway.getAll(auditLogDynamoConfig.lookupTableName)).Items as AuditLogLookup[]).map(
           async (item) => ({
             ...item,
             value: await decompress(item.value)
@@ -224,11 +223,11 @@ describe("AuditLogLookupDynamoGateway", () => {
       await Promise.all(
         [...Array(15).keys()].map((index) => {
           const item = new AuditLogLookup(`Expected value ${index}`, expectedMessageId)
-          return testGateway.insertOne(auditLogLookupDynamoConfig.TABLE_NAME, { ...item, id: `ID-${index}` }, "id")
+          return testGateway.insertOne(auditLogDynamoConfig.lookupTableName, { ...item, id: `ID-${index}` }, "id")
         })
       )
 
-      const insertedItems = (await testGateway.getAll(auditLogLookupDynamoConfig.TABLE_NAME)).Items as AuditLogLookup[]
+      const insertedItems = (await testGateway.getAll(auditLogDynamoConfig.lookupTableName)).Items as AuditLogLookup[]
 
       const result = await gateway.fetchAllByMessageId(expectedMessageId)
 
@@ -266,17 +265,17 @@ describe("AuditLogLookupDynamoGateway", () => {
       await Promise.all(
         [...Array(15).keys()].map((index) => {
           const item = new AuditLogLookup(`Record to delete ${index}`, messageId)
-          return testGateway.insertOne(auditLogLookupDynamoConfig.TABLE_NAME, { ...item, id: `ID-${index}` }, "id")
+          return testGateway.insertOne(auditLogDynamoConfig.lookupTableName, { ...item, id: `ID-${index}` }, "id")
         })
       )
 
       const otherRecord = new AuditLogLookup(`Other record`, "otherMessageId")
-      testGateway.insertOne(auditLogLookupDynamoConfig.TABLE_NAME, otherRecord, "id")
+      testGateway.insertOne(auditLogDynamoConfig.lookupTableName, otherRecord, "id")
 
       const result = await gateway.deleteByMessageId(messageId)
       expect(isError(result)).toBe(false)
 
-      const recordsInDB = await testGateway.getAll(auditLogLookupDynamoConfig.TABLE_NAME)
+      const recordsInDB = await testGateway.getAll(auditLogDynamoConfig.lookupTableName)
       expect(recordsInDB.Items).toEqual([{ _: "_", ...otherRecord }])
     })
 
@@ -304,7 +303,7 @@ describe("AuditLogLookupDynamoGateway", () => {
       await Promise.all(
         [...Array(2).keys()].map((index) => {
           const item = new AuditLogLookup(`Record to delete ${index}`, messageId)
-          return testGateway.insertOne(auditLogLookupDynamoConfig.TABLE_NAME, { ...item, id: `ID-${index}` }, "id")
+          return testGateway.insertOne(auditLogDynamoConfig.lookupTableName, { ...item, id: `ID-${index}` }, "id")
         })
       )
 

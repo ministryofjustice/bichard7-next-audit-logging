@@ -35,9 +35,10 @@ const messageIds = MESSAGE_ID
       .filter((x) => !!x?.trim())
 
 const dynamoConfig = {
-  DYNAMO_REGION: "eu-west-2",
-  TABLE_NAME: "Will be retrieved from Retry Message lambda environment variable",
-  DYNAMO_URL: "Will be retrieved from Retry Message lambda environment variable"
+  region: "eu-west-2",
+  auditLogTableName: "Will be retrieved from Retry Message lambda environment variable",
+  auditLogLookupTableName: "Will be retrieved from Retry Message lambda environment variable",
+  endpoint: "Will be retrieved from Retry Message lambda environment variable"
 }
 
 async function setup() {
@@ -47,18 +48,18 @@ async function setup() {
     throw Error("Couldn't get MQ connection details")
   }
 
-  dynamoConfig.DYNAMO_URL = retryLambda.Configuration?.Environment?.Variables?.AWS_URL || ""
-  if (!dynamoConfig.DYNAMO_URL) {
+  dynamoConfig.endpoint = retryLambda.Configuration?.Environment?.Variables?.AWS_URL || ""
+  if (!dynamoConfig.endpoint) {
     throw Error("Couldn't get DynamoDB URL")
   }
 
-  dynamoConfig.TABLE_NAME = retryLambda.Configuration?.Environment?.Variables?.AUDIT_LOG_TABLE_NAME || ""
-  if (!dynamoConfig.TABLE_NAME) {
+  dynamoConfig.auditLogTableName = retryLambda.Configuration?.Environment?.Variables?.AUDIT_LOG_TABLE_NAME || ""
+  if (!dynamoConfig.auditLogTableName) {
     throw Error("Couldn't get DynamoDB table name")
   }
 }
 
-const dynamo = new AuditLogDynamoGateway(dynamoConfig, dynamoConfig.TABLE_NAME)
+const dynamo = new AuditLogDynamoGateway(dynamoConfig)
 
 async function run() {
   let totalProcessing = 0

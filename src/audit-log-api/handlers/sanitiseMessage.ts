@@ -5,23 +5,21 @@ import { BichardPostgresGateway, createS3Config, HttpStatusCode, S3Gateway } fro
 import type { AuditLog } from "src/shared/types"
 import { isError } from "src/shared/types"
 import createAuditLogDynamoDbConfig from "../createAuditLogDynamoDbConfig"
-import createAuditLogLookupDynamoDbConfig from "../createAuditLogLookupDynamoDbConfig"
 import createBichardPostgresGatewayConfig from "../createBichardPostgresGatewayConfig"
 import { AuditLogDynamoGateway, AwsAuditLogLookupDynamoGateway } from "../gateways/dynamo"
+import { auditLogDynamoConfig } from "../test"
 import DeleteArchivedErrorsUseCase from "../use-cases/DeleteArchivedErrorsUseCase"
 import DeleteAuditLogLookupItemsUseCase from "../use-cases/DeleteAuditLogLookupItemsUseCase"
 import DeleteMessageObjectsFromS3UseCase from "../use-cases/DeleteMessageObjectsFromS3UseCase"
-import FetchById from "../use-cases/FetchById"
 import SanitiseAuditLogUseCase from "../use-cases/SanitiseAuditLogUseCase"
 import shouldSanitiseMessage from "../use-cases/shouldSanitiseMessage"
 import { createJsonApiResult } from "../utils"
 
 const auditLogDynamoDbConfig = createAuditLogDynamoDbConfig()
-const auditLogGateway = new AuditLogDynamoGateway(auditLogDynamoDbConfig, auditLogDynamoDbConfig.TABLE_NAME)
-const auditLogLookupDynamoDbConfig = createAuditLogLookupDynamoDbConfig()
+const auditLogGateway = new AuditLogDynamoGateway(auditLogDynamoDbConfig)
 const auditLogLookupDynamoGateway = new AwsAuditLogLookupDynamoGateway(
-  auditLogLookupDynamoDbConfig,
-  auditLogLookupDynamoDbConfig.TABLE_NAME
+  auditLogDynamoDbConfig,
+  auditLogDynamoDbConfig.lookupTableName
 )
 const postgresConfig = createBichardPostgresGatewayConfig()
 const awsBichardPostgresGateway = new BichardPostgresGateway(postgresConfig)
@@ -63,26 +61,27 @@ export default async function sanitiseMessage(event: APIGatewayProxyEvent): Prom
     })
   }
 
-  const messageFetcher = new FetchById(auditLogGateway, messageId, {
-    includeColumns: ["automationReport", "topExceptionsReport", "version"]
-  })
-  const messageFetcherResult = await messageFetcher.fetch()
+  const messageResult = await auditLogGateway.getOne(
+    auditLogDynamoConfig.auditLogTableName,
+    auditLogGateway.auditLogTableKey,
+    messageId
+  )
 
-  if (isError(messageFetcherResult)) {
+  if (isError(messageResult)) {
     return createJsonApiResult({
       statusCode: HttpStatusCode.internalServerError,
-      body: messageFetcherResult.message
+      body: messageResult.message
     })
   }
 
-  if (!messageFetcherResult) {
+  const message = messageResult?.Item as AuditLog
+
+  if (!message) {
     return createJsonApiResult({
       statusCode: HttpStatusCode.notFound,
       body: "Message id not found"
     })
   }
-
-  const message = messageFetcherResult as AuditLog
 
   const shouldSanitise = await shouldSanitiseMessage(awsBichardPostgresGateway, message, sanitiseConfig.sanitiseAfter)
   if (isError(shouldSanitise)) {

@@ -48,6 +48,7 @@
   },
   "scripts": {
     "build": "node build.js",
+    "check": "tsc --noEmit",
     "hook:before:offline:start:init": "make run-mq run-pg",
     "install-dynamo": "sls dynamodb install",
     "lint:fix": "eslint . --fix",

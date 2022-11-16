@@ -44,6 +44,7 @@ jobs:
       - restore_all_caches
       - run: npm install
       - save_all_caches
+      - run: npm run check
       - run: npm run lint
       - run: npm run build
       - persist_build_dirs

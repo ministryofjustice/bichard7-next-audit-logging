@@ -23,14 +23,7 @@ export default class DynamoGateway {
   protected readonly client: DocumentClient
 
   constructor(config: DynamoDbConfig) {
-    const conf: DynamoDB.ClientConfiguration = {
-      endpoint: config.DYNAMO_URL,
-      region: config.DYNAMO_REGION,
-      accessKeyId: config.AWS_ACCESS_KEY_ID,
-      secretAccessKey: config.AWS_SECRET_ACCESS_KEY
-    }
-
-    this.service = new DynamoDB(conf)
+    this.service = new DynamoDB(config)
 
     this.client = new DocumentClient({
       service: this.service
@@ -41,7 +34,8 @@ export default class DynamoGateway {
     const params: DocumentClient.PutItemInput = {
       TableName: tableName,
       Item: { _: "_", ...record },
-      ConditionExpression: `attribute_not_exists(${keyName})`
+      ExpressionAttributeNames: { "#keyName": keyName },
+      ConditionExpression: `attribute_not_exists(#keyName)`
     }
 
     return this.client
@@ -87,7 +81,7 @@ export default class DynamoGateway {
       })
   }
 
-  updateOne<T>(tableName: string, record: T, keyName: string, version: number): PromiseResult<void> {
+  replaceOne<T>(tableName: string, record: T, keyName: string, version: number): PromiseResult<void> {
     const params: DocumentClient.PutItemInput = {
       TableName: tableName,
       Item: { _: "_", ...record },
@@ -169,6 +163,11 @@ export default class DynamoGateway {
     if (options.rangeKeyName && options.rangeKeyValue !== undefined && options.rangeKeyComparison !== undefined) {
       if (options.rangeKeyComparison == KeyComparison.LessThanOrEqual) {
         queryOptions.KeyConditionExpression += " AND #rangeKeyName <= :rangeKeyValue"
+        queryOptions.ExpressionAttributeNames!["#rangeKeyName"] = options.rangeKeyName
+        queryOptions.ExpressionAttributeValues![":rangeKeyValue"] = options.rangeKeyValue
+      }
+      if (options.rangeKeyComparison == KeyComparison.Equals) {
+        queryOptions.KeyConditionExpression += " AND #rangeKeyName = :rangeKeyValue"
         queryOptions.ExpressionAttributeNames!["#rangeKeyName"] = options.rangeKeyName
         queryOptions.ExpressionAttributeValues![":rangeKeyValue"] = options.rangeKeyValue
       }

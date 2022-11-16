@@ -179,18 +179,18 @@ describe("Sanitise Old Messages e2e", () => {
 
   it("should schedule the nextSanitiseCheck date of every message we check for 2 days time", async () => {
     const messageIds = await insertAuditLogRecords([
-      { externalCorrelationId: "message_1", receivedAt: new Date("2022-01-01T09:00:00") },
-      { externalCorrelationId: "message_2", receivedAt: new Date("2022-01-02T09:00:00") },
-      { externalCorrelationId: "message_3", receivedAt: new Date("2022-01-03T09:00:00") },
-      { externalCorrelationId: "message_4", receivedAt: new Date("2022-01-04T09:00:00") },
-      { externalCorrelationId: "message_5", receivedAt: new Date("2022-01-05T09:00:00") },
-      { externalCorrelationId: "message_6", receivedAt: new Date() },
-      { externalCorrelationId: "message_7", receivedAt: new Date() }
+      { externalCorrelationId: "message_0", receivedAt: new Date("2022-01-01T09:00:00") },
+      { externalCorrelationId: "message_1", receivedAt: new Date("2022-01-02T09:00:00") },
+      { externalCorrelationId: "message_2", receivedAt: new Date("2022-01-03T09:00:00") },
+      { externalCorrelationId: "message_3", receivedAt: new Date("2022-01-04T09:00:00") },
+      { externalCorrelationId: "message_4", receivedAt: new Date("2022-01-05T09:00:00") },
+      { externalCorrelationId: "message_5", receivedAt: new Date() },
+      { externalCorrelationId: "message_6", receivedAt: new Date() }
     ])
     await insertDbRecords(
       db,
-      [messageIds.message_1, messageIds.message_2, messageIds.message_3, messageIds.message_6],
-      [messageIds.message_4, messageIds.message_5, messageIds.message_7]
+      [messageIds.message_0, messageIds.message_1, messageIds.message_2, messageIds.message_5],
+      [messageIds.message_3, messageIds.message_4, messageIds.message_6]
     )
 
     await executeLambda()

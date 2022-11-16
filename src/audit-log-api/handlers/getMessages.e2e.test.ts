@@ -1,6 +1,6 @@
 import type { AxiosError } from "axios"
 import axios from "axios"
-import { addQueryParams, HttpStatusCode } from "src/shared"
+import { addQueryParams, compress, HttpStatusCode } from "src/shared"
 import {
   createMockAuditLog,
   createMockAuditLogEvent,
@@ -9,16 +9,17 @@ import {
   mockAuditLog,
   mockAuditLogEvent
 } from "src/shared/testing"
-import type { AuditLog, AuditLogEvent } from "src/shared/types"
+import type { AuditLog } from "src/shared/types"
+import { AuditLogLookup } from "src/shared/types"
 import { EventCode, isError } from "src/shared/types"
-import { TestDynamoGateway } from "../test"
-import { auditLogDynamoConfig } from "../test/dynamoDbConfig"
+import { auditLogDynamoConfig, TestDynamoGateway } from "../test"
 
 const testDynamoGateway = new TestDynamoGateway(auditLogDynamoConfig)
 
 describe("Getting Audit Logs", () => {
   beforeEach(async () => {
-    await testDynamoGateway.deleteAll(auditLogDynamoConfig.TABLE_NAME, "messageId")
+    await testDynamoGateway.deleteAll(auditLogDynamoConfig.auditLogTableName, "messageId")
+    await testDynamoGateway.deleteAll(auditLogDynamoConfig.eventsTableName, "_id")
   })
 
   it("should return the audit log records", async () => {
@@ -98,15 +99,38 @@ describe("Getting Audit Logs", () => {
     expect(messageIds).toEqual([auditLog2.messageId])
   })
 
-  it("should get message and lookup attribute values", async () => {
-    const auditLog = await createMockError()
+  it.each([
+    ["all", ""],
+    ["messageId", "/msgid1"],
+    ["externalCorrelationId", "?externalCorrelationId=exid1"],
+    ["status", "?status=Processing"],
+    ["onlyUnsanitised", "?unsanitised=true"],
+    ["automationReport", "?eventsFilter=automationReport&start=2020-10-10&end=2100-10-10"],
+    ["topExceptionsReport", "?eventsFilter=topExceptionsReport&start=2020-10-10&end=2100-10-10"]
+  ])("should get message by %s and lookup attribute values for old events", async (_, queryParams) => {
+    const auditLog = await mockAuditLog({
+      externalCorrelationId: "exid1",
+      messageId: "msgid1"
+    })
+    const lookupItem1 = new AuditLogLookup("Test value 1", auditLog.messageId)
+    const lookupItem2Value = (await compress("Test value 2")) as string
+    const lookupItem2 = new AuditLogLookup(lookupItem2Value, auditLog.messageId)
+    lookupItem2.isCompressed = true
+    const event = mockAuditLogEvent()
+    event.addAttribute("Attribute 3", { valueLookup: lookupItem1.id })
+    event.addAttribute("Attribute 4", { valueLookup: lookupItem2.id })
+    event.addAttribute("Error 1 Details", "dummy")
+    auditLog.events.push(event)
+
+    await testDynamoGateway.insertOne(auditLogDynamoConfig.lookupTableName, lookupItem1, "id")
+    await testDynamoGateway.insertOne(auditLogDynamoConfig.lookupTableName, lookupItem2, "id")
+    await testDynamoGateway.insertOne(auditLogDynamoConfig.auditLogTableName, auditLog, "messageId")
+
     if (isError(auditLog)) {
       throw new Error("Unexpected error")
     }
 
-    const result = await axios.get<AuditLog[]>(
-      `http://localhost:3010/messages?externalCorrelationId=${auditLog.externalCorrelationId}`
-    )
+    const result = await axios.get<AuditLog[]>(`http://localhost:3010/messages${queryParams}`)
     expect(result.status).toEqual(HttpStatusCode.ok)
 
     expect(Array.isArray(result.data)).toBeTruthy()
@@ -118,30 +142,8 @@ describe("Getting Audit Logs", () => {
     const { attributes } = actualMessage.events[0]
     expect(attributes["Attribute 1"]).toBe(auditLog.events[0].attributes["Attribute 1"])
     expect(attributes["Attribute 2"]).toBe(auditLog.events[0].attributes["Attribute 2"])
-  })
-
-  it("should not look up attribute values when largeObjects set to false", async () => {
-    const auditLog = await createMockError()
-    if (isError(auditLog)) {
-      throw new Error("Unexpected error")
-    }
-
-    const result = await axios.get<AuditLog[]>(
-      `http://localhost:3010/messages?externalCorrelationId=${auditLog.externalCorrelationId}&largeObjects=false`
-    )
-    expect(result.status).toEqual(HttpStatusCode.ok)
-
-    expect(Array.isArray(result.data)).toBeTruthy()
-    const actualMessage = result.data[0]
-
-    expect(actualMessage.messageId).toEqual(auditLog.messageId)
-    expect(actualMessage.events).toHaveLength(1)
-
-    const { attributes } = actualMessage.events[0]
-    const { eventXml } = actualMessage.events[0] as AuditLogEvent
-    expect(attributes["Attribute 1"]).toHaveProperty("valueLookup")
-    expect(attributes["Attribute 2"]).toBe(auditLog.events[0].attributes["Attribute 2"])
-    expect(eventXml).toHaveProperty("valueLookup")
+    expect(attributes["Attribute 3"]).toBe("Test value 1")
+    expect(attributes["Attribute 4"]).toBe("Test value 2")
   })
 
   describe("fetching unsanitised messages", () => {
@@ -248,7 +250,7 @@ describe("Getting Audit Logs", () => {
     it("should include force owner at the top level of the response", async () => {
       const auditLog: AuditLog = mockAuditLog()
       auditLog.automationReport = { forceOwner: "010000", events: [] }
-      await testDynamoGateway.insertOne(auditLogDynamoConfig.TABLE_NAME, auditLog, "messageId")
+      await testDynamoGateway.insertOne(auditLogDynamoConfig.auditLogTableName, auditLog, "messageId")
 
       const result = await axios.get<AuditLog[]>(
         "http://localhost:3010/messages?eventsFilter=automationReport&start=2000-01-01&end=2099-01-01"
@@ -266,6 +268,7 @@ describe("Getting Audit Logs", () => {
       }
 
       const eventInclude = await createMockAuditLogEvent(auditLog.messageId, {
+        eventCode: EventCode.ExceptionsGenerated,
         attributes: { "Message Type": "SPIResults", "Error 1 Details": "HO100300" }
       })
       const eventExclude = await createMockAuditLogEvent(auditLog.messageId)
@@ -306,7 +309,7 @@ describe("Getting Audit Logs", () => {
     it("should include force owner from the automation report at the top level of the response", async () => {
       const auditLog: AuditLog = mockAuditLog()
       auditLog.automationReport = { forceOwner: "010000", events: [] }
-      await testDynamoGateway.insertOne(auditLogDynamoConfig.TABLE_NAME, auditLog, "messageId")
+      await testDynamoGateway.insertOne(auditLogDynamoConfig.auditLogTableName, auditLog, "messageId")
 
       const result = await axios.get<AuditLog[]>(
         "http://localhost:3010/messages?eventsFilter=topExceptionsReport&start=2000-01-01&end=2099-01-01"
@@ -455,7 +458,7 @@ describe("Getting Audit Logs", () => {
         ]
       })
 
-      await testDynamoGateway.insertOne(auditLogDynamoConfig.TABLE_NAME, auditLog, "messageId")
+      await testDynamoGateway.insertOne(auditLogDynamoConfig.auditLogTableName, auditLog, "messageId")
     })
 
     it("should add user and event code when retrieving old-style event if they're set in the attributes for multiple messages", async () => {
@@ -471,7 +474,6 @@ describe("Getting Audit Logs", () => {
 
       expect(result.data).toHaveLength(1)
 
-      console.log(JSON.stringify(result.data, null, 2))
       expect(result.data[0].events[0].eventCode).toBe("dummy.event")
       expect(result.data[0].events[0].user).toBe("dummy.user")
     })

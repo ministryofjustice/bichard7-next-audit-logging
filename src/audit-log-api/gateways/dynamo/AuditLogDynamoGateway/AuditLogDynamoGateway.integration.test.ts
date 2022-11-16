@@ -1,20 +1,17 @@
-jest.retryTimes(10)
 import type { DocumentClient } from "aws-sdk/clients/dynamodb"
-import { addDays, subDays } from "date-fns"
-import { shuffle } from "lodash"
+import { addDays } from "date-fns"
 import { auditLogDynamoConfig } from "src/audit-log-api/test"
+import { compress, decompress } from "src/shared"
 import "src/shared/testing"
-import type { AuditLogEventOptions } from "src/shared/types"
-import { AuditLog, AuditLogEvent, AuditLogStatus, EventCode, isError } from "src/shared/types"
+import { createMockAuditLog, mockAuditLogEvent } from "src/shared/testing"
+import type { AuditLogEventOptions, KeyValuePair } from "src/shared/types"
+import { AuditLog, AuditLogEvent, AuditLogStatus, isError } from "src/shared/types"
 import TestDynamoGateway from "../../../test/TestDynamoGateway"
-import type DynamoUpdate from "../DynamoGateway/DynamoUpdate"
-import isConditionalExpressionViolationError from "../DynamoGateway/isConditionalExpressionViolationError"
 import AuditLogDynamoGateway from "./AuditLogDynamoGateway"
 
-const gateway = new AuditLogDynamoGateway(auditLogDynamoConfig, auditLogDynamoConfig.TABLE_NAME)
+const gateway = new AuditLogDynamoGateway(auditLogDynamoConfig)
 const testGateway = new TestDynamoGateway(auditLogDynamoConfig)
 const primaryKey = "messageId"
-const sortKey = "receivedDate"
 
 const createAuditLogEvent = (options: Partial<AuditLogEventOptions> = {}) =>
   new AuditLogEvent({
@@ -26,29 +23,9 @@ const createAuditLogEvent = (options: Partial<AuditLogEventOptions> = {}) =>
   })
 
 describe("AuditLogDynamoGateway", () => {
-  beforeAll(async () => {
-    const options = {
-      keyName: primaryKey,
-      sortKey,
-      secondaryIndexes: [
-        {
-          name: "externalCorrelationIdIndex",
-          hashKey: "externalCorrelationId"
-        },
-        {
-          name: "statusIndex",
-          hashKey: "status",
-          rangeKey: "receivedDate"
-        }
-      ],
-      skipIfExists: true
-    }
-
-    await testGateway.createTable(auditLogDynamoConfig.TABLE_NAME, options)
-  })
-
   beforeEach(async () => {
-    await testGateway.deleteAll(auditLogDynamoConfig.TABLE_NAME, primaryKey)
+    await testGateway.deleteAll(auditLogDynamoConfig.auditLogTableName, primaryKey)
+    await testGateway.deleteAll(auditLogDynamoConfig.eventsTableName, "_id")
   })
 
   describe("create()", () => {
@@ -147,369 +124,6 @@ describe("AuditLogDynamoGateway", () => {
     })
   })
 
-  describe("addEvent()", () => {
-    it("should only add an event to and update the status of the specified audit log", async () => {
-      const expectedEvent = createAuditLogEvent({ eventCode: EventCode.IgnoredNoOffences })
-
-      expectedEvent.addAttribute("Attribute one", "Some value")
-      expectedEvent.addAttribute("Attribute two", 2)
-
-      const message = new AuditLog("one", new Date(), "dummy hash")
-      const otherMessage = new AuditLog("two", new Date(), "dummy hash")
-
-      await gateway.create(message)
-      await gateway.create(otherMessage)
-
-      const result = await gateway.addEvent(message.messageId, message.version, expectedEvent)
-
-      expect(isError(result)).toBe(false)
-
-      const getManyOptions = {
-        sortKey,
-        pagination: { limit: 2 }
-      }
-      const actualRecords = <DocumentClient.ScanOutput>(
-        await gateway.getMany(auditLogDynamoConfig.TABLE_NAME, getManyOptions)
-      )
-
-      const actualOtherMessage = <AuditLog>actualRecords.Items?.find((r) => r.messageId === otherMessage.messageId)
-      expect(actualOtherMessage).toBeDefined()
-      expect(actualOtherMessage.events).toBeDefined()
-      expect(actualOtherMessage.events).toHaveLength(0)
-      expect(actualOtherMessage.status).toBe(otherMessage.status)
-
-      const actualMessage = <AuditLog>actualRecords.Items?.find((r) => r.messageId === message.messageId)
-      expect(actualMessage).toBeDefined()
-      expect(actualMessage.events).toBeDefined()
-      expect(actualMessage.events).toHaveLength(1)
-      expect(actualMessage.status).toBe(AuditLogStatus.completed)
-
-      const actualEvent = actualMessage.events[0]
-      expect(actualEvent.eventSource).toBe(expectedEvent.eventSource)
-      expect(actualEvent.category).toBe(expectedEvent.category)
-      expect(actualEvent.timestamp).toBe(expectedEvent.timestamp)
-      expect(actualEvent.eventType).toBe(expectedEvent.eventType)
-
-      const actualEventAttributes = actualEvent.attributes
-      expect(actualEventAttributes).toBeDefined()
-      expect(actualEventAttributes["Attribute one"]).toBe("Some value")
-      expect(actualEventAttributes["Attribute two"]).toBe(2)
-    })
-
-    it("should add two events to the audit log and update the message status to the latest event type", async () => {
-      const expectedEventOne = createAuditLogEvent({ eventType: "Dummy event one" })
-      expectedEventOne.addAttribute("EventOneAttribute", "Event one attribute")
-
-      const expectedEventTwo = createAuditLogEvent({ eventType: "Dummy event two", category: "error" })
-      expectedEventTwo.addAttribute("EventTwoAttribute", "Event two attribute")
-
-      let message = new AuditLog("one", new Date(), "dummy hash")
-      await gateway.create(message)
-
-      const resultOne = await gateway.addEvent(message.messageId, message.version, expectedEventOne)
-      expect(isError(resultOne)).toBe(false)
-
-      message = (await gateway.fetchOne(message.messageId, { includeColumns: ["version"] })) as AuditLog
-      const resultTwo = await gateway.addEvent(message.messageId, message.version, expectedEventTwo)
-      expect(isError(resultTwo)).toBe(false)
-
-      const getManyOptions = {
-        sortKey,
-        pagination: { limit: 1 }
-      }
-      const actualRecords = <DocumentClient.ScanOutput>(
-        await gateway.getMany(auditLogDynamoConfig.TABLE_NAME, getManyOptions)
-      )
-
-      const actualMessage = <AuditLog>actualRecords.Items?.find((r) => r.messageId === message.messageId)
-      expect(actualMessage).toBeDefined()
-      expect(actualMessage.events).toBeDefined()
-      expect(actualMessage.events).toHaveLength(2)
-      expect(actualMessage.status).toBe(AuditLogStatus.error)
-      expect(actualMessage.lastEventType).toBe(expectedEventTwo.eventType)
-
-      const actualEventOne = actualMessage.events.find((e) => e.eventType === expectedEventOne.eventType)
-      expect(actualEventOne?.eventSource).toBe(expectedEventOne.eventSource)
-      expect(actualEventOne?.category).toBe(expectedEventOne.category)
-      expect(actualEventOne?.timestamp).toBe(expectedEventOne.timestamp)
-      expect(actualEventOne?.eventCode).toBe(expectedEventOne.eventCode)
-
-      const actualEventOneAttributes = actualEventOne?.attributes
-      expect(actualEventOneAttributes).toBeDefined()
-      expect(actualEventOneAttributes?.EventOneAttribute).toBe(expectedEventOne.attributes.EventOneAttribute)
-
-      const actualEventTwo = actualMessage.events.find((e) => e.eventType === expectedEventTwo.eventType)
-      expect(actualEventTwo?.eventSource).toBe(expectedEventTwo.eventSource)
-      expect(actualEventTwo?.category).toBe(expectedEventTwo.category)
-      expect(actualEventTwo?.timestamp).toBe(expectedEventTwo.timestamp)
-      expect(actualEventTwo?.eventCode).toBe(expectedEventTwo.eventCode)
-
-      const actualEventTwoAttributes = actualEventTwo?.attributes
-      expect(actualEventTwoAttributes).toBeDefined()
-      expect(actualEventTwoAttributes?.EventTwoAttribute).toBe(expectedEventTwo.attributes.EventTwoAttribute)
-    })
-
-    it("should return error when audit log does not exist", async () => {
-      const event = createAuditLogEvent()
-      const { messageId, version } = new AuditLog("External correlation id", new Date(), "dummy hash")
-
-      const resultOne = await gateway.addEvent(messageId, version, event)
-
-      expect(isError(resultOne)).toBe(true)
-    })
-
-    it("should log the event for top exceptions report", async () => {
-      const expectedEvent = createAuditLogEvent({ eventCode: EventCode.ExceptionsGenerated })
-
-      expectedEvent.addAttribute("Error 2 Details", "Dummy")
-
-      const message = new AuditLog("one", new Date(), "dummy hash")
-
-      await gateway.create(message)
-
-      const result = await gateway.addEvent(message.messageId, message.version, expectedEvent)
-
-      expect(isError(result)).toBe(false)
-
-      const getManyOptions = {
-        sortKey,
-        pagination: { limit: 2 }
-      }
-      const actualRecords = <DocumentClient.ScanOutput>(
-        await gateway.getMany(auditLogDynamoConfig.TABLE_NAME, getManyOptions)
-      )
-
-      const actualMessage = actualRecords.Items?.find((r) => r.messageId === message.messageId) as AuditLog & {
-        topExceptionsReportEvents: AuditLogEvent[]
-      }
-      expect(actualMessage).toBeDefined()
-      expect(actualMessage.events).toBeDefined()
-      expect(actualMessage.events).toHaveLength(1)
-      expect(actualMessage.topExceptionsReport).toBeDefined()
-      expect(actualMessage.topExceptionsReport?.events).toBeDefined()
-      expect(actualMessage.topExceptionsReport?.events).toHaveLength(1)
-
-      const actualEvent = actualMessage.events[0]
-      expect(actualEvent.eventSource).toBe(expectedEvent.eventSource)
-      expect(actualEvent.category).toBe(expectedEvent.category)
-      expect(actualEvent.timestamp).toBe(expectedEvent.timestamp)
-      expect(actualEvent.eventType).toBe(expectedEvent.eventType)
-      expect(actualEvent.eventCode).toBe(expectedEvent.eventCode)
-
-      const actualEventAttributes = actualEvent.attributes
-      expect(actualEventAttributes).toBeDefined()
-      expect(actualEventAttributes["Error 2 Details"]).toBe("Dummy")
-
-      const actualTopExceptionReportEvent = actualMessage.topExceptionsReport?.events[0]
-      expect(actualTopExceptionReportEvent?.eventSource).toBe(expectedEvent.eventSource)
-      expect(actualTopExceptionReportEvent?.category).toBe(expectedEvent.category)
-      expect(actualTopExceptionReportEvent?.timestamp).toBe(expectedEvent.timestamp)
-      expect(actualTopExceptionReportEvent?.eventType).toBe(expectedEvent.eventType)
-
-      const actualTopExceptionReportEventAttribute = actualTopExceptionReportEvent?.attributes
-      expect(actualTopExceptionReportEventAttribute).toBeDefined()
-      expect(actualTopExceptionReportEventAttribute?.["Error 2 Details"]).toBe("Dummy")
-    })
-
-    it("should log the event for automation report", async () => {
-      const expectedEvent = createAuditLogEvent({ eventCode: EventCode.ExceptionsGenerated })
-
-      const message = new AuditLog("one", new Date(), "dummy hash")
-
-      await gateway.create(message)
-
-      const result = await gateway.addEvent(message.messageId, message.version, expectedEvent)
-
-      expect(isError(result)).toBe(false)
-
-      const getManyOptions = {
-        sortKey,
-        pagination: { limit: 2 }
-      }
-      const actualRecords = <DocumentClient.ScanOutput>(
-        await gateway.getMany(auditLogDynamoConfig.TABLE_NAME, getManyOptions)
-      )
-
-      const actualMessage = actualRecords.Items?.find((r) => r.messageId === message.messageId) as AuditLog & {
-        automationReportEvents: AuditLogEvent[]
-      }
-      expect(actualMessage).toBeDefined()
-      expect(actualMessage.events).toBeDefined()
-      expect(actualMessage.events).toHaveLength(1)
-      expect(actualMessage.automationReport).toBeDefined()
-      expect(actualMessage.automationReport?.events).toBeDefined()
-      expect(actualMessage.automationReport?.events).toHaveLength(1)
-
-      const actualEvent = actualMessage.events[0]
-      expect(actualEvent.eventSource).toBe(expectedEvent.eventSource)
-      expect(actualEvent.category).toBe(expectedEvent.category)
-      expect(actualEvent.timestamp).toBe(expectedEvent.timestamp)
-      expect(actualEvent.eventType).toBe(expectedEvent.eventType)
-
-      const actualAutomationReportEvent = actualMessage.automationReport?.events[0]
-      expect(actualAutomationReportEvent?.eventSource).toBe(expectedEvent.eventSource)
-      expect(actualAutomationReportEvent?.category).toBe(expectedEvent.category)
-      expect(actualAutomationReportEvent?.timestamp).toBe(expectedEvent.timestamp)
-      expect(actualAutomationReportEvent?.eventType).toBe(expectedEvent.eventType)
-    })
-
-    it("should log the force owner", async () => {
-      const expectedEvent = createAuditLogEvent({ eventCode: EventCode.HearingOutcomeDetails })
-      expectedEvent.addAttribute("Force Owner", "010000")
-
-      const message = new AuditLog("one", new Date(), "dummy hash")
-
-      await gateway.create(message)
-
-      const result = await gateway.addEvent(message.messageId, message.version, expectedEvent)
-
-      expect(isError(result)).toBe(false)
-
-      const getManyOptions = {
-        sortKey,
-        pagination: { limit: 2 }
-      }
-      const actualRecords = <DocumentClient.ScanOutput>(
-        await gateway.getMany(auditLogDynamoConfig.TABLE_NAME, getManyOptions)
-      )
-
-      const actualMessage = actualRecords.Items?.find((r) => r.messageId === message.messageId) as AuditLog & {
-        automationReportEvents: AuditLogEvent[]
-      }
-      expect(actualMessage).toBeDefined()
-      expect(actualMessage.events).toBeDefined()
-      expect(actualMessage.events).toHaveLength(1)
-      expect(actualMessage.automationReport).toBeDefined()
-      expect(actualMessage.forceOwner).toBe(1)
-    })
-
-    it("should not log the event for report", async () => {
-      const expectedEvent = createAuditLogEvent()
-
-      const message = new AuditLog("one", new Date(), "dummy hash")
-
-      await gateway.create(message)
-
-      const result = await gateway.addEvent(message.messageId, message.version, expectedEvent)
-
-      expect(isError(result)).toBe(false)
-
-      const getManyOptions = {
-        sortKey,
-        pagination: { limit: 2 }
-      }
-      const actualRecords = <DocumentClient.ScanOutput>(
-        await gateway.getMany(auditLogDynamoConfig.TABLE_NAME, getManyOptions)
-      )
-
-      const actualMessage = actualRecords.Items?.find((r) => r.messageId === message.messageId) as AuditLog & {
-        topExceptionsReportEvents: AuditLogEvent[]
-        automationReportEvents: AuditLogEvent[]
-      }
-      expect(actualMessage).toBeDefined()
-      expect(actualMessage.events).toBeDefined()
-      expect(actualMessage.events).toHaveLength(1)
-      expect(actualMessage.topExceptionsReport).toBeDefined()
-      expect(actualMessage.topExceptionsReport?.events).toHaveLength(0)
-      expect(actualMessage.automationReport).toBeDefined()
-      expect(actualMessage.automationReport?.events).toHaveLength(0)
-    })
-
-    it("should increment the retry count for retry message", async () => {
-      const expectedEvent = createAuditLogEvent({ eventCode: EventCode.RetryingMessage })
-
-      const message = new AuditLog("one", new Date(), `dummy hash`)
-
-      await gateway.create(message)
-
-      await gateway.addEvent(message.messageId, message.version, expectedEvent)
-
-      const actualMessage = await gateway.fetchOne(message.messageId, { includeColumns: ["retryCount"] })
-
-      expect(actualMessage).toBeDefined()
-      expect(actualMessage).toNotBeError()
-
-      const actualAuditLog = actualMessage as AuditLog
-      expect(actualAuditLog.retryCount).toBe(1)
-    })
-
-    it("should increment the retry count after several retry messages", async () => {
-      const retryEvent = createAuditLogEvent({ eventCode: EventCode.RetryingMessage })
-
-      const message = new AuditLog("one", new Date(), `dummy hash`)
-
-      await gateway.create(message)
-
-      await gateway.addEvent(message.messageId, message.version, retryEvent)
-      await gateway.addEvent(message.messageId, message.version + 1, retryEvent)
-      await gateway.addEvent(message.messageId, message.version + 2, retryEvent)
-
-      const actualMessage = await gateway.fetchOne(message.messageId, { includeColumns: ["retryCount"] })
-
-      expect(actualMessage).toBeDefined()
-      expect(actualMessage).toNotBeError()
-
-      const actualAuditLog = actualMessage as AuditLog
-      expect(actualAuditLog.retryCount).toBe(3)
-    })
-
-    it("should update the message status", async () => {
-      const expectedEvent = createAuditLogEvent({ eventCode: EventCode.RetryingMessage })
-
-      const message = new AuditLog("one", new Date(), `dummy hash`)
-
-      await gateway.create(message)
-
-      await gateway.addEvent(message.messageId, message.version, expectedEvent)
-
-      const actualMessage = await gateway.fetchOne(message.messageId)
-
-      expect(actualMessage).toBeDefined()
-      expect(actualMessage).toNotBeError()
-
-      const actualAuditLog = actualMessage as AuditLog
-      expect(actualAuditLog.status).toBe(AuditLogStatus.retrying)
-    })
-
-    it("should not change the status and should set error record archival date", async () => {
-      const expectedEvent = createAuditLogEvent({ eventCode: EventCode.ErrorRecordArchived })
-
-      const message = new AuditLog("one", new Date(), `dummy hash`)
-
-      await gateway.create(message)
-
-      await gateway.addEvent(message.messageId, message.version, expectedEvent)
-
-      const actualMessage = await gateway.fetchOne(message.messageId, { includeColumns: ["errorRecordArchivalDate"] })
-
-      expect(actualMessage).toBeDefined()
-      expect(actualMessage).toNotBeError()
-
-      const actualAuditLog = actualMessage as AuditLog
-      expect(actualAuditLog.errorRecordArchivalDate).toBe(expectedEvent.timestamp)
-      expect(actualAuditLog.status).toBe(AuditLogStatus.processing)
-    })
-
-    it("should not change the status and should set sanitised date", async () => {
-      const expectedEvent = createAuditLogEvent({ eventCode: EventCode.Sanitised })
-
-      const message = new AuditLog("one", new Date(), `dummy hash`)
-
-      await gateway.create(message)
-
-      await gateway.addEvent(message.messageId, message.version, expectedEvent)
-
-      const actualMessage = await gateway.fetchOne(message.messageId, { includeColumns: ["isSanitised"] })
-
-      expect(actualMessage).toBeDefined()
-      expect(actualMessage).toNotBeError()
-
-      const actualAuditLog = actualMessage as AuditLog
-      expect(actualAuditLog.isSanitised).toBeTruthy()
-      expect(actualAuditLog.status).toBe(AuditLogStatus.processing)
-    })
-  })
-
   describe("fetchOne", () => {
     it("should return the matching AuditLog", async () => {
       const expectedAuditLog = new AuditLog("ExternalCorrelationId", new Date(), `dummy hash`)
@@ -532,6 +146,40 @@ describe("AuditLogDynamoGateway", () => {
 
       expect(isError(result)).toBe(false)
       expect(result as AuditLog).toBeUndefined()
+    })
+
+    it("should merge events from both tables for one message", async () => {
+      const auditLog = new AuditLog("External correlation id 1", new Date(), "hash-1")
+      auditLog.events.push(mockAuditLogEvent({ eventType: "Type 1" }))
+      await testGateway.insertOne(auditLogDynamoConfig.auditLogTableName, auditLog, gateway.auditLogTableKey)
+      const externalEvent = { ...mockAuditLogEvent(), eventType: "Type 2", _messageId: auditLog.messageId }
+      await testGateway.insertOne(auditLogDynamoConfig.eventsTableName, externalEvent, gateway.eventsTableKey)
+
+      const result = await gateway.fetchOne(auditLog.messageId)
+
+      expect(result).toNotBeError()
+
+      const actualAuditLogs = result as AuditLog
+      expect(actualAuditLogs.events).toHaveLength(2)
+
+      const actualEvents = actualAuditLogs.events
+      expect(actualEvents[0].eventType).toBe("Type 1")
+      expect(actualEvents[1].eventType).toBe("Type 2")
+    })
+
+    it("should not merge events if the column was excluded", async () => {
+      const auditLog = new AuditLog("External correlation id 1", new Date(), "hash-1")
+      auditLog.events.push(mockAuditLogEvent({ eventType: "Type 1" }))
+      await testGateway.insertOne(auditLogDynamoConfig.auditLogTableName, auditLog, gateway.auditLogTableKey)
+      const externalEvent = { ...mockAuditLogEvent(), eventType: "Type 2", _messageId: auditLog.messageId }
+      await testGateway.insertOne(auditLogDynamoConfig.eventsTableName, externalEvent, gateway.eventsTableKey)
+
+      const result = await gateway.fetchOne(auditLog.messageId, { excludeColumns: ["events"] })
+
+      expect(result).toNotBeError()
+
+      const actualAuditLogs = result as AuditLog
+      expect(actualAuditLogs.events).toBeUndefined()
     })
   })
 
@@ -596,6 +244,254 @@ describe("AuditLogDynamoGateway", () => {
       expect(actualAuditLogs[1].receivedDate).toBe(expectedReceivedDates[1])
       expect(actualAuditLogs[2].receivedDate).toBe(expectedReceivedDates[2])
     })
+
+    it("should merge events from both tables for one message", async () => {
+      const auditLog = new AuditLog("External correlation id 1", new Date(), "hash-1")
+      auditLog.events.push(mockAuditLogEvent({ eventType: "Type 1" }))
+      await testGateway.insertOne(auditLogDynamoConfig.auditLogTableName, auditLog, gateway.auditLogTableKey)
+      const externalEvent = { ...mockAuditLogEvent(), eventType: "Type 2", _messageId: auditLog.messageId }
+      await testGateway.insertOne(auditLogDynamoConfig.eventsTableName, externalEvent, gateway.eventsTableKey)
+
+      const result = await gateway.fetchMany({ limit: 1 })
+
+      expect(result).toNotBeError()
+
+      const actualAuditLogs = result as AuditLog[]
+      expect(actualAuditLogs).toHaveLength(1)
+      expect(actualAuditLogs[0].events).toHaveLength(2)
+
+      const actualEvents = actualAuditLogs[0].events
+      expect(actualEvents[0].eventType).toBe("Type 1")
+      expect(actualEvents[1].eventType).toBe("Type 2")
+    })
+
+    it("should merge events from both tables for multiple messages", async () => {
+      await Promise.allSettled(
+        [...Array(3).keys()].map(async (i: number) => {
+          const auditLog = new AuditLog(`External correlation id ${i}`, new Date(`2021-06-01T10:11:0${i}`), `hash-${i}`)
+          auditLog.events.push(
+            mockAuditLogEvent({ eventType: `Main event type ${i}`, timestamp: new Date(`2021-06-01T10:11:01`) })
+          )
+          await testGateway.insertOne(auditLogDynamoConfig.auditLogTableName, auditLog, gateway.auditLogTableKey)
+          const externalEvent = {
+            ...mockAuditLogEvent(),
+            eventType: `External event type ${i}`,
+            _messageId: auditLog.messageId
+          }
+          await testGateway.insertOne(auditLogDynamoConfig.eventsTableName, externalEvent, gateway.eventsTableKey)
+        })
+      )
+
+      const result = await gateway.fetchMany()
+
+      expect(result).toNotBeError()
+
+      const actualAuditLogs = result as AuditLog[]
+      expect(actualAuditLogs).toHaveLength(3)
+      expect(actualAuditLogs[0].events).toHaveLength(2)
+      expect(actualAuditLogs[0].events[0].eventType).toBe("Main event type 2")
+      expect(actualAuditLogs[0].events[1].eventType).toBe("External event type 2")
+
+      expect(actualAuditLogs[1].events).toHaveLength(2)
+      expect(actualAuditLogs[1].events[0].eventType).toBe("Main event type 1")
+      expect(actualAuditLogs[1].events[1].eventType).toBe("External event type 1")
+
+      expect(actualAuditLogs[2].events).toHaveLength(2)
+      expect(actualAuditLogs[2].events[0].eventType).toBe("Main event type 0")
+      expect(actualAuditLogs[2].events[1].eventType).toBe("External event type 0")
+    })
+
+    it("should not merge events if the column was excluded", async () => {
+      const auditLog = new AuditLog("External correlation id 1", new Date(), "hash-1")
+      auditLog.events.push(mockAuditLogEvent({ eventType: "Type 1" }))
+      await testGateway.insertOne(auditLogDynamoConfig.auditLogTableName, auditLog, gateway.auditLogTableKey)
+      const externalEvent = { ...mockAuditLogEvent(), eventType: "Type 2", _messageId: auditLog.messageId }
+      await testGateway.insertOne(auditLogDynamoConfig.eventsTableName, externalEvent, gateway.eventsTableKey)
+
+      const result = await gateway.fetchMany({ limit: 1, excludeColumns: ["events"] })
+
+      expect(result).toNotBeError()
+
+      const actualAuditLogs = result as AuditLog[]
+      expect(actualAuditLogs).toHaveLength(1)
+      expect(actualAuditLogs[0].events).toBeUndefined()
+    })
+  })
+
+  describe("fetchRange", () => {
+    it("should return limited amount of AuditLogs", async () => {
+      await Promise.allSettled(
+        [...Array(3).keys()].map(async (i: number) => {
+          const auditLog = new AuditLog(`External correlation id ${i}`, new Date(), `hash-${i}`)
+          await gateway.create(auditLog)
+        })
+      )
+
+      const result = await gateway.fetchRange({ limit: 1, start: new Date("2020-01-01"), end: new Date("2100-01-01") })
+
+      expect(isError(result)).toBe(false)
+      expect(result).toHaveLength(1)
+    })
+
+    it("should return AuditLogs ordered by receivedDate", async () => {
+      const receivedDates = ["2021-06-01T10:11:12", "2021-06-05T10:11:12", "2021-06-03T10:11:12"]
+      const expectedReceivedDates = receivedDates
+        .map((dateString: string) => new Date(dateString).toISOString())
+        .sort()
+        .reverse()
+
+      await Promise.allSettled(
+        receivedDates.map(async (dateString: string, i: number) => {
+          const auditLog = new AuditLog(`External correlation id ${i}`, new Date(dateString), `hash-${i}`)
+          await gateway.create(auditLog)
+        })
+      )
+
+      const result = await gateway.fetchRange({ start: new Date("2020-01-01"), end: new Date("2100-01-01") })
+
+      expect(isError(result)).toBe(false)
+      expect(result).toHaveLength(3)
+
+      const actualAuditLogs = <AuditLog[]>result
+
+      expect(actualAuditLogs).toBeDefined()
+      expect(actualAuditLogs[0].receivedDate).toBe(expectedReceivedDates[0])
+      expect(actualAuditLogs[1].receivedDate).toBe(expectedReceivedDates[1])
+      expect(actualAuditLogs[2].receivedDate).toBe(expectedReceivedDates[2])
+    })
+
+    it("should filter based on start and end date", async () => {
+      const receivedDates = ["2021-06-01T10:11:12", "2021-06-05T10:11:12", "2021-06-03T10:11:12"]
+      const expectedReceivedDates = receivedDates
+        .map((dateString: string) => new Date(dateString).toISOString())
+        .sort()
+        .reverse()
+
+      await Promise.allSettled(
+        receivedDates.map(async (dateString: string, i: number) => {
+          const auditLog = new AuditLog(`External correlation id ${i}`, new Date(dateString), `hash-${i}`)
+          await gateway.create(auditLog)
+        })
+      )
+
+      const result = await gateway.fetchRange({ start: new Date("2021-06-02"), end: new Date("2021-06-04") })
+
+      expect(isError(result)).toBe(false)
+      expect(result).toHaveLength(1)
+
+      const actualAuditLogs = <AuditLog[]>result
+
+      expect(actualAuditLogs).toBeDefined()
+      expect(actualAuditLogs[0].receivedDate).toBe(expectedReceivedDates[1])
+    })
+
+    it("should merge events from both tables for one message", async () => {
+      const auditLog = new AuditLog("External correlation id 1", new Date(), "hash-1")
+      auditLog.events.push(mockAuditLogEvent({ eventType: "Type 1" }))
+      await testGateway.insertOne(auditLogDynamoConfig.auditLogTableName, auditLog, gateway.auditLogTableKey)
+      const externalEvent = { ...mockAuditLogEvent(), eventType: "Type 2", _messageId: auditLog.messageId }
+      await testGateway.insertOne(auditLogDynamoConfig.eventsTableName, externalEvent, gateway.eventsTableKey)
+
+      const result = await gateway.fetchRange({ limit: 1, start: new Date("2020-01-01"), end: new Date("2100-01-01") })
+
+      expect(result).toNotBeError()
+
+      const actualAuditLogs = result as AuditLog[]
+      expect(actualAuditLogs).toHaveLength(1)
+      expect(actualAuditLogs[0].events).toHaveLength(2)
+
+      const actualEvents = actualAuditLogs[0].events
+      expect(actualEvents[0].eventType).toBe("Type 1")
+      expect(actualEvents[1].eventType).toBe("Type 2")
+    })
+
+    it("should merge events from both tables for multiple messages", async () => {
+      await Promise.allSettled(
+        [...Array(3).keys()].map(async (i: number) => {
+          const auditLog = new AuditLog(`External correlation id ${i}`, new Date(`2021-06-01T10:11:0${i}`), `hash-${i}`)
+          auditLog.events.push(mockAuditLogEvent({ eventType: `Main event type ${i}` }))
+          await testGateway.insertOne(auditLogDynamoConfig.auditLogTableName, auditLog, gateway.auditLogTableKey)
+          const externalEvent = {
+            ...mockAuditLogEvent(),
+            eventType: `External event type ${i}`,
+            _messageId: auditLog.messageId
+          }
+          await testGateway.insertOne(auditLogDynamoConfig.eventsTableName, externalEvent, gateway.eventsTableKey)
+        })
+      )
+
+      const result = await gateway.fetchRange({ start: new Date("2020-01-01"), end: new Date("2100-01-01") })
+
+      expect(result).toNotBeError()
+
+      const actualAuditLogs = result as AuditLog[]
+      expect(actualAuditLogs).toHaveLength(3)
+      expect(actualAuditLogs[0].events).toHaveLength(2)
+      expect(actualAuditLogs[0].events[0].eventType).toBe("Main event type 2")
+      expect(actualAuditLogs[0].events[1].eventType).toBe("External event type 2")
+
+      expect(actualAuditLogs[1].events).toHaveLength(2)
+      expect(actualAuditLogs[1].events[0].eventType).toBe("Main event type 1")
+      expect(actualAuditLogs[1].events[1].eventType).toBe("External event type 1")
+
+      expect(actualAuditLogs[2].events).toHaveLength(2)
+      expect(actualAuditLogs[2].events[0].eventType).toBe("Main event type 0")
+      expect(actualAuditLogs[2].events[1].eventType).toBe("External event type 0")
+    })
+
+    it("should not merge events if the column was excluded", async () => {
+      const auditLog = new AuditLog("External correlation id 1", new Date(), "hash-1")
+      auditLog.events.push(mockAuditLogEvent({ eventType: "Type 1" }))
+      await testGateway.insertOne(auditLogDynamoConfig.auditLogTableName, auditLog, gateway.auditLogTableKey)
+      const externalEvent = { ...mockAuditLogEvent(), eventType: "Type 2", _messageId: auditLog.messageId }
+      await testGateway.insertOne(auditLogDynamoConfig.eventsTableName, externalEvent, gateway.eventsTableKey)
+
+      const result = await gateway.fetchRange({
+        limit: 1,
+        excludeColumns: ["events"],
+        start: new Date("2020-01-01"),
+        end: new Date("2100-01-01")
+      })
+
+      expect(result).toNotBeError()
+
+      const actualAuditLogs = result as AuditLog[]
+      expect(actualAuditLogs).toHaveLength(1)
+      expect(actualAuditLogs[0].events).toBeUndefined()
+    })
+
+    it("should allow events to be filtered for the automation report", async () => {
+      const auditLog = new AuditLog("External correlation id 1", new Date(), "hash-1")
+      await testGateway.insertOne(auditLogDynamoConfig.auditLogTableName, auditLog, gateway.auditLogTableKey)
+      const externalEvent1 = {
+        ...mockAuditLogEvent(),
+        eventType: "Type 1",
+        _messageId: auditLog.messageId,
+        _automationReport: 0
+      }
+      await testGateway.insertOne(auditLogDynamoConfig.eventsTableName, externalEvent1, gateway.eventsTableKey)
+      const externalEvent2 = {
+        ...mockAuditLogEvent(),
+        eventType: "Type 2",
+        _messageId: auditLog.messageId,
+        _automationReport: 1
+      }
+      await testGateway.insertOne(auditLogDynamoConfig.eventsTableName, externalEvent2, gateway.eventsTableKey)
+
+      const result = await gateway.fetchRange({
+        limit: 1,
+        start: new Date("2020-01-01"),
+        end: new Date("2100-01-01"),
+        eventsFilter: "automationReport"
+      })
+
+      expect(result).toNotBeError()
+
+      const actualAuditLogs = result as AuditLog[]
+      expect(actualAuditLogs).toHaveLength(1)
+      expect(actualAuditLogs[0].events).toHaveLength(1)
+      expect(actualAuditLogs[0].events[0].eventType).toBe("Type 2")
+    })
   })
 
   describe("fetchByExternalCorrelationId", () => {
@@ -631,6 +527,42 @@ describe("AuditLogDynamoGateway", () => {
       expect(isError(result)).toBe(false)
       expect(<AuditLog>result).toBeNull()
     })
+
+    it("should merge events from both tables", async () => {
+      const auditLog = new AuditLog("External correlation id 1", new Date(), "hash-1")
+      auditLog.events.push(mockAuditLogEvent({ eventType: "Type 1" }))
+      await testGateway.insertOne(auditLogDynamoConfig.auditLogTableName, auditLog, gateway.auditLogTableKey)
+      const externalEvent = { ...mockAuditLogEvent(), eventType: "Type 2", _messageId: auditLog.messageId }
+      await testGateway.insertOne(auditLogDynamoConfig.eventsTableName, externalEvent, gateway.eventsTableKey)
+
+      const result = await gateway.fetchByExternalCorrelationId(auditLog.externalCorrelationId)
+
+      expect(result).toNotBeError()
+
+      const actualAuditLogs = result as AuditLog
+      expect(actualAuditLogs.events).toHaveLength(2)
+
+      const actualEvents = actualAuditLogs.events
+      expect(actualEvents[0].eventType).toBe("Type 1")
+      expect(actualEvents[1].eventType).toBe("Type 2")
+    })
+
+    it("should not merge events if the column was excluded", async () => {
+      const auditLog = new AuditLog("External correlation id 1", new Date(), "hash-1")
+      auditLog.events.push(mockAuditLogEvent({ eventType: "Type 1" }))
+      await testGateway.insertOne(auditLogDynamoConfig.auditLogTableName, auditLog, gateway.auditLogTableKey)
+      const externalEvent = { ...mockAuditLogEvent(), eventType: "Type 2", _messageId: auditLog.messageId }
+      await testGateway.insertOne(auditLogDynamoConfig.eventsTableName, externalEvent, gateway.eventsTableKey)
+
+      const result = await gateway.fetchByExternalCorrelationId(auditLog.externalCorrelationId, {
+        excludeColumns: ["events"]
+      })
+
+      expect(result).toNotBeError()
+
+      const actualAuditLogs = result as AuditLog
+      expect(actualAuditLogs.events).toBeUndefined()
+    })
   })
 
   describe("fetchByHash", () => {
@@ -652,7 +584,7 @@ describe("AuditLogDynamoGateway", () => {
       expect(item.messageHash).toBe(hash)
     })
 
-    it("should throw error when hash does not exist in the table", async () => {
+    it("should return null when hash does not exist in the table", async () => {
       await Promise.allSettled(
         [...Array(3).keys()].map(async (i: number) => {
           const auditLog = new AuditLog(`External correlation id ${i}`, new Date(), `hash-${i}`)
@@ -665,6 +597,25 @@ describe("AuditLogDynamoGateway", () => {
 
       expect(isError(result)).toBe(false)
       expect(<AuditLog>result).toBeNull()
+    })
+
+    it("should merge events from both tables", async () => {
+      const auditLog = new AuditLog("External correlation id 1", new Date(), "hash-1")
+      auditLog.events.push(mockAuditLogEvent({ eventType: "Type 1" }))
+      await testGateway.insertOne(auditLogDynamoConfig.auditLogTableName, auditLog, gateway.auditLogTableKey)
+      const externalEvent = { ...mockAuditLogEvent(), eventType: "Type 2", _messageId: auditLog.messageId }
+      await testGateway.insertOne(auditLogDynamoConfig.eventsTableName, externalEvent, gateway.eventsTableKey)
+
+      const result = await gateway.fetchByHash(auditLog.messageHash)
+
+      expect(result).toNotBeError()
+
+      const actualAuditLogs = result as AuditLog
+      expect(actualAuditLogs.events).toHaveLength(2)
+
+      const actualEvents = actualAuditLogs.events
+      expect(actualEvents[0].eventType).toBe("Type 1")
+      expect(actualEvents[1].eventType).toBe("Type 2")
     })
   })
 
@@ -690,6 +641,79 @@ describe("AuditLogDynamoGateway", () => {
 
       const item = items[0]
       expect(item.status).toBe(expectedAuditLog.status)
+    })
+
+    it("should merge events from both tables for one message", async () => {
+      const auditLog = new AuditLog("External correlation id 1", new Date(), "hash-1")
+      auditLog.status = AuditLogStatus.completed
+      auditLog.events.push(mockAuditLogEvent({ eventType: "Type 1" }))
+      await testGateway.insertOne(auditLogDynamoConfig.auditLogTableName, auditLog, gateway.auditLogTableKey)
+      const externalEvent = { ...mockAuditLogEvent(), eventType: "Type 2", _messageId: auditLog.messageId }
+      await testGateway.insertOne(auditLogDynamoConfig.eventsTableName, externalEvent, gateway.eventsTableKey)
+
+      const result = await gateway.fetchByStatus(AuditLogStatus.completed)
+
+      expect(result).toNotBeError()
+
+      const actualAuditLogs = result as AuditLog[]
+      expect(actualAuditLogs).toHaveLength(1)
+      expect(actualAuditLogs[0].events).toHaveLength(2)
+
+      const actualEvents = actualAuditLogs[0].events
+      expect(actualEvents[0].eventType).toBe("Type 1")
+      expect(actualEvents[1].eventType).toBe("Type 2")
+    })
+
+    it("should merge events from both tables for multiple messages", async () => {
+      await Promise.allSettled(
+        [...Array(3).keys()].map(async (i: number) => {
+          const auditLog = new AuditLog(`External correlation id ${i}`, new Date(`2021-06-01T10:11:0${i}`), `hash-${i}`)
+          auditLog.status = AuditLogStatus.completed
+          auditLog.events.push(mockAuditLogEvent({ eventType: `Main event type ${i}` }))
+          await testGateway.insertOne(auditLogDynamoConfig.auditLogTableName, auditLog, gateway.auditLogTableKey)
+          const externalEvent = {
+            ...mockAuditLogEvent(),
+            eventType: `External event type ${i}`,
+            _messageId: auditLog.messageId
+          }
+          await testGateway.insertOne(auditLogDynamoConfig.eventsTableName, externalEvent, gateway.eventsTableKey)
+        })
+      )
+
+      const result = await gateway.fetchByStatus(AuditLogStatus.completed)
+
+      expect(result).toNotBeError()
+
+      const actualAuditLogs = result as AuditLog[]
+      expect(actualAuditLogs).toHaveLength(3)
+      expect(actualAuditLogs[0].events).toHaveLength(2)
+      expect(actualAuditLogs[0].events[0].eventType).toBe("Main event type 2")
+      expect(actualAuditLogs[0].events[1].eventType).toBe("External event type 2")
+
+      expect(actualAuditLogs[1].events).toHaveLength(2)
+      expect(actualAuditLogs[1].events[0].eventType).toBe("Main event type 1")
+      expect(actualAuditLogs[1].events[1].eventType).toBe("External event type 1")
+
+      expect(actualAuditLogs[2].events).toHaveLength(2)
+      expect(actualAuditLogs[2].events[0].eventType).toBe("Main event type 0")
+      expect(actualAuditLogs[2].events[1].eventType).toBe("External event type 0")
+    })
+
+    it("should not merge events if the column was excluded", async () => {
+      const auditLog = new AuditLog("External correlation id 1", new Date(), "hash-1")
+      auditLog.status = AuditLogStatus.completed
+      auditLog.events.push(mockAuditLogEvent({ eventType: "Type 1" }))
+      await testGateway.insertOne(auditLogDynamoConfig.auditLogTableName, auditLog, gateway.auditLogTableKey)
+      const externalEvent = { ...mockAuditLogEvent(), eventType: "Type 2", _messageId: auditLog.messageId }
+      await testGateway.insertOne(auditLogDynamoConfig.eventsTableName, externalEvent, gateway.eventsTableKey)
+
+      const result = await gateway.fetchByStatus(AuditLogStatus.completed, { excludeColumns: ["events"] })
+
+      expect(result).toNotBeError()
+
+      const actualAuditLogs = result as AuditLog[]
+      expect(actualAuditLogs).toHaveLength(1)
+      expect(actualAuditLogs[0].events).toBeUndefined()
     })
   })
 
@@ -757,6 +781,79 @@ describe("AuditLogDynamoGateway", () => {
       const items = <AuditLog[]>result
       expect(items).toHaveLength(0)
     })
+
+    it("should merge events from both tables for one message", async () => {
+      const auditLog = new AuditLog("External correlation id 1", new Date(), "hash-1")
+      auditLog.isSanitised = 0
+      auditLog.events.push(mockAuditLogEvent({ eventType: "Type 1" }))
+      await testGateway.insertOne(auditLogDynamoConfig.auditLogTableName, auditLog, gateway.auditLogTableKey)
+      const externalEvent = { ...mockAuditLogEvent(), eventType: "Type 2", _messageId: auditLog.messageId }
+      await testGateway.insertOne(auditLogDynamoConfig.eventsTableName, externalEvent, gateway.eventsTableKey)
+
+      const result = await gateway.fetchUnsanitised()
+
+      expect(result).toNotBeError()
+
+      const actualAuditLogs = result as AuditLog[]
+      expect(actualAuditLogs).toHaveLength(1)
+      expect(actualAuditLogs[0].events).toHaveLength(2)
+
+      const actualEvents = actualAuditLogs[0].events
+      expect(actualEvents[0].eventType).toBe("Type 1")
+      expect(actualEvents[1].eventType).toBe("Type 2")
+    })
+
+    it("should merge events from both tables for multiple messages", async () => {
+      await Promise.allSettled(
+        [...Array(3).keys()].map(async (i: number) => {
+          const auditLog = new AuditLog(`External correlation id ${i}`, new Date(`2021-06-01T10:11:0${i}`), `hash-${i}`)
+          auditLog.isSanitised = 0
+          auditLog.events.push(mockAuditLogEvent({ eventType: `Main event type ${i}` }))
+          await testGateway.insertOne(auditLogDynamoConfig.auditLogTableName, auditLog, gateway.auditLogTableKey)
+          const externalEvent = {
+            ...mockAuditLogEvent(),
+            eventType: `External event type ${i}`,
+            _messageId: auditLog.messageId
+          }
+          await testGateway.insertOne(auditLogDynamoConfig.eventsTableName, externalEvent, gateway.eventsTableKey)
+        })
+      )
+
+      const result = await gateway.fetchUnsanitised()
+
+      expect(result).toNotBeError()
+
+      const actualAuditLogs = result as AuditLog[]
+      expect(actualAuditLogs).toHaveLength(3)
+      expect(actualAuditLogs[2].events).toHaveLength(2)
+      expect(actualAuditLogs[2].events[0].eventType).toBe("Main event type 2")
+      expect(actualAuditLogs[2].events[1].eventType).toBe("External event type 2")
+
+      expect(actualAuditLogs[1].events).toHaveLength(2)
+      expect(actualAuditLogs[1].events[0].eventType).toBe("Main event type 1")
+      expect(actualAuditLogs[1].events[1].eventType).toBe("External event type 1")
+
+      expect(actualAuditLogs[0].events).toHaveLength(2)
+      expect(actualAuditLogs[0].events[0].eventType).toBe("Main event type 0")
+      expect(actualAuditLogs[0].events[1].eventType).toBe("External event type 0")
+    })
+
+    it("should not merge events if the column was excluded", async () => {
+      const auditLog = new AuditLog("External correlation id 1", new Date(), "hash-1")
+      auditLog.isSanitised = 0
+      auditLog.events.push(mockAuditLogEvent({ eventType: "Type 1" }))
+      await testGateway.insertOne(auditLogDynamoConfig.auditLogTableName, auditLog, gateway.auditLogTableKey)
+      const externalEvent = { ...mockAuditLogEvent(), eventType: "Type 2", _messageId: auditLog.messageId }
+      await testGateway.insertOne(auditLogDynamoConfig.eventsTableName, externalEvent, gateway.eventsTableKey)
+
+      const result = await gateway.fetchUnsanitised({ excludeColumns: ["events"] })
+
+      expect(result).toNotBeError()
+
+      const actualAuditLogs = result as AuditLog[]
+      expect(actualAuditLogs).toHaveLength(1)
+      expect(actualAuditLogs[0].events).toBeUndefined()
+    })
   })
 
   describe("fetchEvents", () => {
@@ -777,8 +874,8 @@ describe("AuditLogDynamoGateway", () => {
       const events = <AuditLogEvent[]>result
       expect(events).toHaveLength(3)
       expect(events[0].eventType).toBe("Event 1")
-      expect(events[1].eventType).toBe("Event 2")
-      expect(events[2].eventType).toBe("Event 3")
+      expect(events[1].eventType).toBe("Event 3")
+      expect(events[2].eventType).toBe("Event 2")
     })
 
     it("should return an empty array when message does not have events", async () => {
@@ -806,451 +903,163 @@ describe("AuditLogDynamoGateway", () => {
   })
 
   describe("update()", () => {
-    it("should calculate the status and update the record", async () => {
-      const event = createAuditLogEvent({ eventCode: EventCode.IgnoredNoOffences })
+    let auditLog: AuditLog
 
-      event.addAttribute("Attribute one", "Some value")
-      event.addAttribute("Attribute two", 2)
+    beforeEach(async () => {
+      auditLog = (await createMockAuditLog()) as AuditLog
+    })
 
-      const message = new AuditLog("one", new Date(), "dummy hash")
-      message.status = AuditLogStatus.processing
-      const otherMessage = new AuditLog("two", new Date(), "dummy hash")
-
-      await gateway.create(message)
-      await gateway.create(otherMessage)
-
-      const amendedMessage = {
-        ...message,
-        events: [event]
-      }
-      const result = await gateway.update(amendedMessage)
-
-      expect(isError(result)).toBe(false)
-
-      const getManyOptions = {
-        sortKey,
-        pagination: { limit: 2 }
-      }
-      const actualRecords = <DocumentClient.ScanOutput>(
-        await gateway.getMany(auditLogDynamoConfig.TABLE_NAME, getManyOptions)
+    it("should not update if an empty object is passed in", async () => {
+      const before = await gateway.getOne(
+        auditLogDynamoConfig.auditLogTableName,
+        gateway.auditLogTableKey,
+        auditLog.messageId
       )
 
-      const actualOtherMessage = <AuditLog>actualRecords.Items?.find((r) => r.messageId === otherMessage.messageId)
-      expect(actualOtherMessage).toBeDefined()
-      expect(actualOtherMessage.events).toBeDefined()
-      expect(actualOtherMessage.events).toHaveLength(0)
-      expect(actualOtherMessage.status).toBe(otherMessage.status)
+      const result = await gateway.update(auditLog, {})
+      expect(result).toNotBeError()
 
-      const actualMessage = <AuditLog>actualRecords.Items?.find((r) => r.messageId === message.messageId)
-      expect(actualMessage).toBeDefined()
-      expect(actualMessage.events).toBeDefined()
-      expect(actualMessage.events).toHaveLength(1)
-      expect(actualMessage.status).toBe(AuditLogStatus.completed)
+      const after = await gateway.getOne(
+        auditLogDynamoConfig.auditLogTableName,
+        gateway.auditLogTableKey,
+        auditLog.messageId
+      )
 
-      const actualEvent = actualMessage.events[0]
-      expect(actualEvent.eventSource).toBe(event.eventSource)
-      expect(actualEvent.category).toBe(event.category)
-      expect(actualEvent.timestamp).toBe(event.timestamp)
-      expect(actualEvent.eventType).toBe(event.eventType)
-
-      const actualEventAttributes = actualEvent.attributes
-      expect(actualEventAttributes).toBeDefined()
-      expect(actualEventAttributes["Attribute one"]).toBe("Some value")
-      expect(actualEventAttributes["Attribute two"]).toBe(2)
+      expect(after).toStrictEqual(before)
     })
 
-    it("should not change the status and should set error record archival date", async () => {
-      const expectedEvent = createAuditLogEvent({ eventCode: EventCode.ErrorRecordArchived })
+    it.each([
+      ["forceOwner", { forceOwner: 10 }],
+      ["status", { status: AuditLogStatus.completed }],
+      ["pncStatus", { pncStatus: "Processing" }],
+      ["triggerStatus", { triggerStatus: "NoTriggers" }],
+      ["errorRecordArchivalDate", { errorRecordArchivalDate: "2020-01-01" }],
+      ["isSanitised", { isSanitised: 1 }],
+      ["retryCount", { retryCount: 10 }]
+    ] as [string, Partial<AuditLog>][])(
+      "should update the %s if it is passed in",
+      async (key: string, updates: Partial<AuditLog>) => {
+        const result = await gateway.update(auditLog, updates)
+        expect(result).toNotBeError()
 
-      const now = new Date()
-      const message = new AuditLog("one", now, `dummy hash`)
+        const updated = (
+          (await gateway.getOne(
+            auditLogDynamoConfig.auditLogTableName,
+            gateway.auditLogTableKey,
+            auditLog.messageId
+          )) as DocumentClient.GetItemOutput
+        ).Item!
 
-      await gateway.create(message)
+        const expected = updates as KeyValuePair<string, any>
+        expect(updated[key]).toBe(expected[key])
+      }
+    )
 
-      message.events.push(expectedEvent)
-      await gateway.update(message)
-
-      const actualMessage = await gateway.fetchOne(message.messageId, {
-        includeColumns: ["errorRecordArchivalDate", "isSanitised", "nextSanitiseCheck"]
+    it("should update multiple values if multiple values are passed in", async () => {
+      const result = await gateway.update(auditLog, {
+        errorRecordArchivalDate: "2020-01-02",
+        forceOwner: 22,
+        isSanitised: 1,
+        pncStatus: "Processing",
+        retryCount: 55,
+        status: AuditLogStatus.completed,
+        triggerStatus: "NoTriggers"
       })
 
-      expect(actualMessage).toBeDefined()
-      expect(actualMessage).toNotBeError()
+      expect(result).toNotBeError()
 
-      const actualAuditLog = actualMessage as AuditLog
-      expect(actualAuditLog).toHaveProperty("isSanitised")
-      expect(actualAuditLog.isSanitised).toBeFalsy()
-      expect(actualAuditLog).toHaveProperty("nextSanitiseCheck")
-      expect(actualAuditLog.nextSanitiseCheck).toBe(now.toISOString())
-      expect(actualAuditLog.errorRecordArchivalDate).toBe(expectedEvent.timestamp)
-      expect(actualAuditLog.status).toBe(AuditLogStatus.processing)
+      const updated = (
+        (await gateway.getOne(
+          auditLogDynamoConfig.auditLogTableName,
+          gateway.auditLogTableKey,
+          auditLog.messageId
+        )) as DocumentClient.GetItemOutput
+      ).Item!
+
+      expect(updated.errorRecordArchivalDate).toBe("2020-01-02")
+      expect(updated.forceOwner).toBe(22)
+      expect(updated.isSanitised).toBe(1)
+      expect(updated.pncStatus).toBe("Processing")
+      expect(updated.retryCount).toBe(55)
+      expect(updated.status).toBe("Completed")
+      expect(updated.triggerStatus).toBe("NoTriggers")
     })
 
-    it("should not change the status and should set nextSanitiseCheck if unsanitised", async () => {
-      const expectedEvent = createAuditLogEvent({ eventCode: EventCode.ErrorRecordArchived })
+    it("should add events to the events table if they are passed in", async () => {
+      const events = [mockAuditLogEvent()]
+      const result = await gateway.update(auditLog, { events })
+      expect(result).toNotBeError()
 
-      const now = new Date()
-      const message = new AuditLog("one", now, `dummy hash`)
-      message.nextSanitiseCheck = now.toISOString()
+      const updated = (
+        (await gateway.getOne(
+          auditLogDynamoConfig.auditLogTableName,
+          gateway.auditLogTableKey,
+          auditLog.messageId
+        )) as DocumentClient.GetItemOutput
+      ).Item!
 
-      await gateway.create(message)
+      expect(updated.events).toHaveLength(0)
 
-      message.events.push(expectedEvent)
-      await gateway.update(message)
-
-      const actualMessage = await gateway.fetchOne(message.messageId, {
-        includeColumns: ["isSanitised", "nextSanitiseCheck"]
-      })
-
-      expect(actualMessage).toBeDefined()
-      expect(actualMessage).toNotBeError()
-
-      const actualAuditLog = actualMessage as AuditLog
-      expect(actualAuditLog).toHaveProperty("isSanitised")
-      expect(actualAuditLog.isSanitised).toBe(0)
-      expect(actualAuditLog).toHaveProperty("nextSanitiseCheck")
-      expect(actualAuditLog.nextSanitiseCheck).toBe(now.toISOString())
-      expect(actualAuditLog.status).toBe(AuditLogStatus.processing)
-    })
-
-    it("should not change the status and should set nextSanitiseCheck if sanitised", async () => {
-      const expectedEvent = createAuditLogEvent({ eventCode: EventCode.Sanitised })
-
-      const now = new Date()
-      const message = new AuditLog("one", now, `dummy hash`)
-      message.nextSanitiseCheck = now.toISOString()
-
-      await gateway.create(message)
-
-      message.events.push(expectedEvent)
-      await gateway.update(message)
-
-      const actualMessage = await gateway.fetchOne(message.messageId, {
-        includeColumns: ["errorRecordArchivalDate", "isSanitised", "nextSanitisedCheck"]
-      })
-
-      expect(actualMessage).toBeDefined()
-      expect(actualMessage).toNotBeError()
-
-      const actualAuditLog = actualMessage as AuditLog
-      expect(actualAuditLog).not.toHaveProperty("errorRecordArchivalDate")
-      expect(actualAuditLog).toHaveProperty("isSanitised")
-      expect(actualAuditLog.isSanitised).toBe(1)
-      expect(actualAuditLog.nextSanitiseCheck).toBeFalsy()
-    })
-
-    it("should return error when audit log does not exist", async () => {
-      const result = await gateway.update(new AuditLog("External correlation id", new Date(), "dummy hash"))
-
-      expect(isError(result)).toBe(true)
+      const allEvents = await (await testGateway.getAll(auditLogDynamoConfig.eventsTableName)).Items
+      expect(allEvents).toHaveLength(1)
     })
   })
 
-  describe("prepare()", () => {
-    it("should only add an event to and update the status of the specified audit log", async () => {
-      const expectedEvent = createAuditLogEvent({ eventCode: EventCode.IgnoredNoOffences })
+  describe("Compress and decompress attribute value", () => {
+    let auditLog: AuditLog
 
-      expectedEvent.addAttribute("Attribute one", "Some value")
-      expectedEvent.addAttribute("Attribute two", 2)
+    beforeEach(async () => {
+      auditLog = (await createMockAuditLog()) as AuditLog
+    })
 
-      const message = new AuditLog("one", new Date(), "dummy hash")
+    it("should compress attribute values", async () => {
+      const events = [mockAuditLogEvent()]
+      const result = await gateway.update(auditLog, { events })
+      expect(result).toNotBeError()
 
-      await gateway.create(message)
+      const updated = (
+        (await gateway.getOne(
+          auditLogDynamoConfig.auditLogTableName,
+          gateway.auditLogTableKey,
+          auditLog.messageId
+        )) as DocumentClient.GetItemOutput
+      ).Item!
 
-      const result = await gateway.prepare(message.messageId, message.version, expectedEvent)
+      expect(updated.events).toHaveLength(0)
 
-      expect(isError(result)).toBe(false)
+      const allEvents = (await (
+        await testGateway.getAll(auditLogDynamoConfig.eventsTableName)
+      ).Items) as AuditLogEvent[]
 
-      const expectedUpdate = {
-        Update: {
-          TableName: "auditLogTable",
-          Key: { messageId: message.messageId },
-          UpdateExpression:
-            "\n" +
-            "      set events = list_append(if_not_exists(events, :empty_list), :events),\n" +
-            "      #lastEventType = :lastEventType\n" +
-            "    , #status = :status, #pncStatus = :pncStatus, #triggerStatus = :triggerStatus ADD version :version_increment",
-          ExpressionAttributeNames: {
-            "#lastEventType": "lastEventType",
-            "#status": "status",
-            "#pncStatus": "pncStatus",
-            "#triggerStatus": "triggerStatus"
-          },
-          ExpressionAttributeValues: {
-            ":events": [expectedEvent],
-            ":empty_list": [],
-            ":lastEventType": "Dummy Event Type",
-            ":status": "Completed",
-            ":pncStatus": "Ignored",
-            ":triggerStatus": "NoTriggers",
-            ":version": 0,
-            ":version_increment": 1
-          },
-          ConditionExpression: "attribute_exists(messageId) AND version = :version"
-        }
+      expect(allEvents).toHaveLength(1)
+      const attribute1 = allEvents[0].attributes["Attribute 1"]
+      expect(attribute1).toHaveProperty("_compressedValue")
+
+      const decompressedValue = (await decompress(
+        (attribute1 as { _compressedValue: string })._compressedValue
+      )) as string
+      expect(decompressedValue).toBe("Attribute 1 data".repeat(500))
+    })
+
+    it("should decompress attribute values", async () => {
+      await testGateway.insertOne(auditLogDynamoConfig.auditLogTableName, auditLog, gateway.auditLogTableKey)
+      const externalEvent = { ...mockAuditLogEvent(), eventType: "Type 1", _messageId: auditLog.messageId }
+      externalEvent.attributes["Attribute 1"] = {
+        _compressedValue: (await compress(externalEvent.attributes["Attribute 1"] as string)) as string
       }
+      await testGateway.insertOne(auditLogDynamoConfig.eventsTableName, externalEvent, gateway.eventsTableKey)
 
-      expect(result).toStrictEqual(expectedUpdate)
-    })
-  })
+      const result = await gateway.fetchMany({ limit: 1 })
 
-  describe("prepareEvents()", () => {
-    it("should only add an event to and update the status of the specified audit log", async () => {
-      const expectedEvent = createAuditLogEvent({ eventCode: EventCode.IgnoredNoOffences })
+      expect(result).toNotBeError()
 
-      expectedEvent.addAttribute("Attribute one", "Some value")
-      expectedEvent.addAttribute("Attribute two", 2)
+      const actualAuditLogs = result as AuditLog[]
+      expect(actualAuditLogs).toHaveLength(1)
+      expect(actualAuditLogs[0].events).toHaveLength(1)
 
-      const message = new AuditLog("one", new Date(), "dummy hash")
-
-      await gateway.create(message)
-
-      const result = await gateway.prepareEvents(message.messageId, message.version, [expectedEvent])
-
-      expect(isError(result)).toBe(false)
-
-      const expectedUpdate = {
-        Update: {
-          TableName: "auditLogTable",
-          Key: { messageId: message.messageId },
-          UpdateExpression:
-            "\n" +
-            "      set events = list_append(if_not_exists(events, :empty_list), :events),\n" +
-            "      #lastEventType = :lastEventType\n" +
-            "    , #status = :status, #pncStatus = :pncStatus, #triggerStatus = :triggerStatus ADD version :version_increment",
-          ExpressionAttributeNames: {
-            "#lastEventType": "lastEventType",
-            "#status": "status",
-            "#pncStatus": "pncStatus",
-            "#triggerStatus": "triggerStatus"
-          },
-          ExpressionAttributeValues: {
-            ":events": [expectedEvent],
-            ":empty_list": [],
-            ":lastEventType": "Dummy Event Type",
-            ":status": "Completed",
-            ":pncStatus": "Ignored",
-            ":triggerStatus": "NoTriggers",
-            ":version": 0,
-            ":version_increment": 1
-          },
-          ConditionExpression: "attribute_exists(messageId) AND version = :version"
-        }
-      }
-
-      expect(result).toStrictEqual(expectedUpdate)
-    })
-
-    it("should use the latest force owner change event to set the force owner", async () => {
-      const forceOwnerChange1 = createAuditLogEvent({ eventCode: EventCode.HearingOutcomeDetails })
-      forceOwnerChange1.addAttribute("Force Owner", "010000")
-      const forceOwnerChange2 = createAuditLogEvent({ eventCode: EventCode.HearingOutcomeDetails })
-      forceOwnerChange2.addAttribute("Force Owner", "020000")
-      const forceOwnerChange3 = createAuditLogEvent({
-        timestamp: addDays(new Date(), 1),
-        eventCode: EventCode.HearingOutcomeDetails
-      })
-      forceOwnerChange3.addAttribute("Force Owner", "030000")
-      const forceOwnerChange4 = createAuditLogEvent({ eventCode: EventCode.HearingOutcomeDetails })
-      forceOwnerChange4.addAttribute("Force Owner", "040000")
-
-      const message = new AuditLog("one", new Date(), "dummy hash")
-
-      await gateway.create(message)
-
-      const result = await gateway.prepareEvents(message.messageId, message.version, [
-        forceOwnerChange1,
-        forceOwnerChange2,
-        forceOwnerChange3,
-        forceOwnerChange4
-      ])
-
-      expect(isError(result)).toBe(false)
-
-      const transaction = result as DynamoUpdate
-
-      expect(transaction.Update).toBeDefined()
-      expect(transaction.Update!.UpdateExpression).toContain("forceOwner = :forceOwner")
-      expect(transaction.Update!.ExpressionAttributeValues).toBeDefined()
-      expect(transaction.Update!.ExpressionAttributeValues![":forceOwner"]).toBe(3)
-    })
-
-    it("should add all events to be logged for the automation report", async () => {
-      const eventsToBeLogged = [
-        createAuditLogEvent({ eventCode: EventCode.ExceptionsGenerated }),
-        createAuditLogEvent({ eventCode: EventCode.ExceptionsResolved }),
-        createAuditLogEvent({ eventCode: EventCode.PncUpdated })
-      ]
-      const eventsNotToBeLogged = [createAuditLogEvent(), createAuditLogEvent()]
-      const allEvents = shuffle([...eventsToBeLogged, ...eventsNotToBeLogged])
-
-      const message = new AuditLog("one", new Date(), "dummy hash")
-
-      await gateway.create(message)
-
-      const result = await gateway.prepareEvents(message.messageId, message.version, allEvents)
-
-      expect(isError(result)).toBe(false)
-
-      const transaction = result as DynamoUpdate
-
-      expect(transaction.Update).toBeDefined()
-      expect(transaction.Update!.UpdateExpression).toContain(
-        "automationReport.events = list_append(if_not_exists(automationReport.events, :empty_list), :automationReportEvents)"
-      )
-      expect(transaction.Update!.ExpressionAttributeValues).toBeDefined()
-      expect(transaction.Update!.ExpressionAttributeValues![":automationReportEvents"]).toHaveLength(3)
-      expect(transaction.Update!.ExpressionAttributeValues![":automationReportEvents"]).toContainEqual(
-        eventsToBeLogged[0]
-      )
-      expect(transaction.Update!.ExpressionAttributeValues![":automationReportEvents"]).toContainEqual(
-        eventsToBeLogged[1]
-      )
-      expect(transaction.Update!.ExpressionAttributeValues![":automationReportEvents"]).toContainEqual(
-        eventsToBeLogged[2]
-      )
-    })
-
-    it("should add all events to be logged for the top exceptions report", async () => {
-      const eventsToBeLogged = [
-        createAuditLogEvent({ eventCode: EventCode.ExceptionsGenerated }),
-        createAuditLogEvent({ eventCode: EventCode.ExceptionsGenerated }),
-        createAuditLogEvent({ eventCode: EventCode.ExceptionsGenerated }),
-        createAuditLogEvent({ eventCode: EventCode.ExceptionsGenerated })
-      ]
-      eventsToBeLogged.forEach((event) => {
-        event.addAttribute("Error Details", "An error occured")
-      })
-      const eventsNotToBeLogged = [createAuditLogEvent(), createAuditLogEvent()]
-      const allEvents = shuffle([...eventsToBeLogged, ...eventsNotToBeLogged])
-
-      const message = new AuditLog("one", new Date(), "dummy hash")
-
-      await gateway.create(message)
-
-      const result = await gateway.prepareEvents(message.messageId, message.version, allEvents)
-
-      expect(isError(result)).toBe(false)
-
-      const transaction = result as DynamoUpdate
-
-      expect(transaction.Update).toBeDefined()
-      expect(transaction.Update!.UpdateExpression).toContain(
-        "topExceptionsReport.events = list_append(if_not_exists(topExceptionsReport.events, :empty_list), :topExceptionEvents)"
-      )
-      expect(transaction.Update!.ExpressionAttributeValues).toBeDefined()
-      expect(transaction.Update!.ExpressionAttributeValues![":topExceptionEvents"]).toHaveLength(4)
-      expect(transaction.Update!.ExpressionAttributeValues![":topExceptionEvents"]).toContainEqual(eventsToBeLogged[0])
-      expect(transaction.Update!.ExpressionAttributeValues![":topExceptionEvents"]).toContainEqual(eventsToBeLogged[1])
-      expect(transaction.Update!.ExpressionAttributeValues![":topExceptionEvents"]).toContainEqual(eventsToBeLogged[2])
-      expect(transaction.Update!.ExpressionAttributeValues![":topExceptionEvents"]).toContainEqual(eventsToBeLogged[3])
-    })
-
-    it("should set the archival date to the earliest archival event timestamp", async () => {
-      const events = [
-        createAuditLogEvent({ eventCode: EventCode.ErrorRecordArchived }),
-        createAuditLogEvent({ eventCode: EventCode.ErrorRecordArchived }),
-        createAuditLogEvent({ eventCode: EventCode.ErrorRecordArchived })
-      ]
-      const earliestEvent = createAuditLogEvent({
-        timestamp: subDays(new Date(), 1),
-        eventCode: EventCode.ErrorRecordArchived
-      })
-      events.splice(2, 0, earliestEvent)
-
-      const message = new AuditLog("one", new Date(), "dummy hash")
-
-      await gateway.create(message)
-
-      const result = await gateway.prepareEvents(message.messageId, message.version, events)
-
-      expect(isError(result)).toBe(false)
-
-      const transaction = result as DynamoUpdate
-
-      expect(transaction.Update).toBeDefined()
-      expect(transaction.Update!.UpdateExpression).toContain("#errorRecordArchivalDate = :errorRecordArchivalDate")
-      expect(transaction.Update!.ExpressionAttributeNames).toBeDefined()
-      expect(transaction.Update!.ExpressionAttributeNames!["#errorRecordArchivalDate"]).toBe("errorRecordArchivalDate")
-      expect(transaction.Update!.ExpressionAttributeValues).toBeDefined()
-      expect(transaction.Update!.ExpressionAttributeValues![":errorRecordArchivalDate"]).toBe(earliestEvent.timestamp)
-    })
-
-    it("should set the sanitised flag when one of the events is a sanitisation event", async () => {
-      const events = [
-        createAuditLogEvent({ eventCode: EventCode.ErrorRecordArchived }),
-        createAuditLogEvent({ eventCode: EventCode.Sanitised }),
-        createAuditLogEvent()
-      ]
-
-      const message = new AuditLog("one", new Date(), "dummy hash")
-
-      await gateway.create(message)
-
-      const result = await gateway.prepareEvents(message.messageId, message.version, events)
-
-      expect(isError(result)).toBe(false)
-
-      const transaction = result as DynamoUpdate
-
-      expect(transaction.Update).toBeDefined()
-      expect(transaction.Update!.UpdateExpression).toContain("#isSanitised = :isSanitised")
-      expect(transaction.Update!.ExpressionAttributeNames).toBeDefined()
-      expect(transaction.Update!.ExpressionAttributeNames!["#isSanitised"]).toBe("isSanitised")
-      expect(transaction.Update!.ExpressionAttributeValues).toBeDefined()
-      expect(transaction.Update!.ExpressionAttributeValues![":isSanitised"]).toBe(1)
-    })
-
-    it("should update the retry count when there are retry events", async () => {
-      const events = [
-        createAuditLogEvent({ eventCode: EventCode.ErrorRecordArchived }),
-        createAuditLogEvent({ eventCode: EventCode.RetryingMessage }),
-        createAuditLogEvent()
-      ]
-
-      const message = new AuditLog("one", new Date(), "dummy hash")
-
-      await gateway.create(message)
-
-      const result = await gateway.prepareEvents(message.messageId, message.version, events)
-
-      expect(isError(result)).toBe(false)
-
-      const transaction = result as DynamoUpdate
-
-      expect(transaction.Update).toBeDefined()
-      expect(transaction.Update!.UpdateExpression).toContain(
-        "#retryCount = if_not_exists(#retryCount, :zero) + :retryCount"
-      )
-      expect(transaction.Update!.ExpressionAttributeValues).toBeDefined()
-      expect(transaction.Update!.ExpressionAttributeValues![":zero"]).toBe(0)
-      expect(transaction.Update!.ExpressionAttributeValues![":retryCount"]).toBe(1)
-      expect(transaction.Update!.ExpressionAttributeNames).toBeDefined()
-      expect(transaction.Update!.ExpressionAttributeNames!["#retryCount"]).toBe("retryCount")
-    })
-  })
-
-  describe("prepare() and execute()", () => {
-    it("should give an appropriate error when adding many events to an audit log which has been updated in the background", async () => {
-      const events = [
-        createAuditLogEvent({ eventCode: EventCode.ErrorRecordArchived }),
-        createAuditLogEvent({ eventCode: EventCode.PncUpdated }),
-        createAuditLogEvent()
-      ]
-      const message = new AuditLog("one", new Date(), "dummy hash")
-
-      await gateway.create(message)
-
-      const prepareResult = await gateway.prepareEvents(message.messageId, message.version, events)
-      expect(isError(prepareResult)).toBe(false)
-
-      // Update audit log with additional messages before executing the prepared updates
-      const updateResult = await gateway.addEvent(message.messageId, message.version, createAuditLogEvent())
-      expect(isError(updateResult)).toBe(false)
-
-      const executeResult = await gateway.executeTransaction([prepareResult as DynamoUpdate])
-      expect(isError(executeResult)).toBe(true)
-      expect(isConditionalExpressionViolationError(executeResult as Error)).toBeTruthy()
+      const actualEvents = actualAuditLogs[0].events
+      expect(actualEvents[0].eventType).toBe("Type 1")
+      expect(actualEvents[0].attributes).toHaveProperty("Attribute 1", "Attribute 1 data".repeat(500))
     })
   })
 })

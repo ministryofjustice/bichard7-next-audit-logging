@@ -1,4 +1,3 @@
-jest.retryTimes(10)
 import { isError } from "src/shared/types"
 import type { MqConfig } from "../../configs"
 import MqGateway from "./MqGateway"

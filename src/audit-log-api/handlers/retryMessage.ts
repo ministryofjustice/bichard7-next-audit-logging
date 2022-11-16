@@ -11,7 +11,6 @@ import {
 import type { PromiseResult } from "src/shared/types"
 import { isError } from "src/shared/types"
 import createAuditLogDynamoDbConfig from "../createAuditLogDynamoDbConfig"
-import createAuditLogLookupDynamoDbConfig from "../createAuditLogLookupDynamoDbConfig"
 import { AuditLogDynamoGateway, AwsAuditLogLookupDynamoGateway } from "../gateways/dynamo"
 import getApiKey from "../getApiKey"
 import getApiUrl from "../getApiUrl"
@@ -24,11 +23,10 @@ import SendMessageToQueueUseCase from "../use-cases/SendMessageToQueueUseCase"
 import { createJsonApiResult } from "../utils"
 
 const auditLogGatewayConfig = createAuditLogDynamoDbConfig()
-const auditLogGateway = new AuditLogDynamoGateway(auditLogGatewayConfig, auditLogGatewayConfig.TABLE_NAME)
-const auditLogLookupGatewayConfig = createAuditLogLookupDynamoDbConfig()
+const auditLogGateway = new AuditLogDynamoGateway(auditLogGatewayConfig)
 const auditLogLookupGateway = new AwsAuditLogLookupDynamoGateway(
-  auditLogLookupGatewayConfig,
-  auditLogLookupGatewayConfig.TABLE_NAME
+  auditLogGatewayConfig,
+  auditLogGatewayConfig.lookupTableName
 )
 
 const mqGatewayConfig = createMqConfig()

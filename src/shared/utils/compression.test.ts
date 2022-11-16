@@ -1,3 +1,4 @@
+import "src/shared/testing"
 import { isError } from "src/shared/types"
 import { compress, decompress } from "./compression"
 
@@ -7,34 +8,23 @@ describe("compression", () => {
 
     const compressedResult = await compress(expectedData)
 
-    expect(isError(compressedResult)).toBe(false)
+    expect(compressedResult).toNotBeError()
     expect(compressedResult).not.toBe(expectedData)
     expect((compressedResult as string).length).toBeLessThan(expectedData.length)
 
     const decompressedResult = await decompress(compressedResult as string)
-    expect(isError(decompressedResult)).toBe(false)
+    expect(decompressedResult).toNotBeError()
     expect(decompressedResult).toBe(expectedData)
   })
 
-  it("should return undefined when input is empty", async () => {
+  it("should return empty string when input is empty", async () => {
     const compressedResult = await compress("")
 
     expect(isError(compressedResult)).toBe(false)
-    expect(compressedResult).toBeUndefined()
+    expect(compressedResult).toBe("")
 
     const decompressedResult = await decompress(compressedResult as string)
-    expect(isError(decompressedResult)).toBe(false)
-    expect(decompressedResult).toBeUndefined()
-  })
-
-  it("should return undefined when input is undefined", async () => {
-    const compressedResult = await compress(undefined as unknown as string)
-
-    expect(isError(compressedResult)).toBe(false)
-    expect(compressedResult).toBeUndefined()
-
-    const decompressedResult = await decompress(compressedResult as string)
-    expect(isError(decompressedResult)).toBe(false)
-    expect(decompressedResult).toBeUndefined()
+    expect(decompressedResult).toNotBeError()
+    expect(decompressedResult).toBe("")
   })
 })

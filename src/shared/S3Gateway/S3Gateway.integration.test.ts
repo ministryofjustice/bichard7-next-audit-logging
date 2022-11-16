@@ -1,4 +1,3 @@
-jest.retryTimes(10)
 import type { S3 } from "aws-sdk"
 import "src/shared/testing"
 import { externalIncomingS3Config, internalIncomingS3Config } from "src/shared/testing"

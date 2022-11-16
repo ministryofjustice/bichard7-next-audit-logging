@@ -1,6 +1,6 @@
 import type { AuditLogEvent } from "src/shared/types"
 import { EventCode } from "src/shared/types"
-import retryCountUpdateComponent from "./retryCountUpdateComponent"
+import calculateRetryCount from "./calculateRetryCount"
 
 const retryEvent = (): AuditLogEvent => {
   return {
@@ -16,30 +16,22 @@ const nonRetryEvent = (): AuditLogEvent => {
   } as unknown as AuditLogEvent
 }
 
-describe("retryCountUpdateComponent", () => {
+describe("calculateRetryCount", () => {
   it("should set sanitised status when a retry event is added", () => {
     const events = [nonRetryEvent(), nonRetryEvent(), retryEvent(), nonRetryEvent()]
-    const forceOwnerDynamoUpdates = retryCountUpdateComponent([], events)
-    expect(forceOwnerDynamoUpdates).toStrictEqual({
-      updateExpression: "#retryCount = if_not_exists(#retryCount, :zero) + :retryCount",
-      expressionAttributeNames: { "#retryCount": "retryCount" },
-      updateExpressionValues: { ":retryCount": 1, ":zero": 0 }
-    })
+    const forceOwnerDynamoUpdates = calculateRetryCount(events)
+    expect(forceOwnerDynamoUpdates).toStrictEqual({ retryCount: 1 })
   })
 
   it("should increase the count by the correct amount when many retry events are added", () => {
     const events = [nonRetryEvent(), nonRetryEvent(), retryEvent(), nonRetryEvent(), retryEvent(), retryEvent()]
-    const forceOwnerDynamoUpdates = retryCountUpdateComponent([], events)
-    expect(forceOwnerDynamoUpdates).toStrictEqual({
-      updateExpression: "#retryCount = if_not_exists(#retryCount, :zero) + :retryCount",
-      expressionAttributeNames: { "#retryCount": "retryCount" },
-      updateExpressionValues: { ":retryCount": 3, ":zero": 0 }
-    })
+    const forceOwnerDynamoUpdates = calculateRetryCount(events)
+    expect(forceOwnerDynamoUpdates).toStrictEqual({ retryCount: 3 })
   })
 
   it("shouldn't change anything in dynamodb when there are no retry events", () => {
     const events = [nonRetryEvent(), nonRetryEvent(), nonRetryEvent()]
-    const forceOwnerDynamoUpdates = retryCountUpdateComponent([], events)
+    const forceOwnerDynamoUpdates = calculateRetryCount(events)
     expect(forceOwnerDynamoUpdates).toStrictEqual({})
   })
 })

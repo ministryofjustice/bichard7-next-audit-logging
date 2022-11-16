@@ -1,6 +1,6 @@
 import type { AuditLogEvent } from "src/shared/types"
 import { EventCode } from "src/shared/types"
-import archivalUpdateComponent from "./archivalUpdateComponent"
+import calculateErrorRecordArchivalDate from "./calculateErrorRecordArchivalDate"
 
 const archivalTime = Date.now()
 
@@ -19,20 +19,16 @@ const nonArchivalEvent = (): AuditLogEvent => {
   } as unknown as AuditLogEvent
 }
 
-describe("archivalUpdateComponent", () => {
+describe("calculateErrorRecordArchivalDate", () => {
   it("should set archived status when an archival event is added", () => {
     const events = [nonArchivalEvent(), nonArchivalEvent(), archivalEvent(), nonArchivalEvent()]
-    const forceOwnerDynamoUpdates = archivalUpdateComponent([], events)
-    expect(forceOwnerDynamoUpdates).toStrictEqual({
-      updateExpression: "#errorRecordArchivalDate = :errorRecordArchivalDate",
-      expressionAttributeNames: { "#errorRecordArchivalDate": "errorRecordArchivalDate" },
-      updateExpressionValues: { ":errorRecordArchivalDate": archivalTime }
-    })
+    const forceOwnerDynamoUpdates = calculateErrorRecordArchivalDate(events)
+    expect(forceOwnerDynamoUpdates).toStrictEqual({ errorRecordArchivalDate: archivalTime })
   })
 
   it("shouldn't change anything in dynamodb when there are no archival events", () => {
     const events = [nonArchivalEvent(), nonArchivalEvent(), nonArchivalEvent()]
-    const forceOwnerDynamoUpdates = archivalUpdateComponent([], events)
+    const forceOwnerDynamoUpdates = calculateErrorRecordArchivalDate(events)
     expect(forceOwnerDynamoUpdates).toStrictEqual({})
   })
 })

@@ -65,6 +65,13 @@ describe("Add Error Records e2e", () => {
       accessKeyId: "DUMMY",
       secretAccessKey: "DUMMY"
     })
+
+    await clearDynamoTable("auditLogEventsTable", "_id", {
+      endpoint: "http://localhost:8000",
+      region: "eu-west-2",
+      accessKeyId: "DUMMY",
+      secretAccessKey: "DUMMY"
+    })
   })
 
   it("should audit log single error records successfully", async () => {
@@ -97,8 +104,6 @@ describe("Add Error Records e2e", () => {
 
     expect(message.events).toHaveLength(1)
     expect(message.events[0]).toStrictEqual({
-      _automationReport: false,
-      _topExceptionsReport: false,
       eventSource: "me",
       attributes: { "Record ID": 1 },
       eventCode: EventCode.ErrorRecordArchived,
@@ -157,8 +162,6 @@ describe("Add Error Records e2e", () => {
 
     expect(message.events).toHaveLength(1)
     expect(message.events[0]).toStrictEqual({
-      _automationReport: false,
-      _topExceptionsReport: false,
       eventSource: "me",
       attributes: { "Record ID": 1 },
       eventCode: EventCode.ErrorRecordArchived,
@@ -542,8 +545,6 @@ describe("Add Error Records e2e", () => {
 
     expect(message.events).toHaveLength(1)
     expect(message.events[0]).toStrictEqual({
-      _automationReport: false,
-      _topExceptionsReport: false,
       eventSource: "me",
       attributes: { "Record ID": 1 },
       eventCode: EventCode.ErrorRecordArchived,

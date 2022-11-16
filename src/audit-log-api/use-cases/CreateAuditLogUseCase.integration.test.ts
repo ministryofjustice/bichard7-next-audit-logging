@@ -1,21 +1,20 @@
-jest.retryTimes(10)
 import { AuditLog } from "src/shared/types"
 import { AuditLogDynamoGateway } from "../gateways/dynamo"
 import { auditLogDynamoConfig, TestDynamoGateway } from "../test"
 import CreateAuditLogUseCase from "./CreateAuditLogUseCase"
 
 const testDynamoGateway = new TestDynamoGateway(auditLogDynamoConfig)
-const auditLogDynamoGateway = new AuditLogDynamoGateway(auditLogDynamoConfig, auditLogDynamoConfig.TABLE_NAME)
+const auditLogDynamoGateway = new AuditLogDynamoGateway(auditLogDynamoConfig)
 const createAuditLogUseCase = new CreateAuditLogUseCase(auditLogDynamoGateway)
 
 const createAuditLog = (): AuditLog => new AuditLog("CorrelationId", new Date(), "Dummy hash")
 
 const getAuditLog = (messageId: string): Promise<AuditLog | null> =>
-  testDynamoGateway.getOne(auditLogDynamoConfig.TABLE_NAME, "messageId", messageId)
+  testDynamoGateway.getOne(auditLogDynamoConfig.auditLogTableName, "messageId", messageId)
 
 describe("CreateAuditLogUseCase", () => {
   beforeEach(async () => {
-    await testDynamoGateway.deleteAll(auditLogDynamoConfig.TABLE_NAME, "messageId")
+    await testDynamoGateway.deleteAll(auditLogDynamoConfig.auditLogTableName, "messageId")
   })
 
   it("should return a conflict result when an Audit Log record exists with the same messageId", async () => {
@@ -29,7 +28,7 @@ describe("CreateAuditLogUseCase", () => {
   })
 
   it("should return an error result when an unknown error occurs within the database", async () => {
-    const gateway = new AuditLogDynamoGateway(auditLogDynamoConfig, "Invalid Table Name")
+    const gateway = new AuditLogDynamoGateway({ ...auditLogDynamoConfig, auditLogTableName: "Invalid Table Name" })
     const useCase = new CreateAuditLogUseCase(gateway)
 
     const auditLog = createAuditLog()

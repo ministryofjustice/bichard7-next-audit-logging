@@ -3,8 +3,8 @@ jest.mock("../use-cases/FetchById")
 import type { APIGatewayProxyEvent } from "aws-lambda"
 import { HttpStatusCode } from "src/shared"
 import { setEnvironmentVariables } from "src/shared/testing"
+import { DynamoGateway } from "../gateways/dynamo/DynamoGateway"
 import "../testConfig"
-import FetchById from "../use-cases/FetchById"
 setEnvironmentVariables()
 
 import sanitiseMessage from "./sanitiseMessage"
@@ -30,7 +30,7 @@ test("returns BadRequest error when there is no message ID passed", async () => 
 
 test("returns Internal Server error when there is an error from Dynamo", async () => {
   const expectedError = "Something bad happened"
-  jest.spyOn(FetchById.prototype, "fetch").mockResolvedValue(new Error(expectedError))
+  jest.spyOn(DynamoGateway.prototype, "getOne").mockResolvedValue(new Error(expectedError))
   const event = createProxyEvent("MessageId")
 
   const result = await sanitiseMessage(event)

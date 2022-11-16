@@ -7,7 +7,7 @@ import { CreateAuditLogUseCase, parseCreateAuditLogRequest, validateCreateAuditL
 import { createJsonApiResult } from "../utils"
 
 const config = createAuditLogDynamoDbConfig()
-const auditLogGateway = new AuditLogDynamoGateway(config, config.TABLE_NAME)
+const auditLogGateway = new AuditLogDynamoGateway(config)
 const createAuditLogUseCase = new CreateAuditLogUseCase(auditLogGateway)
 
 export default async function createAuditLog(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {

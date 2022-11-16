@@ -30,12 +30,12 @@ export default class FakeAuditLogDynamoGateway implements AuditLogDynamoGatewayI
     throw new Error("Method not implemented")
   }
 
-  update(message: AuditLog): PromiseResult<AuditLog> {
+  update(_: AuditLog, __: Partial<AuditLog>): PromiseResult<void> {
     if (this.error) {
       return Promise.resolve(this.error)
     }
 
-    return Promise.resolve(message)
+    return Promise.resolve()
   }
 
   fetchMany(_: FetchManyOptions = {}): PromiseResult<AuditLog[]> {
@@ -110,6 +110,10 @@ export default class FakeAuditLogDynamoGateway implements AuditLogDynamoGatewayI
     const sortedEvents = events.sort((eventA, eventB) => (eventA.timestamp > eventB.timestamp ? -1 : 1))
 
     return Promise.resolve(sortedEvents)
+  }
+
+  replaceAuditLog(_: AuditLog, __: number): PromiseResult<void> {
+    throw new Error("Method not implemented.")
   }
 
   addEvent(_: string, __: number, ___: AuditLogEvent): PromiseResult<void> {

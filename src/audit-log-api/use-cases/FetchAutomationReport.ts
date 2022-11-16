@@ -1,8 +1,8 @@
 import type { AuditLog, PromiseResult } from "src/shared/types"
 import { isError } from "src/shared/types"
 import type { AuditLogDynamoGatewayInterface } from "../gateways/dynamo"
-import { parseForceOwner } from "../gateways/dynamo"
 import type { FetchReportOptions } from "../types/queryParams"
+import { parseForceOwner } from "../utils"
 import getMessageById from "./getMessageById"
 import type MessageFetcher from "./MessageFetcher"
 
@@ -18,8 +18,8 @@ export default class FetchAutomationReport implements MessageFetcher {
     const records = await this.gateway.fetchRange({
       ...this.options,
       includeColumns: ["automationReport"],
-      excludeColumns: ["events"],
-      lastMessage
+      lastMessage,
+      eventsFilter: "automationReport"
     })
 
     if (isError(records)) {
@@ -27,10 +27,10 @@ export default class FetchAutomationReport implements MessageFetcher {
     }
 
     return records.map((record) => {
-      record.events = []
-
       if (record.automationReport) {
-        record.events = record.automationReport.events
+        record.events = (record.events ?? [])
+          .concat(record.automationReport.events)
+          .sort((a, b) => (a.timestamp > b.timestamp ? 1 : b.timestamp > a.timestamp ? -1 : 0))
         if (!record.forceOwner && record.automationReport.forceOwner) {
           record.forceOwner = parseForceOwner(record.automationReport.forceOwner)
         }

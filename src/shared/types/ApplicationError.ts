@@ -3,3 +3,5 @@ export default class ApplicationError extends Error {
     super(message)
   }
 }
+
+export class NotFoundError extends Error {}

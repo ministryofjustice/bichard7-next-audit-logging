@@ -1,4 +1,3 @@
-jest.retryTimes(10)
 import type { S3 } from "aws-sdk"
 import { TestS3Gateway } from "src/shared"
 import "src/shared/testing"

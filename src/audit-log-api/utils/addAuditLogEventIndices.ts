@@ -3,8 +3,8 @@ import shouldLogForAutomationReport from "../gateways/dynamo/AuditLogDynamoGatew
 import shouldLogForTopExceptionsReport from "../gateways/dynamo/AuditLogDynamoGateway/shouldLogForTopExceptionsReport"
 
 const addAuditLogEventIndices = (event: AuditLogEvent): AuditLogEvent => {
-  event._automationReport = shouldLogForAutomationReport(event)
-  event._topExceptionsReport = shouldLogForTopExceptionsReport(event)
+  event._automationReport = shouldLogForAutomationReport(event) ? 1 : 0
+  event._topExceptionsReport = shouldLogForTopExceptionsReport(event) ? 1 : 0
 
   return event
 }

@@ -1,4 +1,4 @@
-import type { EventCategory } from "src/shared/types"
+import type { AuditLogEventOptions, EventCategory } from "src/shared/types"
 import { AuditLogEvent } from "src/shared/types"
 import validateCreateAuditLogEvents from "./validateCreateAuditLogEvents"
 
@@ -139,12 +139,14 @@ it("should be invalid when a single audit log event category is invalid", () => 
 })
 
 it("should attribute validation errors to the correct event", () => {
-  const validEvent = new AuditLogEvent({
+  const eventAttributes: AuditLogEventOptions = {
     category: "information",
     eventSource: "Event source",
     eventType: "Event type",
-    timestamp: new Date("2021-10-05T15:12:13.000Z")
-  })
+    timestamp: new Date("2021-10-05T15:12:13.000Z"),
+    attributes: {}
+  }
+  const validEvent = new AuditLogEvent(eventAttributes)
   const invalidEvent = {} as AuditLogEvent
 
   const { isValid, eventValidationResults } = validateCreateAuditLogEvents([validEvent, invalidEvent])
@@ -155,7 +157,7 @@ it("should attribute validation errors to the correct event", () => {
   expect(eventValidationResults[0]).toEqual({
     timestamp: validEvent.timestamp,
     errors: [],
-    auditLogEvent: validEvent
+    auditLogEvent: { ...eventAttributes, timestamp: "2021-10-05T15:12:13.000Z" }
   })
   expect(eventValidationResults[1]).toEqual({
     timestamp: "No event timestamp given",

@@ -1,8 +1,7 @@
 jest.setTimeout(50000)
 
-import type { S3 } from "aws-sdk"
 import fs from "fs"
-import { AuditLogApiClient, encodeBase64, Poller, PollOptions, TestS3Gateway } from "src/shared"
+import { AuditLogApiClient, encodeBase64, TestS3Gateway } from "src/shared"
 import "src/shared/testing"
 import { clearDynamoTable, createMockAuditLog, setEnvironmentVariables } from "src/shared/testing"
 import type { AmazonMqEventSourceRecordEvent, AuditLogEvent } from "src/shared/types"
@@ -41,8 +40,6 @@ const getEvents = async (messageId1: string, messageId2: string): Promise<Dynamo
     actualEvents2: message2.events
   }
 }
-
-const wait = (seconds: number) => new Promise((resolve) => setTimeout(resolve, seconds * 1000))
 
 interface TestInput {
   eventFilename: string
@@ -116,50 +113,16 @@ test.each<TestInput>([
     const result = await messageReceiver(event)
     expect(result).toNotBeError()
 
-    // Waiting until events are uploaded to S3 bucket
-    const s3Poller = new Poller(() => s3Gateway.getAll())
-
-    const s3PollerOptions = new PollOptions<S3.ObjectList | undefined>(40000)
-    s3PollerOptions.delay = 1000
-    s3PollerOptions.condition = (s3Objects) => (s3Objects?.length || 0) === event.messages.length
-
-    const s3PollerResult = await s3Poller.poll(s3PollerOptions).catch((error) => error)
-
-    expect(s3Poller).toNotBeError()
-
     // Simulating EventBridge rule for triggering state machine for the uploaded object to S3 bucket
-    const s3Objects = s3PollerResult as S3.ObjectList
+    const s3Objects = (await s3Gateway.getAll()) ?? []
     const objectKeys = s3Objects.map((s3Object) => s3Object.Key)
-    const executions: Promise<void>[] = []
-    objectKeys.forEach((key, index) => {
-      const promise = async () => {
-        await wait(index * 3)
-        await eventHandlerSimulator.start(key!, uuid())
-      }
-      executions.push(promise())
-    })
+    const executions = objectKeys.map((key) => eventHandlerSimulator.start(key!, uuid()))
 
     await Promise.all(executions)
 
-    await wait(5)
-
-    const dynamoDbPoller = new Poller(() => getEvents(auditLog1.messageId, auditLog2.messageId))
-
-    const dynamoDbPollerOptions = new PollOptions<DynamoPollResult>(100000)
-    dynamoDbPollerOptions.delay = 1000
-    dynamoDbPollerOptions.condition = ({ actualEvents1, actualEvents2 }) =>
-      actualEvents1.length === 2 && actualEvents2.length === 1
-
-    try {
-      await dynamoDbPoller.poll(dynamoDbPollerOptions)
-    } catch (error) {
-      console.error(`Event Handler e2e (${eventFilename}) failed when polling for events`)
-
-      const events = await getEvents(auditLog1.messageId, auditLog2.messageId)
-      console.log(events)
-
-      throw error
-    }
+    const { actualEvents1, actualEvents2 } = await getEvents(auditLog1.messageId, auditLog2.messageId)
+    expect(actualEvents1).toHaveLength(2)
+    expect(actualEvents2).toHaveLength(1)
   }
 )
 
@@ -186,19 +149,8 @@ test("Event with no MesageId should not fail to be processed by the audit logger
   const messageReceiverResult = await messageReceiver(event)
   expect(messageReceiverResult).toNotBeError()
 
-  // Waiting until events are uploaded to S3 bucket
-  const s3Poller = new Poller(() => s3Gateway.getAll())
-
-  const s3PollerOptions = new PollOptions<S3.ObjectList | undefined>(40000)
-  s3PollerOptions.delay = 1000
-  s3PollerOptions.condition = (s3Objects) => (s3Objects?.length || 0) === 1
-
-  const s3PollerResult = await s3Poller.poll(s3PollerOptions).catch((error) => error)
-
-  expect(s3Poller).toNotBeError()
-
   // Simulating EventBridge rule for triggering state machine for the uploaded object to S3 bucket
-  const s3Objects = s3PollerResult as S3.ObjectList
+  const s3Objects = (await s3Gateway.getAll()) ?? []
   const objectKey = s3Objects.map((s3Object) => s3Object.Key)[0]
   const eventHandlerResult = await eventHandlerSimulator.start(objectKey!, uuid()).catch((error) => error)
 

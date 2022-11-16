@@ -1,7 +1,0 @@
-export { default as archivalUpdateComponent } from "./archivalUpdateComponent"
-export { default as automationRateReportUpdateComponent } from "./automationRateReportUpdateComponent"
-export { default as forceOwnerUpdateComponent } from "./forceOwnerUpdateComponent"
-export { default as retryCountUpdateComponent } from "./retryCountUpdateComponent"
-export { default as sanitisationUpdateComponent } from "./sanitisationUpdateComponent"
-export { default as statusUpdateComponent } from "./statusUpdateComponent"
-export { default as topExceptionsReportUpdateComponent } from "./topExceptionsReportUpdateComponent"

@@ -2,18 +2,13 @@ import type { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda"
 import { HttpStatusCode, logger } from "src/shared"
 import { isError } from "src/shared/types"
 import createAuditLogDynamoDbConfig from "../createAuditLogDynamoDbConfig"
-import createAuditLogLookupDynamoDbConfig from "../createAuditLogLookupDynamoDbConfig"
-import { AuditLogDynamoGateway, AwsAuditLogLookupDynamoGateway } from "../gateways/dynamo"
-import { CreateAuditLogEventUseCase, parseCreateAuditLogEventRequest, validateCreateAuditLogEvent } from "../use-cases"
-import StoreValuesInLookupTableUseCase from "../use-cases/StoreValuesInLookupTableUseCase"
+import { AuditLogDynamoGateway } from "../gateways/dynamo"
+import { CreateAuditLogEventsUseCase, parseCreateAuditLogEventRequest, validateCreateAuditLogEvent } from "../use-cases"
 import { addAuditLogEventIndices, createJsonApiResult, statusCodeLookup, transformAuditLogEvent } from "../utils"
 
 const auditLogConfig = createAuditLogDynamoDbConfig()
-const auditLogLookupConfig = createAuditLogLookupDynamoDbConfig()
-const auditLogGateway = new AuditLogDynamoGateway(auditLogConfig, auditLogConfig.TABLE_NAME)
-const auditLogLookupGateway = new AwsAuditLogLookupDynamoGateway(auditLogLookupConfig, auditLogLookupConfig.TABLE_NAME)
-const storeValuesInLookupTableUseCase = new StoreValuesInLookupTableUseCase(auditLogLookupGateway)
-const createAuditLogEventUseCase = new CreateAuditLogEventUseCase(auditLogGateway, storeValuesInLookupTableUseCase)
+const auditLogGateway = new AuditLogDynamoGateway(auditLogConfig)
+const createAuditLogEventsUseCase = new CreateAuditLogEventsUseCase(auditLogGateway)
 
 export default async function createAuditLogEvent(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
   const request = parseCreateAuditLogEventRequest(event)
@@ -39,7 +34,7 @@ export default async function createAuditLogEvent(event: APIGatewayProxyEvent): 
   logger.info(
     `[${request.messageId}] - Logging event - ${indexedAuditLogEvent.eventType} (${indexedAuditLogEvent.eventCode})`
   )
-  const result = await createAuditLogEventUseCase.create(request.messageId, indexedAuditLogEvent)
+  const result = await createAuditLogEventsUseCase.create(request.messageId, indexedAuditLogEvent)
 
   if (result.resultType === "success") {
     return createJsonApiResult({

@@ -1,4 +1,3 @@
-jest.retryTimes(10)
 import "src/shared/testing"
 import type { MqConfig } from "src/shared/types"
 import { MqGateway, TestMqGateway } from "."
