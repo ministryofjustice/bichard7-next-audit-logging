@@ -4,5 +4,4 @@ dist
 storybook-static
 cypress.config.ts
 build.js
-src/audit-log-portal/*
 scripts/*

@@ -124,13 +124,6 @@ upload_to_s3 retryFailedMessages.zip retryFailedMessages.zip
 cd -
 
 ############################################
-# Audit Log Portal
-############################################
-
-# Build the Portal Docker Image
-make codebuild-portal-image
-
-############################################
 # Add Archival Events
 ############################################
 
