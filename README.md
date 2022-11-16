@@ -14,7 +14,6 @@ Other diagrams:
 This repository contains multiple distinct components that together form the audit logging service within Bichard7. Each component is wrapped up in a separate node package.
 
 - [**Audit Log API** (`audit-log-api`)](src/audit-log-api/) - API exposing Audit Log records and attached events
-- [**Audit Log Portal** (`audit-log-portal`)](src/audit-log-portal/) - Web-based portal allowing access to view and explore all Audit Log records and their events
 - [**Incoming Message Handler** (`incoming-message-handler`)](src/incoming-message-handler/) - AWS Step Functions and Lambdas for intercepting and processing messages coming into the Bichard system
 - [**Event Handler** (`src/event-handler`)](src/event-handler/) - A component that handles messages received from queues and translates them into Audit Log events.
 

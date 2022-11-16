@@ -90,43 +90,8 @@ jobs:
           command: nvm use && npm run test:e2e
       - store_results
 
-
-  build-test-portal:
-    machine:
-      image: ubuntu-2004:202104-01
-      docker_layer_caching: true
-    resource_class: large
-    working_directory: ~
-    steps:
-      - checkout
-      - attach_workspace:
-          at: .
-      - run:
-          name: Build Portal Stories
-          command: cd src/audit-log-portal && npm install && npm run build-storybook && cd -
-      - run:
-          name: Install Nodejs version in .nvmrc
-          command: nvm install
-      - run:
-          name: Install
-          command: nvm use && cd src/audit-log-portal && npm install
-      - run:
-          name: Build
-          command: nvm use && cd src/audit-log-portal && npm run build
-      - run:
-          name: Install Cypress
-          command: ./.circleci/scripts/install-cypress.sh
-      - run:
-          name: Run UI tests
-          command: cd ./src/audit-log-portal && npm run test:integration
-      - store_artifacts:
-          path: ./src/audit-log-portal/cypress/videos
-      - store_artifacts:
-          path: ./src/audit-log-portal/cypress/screenshots
-
 workflows:
   version: 2
   build-and-test:
     jobs:
       - build-test-lambdas
-      - build-test-portal

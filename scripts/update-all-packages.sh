@@ -2,7 +2,7 @@
 
 # set -e
 
-packages=$(find . -name package.json | grep -v node_modules | grep -v audit-log-portal)
+packages=$(find . -name package.json | grep -v node_modules)
 
 for p in ${packages}; do
   folder=$(dirname $p)
