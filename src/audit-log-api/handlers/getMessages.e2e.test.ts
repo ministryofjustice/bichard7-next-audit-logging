@@ -97,7 +97,7 @@ describe("Getting Audit Logs", () => {
     expect(messageIds).toEqual([auditLog2.messageId])
   })
 
-  it.each([
+  describe.each([
     ["all", ""],
     ["messageId", "/msgid1"],
     ["externalCorrelationId", "?externalCorrelationId=exid1"],
@@ -105,43 +105,83 @@ describe("Getting Audit Logs", () => {
     ["onlyUnsanitised", "?unsanitised=true"],
     ["automationReport", "?eventsFilter=automationReport&start=2020-10-10&end=2100-10-10"],
     ["topExceptionsReport", "?eventsFilter=topExceptionsReport&start=2020-10-10&end=2100-10-10"]
-  ])("should get message by %s and lookup attribute values for old events", async (_, queryParams) => {
-    const auditLog = await mockDynamoAuditLog({
-      externalCorrelationId: "exid1",
-      messageId: "msgid1"
+  ])("fetching messages", (requestType, queryParams) => {
+    it(`should get message by ${requestType} and lookup attribute values for old events`, async () => {
+      const auditLog = await mockDynamoAuditLog({
+        externalCorrelationId: "exid1",
+        messageId: "msgid1"
+      })
+      const lookupItem1 = new AuditLogLookup("Test value 1", auditLog.messageId)
+      const lookupItem2Value = (await compress("Test value 2")) as string
+      const lookupItem2 = new AuditLogLookup(lookupItem2Value, auditLog.messageId)
+      lookupItem2.isCompressed = true
+      const event = mockAuditLogEvent()
+      event.addAttribute("Attribute 3", { valueLookup: lookupItem1.id })
+      event.addAttribute("Attribute 4", { valueLookup: lookupItem2.id })
+      event.addAttribute("Error 1 Details", "dummy")
+      auditLog.events.push(event)
+
+      await testDynamoGateway.insertOne(auditLogDynamoConfig.lookupTableName, lookupItem1, "id")
+      await testDynamoGateway.insertOne(auditLogDynamoConfig.lookupTableName, lookupItem2, "id")
+      await testDynamoGateway.insertOne(auditLogDynamoConfig.auditLogTableName, auditLog, "messageId")
+
+      if (isError(auditLog)) {
+        throw new Error("Unexpected error")
+      }
+
+      const result = await axios.get<OutputApiAuditLog[]>(`http://localhost:3010/messages${queryParams}`)
+      expect(result.status).toEqual(HttpStatusCode.ok)
+
+      expect(Array.isArray(result.data)).toBeTruthy()
+      const actualMessage = result.data[0]
+
+      expect(actualMessage.messageId).toEqual(auditLog.messageId)
+      expect(actualMessage.events).toHaveLength(1)
+
+      const { attributes } = actualMessage.events[0]
+      expect(attributes["Attribute 1"]).toBe(auditLog.events[0].attributes["Attribute 1"])
+      expect(attributes["Attribute 2"]).toBe(auditLog.events[0].attributes["Attribute 2"])
+      expect(attributes["Attribute 3"]).toBe("Test value 1")
+      expect(attributes["Attribute 4"]).toBe("Test value 2")
     })
-    const lookupItem1 = new AuditLogLookup("Test value 1", auditLog.messageId)
-    const lookupItem2Value = (await compress("Test value 2")) as string
-    const lookupItem2 = new AuditLogLookup(lookupItem2Value, auditLog.messageId)
-    lookupItem2.isCompressed = true
-    const event = mockAuditLogEvent()
-    event.addAttribute("Attribute 3", { valueLookup: lookupItem1.id })
-    event.addAttribute("Attribute 4", { valueLookup: lookupItem2.id })
-    event.addAttribute("Error 1 Details", "dummy")
-    auditLog.events.push(event)
 
-    await testDynamoGateway.insertOne(auditLogDynamoConfig.lookupTableName, lookupItem1, "id")
-    await testDynamoGateway.insertOne(auditLogDynamoConfig.lookupTableName, lookupItem2, "id")
-    await testDynamoGateway.insertOne(auditLogDynamoConfig.auditLogTableName, auditLog, "messageId")
+    it(`should not expose internal Dynamo attributes when requesting via ${requestType}`, async () => {
+      const auditLog = await mockDynamoAuditLog({
+        externalCorrelationId: "exid1",
+        messageId: "msgid1",
+        errorRecordArchivalDate: "2020-01-01T01:01:01.000Z",
+        expiryTime: "2020-01-01T01:01:01.000Z",
+        retryCount: 10,
+        automationReport: { events: [], forceOwner: "010000" },
+        topExceptionsReport: { events: [] }
+      })
 
-    if (isError(auditLog)) {
-      throw new Error("Unexpected error")
-    }
+      await testDynamoGateway.insertOne(auditLogDynamoConfig.auditLogTableName, auditLog, "messageId")
 
-    const result = await axios.get<OutputApiAuditLog[]>(`http://localhost:3010/messages${queryParams}`)
-    expect(result.status).toEqual(HttpStatusCode.ok)
+      if (isError(auditLog)) {
+        throw new Error("Unexpected error")
+      }
 
-    expect(Array.isArray(result.data)).toBeTruthy()
-    const actualMessage = result.data[0]
+      const result = await axios.get<OutputApiAuditLog[]>(`http://localhost:3010/messages${queryParams}`)
+      expect(result.status).toEqual(HttpStatusCode.ok)
 
-    expect(actualMessage.messageId).toEqual(auditLog.messageId)
-    expect(actualMessage.events).toHaveLength(1)
+      expect(Array.isArray(result.data)).toBeTruthy()
+      const actualMessage = result.data[0]
 
-    const { attributes } = actualMessage.events[0]
-    expect(attributes["Attribute 1"]).toBe(auditLog.events[0].attributes["Attribute 1"])
-    expect(attributes["Attribute 2"]).toBe(auditLog.events[0].attributes["Attribute 2"])
-    expect(attributes["Attribute 3"]).toBe("Test value 1")
-    expect(attributes["Attribute 4"]).toBe("Test value 2")
+      expect(actualMessage.messageId).toEqual(auditLog.messageId)
+      expect(auditLog).toHaveProperty("errorRecordArchivalDate")
+      expect(auditLog).toHaveProperty("expiryTime")
+      expect(auditLog).toHaveProperty("retryCount")
+      expect(auditLog).toHaveProperty("version")
+      expect(auditLog).toHaveProperty("automationReport")
+      expect(auditLog).toHaveProperty("topExceptionsReport")
+      expect(actualMessage).not.toHaveProperty("errorRecordArchivalDate")
+      expect(actualMessage).not.toHaveProperty("expiryTime")
+      expect(actualMessage).not.toHaveProperty("retryCount")
+      expect(actualMessage).not.toHaveProperty("version")
+      expect(actualMessage).not.toHaveProperty("automationReport")
+      expect(actualMessage).not.toHaveProperty("topExceptionsReport")
+    })
   })
 
   describe("fetching unsanitised messages", () => {
