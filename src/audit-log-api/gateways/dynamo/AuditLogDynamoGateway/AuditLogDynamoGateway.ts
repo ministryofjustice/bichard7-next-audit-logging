@@ -35,7 +35,7 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
 
   readonly eventsTableKey: string = "_id"
 
-  constructor(private readonly config: DynamoDbConfig) {
+  constructor(readonly config: DynamoDbConfig) {
     super(config)
   }
 
@@ -431,7 +431,7 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
     return this.replaceOne(this.config.auditLogTableName, replacement, this.auditLogTableKey, version)
   }
 
-  private async prepareStoreEvents(messageId: string, events: AuditLogEvent[]): PromiseResult<DynamoUpdate[]> {
+  async prepareStoreEvents(messageId: string, events: AuditLogEvent[]): PromiseResult<DynamoUpdate[]> {
     const dynamoUpdates: DynamoUpdate[] = []
     for (const event of events) {
       const compressedEvent = await this.compressEventValues(event)

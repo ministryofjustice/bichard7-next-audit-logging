@@ -29,6 +29,8 @@ export default class AuditLogEvent {
 
   public readonly eventSource: string
 
+  public eventSourceArn?: string
+
   public readonly eventSourceQueueName?: string
 
   public readonly eventType: string
@@ -44,6 +46,8 @@ export default class AuditLogEvent {
   public _topExceptionsReport?: number
 
   public eventCode?: string
+
+  public s3Path?: string
 
   public _messageId?: string
 
@@ -62,6 +66,7 @@ export default class AuditLogEvent {
     this.eventType = options.eventType
     this.eventXml = options.eventXml
     this.timestamp = new Date(options.timestamp).toISOString()
+    this.s3Path = options.s3Path
     this.user = options.user
   }
 

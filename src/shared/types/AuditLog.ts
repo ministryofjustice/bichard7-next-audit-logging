@@ -27,6 +27,7 @@ export type OutputApiAuditLog = InputApiAuditLog & {
 export type DynamoAuditLog = OutputApiAuditLog & {
   errorRecordArchivalDate?: string
   expiryTime?: string
+  lastEventType?: string
   retryCount?: number
   version: number
   automationReport?: { events: AuditLogEvent[]; forceOwner: string }

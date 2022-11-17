@@ -13,6 +13,7 @@ export default interface AuditLogEventOptions {
   eventSourceQueueName?: string
   eventType: string
   eventXml?: string | AuditLogEventCompressedValue
+  s3Path?: string
   timestamp: Date | string
   user?: string
 }
