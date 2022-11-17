@@ -1,6 +1,6 @@
 import CalculateMessageStatusUseCase from "src/audit-log-api/gateways/dynamo/AuditLogDynamoGateway/CalculateMessageStatusUseCase"
-import type { AuditLog, AuditLogEvent } from "src/shared/types"
+import type { AuditLogEvent, DynamoAuditLog } from "src/shared/types"
 
-export default (allEvents: AuditLogEvent[]): Partial<AuditLog> => {
+export default (allEvents: AuditLogEvent[]): Partial<DynamoAuditLog> => {
   return new CalculateMessageStatusUseCase(allEvents).call()
 }

@@ -1,9 +1,9 @@
 import { Lambda } from "aws-sdk"
 import fs from "fs"
-import { AuditLogDynamoGateway } from "../../src/audit-log-api/gateways/dynamo"
+import { AuditLogDynamoGateway, DynamoDbConfig } from "../../src/audit-log-api/gateways/dynamo"
 import CalculateMessageStatusUseCase from "../../src/audit-log-api/gateways/dynamo/AuditLogDynamoGateway/CalculateMessageStatusUseCase"
 import { transformAuditLogEvent } from "../../src/audit-log-api/utils"
-import type { AuditLog, PromiseResult } from "../../src/shared/types"
+import type { DynamoAuditLog, PromiseResult } from "../../src/shared/types"
 import { isError } from "../../src/shared/types"
 
 const outDir = "pnc-status-debugging"
@@ -14,10 +14,12 @@ if (!WORKSPACE) {
   process.exit(1)
 }
 
-const dynamoConfig = {
-  DYNAMO_REGION: "eu-west-2",
-  TABLE_NAME: "Will be retrieved from Retry Message lambda environment variable",
-  DYNAMO_URL: "Will be retrieved from Retry Message lambda environment variable"
+const dynamoConfig: DynamoDbConfig = {
+  auditLogTableName: "Will be retrieved from Retry Message lambda environment variable",
+  endpoint: "Will be retrieved from Retry Message lambda environment variable",
+  eventsTableName: "Not needed",
+  lookupTableName: "Not needed",
+  region: "eu-west-2"
 }
 
 async function setup() {
@@ -27,20 +29,24 @@ async function setup() {
     throw Error("Couldn't get MQ connection details")
   }
 
-  dynamoConfig.DYNAMO_URL = retryLambda.Configuration?.Environment?.Variables?.AWS_URL || ""
-  if (!dynamoConfig.DYNAMO_URL) {
+  dynamoConfig.endpoint = retryLambda.Configuration?.Environment?.Variables?.AWS_URL || ""
+  if (!dynamoConfig.endpoint) {
     throw Error("Couldn't get DynamoDB URL")
   }
 
-  dynamoConfig.TABLE_NAME = retryLambda.Configuration?.Environment?.Variables?.AUDIT_LOG_TABLE_NAME || ""
-  if (!dynamoConfig.TABLE_NAME) {
+  dynamoConfig.auditLogTableName = retryLambda.Configuration?.Environment?.Variables?.AUDIT_LOG_TABLE_NAME || ""
+  if (!dynamoConfig.auditLogTableName) {
     throw Error("Couldn't get DynamoDB table name")
   }
 }
 
-const fetchAllRecords = async (dynamo: AuditLogDynamoGateway, start: Date, end: Date): PromiseResult<AuditLog[]> => {
-  const output: AuditLog[] = []
-  let lastMessage: AuditLog | undefined = undefined
+const fetchAllRecords = async (
+  dynamo: AuditLogDynamoGateway,
+  start: Date,
+  end: Date
+): PromiseResult<DynamoAuditLog[]> => {
+  const output: DynamoAuditLog[] = []
+  let lastMessage: DynamoAuditLog | undefined = undefined
   while (true) {
     const records = await dynamo.fetchRange({ start, end, lastMessage })
     if (isError(records)) {
@@ -55,7 +61,7 @@ const fetchAllRecords = async (dynamo: AuditLogDynamoGateway, start: Date, end: 
 }
 
 const run = async () => {
-  const dynamo = new AuditLogDynamoGateway(dynamoConfig, dynamoConfig.TABLE_NAME)
+  const dynamo = new AuditLogDynamoGateway(dynamoConfig)
   const startTime = new Date(process.argv[2])
   const endTime = new Date(process.argv[3])
 

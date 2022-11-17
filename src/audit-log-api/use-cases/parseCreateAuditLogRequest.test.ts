@@ -1,18 +1,19 @@
 import type { APIGatewayProxyEvent } from "aws-lambda"
-import { AuditLog, isError } from "src/shared/types"
+import { mockInputApiAuditLog } from "src/shared/testing"
+import { InputApiAuditLog, isError } from "src/shared/types"
 import parseCreateAuditLogRequest from "./parseCreateAuditLogRequest"
 
 test("should return audit log when request body has value", () => {
-  const expectedDate = new Date()
+  const auditLog = mockInputApiAuditLog()
   const result = parseCreateAuditLogRequest(<APIGatewayProxyEvent>{
-    body: JSON.stringify(new AuditLog("123", expectedDate, "Dummy hash"))
+    body: JSON.stringify(auditLog)
   })
 
   expect(isError(result)).toBe(false)
 
-  const auditLog = <AuditLog>result
-  expect(auditLog.externalCorrelationId).toBe("123")
-  expect(auditLog.receivedDate).toBe(expectedDate.toISOString())
+  const auditLogResult = <InputApiAuditLog>result
+  expect(auditLogResult.externalCorrelationId).toBe(auditLog.externalCorrelationId)
+  expect(auditLogResult.receivedDate).toBe(auditLog.receivedDate)
 })
 
 test("should return error when request body is empty", () => {

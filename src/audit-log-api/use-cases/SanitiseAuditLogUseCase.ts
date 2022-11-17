@@ -1,11 +1,12 @@
-import type { AuditLog, PromiseResult } from "src/shared/types"
+import type { DynamoAuditLog, PromiseResult } from "src/shared/types"
 import { AuditLogEvent, EventCode } from "src/shared/types"
-import { AuditLogDynamoGatewayInterface } from "../gateways/dynamo"
+import type { AuditLogDynamoGatewayInterface } from "../gateways/dynamo"
+import { CreateAuditLogEventsUseCase } from "./CreateAuditLogEventsUseCase"
 
 export default class SanitiseAuditLogUseCase {
   constructor(private readonly auditLogDynamoGateway: AuditLogDynamoGatewayInterface) {}
 
-  call(auditLog: AuditLog): PromiseResult<void> {
+  async call(auditLog: DynamoAuditLog): PromiseResult<void> {
     ;[auditLog.events, auditLog.automationReport?.events, auditLog.topExceptionsReport?.events].forEach((events) => {
       if (!events) {
         return
@@ -21,19 +22,22 @@ export default class SanitiseAuditLogUseCase {
       }
     })
 
-    auditLog.events.push(
-      new AuditLogEvent({
-        category: "information",
-        timestamp: new Date(),
-        eventCode: EventCode.Sanitised,
-        eventType: "Sanitised message",
-        eventSource: "Audit Log Api"
-      })
-    )
+    const sanitiseEvent = new AuditLogEvent({
+      category: "information",
+      timestamp: new Date(),
+      eventCode: EventCode.Sanitised,
+      eventType: "Sanitised message",
+      eventSource: "Audit Log Api"
+    })
 
     auditLog.isSanitised = 1
     delete auditLog.nextSanitiseCheck
 
-    return this.auditLogDynamoGateway.replaceAuditLog(auditLog, auditLog.version)
+    // TODO: We need to sanitise the individual events in the separate events table
+    // Note: We are going to do this once we have moved the existing events to the new table
+    // The sanitisation job has been paused in the meantime
+    await this.auditLogDynamoGateway.replaceAuditLog(auditLog, auditLog.version)
+    const createAuditLogEventsUseCase = new CreateAuditLogEventsUseCase(this.auditLogDynamoGateway)
+    createAuditLogEventsUseCase.create(auditLog.messageId, [sanitiseEvent])
   }
 }

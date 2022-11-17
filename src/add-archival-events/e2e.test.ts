@@ -5,9 +5,9 @@ import { execute } from "lambda-local"
 import partition from "lodash.partition"
 import { Client } from "pg"
 import { AuditLogApiClient, logger } from "src/shared"
-import { clearDynamoTable } from "src/shared/testing"
-import type { ApiClient } from "src/shared/types"
-import { AuditLog, AuditLogEvent, EventCode, isSuccess } from "src/shared/types"
+import { clearDynamoTable, createMockAuditLog, mockInputApiAuditLog } from "src/shared/testing"
+import type { ApiClient, InputApiAuditLog, OutputApiAuditLog } from "src/shared/types"
+import { AuditLogEvent, EventCode, isSuccess } from "src/shared/types"
 import addArchivalEvents from "."
 
 logger.level = "debug"
@@ -84,15 +84,7 @@ describe("Add Error Records e2e", () => {
     )
 
     // Insert testdata into audit log
-    await api.createAuditLog({
-      messageId: "message_1",
-      receivedDate: new Date().toISOString(),
-      events: [],
-      caseId: "message_1",
-      externalCorrelationId: "message_1",
-      createdBy: "add-archival-events e2e tests",
-      messageHash: "message_1"
-    } as unknown as AuditLog)
+    await createMockAuditLog({ messageId: "message_1" })
 
     // Invoke lambda
     await executeLambda()
@@ -100,7 +92,7 @@ describe("Add Error Records e2e", () => {
     // Assert audit log results
     const messageResult = await api.getMessage("message_1")
     expect(isSuccess(messageResult)).toBeTruthy()
-    const message = messageResult as AuditLog
+    const message = messageResult as OutputApiAuditLog
 
     expect(message.events).toHaveLength(1)
     expect(message.events[0]).toStrictEqual({
@@ -132,15 +124,7 @@ describe("Add Error Records e2e", () => {
     )
 
     // Insert testdata into audit log
-    await api.createAuditLog({
-      messageId: "message_1",
-      receivedDate: new Date().toISOString(),
-      events: [],
-      caseId: "message_1",
-      externalCorrelationId: "message_1",
-      createdBy: "add-archival-events e2e tests",
-      messageHash: "message_1"
-    } as unknown as AuditLog)
+    await createMockAuditLog({ messageId: "message_1" })
 
     // Insert testdata into audit log
     const existingEvent = new AuditLogEvent({
@@ -158,7 +142,7 @@ describe("Add Error Records e2e", () => {
     // Assert audit log results
     const messageResult = await api.getMessage("message_1")
     expect(isSuccess(messageResult)).toBeTruthy()
-    const message = messageResult as AuditLog
+    const message = messageResult as OutputApiAuditLog
 
     expect(message.events).toHaveLength(1)
     expect(message.events[0]).toStrictEqual({
@@ -194,46 +178,15 @@ describe("Add Error Records e2e", () => {
     )
 
     // Insert testdata into audit log
-    const messages = [
-      {
-        messageId: "message_1",
-        receivedDate: new Date().toISOString(),
-        events: [],
-        caseId: "message_1",
-        externalCorrelationId: "message_1",
-        createdBy: "add-archival-events e2e tests",
-        messageHash: "message_1"
-      },
-      {
-        messageId: "message_2",
-        receivedDate: new Date().toISOString(),
-        events: [],
-        caseId: "message_2",
-        externalCorrelationId: "message_2",
-        createdBy: "add-archival-events e2e tests",
-        messageHash: "message_2"
-      },
-      {
-        messageId: "message_3",
-        receivedDate: new Date().toISOString(),
-        events: [],
-        caseId: "message_3",
-        externalCorrelationId: "message_3",
-        createdBy: "add-archival-events e2e tests",
-        messageHash: "message_3"
-      },
-      {
-        messageId: "message_4",
-        receivedDate: new Date().toISOString(),
-        events: [],
-        caseId: "message_4",
-        externalCorrelationId: "message_4",
-        createdBy: "add-archival-events e2e tests",
-        messageHash: "message_4"
-      }
+    const messages: Partial<InputApiAuditLog>[] = [
+      { messageId: "message_1" },
+      { messageId: "message_2" },
+      { messageId: "message_3" },
+      { messageId: "message_4" }
     ]
+
     for (const message of messages) {
-      await api.createAuditLog(message as unknown as AuditLog)
+      await createMockAuditLog(message)
     }
 
     // Invoke lambda
@@ -241,9 +194,9 @@ describe("Add Error Records e2e", () => {
 
     // Assert audit log results
     for (const [index, messageId] of messages.map((message) => message.messageId).entries()) {
-      const messageResult = await api.getMessage(messageId)
+      const messageResult = await api.getMessage(messageId!)
       expect(isSuccess(messageResult)).toBeTruthy()
-      const message = messageResult as AuditLog
+      const message = messageResult as OutputApiAuditLog
 
       expect(message.events).toHaveLength(1)
       expect(message.events[0].eventType).toBe("Error record archival")
@@ -280,45 +233,14 @@ describe("Add Error Records e2e", () => {
 
     // Insert testdata into audit log
     const messages = [
-      {
-        messageId: "message_1",
-        receivedDate: new Date().toISOString(),
-        events: [],
-        caseId: "message_1",
-        externalCorrelationId: "message_1",
-        createdBy: "add-archival-events e2e tests",
-        messageHash: "message_1"
-      },
-      {
-        messageId: "message_2",
-        receivedDate: new Date().toISOString(),
-        events: [],
-        caseId: "message_2",
-        externalCorrelationId: "message_2",
-        createdBy: "add-archival-events e2e tests",
-        messageHash: "message_2"
-      },
-      {
-        messageId: "message_3",
-        receivedDate: new Date().toISOString(),
-        events: [],
-        caseId: "message_3",
-        externalCorrelationId: "message_3",
-        createdBy: "add-archival-events e2e tests",
-        messageHash: "message_3"
-      },
-      {
-        messageId: "message_4",
-        receivedDate: new Date().toISOString(),
-        events: [],
-        caseId: "message_4",
-        externalCorrelationId: "message_4",
-        createdBy: "add-archival-events e2e tests",
-        messageHash: "message_4"
-      }
+      { messageId: "message_1" },
+      { messageId: "message_2" },
+      { messageId: "message_3" },
+      { messageId: "message_4" }
     ]
+
     for (const message of messages) {
-      await api.createAuditLog(message as unknown as AuditLog)
+      await createMockAuditLog(message)
     }
 
     // Invoke lambda
@@ -328,7 +250,7 @@ describe("Add Error Records e2e", () => {
     for (const [index, messageId] of messages.map((message) => message.messageId).entries()) {
       const messageResult = await api.getMessage(messageId)
       expect(isSuccess(messageResult)).toBeTruthy()
-      const message = messageResult as AuditLog
+      const message = messageResult as OutputApiAuditLog
 
       expect(message.events).toHaveLength(1)
       expect(message.events[0].eventType).toBe("Error record archival")
@@ -369,47 +291,24 @@ describe("Add Error Records e2e", () => {
     const messages = [
       {
         messageId: "message_1",
-        receivedDate: new Date().toISOString(),
-        events: [],
-        caseId: "message_1",
-        externalCorrelationId: "message_1",
-        createdBy: "add-archival-events e2e tests",
-        messageHash: "message_1",
         archiveLogGroup: 1
       },
       {
         messageId: "message_2",
-        receivedDate: new Date().toISOString(),
-        events: [],
-        caseId: "message_2",
-        externalCorrelationId: "message_2",
-        createdBy: "add-archival-events e2e tests",
-        messageHash: "message_2",
         archiveLogGroup: 2
       },
       {
         messageId: "message_3",
-        receivedDate: new Date().toISOString(),
-        events: [],
-        caseId: "message_3",
-        externalCorrelationId: "message_3",
-        createdBy: "add-archival-events e2e tests",
-        messageHash: "message_3",
         archiveLogGroup: 1
       },
       {
         messageId: "message_4",
-        receivedDate: new Date().toISOString(),
-        events: [],
-        caseId: "message_4",
-        externalCorrelationId: "message_4",
-        createdBy: "add-archival-events e2e tests",
-        messageHash: "message_4",
         archiveLogGroup: 2
       }
     ]
+
     for (const message of messages) {
-      await api.createAuditLog(message as unknown as AuditLog)
+      await createMockAuditLog(message)
     }
 
     // Invoke lambda
@@ -423,7 +322,7 @@ describe("Add Error Records e2e", () => {
       messages.map(async (message) => {
         const messageResult = await api.getMessage(message.messageId)
         expect(isSuccess(messageResult)).toBeTruthy()
-        const auditLogMessage = messageResult as AuditLog
+        const auditLogMessage = messageResult as OutputApiAuditLog
         return {
           messageId: message.messageId,
           archiveLogGroup: message.archiveLogGroup,
@@ -464,11 +363,14 @@ describe("Add Error Records e2e", () => {
     await Promise.all(
       [1, 2, 3].map((messageNumber) => {
         const messageId = `message_${messageNumber}`
-        const message = {
-          ...new AuditLog(messageId, new Date("2022-05-26T12:53:55.000Z"), messageId, messageId),
+        const message = mockInputApiAuditLog({
+          externalCorrelationId: messageId,
+          receivedDate: "2022-05-26T12:53:55.000Z",
+          messageHash: messageId,
+          messageId: messageId,
           caseId: messageId,
           createdBy: "add-archival-events e2e tests"
-        } as unknown as AuditLog
+        })
 
         return api.createAuditLog(message)
       })
@@ -497,7 +399,7 @@ describe("Add Error Records e2e", () => {
 
     // Assert audit log results
     for (let i = 0; i < 3; i++) {
-      const message = (await api.getMessage("message_" + (i + 1))) as AuditLog
+      const message = (await api.getMessage("message_" + (i + 1))) as OutputApiAuditLog
 
       expect(isSuccess(message)).toBeTruthy()
       expect(message.events).toHaveLength(1)
@@ -541,7 +443,7 @@ describe("Add Error Records e2e", () => {
     // Assert audit log results
     const messageResult = await api.getMessage(legacyRecordId)
     expect(isSuccess(messageResult)).toBeTruthy()
-    const message = messageResult as AuditLog
+    const message = messageResult as OutputApiAuditLog
 
     expect(message.events).toHaveLength(1)
     expect(message.events[0]).toStrictEqual({

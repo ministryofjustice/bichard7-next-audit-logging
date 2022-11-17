@@ -4,8 +4,8 @@ import fs from "fs"
 import { AuditLogApiClient, encodeBase64, TestS3Gateway } from "src/shared"
 import "src/shared/testing"
 import { clearDynamoTable, createMockAuditLog, setEnvironmentVariables } from "src/shared/testing"
-import type { AmazonMqEventSourceRecordEvent, AuditLogEvent } from "src/shared/types"
-import { AuditLog, isError } from "src/shared/types"
+import type { AmazonMqEventSourceRecordEvent, AuditLogEvent, OutputApiAuditLog } from "src/shared/types"
+import { isError } from "src/shared/types"
 import { v4 as uuid } from "uuid"
 setEnvironmentVariables()
 
@@ -68,11 +68,14 @@ test.each<TestInput>([
 ])(
   "given the event, the step function is invoked with 3 duplicate events across 2 messages",
   async ({ eventFilename, messageFormat }: TestInput) => {
-    const auditLog1 = new AuditLog("CorrelationId1", new Date(), "hash-1")
-    const auditLog2 = new AuditLog("CorrelationId2", new Date(), "hash-2")
-
-    await createMockAuditLog(auditLog1)
-    await createMockAuditLog(auditLog2)
+    const auditLog1 = (await createMockAuditLog({
+      externalCorrelationId: "CorrelationId1",
+      messageHash: "hash-1"
+    })) as OutputApiAuditLog
+    const auditLog2 = (await createMockAuditLog({
+      externalCorrelationId: "CorrelationId2",
+      messageHash: "hash-2"
+    })) as OutputApiAuditLog
 
     const rawMessage = fs.readFileSync(`events/${eventFilename}.xml`).toString()
     const messageData1 = encodeBase64(rawMessage.replace("{MESSAGE_ID}", auditLog1.messageId))

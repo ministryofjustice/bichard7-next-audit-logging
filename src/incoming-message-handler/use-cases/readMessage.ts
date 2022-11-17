@@ -1,6 +1,7 @@
 import { parseXml } from "src/shared"
-import type { PromiseResult, Result } from "src/shared/types"
-import { ApplicationError, AuditLog, isError } from "src/shared/types"
+import type { InputApiAuditLog, PromiseResult, Result } from "src/shared/types"
+import { ApplicationError, isError } from "src/shared/types"
+import { v4 as uuid } from "uuid"
 import type { DeliveryMessage, ReceivedMessage } from "../entities"
 
 const getCaseId = (xml: DeliveryMessage): Result<string> => {
@@ -31,7 +32,7 @@ const getExternalCorrelationId = (xml: DeliveryMessage): Result<string> => {
   return externalCorrelationId.trim()
 }
 
-const readMessage = async (message: ReceivedMessage): PromiseResult<AuditLog> => {
+const readMessage = async (message: ReceivedMessage): PromiseResult<InputApiAuditLog> => {
   if (!message.hash) {
     return Error("Message hash is mandatory.")
   }
@@ -52,15 +53,19 @@ const readMessage = async (message: ReceivedMessage): PromiseResult<AuditLog> =>
     return caseId
   }
 
-  const auditLog = new AuditLog(externalCorrelationId, new Date(message.receivedDate), message.hash)
-  auditLog.caseId = caseId
-  auditLog.systemId = xml.RouteData?.DataStream?.System?.trim()
-  auditLog.createdBy = "Incoming message handler"
-  auditLog.s3Path = message.s3Path
-  auditLog.externalId = message.externalId
-  auditLog.stepExecutionId = message.stepExecutionId
-
-  return auditLog
+  return {
+    caseId: caseId,
+    createdBy: "Incoming message handler",
+    externalCorrelationId,
+    externalId: message.externalId,
+    isSanitised: 0,
+    messageHash: message.hash,
+    messageId: uuid(),
+    receivedDate: message.receivedDate,
+    s3Path: message.s3Path,
+    stepExecutionId: message.stepExecutionId,
+    systemId: xml.RouteData?.DataStream?.System?.trim()
+  }
 }
 
 export default readMessage

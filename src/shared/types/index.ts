@@ -1,7 +1,7 @@
 export type { default as AmazonMqEventSourceRecordEvent } from "./AmazonMqEventSourceRecordEvent"
 export type { default as ApiClient } from "./ApiClient"
 export { default as ApplicationError } from "./ApplicationError"
-export { default as AuditLog } from "./AuditLog"
+export * from "./AuditLog"
 export { default as AuditLogEvent } from "./AuditLogEvent"
 export type { default as AuditLogEventOptions } from "./AuditLogEventOptions"
 export { default as AuditLogLookup } from "./AuditLogLookup"

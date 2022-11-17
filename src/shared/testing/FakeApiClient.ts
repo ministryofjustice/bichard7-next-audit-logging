@@ -1,8 +1,8 @@
-import type { ApiClient, AuditLog, AuditLogEvent, PromiseResult } from "src/shared/types"
+import type { ApiClient, AuditLogEvent, InputApiAuditLog, OutputApiAuditLog, PromiseResult } from "src/shared/types"
 import type { GetMessageOptions, GetMessagesOptions } from "../types/ApiClient"
 
 export default class FakeApiClient implements ApiClient {
-  private messages: AuditLog[] = []
+  private messages: InputApiAuditLog[] = []
 
   private error?: Error
 
@@ -25,18 +25,18 @@ export default class FakeApiClient implements ApiClient {
     )
   }
 
-  getMessage(messageId: string): PromiseResult<AuditLog> {
+  getMessage(messageId: string): PromiseResult<OutputApiAuditLog> {
     if (this.shouldFunctionReturnError("getMessage")) {
       return Promise.resolve(this.error!)
     }
 
     const message = this.messages.filter((x) => x.messageId === messageId)[0]
-    return Promise.resolve(message ?? { events: [] })
+    return Promise.resolve((message ?? { events: [] }) as OutputApiAuditLog)
   }
 
   // @ts-ignore
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  createAuditLog(auditLog: AuditLog): PromiseResult<void> {
+  createAuditLog(auditLog: InputApiAuditLog): PromiseResult<void> {
     if (this.shouldFunctionReturnError("createAuditLog")) {
       return Promise.resolve(this.error!)
     }
@@ -71,16 +71,16 @@ export default class FakeApiClient implements ApiClient {
     this.successfullCallsRemaining = calls
   }
 
-  reset(messages?: AuditLog[]): void {
+  reset(messages?: InputApiAuditLog[]): void {
     this.error = undefined
     this.messages = messages ?? []
   }
 
-  addMessage(message: AuditLog): void {
+  addMessage(message: InputApiAuditLog): void {
     this.messages.push(message)
   }
 
-  getMessages(_?: GetMessagesOptions): PromiseResult<AuditLog[]> {
+  getMessages(_?: GetMessagesOptions): PromiseResult<OutputApiAuditLog[]> {
     return Promise.resolve(new Error("Unimplemented"))
   }
 
@@ -88,7 +88,7 @@ export default class FakeApiClient implements ApiClient {
     return Promise.resolve(new Error("Unimplemented"))
   }
 
-  fetchUnsanitised(_?: GetMessageOptions | undefined): PromiseResult<AuditLog[]> {
+  fetchUnsanitised(_?: GetMessageOptions | undefined): PromiseResult<OutputApiAuditLog[]> {
     return Promise.resolve(new Error("Unimplemented"))
   }
 }

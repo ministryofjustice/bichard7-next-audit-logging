@@ -1,18 +1,18 @@
-import type { AuditLog } from "src/shared/types"
+import type { InputApiAuditLog } from "src/shared/types"
 import type { AuditLogDynamoGatewayInterface } from "../gateways/dynamo"
 import validateCreateAuditLog from "./validateCreateAuditLog"
 
 interface ValidationResult {
   isValid: boolean
   errors: string[]
-  auditLogs: AuditLog[]
+  auditLogs: InputApiAuditLog[]
 }
 
 // dynamodb limit https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/transaction-apis.html#transaction-apis-txwriteitems
 const MAX_AUDIT_LOGS = 25
 
 export default async (
-  auditLogs: AuditLog[],
+  auditLogs: InputApiAuditLog[],
   dynamoGateway: AuditLogDynamoGatewayInterface
 ): Promise<ValidationResult> => {
   if (auditLogs.length > MAX_AUDIT_LOGS) {

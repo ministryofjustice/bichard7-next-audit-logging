@@ -1,11 +1,12 @@
-import { AuditLog, isError } from "src/shared/types"
+import { mockDynamoAuditLog } from "src/shared/testing"
+import { DynamoAuditLog, isError } from "src/shared/types"
 import { FakeAuditLogDynamoGateway } from "../test"
 import FetchByExternalCorrelationId from "./FetchByExternalCorrelationId"
 
 const gateway = new FakeAuditLogDynamoGateway()
 
 it("should return one message when externalCorrelationId exists", async () => {
-  const expectedMessage = new AuditLog("1", new Date(), "Dummy hash")
+  const expectedMessage = mockDynamoAuditLog({ externalCorrelationId: "1" })
   gateway.reset([expectedMessage])
 
   const messageFetcher = new FetchByExternalCorrelationId(gateway, expectedMessage.externalCorrelationId)
@@ -13,7 +14,7 @@ it("should return one message when externalCorrelationId exists", async () => {
 
   expect(isError(result)).toBe(false)
 
-  const actualMessage = <AuditLog>result
+  const actualMessage = <DynamoAuditLog>result
   expect(actualMessage.externalCorrelationId).toBe("1")
 })
 

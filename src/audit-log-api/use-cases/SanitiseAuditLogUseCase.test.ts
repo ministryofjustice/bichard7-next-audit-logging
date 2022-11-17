@@ -1,6 +1,8 @@
 import MockDate from "mockdate"
 import "src/shared/testing"
-import { AuditLog, AuditLogEvent, EventCode } from "src/shared/types"
+import { mockDynamoAuditLog } from "src/shared/testing"
+import type { DynamoAuditLog } from "src/shared/types"
+import { AuditLogEvent, EventCode } from "src/shared/types"
 import { FakeAuditLogDynamoGateway } from "../test"
 import SanitiseAuditLogUseCase from "./SanitiseAuditLogUseCase"
 
@@ -25,13 +27,11 @@ const createAuditLogEvent = () => {
   return event
 }
 
-const message = new AuditLog("External Correlation ID", new Date(), "Dummy hash")
-message.events = [createAuditLogEvent()]
-message.automationReport = { events: [] }
-message.automationReport.events = [createAuditLogEvent()]
-message.topExceptionsReport = { events: [] }
-message.topExceptionsReport.events = [createAuditLogEvent()]
-message.nextSanitiseCheck = new Date().toISOString()
+const message = mockDynamoAuditLog({
+  events: [createAuditLogEvent()],
+  automationReport: { events: [createAuditLogEvent()], forceOwner: "010000" },
+  topExceptionsReport: { events: [createAuditLogEvent()] }
+})
 
 afterAll(() => {
   MockDate.reset()
@@ -41,7 +41,7 @@ it.skip("should remove attributes containing PII", async () => {
   const sanitiseAuditLogResult = await sanitiseAuditLogUseCase.call(message)
 
   expect(sanitiseAuditLogResult).toNotBeError()
-  const actualMessage = {} as AuditLog
+  const actualMessage = {} as DynamoAuditLog
   const attributes = actualMessage?.events?.[0].attributes ?? {}
   expect(Object.keys(attributes)).toHaveLength(1)
   expect(attributes["Trigger 2 Details"]).toBe("TRPR0004")
@@ -70,6 +70,6 @@ it.skip("should add a new event when the audit log successfully sanitised", asyn
   const sanitiseAuditLogResult = await sanitiseAuditLogUseCase.call(message)
 
   expect(sanitiseAuditLogResult).toNotBeError()
-  const actualMessage = {} as AuditLog
+  const actualMessage = {} as DynamoAuditLog
   expect(actualMessage?.events.slice(-1)[0]).toEqual(expectedAuditLogEvent)
 })

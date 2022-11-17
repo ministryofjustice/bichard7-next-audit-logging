@@ -1,5 +1,5 @@
 import { AuditLogApiClient, createS3Config, logger, S3Gateway } from "src/shared"
-import type { AuditLog, S3PutObjectEvent } from "src/shared/types"
+import type { InputApiAuditLog, S3PutObjectEvent } from "src/shared/types"
 import { isError } from "src/shared/types"
 import { getApiKey, getApiUrl } from "../configs"
 import CreateAuditLogUseCase from "../use-cases/CreateAuditLogUseCase"
@@ -9,7 +9,7 @@ import readMessage from "../use-cases/readMessage"
 import retrieveMessageFromS3 from "../use-cases/retrieveMessageFromS3"
 
 interface StoreMessageResult {
-  auditLog: AuditLog
+  auditLog: InputApiAuditLog
   messageXml: string
 }
 

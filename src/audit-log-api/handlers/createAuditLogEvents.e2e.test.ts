@@ -1,8 +1,7 @@
 import axios from "axios"
 import { HttpStatusCode } from "src/shared"
-import { mockAuditLog, mockAuditLogEvent } from "src/shared/testing"
-import type { AuditLog, AuditLogEvent } from "src/shared/types"
-import { EventCode } from "src/shared/types"
+import { mockAuditLogEvent, mockInputApiAuditLog } from "src/shared/testing"
+import { AuditLogEvent, DynamoAuditLog, EventCode } from "src/shared/types"
 import { AuditLogDynamoGateway } from "../gateways/dynamo"
 import { auditLogDynamoConfig, TestDynamoGateway } from "../test"
 const testGateway = new TestDynamoGateway(auditLogDynamoConfig)
@@ -14,7 +13,7 @@ describe("Creating multiple Audit Log events", () => {
   })
 
   it("should create a single new audit log event for an existing audit log record", async () => {
-    const auditLog = mockAuditLog()
+    const auditLog = mockInputApiAuditLog()
     const result1 = await axios.post("http://localhost:3010/messages", auditLog)
     expect(result1.status).toEqual(HttpStatusCode.created)
 
@@ -22,7 +21,7 @@ describe("Creating multiple Audit Log events", () => {
     const result2 = await axios.post(`http://localhost:3010/messages/${auditLog.messageId}/manyEvents`, [event])
     expect(result2.status).toEqual(HttpStatusCode.created)
 
-    const record = (await gateway.fetchOne(auditLog.messageId)) as AuditLog
+    const record = (await gateway.fetchOne(auditLog.messageId)) as DynamoAuditLog
 
     expect(record).not.toBeNull()
 
@@ -45,7 +44,7 @@ describe("Creating multiple Audit Log events", () => {
   })
 
   it("should create many new audit log events for an existing audit log record", async () => {
-    const auditLog = mockAuditLog()
+    const auditLog = mockInputApiAuditLog()
     const result1 = await axios.post("http://localhost:3010/messages", auditLog)
     expect(result1.status).toEqual(HttpStatusCode.created)
 
@@ -53,7 +52,7 @@ describe("Creating multiple Audit Log events", () => {
     const result2 = await axios.post(`http://localhost:3010/messages/${auditLog.messageId}/manyEvents`, events)
     expect(result2.status).toEqual(HttpStatusCode.created)
 
-    const record = (await gateway.fetchOne(auditLog.messageId)) as AuditLog
+    const record = (await gateway.fetchOne(auditLog.messageId)) as DynamoAuditLog
 
     const { messageId, events: dynamoEvents } = record!
     expect(messageId).toEqual(auditLog.messageId)
@@ -68,7 +67,7 @@ describe("Creating multiple Audit Log events", () => {
 
 describe("Creating a single Audit Log event", () => {
   it("should create a new audit log event for an existing audit log record", async () => {
-    const auditLog = mockAuditLog()
+    const auditLog = mockInputApiAuditLog()
     const result1 = await axios.post("http://localhost:3010/messages", auditLog)
     expect(result1.status).toEqual(HttpStatusCode.created)
 
@@ -76,7 +75,7 @@ describe("Creating a single Audit Log event", () => {
     const result2 = await axios.post(`http://localhost:3010/messages/${auditLog.messageId}/manyEvents`, event)
     expect(result2.status).toEqual(HttpStatusCode.created)
 
-    const record = (await gateway.fetchOne(auditLog.messageId)) as AuditLog
+    const record = (await gateway.fetchOne(auditLog.messageId)) as DynamoAuditLog
 
     expect(record).not.toBeNull()
 
@@ -100,7 +99,7 @@ describe("Creating a single Audit Log event", () => {
   })
 
   it("should transform the audit log event before saving", async () => {
-    const auditLog = mockAuditLog()
+    const auditLog = mockInputApiAuditLog()
     const result1 = await axios.post("http://localhost:3010/messages", auditLog)
     expect(result1.status).toEqual(HttpStatusCode.created)
 
@@ -110,7 +109,7 @@ describe("Creating a single Audit Log event", () => {
     const result2 = await axios.post(`http://localhost:3010/messages/${auditLog.messageId}/manyEvents`, event)
     expect(result2.status).toEqual(HttpStatusCode.created)
 
-    const record = (await gateway.fetchOne(auditLog.messageId)) as AuditLog
+    const record = (await gateway.fetchOne(auditLog.messageId)) as DynamoAuditLog
 
     expect(record).not.toBeNull()
 
@@ -126,12 +125,12 @@ describe("Creating a single Audit Log event", () => {
 
   describe("updating the PNC status", () => {
     const getPncStatus = async (messageId: string): Promise<string | undefined> => {
-      const record = (await gateway.fetchOne(messageId)) as AuditLog
+      const record = (await gateway.fetchOne(messageId)) as DynamoAuditLog
       return record?.pncStatus
     }
 
     it("should update the status with each event", async () => {
-      const auditLog = mockAuditLog()
+      const auditLog = mockInputApiAuditLog()
       await axios.post("http://localhost:3010/messages", auditLog)
 
       let pncStatus = await getPncStatus(auditLog.messageId)
@@ -165,12 +164,12 @@ describe("Creating a single Audit Log event", () => {
 
   describe("updating the Trigger status", () => {
     const getTriggerStatus = async (messageId: string): Promise<string | undefined> => {
-      const record = (await gateway.fetchOne(messageId)) as AuditLog
+      const record = (await gateway.fetchOne(messageId)) as DynamoAuditLog
       return record?.triggerStatus
     }
 
     it("should update the status with each event", async () => {
-      const auditLog = mockAuditLog()
+      const auditLog = mockInputApiAuditLog()
       await axios.post("http://localhost:3010/messages", auditLog)
 
       let triggerStatus = await getTriggerStatus(auditLog.messageId)

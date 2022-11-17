@@ -1,8 +1,8 @@
-import type { AuditLog } from "src/shared/types"
+import { DynamoAuditLog } from "src/shared/types"
 
 export type PaginationOptions = {
   limit?: number
-  lastMessage?: AuditLog
+  lastMessage?: DynamoAuditLog
   lastMessageId?: string
 }
 

@@ -1,6 +1,7 @@
 import "src/shared/testing"
+import { mockDynamoAuditLog } from "src/shared/testing"
 import type { EventCategory } from "src/shared/types"
-import { AuditLog, AuditLogEvent, AuditLogLookup, isError } from "src/shared/types"
+import { AuditLogEvent, AuditLogLookup, isError } from "src/shared/types"
 import { FakeAuditLogDynamoGateway, FakeAuditLogLookupDynamoGateway } from "../test"
 import FetchEventsUseCase from "./FetchEventsUseCase"
 import LookupEventValuesUseCase from "./LookupEventValuesUseCase"
@@ -25,7 +26,7 @@ describe("FetchEventsUseCase", () => {
       createAuditLogEvent("information", new Date("2021-06-15T10:12:13"), "Event 2"),
       createAuditLogEvent("information", new Date("2021-06-10T10:12:13"), "Event 3")
     ]
-    const message = new AuditLog("External correlation id", new Date(), "Dummy hash")
+    const message = mockDynamoAuditLog()
     message.events = expectedEvents
 
     auditLogGateway.reset([message])
@@ -43,7 +44,7 @@ describe("FetchEventsUseCase", () => {
   })
 
   it("should lookup the events values by default", async () => {
-    const message = new AuditLog("External correlation id", new Date(), "Dummy hash")
+    const message = mockDynamoAuditLog()
     const lookupItem = new AuditLogLookup("long value ".repeat(500), message.messageId)
     const eventWithLongAttributeValue = createAuditLogEvent("information", new Date("2021-06-15T10:12:13"), "Event 2")
     eventWithLongAttributeValue.addAttribute("attr1", "short value")
@@ -78,7 +79,7 @@ describe("FetchEventsUseCase", () => {
   })
 
   it("should return the lookup id with the events if largeObjects set to false", async () => {
-    const message = new AuditLog("External correlation id", new Date(), "Dummy hash")
+    const message = mockDynamoAuditLog()
     const lookupItemId = "exp3ct3d-100kup-1d"
     const eventWithLongAttributeValue = createAuditLogEvent("information", new Date("2021-06-15T10:12:13"), "Event")
     eventWithLongAttributeValue.addAttribute("attr1", "short value")
@@ -110,7 +111,7 @@ describe("FetchEventsUseCase", () => {
     const eventWithLongAttributeValue = createAuditLogEvent("information", new Date("2021-06-15T10:12:13"), "Event 2")
     eventWithLongAttributeValue.addAttribute("attr1", "short value")
     eventWithLongAttributeValue.addAttribute("attr2", { valueLookup: "dummy lookup ID" })
-    const message = new AuditLog("External correlation id", new Date(), "Dummy hash")
+    const message = mockDynamoAuditLog()
     message.events = [eventWithLongAttributeValue]
     auditLogGateway.reset([message])
 

@@ -1,10 +1,10 @@
 import type { AuditLogApiClient } from "src/shared"
-import type { AuditLog, PromiseResult } from "src/shared/types"
+import type { OutputApiAuditLog, PromiseResult } from "src/shared/types"
 import { isError } from "src/shared/types"
 import shouldRetry from "./shouldRetry"
 
-export default async function (apiClient: AuditLogApiClient, errorCount: number): PromiseResult<AuditLog[]> {
-  let errors: AuditLog[] = []
+export default async function (apiClient: AuditLogApiClient, errorCount: number): PromiseResult<OutputApiAuditLog[]> {
+  let errors: OutputApiAuditLog[] = []
   let lastMessageId: string | undefined
 
   while (errors.length < errorCount) {

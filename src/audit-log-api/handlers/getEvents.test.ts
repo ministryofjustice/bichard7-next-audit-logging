@@ -2,7 +2,8 @@ jest.mock("../use-cases/parseGetEventsRequest")
 
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda"
 import { HttpStatusCode } from "src/shared"
-import { AuditLog, AuditLogEvent } from "src/shared/types"
+import { mockOutputApiAuditLog } from "src/shared/testing"
+import { AuditLogEvent } from "src/shared/types"
 import "../testConfig"
 import { FetchEventsUseCase, parseGetEventsRequest } from "../use-cases"
 import getEvents from "./getEvents"
@@ -25,7 +26,7 @@ const createAuditLogEvent = (timestamp: Date, eventType: string): AuditLogEvent 
     eventSource: "Test"
   })
 
-const log = new AuditLog("1", new Date(2021, 10, 12), "Dummy hash")
+const log = mockOutputApiAuditLog()
 log.events = [
   createAuditLogEvent(new Date("2021-06-20T10:12:13"), "Event 1"),
   createAuditLogEvent(new Date("2021-06-15T10:12:13"), "Event 2"),

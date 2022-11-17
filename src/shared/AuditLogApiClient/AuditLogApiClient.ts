@@ -1,7 +1,7 @@
 import type { AxiosError } from "axios"
 import axios from "axios"
 import * as https from "https"
-import type { ApiClient, AuditLog, AuditLogEvent, PromiseResult } from "src/shared/types"
+import type { ApiClient, AuditLogEvent, InputApiAuditLog, OutputApiAuditLog, PromiseResult } from "src/shared/types"
 import { ApplicationError } from "src/shared/types"
 import type { GetMessageOptions, GetMessagesOptions } from "src/shared/types/ApiClient"
 import { addQueryParams, HttpStatusCode, logger } from "../utils"
@@ -17,7 +17,7 @@ export default class AuditLogApiClient implements ApiClient {
     return typeof message === "string" ? message : JSON.stringify(message)
   }
 
-  getMessages(options?: GetMessagesOptions): PromiseResult<AuditLog[]> {
+  getMessages(options?: GetMessagesOptions): PromiseResult<OutputApiAuditLog[]> {
     const url = addQueryParams(`${this.apiUrl}/messages`, options)
 
     return axios
@@ -39,7 +39,7 @@ export default class AuditLogApiClient implements ApiClient {
       })
   }
 
-  getMessage(messageId: string, options: GetMessageOptions = {}): PromiseResult<AuditLog> {
+  getMessage(messageId: string, options: GetMessageOptions = {}): PromiseResult<OutputApiAuditLog> {
     const queryParams: string[] = []
     let queryString = ""
     if (options?.includeColumns) {
@@ -71,7 +71,7 @@ export default class AuditLogApiClient implements ApiClient {
       })
   }
 
-  createAuditLog(auditLog: AuditLog): PromiseResult<void> {
+  createAuditLog(auditLog: InputApiAuditLog): PromiseResult<void> {
     return axios
       .post(`${this.apiUrl}/messages`, this.stringify(auditLog), {
         headers: {
@@ -164,7 +164,7 @@ export default class AuditLogApiClient implements ApiClient {
       })
   }
 
-  fetchUnsanitised(options: GetMessageOptions = {}): PromiseResult<AuditLog[]> {
+  fetchUnsanitised(options: GetMessageOptions = {}): PromiseResult<OutputApiAuditLog[]> {
     const url = addQueryParams(`${this.apiUrl}/messages`, {
       limit: options.limit,
       includeColumns: options.includeColumns?.join(","),

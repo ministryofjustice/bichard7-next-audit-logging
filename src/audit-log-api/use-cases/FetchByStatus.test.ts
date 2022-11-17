@@ -1,4 +1,5 @@
-import { AuditLog, AuditLogStatus, isError } from "src/shared/types"
+import { mockDynamoAuditLog } from "src/shared/testing"
+import { AuditLogStatus, DynamoAuditLog, isError } from "src/shared/types"
 import { FakeAuditLogDynamoGateway } from "../test"
 import FetchByStatus from "./FetchByStatus"
 
@@ -6,7 +7,7 @@ const gateway = new FakeAuditLogDynamoGateway()
 
 it("should return one message when there is a message with the specified status", async () => {
   const expectedStatus = AuditLogStatus.error
-  const expectedMessage = new AuditLog("1", new Date(), "Dummy hash")
+  const expectedMessage = mockDynamoAuditLog({ status: expectedStatus })
   expectedMessage.status = expectedStatus
   gateway.reset([expectedMessage])
 
@@ -15,7 +16,7 @@ it("should return one message when there is a message with the specified status"
 
   expect(isError(result)).toBe(false)
 
-  const actualMessages = <AuditLog[]>result
+  const actualMessages = <DynamoAuditLog[]>result
   expect(actualMessages).toHaveLength(1)
 
   const actualMessage = actualMessages[0]

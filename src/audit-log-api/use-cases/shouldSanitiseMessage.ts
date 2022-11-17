@@ -1,11 +1,11 @@
 import { add } from "date-fns"
 import type { BichardPostgresGateway } from "src/shared"
-import type { AuditLog, PromiseResult } from "src/shared/types"
+import type { DynamoAuditLog, PromiseResult } from "src/shared/types"
 import { isError } from "src/shared/types"
 
 const shouldSanitiseMessage = async (
   postgresGateway: BichardPostgresGateway,
-  message: AuditLog,
+  message: DynamoAuditLog,
   ageThreshold: Duration
 ): PromiseResult<boolean> => {
   if (add(new Date(message.receivedDate), ageThreshold) > new Date()) {

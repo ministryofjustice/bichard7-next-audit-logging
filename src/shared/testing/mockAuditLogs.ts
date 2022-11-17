@@ -1,18 +1,44 @@
-import type { AuditLogEventOptions, EventCategory } from "src/shared/types"
-import { AuditLog, AuditLogEvent } from "src/shared/types"
+import type {
+  AuditLogEventOptions,
+  DynamoAuditLog,
+  EventCategory,
+  InputApiAuditLog,
+  OutputApiAuditLog
+} from "src/shared/types"
+import { AuditLogEvent, AuditLogStatus, PncStatus, TriggerStatus } from "src/shared/types"
 import { v4 as uuid } from "uuid"
 
-export function mockAuditLog(overrides: Partial<AuditLog> = {}): AuditLog {
-  const logDate = overrides.receivedDate ? new Date(overrides.receivedDate) : new Date()
-  const auditLog = new AuditLog(uuid(), logDate, uuid())
-  auditLog.caseId = "Case ID"
-  auditLog.createdBy = "Create audit log test"
-  auditLog.stepExecutionId = uuid()
-  auditLog.externalId = uuid()
-  auditLog.s3Path = "2022/01/18/09/01/message.xml"
-  auditLog.isSanitised = 0
-  return { ...auditLog, ...overrides }
-}
+export const mockInputApiAuditLog = (overrides: Partial<InputApiAuditLog> = {}): InputApiAuditLog => ({
+  caseId: "Case ID",
+  createdBy: "Create audit log test",
+  externalCorrelationId: uuid(),
+  externalId: uuid(),
+  isSanitised: 0,
+  messageHash: uuid(),
+  messageId: uuid(),
+  nextSanitiseCheck: new Date().toISOString(),
+  receivedDate: new Date().toISOString(),
+  s3Path: "2022/01/18/09/01/message.xml",
+  stepExecutionId: uuid(),
+  systemId: "System",
+  ...overrides
+})
+
+export const mockOutputApiAuditLog = (overrides: Partial<OutputApiAuditLog> = {}): OutputApiAuditLog => ({
+  ...mockInputApiAuditLog(overrides),
+  pncStatus: PncStatus.Processing,
+  triggerStatus: TriggerStatus.NoTriggers,
+  status: AuditLogStatus.processing,
+  events: [],
+  ...overrides
+})
+
+export const mockDynamoAuditLog = (overrides: Partial<DynamoAuditLog> = {}): DynamoAuditLog => ({
+  ...mockOutputApiAuditLog(overrides),
+  isSanitised: 0,
+  version: 0,
+  ...overrides
+})
 
 export function mockAuditLogEvent(overrides: Partial<AuditLogEventOptions> = {}): AuditLogEvent {
   const defaults: AuditLogEventOptions = {

@@ -104,7 +104,7 @@ export default class CreateAuditLogEventsUseCase {
       events: deduplicatedNewEvents
     }
 
-    const transactionResult = await this.auditLogGateway.update(message, updates)
+    const transactionResult = await this.auditLogGateway.update(message, updates, deduplicatedNewEvents)
 
     if (isError(transactionResult)) {
       if (isConditionalExpressionViolationError(transactionResult) || isTransactionConflictError(transactionResult)) {

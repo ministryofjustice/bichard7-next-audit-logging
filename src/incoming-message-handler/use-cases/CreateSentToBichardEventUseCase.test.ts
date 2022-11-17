@@ -1,11 +1,15 @@
 import type { AxiosError } from "axios"
 import axios from "axios"
-import { AuditLog, isError } from "src/shared/types"
+import { mockInputApiAuditLog } from "src/shared/testing"
+import { isError } from "src/shared/types"
 import CreateSentToBichardEventUseCase from "./CreateSentToBichardEventUseCase"
 
 const message = {
   sentAt: new Date().toISOString(),
-  auditLog: new AuditLog("b5edf595-16a9-450f-a52b-40628cd58c29", new Date(), "dummy hash")
+  auditLog: mockInputApiAuditLog({
+    externalCorrelationId: "b5edf595-16a9-450f-a52b-40628cd58c29",
+    messageHash: "dummy hash"
+  })
 }
 const useCase = new CreateSentToBichardEventUseCase("http://localhost", "dummydummydummydummy")
 

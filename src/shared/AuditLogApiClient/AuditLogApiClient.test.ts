@@ -1,12 +1,20 @@
 import type { AxiosError } from "axios"
 import axios from "axios"
 import "src/shared/testing"
-import { AuditLog, AuditLogEvent } from "src/shared/types"
+import { mockOutputApiAuditLog } from "src/shared/testing"
+import type { OutputApiAuditLog } from "src/shared/types"
+import { AuditLogEvent } from "src/shared/types"
 import AuditLogApiClient from "./AuditLogApiClient"
 
 const apiClient = new AuditLogApiClient("http://localhost", "dummy")
-const message = new AuditLog("b5edf595-16a9-450f-a52b-40628cd58c29", new Date(), "hash-1")
-const message2 = new AuditLog("b5edf595-16a9-450f-a52b-40628cd58c28", new Date(), "hash-2")
+const message = mockOutputApiAuditLog({
+  externalCorrelationId: "b5edf595-16a9-450f-a52b-40628cd58c29",
+  messageHash: "hash-1"
+})
+const message2 = mockOutputApiAuditLog({
+  externalCorrelationId: "b5edf595-16a9-450f-a52b-40628cd58c28",
+  messageHash: "hash-2"
+})
 const event = new AuditLogEvent({
   category: "information",
   timestamp: new Date(),
@@ -92,7 +100,7 @@ describe("getMessage()", () => {
 
     expect(result).toNotBeError()
 
-    const actualMessage = <AuditLog>result
+    const actualMessage = <OutputApiAuditLog>result
     expect(actualMessage.messageId).toBe(message.messageId)
     expect(actualMessage.externalCorrelationId).toBe(message.externalCorrelationId)
     expect(actualMessage.receivedDate).toBe(message.receivedDate)

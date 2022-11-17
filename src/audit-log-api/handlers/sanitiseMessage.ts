@@ -2,7 +2,7 @@ import type { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda"
 import type { Duration } from "date-fns"
 import { add } from "date-fns"
 import { BichardPostgresGateway, createS3Config, HttpStatusCode, S3Gateway } from "src/shared"
-import type { AuditLog } from "src/shared/types"
+import type { DynamoAuditLog } from "src/shared/types"
 import { isError } from "src/shared/types"
 import createAuditLogDynamoDbConfig from "../createAuditLogDynamoDbConfig"
 import createBichardPostgresGatewayConfig from "../createBichardPostgresGatewayConfig"
@@ -74,7 +74,7 @@ export default async function sanitiseMessage(event: APIGatewayProxyEvent): Prom
     })
   }
 
-  const message = messageResult?.Item as AuditLog
+  const message = messageResult?.Item as DynamoAuditLog
 
   if (!message) {
     return createJsonApiResult({

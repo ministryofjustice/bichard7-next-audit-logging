@@ -1,6 +1,6 @@
 import { addDays } from "date-fns"
 import { compress, decompress } from "src/shared"
-import type { AuditLog, KeyValuePair, PromiseResult, ValueLookup } from "src/shared/types"
+import type { DynamoAuditLog, KeyValuePair, PromiseResult, ValueLookup } from "src/shared/types"
 import { AuditLogEvent, AuditLogLookup, isError } from "src/shared/types"
 import type { AuditLogEventAttributes } from "src/shared/types/AuditLogEvent"
 import type {
@@ -19,6 +19,15 @@ import type DynamoUpdate from "../DynamoGateway/DynamoUpdate"
 import type AuditLogDynamoGatewayInterface from "./AuditLogDynamoGatewayInterface"
 
 const maxAttributeValueLength = 1000
+
+type InternalDynamoAuditLog = Omit<DynamoAuditLog, "events">
+
+const convertDynamoAuditLogToInternal = (
+  input: InternalDynamoAuditLog & { events?: AuditLogEvent[] }
+): InternalDynamoAuditLog => {
+  delete input.events
+  return input
+}
 
 export default class AuditLogDynamoGateway extends DynamoGateway implements AuditLogDynamoGatewayInterface {
   readonly auditLogTableKey: string = "messageId"
@@ -58,14 +67,19 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
     }
   }
 
-  async create(message: AuditLog): PromiseResult<AuditLog> {
+  async create(message: DynamoAuditLog): PromiseResult<DynamoAuditLog> {
     if (process.env.IS_E2E) {
       message.expiryTime = Math.round(
         addDays(new Date(), parseInt(process.env.EXPIRY_DAYS || "7")).getTime() / 1000
       ).toString()
     }
+    const messageToCreate = convertDynamoAuditLogToInternal(message)
 
-    const result = await this.insertOne(this.config.auditLogTableName, message, this.auditLogTableKey)
+    const result = await this.insertOne<InternalDynamoAuditLog>(
+      this.config.auditLogTableName,
+      messageToCreate,
+      this.auditLogTableKey
+    )
 
     if (isError(result)) {
       return result
@@ -74,7 +88,7 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
     return message
   }
 
-  async createMany(messages: AuditLog[]): PromiseResult<AuditLog[]> {
+  async createMany(messages: DynamoAuditLog[]): PromiseResult<DynamoAuditLog[]> {
     if (process.env.IS_E2E) {
       messages.map((message) => {
         message.expiryTime = Math.round(
@@ -92,7 +106,7 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
     return messages
   }
 
-  async updateSanitiseCheck(message: AuditLog, nextSanitiseCheck: Date): PromiseResult<void> {
+  async updateSanitiseCheck(message: DynamoAuditLog, nextSanitiseCheck: Date): PromiseResult<void> {
     const options: UpdateOptions = {
       keyName: this.auditLogTableKey,
       keyValue: message.messageId,
@@ -107,7 +121,7 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
   }
 
   private async mergeEventsFromEventsTable(
-    auditLogs: AuditLog[],
+    auditLogs: DynamoAuditLog[],
     options: EventsFilterOptions = {}
   ): PromiseResult<void> {
     for (const auditLog of auditLogs) {
@@ -151,8 +165,8 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
     }
   }
 
-  async fetchMany(options: FetchManyOptions = {}): PromiseResult<AuditLog[]> {
-    const result = await new IndexSearcher<AuditLog[]>(this, this.config.auditLogTableName, this.auditLogTableKey)
+  async fetchMany(options: FetchManyOptions = {}): PromiseResult<DynamoAuditLog[]> {
+    const result = await new IndexSearcher<DynamoAuditLog[]>(this, this.config.auditLogTableName, this.auditLogTableKey)
       .useIndex(`${this.auditLogSortKey}Index`)
       .setIndexKeys("_", "_", "receivedDate")
       .setProjection(this.getProjectionExpression(options.includeColumns, options.excludeColumns))
@@ -164,14 +178,14 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
     }
 
     if (!options.excludeColumns || !options.excludeColumns.includes("events")) {
-      await this.mergeEventsFromEventsTable(result as AuditLog[])
+      await this.mergeEventsFromEventsTable(result as DynamoAuditLog[])
     }
 
-    return result as AuditLog[]
+    return result as DynamoAuditLog[]
   }
 
-  async fetchRange(options: FetchRangeOptions): PromiseResult<AuditLog[]> {
-    const result = await new IndexSearcher<AuditLog[]>(this, this.config.auditLogTableName, this.auditLogTableKey)
+  async fetchRange(options: FetchRangeOptions): PromiseResult<DynamoAuditLog[]> {
+    const result = await new IndexSearcher<DynamoAuditLog[]>(this, this.config.auditLogTableName, this.auditLogTableKey)
       .useIndex(`${this.auditLogSortKey}Index`)
       .setIndexKeys("_", "_", "receivedDate")
       .setBetweenKey(options.start.toISOString(), options.end.toISOString())
@@ -184,16 +198,16 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
     }
 
     if (!options.excludeColumns || !options.excludeColumns.includes("events")) {
-      await this.mergeEventsFromEventsTable(result as AuditLog[], { eventsFilter: options.eventsFilter })
+      await this.mergeEventsFromEventsTable(result as DynamoAuditLog[], { eventsFilter: options.eventsFilter })
     }
 
-    return <AuditLog[]>result
+    return <DynamoAuditLog[]>result
   }
 
   async fetchByExternalCorrelationId(
     externalCorrelationId: string,
     options: ProjectionOptions = {}
-  ): PromiseResult<AuditLog | null> {
+  ): PromiseResult<DynamoAuditLog | null> {
     const fetchByIndexOptions: FetchByIndexOptions = {
       indexName: "externalCorrelationIdIndex",
       hashKeyName: "externalCorrelationId",
@@ -212,15 +226,15 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
       return null
     }
 
-    const items = <AuditLog[]>result?.Items
+    const items = <DynamoAuditLog[]>result?.Items
     if (!options.excludeColumns || !options.excludeColumns.includes("events")) {
-      await this.mergeEventsFromEventsTable(items as AuditLog[])
+      await this.mergeEventsFromEventsTable(items as DynamoAuditLog[])
     }
 
     return items[0]
   }
 
-  async fetchByHash(hash: string): PromiseResult<AuditLog | null> {
+  async fetchByHash(hash: string): PromiseResult<DynamoAuditLog | null> {
     const options: FetchByIndexOptions = {
       indexName: "messageHashIndex",
       hashKeyName: "messageHash",
@@ -238,14 +252,14 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
       return null
     }
 
-    const items = <AuditLog[]>result?.Items
-    await this.mergeEventsFromEventsTable(items as AuditLog[])
+    const items = <DynamoAuditLog[]>result?.Items
+    await this.mergeEventsFromEventsTable(items as DynamoAuditLog[])
 
     return items[0]
   }
 
-  async fetchByStatus(status: string, options: FetchByStatusOptions = {}): PromiseResult<AuditLog[]> {
-    const result = await new IndexSearcher<AuditLog[]>(this, this.config.auditLogTableName, this.auditLogTableKey)
+  async fetchByStatus(status: string, options: FetchByStatusOptions = {}): PromiseResult<DynamoAuditLog[]> {
+    const result = await new IndexSearcher<DynamoAuditLog[]>(this, this.config.auditLogTableName, this.auditLogTableKey)
       .useIndex("statusIndex")
       .setIndexKeys("status", status, "receivedDate")
       .setProjection(this.getProjectionExpression(options?.includeColumns, options?.excludeColumns))
@@ -257,14 +271,14 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
     }
 
     if (!options.excludeColumns || !options.excludeColumns.includes("events")) {
-      await this.mergeEventsFromEventsTable(result as AuditLog[])
+      await this.mergeEventsFromEventsTable(result as DynamoAuditLog[])
     }
 
-    return <AuditLog[]>result
+    return <DynamoAuditLog[]>result
   }
 
-  async fetchUnsanitised(options: FetchUnsanitisedOptions = {}): PromiseResult<AuditLog[]> {
-    const result = await new IndexSearcher<AuditLog[]>(this, this.config.auditLogTableName, this.auditLogTableKey)
+  async fetchUnsanitised(options: FetchUnsanitisedOptions = {}): PromiseResult<DynamoAuditLog[]> {
+    const result = await new IndexSearcher<DynamoAuditLog[]>(this, this.config.auditLogTableName, this.auditLogTableKey)
       .useIndex("isSanitisedIndex")
       .setIndexKeys("isSanitised", 0, "nextSanitiseCheck")
       .setRangeKey(new Date().toISOString(), KeyComparison.LessThanOrEqual)
@@ -277,13 +291,13 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
     }
 
     if (!options.excludeColumns || !options.excludeColumns.includes("events")) {
-      await this.mergeEventsFromEventsTable(result as AuditLog[])
+      await this.mergeEventsFromEventsTable(result as DynamoAuditLog[])
     }
 
-    return <AuditLog[]>result
+    return <DynamoAuditLog[]>result
   }
 
-  async fetchOne(messageId: string, options: ProjectionOptions = {}): PromiseResult<AuditLog | undefined> {
+  async fetchOne(messageId: string, options: ProjectionOptions = {}): PromiseResult<DynamoAuditLog | undefined> {
     const result = await this.getOne(
       this.config.auditLogTableName,
       this.auditLogTableKey,
@@ -295,7 +309,7 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
       return result
     }
 
-    const item = result?.Item as AuditLog
+    const item = result?.Item as DynamoAuditLog
     if (item && (!options.excludeColumns || !options.excludeColumns.includes("events"))) {
       await this.mergeEventsFromEventsTable([item])
     }
@@ -310,7 +324,7 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
       return result
     }
 
-    const auditLog = result?.Item as AuditLog
+    const auditLog = result?.Item as DynamoAuditLog
 
     return auditLog ? auditLog.version : null
   }
@@ -333,7 +347,7 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
     return result.events
   }
 
-  async update(existing: AuditLog, updates: Partial<AuditLog>): PromiseResult<void> {
+  async update(existing: DynamoAuditLog, updates: Partial<DynamoAuditLog>): PromiseResult<void> {
     const updateExpression = []
     const expressionAttributeNames: KeyValuePair<string, string> = {}
     const updateExpressionValues: KeyValuePair<string, unknown> = {}
@@ -467,7 +481,7 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
     }
   }
 
-  replaceAuditLog(auditLog: AuditLog, version: number): PromiseResult<void> {
+  replaceAuditLog(auditLog: DynamoAuditLog, version: number): PromiseResult<void> {
     const replacement = { ...auditLog, version: version + 1 }
     return this.replaceOne(this.config.auditLogTableName, replacement, this.auditLogTableKey, version)
   }

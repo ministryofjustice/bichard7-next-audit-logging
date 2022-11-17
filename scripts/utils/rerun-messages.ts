@@ -14,14 +14,12 @@
  *
  */
 
+import { Lambda, SSM } from "aws-sdk"
 import fs from "fs"
-import { AuditLogDynamoGateway } from "../../src/audit-log-api/src/gateways/dynamo"
-import transformMessageXml from "../../src/incoming-message-handler/src/use-cases/transformMessageXml"
-import type { AuditLog } from "../../src/shared-types/src"
-import { isError } from "../../src/shared-types/src"
-import { Lambda, SSM } from "../../src/shared/node_modules/aws-sdk"
-import { MqGateway } from "../../src/shared/src/MqGateway"
-import { S3Gateway } from "../../src/shared/src/S3Gateway"
+import { AuditLogDynamoGateway, DynamoDbConfig } from "../../src/audit-log-api/gateways/dynamo"
+import transformMessageXml from "../../src/incoming-message-handler/use-cases/transformMessageXml"
+import { MqGateway, S3Gateway } from "../../src/shared"
+import { InputApiAuditLog, isError } from "../../src/shared/types"
 
 const { SOURCE_FILE, MESSAGE_ID, SESSION, WORKSPACE } = process.env
 if (!WORKSPACE) {
@@ -53,11 +51,12 @@ const messageIds = MESSAGE_ID
       .filter((x) => !!x?.trim())
       .map((x) => x.trim())
 
-const dynamoConfig = {
-  region: "eu-west-2",
+const dynamoConfig: DynamoDbConfig = {
   auditLogTableName: "Will be retrieved from Retry Message lambda environment variable",
-  auditLogLookupTableName: "Will be retrieved from Retry Message lambda environment variable",
-  endpoint: "Will be retrieved from Retry Message lambda environment variable"
+  endpoint: "Will be retrieved from Retry Message lambda environment variable",
+  eventsTableName: "Not needed",
+  lookupTableName: "Not needed",
+  region: "eu-west-2"
 }
 
 const s3Config = {
@@ -169,7 +168,7 @@ async function rerunMessages() {
       throw contentInNewFormat
     }
 
-    const contentInOldFormat = transformMessageXml({ messageId: id } as AuditLog, contentInNewFormat)
+    const contentInOldFormat = transformMessageXml({ messageId: id } as InputApiAuditLog, contentInNewFormat)
 
     const mqResult = await mq.execute(contentInOldFormat, "COURT_RESULT_INPUT_QUEUE")
 

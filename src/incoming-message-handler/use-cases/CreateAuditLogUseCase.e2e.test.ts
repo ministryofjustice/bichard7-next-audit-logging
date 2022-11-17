@@ -1,7 +1,7 @@
 import { AuditLogApiClient } from "src/shared"
 import "src/shared/testing"
-import { mockAuditLog } from "src/shared/testing"
-import type { AuditLog } from "src/shared/types"
+import { mockInputApiAuditLog } from "src/shared/testing"
+import type { InputApiAuditLog } from "src/shared/types"
 import type { ValidationResult } from "../handlers/storeMessage"
 import CreateAuditLogUseCase from "./CreateAuditLogUseCase"
 
@@ -10,7 +10,7 @@ const useCase = new CreateAuditLogUseCase(apiClient)
 
 describe("CreateAuditLogUseCase", () => {
   it("should create an audit log record", async () => {
-    const auditLog = mockAuditLog()
+    const auditLog = mockInputApiAuditLog()
 
     const result = await useCase.execute(auditLog)
 
@@ -22,14 +22,14 @@ describe("CreateAuditLogUseCase", () => {
   })
 
   it("should fail the validation when message hash already exists", async () => {
-    const auditLog1 = mockAuditLog()
+    const auditLog1 = mockInputApiAuditLog()
 
     const result1 = await useCase.execute(auditLog1)
 
     expect(result1).toBeDefined()
     expect(result1).toNotBeError()
 
-    const auditLog2 = { ...mockAuditLog(), messageHash: auditLog1.messageHash }
+    const auditLog2 = { ...mockInputApiAuditLog(), messageHash: auditLog1.messageHash }
 
     const result2 = await useCase.execute(auditLog2)
 
@@ -42,7 +42,7 @@ describe("CreateAuditLogUseCase", () => {
   })
 
   it("should return error when API returns error", async () => {
-    const auditLog = { ...mockAuditLog(), receivedDate: undefined } as unknown as AuditLog
+    const auditLog = { ...mockInputApiAuditLog(), receivedDate: undefined } as unknown as InputApiAuditLog
 
     const result = await useCase.execute(auditLog)
 
