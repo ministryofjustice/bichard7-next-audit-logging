@@ -149,7 +149,8 @@ if [ "${IS_CD}" = "true" ]; then
   cat <<EOF>/tmp/audit-logging.json
   {
     "source-hash" : "${CODEBUILD_RESOLVED_SOURCE_VERSION}",
-    "build-time": "${CODEBUILD_START_TIME}"
+    "build-time": "${CODEBUILD_START_TIME}",
+    "image-hash": "sha256:4e09203e829a61d53e1052fe856bfcd91558dfb678746aa23a26a24d707766f1"
  }
 EOF
   aws s3 cp /tmp/audit-logging.json s3://${ARTIFACT_BUCKET}/semaphores/audit-logging.json
