@@ -7,7 +7,8 @@ import { Client } from "pg"
 import { AuditLogApiClient, logger } from "src/shared"
 import "src/shared/testing"
 import { clearDynamoTable, createMockAuditLog, setEnvironmentVariables } from "src/shared/testing"
-import { ApiClient, isError, KeyValuePair, OutputApiAuditLog } from "src/shared/types"
+import type { ApiClient, KeyValuePair, OutputApiAuditLog } from "src/shared/types"
+import { isError } from "src/shared/types"
 import sanitiseOldMessages from "./index"
 
 setEnvironmentVariables({

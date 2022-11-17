@@ -1,7 +1,8 @@
 import axios from "axios"
 import { HttpStatusCode } from "src/shared"
 import { mockAuditLogEvent, mockInputApiAuditLog } from "src/shared/testing"
-import { AuditLogEvent, DynamoAuditLog, EventCode } from "src/shared/types"
+import type { AuditLogEvent, DynamoAuditLog } from "src/shared/types"
+import { EventCode } from "src/shared/types"
 import { AuditLogDynamoGateway } from "../gateways/dynamo"
 import { auditLogDynamoConfig, TestDynamoGateway } from "../test"
 const testGateway = new TestDynamoGateway(auditLogDynamoConfig)

@@ -1,6 +1,6 @@
 import type { AuditLogEvent, PromiseResult } from "src/shared/types"
 import { isError } from "src/shared/types"
-import AuditLogErrorEvent from "src/shared/types/AuditLogErrorEvent"
+import type AuditLogErrorEvent from "src/shared/types/AuditLogErrorEvent"
 import type { AuditLogDynamoGatewayInterface } from "../gateways/dynamo"
 import type LookupEventValuesUseCase from "./LookupEventValuesUseCase"
 
