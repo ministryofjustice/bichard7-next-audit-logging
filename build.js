@@ -6,7 +6,6 @@ require("esbuild")
       "src/audit-log-api/handlers/createAuditLog.ts",
       "src/audit-log-api/handlers/createAuditLogEvent.ts",
       "src/audit-log-api/handlers/createAuditLogEvents.ts",
-      "src/audit-log-api/handlers/createAuditLogs.ts",
       "src/audit-log-api/handlers/getEvents.ts",
       "src/audit-log-api/handlers/getMessages.ts",
       "src/audit-log-api/handlers/retryMessage.ts",
