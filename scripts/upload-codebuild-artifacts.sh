@@ -144,3 +144,13 @@ zip sanitiseOldMessages.zip sanitiseOldMessages.js
 upload_to_s3 sanitiseOldMessages.zip sanitiseOldMessages.zip
 
 cd -
+
+if [ "${IS_CD}" = "true" ]; then
+  cat <<EOF>/tmp/audit-logging.json
+  {
+    "source-hash" : "${CODEBUILD_RESOLVED_SOURCE_VERSION}",
+    "build-time": "${CODEBUILD_START_TIME}"
+ }
+EOF
+  aws s3 cp /tmp/audit-logging.json s3://${ARTIFACT_BUCKET}/semaphores/audit-logging.json
+fi
