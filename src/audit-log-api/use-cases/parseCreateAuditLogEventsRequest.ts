@@ -21,10 +21,11 @@ export default function parseCreateAuditLogEventsRequest(
     if (!body) {
       return Error("Body cannot be empty.")
     }
+    const parsedBody = JSON.parse(body)
 
     return {
       messageId,
-      auditLogEvents: <AuditLogEvent[]>JSON.parse(body)
+      auditLogEvents: Array.isArray(parsedBody) ? parsedBody : [parsedBody]
     }
   } catch (error) {
     return isError(error) ? error : Error("Error parsing JSON")
