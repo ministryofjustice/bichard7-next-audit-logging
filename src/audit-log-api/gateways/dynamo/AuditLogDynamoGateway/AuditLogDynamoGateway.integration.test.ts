@@ -932,6 +932,7 @@ describe("AuditLogDynamoGateway", () => {
           )) as DocumentClient.GetItemOutput
         ).Item!
 
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const expected = updates as KeyValuePair<string, any>
         expect(updated[key]).toBe(expected[key])
       }

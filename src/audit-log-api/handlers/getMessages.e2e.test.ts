@@ -9,7 +9,8 @@ import {
   mockAuditLogEvent,
   mockDynamoAuditLog
 } from "src/shared/testing"
-import { AuditLogLookup, DynamoAuditLog, EventCode, isError, OutputApiAuditLog } from "src/shared/types"
+import type { DynamoAuditLog, OutputApiAuditLog } from "src/shared/types"
+import { AuditLogLookup, EventCode, isError } from "src/shared/types"
 import { auditLogDynamoConfig, TestDynamoGateway } from "../test"
 
 const testDynamoGateway = new TestDynamoGateway(auditLogDynamoConfig)

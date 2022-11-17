@@ -1,5 +1,5 @@
 import { mockAuditLogEvent, mockDynamoAuditLog } from "src/shared/testing"
-import { DynamoAuditLog } from "src/shared/types"
+import type { DynamoAuditLog } from "src/shared/types"
 import { AuditLogDynamoGateway } from "../gateways/dynamo"
 import { auditLogDynamoConfig, TestDynamoGateway } from "../test"
 import FetchAutomationReport from "./FetchAutomationReport"
