@@ -4,7 +4,7 @@ import type EventCategory from "./EventCategory"
 
 export type AuditLogEventAttributeLookupValue = { valueLookup: string }
 
-export type AuditLogEventAttributeCompressedValue = { _compressedValue: string }
+export type AuditLogEventCompressedValue = { _compressedValue: string }
 
 export type AuditLogEventDecompressedAttributeValue = string | number | boolean
 
@@ -18,7 +18,7 @@ export type AuditLogEventDecompressedAttributes = {
 
 export type AuditLogEventAttributeValue =
   | AuditLogEventDecompressedAttributeValue
-  | AuditLogEventAttributeCompressedValue
+  | AuditLogEventCompressedValue
   | AuditLogEventAttributeLookupValue
 
 // TODO: Split this into a type an an implementation
@@ -33,7 +33,7 @@ export default class AuditLogEvent {
 
   public readonly eventType: string
 
-  public readonly eventXml?: string
+  public eventXml?: string | AuditLogEventCompressedValue
 
   public readonly _id?: string
 

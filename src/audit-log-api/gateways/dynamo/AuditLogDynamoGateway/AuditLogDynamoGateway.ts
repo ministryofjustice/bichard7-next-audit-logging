@@ -1,8 +1,7 @@
 import { addDays } from "date-fns"
 import { compress, decompress } from "src/shared"
-import type { DynamoAuditLog, KeyValuePair, PromiseResult, ValueLookup } from "src/shared/types"
-import { AuditLogEvent, AuditLogLookup, isError } from "src/shared/types"
-import type { AuditLogEventAttributes } from "src/shared/types/AuditLogEvent"
+import type { DynamoAuditLog, KeyValuePair, PromiseResult } from "src/shared/types"
+import { AuditLogEvent, isError } from "src/shared/types"
 import type {
   EventsFilterOptions,
   FetchByStatusOptions,
@@ -144,19 +143,19 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
         indexSearcher.useIndex("messageIdIndex").setIndexKeys("_messageId", auditLog.messageId, "timestamp")
       }
 
-      const events = await indexSearcher.execute()
+      const events = (await indexSearcher.execute()) ?? []
 
       if (isError(events)) {
         return events
       }
 
-      for (const event of events ?? []) {
-        const attributes = await this.decompressEventAttributes(event.attributes)
-        if (isError(attributes)) {
-          return attributes
+      for (let i = 0; i < events.length; i++) {
+        const decompressedEvent = await this.decompressEventValues(events[i])
+        if (isError(decompressedEvent)) {
+          return decompressedEvent
         }
 
-        event.attributes = attributes
+        events[i] = decompressedEvent
       }
 
       auditLog.events = (auditLog.events ?? [])
@@ -427,60 +426,6 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
     return this.executeTransaction(dynamoUpdates)
   }
 
-  async prepareLookupItems(event: AuditLogEvent, messageId: string): Promise<[DynamoUpdate[], AuditLogEvent]> {
-    const attributes: KeyValuePair<string, unknown> = {}
-    const dynamoUpdates: DynamoUpdate[] = []
-
-    const attributeKeys = Object.keys(event.attributes)
-
-    for (const attributeKey of attributeKeys) {
-      const attributeValue = event.attributes[attributeKey]
-      if (attributeValue && typeof attributeValue === "string" && attributeValue.length > maxAttributeValueLength) {
-        const lookupItem = new AuditLogLookup(attributeValue, messageId)
-        const lookupDynamoUpdate = await this.prepareLookupItem(lookupItem)
-
-        dynamoUpdates.push(lookupDynamoUpdate)
-        attributes[attributeKey] = { valueLookup: lookupItem.id } as ValueLookup
-      } else {
-        attributes[attributeKey] = attributeValue
-      }
-    }
-
-    let eventXml: string | undefined | ValueLookup = "eventXml" in event ? (event as AuditLogEvent).eventXml : undefined
-    if (eventXml) {
-      const lookupItem = new AuditLogLookup(eventXml, messageId)
-      const lookupDynamoUpdates = await this.prepareLookupItem(lookupItem)
-
-      dynamoUpdates.push(lookupDynamoUpdates)
-      eventXml = { valueLookup: lookupItem.id }
-    }
-
-    const updatedEvent = {
-      ...event,
-      attributes,
-      ...(eventXml ? { eventXml } : {})
-    } as AuditLogEvent
-    return [dynamoUpdates, updatedEvent]
-  }
-
-  async prepareLookupItem(lookupItem: AuditLogLookup): Promise<DynamoUpdate> {
-    if (process.env.IS_E2E) {
-      lookupItem.expiryTime = Math.round(
-        addDays(new Date(), parseInt(process.env.EXPIRY_DAYS || "7")).getTime() / 1000
-      ).toString()
-    }
-
-    const itemToSave = { ...lookupItem, value: await compress(lookupItem.value), isCompressed: true }
-
-    return {
-      Put: {
-        Item: itemToSave,
-        TableName: this.config.lookupTableName,
-        ConditionExpression: `attribute_not_exists(${this.auditLogTableKey})`
-      }
-    }
-  }
-
   replaceAuditLog(auditLog: DynamoAuditLog, version: number): PromiseResult<void> {
     const replacement = { ...auditLog, version: version + 1 }
     return this.replaceOne(this.config.auditLogTableName, replacement, this.auditLogTableKey, version)
@@ -489,12 +434,12 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
   private async prepareStoreEvents(messageId: string, events: AuditLogEvent[]): PromiseResult<DynamoUpdate[]> {
     const dynamoUpdates: DynamoUpdate[] = []
     for (const event of events) {
-      const attributes = await this.compressEventAttributes(event.attributes)
-      if (isError(attributes)) {
-        return attributes
+      const compressedEvent = await this.compressEventValues(event)
+      if (isError(compressedEvent)) {
+        return compressedEvent
       }
 
-      const eventToInsert = new AuditLogEvent({ ...event, _messageId: messageId, attributes })
+      const eventToInsert = new AuditLogEvent({ ...compressedEvent, _messageId: messageId })
       dynamoUpdates.push({
         Put: {
           Item: { ...eventToInsert, _: "_" },
@@ -508,31 +453,33 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
     return dynamoUpdates
   }
 
-  private async compressEventAttributes(attributes: AuditLogEventAttributes): PromiseResult<AuditLogEventAttributes> {
-    const result: AuditLogEventAttributes = {}
-
-    const attributeKeys = Object.keys(attributes)
-
-    for (const attributeKey of attributeKeys) {
-      const attributeValue = attributes[attributeKey]
+  private async compressEventValues(event: AuditLogEvent): PromiseResult<AuditLogEvent> {
+    for (const attributeKey of Object.keys(event.attributes)) {
+      const attributeValue = event.attributes[attributeKey]
       if (attributeValue && typeof attributeValue === "string" && attributeValue.length > maxAttributeValueLength) {
         const compressedValue = await compress(attributeValue)
         if (isError(compressedValue)) {
           return compressedValue
         }
 
-        result[attributeKey] = { _compressedValue: compressedValue }
-      } else {
-        result[attributeKey] = attributeValue
+        event.attributes[attributeKey] = { _compressedValue: compressedValue }
       }
     }
-    return result
+
+    if (event.eventXml && typeof event.eventXml === "string" && event.eventXml.length > maxAttributeValueLength) {
+      const compressedValue = await compress(event.eventXml)
+      if (isError(compressedValue)) {
+        return compressedValue
+      }
+
+      event.eventXml = { _compressedValue: compressedValue }
+    }
+
+    return event
   }
 
-  private async decompressEventAttributes(attributes: AuditLogEventAttributes): PromiseResult<AuditLogEventAttributes> {
-    const result: AuditLogEventAttributes = {}
-
-    for (const [attributeKey, attributeValue] of Object.entries(attributes)) {
+  private async decompressEventValues(event: AuditLogEvent): PromiseResult<AuditLogEvent> {
+    for (const [attributeKey, attributeValue] of Object.entries(event.attributes)) {
       if (attributeValue && typeof attributeValue === "object" && "_compressedValue" in attributeValue) {
         const compressedValue = (attributeValue as { _compressedValue: string })._compressedValue
         const decompressedValue = await decompress(compressedValue)
@@ -540,12 +487,19 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
           return decompressedValue
         }
 
-        result[attributeKey] = decompressedValue
-      } else {
-        result[attributeKey] = attributeValue
+        event.attributes[attributeKey] = decompressedValue
       }
     }
 
-    return result
+    if (event.eventXml && typeof event.eventXml === "object" && "_compressedValue" in event.eventXml) {
+      const decompressedValue = await decompress(event.eventXml._compressedValue)
+      if (isError(decompressedValue)) {
+        return decompressedValue
+      }
+
+      event.eventXml = decompressedValue
+    }
+
+    return event
   }
 }
