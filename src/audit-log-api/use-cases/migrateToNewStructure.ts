@@ -1,10 +1,14 @@
 import fs from "fs"
-import { isError } from "lodash"
-import { decodeBase64, S3Gateway } from "src/shared"
-import { AuditLogEvent, DynamoAuditLog } from "src/shared/types"
-import { AuditLogDynamoGateway, DynamoUpdate } from "../gateways/dynamo"
+import type { S3Gateway } from "src/shared"
+import { decodeBase64 } from "src/shared"
+import type { AuditLogEvent, DynamoAuditLog } from "src/shared/types"
+import { isError } from "src/shared/types"
+import type { AuditLogDynamoGateway, DynamoUpdate } from "../gateways/dynamo"
+import type { MessageStatus } from "../gateways/dynamo/AuditLogDynamoGateway/CalculateMessageStatusUseCase"
+import CalculateMessageStatusUseCase from "../gateways/dynamo/AuditLogDynamoGateway/CalculateMessageStatusUseCase"
+import { IndexSearcher } from "../gateways/dynamo/DynamoGateway"
 import { addAuditLogEventIndices, transformAuditLogEvent } from "../utils"
-import LookupEventValuesUseCase from "./LookupEventValuesUseCase"
+import type LookupEventValuesUseCase from "./LookupEventValuesUseCase"
 
 const getEventXmlFromS3 = async (s3Gateway: S3Gateway, s3Path: string): Promise<string> => {
   const eventJson = await s3Gateway.getItem(s3Path)
@@ -56,8 +60,22 @@ const migrateToNewStructure = async (
   //
   // Eventually, once everything is done:
   // - Remove lookup table
+  if (!auditLog.events && !auditLog.lastEventType && auditLog.pncStatus && auditLog.triggerStatus) {
+    return
+  }
 
-  const newEventsPromises = (auditLog.events ?? [])
+  let eventsToMove: AuditLogEvent[] = []
+  if (auditLog.events) {
+    if (auditLog.events.length > 24) {
+      eventsToMove = auditLog.events.slice(0, 23)
+      auditLog.events = auditLog.events.slice(23)
+    } else {
+      eventsToMove = auditLog.events
+      delete (auditLog as any).events
+    }
+  }
+
+  const newEventsPromises = (eventsToMove ?? [])
     .map(transformAuditLogEvent)
     .map(addAuditLogEventIndices)
     .map((event) => lookupUseCase.execute(event))
@@ -81,7 +99,13 @@ const migrateToNewStructure = async (
           throw event
         }
 
-        if (event.eventSourceQueueName && event.category === "error" && event.s3Path && !event.eventXml) {
+        if (
+          event.eventSourceQueueName &&
+          event.category === "error" &&
+          event.s3Path &&
+          !event.eventXml &&
+          !event.eventType.startsWith("Message Rejected by [")
+        ) {
           event.eventXml = await getEventXmlFromS3(s3Gateway, event.s3Path)
           s3PathsToDelete.push(event.s3Path)
         }
@@ -105,7 +129,33 @@ const migrateToNewStructure = async (
     throw eventUpdates
   }
 
-  delete (auditLog as any).events
+  if (!auditLog.pncStatus || !auditLog.triggerStatus) {
+    let newStatuses: MessageStatus | undefined
+    if (auditLog.events) {
+      newStatuses = new CalculateMessageStatusUseCase(auditLog.events).call()
+    } else {
+      const events = await new IndexSearcher<AuditLogEvent[]>(
+        gateway,
+        gateway.config.eventsTableName,
+        gateway.eventsTableKey
+      )
+        .useIndex("messageIdIndex")
+        .setIndexKeys("_messageId", auditLog.messageId, "timestamp")
+        .execute()
+      if (isError(events)) {
+        throw events
+      }
+      if (!events) {
+        throw new Error("No events found")
+      }
+      newStatuses = new CalculateMessageStatusUseCase(events).call()
+    }
+
+    auditLog.status = newStatuses.status
+    auditLog.pncStatus = newStatuses.pncStatus
+    auditLog.triggerStatus = newStatuses.triggerStatus
+  }
+
   delete auditLog.automationReport
   delete auditLog.topExceptionsReport
   delete auditLog.lastEventType
@@ -136,7 +186,13 @@ const migrateToNewStructure = async (
     throw result
   }
 
-  fs.appendFileSync("s3-paths-to-delete.txt", `${s3PathsToDelete.join("\n")}\n`)
+  if (auditLog.events && auditLog.events.length > 0) {
+    await migrateToNewStructure(gateway, lookupUseCase, s3Gateway, auditLog)
+  }
+
+  if (s3PathsToDelete.length > 0) {
+    fs.appendFileSync("s3-paths-to-delete.txt", `${s3PathsToDelete.join("\n")}\n`)
+  }
 }
 
 export default migrateToNewStructure

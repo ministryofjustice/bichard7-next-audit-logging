@@ -30,6 +30,6 @@ export type DynamoAuditLog = OutputApiAuditLog & {
   lastEventType?: string
   retryCount?: number
   version: number
-  automationReport?: { events: AuditLogEvent[]; forceOwner: string }
+  automationReport?: { events: AuditLogEvent[]; forceOwner?: string }
   topExceptionsReport?: { events: AuditLogEvent[] }
 }

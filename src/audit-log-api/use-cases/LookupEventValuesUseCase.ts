@@ -8,7 +8,7 @@ export default class LookupEventValuesUseCase {
   async execute(event: AuditLogEvent): PromiseResult<AuditLogEvent> {
     const attributes = {} as KeyValuePair<string, unknown>
 
-    const attributeKeys = Object.keys(event.attributes)
+    const attributeKeys = Object.keys(event.attributes ?? {})
 
     for (const attributeKey of attributeKeys) {
       const attributeValue = event.attributes[attributeKey]
@@ -34,6 +34,10 @@ export default class LookupEventValuesUseCase {
 
       if (isError(lookupItem)) {
         return lookupItem
+      }
+
+      if (!lookupItem) {
+        return new Error("Could not find lookup item: " + valueLookup)
       }
 
       eventXml = lookupItem.value

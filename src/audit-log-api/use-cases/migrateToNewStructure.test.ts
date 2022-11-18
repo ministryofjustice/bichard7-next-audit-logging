@@ -1,9 +1,11 @@
-import { DocumentClient } from "aws-sdk/clients/dynamodb"
+jest.setTimeout(99999999)
+import type { DocumentClient } from "aws-sdk/clients/dynamodb"
 import fs from "fs"
 import { compress, createS3Config, encodeBase64, TestS3Gateway } from "src/shared"
 import { mockDynamoAuditLog, setEnvironmentVariables } from "src/shared/testing"
-import { AuditLogEvent, AuditLogLookup } from "src/shared/types"
-import { AuditLogEventCompressedValue } from "src/shared/types/AuditLogEvent"
+import type { AuditLogEvent, DynamoAuditLog } from "src/shared/types"
+import { AuditLogLookup, AuditLogStatus } from "src/shared/types"
+import type { AuditLogEventCompressedValue } from "src/shared/types/AuditLogEvent"
 import { AuditLogDynamoGateway, AwsAuditLogLookupDynamoGateway } from "../gateways/dynamo"
 import { auditLogDynamoConfig, TestDynamoGateway } from "../test"
 import LookupEventValuesUseCase from "./LookupEventValuesUseCase"
@@ -21,7 +23,7 @@ const s3Gateway = new TestS3Gateway(createS3Config("EVENTS_BUCKET_NAME"))
 const superMockAuditLogEvent = () =>
   ({
     category: "information",
-    timestamp: new Date(),
+    timestamp: new Date().toISOString(),
     eventType: "Trigger generated",
     eventSource: "TestSource",
     eventSourceArn: "TestArn",
@@ -203,5 +205,141 @@ describe("migrateToNewStructure()", () => {
     expect(pathsToDelete).toHaveLength(2)
     expect(pathsToDelete).toContain("path/to/test.xml")
     expect(pathsToDelete).toContain("path/to/test-long.xml")
+  })
+
+  it("should update the status fields", async () => {
+    const auditLog: Partial<DynamoAuditLog> = mockDynamoAuditLog()
+    delete auditLog.pncStatus
+    delete auditLog.triggerStatus
+
+    auditLog.events = [superMockAuditLogEvent()]
+
+    await gateway.insertOne(auditLogDynamoConfig.auditLogTableName, auditLog, gateway.auditLogTableKey)
+
+    expect(auditLog).not.toHaveProperty("pncStatus")
+    expect(auditLog).not.toHaveProperty("triggerStatus")
+
+    await migrateToNewStructure(gateway, lookupUseCase, s3Gateway, auditLog as DynamoAuditLog)
+
+    const newAuditLog = (
+      (await gateway.getOne(
+        auditLogDynamoConfig.auditLogTableName,
+        gateway.auditLogTableKey,
+        auditLog.messageId
+      )) as DocumentClient.GetItemOutput
+    ).Item
+
+    expect(newAuditLog).not.toHaveProperty("events")
+
+    expect(newAuditLog).toHaveProperty("pncStatus", "Processing")
+    expect(newAuditLog).toHaveProperty("triggerStatus", "NoTriggers")
+  })
+
+  it("should update the status fields if the record has already been migrated", async () => {
+    const auditLog: Partial<DynamoAuditLog> = mockDynamoAuditLog()
+    delete auditLog.pncStatus
+    delete auditLog.triggerStatus
+    delete auditLog.events
+
+    const event = superMockAuditLogEvent()
+
+    await gateway.insertOne(auditLogDynamoConfig.auditLogTableName, auditLog, gateway.auditLogTableKey)
+    await gateway.insertOne(auditLogDynamoConfig.eventsTableName, event, "_id")
+
+    expect(auditLog).not.toHaveProperty("pncStatus")
+    expect(auditLog).not.toHaveProperty("triggerStatus")
+
+    await migrateToNewStructure(gateway, lookupUseCase, s3Gateway, auditLog as DynamoAuditLog)
+
+    const newAuditLog = (
+      (await gateway.getOne(
+        auditLogDynamoConfig.auditLogTableName,
+        gateway.auditLogTableKey,
+        auditLog.messageId
+      )) as DocumentClient.GetItemOutput
+    ).Item
+
+    expect(newAuditLog).not.toHaveProperty("events")
+
+    expect(newAuditLog).toHaveProperty("pncStatus", "Processing")
+    expect(newAuditLog).toHaveProperty("triggerStatus", "NoTriggers")
+  })
+
+  it("should handle records with more than 24 events", async () => {
+    const auditLog: Partial<DynamoAuditLog> = mockDynamoAuditLog()
+
+    for (let i = 0; i < 100; i++) {
+      auditLog.events?.push({
+        ...superMockAuditLogEvent(),
+        attributes: {},
+        eventType: `Event type ${i}`
+      } as AuditLogEvent)
+    }
+    const expectedEventTypes = auditLog.events?.map((e) => e.eventType).sort()
+
+    await gateway.insertOne(auditLogDynamoConfig.auditLogTableName, auditLog, gateway.auditLogTableKey)
+
+    expect(auditLog.events).toHaveLength(100)
+
+    await migrateToNewStructure(gateway, lookupUseCase, s3Gateway, auditLog as DynamoAuditLog)
+
+    const newAuditLog = (
+      (await gateway.getOne(
+        auditLogDynamoConfig.auditLogTableName,
+        gateway.auditLogTableKey,
+        auditLog.messageId
+      )) as DocumentClient.GetItemOutput
+    ).Item
+
+    expect(newAuditLog).not.toHaveProperty("events")
+
+    const newEvents = (await testGateway.getAll(auditLogDynamoConfig.eventsTableName)).Items?.sort((a, b) =>
+      a.timestamp.localeCompare(b.timestamp)
+    ) as AuditLogEvent[]
+
+    expect(newEvents).toHaveLength(100)
+
+    const receivedEventTypes = newEvents.map((e) => e.eventType).sort()
+    expect(receivedEventTypes).toStrictEqual(expectedEventTypes)
+  })
+
+  it.only("should handle current audit logs", async () => {
+    const auditLog: DynamoAuditLog = {
+      messageId: "34aaa682-d397-4f80-9574-887a740a80bc",
+      automationReport: { events: [] },
+      caseId: "43TT0268122",
+      createdBy: "Incoming message handler",
+      events: [],
+      externalCorrelationId: "221118-080458-C8EH-YG33-U4NR",
+      externalId: "38997592",
+      forceOwner: 43,
+      isSanitised: 0,
+      lastEventType: "",
+      messageHash: "2e12d805201344a1f1dd53b8a08208bb5008cb614a66b4a73919290de9b6cd8e",
+      nextSanitiseCheck: "2022-11-18T08:04:00.000Z",
+      pncStatus: "Ignored",
+      receivedDate: "2022-11-18T08:04:00.000Z",
+      retryCount: 0,
+      s3Path: "2022/11/18/08/04/38997592.xml",
+      status: AuditLogStatus.completed,
+      stepExecutionId: "0699fc47-42d3-86be-f708-c573b2cec73d",
+      systemId: "B00LIBRA",
+      topExceptionsReport: { events: [] },
+      triggerStatus: "NoTriggers",
+      version: 9
+    }
+    await gateway.insertOne(auditLogDynamoConfig.auditLogTableName, auditLog, gateway.auditLogTableKey)
+
+    await migrateToNewStructure(gateway, lookupUseCase, s3Gateway, auditLog as DynamoAuditLog)
+    const newAuditLog = (
+      (await gateway.getOne(
+        auditLogDynamoConfig.auditLogTableName,
+        gateway.auditLogTableKey,
+        auditLog.messageId
+      )) as DocumentClient.GetItemOutput
+    ).Item
+    expect(newAuditLog).not.toHaveProperty("topExceptionsReport")
+    expect(newAuditLog).not.toHaveProperty("automationReport")
+    expect(newAuditLog).not.toHaveProperty("events")
   })
 })

@@ -22,4 +22,21 @@ describe("Creating Audit Log", () => {
     expect(record).not.toBeNull()
     expect(record?.messageId).toEqual(auditLog.messageId)
   })
+
+  it("should only include valid attributes", async () => {
+    const gateway = new TestDynamoGateway(auditLogDynamoConfig)
+
+    const auditLog = mockInputApiAuditLog()
+
+    const result = await axios.post("http://localhost:3010/messages", auditLog)
+    expect(result.status).toEqual(HttpStatusCode.created)
+
+    const record = (await gateway.getOne<DynamoAuditLog>(
+      auditLogDynamoConfig.auditLogTableName,
+      "messageId",
+      auditLog.messageId
+    )) as DynamoAuditLog
+
+    expect(Object.keys(record).sort()).toStrictEqual([])
+  })
 })
