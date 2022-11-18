@@ -1,36 +1,22 @@
-// - For each event:
-//     X Transform it into new structure
-//          X Remove eventSourceArn and s3Path
-//          X Pull attributes from lookup table into event
-//          X Add eventCode (lookup event type)
-//          X Add indices (topExceptionsReport, automationReport)
-//          X Add event XML from S3 if it's from a failure queue and it's not been sanitised
-//     X Insert into events table
-//
-// X Remove events attribute
-// X Remove automationReport, topExceptionsReport, lastEventType
-// X Ensure isSanitised is set
-// X Ensure nextSanitiseCheck is set to current datetime if not set and isSanitised is false
-//
-// Eventually, once everything is done:
-// - Remove lookup table
-
 import { DocumentClient } from "aws-sdk/clients/dynamodb"
-import { createS3Config, S3Gateway } from "src/shared"
+import fs from "fs"
+import { compress, createS3Config, encodeBase64, TestS3Gateway } from "src/shared"
 import { mockDynamoAuditLog, setEnvironmentVariables } from "src/shared/testing"
-import { AuditLogEvent } from "src/shared/types"
+import { AuditLogEvent, AuditLogLookup } from "src/shared/types"
+import { AuditLogEventCompressedValue } from "src/shared/types/AuditLogEvent"
 import { AuditLogDynamoGateway, AwsAuditLogLookupDynamoGateway } from "../gateways/dynamo"
 import { auditLogDynamoConfig, TestDynamoGateway } from "../test"
 import LookupEventValuesUseCase from "./LookupEventValuesUseCase"
 import migrateToNewStructure from "./MigrateToNewStructure"
 
 setEnvironmentVariables()
+process.env.EVENTS_BUCKET_NAME = "auditLogEventsBucket"
 
 const gateway = new AuditLogDynamoGateway(auditLogDynamoConfig)
 const testGateway = new TestDynamoGateway(auditLogDynamoConfig)
 const lookupGateway = new AwsAuditLogLookupDynamoGateway(auditLogDynamoConfig, auditLogDynamoConfig.lookupTableName)
 const lookupUseCase = new LookupEventValuesUseCase(lookupGateway)
-const s3Gateway = new S3Gateway(createS3Config())
+const s3Gateway = new TestS3Gateway(createS3Config("EVENTS_BUCKET_NAME"))
 
 const superMockAuditLogEvent = () =>
   ({
@@ -47,11 +33,12 @@ const superMockAuditLogEvent = () =>
     }
   } as any as AuditLogEvent)
 
-describe("migrateToNewStructure", () => {
+describe("migrateToNewStructure()", () => {
   beforeEach(async () => {
     await testGateway.deleteAll(auditLogDynamoConfig.auditLogTableName, gateway.auditLogTableKey)
     await testGateway.deleteAll(auditLogDynamoConfig.lookupTableName, "id")
     await testGateway.deleteAll(auditLogDynamoConfig.eventsTableName, "_id")
+    await fs.promises.unlink("s3-paths-to-delete.txt").catch((e) => e)
   })
 
   it("should correctly migrate events into the new table", async () => {
@@ -66,7 +53,7 @@ describe("migrateToNewStructure", () => {
     delete (auditLog as any).nextSanitiseCheck
 
     auditLog.events = [superMockAuditLogEvent()]
-    gateway.insertOne(auditLogDynamoConfig.auditLogTableName, auditLog, gateway.auditLogTableKey)
+    await gateway.insertOne(auditLogDynamoConfig.auditLogTableName, auditLog, gateway.auditLogTableKey)
 
     expect(auditLog).toHaveProperty("events")
     expect(auditLog).toHaveProperty("automationReport")
@@ -108,6 +95,113 @@ describe("migrateToNewStructure", () => {
     expect(newEvents[0].attributes["Attribute 1"]).toHaveProperty("_compressedValue")
   })
 
-  it("should correctly migrate large objects from the lookup table", async () => {})
-  it("should move content from S3 into eventXml and output S3 paths", async () => {})
+  it("should correctly migrate large objects from the lookup table", async () => {
+    const auditLog = mockDynamoAuditLog()
+
+    const lookupItem1 = new AuditLogLookup("Test value 1", auditLog.messageId)
+
+    const lookupItem2Value = (await compress("Test value 2".repeat(500))) as string
+    const lookupItem2 = new AuditLogLookup(lookupItem2Value, auditLog.messageId)
+    lookupItem2.isCompressed = true
+
+    const event = superMockAuditLogEvent()
+    event.attributes["Attribute 3"] = { valueLookup: lookupItem1.id }
+    event.attributes["Attribute 4"] = { valueLookup: lookupItem2.id }
+
+    const eventXmlValue = (await compress("Event XML value".repeat(500))) as string
+    const eventXmlLookup = new AuditLogLookup(eventXmlValue, auditLog.messageId)
+    eventXmlLookup.isCompressed = true
+
+    event.eventXml = { valueLookup: eventXmlLookup.id } as any
+    auditLog.events = [event]
+
+    await testGateway.insertOne(auditLogDynamoConfig.lookupTableName, lookupItem1, "id")
+    await testGateway.insertOne(auditLogDynamoConfig.lookupTableName, lookupItem2, "id")
+    await testGateway.insertOne(auditLogDynamoConfig.lookupTableName, eventXmlLookup, "id")
+    await gateway.insertOne(auditLogDynamoConfig.auditLogTableName, auditLog, gateway.auditLogTableKey)
+
+    await migrateToNewStructure(gateway, lookupUseCase, s3Gateway, auditLog)
+
+    const newEvents = (await testGateway.getAll(auditLogDynamoConfig.eventsTableName)).Items as AuditLogEvent[]
+
+    expect(newEvents).toHaveLength(1)
+    expect(newEvents[0]).toHaveProperty("eventXml")
+    expect(newEvents[0].eventXml).toHaveProperty("_compressedValue", eventXmlValue)
+    expect(newEvents[0]).toHaveProperty("attributes")
+    expect(newEvents[0].attributes).toHaveProperty("Attribute 3", "Test value 1")
+    expect(newEvents[0].attributes).toHaveProperty("Attribute 4")
+    expect(newEvents[0].attributes["Attribute 4"]).toHaveProperty("_compressedValue", lookupItem2Value)
+  })
+
+  it("should move content from S3 into eventXml and output S3 paths", async () => {
+    const auditLog = {
+      ...mockDynamoAuditLog(),
+      automationReport: { events: [], forceOwner: "010000" },
+      topExceptionsReport: { events: [] },
+      lastEventType: "Triggers generated"
+    }
+
+    auditLog.events = [
+      {
+        ...superMockAuditLogEvent(),
+        s3Path: "path/to/test.xml",
+        eventSourceQueueName: "queueName",
+        category: "error",
+        timestamp: "2022-01-01"
+      },
+      {
+        ...superMockAuditLogEvent(),
+        s3Path: "path/to/test-long.xml",
+        eventSourceQueueName: "queueName",
+        category: "error",
+        timestamp: "2022-02-02"
+      }
+    ] as AuditLogEvent[]
+
+    const content = JSON.stringify({ messageData: encodeBase64("xml content") })
+    s3Gateway.upload(auditLog.events[0].s3Path!, content)
+    const longContent = JSON.stringify({ messageData: encodeBase64("really long xml".repeat(500)) })
+    s3Gateway.upload(auditLog.events[1].s3Path!, longContent)
+
+    await gateway.insertOne(auditLogDynamoConfig.auditLogTableName, auditLog, gateway.auditLogTableKey)
+
+    expect(auditLog).toHaveProperty("events")
+    expect(auditLog.events[0]).toHaveProperty("s3Path")
+    expect(auditLog.events[0]).not.toHaveProperty("eventXml")
+    expect(auditLog.events[1]).toHaveProperty("s3Path")
+    expect(auditLog.events[1]).not.toHaveProperty("eventXml")
+
+    await migrateToNewStructure(gateway, lookupUseCase, s3Gateway, auditLog)
+
+    const newAuditLog = (
+      (await gateway.getOne(
+        auditLogDynamoConfig.auditLogTableName,
+        gateway.auditLogTableKey,
+        auditLog.messageId
+      )) as DocumentClient.GetItemOutput
+    ).Item
+
+    expect(newAuditLog).not.toHaveProperty("events")
+
+    const newEvents = (await testGateway.getAll(auditLogDynamoConfig.eventsTableName)).Items?.sort((a, b) =>
+      a.timestamp.localeCompare(b.timestamp)
+    ) as AuditLogEvent[]
+
+    expect(newEvents).toHaveLength(2)
+    expect(newEvents[0]).not.toHaveProperty("s3Path")
+    expect(newEvents[0]).toHaveProperty("eventXml", "xml content")
+    expect(newEvents[1]).not.toHaveProperty("s3Path")
+    expect(newEvents[1].eventXml).toHaveProperty("_compressedValue")
+    const compressedValue = (newEvents[1].eventXml as AuditLogEventCompressedValue)._compressedValue
+    expect(compressedValue).not.toBe("really long xml".repeat(500))
+
+    const pathsToDelete = (await fs.promises.readFile("s3-paths-to-delete.txt"))
+      .toString()
+      .split("\n")
+      .filter((x) => x)
+
+    expect(pathsToDelete).toHaveLength(2)
+    expect(pathsToDelete).toContain("path/to/test.xml")
+    expect(pathsToDelete).toContain("path/to/test-long.xml")
+  })
 })
