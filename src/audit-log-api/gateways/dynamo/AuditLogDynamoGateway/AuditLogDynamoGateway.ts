@@ -427,60 +427,6 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
     return this.executeTransaction(dynamoUpdates)
   }
 
-  async prepareLookupItems(event: AuditLogEvent, messageId: string): Promise<[DynamoUpdate[], AuditLogEvent]> {
-    const attributes: KeyValuePair<string, unknown> = {}
-    const dynamoUpdates: DynamoUpdate[] = []
-
-    const attributeKeys = Object.keys(event.attributes)
-
-    for (const attributeKey of attributeKeys) {
-      const attributeValue = event.attributes[attributeKey]
-      if (attributeValue && typeof attributeValue === "string" && attributeValue.length > maxAttributeValueLength) {
-        const lookupItem = new AuditLogLookup(attributeValue, messageId)
-        const lookupDynamoUpdate = await this.prepareLookupItem(lookupItem)
-
-        dynamoUpdates.push(lookupDynamoUpdate)
-        attributes[attributeKey] = { valueLookup: lookupItem.id } as ValueLookup
-      } else {
-        attributes[attributeKey] = attributeValue
-      }
-    }
-
-    let eventXml: string | undefined | ValueLookup = "eventXml" in event ? (event as AuditLogEvent).eventXml : undefined
-    if (eventXml) {
-      const lookupItem = new AuditLogLookup(eventXml, messageId)
-      const lookupDynamoUpdates = await this.prepareLookupItem(lookupItem)
-
-      dynamoUpdates.push(lookupDynamoUpdates)
-      eventXml = { valueLookup: lookupItem.id }
-    }
-
-    const updatedEvent = {
-      ...event,
-      attributes,
-      ...(eventXml ? { eventXml } : {})
-    } as AuditLogEvent
-    return [dynamoUpdates, updatedEvent]
-  }
-
-  async prepareLookupItem(lookupItem: AuditLogLookup): Promise<DynamoUpdate> {
-    if (process.env.IS_E2E) {
-      lookupItem.expiryTime = Math.round(
-        addDays(new Date(), parseInt(process.env.EXPIRY_DAYS || "7")).getTime() / 1000
-      ).toString()
-    }
-
-    const itemToSave = { ...lookupItem, value: await compress(lookupItem.value), isCompressed: true }
-
-    return {
-      Put: {
-        Item: itemToSave,
-        TableName: this.config.lookupTableName,
-        ConditionExpression: `attribute_not_exists(${this.auditLogTableKey})`
-      }
-    }
-  }
-
   replaceAuditLog(auditLog: DynamoAuditLog, version: number): PromiseResult<void> {
     const replacement = { ...auditLog, version: version + 1 }
     return this.replaceOne(this.config.auditLogTableName, replacement, this.auditLogTableKey, version)
