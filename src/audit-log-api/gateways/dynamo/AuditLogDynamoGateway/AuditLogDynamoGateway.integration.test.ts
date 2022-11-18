@@ -1043,5 +1043,49 @@ describe("AuditLogDynamoGateway", () => {
       expect(actualEvents[0].eventType).toBe("Type 1")
       expect(actualEvents[0].attributes).toHaveProperty("Attribute 1", "Attribute 1 data".repeat(500))
     })
+
+    it("should compress event xml", async () => {
+      const events = [mockAuditLogEvent({ eventXml: "really long xml".repeat(500) })]
+      const result = await gateway.update(auditLog, { events })
+      expect(result).toNotBeError()
+
+      const allEvents = (await (
+        await testGateway.getAll(auditLogDynamoConfig.eventsTableName)
+      ).Items) as AuditLogEvent[]
+
+      expect(allEvents).toHaveLength(1)
+      expect(allEvents[0]).toHaveProperty("eventXml")
+      expect(allEvents[0].eventXml).toHaveProperty("_compressedValue")
+
+      const decompressedValue = (await decompress(
+        (allEvents[0].eventXml as { _compressedValue: string })._compressedValue
+      )) as string
+      expect(decompressedValue).toBe("really long xml".repeat(500))
+    })
+
+    it("should decompress event xml", async () => {
+      await testGateway.insertOne(auditLogDynamoConfig.auditLogTableName, auditLog, gateway.auditLogTableKey)
+      const externalEvent = {
+        ...mockAuditLogEvent(),
+        _messageId: auditLog.messageId,
+        eventXml: {
+          _compressedValue: await compress("really long xml".repeat(500))
+        }
+      }
+
+      await testGateway.insertOne(auditLogDynamoConfig.eventsTableName, externalEvent, gateway.eventsTableKey)
+
+      const result = await gateway.fetchMany({ limit: 1 })
+
+      expect(result).toNotBeError()
+
+      const actualAuditLogs = result as DynamoAuditLog[]
+      expect(actualAuditLogs).toHaveLength(1)
+      expect(actualAuditLogs[0].events).toHaveLength(1)
+
+      const actualEvents = actualAuditLogs[0].events
+      expect(actualEvents[0]).not.toHaveProperty("_compressedValue")
+      expect(actualEvents[0].eventXml).toBe("really long xml".repeat(500))
+    })
   })
 })

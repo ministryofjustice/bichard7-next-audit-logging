@@ -1,4 +1,4 @@
-import type { AuditLogEventAttributes } from "./AuditLogEvent"
+import type { AuditLogEventAttributes, AuditLogEventCompressedValue } from "./AuditLogEvent"
 import type EventCategory from "./EventCategory"
 
 export default interface AuditLogEventOptions {
@@ -12,7 +12,7 @@ export default interface AuditLogEventOptions {
   eventSource: string
   eventSourceQueueName?: string
   eventType: string
-  eventXml?: string
+  eventXml?: string | AuditLogEventCompressedValue
   timestamp: Date | string
   user?: string
 }
