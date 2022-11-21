@@ -20,7 +20,7 @@ export type Projection = {
 export default class DynamoGateway {
   protected readonly service: DynamoDB
 
-  protected readonly client: DocumentClient
+  public readonly client: DocumentClient
 
   constructor(config: DynamoDbConfig) {
     this.service = new DynamoDB(config)
