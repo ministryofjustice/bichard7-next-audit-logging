@@ -4,7 +4,7 @@ import axios from "axios"
 import { encodeBase64, HttpStatusCode, TestMqGateway, TestS3Gateway } from "src/shared"
 import { auditLogEventsS3Config, mockDynamoAuditLog } from "src/shared/testing"
 import type { MqConfig } from "src/shared/types"
-import { AuditLogEvent, AuditLogLookup, AuditLogStatus } from "src/shared/types"
+import { AuditLogEvent, AuditLogStatus } from "src/shared/types"
 import { v4 as uuid } from "uuid"
 import { auditLogDynamoConfig, TestDynamoGateway } from "../test"
 
@@ -15,21 +15,18 @@ const mqConfig: MqConfig = {
 }
 
 const testAuditLogDynamoGateway = new TestDynamoGateway(auditLogDynamoConfig)
-const testAuditLogLookupDynamoGateway = new TestDynamoGateway(auditLogDynamoConfig)
 const s3Gateway = new TestS3Gateway(auditLogEventsS3Config)
 const testMqGateway = new TestMqGateway(mqConfig)
 
 describe("retryMessage", () => {
   beforeEach(async () => {
     await testAuditLogDynamoGateway.deleteAll(auditLogDynamoConfig.auditLogTableName, "messageId")
-    await testAuditLogLookupDynamoGateway.deleteAll(auditLogDynamoConfig.auditLogTableName, "id")
     await s3Gateway.deleteAll()
   })
 
   it("should return Ok status when message contains eventXml and has been retried successfully", async () => {
     const eventXml = `<Xml>${uuid()}</Xml>`
     const message = mockDynamoAuditLog()
-    const lookupItem = new AuditLogLookup(eventXml, message.messageId)
     message.events.push(
       new AuditLogEvent({
         eventSource: "Dummy Event Source",
@@ -37,12 +34,11 @@ describe("retryMessage", () => {
         eventType: "Dummy Failed Message",
         category: "error",
         timestamp: new Date(),
-        eventXml: { valueLookup: lookupItem.id } as unknown as string
+        eventXml
       })
     )
 
     await testAuditLogDynamoGateway.insertOne(auditLogDynamoConfig.auditLogTableName, message, "messageId")
-    await testAuditLogLookupDynamoGateway.insertOne(auditLogDynamoConfig.lookupTableName, lookupItem, "id")
 
     const response = await axios.post(`http://localhost:3010/messages/${message.messageId}/retry`, null)
 
@@ -57,7 +53,6 @@ describe("retryMessage", () => {
   it("should return Ok status when message constains s3Path for the event and has been retried successfully", async () => {
     const eventXml = `<Xml>${uuid()}< /Xml>`
     const message = mockDynamoAuditLog()
-    const lookupItem = new AuditLogLookup(eventXml, message.messageId)
     const eventS3Path = "event.xml"
     const messageEvent = {
       s3Path: eventS3Path,
@@ -77,7 +72,6 @@ describe("retryMessage", () => {
     await s3Gateway.upload(eventS3Path, JSON.stringify(eventObjectInS3))
 
     await testAuditLogDynamoGateway.insertOne(auditLogDynamoConfig.auditLogTableName, message, "messageId")
-    await testAuditLogLookupDynamoGateway.insertOne(auditLogDynamoConfig.lookupTableName, lookupItem, "id")
 
     const response = await axios.post(`http://localhost:3010/messages/${message.messageId}/retry`, null)
 

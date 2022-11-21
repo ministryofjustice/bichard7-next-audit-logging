@@ -1,28 +1,13 @@
 import type { APIGatewayProxyEvent } from "aws-lambda"
 import { HttpStatusCode } from "src/shared"
-import { AuditLogEvent } from "src/shared/types"
+import { mockApiAuditLogEvent } from "src/shared/testing"
+import { ApiAuditLogEvent } from "src/shared/types"
 import "../testConfig"
 import { CreateAuditLogEventsUseCase } from "../use-cases"
 import createAuditLogEvents from "./createAuditLogEvents"
 
-const createTestAuditLogEvent = (): AuditLogEvent => {
-  return new AuditLogEvent({
-    category: "information",
-    timestamp: new Date(),
-    eventType: "Test event",
-    eventSource: "Test"
-  })
-}
-
-const createHandlerEvent = (...auditLogEvents: AuditLogEvent[]): APIGatewayProxyEvent => {
-  const events = auditLogEvents || [
-    new AuditLogEvent({
-      category: "information",
-      timestamp: new Date(),
-      eventType: "Test event",
-      eventSource: "Test"
-    })
-  ]
+const createHandlerEvent = (...auditLogEvents: ApiAuditLogEvent[]): APIGatewayProxyEvent => {
+  const events = auditLogEvents || [mockApiAuditLogEvent()]
 
   return <APIGatewayProxyEvent>{
     body: JSON.stringify(events),
@@ -54,7 +39,7 @@ describe("createAuditLogEvents()", () => {
       })
     )
 
-    const auditLogEvents = new Array(10).fill(0).map(() => createTestAuditLogEvent())
+    const auditLogEvents = new Array(10).fill(0).map(() => mockApiAuditLogEvent())
     const event = createHandlerEvent(...auditLogEvents)
     const actualResponse = await createAuditLogEvents(event)
 
@@ -63,7 +48,7 @@ describe("createAuditLogEvents()", () => {
   })
 
   it("should return Bad request status when a single audit log event is not valid", async () => {
-    const event = createHandlerEvent({} as AuditLogEvent)
+    const event = createHandlerEvent({} as ApiAuditLogEvent)
     const actualResponse = await createAuditLogEvents(event)
 
     expect(actualResponse.statusCode).toBe(HttpStatusCode.badRequest)
@@ -84,8 +69,8 @@ describe("createAuditLogEvents()", () => {
   })
 
   it("should return Bad request status when a one audit log event among many is not valid", async () => {
-    const events = new Array(10).fill(0).map(() => createTestAuditLogEvent())
-    events.splice(4, 0, {} as AuditLogEvent)
+    const events = new Array(10).fill(0).map(() => mockApiAuditLogEvent())
+    events.splice(4, 0, {} as ApiAuditLogEvent)
     const handlerEvent = createHandlerEvent(...events)
     const actualResponse = await createAuditLogEvents(handlerEvent)
 

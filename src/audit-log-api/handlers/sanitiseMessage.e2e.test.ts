@@ -4,14 +4,13 @@ import { addDays } from "date-fns"
 import { BichardPostgresGateway, createS3Config, HttpStatusCode, TestPostgresGateway, TestS3Gateway } from "src/shared"
 import { mockDynamoAuditLog, setEnvironmentVariables } from "src/shared/testing"
 import type { DynamoAuditLog } from "src/shared/types"
-import { AuditLogEvent, AuditLogLookup } from "src/shared/types"
+import { AuditLogEvent } from "src/shared/types"
 import createBichardPostgresGatewayConfig from "../createBichardPostgresGatewayConfig"
 import { auditLogDynamoConfig, TestDynamoGateway } from "../test"
 
 setEnvironmentVariables()
 
 const auditLogTableName = "auditLogTable"
-const auditLogLookupTableName = "auditLogLookupTable"
 
 const postgresConfig = createBichardPostgresGatewayConfig()
 const errorListPostgresConfig = {
@@ -51,7 +50,6 @@ describe("sanitiseMessage", () => {
     await eventsS3Gateway.deleteAll()
     await messagesS3Gateway.deleteAll()
     await testDynamoGateway.deleteAll(auditLogTableName, "messageId")
-    await testDynamoGateway.deleteAll(auditLogLookupTableName, "id")
     await testPostgresGateway.truncateTable()
     await errorListTestPostgresGateway.truncateTable()
   })
@@ -78,13 +76,6 @@ describe("sanitiseMessage", () => {
     await eventsS3Gateway.upload(event1.s3Path, "dummy")
 
     await testDynamoGateway.insertOne(auditLogTableName, message, "messageId")
-
-    await Promise.all(
-      [...Array(2).keys()].map((index) => {
-        const item = new AuditLogLookup(`Record to delete ${index}`, message.messageId)
-        return testDynamoGateway.insertOne(auditLogLookupTableName, { ...item, id: `ID-${index}` }, "id")
-      })
-    )
 
     const otherMessageId = "otherMessageID"
     const records = [
@@ -115,9 +106,6 @@ describe("sanitiseMessage", () => {
     const attributes = actualMessage?.events.find((event) => "s3Path" in event)?.attributes ?? {}
     expect(Object.keys(attributes)).toHaveLength(1)
     expect(attributes["Trigger 2 Details"]).toBe("TRPR0004")
-
-    const lookupItems = await testDynamoGateway.getAll(auditLogLookupTableName)
-    expect(lookupItems.Items).toHaveLength(0)
 
     const allResults = await testPostgresGateway.findAll()
     expect(allResults).toHaveLength(1)

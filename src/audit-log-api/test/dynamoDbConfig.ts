@@ -5,7 +5,6 @@ const auditLogDynamoConfig: DynamoDbConfig = {
   region: "eu-west-2",
   auditLogTableName: "auditLogTable",
   eventsTableName: "auditLogEventsTable",
-  lookupTableName: "auditLogLookupTable",
   accessKeyId: "DUMMY",
   secretAccessKey: "DUMMY"
 }

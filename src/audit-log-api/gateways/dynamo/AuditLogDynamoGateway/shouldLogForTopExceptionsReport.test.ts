@@ -1,4 +1,4 @@
-import type { AuditLogEvent } from "src/shared/types"
+import type { ApiAuditLogEvent } from "src/shared/types"
 import shouldLogForTopExceptionsReport from "./shouldLogForTopExceptionsReport"
 
 it("should return true when event has correct event code attribute", () => {
@@ -7,7 +7,7 @@ it("should return true when event has correct event code attribute", () => {
     attributes: {
       "Error 1 Details": "Dummy"
     }
-  } as unknown as AuditLogEvent
+  } as unknown as ApiAuditLogEvent
 
   const result = shouldLogForTopExceptionsReport(event)
 
@@ -17,7 +17,7 @@ it("should return true when event has correct event code attribute", () => {
 it("should return false when event has incorrect event code attribute", () => {
   const event = {
     eventCode: "dummy"
-  } as unknown as AuditLogEvent
+  } as unknown as ApiAuditLogEvent
 
   const result = shouldLogForTopExceptionsReport(event)
 

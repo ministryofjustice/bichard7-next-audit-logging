@@ -1,7 +1,7 @@
 import axios from "axios"
 import { HttpStatusCode } from "src/shared"
 import { mockApiAuditLogEvent, mockInputApiAuditLog } from "src/shared/testing"
-import { AuditLogEvent, DynamoAuditLog, EventCode } from "src/shared/types"
+import { ApiAuditLogEvent, DynamoAuditLog, EventCode } from "src/shared/types"
 import { AuditLogDynamoGateway } from "../gateways/dynamo"
 import { auditLogDynamoConfig, TestDynamoGateway } from "../test"
 const testGateway = new TestDynamoGateway(auditLogDynamoConfig)
@@ -30,7 +30,7 @@ describe("Creating multiple Audit Log events", () => {
 
     expect(events).toHaveLength(1)
 
-    const actualEvent = events[0] as AuditLogEvent
+    const actualEvent = events[0] as ApiAuditLogEvent
     expect(actualEvent).toStrictEqual({
       category: event.category,
       eventCode: event.eventCode,
@@ -40,7 +40,7 @@ describe("Creating multiple Audit Log events", () => {
       eventXml: event.eventXml,
       timestamp: event.timestamp,
       attributes: event.attributes
-    } as AuditLogEvent)
+    } as ApiAuditLogEvent)
   })
 
   it("should create many new audit log events for an existing audit log record", async () => {
@@ -84,7 +84,7 @@ describe("Creating a single Audit Log event", () => {
 
     expect(events).toHaveLength(1)
 
-    const actualEvent = events[0] as AuditLogEvent
+    const actualEvent = events[0] as ApiAuditLogEvent
 
     expect(actualEvent).toEqual({
       category: event.category,
@@ -95,7 +95,7 @@ describe("Creating a single Audit Log event", () => {
       eventXml: event.eventXml,
       timestamp: event.timestamp,
       attributes: event.attributes
-    } as AuditLogEvent)
+    } as ApiAuditLogEvent)
   })
 
   it("should transform the audit log event before saving", async () => {
@@ -103,9 +103,7 @@ describe("Creating a single Audit Log event", () => {
     const result1 = await axios.post("http://localhost:3010/messages", auditLog)
     expect(result1.status).toEqual(HttpStatusCode.created)
 
-    const event = mockApiAuditLogEvent()
-    event.addAttribute("user", "Test User")
-    event.addAttribute("eventCode", "test.event")
+    const event = mockApiAuditLogEvent({ attributes: { user: "Test User", eventCode: "test.event" } })
     const result2 = await axios.post(`http://localhost:3010/messages/${auditLog.messageId}/events`, event)
     expect(result2.status).toEqual(HttpStatusCode.created)
 
@@ -118,7 +116,7 @@ describe("Creating a single Audit Log event", () => {
 
     expect(events).toHaveLength(1)
 
-    const actualEvent = events[0] as AuditLogEvent
+    const actualEvent = events[0] as ApiAuditLogEvent
     expect(actualEvent.user).toBe("Test User")
     expect(actualEvent.eventCode).toBe("test.event")
   })
@@ -175,15 +173,19 @@ describe("Creating a single Audit Log event", () => {
       let triggerStatus = await getTriggerStatus(auditLog.messageId)
       expect(triggerStatus).toBe("NoTriggers")
 
-      let event = mockApiAuditLogEvent({ eventCode: EventCode.TriggersGenerated })
-      event.addAttribute("Trigger 1 Details", "TRPR0001")
+      let event = mockApiAuditLogEvent({
+        attributes: { "Trigger 1 Details": "TRPR0001" },
+        eventCode: EventCode.TriggersGenerated
+      })
       await axios.post(`http://localhost:3010/messages/${auditLog.messageId}/events`, event)
 
       triggerStatus = await getTriggerStatus(auditLog.messageId)
       expect(triggerStatus).toBe("Generated")
 
-      event = mockApiAuditLogEvent({ eventCode: EventCode.TriggersResolved })
-      event.addAttribute("Trigger 1 Details", "TRPR0001")
+      event = mockApiAuditLogEvent({
+        attributes: { "Trigger 1 Details": "TRPR0001" },
+        eventCode: EventCode.TriggersResolved
+      })
       await axios.post(`http://localhost:3010/messages/${auditLog.messageId}/events`, event)
 
       triggerStatus = await getTriggerStatus(auditLog.messageId)

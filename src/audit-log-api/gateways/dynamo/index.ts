@@ -1,8 +1,6 @@
 export { default as AuditLogDynamoGateway } from "./AuditLogDynamoGateway/AuditLogDynamoGateway"
 export * from "./AuditLogDynamoGateway/AuditLogDynamoGatewayInterface"
 export { default as AuditLogDynamoGatewayInterface } from "./AuditLogDynamoGateway/AuditLogDynamoGatewayInterface"
-export { default as AuditLogLookupDynamoGateway } from "./AuditLogLookupDynamoGateway/AuditLogLookupDynamoGateway"
-export { default as AwsAuditLogLookupDynamoGateway } from "./AuditLogLookupDynamoGateway/AwsAuditLogLookupDynamoGateway"
 export type { default as DynamoDbConfig } from "./DynamoGateway/DynamoDbConfig"
 export type { default as DynamoUpdate } from "./DynamoGateway/DynamoUpdate"
 export { default as isConditionalExpressionViolationError } from "./DynamoGateway/isConditionalExpressionViolationError"

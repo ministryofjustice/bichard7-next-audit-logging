@@ -126,7 +126,7 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
     options: EventsFilterOptions = {}
   ): PromiseResult<void> {
     for (const auditLog of auditLogs) {
-      const indexSearcher = new IndexSearcher<ApiAuditLogEvent[]>(
+      const indexSearcher = new IndexSearcher<DynamoAuditLogEvent[]>(
         this,
         this.config.eventsTableName,
         this.eventsTableKey
@@ -330,24 +330,6 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
     return auditLog ? auditLog.version : null
   }
 
-  async fetchEvents(messageId: string): PromiseResult<DynamoAuditLogEvent[]> {
-    const result = await this.fetchOne(messageId)
-
-    if (isError(result)) {
-      return result
-    }
-
-    if (!result) {
-      return new Error(`Couldn't get events for message '${messageId}'.`)
-    }
-
-    if (!result.events) {
-      return []
-    }
-
-    return result.events as DynamoAuditLogEvent[]
-  }
-
   async update(existing: DynamoAuditLog, updates: Partial<DynamoAuditLog>): PromiseResult<void> {
     const updateExpression = []
     const expressionAttributeNames: KeyValuePair<string, string> = {}
@@ -480,7 +462,7 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
     return event
   }
 
-  private async decompressEventValues(event: ApiAuditLogEvent): PromiseResult<ApiAuditLogEvent> {
+  private async decompressEventValues(event: DynamoAuditLogEvent): PromiseResult<DynamoAuditLogEvent> {
     for (const [attributeKey, attributeValue] of Object.entries(event.attributes)) {
       if (attributeValue && typeof attributeValue === "object" && "_compressedValue" in attributeValue) {
         const compressedValue = (attributeValue as { _compressedValue: string })._compressedValue

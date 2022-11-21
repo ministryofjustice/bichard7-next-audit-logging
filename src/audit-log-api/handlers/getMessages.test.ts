@@ -11,7 +11,6 @@ import { mockDynamoAuditLog } from "src/shared/testing"
 import type { DynamoAuditLog, OutputApiAuditLog, Result } from "src/shared/types"
 import "../testConfig"
 import { createMessageFetcher } from "../use-cases"
-import LookupMessageValuesUseCase from "../use-cases/LookupMessageValuesUseCase"
 import type MessageFetcher from "../use-cases/MessageFetcher"
 import getMessages from "./getMessages"
 
@@ -89,22 +88,6 @@ test("should respond with error when message fetcher fails", async () => {
   expect(actualResponse.body).toBe("Error: Expected Error")
 })
 
-test("should respond with error when lookup message values fails", async () => {
-  const error = new Error("Expected Error")
-  const lookupMessageValuesUseCaseSpy = jest
-    .spyOn(LookupMessageValuesUseCase.prototype, "execute")
-    .mockResolvedValue(error)
-  mockCreateMessageFetcher.mockReturnValue(createDummyMessageFetcher(log1))
-
-  const event = createEvent({ messageId: "SomeMessageId" })
-  const messages = await getMessages(event)
-  const actualResponse = <APIGatewayProxyResult>messages
-
-  expect(actualResponse.statusCode).toBe(HttpStatusCode.internalServerError)
-  expect(actualResponse.body).toBe("Error: Expected Error")
-  lookupMessageValuesUseCaseSpy.mockRestore()
-})
-
 test("should return a single message when the message Id is given", async () => {
   mockCreateMessageFetcher.mockReturnValue(createDummyMessageFetcher(log1))
 
@@ -157,37 +140,4 @@ test("should return a single message when the externalCorrelationId is given and
   expect(actualMessage.externalCorrelationId).toBe(log1.externalCorrelationId)
   expect(actualMessage.caseId).toBe(log1.caseId)
   expect(actualMessage.receivedDate).toBe(log1.receivedDate)
-})
-
-test("should look up message values if fetchLargeMessages param is true", async () => {
-  mockCreateMessageFetcher.mockReturnValue(createDummyMessageFetcher(log1))
-  const lookupMessageValuesUseCaseSpy = jest.spyOn(LookupMessageValuesUseCase.prototype, "execute")
-
-  const event = createEvent(undefined, { externalCorrelationId: "SomeExternalCorrelationId" })
-  await getMessages(event)
-
-  expect(lookupMessageValuesUseCaseSpy).toHaveBeenCalledTimes(1)
-})
-
-test("should look up message values if fetchLargeMessages param is undefined", async () => {
-  mockCreateMessageFetcher.mockReturnValue(createDummyMessageFetcher(log1))
-  const lookupMessageValuesUseCaseSpy = jest.spyOn(LookupMessageValuesUseCase.prototype, "execute")
-
-  const eventWithLargeObjectsParam = createEvent(undefined, {
-    externalCorrelationId: "SomeExternalCorrelationId",
-    largeObjects: "true"
-  })
-  await getMessages(eventWithLargeObjectsParam)
-
-  expect(lookupMessageValuesUseCaseSpy).toHaveBeenCalledTimes(1)
-})
-
-test("should not look up message values if fetchLargeMessages param is false", async () => {
-  mockCreateMessageFetcher.mockReturnValue(createDummyMessageFetcher(log1))
-  const lookupMessageValuesUseCaseSpy = jest.spyOn(LookupMessageValuesUseCase.prototype, "execute")
-
-  const event = createEvent(undefined, { externalCorrelationId: "SomeExternalCorrelationId", largeObjects: "false" })
-  await getMessages(event)
-
-  expect(lookupMessageValuesUseCaseSpy).toHaveBeenCalledTimes(0)
 })

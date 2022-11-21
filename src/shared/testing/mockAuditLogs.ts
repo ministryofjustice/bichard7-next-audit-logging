@@ -1,6 +1,7 @@
 import type {
   ApiAuditLogEvent,
   DynamoAuditLog,
+  DynamoAuditLogEvent,
   EventCategory,
   InputApiAuditLog,
   OutputApiAuditLog
@@ -53,4 +54,11 @@ export const mockApiAuditLogEvent = (overrides: Partial<ApiAuditLogEvent> = {}):
     "Attribute 2": "Attribute 2 data"
   },
   ...overrides
+})
+
+export const mockDynamoAuditLogEvent = (overrides: Partial<DynamoAuditLogEvent> = {}): DynamoAuditLogEvent => ({
+  ...mockApiAuditLogEvent(overrides),
+  _automationReport: 0,
+  _topExceptionsReport: 0,
+  _messageId: "needs-setting"
 })

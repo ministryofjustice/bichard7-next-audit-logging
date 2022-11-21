@@ -24,7 +24,6 @@ const s3Gateway = new TestS3Gateway({
   secretAccessKey: "S3RVER"
 })
 const auditLogTableName = "auditLogTable"
-const auditLogLookupTableName = "auditLogLookupTable"
 const auditLogApi = new AuditLogApiClient("http://localhost:3010", "Api-key")
 const eventHandlerSimulator = new EventHandlerSimulator()
 
@@ -53,7 +52,6 @@ type DynamoPollResult = {
 
 beforeEach(async () => {
   await clearDynamoTable(auditLogTableName, "messageId")
-  await clearDynamoTable(auditLogLookupTableName, "id")
   await s3Gateway.deleteAll()
 })
 

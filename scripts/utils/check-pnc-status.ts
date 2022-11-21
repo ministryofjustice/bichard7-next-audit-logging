@@ -18,7 +18,6 @@ const dynamoConfig: DynamoDbConfig = {
   auditLogTableName: "Will be retrieved from Retry Message lambda environment variable",
   endpoint: "Will be retrieved from Retry Message lambda environment variable",
   eventsTableName: "Not needed",
-  lookupTableName: "Not needed",
   region: "eu-west-2"
 }
 

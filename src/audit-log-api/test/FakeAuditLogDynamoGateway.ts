@@ -103,18 +103,6 @@ export default class FakeAuditLogDynamoGateway implements AuditLogDynamoGatewayI
     throw new Error("Method not implemented.")
   }
 
-  fetchEvents(messageId: string): PromiseResult<AuditLogEvent[]> {
-    if (this.error) {
-      return Promise.resolve(this.error)
-    }
-
-    const events = this.messages.find((x) => x.messageId === messageId)?.events || []
-
-    const sortedEvents = events.sort((eventA, eventB) => (eventA.timestamp > eventB.timestamp ? -1 : 1))
-
-    return Promise.resolve(sortedEvents)
-  }
-
   replaceAuditLog(_: DynamoAuditLog, __: number): PromiseResult<void> {
     throw new Error("Method not implemented.")
   }

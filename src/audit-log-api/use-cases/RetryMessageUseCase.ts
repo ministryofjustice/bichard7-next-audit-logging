@@ -2,13 +2,11 @@ import { decodeBase64, logger } from "src/shared"
 import type { PromiseResult } from "src/shared/types"
 import { isError } from "src/shared/types"
 import type CreateRetryingEventUseCase from "./CreateRetryingEventUseCase"
-import type GetLastFailedMessageEventUseCase from "./GetLastEventUseCase"
 import type RetrieveEventXmlFromS3 from "./RetrieveEventXmlFromS3UseCase"
 import type SendMessageToQueueUseCase from "./SendMessageToQueueUseCase"
 
 export default class RetryMessageUseCase {
   constructor(
-    private readonly getLastFailedMessageEventUseCase: GetLastFailedMessageEventUseCase,
     private readonly sendMessageToQueueUseCase: SendMessageToQueueUseCase,
     private readonly retrieveEventXmlFromS3UseCase: RetrieveEventXmlFromS3,
     private readonly createRetryingEventUseCase: CreateRetryingEventUseCase
@@ -16,6 +14,7 @@ export default class RetryMessageUseCase {
 
   async retry(messageId: string): PromiseResult<void> {
     logger.info(`Retrying message ${messageId}`)
+    // TODO: Should get full message with events
     const event = await this.getLastFailedMessageEventUseCase.get(messageId)
 
     if (isError(event)) {

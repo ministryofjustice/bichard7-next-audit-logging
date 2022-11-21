@@ -228,7 +228,7 @@ describe("CreateAuditLogEventsUseCase", () => {
 
     const events = new Array(250).fill(0).map(() => {
       const event = createAuditLogEvent()
-      event.addAttribute("longAttribute", "this goes in the lookup table".repeat(100))
+      event.addAttribute("longAttribute", "this should be compressed".repeat(100))
       return event
     })
 

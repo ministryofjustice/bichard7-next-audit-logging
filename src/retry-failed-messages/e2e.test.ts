@@ -19,7 +19,6 @@ process.env.BUCKET_NAME = "auditLogEventsBucket"
 import handler from "./index"
 
 const auditLogTableName = "auditLogTable"
-const auditLogLookupTableName = "auditLogLookupTable"
 
 const s3Gateway = new TestS3Gateway(auditLogEventsS3Config)
 
@@ -27,7 +26,6 @@ describe("Retry Failed Messages", () => {
   beforeEach(async () => {
     await s3Gateway.deleteAll()
     await clearDynamoTable(auditLogTableName, "messageId")
-    await clearDynamoTable(auditLogLookupTableName, "id")
   })
 
   it("should retry the correct messages using eventXml for the first time", async () => {

@@ -1,3 +1,3 @@
-import type { AuditLogEvent } from "src/shared/types"
+import type { ApiAuditLogEvent } from "src/shared/types"
 
-export default (event: AuditLogEvent): boolean => event.eventCode === "exceptions.generated"
+export default (event: ApiAuditLogEvent): boolean => event.eventCode === "exceptions.generated"

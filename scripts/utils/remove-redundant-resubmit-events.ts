@@ -40,7 +40,6 @@ const messageIds = MESSAGE_ID
 const dynamoConfig = {
   region: "eu-west-2",
   auditLogTableName: "Will be retrieved from Retry Message lambda environment variable",
-  auditLogLookupTableName: "Will be retrieved from Retry Message lambda environment variable",
   endpoint: "Will be retrieved from Retry Message lambda environment variable"
 }
 

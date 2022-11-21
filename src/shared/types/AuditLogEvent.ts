@@ -1,7 +1,5 @@
 import type EventCategory from "./EventCategory"
 
-export type AuditLogEventAttributeLookupValue = { valueLookup: string }
-
 export type AuditLogEventCompressedValue = { _compressedValue: string }
 
 export type AuditLogEventDecompressedAttributeValue = string | number | boolean
@@ -14,10 +12,7 @@ export type AuditLogEventDecompressedAttributes = {
   [key: string]: AuditLogEventDecompressedAttributeValue
 }
 
-export type AuditLogEventAttributeValue =
-  | AuditLogEventDecompressedAttributeValue
-  | AuditLogEventCompressedValue
-  | AuditLogEventAttributeLookupValue
+export type AuditLogEventAttributeValue = AuditLogEventDecompressedAttributeValue | AuditLogEventCompressedValue
 
 export type ApiAuditLogEvent = {
   attributes: AuditLogEventAttributes
