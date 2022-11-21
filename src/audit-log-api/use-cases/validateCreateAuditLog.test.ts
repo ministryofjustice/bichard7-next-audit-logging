@@ -1,5 +1,5 @@
 import { mockDynamoAuditLog, mockInputApiAuditLog } from "src/shared/testing"
-import { InputApiAuditLog } from "src/shared/types"
+import type { InputApiAuditLog } from "src/shared/types"
 import { FakeAuditLogDynamoGateway } from "../test"
 import validateCreateAuditLog from "./validateCreateAuditLog"
 

@@ -1,6 +1,7 @@
 import "src/shared/testing"
 import { mockDynamoAuditLog } from "src/shared/testing"
-import { AuditLogEvent, AuditLogLookup, DynamoAuditLog } from "src/shared/types"
+import type { DynamoAuditLog } from "src/shared/types"
+import { AuditLogEvent, AuditLogLookup } from "src/shared/types"
 import { FakeAuditLogLookupDynamoGateway } from "../test"
 import LookupEventValuesUseCase from "./LookupEventValuesUseCase"
 import LookupMessageValuesUseCase from "./LookupMessageValuesUseCase"

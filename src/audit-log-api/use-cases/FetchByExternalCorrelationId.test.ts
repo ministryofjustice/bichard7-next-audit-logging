@@ -1,5 +1,6 @@
 import { mockDynamoAuditLog } from "src/shared/testing"
-import { DynamoAuditLog, isError } from "src/shared/types"
+import type { DynamoAuditLog } from "src/shared/types"
+import { isError } from "src/shared/types"
 import { FakeAuditLogDynamoGateway } from "../test"
 import FetchByExternalCorrelationId from "./FetchByExternalCorrelationId"
 

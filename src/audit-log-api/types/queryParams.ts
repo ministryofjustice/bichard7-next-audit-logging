@@ -1,4 +1,4 @@
-import { DynamoAuditLog } from "src/shared/types"
+import type { DynamoAuditLog } from "src/shared/types"
 
 export type PaginationOptions = {
   limit?: number

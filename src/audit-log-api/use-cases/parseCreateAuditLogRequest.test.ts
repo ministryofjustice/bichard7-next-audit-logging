@@ -1,6 +1,7 @@
 import type { APIGatewayProxyEvent } from "aws-lambda"
 import { mockInputApiAuditLog } from "src/shared/testing"
-import { InputApiAuditLog, isError } from "src/shared/types"
+import type { InputApiAuditLog } from "src/shared/types"
+import { isError } from "src/shared/types"
 import parseCreateAuditLogRequest from "./parseCreateAuditLogRequest"
 
 test("should return audit log when request body has value", () => {

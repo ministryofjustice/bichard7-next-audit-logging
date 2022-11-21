@@ -1,18 +1,20 @@
 import type { APIGatewayProxyEvent } from "aws-lambda"
 import { AuditLogEvent, isError } from "src/shared/types"
-import type { ParseCreateAuditLogEventRequestResult } from "./parseCreateAuditLogEventRequest"
-import parseCreateAuditLogEventRequest from "./parseCreateAuditLogEventRequest"
+import type { ParseCreateAuditLogEventsRequestResult } from "./parseCreateAuditLogEventsRequest"
+import parseCreateAuditLogEventsRequest from "./parseCreateAuditLogEventsRequest"
 
-const expectedAuditLogEvent = new AuditLogEvent({
-  category: "information",
-  timestamp: new Date(),
-  eventType: "Test parsing request",
-  eventSource: "Test"
-})
+const expectedAuditLogEvent = [
+  new AuditLogEvent({
+    category: "information",
+    timestamp: new Date(),
+    eventType: "Test parsing request",
+    eventSource: "Test"
+  })
+]
 const expectedMessageId = "0197bffc-fbf0-4ddd-9324-462d224c6c2e"
 
 test("should return audit log event and messageId when request body has value and messageId is in path", () => {
-  const result = parseCreateAuditLogEventRequest(<APIGatewayProxyEvent>{
+  const result = parseCreateAuditLogEventsRequest(<APIGatewayProxyEvent>{
     body: JSON.stringify(expectedAuditLogEvent),
     pathParameters: <unknown>{
       messageId: expectedMessageId
@@ -21,16 +23,17 @@ test("should return audit log event and messageId when request body has value an
 
   expect(isError(result)).toBe(false)
 
-  const { messageId, auditLogEvent } = <ParseCreateAuditLogEventRequestResult>result
+  const { messageId, auditLogEvents } = <ParseCreateAuditLogEventsRequestResult>result
   expect(messageId).toBe(messageId)
-  expect(auditLogEvent).toBeDefined()
-  expect(auditLogEvent.category).toBe(expectedAuditLogEvent.category)
-  expect(auditLogEvent.timestamp).toBe(expectedAuditLogEvent.timestamp)
-  expect(auditLogEvent.eventType).toBe(expectedAuditLogEvent.eventType)
+  expect(auditLogEvents).toBeDefined()
+  expect(auditLogEvents[0]).toBeDefined()
+  expect(auditLogEvents[0].category).toBe(expectedAuditLogEvent[0].category)
+  expect(auditLogEvents[0].timestamp).toBe(expectedAuditLogEvent[0].timestamp)
+  expect(auditLogEvents[0].eventType).toBe(expectedAuditLogEvent[0].eventType)
 })
 
 test("should return error when request body is empty", () => {
-  const result = parseCreateAuditLogEventRequest(<APIGatewayProxyEvent>{
+  const result = parseCreateAuditLogEventsRequest(<APIGatewayProxyEvent>{
     body: null,
     pathParameters: <unknown>{
       messageId: expectedMessageId
@@ -44,7 +47,7 @@ test("should return error when request body is empty", () => {
 })
 
 test("should return error when request body is not valid", () => {
-  const result = parseCreateAuditLogEventRequest(<APIGatewayProxyEvent>{
+  const result = parseCreateAuditLogEventsRequest(<APIGatewayProxyEvent>{
     body: "Invalid format",
     pathParameters: <unknown>{
       messageId: expectedMessageId
@@ -58,7 +61,7 @@ test("should return error when request body is not valid", () => {
 })
 
 test("should return error when messageId is not in path", () => {
-  const result = parseCreateAuditLogEventRequest(<APIGatewayProxyEvent>{
+  const result = parseCreateAuditLogEventsRequest(<APIGatewayProxyEvent>{
     body: JSON.stringify(expectedAuditLogEvent)
   })
 

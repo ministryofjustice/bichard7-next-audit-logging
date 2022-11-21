@@ -1,5 +1,6 @@
 import { mockDynamoAuditLog } from "src/shared/testing"
-import { AuditLogEvent, DynamoAuditLog } from "src/shared/types"
+import type { DynamoAuditLog } from "src/shared/types"
+import { AuditLogEvent } from "src/shared/types"
 import { AuditLogDynamoGateway } from "../gateways/dynamo"
 import { auditLogDynamoConfig, TestDynamoGateway } from "../test"
 import { CreateAuditLogEventsUseCase } from "./CreateAuditLogEventsUseCase"

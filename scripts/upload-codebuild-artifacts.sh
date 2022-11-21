@@ -79,19 +79,13 @@ cd build/audit-log-api/handlers
 
 zip getMessages.zip getMessages.js
 zip createAuditLog.zip createAuditLog.js
-zip createAuditLogs.zip createAuditLogs.js
-zip createAuditLogEvent.zip createAuditLogEvent.js
 zip createAuditLogEvents.zip createAuditLogEvents.js
-zip getEvents.zip getEvents.js
 zip retryMessage.zip retryMessage.js
 zip sanitiseMessage.zip sanitiseMessage.js
 
 upload_to_s3 getMessages.zip getMessages.zip
 upload_to_s3 createAuditLog.zip createAuditLog.zip
-upload_to_s3 createAuditLogs.zip createAuditLogs.zip
-upload_to_s3 createAuditLogEvent.zip createAuditLogEvent.zip
 upload_to_s3 createAuditLogEvents.zip createAuditLogEvents.zip
-upload_to_s3 getEvents.zip getEvents.zip
 upload_to_s3 retryMessage.zip retryMessage.zip
 upload_to_s3 sanitiseMessage.zip sanitiseMessage.zip
 

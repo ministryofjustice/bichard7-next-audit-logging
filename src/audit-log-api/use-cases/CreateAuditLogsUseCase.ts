@@ -1,12 +1,5 @@
-import {
-  AuditLogStatus,
-  DynamoAuditLog,
-  InputApiAuditLog,
-  isError,
-  PncStatus,
-  TransactionFailureReason,
-  TriggerStatus
-} from "src/shared/types"
+import type { DynamoAuditLog, InputApiAuditLog, TransactionFailureReason } from "src/shared/types"
+import { AuditLogStatus, isError, PncStatus, TriggerStatus } from "src/shared/types"
 import type { AuditLogDynamoGatewayInterface } from "../gateways/dynamo"
 import { isConditionalExpressionViolationError, isTransactionFailedError } from "../gateways/dynamo"
 
