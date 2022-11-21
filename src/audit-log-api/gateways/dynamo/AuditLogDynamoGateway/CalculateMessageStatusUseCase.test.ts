@@ -1,4 +1,4 @@
-import type { AuditLogEvent, KeyValuePair } from "src/shared/types"
+import type { ApiAuditLogEvent, KeyValuePair } from "src/shared/types"
 import { AuditLogStatus, EventCode, PncStatus, TriggerStatus } from "src/shared/types"
 import CalculateMessageStatusUseCase from "./CalculateMessageStatusUseCase"
 
@@ -9,7 +9,7 @@ const createEvent = (eventCode: EventCode, category = "information", attributes?
     category,
     attributes,
     timestamp: new Date(new Date().getTime() + 1000 * eventIndex++)
-  } as unknown as AuditLogEvent)
+  } as unknown as ApiAuditLogEvent)
 const sanitisedEvent = () => createEvent(EventCode.Sanitised)
 const archivedRecordEvent = () => createEvent(EventCode.ErrorRecordArchived)
 const errorEvent = () => createEvent(EventCode.MessageRejected, "error")

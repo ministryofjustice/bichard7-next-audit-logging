@@ -6,7 +6,7 @@ import {
   createMockAuditLogEvent,
   createMockAuditLogs,
   createMockError,
-  mockAuditLogEvent,
+  mockApiAuditLogEvent,
   mockDynamoAuditLog
 } from "src/shared/testing"
 import type { DynamoAuditLog, OutputApiAuditLog } from "src/shared/types"
@@ -116,7 +116,7 @@ describe("Getting Audit Logs", () => {
       const lookupItem2Value = (await compress("Test value 2")) as string
       const lookupItem2 = new AuditLogLookup(lookupItem2Value, auditLog.messageId)
       lookupItem2.isCompressed = true
-      const event = mockAuditLogEvent()
+      const event = mockApiAuditLogEvent()
       event.addAttribute("Attribute 3", { valueLookup: lookupItem1.id })
       event.addAttribute("Attribute 4", { valueLookup: lookupItem2.id })
       event.addAttribute("Error 1 Details", "dummy")
@@ -490,7 +490,7 @@ describe("Getting Audit Logs", () => {
     beforeEach(async () => {
       auditLog = mockDynamoAuditLog({
         events: [
-          mockAuditLogEvent({
+          mockApiAuditLogEvent({
             attributes: {
               eventCode: "dummy.event",
               user: "dummy.user"

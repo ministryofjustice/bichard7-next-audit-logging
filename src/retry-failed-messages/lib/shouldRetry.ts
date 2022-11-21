@@ -1,10 +1,10 @@
-import type { AuditLogEvent, OutputApiAuditLog, Result } from "src/shared/types"
+import type { ApiAuditLogEvent, OutputApiAuditLog, Result } from "src/shared/types"
 import config from "../config"
 
 export default (message: OutputApiAuditLog): Result<boolean> => {
   let retryTime: number
 
-  const hasFailedEvent = (message.events as AuditLogEvent[]).some(
+  const hasFailedEvent = (message.events as ApiAuditLogEvent[]).some(
     (event) => event.category === "error" && (!!event.eventXml || "s3Path" in event) && !!event.eventSourceQueueName
   )
   if (!hasFailedEvent) {

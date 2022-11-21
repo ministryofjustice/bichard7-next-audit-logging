@@ -1,4 +1,4 @@
-import type { AuditLogEvent } from "src/shared/types"
+import type { ApiAuditLogEvent } from "src/shared/types"
 import { AuditLogStatus, EventCode, PncStatus, TriggerStatus } from "src/shared/types"
 
 export type MessageStatus = {
@@ -8,11 +8,11 @@ export type MessageStatus = {
 }
 
 export default class CalculateMessageStatusUseCase {
-  private readonly events: AuditLogEvent[] = []
+  private readonly events: ApiAuditLogEvent[] = []
 
-  constructor(...allEvents: (AuditLogEvent[] | AuditLogEvent)[]) {
+  constructor(...allEvents: (ApiAuditLogEvent[] | ApiAuditLogEvent)[]) {
     this.events = allEvents
-      .flatMap((events: AuditLogEvent[] | AuditLogEvent) => (Array.isArray(events) ? events : [events]))
+      .flatMap((events: ApiAuditLogEvent[] | ApiAuditLogEvent) => (Array.isArray(events) ? events : [events]))
       .sort((eventA, eventB) => (eventA.timestamp > eventB.timestamp ? 1 : -1))
   }
 

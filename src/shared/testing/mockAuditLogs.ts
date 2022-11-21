@@ -1,11 +1,11 @@
 import type {
-  AuditLogEventOptions,
+  ApiAuditLogEvent,
   DynamoAuditLog,
   EventCategory,
   InputApiAuditLog,
   OutputApiAuditLog
 } from "src/shared/types"
-import { AuditLogEvent, AuditLogStatus, PncStatus, TriggerStatus } from "src/shared/types"
+import { AuditLogStatus, PncStatus, TriggerStatus } from "src/shared/types"
 import { v4 as uuid } from "uuid"
 
 export const mockInputApiAuditLog = (overrides: Partial<InputApiAuditLog> = {}): InputApiAuditLog => ({
@@ -40,20 +40,17 @@ export const mockDynamoAuditLog = (overrides: Partial<DynamoAuditLog> = {}): Dyn
   ...overrides
 })
 
-export function mockAuditLogEvent(overrides: Partial<AuditLogEventOptions> = {}): AuditLogEvent {
-  const defaults: AuditLogEventOptions = {
-    category: "information" as EventCategory,
-    timestamp: new Date(),
-    eventCode: "dummy.event.code",
-    eventType: "Test event",
-    eventSource: "Test",
-    eventSourceQueueName: "Test event source queue name",
-    eventXml: "Test event xml".repeat(500),
-    attributes: {
-      "Attribute 1": "Attribute 1 data".repeat(500),
-      "Attribute 2": "Attribute 2 data"
-    }
-  }
-
-  return new AuditLogEvent({ ...defaults, ...overrides })
-}
+export const mockApiAuditLogEvent = (overrides: Partial<ApiAuditLogEvent> = {}): ApiAuditLogEvent => ({
+  category: "information" as EventCategory,
+  timestamp: new Date().toISOString(),
+  eventCode: "dummy.event.code",
+  eventType: "Test event",
+  eventSource: "Test",
+  eventSourceQueueName: "Test event source queue name",
+  eventXml: "Test event xml".repeat(500),
+  attributes: {
+    "Attribute 1": "Attribute 1 data".repeat(500),
+    "Attribute 2": "Attribute 2 data"
+  },
+  ...overrides
+})

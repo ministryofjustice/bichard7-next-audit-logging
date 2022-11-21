@@ -1,5 +1,5 @@
-import { mockAuditLogEvent, mockDynamoAuditLog } from "src/shared/testing"
-import type { DynamoAuditLog } from "src/shared/types"
+import { mockApiAuditLogEvent, mockDynamoAuditLog } from "src/shared/testing"
+import { DynamoAuditLog } from "src/shared/types"
 import { AuditLogDynamoGateway } from "../gateways/dynamo"
 import { auditLogDynamoConfig, TestDynamoGateway } from "../test"
 import FetchTopExceptionsReport from "./FetchTopExceptionsReport"
@@ -19,7 +19,7 @@ describe("FetchTopExceptionsReport", () => {
   it("should merge events for the top exceptions report", async () => {
     const auditLog = mockDynamoAuditLog()
     auditLog.events.push(
-      mockAuditLogEvent({
+      mockApiAuditLogEvent({
         eventType: "Internal Type 1",
         timestamp: "2022-11-11T10:00:00",
         attributes: { "Error 1 Details": "foo" }
@@ -27,14 +27,14 @@ describe("FetchTopExceptionsReport", () => {
     )
     await testGateway.insertOne(auditLogDynamoConfig.auditLogTableName, auditLog, gateway.auditLogTableKey)
     const externalEvent1 = {
-      ...mockAuditLogEvent(),
+      ...mockApiAuditLogEvent(),
       eventType: "Type 1",
       _messageId: auditLog.messageId,
       _topExceptionsReport: 0
     }
     await testGateway.insertOne(auditLogDynamoConfig.eventsTableName, externalEvent1, gateway.eventsTableKey)
     const externalEvent2 = {
-      ...mockAuditLogEvent(),
+      ...mockApiAuditLogEvent(),
       eventType: "Type 2",
       _messageId: auditLog.messageId,
       _topExceptionsReport: 1,

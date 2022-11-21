@@ -1,8 +1,7 @@
 import axios from "axios"
 import { HttpStatusCode } from "src/shared"
-import { mockAuditLogEvent, mockInputApiAuditLog } from "src/shared/testing"
-import type { AuditLogEvent, DynamoAuditLog } from "src/shared/types"
-import { EventCode } from "src/shared/types"
+import { mockApiAuditLogEvent, mockInputApiAuditLog } from "src/shared/testing"
+import { AuditLogEvent, DynamoAuditLog, EventCode } from "src/shared/types"
 import { AuditLogDynamoGateway } from "../gateways/dynamo"
 import { auditLogDynamoConfig, TestDynamoGateway } from "../test"
 const testGateway = new TestDynamoGateway(auditLogDynamoConfig)
@@ -18,7 +17,7 @@ describe("Creating multiple Audit Log events", () => {
     const result1 = await axios.post("http://localhost:3010/messages", auditLog)
     expect(result1.status).toEqual(HttpStatusCode.created)
 
-    const event = mockAuditLogEvent()
+    const event = mockApiAuditLogEvent()
     const result2 = await axios.post(`http://localhost:3010/messages/${auditLog.messageId}/events`, [event])
     expect(result2.status).toEqual(HttpStatusCode.created)
 
@@ -49,7 +48,7 @@ describe("Creating multiple Audit Log events", () => {
     const result1 = await axios.post("http://localhost:3010/messages", auditLog)
     expect(result1.status).toEqual(HttpStatusCode.created)
 
-    const events = new Array(10).fill(0).map((_, index) => mockAuditLogEvent({ eventType: `Test event ${index}` }))
+    const events = new Array(10).fill(0).map((_, index) => mockApiAuditLogEvent({ eventType: `Test event ${index}` }))
     const result2 = await axios.post(`http://localhost:3010/messages/${auditLog.messageId}/events`, events)
     expect(result2.status).toEqual(HttpStatusCode.created)
 
@@ -72,7 +71,7 @@ describe("Creating a single Audit Log event", () => {
     const result1 = await axios.post("http://localhost:3010/messages", auditLog)
     expect(result1.status).toEqual(HttpStatusCode.created)
 
-    const event = mockAuditLogEvent({ eventType: "Dummy event type" })
+    const event = mockApiAuditLogEvent({ eventType: "Dummy event type" })
     const result2 = await axios.post(`http://localhost:3010/messages/${auditLog.messageId}/events`, event)
     expect(result2.status).toEqual(HttpStatusCode.created)
 
@@ -104,7 +103,7 @@ describe("Creating a single Audit Log event", () => {
     const result1 = await axios.post("http://localhost:3010/messages", auditLog)
     expect(result1.status).toEqual(HttpStatusCode.created)
 
-    const event = mockAuditLogEvent()
+    const event = mockApiAuditLogEvent()
     event.addAttribute("user", "Test User")
     event.addAttribute("eventCode", "test.event")
     const result2 = await axios.post(`http://localhost:3010/messages/${auditLog.messageId}/events`, event)
@@ -137,25 +136,25 @@ describe("Creating a single Audit Log event", () => {
       let pncStatus = await getPncStatus(auditLog.messageId)
       expect(pncStatus).toBe("Processing")
 
-      let event = mockAuditLogEvent({ eventCode: EventCode.ExceptionsGenerated })
+      let event = mockApiAuditLogEvent({ eventCode: EventCode.ExceptionsGenerated })
       await axios.post(`http://localhost:3010/messages/${auditLog.messageId}/events`, event)
 
       pncStatus = await getPncStatus(auditLog.messageId)
       expect(pncStatus).toBe("Exceptions")
 
-      event = mockAuditLogEvent({ eventCode: EventCode.ExceptionsResolved })
+      event = mockApiAuditLogEvent({ eventCode: EventCode.ExceptionsResolved })
       await axios.post(`http://localhost:3010/messages/${auditLog.messageId}/events`, event)
 
       pncStatus = await getPncStatus(auditLog.messageId)
       expect(pncStatus).toBe("ManuallyResolved")
 
-      event = mockAuditLogEvent({ eventCode: EventCode.IgnoredAppeal })
+      event = mockApiAuditLogEvent({ eventCode: EventCode.IgnoredAppeal })
       await axios.post(`http://localhost:3010/messages/${auditLog.messageId}/events`, event)
 
       pncStatus = await getPncStatus(auditLog.messageId)
       expect(pncStatus).toBe("Ignored")
 
-      event = mockAuditLogEvent({ eventCode: EventCode.PncUpdated })
+      event = mockApiAuditLogEvent({ eventCode: EventCode.PncUpdated })
       await axios.post(`http://localhost:3010/messages/${auditLog.messageId}/events`, event)
 
       pncStatus = await getPncStatus(auditLog.messageId)
@@ -176,14 +175,14 @@ describe("Creating a single Audit Log event", () => {
       let triggerStatus = await getTriggerStatus(auditLog.messageId)
       expect(triggerStatus).toBe("NoTriggers")
 
-      let event = mockAuditLogEvent({ eventCode: EventCode.TriggersGenerated })
+      let event = mockApiAuditLogEvent({ eventCode: EventCode.TriggersGenerated })
       event.addAttribute("Trigger 1 Details", "TRPR0001")
       await axios.post(`http://localhost:3010/messages/${auditLog.messageId}/events`, event)
 
       triggerStatus = await getTriggerStatus(auditLog.messageId)
       expect(triggerStatus).toBe("Generated")
 
-      event = mockAuditLogEvent({ eventCode: EventCode.TriggersResolved })
+      event = mockApiAuditLogEvent({ eventCode: EventCode.TriggersResolved })
       event.addAttribute("Trigger 1 Details", "TRPR0001")
       await axios.post(`http://localhost:3010/messages/${auditLog.messageId}/events`, event)
 

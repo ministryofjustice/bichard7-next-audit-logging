@@ -1,5 +1,5 @@
-import { mockAuditLogEvent, mockDynamoAuditLog } from "src/shared/testing"
-import type { DynamoAuditLog } from "src/shared/types"
+import { mockApiAuditLogEvent, mockDynamoAuditLog } from "src/shared/testing"
+import { DynamoAuditLog } from "src/shared/types"
 import { AuditLogDynamoGateway } from "../gateways/dynamo"
 import { auditLogDynamoConfig, TestDynamoGateway } from "../test"
 import FetchAutomationReport from "./FetchAutomationReport"
@@ -19,13 +19,13 @@ describe("FetchAutomationReport", () => {
   it("should merge events for the automation report", async () => {
     const auditLog = mockDynamoAuditLog()
     auditLog.automationReport = {
-      events: [mockAuditLogEvent({ eventType: "Internal Type 1", timestamp: "2022-11-11T10:00:00" })],
+      events: [mockApiAuditLogEvent({ eventType: "Internal Type 1", timestamp: "2022-11-11T10:00:00" })],
       forceOwner: "010000"
     }
     await testGateway.insertOne(auditLogDynamoConfig.auditLogTableName, auditLog, gateway.auditLogTableKey)
 
     const externalEvent1 = {
-      ...mockAuditLogEvent(),
+      ...mockApiAuditLogEvent(),
       eventType: "Type 1",
       _messageId: auditLog.messageId,
       _automationReport: 0
@@ -33,7 +33,7 @@ describe("FetchAutomationReport", () => {
     await testGateway.insertOne(auditLogDynamoConfig.eventsTableName, externalEvent1, gateway.eventsTableKey)
 
     const externalEvent2 = {
-      ...mockAuditLogEvent(),
+      ...mockApiAuditLogEvent(),
       eventType: "Type 2",
       _messageId: auditLog.messageId,
       _automationReport: 1,

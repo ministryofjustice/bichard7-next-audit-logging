@@ -1,7 +1,8 @@
 import { addDays } from "date-fns"
 import { compress, decompress } from "src/shared"
-import type { DynamoAuditLog, KeyValuePair, PromiseResult } from "src/shared/types"
-import { AuditLogEvent, isError } from "src/shared/types"
+import type { DynamoAuditLog, DynamoAuditLogEvent, KeyValuePair, PromiseResult } from "src/shared/types"
+import { ApiAuditLogEvent, isError } from "src/shared/types"
+import { v4 as uuid } from "uuid"
 import type {
   EventsFilterOptions,
   FetchByStatusOptions,
@@ -20,9 +21,10 @@ import type AuditLogDynamoGatewayInterface from "./AuditLogDynamoGatewayInterfac
 const maxAttributeValueLength = 1000
 
 type InternalDynamoAuditLog = Omit<DynamoAuditLog, "events">
+type InternalDynamoAuditLogEvent = DynamoAuditLogEvent & { _id: string }
 
 const convertDynamoAuditLogToInternal = (
-  input: InternalDynamoAuditLog & { events?: AuditLogEvent[] }
+  input: InternalDynamoAuditLog & { events?: ApiAuditLogEvent[] }
 ): InternalDynamoAuditLog => {
   delete input.events
   return input
@@ -124,7 +126,7 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
     options: EventsFilterOptions = {}
   ): PromiseResult<void> {
     for (const auditLog of auditLogs) {
-      const indexSearcher = new IndexSearcher<AuditLogEvent[]>(
+      const indexSearcher = new IndexSearcher<ApiAuditLogEvent[]>(
         this,
         this.config.eventsTableName,
         this.eventsTableKey
@@ -328,7 +330,7 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
     return auditLog ? auditLog.version : null
   }
 
-  async fetchEvents(messageId: string): PromiseResult<AuditLogEvent[]> {
+  async fetchEvents(messageId: string): PromiseResult<DynamoAuditLogEvent[]> {
     const result = await this.fetchOne(messageId)
 
     if (isError(result)) {
@@ -343,7 +345,7 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
       return []
     }
 
-    return result.events
+    return result.events as DynamoAuditLogEvent[]
   }
 
   async update(existing: DynamoAuditLog, updates: Partial<DynamoAuditLog>): PromiseResult<void> {
@@ -431,7 +433,7 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
     return this.replaceOne(this.config.auditLogTableName, replacement, this.auditLogTableKey, version)
   }
 
-  private async prepareStoreEvents(messageId: string, events: AuditLogEvent[]): PromiseResult<DynamoUpdate[]> {
+  private async prepareStoreEvents(messageId: string, events: DynamoAuditLogEvent[]): PromiseResult<DynamoUpdate[]> {
     const dynamoUpdates: DynamoUpdate[] = []
     for (const event of events) {
       const compressedEvent = await this.compressEventValues(event)
@@ -439,7 +441,7 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
         return compressedEvent
       }
 
-      const eventToInsert = new AuditLogEvent({ ...compressedEvent, _messageId: messageId })
+      const eventToInsert: InternalDynamoAuditLogEvent = { ...compressedEvent, _id: uuid(), _messageId: messageId }
       dynamoUpdates.push({
         Put: {
           Item: { ...eventToInsert, _: "_" },
@@ -453,7 +455,7 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
     return dynamoUpdates
   }
 
-  private async compressEventValues(event: AuditLogEvent): PromiseResult<AuditLogEvent> {
+  private async compressEventValues(event: DynamoAuditLogEvent): PromiseResult<DynamoAuditLogEvent> {
     for (const attributeKey of Object.keys(event.attributes)) {
       const attributeValue = event.attributes[attributeKey]
       if (attributeValue && typeof attributeValue === "string" && attributeValue.length > maxAttributeValueLength) {
@@ -478,7 +480,7 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
     return event
   }
 
-  private async decompressEventValues(event: AuditLogEvent): PromiseResult<AuditLogEvent> {
+  private async decompressEventValues(event: ApiAuditLogEvent): PromiseResult<ApiAuditLogEvent> {
     for (const [attributeKey, attributeValue] of Object.entries(event.attributes)) {
       if (attributeValue && typeof attributeValue === "object" && "_compressedValue" in attributeValue) {
         const compressedValue = (attributeValue as { _compressedValue: string })._compressedValue

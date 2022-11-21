@@ -1,4 +1,4 @@
-import type { ApiClient, AuditLogEvent, InputApiAuditLog, OutputApiAuditLog, PromiseResult } from "src/shared/types"
+import type { ApiAuditLogEvent, ApiClient, InputApiAuditLog, OutputApiAuditLog, PromiseResult } from "src/shared/types"
 import type { GetMessageOptions, GetMessagesOptions } from "../types/ApiClient"
 
 export default class FakeApiClient implements ApiClient {
@@ -46,7 +46,7 @@ export default class FakeApiClient implements ApiClient {
 
   // @ts-ignore
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  createEvent(messageId: string, event: AuditLogEvent): PromiseResult<void> {
+  createEvent(messageId: string, event: ApiAuditLogEvent): PromiseResult<void> {
     if (this.shouldFunctionReturnError("createEvent")) {
       return Promise.resolve(this.error!)
     }

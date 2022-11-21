@@ -4,7 +4,7 @@ import fs from "fs"
 import { AuditLogApiClient, encodeBase64, TestS3Gateway } from "src/shared"
 import "src/shared/testing"
 import { clearDynamoTable, createMockAuditLog, setEnvironmentVariables } from "src/shared/testing"
-import type { AmazonMqEventSourceRecordEvent, AuditLogEvent, OutputApiAuditLog } from "src/shared/types"
+import type { AmazonMqEventSourceRecordEvent, OutputApiAuditLog } from "src/shared/types"
 import { isError } from "src/shared/types"
 import { v4 as uuid } from "uuid"
 setEnvironmentVariables()

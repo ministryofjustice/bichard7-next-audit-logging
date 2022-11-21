@@ -1,10 +1,10 @@
 process.env.API_URL = "dummy"
 process.env.API_KEY = "dummy"
-import { mockAuditLogEvent, mockOutputApiAuditLog } from "src/shared/testing"
+import { mockApiAuditLogEvent, mockOutputApiAuditLog } from "src/shared/testing"
 import shouldRetry from "./shouldRetry"
 
-const generateDateInThePast = (hours: number, minutes: number, seconds: number) =>
-  new Date(Date.now() - hours * 3_600_000 - minutes * 60_000 - seconds * 1_000)
+const generateDateInThePast = (hours: number, minutes: number, seconds: number): string =>
+  new Date(Date.now() - hours * 3_600_000 - minutes * 60_000 - seconds * 1_000).toISOString()
 
 const lessThanInitialRetryDelay = generateDateInThePast(0, 29, 59)
 const moreThanInitialRetryDelay = generateDateInThePast(0, 30, 1)
@@ -13,9 +13,9 @@ const moreThanRetryDelay = generateDateInThePast(24, 0, 1)
 
 describe("shouldRetry", () => {
   it("should not retry new messages too early", () => {
-    const receivedDate = lessThanInitialRetryDelay.toISOString()
+    const receivedDate = lessThanInitialRetryDelay
     const message = mockOutputApiAuditLog({ receivedDate })
-    const event = mockAuditLogEvent({
+    const event = mockApiAuditLogEvent({
       category: "error",
       eventType: "Failed event",
       timestamp: lessThanInitialRetryDelay
@@ -25,12 +25,12 @@ describe("shouldRetry", () => {
   })
 
   it("should correctly retry new messages after an initial wait", () => {
-    const receivedDate = moreThanInitialRetryDelay.toISOString()
+    const receivedDate = moreThanInitialRetryDelay
     const message = mockOutputApiAuditLog({ receivedDate })
-    const event = mockAuditLogEvent({
+    const event = mockApiAuditLogEvent({
       category: "error",
       eventType: "Failed event",
-      timestamp: moreThanInitialRetryDelay
+      timestamp: receivedDate
     })
     message.events.push(event)
     expect(shouldRetry(message)).toBeTruthy()
@@ -38,13 +38,13 @@ describe("shouldRetry", () => {
 
   it("should correctly handle messages that have already been retried", () => {
     const message = mockOutputApiAuditLog()
-    const errorEvent = mockAuditLogEvent({
+    const errorEvent = mockApiAuditLogEvent({
       category: "error",
       eventType: "Failed event",
       timestamp: generateDateInThePast(24, 0, 40)
     })
     message.events.push(errorEvent)
-    const retryEvent = mockAuditLogEvent({
+    const retryEvent = mockApiAuditLogEvent({
       category: "information",
       eventType: "Retrying failed message",
       timestamp: moreThanRetryDelay
@@ -56,13 +56,13 @@ describe("shouldRetry", () => {
   it("shouldn't retry messages too often that have already been retried", () => {
     const receivedDate = new Date().toISOString()
     const message = mockOutputApiAuditLog({ receivedDate })
-    const errorEvent = mockAuditLogEvent({
+    const errorEvent = mockApiAuditLogEvent({
       category: "error",
       eventType: "Failed event",
       timestamp: generateDateInThePast(24, 59, 59)
     })
     message.events.push(errorEvent)
-    const retryEvent = mockAuditLogEvent({
+    const retryEvent = mockApiAuditLogEvent({
       category: "information",
       eventType: "Retrying failed message",
       timestamp: lessThanRetryDelay
@@ -74,22 +74,22 @@ describe("shouldRetry", () => {
   it("shouldn't retry messages too many times", () => {
     const receivedDate = new Date().toISOString()
     const message = mockOutputApiAuditLog({ receivedDate })
-    const errorEvent = mockAuditLogEvent({
+    const errorEvent = mockApiAuditLogEvent({
       category: "error",
       eventType: "Failed event",
       timestamp: generateDateInThePast(28, 0, 0)
     })
-    const retryEvent1 = mockAuditLogEvent({
+    const retryEvent1 = mockApiAuditLogEvent({
       category: "information",
       eventType: "Retrying failed message",
       timestamp: generateDateInThePast(27, 0, 0)
     })
-    const retryEvent2 = mockAuditLogEvent({
+    const retryEvent2 = mockApiAuditLogEvent({
       category: "information",
       eventType: "Retrying failed message",
       timestamp: generateDateInThePast(26, 0, 0)
     })
-    const retryEvent3 = mockAuditLogEvent({
+    const retryEvent3 = mockApiAuditLogEvent({
       category: "information",
       eventType: "Retrying failed message",
       timestamp: moreThanRetryDelay

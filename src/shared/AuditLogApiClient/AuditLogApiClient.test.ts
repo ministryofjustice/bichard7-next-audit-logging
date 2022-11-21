@@ -1,9 +1,8 @@
 import type { AxiosError } from "axios"
 import axios from "axios"
 import "src/shared/testing"
-import { mockOutputApiAuditLog } from "src/shared/testing"
+import { mockApiAuditLogEvent, mockOutputApiAuditLog } from "src/shared/testing"
 import type { OutputApiAuditLog } from "src/shared/types"
-import { AuditLogEvent } from "src/shared/types"
 import AuditLogApiClient from "./AuditLogApiClient"
 
 const apiClient = new AuditLogApiClient("http://localhost", "dummy")
@@ -15,12 +14,7 @@ const message2 = mockOutputApiAuditLog({
   externalCorrelationId: "b5edf595-16a9-450f-a52b-40628cd58c28",
   messageHash: "hash-2"
 })
-const event = new AuditLogEvent({
-  category: "information",
-  timestamp: new Date(),
-  eventType: "Dummy Event Type",
-  eventSource: "Dummy Event Source"
-})
+const event = mockApiAuditLogEvent()
 
 const createErrorResponse = (errorCode: number, errorMessage: string): AxiosError =>
   ({

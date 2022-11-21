@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Client } from "pg"
 import { FakeApiClient, setEnvironmentVariables } from "src/shared/testing"
-import type { AuditLogEvent, KeyValuePair } from "src/shared/types"
+import type { ApiAuditLogEvent, KeyValuePair } from "src/shared/types"
 import { EventCode } from "src/shared/types"
 import AddArchivalEvents from "./addArchivalEvents"
 import type { BichardRecord, DatabaseRow } from "./db"
@@ -321,7 +321,7 @@ describe("Add Archival Events integration", () => {
       messageId: "Message2",
       receivedDate: new Date().toISOString(),
       events: [
-        <AuditLogEvent>{
+        <ApiAuditLogEvent>{
           eventSource: "Error archiver process 1",
           category: "information",
           eventCode: EventCode.ErrorRecordArchived,

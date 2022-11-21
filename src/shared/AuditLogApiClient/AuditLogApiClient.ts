@@ -1,7 +1,7 @@
 import type { AxiosError } from "axios"
 import axios from "axios"
 import * as https from "https"
-import type { ApiClient, AuditLogEvent, InputApiAuditLog, OutputApiAuditLog, PromiseResult } from "src/shared/types"
+import type { ApiAuditLogEvent, ApiClient, InputApiAuditLog, OutputApiAuditLog, PromiseResult } from "src/shared/types"
 import { ApplicationError } from "src/shared/types"
 import type { GetMessageOptions, GetMessagesOptions } from "src/shared/types/ApiClient"
 import { addQueryParams, HttpStatusCode, logger } from "../utils"
@@ -97,7 +97,7 @@ export default class AuditLogApiClient implements ApiClient {
       })
   }
 
-  createEvent(messageId: string, event: AuditLogEvent): PromiseResult<void> {
+  createEvent(messageId: string, event: ApiAuditLogEvent): PromiseResult<void> {
     return axios
       .post(`${this.apiUrl}/messages/${messageId}/events`, event, {
         httpsAgent,

@@ -5,7 +5,7 @@ import type {
   FetchUnsanitisedOptions,
   ProjectionOptions
 } from "src/audit-log-api/types/queryParams"
-import type { AuditLogEvent, DynamoAuditLog, PromiseResult } from "src/shared/types"
+import type { DynamoAuditLog, DynamoAuditLogEvent, PromiseResult } from "src/shared/types"
 import type DynamoUpdate from "../DynamoGateway/DynamoUpdate"
 
 export default interface AuditLogDynamoGateway {
@@ -23,8 +23,12 @@ export default interface AuditLogDynamoGateway {
   fetchUnsanitised(options?: FetchUnsanitisedOptions): PromiseResult<DynamoAuditLog[]>
   fetchOne(messageId: string, options?: ProjectionOptions): PromiseResult<DynamoAuditLog | undefined>
   fetchVersion(messageId: string): PromiseResult<number | null>
-  fetchEvents(messageId: string): PromiseResult<AuditLogEvent[]>
+  fetchEvents(messageId: string): PromiseResult<DynamoAuditLogEvent[]>
   replaceAuditLog(message: DynamoAuditLog, version: number): PromiseResult<void>
-  update(existing: DynamoAuditLog, updates: Partial<DynamoAuditLog>, events?: AuditLogEvent[]): PromiseResult<void>
+  update(
+    existing: DynamoAuditLog,
+    updates: Partial<DynamoAuditLog>,
+    events?: DynamoAuditLogEvent[]
+  ): PromiseResult<void>
   executeTransaction(actions: DynamoUpdate[]): PromiseResult<void>
 }
