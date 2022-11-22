@@ -86,6 +86,8 @@ resources:
       Properties:
         TableName: auditLogEventsTable
         AttributeDefinitions:
+          - AttributeName: _
+            AttributeType: S
           - AttributeName: _id
             AttributeType: S
           - AttributeName: _messageId
@@ -106,6 +108,17 @@ resources:
           - AttributeName: _id
             KeyType: HASH
         GlobalSecondaryIndexes:
+          - IndexName: timestampIndex
+            KeySchema:
+              - AttributeName: _
+                KeyType: HASH
+              - AttributeName: timestamp
+                KeyType: RANGE
+            Projection:
+              ProjectionType: "ALL"
+            ProvisionedThroughput:
+              ReadCapacityUnits: 1
+              WriteCapacityUnits: 1
           - IndexName: messageIdIndex
             KeySchema:
               - AttributeName: _messageId
