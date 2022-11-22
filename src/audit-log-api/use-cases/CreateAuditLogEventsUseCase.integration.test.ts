@@ -1,6 +1,5 @@
-import { mockDynamoAuditLog } from "src/shared/testing"
-import type { DynamoAuditLog } from "src/shared/types"
-import { AuditLogEvent } from "src/shared/types"
+import { mockDynamoAuditLog, mockDynamoAuditLogEvent } from "src/shared/testing"
+import type { DynamoAuditLog, DynamoAuditLogEvent } from "src/shared/types"
 import { AuditLogDynamoGateway } from "../gateways/dynamo"
 import { auditLogDynamoConfig, TestDynamoGateway } from "../test"
 import { CreateAuditLogEventsUseCase } from "./CreateAuditLogEventsUseCase"
@@ -9,26 +8,18 @@ const testAuditLogDynamoGateway = new TestDynamoGateway(auditLogDynamoConfig)
 const auditLogDynamoGateway = new AuditLogDynamoGateway(auditLogDynamoConfig)
 const createAuditLogEventsUseCase = new CreateAuditLogEventsUseCase(auditLogDynamoGateway)
 
-const createAuditLogEvent = (): AuditLogEvent =>
-  new AuditLogEvent({
-    category: "information",
-    timestamp: new Date(),
-    eventType: "Create audit log event test",
-    eventSource: "Integration Test"
-  })
-
-const createStacktraceAuditLogEvent = (): AuditLogEvent => {
-  const event = new AuditLogEvent({
+const createStacktraceAuditLogEvent = (): DynamoAuditLogEvent => {
+  const event = mockDynamoAuditLogEvent({
     eventSource: "CourtResultBean",
     eventType: "Message Rejected by [CourtResultBean] MDB",
     category: "error",
-    timestamp: new Date()
+    timestamp: new Date().toISOString(),
+    attributes: {
+      "Exception Message": "The XML Converter encountered an Error during message UnMarshalling",
+      "Exception Stack Trace":
+        "uk.gov.ocjr.mtu.br7.ho.pub.choreography.exception.MessageParsingException: The XML Converter encountered an Error during message UnMarshalling\n\tat uk.gov.ocjr.mtu.br7.ho.pub.choreography.CourtResultBean.extractGenericHearingOutcome(Unknown Source)"
+    }
   })
-  event.addAttribute("Exception Message", "The XML Converter encountered an Error during message UnMarshalling")
-  event.addAttribute(
-    "Exception Stack Trace",
-    "uk.gov.ocjr.mtu.br7.ho.pub.choreography.exception.MessageParsingException: The XML Converter encountered an Error during message UnMarshalling\n\tat uk.gov.ocjr.mtu.br7.ho.pub.choreography.CourtResultBean.extractGenericHearingOutcome(Unknown Source)"
-  )
   return event
 }
 
@@ -45,7 +36,7 @@ describe("CreateAuditLogEventsUseCase", () => {
     const auditLog = mockDynamoAuditLog()
     await auditLogDynamoGateway.create(auditLog)
 
-    const event = createAuditLogEvent()
+    const event = mockDynamoAuditLogEvent()
     const result = await createAuditLogEventsUseCase.create(auditLog.messageId, [event])
 
     expect(result.resultType).toBe("success")
@@ -64,7 +55,7 @@ describe("CreateAuditLogEventsUseCase", () => {
 
   it("should return not found result when audit log does not exist", async () => {
     const nonExistentMessageId = "11290b62-e8b8-47a8-ab24-6702a8fc6bba"
-    const event = createAuditLogEvent()
+    const event = mockDynamoAuditLogEvent()
     const result = await createAuditLogEventsUseCase.create(nonExistentMessageId, [event])
 
     expect(result.resultType).toBe("notFound")
@@ -153,7 +144,7 @@ describe("CreateAuditLogEventsUseCase", () => {
 
     expect(result1.resultType).toBe("success")
 
-    const event2 = createAuditLogEvent()
+    const event2 = mockDynamoAuditLogEvent()
     const result2 = await createAuditLogEventsUseCase.create(auditLog.messageId, event2)
 
     expect(result2.resultType).toBe("success")
@@ -174,7 +165,7 @@ describe("CreateAuditLogEventsUseCase", () => {
     await auditLogDynamoGateway.create(auditLog)
 
     const event1 = createStacktraceAuditLogEvent()
-    const event2 = createAuditLogEvent()
+    const event2 = mockDynamoAuditLogEvent()
     const event3 = createStacktraceAuditLogEvent()
     const result = await createAuditLogEventsUseCase.create(auditLog.messageId, [event1, event2, event3])
 
@@ -190,8 +181,8 @@ describe("CreateAuditLogEventsUseCase", () => {
     const auditLog = mockDynamoAuditLog()
     await auditLogDynamoGateway.create(auditLog)
 
-    const event1 = createAuditLogEvent()
-    const event2 = createAuditLogEvent()
+    const event1 = mockDynamoAuditLogEvent()
+    const event2 = mockDynamoAuditLogEvent()
     const result2 = await createAuditLogEventsUseCase.create(auditLog.messageId, [event1, event2])
 
     expect(result2.resultType).toBe("success")
@@ -206,8 +197,7 @@ describe("CreateAuditLogEventsUseCase", () => {
     const auditLog = mockDynamoAuditLog()
     await auditLogDynamoGateway.create(auditLog)
 
-    const event = createAuditLogEvent()
-    event.addAttribute("reallyLongAttribute", "X".repeat(10_000))
+    const event = mockDynamoAuditLogEvent({ attributes: { reallyLongAttribute: "X".repeat(10_000) } })
 
     jest
       .spyOn(auditLogDynamoGateway, "executeTransaction")
@@ -227,8 +217,7 @@ describe("CreateAuditLogEventsUseCase", () => {
     await auditLogDynamoGateway.create(auditLog)
 
     const events = new Array(250).fill(0).map(() => {
-      const event = createAuditLogEvent()
-      event.addAttribute("longAttribute", "this should be compressed".repeat(100))
+      const event = mockDynamoAuditLogEvent({ attributes: { longAttribute: "this should be compressed".repeat(100) } })
       return event
     })
 

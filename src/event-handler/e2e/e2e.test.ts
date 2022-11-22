@@ -4,7 +4,7 @@ import fs from "fs"
 import { AuditLogApiClient, encodeBase64, TestS3Gateway } from "src/shared"
 import "src/shared/testing"
 import { clearDynamoTable, createMockAuditLog, setEnvironmentVariables } from "src/shared/testing"
-import type { AmazonMqEventSourceRecordEvent, OutputApiAuditLog } from "src/shared/types"
+import type { AmazonMqEventSourceRecordEvent, ApiAuditLogEvent, OutputApiAuditLog } from "src/shared/types"
 import { isError } from "src/shared/types"
 import { v4 as uuid } from "uuid"
 setEnvironmentVariables()
@@ -27,7 +27,7 @@ const auditLogTableName = "auditLogTable"
 const auditLogApi = new AuditLogApiClient("http://localhost:3010", "Api-key")
 const eventHandlerSimulator = new EventHandlerSimulator()
 
-const getEvents = async (messageId1: string, messageId2: string): Promise<DynamoPollResult> => {
+const getEvents = async (messageId1: string, messageId2: string): Promise<ApiPollResult> => {
   const message1 = await auditLogApi.getMessage(messageId1)
   const message2 = await auditLogApi.getMessage(messageId2)
   if (isError(message1) || isError(message2)) {
@@ -45,9 +45,9 @@ interface TestInput {
   messageFormat: string
 }
 
-type DynamoPollResult = {
-  actualEvents1: AuditLogEvent[]
-  actualEvents2: AuditLogEvent[]
+type ApiPollResult = {
+  actualEvents1: ApiAuditLogEvent[]
+  actualEvents2: ApiAuditLogEvent[]
 }
 
 beforeEach(async () => {

@@ -1,14 +1,14 @@
-import type { DynamoAuditLog, PromiseResult } from "src/shared/types"
+import type { DynamoAuditLog, OutputApiAuditLog, PromiseResult } from "src/shared/types"
 import { isError } from "src/shared/types"
 import type { AuditLogDynamoGatewayInterface } from "../gateways/dynamo"
 import type { FetchReportOptions } from "../types/queryParams"
-import { parseForceOwner } from "../utils"
+import convertDynamoAuditLogToOutputApi from "../utils/convertDynamoAuditLogToOutputApi"
 import type MessageFetcher from "./MessageFetcher"
 
 export default class FetchAutomationReport implements MessageFetcher {
   constructor(private readonly gateway: AuditLogDynamoGatewayInterface, private readonly options: FetchReportOptions) {}
 
-  async fetch(): PromiseResult<DynamoAuditLog[]> {
+  async fetch(): PromiseResult<OutputApiAuditLog[]> {
     let lastMessage: DynamoAuditLog | undefined
 
     if (this.options.lastMessageId) {
@@ -32,18 +32,6 @@ export default class FetchAutomationReport implements MessageFetcher {
       return records
     }
 
-    return records.map((record) => {
-      if (record.automationReport) {
-        record.events = (record.events ?? [])
-          .concat(record.automationReport.events)
-          .sort((a, b) => (a.timestamp > b.timestamp ? 1 : b.timestamp > a.timestamp ? -1 : 0))
-        if (!record.forceOwner && record.automationReport.forceOwner) {
-          record.forceOwner = parseForceOwner(record.automationReport.forceOwner)
-        }
-        delete record.automationReport
-      }
-
-      return record
-    })
+    return records.map(convertDynamoAuditLogToOutputApi)
   }
 }

@@ -1,16 +1,19 @@
 import type { APIGatewayProxyEvent } from "aws-lambda"
-import { AuditLogEvent, isError } from "src/shared/types"
+import { ApiAuditLogEvent, isError } from "src/shared/types"
 import type { ParseCreateAuditLogEventsRequestResult } from "./parseCreateAuditLogEventsRequest"
 import parseCreateAuditLogEventsRequest from "./parseCreateAuditLogEventsRequest"
 
 const expectedAuditLogEvent = [
-  new AuditLogEvent({
+  {
     category: "information",
-    timestamp: new Date(),
+    timestamp: new Date().toISOString(),
     eventType: "Test parsing request",
-    eventSource: "Test"
-  })
-]
+    eventSource: "Test",
+    attributes: {},
+    eventCode: "test.event.code"
+  }
+] as ApiAuditLogEvent[]
+
 const expectedMessageId = "0197bffc-fbf0-4ddd-9324-462d224c6c2e"
 
 test("should return audit log event and messageId when request body has value and messageId is in path", () => {

@@ -1,9 +1,9 @@
-import type { AuditLogEvent } from "src/shared/types"
+import { ApiAuditLogEvent } from "src/shared/types"
 import isIsoDate from "./isIsoDate"
 
 type ValidationResult = {
   errors: string[]
-  auditLogEvent: AuditLogEvent
+  auditLogEvent: ApiAuditLogEvent
 }
 
 export default ({
@@ -16,7 +16,7 @@ export default ({
   eventXml,
   timestamp,
   user
-}: AuditLogEvent): ValidationResult => {
+}: ApiAuditLogEvent): ValidationResult => {
   const errors: string[] = []
 
   if (attributes && (typeof attributes !== "object" || Array.isArray(attributes))) {
@@ -63,7 +63,7 @@ export default ({
     errors.push("User must be string")
   }
 
-  let validatedAuditLogEvent = {
+  let validatedAuditLogEvent: ApiAuditLogEvent = {
     attributes,
     category,
     eventCode,
@@ -73,10 +73,10 @@ export default ({
     eventXml,
     timestamp,
     user
-  } as AuditLogEvent
+  }
 
   if (!validatedAuditLogEvent.attributes) {
-    validatedAuditLogEvent = { ...validatedAuditLogEvent, attributes: {} } as AuditLogEvent
+    validatedAuditLogEvent = { ...validatedAuditLogEvent, attributes: {} }
   }
 
   Object.keys(validatedAuditLogEvent).forEach(

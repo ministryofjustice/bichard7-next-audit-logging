@@ -81,7 +81,7 @@ export default class ArchivalEventsApiClient {
       return (
         event.eventCode === EventCode.ErrorRecordArchived &&
         event.category === "information" &&
-        (event.attributes["Record ID"] || "") === recordId
+        (event.attributes?.["Record ID"] || "") === recordId
       )
     }).length > 0
 }

@@ -1,10 +1,10 @@
-import type { AuditLogEvent } from "src/shared/types"
+import { ApiAuditLogEvent } from "src/shared/types"
 import { validateAuditLogEvent } from "../utils"
 
 export interface EventValidationResult {
   timestamp: string
   errors: string[]
-  auditLogEvent: AuditLogEvent
+  auditLogEvent: ApiAuditLogEvent
 }
 
 export interface ValidationResult {
@@ -12,7 +12,7 @@ export interface ValidationResult {
   eventValidationResults: EventValidationResult[]
 }
 
-export default (unvalidatedAuditLogEvents: AuditLogEvent[]): ValidationResult => {
+export default (unvalidatedAuditLogEvents: ApiAuditLogEvent[]): ValidationResult => {
   const validationResults: EventValidationResult[] = unvalidatedAuditLogEvents.map((unvalidatedAuditLogEvent) => {
     const { errors, auditLogEvent } = validateAuditLogEvent(unvalidatedAuditLogEvent)
     return {

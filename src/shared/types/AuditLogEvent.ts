@@ -15,7 +15,7 @@ export type AuditLogEventDecompressedAttributes = {
 export type AuditLogEventAttributeValue = AuditLogEventDecompressedAttributeValue | AuditLogEventCompressedValue
 
 export type ApiAuditLogEvent = {
-  attributes: AuditLogEventAttributes
+  attributes?: AuditLogEventAttributes
   category: EventCategory
   eventCode: string
   eventSource: string

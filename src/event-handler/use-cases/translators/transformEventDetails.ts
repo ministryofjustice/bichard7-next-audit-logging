@@ -31,6 +31,7 @@ export default (eventDetails: EventDetails, eventXml: string, eventSourceQueueNa
   }
 
   const attributes = nameValuePairs?.nameValuePair
+
   if (attributes && Array.isArray(attributes)) {
     attributes.forEach((attribute) => {
       if (attribute.name === "eventCode") {
@@ -38,7 +39,7 @@ export default (eventDetails: EventDetails, eventXml: string, eventSourceQueueNa
       } else if (attribute.name.toLowerCase() === "user") {
         event.eventCode = attribute.value
       }
-      event.attributes[attribute.name] = attribute.value
+      event.attributes![attribute.name] = attribute.value
     })
   }
 

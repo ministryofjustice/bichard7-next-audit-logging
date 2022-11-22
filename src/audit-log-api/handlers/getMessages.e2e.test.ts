@@ -6,8 +6,8 @@ import {
   createMockAuditLogEvent,
   createMockAuditLogs,
   createMockError,
-  mockApiAuditLogEvent,
-  mockDynamoAuditLog
+  mockDynamoAuditLog,
+  mockDynamoAuditLogEvent
 } from "src/shared/testing"
 import type { DynamoAuditLog, OutputApiAuditLog } from "src/shared/types"
 import { EventCode, isError } from "src/shared/types"
@@ -198,18 +198,6 @@ describe("Getting Audit Logs", () => {
       expect(filteredResult.data[0].events).toHaveLength(1)
       expect(filteredResult.data[0].events[0].eventType).toBe(eventInclude.eventType)
     })
-
-    it("should include force owner at the top level of the response", async () => {
-      const auditLog: DynamoAuditLog = mockDynamoAuditLog()
-      auditLog.automationReport = { forceOwner: "010000", events: [] }
-      await testDynamoGateway.insertOne(auditLogDynamoConfig.auditLogTableName, auditLog, "messageId")
-
-      const result = await axios.get<OutputApiAuditLog[]>(
-        "http://localhost:3010/messages?eventsFilter=automationReport&start=2000-01-01&end=2099-01-01"
-      )
-      expect(result.status).toEqual(HttpStatusCode.ok)
-      expect(result.data[0].forceOwner).toBe(1)
-    })
   })
 
   describe("fetchTopExceptionsReport", () => {
@@ -256,18 +244,6 @@ describe("Getting Audit Logs", () => {
       expect(result.data).toHaveLength(2)
       expect(result.data[0].messageId).toBe(auditLogs[1].messageId)
       expect(result.data[1].messageId).toBe(auditLogs[0].messageId)
-    })
-
-    it("should include force owner from the automation report at the top level of the response", async () => {
-      const auditLog: DynamoAuditLog = mockDynamoAuditLog()
-      auditLog.automationReport = { forceOwner: "010000", events: [] }
-      await testDynamoGateway.insertOne(auditLogDynamoConfig.auditLogTableName, auditLog, "messageId")
-
-      const result = await axios.get<OutputApiAuditLog[]>(
-        "http://localhost:3010/messages?eventsFilter=topExceptionsReport&start=2000-01-01&end=2099-01-01"
-      )
-      expect(result.status).toEqual(HttpStatusCode.ok)
-      expect(result.data[0].forceOwner).toBe(1)
     })
   })
 
@@ -397,13 +373,14 @@ describe("Getting Audit Logs", () => {
     })
   })
 
+  // TODO: Move transformation into the event handler and not in the API
   describe("transformation for old-style events", () => {
     let auditLog: DynamoAuditLog
 
     beforeEach(async () => {
       auditLog = mockDynamoAuditLog({
         events: [
-          mockApiAuditLogEvent({
+          mockDynamoAuditLogEvent({
             attributes: {
               eventCode: "dummy.event",
               user: "dummy.user"

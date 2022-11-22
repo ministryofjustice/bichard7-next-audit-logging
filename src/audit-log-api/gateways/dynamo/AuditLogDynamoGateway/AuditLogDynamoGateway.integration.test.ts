@@ -606,7 +606,7 @@ describe("AuditLogDynamoGateway", () => {
       ).Items) as ApiAuditLogEvent[]
 
       expect(allEvents).toHaveLength(1)
-      const attribute1 = allEvents[0].attributes["Attribute 1"]
+      const attribute1 = allEvents[0].attributes?.["Attribute 1"]
       expect(attribute1).toHaveProperty("_compressedValue")
 
       const decompressedValue = (await decompress(
@@ -617,10 +617,14 @@ describe("AuditLogDynamoGateway", () => {
 
     it("should decompress attribute values", async () => {
       await testGateway.insertOne(auditLogDynamoConfig.auditLogTableName, auditLog, gateway.auditLogTableKey)
-      const externalEvent = { ...mockApiAuditLogEvent(), eventType: "Type 1", _messageId: auditLog.messageId }
-      externalEvent.attributes["Attribute 1"] = {
-        _compressedValue: (await compress(externalEvent.attributes["Attribute 1"] as string)) as string
-      }
+      const externalEvent = mockDynamoAuditLogEvent({
+        eventType: "Type 1",
+        _messageId: auditLog.messageId,
+        attributes: {
+          "Attribute 1": { _compressedValue: (await compress("Attribute 1 data".repeat(500))) as string }
+        }
+      })
+
       await testGateway.insertOne(auditLogDynamoConfig.eventsTableName, externalEvent, gateway.eventsTableKey)
 
       const result = await gateway.fetchMany({ limit: 1 })

@@ -1,14 +1,14 @@
-import type { DynamoAuditLog, PromiseResult } from "src/shared/types"
+import type { DynamoAuditLog, OutputApiAuditLog, PromiseResult } from "src/shared/types"
 import { isError } from "src/shared/types"
 import type { AuditLogDynamoGatewayInterface } from "../gateways/dynamo"
 import type { FetchReportOptions } from "../types/queryParams"
-import { parseForceOwner } from "../utils"
+import convertDynamoAuditLogToOutputApi from "../utils/convertDynamoAuditLogToOutputApi"
 import type MessageFetcher from "./MessageFetcher"
 
 export default class FetchTopExceptionsReport implements MessageFetcher {
   constructor(private readonly gateway: AuditLogDynamoGatewayInterface, private readonly options: FetchReportOptions) {}
 
-  async fetch(): PromiseResult<DynamoAuditLog[]> {
+  async fetch(): PromiseResult<OutputApiAuditLog[]> {
     let lastMessage: DynamoAuditLog | undefined
 
     if (this.options.lastMessageId) {
@@ -34,17 +34,6 @@ export default class FetchTopExceptionsReport implements MessageFetcher {
       return records
     }
 
-    return records.map((record) => {
-      record.events = record.events.filter((e) => e.attributes && "Error 1 Details" in e.attributes)
-
-      if (record.automationReport) {
-        if (!record.forceOwner && record.automationReport.forceOwner) {
-          record.forceOwner = parseForceOwner(record.automationReport.forceOwner)
-        }
-        delete record.automationReport
-      }
-
-      return record
-    })
+    return records.map(convertDynamoAuditLogToOutputApi)
   }
 }

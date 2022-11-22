@@ -1,19 +1,19 @@
-import type { AuditLogEvent } from "src/shared/types"
+import type { DynamoAuditLogEvent } from "src/shared/types"
 import { EventCode } from "src/shared/types"
 import calculateRetryCount from "./calculateRetryCount"
 
-const retryEvent = (): AuditLogEvent => {
+const retryEvent = (): DynamoAuditLogEvent => {
   return {
     eventCode: EventCode.RetryingMessage,
     attributes: {}
-  } as unknown as AuditLogEvent
+  } as unknown as DynamoAuditLogEvent
 }
 
-const nonRetryEvent = (): AuditLogEvent => {
+const nonRetryEvent = (): DynamoAuditLogEvent => {
   return {
     eventType: "Something else",
     attributes: {}
-  } as unknown as AuditLogEvent
+  } as unknown as DynamoAuditLogEvent
 }
 
 describe("calculateRetryCount", () => {

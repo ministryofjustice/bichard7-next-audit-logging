@@ -7,20 +7,23 @@ export default class SanitiseAuditLogUseCase {
   constructor(private readonly auditLogDynamoGateway: AuditLogDynamoGatewayInterface) {}
 
   async call(auditLog: DynamoAuditLog): PromiseResult<void> {
-    ;[auditLog.events, auditLog.automationReport?.events, auditLog.topExceptionsReport?.events].forEach((events) => {
-      if (!events) {
-        return
-      }
+    const events = auditLog.events
+    if (!events) {
+      return
+    }
 
-      for (const auditLogEvent of events) {
-        delete auditLogEvent.attributes.AmendedPNCUpdateDataset
-        delete auditLogEvent.attributes.AmendedHearingOutcome
-        delete auditLogEvent.attributes["Original Hearing Outcome / PNC Update Dataset"]
-        delete auditLogEvent.attributes.OriginalHearingOutcome
-        delete auditLogEvent.attributes.OriginalPNCUpdateDataset
-        delete auditLogEvent.attributes.PNCUpdateDataset
+    // TODO: We need to handle the `sensitive` flag that Bichard sets
+
+    for (const event of events) {
+      if (event.attributes) {
+        delete event.attributes.AmendedPNCUpdateDataset
+        delete event.attributes.AmendedHearingOutcome
+        delete event.attributes["Original Hearing Outcome / PNC Update Dataset"]
+        delete event.attributes.OriginalHearingOutcome
+        delete event.attributes.OriginalPNCUpdateDataset
+        delete event.attributes.PNCUpdateDataset
       }
-    })
+    }
 
     const sanitiseEvent = new AuditLogEvent({
       category: "information",

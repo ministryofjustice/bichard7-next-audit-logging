@@ -202,7 +202,7 @@ describe("Add Error Records e2e", () => {
 
       expect(message.events).toHaveLength(1)
       expect(message.events[0].eventType).toBe("Error record archival")
-      expect(message.events[0].attributes["Record ID"]).toBe(index + 1)
+      expect(message.events[0].attributes?.["Record ID"]).toBe(index + 1)
     }
 
     // Assert postgres results
@@ -256,7 +256,7 @@ describe("Add Error Records e2e", () => {
 
       expect(message.events).toHaveLength(1)
       expect(message.events[0].eventType).toBe("Error record archival")
-      expect(message.events[0].attributes["Record ID"]).toBe(index + 1)
+      expect(message.events[0].attributes?.["Record ID"]).toBe(index + 1)
     }
 
     // Assert postgres results
@@ -406,7 +406,7 @@ describe("Add Error Records e2e", () => {
       expect(isSuccess(message)).toBeTruthy()
       expect(message.events).toHaveLength(1)
       expect(message.events[0].eventType).toBe("Error record archival")
-      expect(message.events[0].attributes["Record ID"]).toBe(i + 1)
+      expect(message.events[0].attributes?.["Record ID"]).toBe(i + 1)
     }
 
     // Assert postgres results

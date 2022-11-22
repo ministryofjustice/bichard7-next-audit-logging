@@ -1,4 +1,4 @@
-import type { AuditLogEvent, CreateAuditLogEventsResult } from "src/shared/types"
+import type { ApiAuditLogEvent, CreateAuditLogEventsResult, DynamoAuditLogEvent } from "src/shared/types"
 import { isError } from "src/shared/types"
 import { NotFoundError } from "src/shared/types/ApplicationError"
 import type { AuditLogDynamoGatewayInterface } from "../../gateways/dynamo"
@@ -7,6 +7,7 @@ import {
   isTooManyEventsError,
   isTransactionConflictError
 } from "../../gateways/dynamo"
+import calculateAuditLogEventIndices from "./calculateAuditLogEventIndices"
 import calculateErrorRecordArchivalDate from "./calculateErrorRecordArchivalDate"
 import calculateForceOwner from "./calculateForceOwner"
 import calculateIsSanitised from "./calculateIsSanitised"
@@ -15,23 +16,22 @@ import calculateStatuses from "./calculateStatuses"
 
 const retryAttempts = 10
 
-const shouldDeduplicate = (event: AuditLogEvent): boolean =>
+const shouldDeduplicate = (event: ApiAuditLogEvent): boolean =>
   event.category === "error" &&
-  event.attributes &&
-  event.attributes.hasOwnProperty("Exception Message") &&
-  event.attributes.hasOwnProperty("Exception Stack Trace")
+  !!event.attributes?.["Exception Message"] &&
+  !!event.attributes?.["Exception Stack Trace"]
 
 const stackTraceFirstLine = (stackTrace: string): string => stackTrace.split("\n")[0].trim()
 
-const isDuplicateEvent = (event: AuditLogEvent, existingEvents: AuditLogEvent[]): boolean => {
+const isDuplicateEvent = (event: ApiAuditLogEvent, existingEvents: ApiAuditLogEvent[]): boolean => {
   if (existingEvents.length === 0) {
     return false
   }
   const lastEvent = existingEvents[existingEvents.length - 1]
-  if (lastEvent && lastEvent.attributes["Exception Message"] === event.attributes["Exception Message"]) {
+  if (lastEvent && lastEvent.attributes?.["Exception Message"] === event.attributes?.["Exception Message"]) {
     if (
-      typeof lastEvent.attributes["Exception Stack Trace"] === "string" &&
-      typeof event.attributes["Exception Stack Trace"] === "string"
+      typeof lastEvent.attributes?.["Exception Stack Trace"] === "string" &&
+      typeof event.attributes?.["Exception Stack Trace"] === "string"
     ) {
       const previousStacktrace: string = lastEvent.attributes["Exception Stack Trace"] as string
       const thisStacktrace: string = event.attributes["Exception Stack Trace"] as string
@@ -44,9 +44,9 @@ const isDuplicateEvent = (event: AuditLogEvent, existingEvents: AuditLogEvent[])
   return false
 }
 
-const filterDuplicateEvents = (existingEvents: AuditLogEvent[]) => {
-  const deduplicatedNewEvents: AuditLogEvent[] = []
-  return (event: AuditLogEvent): boolean => {
+const filterDuplicateEvents = (existingEvents: ApiAuditLogEvent[]) => {
+  const deduplicatedNewEvents: ApiAuditLogEvent[] = []
+  return (event: ApiAuditLogEvent): boolean => {
     if (!shouldDeduplicate(event)) {
       deduplicatedNewEvents.push(event)
       return true
@@ -61,12 +61,18 @@ const filterDuplicateEvents = (existingEvents: AuditLogEvent[]) => {
   }
 }
 
+const convertApiEventToDynamo = (event: ApiAuditLogEvent, messageId: string): DynamoAuditLogEvent => ({
+  ...event,
+  ...calculateAuditLogEventIndices(event),
+  _messageId: messageId
+})
+
 export default class CreateAuditLogEventsUseCase {
   constructor(private readonly auditLogGateway: AuditLogDynamoGatewayInterface) {}
 
   async create(
     messageId: string,
-    events: AuditLogEvent[] | AuditLogEvent,
+    events: ApiAuditLogEvent[] | ApiAuditLogEvent,
     attempts = retryAttempts
   ): Promise<CreateAuditLogEventsResult> {
     const newEvents = Array.isArray(events) ? events : [events]
@@ -86,8 +92,10 @@ export default class CreateAuditLogEventsUseCase {
       }
     }
 
-    const allEvents = newEvents.concat(message.events ?? [])
-    const deduplicatedNewEvents = newEvents.filter(filterDuplicateEvents(message.events ?? []))
+    const newDynamoEvents = newEvents.map((event) => convertApiEventToDynamo(event, messageId))
+
+    const allEvents = newDynamoEvents.concat(message.events ?? [])
+    const deduplicatedNewEvents = newDynamoEvents.filter(filterDuplicateEvents(message.events ?? []))
 
     if (deduplicatedNewEvents.length === 0) {
       return {

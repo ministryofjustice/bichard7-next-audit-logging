@@ -87,13 +87,13 @@ export default class CalculateMessageStatusUseCase {
     const generatedTriggers = triggersGeneratedEvents.flatMap((event) =>
       Object.keys(event.attributes ?? {})
         .filter((key) => /Trigger \d+ Details/i.test(key))
-        .map((key) => String(event.attributes[key]))
+        .map((key) => String(event.attributes?.[key]))
     )
 
     const resolvedTriggers = triggerResolvedEvents.flatMap((event) =>
       Object.keys(event.attributes ?? {})
         .filter((key) => /Trigger \d+ Details.*/i.test(key))
-        .map((key) => String(event.attributes[key]).match(/(TRP[RS]\d{4})/)?.[1])
+        .map((key) => String(event.attributes?.[key]).match(/(TRP[RS]\d{4})/)?.[1])
         .filter((value) => value)
     )
 

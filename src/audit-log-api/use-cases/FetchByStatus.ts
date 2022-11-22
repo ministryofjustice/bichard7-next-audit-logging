@@ -1,7 +1,8 @@
-import type { DynamoAuditLog, PromiseResult } from "src/shared/types"
+import type { DynamoAuditLog, OutputApiAuditLog, PromiseResult } from "src/shared/types"
 import { isError } from "src/shared/types"
 import type { AuditLogDynamoGatewayInterface } from "../gateways/dynamo"
 import type { FetchByStatusOptions } from "../types/queryParams"
+import convertDynamoAuditLogToOutputApi from "../utils/convertDynamoAuditLogToOutputApi"
 import type MessageFetcher from "./MessageFetcher"
 
 export default class FetchByStatus implements MessageFetcher {
@@ -11,7 +12,7 @@ export default class FetchByStatus implements MessageFetcher {
     private readonly options: FetchByStatusOptions = {}
   ) {}
 
-  async fetch(): PromiseResult<DynamoAuditLog[]> {
+  async fetch(): PromiseResult<OutputApiAuditLog[]> {
     let lastMessage: DynamoAuditLog | undefined
 
     if (this.options.lastMessageId) {
@@ -28,6 +29,11 @@ export default class FetchByStatus implements MessageFetcher {
       return lastMessage
     }
 
-    return this.gateway.fetchByStatus(this.status, { ...this.options, lastMessage })
+    const records = await this.gateway.fetchByStatus(this.status, { ...this.options, lastMessage })
+    if (isError(records)) {
+      return records
+    }
+
+    return records.map(convertDynamoAuditLogToOutputApi)
   }
 }

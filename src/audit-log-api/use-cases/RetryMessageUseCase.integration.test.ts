@@ -1,17 +1,18 @@
-import { AuditLogApiClient, encodeBase64, TestMqGateway, TestS3Gateway } from "src/shared"
+import { AuditLogApiClient, TestMqGateway, TestS3Gateway } from "src/shared"
 import "src/shared/testing"
-import { auditLogEventsS3Config, mockDynamoAuditLog } from "src/shared/testing"
+import { auditLogEventsS3Config, mockDynamoAuditLog, mockDynamoAuditLogEvent } from "src/shared/testing"
 import type { DynamoAuditLog, MqConfig } from "src/shared/types"
-import { AuditLogEvent } from "src/shared/types"
 import { AuditLogDynamoGateway } from "../gateways/dynamo"
 import { auditLogDynamoConfig, TestDynamoGateway } from "../test"
 import CreateRetryingEventUseCase from "./CreateRetryingEventUseCase"
+import GetLastFailedMessageEventUseCase from "./GetLastEventUseCase"
 import RetrieveEventXmlFromS3UseCase from "./RetrieveEventXmlFromS3UseCase"
 import RetryMessageUseCase from "./RetryMessageUseCase"
 import SendMessageToQueueUseCase from "./SendMessageToQueueUseCase"
 
 const testDynamoGateway = new TestDynamoGateway(auditLogDynamoConfig)
 const auditLogDynamoGateway = new AuditLogDynamoGateway(auditLogDynamoConfig)
+const getLastEventUseCase = new GetLastFailedMessageEventUseCase(auditLogDynamoGateway)
 
 const queueName = "retry-event-integration-testing"
 const mqConfig: MqConfig = {
@@ -29,6 +30,7 @@ const apiClient = new AuditLogApiClient("http://localhost:3010", "DUMMY")
 const createRetryingEventUseCase = new CreateRetryingEventUseCase(apiClient)
 
 const useCase = new RetryMessageUseCase(
+  getLastEventUseCase,
   sendMessageToQueueUseCase,
   retrieveEventXmlFromS3UseCase,
   createRetryingEventUseCase
@@ -48,56 +50,10 @@ describe("RetryMessageUseCase", () => {
   })
 
   it("should retry message using eventXml field when last event is error", async () => {
-    const message = mockDynamoAuditLog()
-    const event = new AuditLogEvent({
-      eventSource: "Dummy Event Source",
-      eventSourceQueueName: queueName,
-      eventType: "Dummy Failed Message",
-      category: "error",
-      timestamp: new Date(),
-      eventXml
+    const message = mockDynamoAuditLog({
+      events: [mockDynamoAuditLogEvent({ category: "error", eventSourceQueueName: queueName, eventXml })]
     })
-    message.events.push(event)
 
-    await testDynamoGateway.insertOne(auditLogDynamoConfig.auditLogTableName, message, "messageId")
-
-    const result = await useCase.retry(message.messageId)
-
-    expect(result).toNotBeError()
-
-    const mqMessage = await mqGateway.getMessage(queueName)
-    mqGateway.dispose()
-    expect(mqMessage).toBe(eventXml)
-
-    const actualAuditLogRecordResult = await auditLogDynamoGateway.fetchOne(message.messageId)
-
-    expect(actualAuditLogRecordResult).toNotBeError()
-    expect(actualAuditLogRecordResult).toBeDefined()
-
-    const actualAuditLogRecord = <DynamoAuditLog>actualAuditLogRecordResult
-    expect(actualAuditLogRecord.status).toBe("Retrying")
-
-    const retryingEvents = actualAuditLogRecord.events.filter((x) => x.eventType === "Retrying failed message")
-    expect(retryingEvents).toBeDefined()
-    expect(retryingEvents).toHaveLength(1)
-  })
-
-  it("should retry message using event s3Path field when last event is error", async () => {
-    const message = mockDynamoAuditLog()
-    const eventS3Path = "event.xml"
-    const event = {
-      s3Path: eventS3Path,
-      ...new AuditLogEvent({
-        eventSource: "Dummy Event Source",
-        eventSourceQueueName: queueName,
-        eventType: "Dummy Failed Message",
-        category: "error",
-        timestamp: new Date()
-      })
-    } as unknown as AuditLogEvent
-    message.events.push(event)
-
-    await s3Gateway.upload(eventS3Path, JSON.stringify({ messageData: encodeBase64(eventXml) }))
     await testDynamoGateway.insertOne(auditLogDynamoConfig.auditLogTableName, message, "messageId")
 
     const result = await useCase.retry(message.messageId)

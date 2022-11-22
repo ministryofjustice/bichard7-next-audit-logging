@@ -5,7 +5,7 @@ import { isError } from "src/shared/types"
 import createAuditLogDynamoDbConfig from "../createAuditLogDynamoDbConfig"
 import { AuditLogDynamoGateway } from "../gateways/dynamo"
 import createMessageFetcher from "../use-cases/createMessageFetcher"
-import { createJsonApiResult, transformAuditLogEvent } from "../utils"
+import { createJsonApiResult } from "../utils"
 
 const auditLogConfig = createAuditLogDynamoDbConfig()
 const auditLogGateway = new AuditLogDynamoGateway(auditLogConfig)
@@ -39,11 +39,6 @@ export default async function getMessages(event: APIGatewayProxyEvent): PromiseR
   }
 
   const messages = Array.isArray(messageFetcherResult) ? messageFetcherResult : [messageFetcherResult]
-  messages.forEach((m) => {
-    if (m.events) {
-      m.events = m.events.map(transformAuditLogEvent)
-    }
-  })
 
   return createJsonApiResult({
     statusCode: HttpStatusCode.ok,

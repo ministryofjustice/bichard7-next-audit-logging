@@ -1,14 +1,9 @@
-import type { AuditLogEventOptions, EventCategory } from "src/shared/types"
-import { AuditLogEvent } from "src/shared/types"
+import { mockApiAuditLogEvent } from "src/shared/testing"
+import type { ApiAuditLogEvent, EventCategory } from "src/shared/types"
 import validateCreateAuditLogEvents from "./validateCreateAuditLogEvents"
 
 it("should be valid when a single audit log event is valid", () => {
-  const event = new AuditLogEvent({
-    category: "information",
-    eventSource: "Event source",
-    eventType: "Event type",
-    timestamp: new Date("2021-10-05T15:12:13.000Z")
-  })
+  const event = mockApiAuditLogEvent()
 
   const { isValid, eventValidationResults } = validateCreateAuditLogEvents([event])
 
@@ -27,15 +22,7 @@ it("should be valid when a single audit log event is valid", () => {
 })
 
 it("should be valid and set attributes when a single audit log is undefined", () => {
-  let event = new AuditLogEvent({
-    category: "information",
-    eventSource: "Event source",
-    eventType: "Event type",
-    timestamp: new Date("2021-10-05T15:12:13.000Z")
-  })
-
-  event = { ...event, attributes: undefined } as unknown as AuditLogEvent
-
+  const event = mockApiAuditLogEvent({ attributes: undefined })
   const { isValid, eventValidationResults } = validateCreateAuditLogEvents([event])
 
   expect(isValid).toBe(true)
@@ -46,13 +33,8 @@ it("should be valid and set attributes when a single audit log is undefined", ()
 })
 
 it("should remove arbitrary keys from a single audit log event", () => {
-  let event = new AuditLogEvent({
-    category: "information",
-    eventSource: "Event source",
-    eventType: "Event type",
-    timestamp: new Date("2021-10-05T15:12:13.000Z")
-  })
-  event = { ...event, customKey1: "Value", myKey: { anotherKey: 5 } } as unknown as AuditLogEvent
+  let event = mockApiAuditLogEvent()
+  event = { ...event, customKey1: "Value", myKey: { anotherKey: 5 } } as unknown as ApiAuditLogEvent
 
   const { isValid, eventValidationResults } = validateCreateAuditLogEvents([event])
 
@@ -75,7 +57,7 @@ it("should remove arbitrary keys from a single audit log event", () => {
 })
 
 it("should be invalid when a single audit log event is missing all fields", () => {
-  const event = {} as AuditLogEvent
+  const event = {} as ApiAuditLogEvent
 
   const { isValid, eventValidationResults } = validateCreateAuditLogEvents([event])
 
@@ -103,7 +85,7 @@ it("should be invalid when a single audit log event fields have incorrect format
     eventType: 5,
     eventXml: 6,
     timestamp: "2021-10-05 12:13:14"
-  } as unknown as AuditLogEvent
+  } as unknown as ApiAuditLogEvent
 
   const { isValid, eventValidationResults } = validateCreateAuditLogEvents([event])
 
@@ -123,13 +105,7 @@ it("should be invalid when a single audit log event fields have incorrect format
 })
 
 it("should be invalid when a single audit log event category is invalid", () => {
-  const event = new AuditLogEvent({
-    category: "invalid category" as EventCategory,
-    eventSource: "Event source",
-    eventType: "Event type",
-    timestamp: new Date("2021-10-05T15:12:13.000Z")
-  })
-
+  const event = mockApiAuditLogEvent({ category: "invalid category" as EventCategory })
   const { isValid, eventValidationResults } = validateCreateAuditLogEvents([event])
 
   expect(isValid).toBe(false)
@@ -139,15 +115,8 @@ it("should be invalid when a single audit log event category is invalid", () => 
 })
 
 it("should attribute validation errors to the correct event", () => {
-  const eventAttributes: AuditLogEventOptions = {
-    category: "information",
-    eventSource: "Event source",
-    eventType: "Event type",
-    timestamp: new Date("2021-10-05T15:12:13.000Z"),
-    attributes: {}
-  }
-  const validEvent = new AuditLogEvent(eventAttributes)
-  const invalidEvent = {} as AuditLogEvent
+  const validEvent = mockApiAuditLogEvent()
+  const invalidEvent = {} as ApiAuditLogEvent
 
   const { isValid, eventValidationResults } = validateCreateAuditLogEvents([validEvent, invalidEvent])
 
@@ -157,7 +126,7 @@ it("should attribute validation errors to the correct event", () => {
   expect(eventValidationResults[0]).toEqual({
     timestamp: validEvent.timestamp,
     errors: [],
-    auditLogEvent: { ...eventAttributes, timestamp: "2021-10-05T15:12:13.000Z" }
+    auditLogEvent: validEvent
   })
   expect(eventValidationResults[1]).toEqual({
     timestamp: "No event timestamp given",

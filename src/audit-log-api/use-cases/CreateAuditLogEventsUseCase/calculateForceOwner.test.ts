@@ -1,23 +1,23 @@
-import type { AuditLogEvent } from "src/shared/types"
+import type { DynamoAuditLogEvent } from "src/shared/types"
 import { EventCode } from "src/shared/types"
 import calculateForceOwner from "./calculateForceOwner"
 
-const forceOwnerChangeEvent = (): AuditLogEvent => {
+const forceOwnerChangeEvent = (): DynamoAuditLogEvent => {
   return {
     eventCode: EventCode.HearingOutcomeDetails,
     attributes: {
       "Force Owner": "010000"
     },
     timestamp: Date.now()
-  } as unknown as AuditLogEvent
+  } as unknown as DynamoAuditLogEvent
 }
 
-const nonForceOwnerChangeEvent = (): AuditLogEvent => {
+const nonForceOwnerChangeEvent = (): DynamoAuditLogEvent => {
   return {
     eventType: "Something else",
     attributes: {},
     timestamp: Date.now()
-  } as unknown as AuditLogEvent
+  } as unknown as DynamoAuditLogEvent
 }
 
 describe("calculateForceOwner", () => {

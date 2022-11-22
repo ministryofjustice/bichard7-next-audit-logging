@@ -1,19 +1,19 @@
-import type { AuditLogEvent } from "src/shared/types"
+import type { DynamoAuditLogEvent } from "src/shared/types"
 import { EventCode } from "src/shared/types"
 import calculateIsSanitised from "./calculateIsSanitised"
 
-const sanitisationEvent = (): AuditLogEvent => {
+const sanitisationEvent = (): DynamoAuditLogEvent => {
   return {
     eventCode: EventCode.Sanitised,
     attributes: {}
-  } as unknown as AuditLogEvent
+  } as unknown as DynamoAuditLogEvent
 }
 
-const nonSanitisationEvent = (): AuditLogEvent => {
+const nonSanitisationEvent = (): DynamoAuditLogEvent => {
   return {
     eventType: "Something else",
     attributes: {}
-  } as unknown as AuditLogEvent
+  } as unknown as DynamoAuditLogEvent
 }
 
 describe("calculateIsSanitised", () => {
