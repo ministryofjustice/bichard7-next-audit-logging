@@ -12,6 +12,7 @@
     "@types/lodash.maxby": "^4.6.7",
     "@types/lodash.minby": "^4.6.7",
     "@types/lodash.partition": "^4.6.7",
+    "@types/node": "^18.11.9",
     "@types/pg": "^8.6.5",
     "@types/stompit": "^0.26.3",
     "@types/uuid": "^8.3.4",
