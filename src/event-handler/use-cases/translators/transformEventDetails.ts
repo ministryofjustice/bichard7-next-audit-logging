@@ -23,7 +23,7 @@ export default (eventDetails: EventDetails, eventXml: string, eventSourceQueueNa
     eventSource: componentID,
     category,
     eventType,
-    timestamp: eventDateTime,
+    timestamp: new Date(eventDateTime).toISOString(),
     eventSourceQueueName,
     ...(category === "error" ? { eventXml } : {}),
     attributes: {},

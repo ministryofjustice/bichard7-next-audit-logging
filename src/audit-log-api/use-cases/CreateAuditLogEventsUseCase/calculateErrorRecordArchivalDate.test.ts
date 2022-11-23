@@ -1,13 +1,13 @@
 import { DynamoAuditLogEvent, EventCode } from "src/shared/types"
 import calculateErrorRecordArchivalDate from "./calculateErrorRecordArchivalDate"
 
-const archivalTime = Date.now()
+const archivalTime = new Date().toISOString()
 
 const archivalEvent = (): DynamoAuditLogEvent => {
   return {
     attributes: {},
     eventCode: EventCode.ErrorRecordArchived,
-    timestamp: new Date(archivalTime).toISOString()
+    timestamp: archivalTime
   } as DynamoAuditLogEvent
 }
 

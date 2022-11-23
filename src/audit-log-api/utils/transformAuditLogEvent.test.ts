@@ -31,7 +31,7 @@ describe("transformAuditLogEvent", () => {
   })
 
   it("should add the eventCode for a valid event", () => {
-    const event = mockApiAuditLogEvent({ eventType: "Trigger generated" })
+    const event = mockApiAuditLogEvent({ eventCode: undefined, eventType: "Trigger generated" })
     const result = transformAuditLogEvent(event)
     expect(result.eventCode).toBe(EventCode.TriggersGenerated)
   })

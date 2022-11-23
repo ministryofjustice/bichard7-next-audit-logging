@@ -10,8 +10,8 @@ import {
 import calculateAuditLogEventIndices from "./calculateAuditLogEventIndices"
 import calculateErrorRecordArchivalDate from "./calculateErrorRecordArchivalDate"
 import calculateForceOwner from "./calculateForceOwner"
-import calculateIsSanitised from "./calculateIsSanitised"
 import calculateRetryCount from "./calculateRetryCount"
+import calculateSanitisation from "./calculateSanitisation"
 import calculateStatuses from "./calculateStatuses"
 
 const retryAttempts = 10
@@ -107,7 +107,7 @@ export default class CreateAuditLogEventsUseCase {
       ...calculateForceOwner(allEvents),
       ...calculateStatuses(allEvents),
       ...calculateErrorRecordArchivalDate(allEvents),
-      ...calculateIsSanitised(allEvents),
+      ...calculateSanitisation(allEvents),
       ...calculateRetryCount(allEvents),
       events: deduplicatedNewEvents
     }

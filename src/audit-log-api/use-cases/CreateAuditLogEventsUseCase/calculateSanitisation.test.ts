@@ -1,6 +1,6 @@
 import type { DynamoAuditLogEvent } from "src/shared/types"
 import { EventCode } from "src/shared/types"
-import calculateIsSanitised from "./calculateIsSanitised"
+import calculateSanitisation from "./calculateSanitisation"
 
 const sanitisationEvent = (): DynamoAuditLogEvent => {
   return {
@@ -16,16 +16,16 @@ const nonSanitisationEvent = (): DynamoAuditLogEvent => {
   } as unknown as DynamoAuditLogEvent
 }
 
-describe("calculateIsSanitised", () => {
+describe("calculateSanitisation", () => {
   it("should set sanitised status when a sanitisation is added", () => {
     const events = [nonSanitisationEvent(), nonSanitisationEvent(), sanitisationEvent(), nonSanitisationEvent()]
-    const forceOwnerDynamoUpdates = calculateIsSanitised(events)
-    expect(forceOwnerDynamoUpdates).toStrictEqual({ isSanitised: 1 })
+    const forceOwnerDynamoUpdates = calculateSanitisation(events)
+    expect(forceOwnerDynamoUpdates).toStrictEqual({ isSanitised: 1, nextSanitiseCheck: undefined })
   })
 
   it("shouldn't change anything in dynamodb when there are no sanitisation events", () => {
     const events = [nonSanitisationEvent(), nonSanitisationEvent(), nonSanitisationEvent()]
-    const forceOwnerDynamoUpdates = calculateIsSanitised(events)
+    const forceOwnerDynamoUpdates = calculateSanitisation(events)
     expect(forceOwnerDynamoUpdates).toStrictEqual({})
   })
 })

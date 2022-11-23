@@ -18,7 +18,7 @@ it("should be valid when a single audit log event is valid", () => {
   expect(auditLogEvent.eventSource).toBe(event.eventSource)
   expect(auditLogEvent.eventType).toBe(event.eventType)
   expect(auditLogEvent.timestamp).toBe(event.timestamp)
-  expect(auditLogEvent.attributes).toEqual({})
+  expect(auditLogEvent.attributes).toEqual(event.attributes)
 })
 
 it("should be valid and set attributes when a single audit log is undefined", () => {
@@ -49,7 +49,7 @@ it("should remove arbitrary keys from a single audit log event", () => {
   expect(auditLogEvent.eventSource).toBe(event.eventSource)
   expect(auditLogEvent.eventType).toBe(event.eventType)
   expect(auditLogEvent.timestamp).toBe(event.timestamp)
-  expect(auditLogEvent.attributes).toEqual({})
+  expect(auditLogEvent.attributes).toStrictEqual(event.attributes)
 
   const keys = Object.keys(auditLogEvent)
   expect(keys).not.toContain("customKey1")
