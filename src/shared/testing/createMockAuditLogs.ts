@@ -79,6 +79,7 @@ export const createMockAuditLogEvent = async (
   const res = await axios
     .post(`http://localhost:3010/messages/${messageId}/events`, auditLogEvent)
     .catch((error: AxiosError) => error)
+
   if (isError(res)) {
     return res
   }

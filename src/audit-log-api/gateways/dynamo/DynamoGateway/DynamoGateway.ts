@@ -273,8 +273,6 @@ export default class DynamoGateway {
       ConditionExpression: `attribute_exists(${keyName}) and version = :version`
     }
 
-    console.log(`updateParams: ${updateParams}`)
-
     return this.client
       .update(updateParams)
       .promise()

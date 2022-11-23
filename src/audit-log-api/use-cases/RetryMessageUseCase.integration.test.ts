@@ -1,7 +1,7 @@
 import { AuditLogApiClient, TestMqGateway, TestS3Gateway } from "src/shared"
 import "src/shared/testing"
-import { auditLogEventsS3Config, mockDynamoAuditLog, mockDynamoAuditLogEvent } from "src/shared/testing"
-import type { DynamoAuditLog, MqConfig } from "src/shared/types"
+import { auditLogEventsS3Config, createMockAuditLog, createMockAuditLogEvent } from "src/shared/testing"
+import type { DynamoAuditLog, MqConfig, OutputApiAuditLog } from "src/shared/types"
 import { AuditLogDynamoGateway } from "../gateways/dynamo"
 import { auditLogDynamoConfig, TestDynamoGateway } from "../test"
 import CreateRetryingEventUseCase from "./CreateRetryingEventUseCase"
@@ -50,11 +50,12 @@ describe("RetryMessageUseCase", () => {
   })
 
   it("should retry message using eventXml field when last event is error", async () => {
-    const message = mockDynamoAuditLog({
-      events: [mockDynamoAuditLogEvent({ category: "error", eventSourceQueueName: queueName, eventXml })]
+    const message = (await createMockAuditLog()) as OutputApiAuditLog
+    await createMockAuditLogEvent(message.messageId, {
+      category: "error",
+      eventSourceQueueName: queueName,
+      eventXml
     })
-
-    await testDynamoGateway.insertOne(auditLogDynamoConfig.auditLogTableName, message, "messageId")
 
     const result = await useCase.retry(message.messageId)
 

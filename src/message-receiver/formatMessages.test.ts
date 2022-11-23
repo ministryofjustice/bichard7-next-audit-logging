@@ -26,18 +26,18 @@ test("returns all messages with message format attached", () => {
     messages: [expectedMessage1, expectedMessage2]
   }
 
-  const messages = formatMessages(event, "AuditEvent")
+  const messages = formatMessages(event, "GeneralEvent")
   expect(messages).toHaveLength(2)
 
   const actualMessage1 = messages[0] as EventMessage
   expect(actualMessage1.messageData).toBe(expectedMessage1.data)
-  expect(actualMessage1.messageFormat).toBe("AuditEvent")
+  expect(actualMessage1.messageFormat).toBe("GeneralEvent")
   expect(actualMessage1.eventSourceArn).toBe("DummyArn")
   expect(actualMessage1.eventSourceQueueName).toBe("DUMMY_QUEUE_1")
 
   const actualMessage2 = messages[1] as EventMessage
   expect(actualMessage2.messageData).toBe(expectedMessage2.data)
-  expect(actualMessage2.messageFormat).toBe("AuditEvent")
+  expect(actualMessage2.messageFormat).toBe("GeneralEvent")
   expect(actualMessage2.eventSourceArn).toBe("DummyArn")
   expect(actualMessage2.eventSourceQueueName).toBe("DUMMY_QUEUE_2")
 })
@@ -58,12 +58,12 @@ test("returns corrected queue name when message is from failure queue", () => {
     messages: [expectedMessage]
   }
 
-  const messages = formatMessages(event, "AuditEvent")
+  const messages = formatMessages(event, "GeneralEvent")
   expect(messages).toHaveLength(1)
 
   const actualMessage = messages[0] as EventMessage
   expect(actualMessage.messageData).toBe(expectedMessage.data)
-  expect(actualMessage.messageFormat).toBe("AuditEvent")
+  expect(actualMessage.messageFormat).toBe("GeneralEvent")
   expect(actualMessage.eventSourceArn).toBe("DummyArn")
   expect(actualMessage.eventSourceQueueName).toBe("DUMMY_QUEUE")
 })

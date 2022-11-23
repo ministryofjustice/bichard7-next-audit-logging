@@ -1,5 +1,4 @@
 import type { MessageFormat, Result } from "src/shared/types"
-import AuditEventTranslator from "./AuditEventTranslator"
 import CourtResultInputTranslator from "./CourtResultInputTranslator"
 import DataSetPncUpdateTranslator from "./DataSetPncUpdateTranslator"
 import GeneralEventTranslator from "./GeneralEventTranslator"
@@ -10,9 +9,6 @@ import type Translator from "./Translator"
 
 export default (messageFormat: MessageFormat): Result<Translator> => {
   switch (messageFormat) {
-    case "AuditEvent":
-      return AuditEventTranslator
-
     case "GeneralEvent":
       return GeneralEventTranslator
 

@@ -9,7 +9,6 @@ import translateEvent from "./translateEvent"
 import type TranslationResult from "./translators/TranslationResult"
 
 const filenameMappings: Record<MessageFormat, string> = {
-  AuditEvent: "audit-event",
   GeneralEvent: "general-event",
   CourtResultInput: "court-result-input",
   HearingOutcomePncUpdate: "hearing-outcome-pnc-update",
@@ -42,13 +41,6 @@ interface TestInput {
 }
 
 test.each<TestInput>([
-  {
-    messageFormat: "AuditEvent",
-    messageId: "{MESSAGE_ID}",
-    category: "warning",
-    eventSource: "ErrorHandlerScreenFlow",
-    eventType: "Trigger Instances resolved"
-  },
   {
     messageFormat: "GeneralEvent",
     messageId: "{MESSAGE_ID}",

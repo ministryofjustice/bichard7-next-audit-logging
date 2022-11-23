@@ -11,6 +11,7 @@ import {
 } from "src/shared/testing"
 import type { ApiAuditLogEvent, DynamoAuditLog, KeyValuePair } from "src/shared/types"
 import { AuditLogStatus, isError } from "src/shared/types"
+import { v4 as uuid } from "uuid"
 import TestDynamoGateway from "../../../test/TestDynamoGateway"
 import AuditLogDynamoGateway from "./AuditLogDynamoGateway"
 
@@ -143,40 +144,6 @@ describe("AuditLogDynamoGateway", () => {
       expect(isError(result)).toBe(false)
       expect(result as DynamoAuditLog).toBeUndefined()
     })
-
-    it("should merge events from both tables for one message", async () => {
-      const auditLog = mockDynamoAuditLog()
-      auditLog.events.push(mockDynamoAuditLogEvent({ eventType: "Type 1" }))
-      await testGateway.insertOne(auditLogDynamoConfig.auditLogTableName, auditLog, gateway.auditLogTableKey)
-      const externalEvent = { ...mockApiAuditLogEvent(), eventType: "Type 2", _messageId: auditLog.messageId }
-      await testGateway.insertOne(auditLogDynamoConfig.eventsTableName, externalEvent, gateway.eventsTableKey)
-
-      const result = await gateway.fetchOne(auditLog.messageId)
-
-      expect(result).toNotBeError()
-
-      const actualAuditLogs = result as DynamoAuditLog
-      expect(actualAuditLogs.events).toHaveLength(2)
-
-      const actualEvents = actualAuditLogs.events
-      expect(actualEvents[0].eventType).toBe("Type 1")
-      expect(actualEvents[1].eventType).toBe("Type 2")
-    })
-
-    it("should not merge events if the column was excluded", async () => {
-      const auditLog = mockDynamoAuditLog()
-      auditLog.events.push(mockDynamoAuditLogEvent({ eventType: "Type 1" }))
-      await testGateway.insertOne(auditLogDynamoConfig.auditLogTableName, auditLog, gateway.auditLogTableKey)
-      const externalEvent = { ...mockApiAuditLogEvent(), eventType: "Type 2", _messageId: auditLog.messageId }
-      await testGateway.insertOne(auditLogDynamoConfig.eventsTableName, externalEvent, gateway.eventsTableKey)
-
-      const result = await gateway.fetchOne(auditLog.messageId, { excludeColumns: ["events"] })
-
-      expect(result).toNotBeError()
-
-      const actualAuditLogs = result as DynamoAuditLog
-      expect(actualAuditLogs.events).toBeUndefined()
-    })
   })
 
   describe("fetchVersion", () => {
@@ -305,22 +272,14 @@ describe("AuditLogDynamoGateway", () => {
     })
 
     it("should allow events to be filtered for the automation report", async () => {
-      const auditLog = mockDynamoAuditLog()
-      await testGateway.insertOne(auditLogDynamoConfig.auditLogTableName, auditLog, gateway.auditLogTableKey)
-      const externalEvent1 = {
-        ...mockApiAuditLogEvent(),
-        eventType: "Type 1",
-        _messageId: auditLog.messageId,
-        _automationReport: 0
-      }
-      await testGateway.insertOne(auditLogDynamoConfig.eventsTableName, externalEvent1, gateway.eventsTableKey)
-      const externalEvent2 = {
-        ...mockApiAuditLogEvent(),
-        eventType: "Type 2",
-        _messageId: auditLog.messageId,
-        _automationReport: 1
-      }
-      await testGateway.insertOne(auditLogDynamoConfig.eventsTableName, externalEvent2, gateway.eventsTableKey)
+      const auditLog = (await createMockAuditLog()) as DynamoAuditLog
+
+      await gateway.update(auditLog, {
+        events: [
+          mockDynamoAuditLogEvent({ eventType: "Type 1", _automationReport: 0 }),
+          mockDynamoAuditLogEvent({ eventType: "Type 2", _automationReport: 1 })
+        ]
+      })
 
       const result = await gateway.fetchRange({
         limit: 1,
@@ -619,11 +578,12 @@ describe("AuditLogDynamoGateway", () => {
       await testGateway.insertOne(auditLogDynamoConfig.auditLogTableName, auditLog, gateway.auditLogTableKey)
       const externalEvent = mockDynamoAuditLogEvent({
         eventType: "Type 1",
+        _id: uuid(),
         _messageId: auditLog.messageId,
         attributes: {
           "Attribute 1": { _compressedValue: (await compress("Attribute 1 data".repeat(500))) as string }
         }
-      })
+      } as any)
 
       await testGateway.insertOne(auditLogDynamoConfig.eventsTableName, externalEvent, gateway.eventsTableKey)
 
@@ -663,6 +623,7 @@ describe("AuditLogDynamoGateway", () => {
       await testGateway.insertOne(auditLogDynamoConfig.auditLogTableName, auditLog, gateway.auditLogTableKey)
       const externalEvent = {
         ...mockApiAuditLogEvent(),
+        _id: uuid(),
         _messageId: auditLog.messageId,
         eventXml: {
           _compressedValue: await compress("really long xml".repeat(500))

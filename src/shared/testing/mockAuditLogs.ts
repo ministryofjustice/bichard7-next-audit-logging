@@ -61,5 +61,6 @@ export const mockDynamoAuditLogEvent = (overrides: Partial<DynamoAuditLogEvent> 
   ...mockApiAuditLogEvent(overrides),
   _automationReport: 0,
   _topExceptionsReport: 0,
-  _messageId: "needs-setting"
+  _messageId: "needs-setting",
+  ...overrides
 })
