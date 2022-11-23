@@ -287,11 +287,13 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
 
   replaceAuditLog(auditLog: DynamoAuditLog, version: number): PromiseResult<void> {
     const replacement = { ...auditLog, version: version + 1 }
+    delete (replacement as any).events
     return this.replaceOne(this.config.auditLogTableName, replacement, this.auditLogTableKey, version)
   }
 
   async update(existing: DynamoAuditLog, updates: Partial<DynamoAuditLog>): PromiseResult<void> {
     const updateExpression = []
+    let removeExpression = ""
     const expressionAttributeNames: KeyValuePair<string, string> = {}
     const updateExpressionValues: KeyValuePair<string, unknown> = {}
 
@@ -337,6 +339,10 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
       updateExpressionValues[":isSanitised"] = updates.isSanitised
     }
 
+    if (updates.nextSanitiseCheck === undefined) {
+      removeExpression = "REMOVE nextSanitiseCheck"
+    }
+
     if (updates.retryCount) {
       updateExpression.push("retryCount = :retryCount")
       updateExpressionValues[":retryCount"] = updates.retryCount
@@ -349,7 +355,7 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
           Key: {
             messageId: existing.messageId
           },
-          UpdateExpression: `SET ${updateExpression.join(",")} ADD version :version_increment`,
+          UpdateExpression: `SET ${updateExpression.join(",")} ${removeExpression} ADD version :version_increment`,
           ...(Object.keys(expressionAttributeNames).length > 0
             ? { ExpressionAttributeNames: expressionAttributeNames }
             : {}),
@@ -451,10 +457,7 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
       this,
       this.config.eventsTableName,
       this.eventsTableKey
-    ).setProjection({
-      expression: "attributes,category,eventSource,eventSourceQueueName,eventType,eventXml,#timestamp,eventCode,#user",
-      attributeNames: { "#timestamp": "timestamp", "#user": "user" }
-    })
+    )
 
     if (options.eventsFilter) {
       indexSearcher

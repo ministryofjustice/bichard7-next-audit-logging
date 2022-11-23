@@ -6,11 +6,11 @@ import {
   createMockAuditLog,
   createMockAuditLogEvent,
   mockDynamoAuditLog,
-  mockDynamoAuditLogEvent,
   setEnvironmentVariables
 } from "src/shared/testing"
-import type { DynamoAuditLog } from "src/shared/types"
+import type { DynamoAuditLog, OutputApiAuditLog } from "src/shared/types"
 import createBichardPostgresGatewayConfig from "../createBichardPostgresGatewayConfig"
+import { AuditLogDynamoGateway } from "../gateways/dynamo"
 import { auditLogDynamoConfig, TestDynamoGateway } from "../test"
 
 setEnvironmentVariables()
@@ -27,6 +27,7 @@ const postgresGateway = new BichardPostgresGateway(postgresConfig)
 const messagesS3Gateway = new TestS3Gateway(createS3Config("INTERNAL_INCOMING_MESSAGES_BUCKET"))
 const eventsS3Gateway = new TestS3Gateway(createS3Config("AUDIT_LOG_EVENTS_BUCKET"))
 
+const auditLogDynamoGateway = new AuditLogDynamoGateway(auditLogDynamoConfig)
 const testDynamoGateway = new TestDynamoGateway(auditLogDynamoConfig)
 const testPostgresGateway = new TestPostgresGateway(postgresConfig)
 const errorListTestPostgresGateway = new TestPostgresGateway(errorListPostgresConfig)
@@ -46,16 +47,14 @@ describe("sanitiseMessage", () => {
     await postgresGateway.dispose()
   })
 
-  it("should return Ok status when message has been sanitised successfully", async () => {
+  it("should fully sanitise message and return successfully", async () => {
     const s3Path = "message.xml"
-    const message = mockDynamoAuditLog({
+    const message = (await createMockAuditLog({
       receivedDate: new Date("2020-01-01").toISOString(),
       s3Path
-    })
+    })) as OutputApiAuditLog
 
-    createMockAuditLog(message)
-
-    const event1 = mockDynamoAuditLogEvent({
+    await createMockAuditLogEvent(message.messageId, {
       attributes: {
         "Trigger 2 Details": "TRPR0004",
         "Original Hearing Outcome / PNC Update Dataset": "<?xml><dummy></dummy>",
@@ -67,21 +66,12 @@ describe("sanitiseMessage", () => {
       }
     })
 
-    const event2 = mockDynamoAuditLogEvent()
-
-    createMockAuditLogEvent(message.messageId, event1)
-    createMockAuditLogEvent(message.messageId, event2)
+    await createMockAuditLogEvent(message.messageId)
 
     await messagesS3Gateway.upload(s3Path, "dummy")
-    await testDynamoGateway.insertOne(auditLogTableName, message, "messageId")
 
     const otherMessageId = "otherMessageID"
-    const records = [
-      { message_id: message.messageId },
-      { message_id: message.messageId },
-      { message_id: otherMessageId }
-    ]
-    await testPostgresGateway.insertRecords(records)
+    await testPostgresGateway.insertRecords([{ message_id: message.messageId }, { message_id: otherMessageId }])
 
     const response = await axios.post(`http://localhost:3010/messages/${message.messageId}/sanitise`, null, {
       validateStatus: undefined
@@ -92,18 +82,13 @@ describe("sanitiseMessage", () => {
     const actualMessageS3Objects = await messagesS3Gateway.getAll()
     expect(actualMessageS3Objects).toEqual([])
 
-    const actualEventS3Objects = await eventsS3Gateway.getAll()
-    expect(actualEventS3Objects).toEqual([])
-
-    const actualMessage = await testDynamoGateway.getOne<DynamoAuditLog>(
-      auditLogTableName,
-      "messageId",
-      message.messageId
+    const actualMessage = (await auditLogDynamoGateway.fetchOne(message.messageId)) as DynamoAuditLog
+    const triggerEvent = actualMessage.events.find((event) =>
+      Object.keys(event.attributes ?? {}).includes("Trigger 2 Details")
     )
-
-    const attributes = actualMessage?.events.find((event) => "s3Path" in event)?.attributes ?? {}
-    expect(Object.keys(attributes)).toHaveLength(1)
-    expect(attributes["Trigger 2 Details"]).toBe("TRPR0004")
+    const triggerEventAttributes = triggerEvent?.attributes ?? {}
+    expect(Object.keys(triggerEventAttributes)).toHaveLength(1)
+    expect(triggerEventAttributes["Trigger 2 Details"]).toBe("TRPR0004")
 
     const allResults = await testPostgresGateway.findAll()
     expect(allResults).toHaveLength(1)

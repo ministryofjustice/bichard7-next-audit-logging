@@ -89,7 +89,10 @@ export default class DynamoGateway {
         Put: {
           TableName: tableName,
           Item: { _: "_", ...record },
-          ConditionExpression: `attribute_exists(${keyName})`
+          ConditionExpression: "attribute_exists(#keyName)",
+          ExpressionAttributeNames: {
+            "#keyName": keyName
+          }
         }
       })
     }
@@ -269,6 +272,8 @@ export default class DynamoGateway {
       ExpressionAttributeNames: expressionAttributeNames,
       ConditionExpression: `attribute_exists(${keyName}) and version = :version`
     }
+
+    console.log(`updateParams: ${updateParams}`)
 
     return this.client
       .update(updateParams)

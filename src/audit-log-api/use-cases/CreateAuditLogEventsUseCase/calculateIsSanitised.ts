@@ -4,7 +4,7 @@ import { EventCode } from "src/shared/types"
 export default (events: DynamoAuditLogEvent[]): Partial<DynamoAuditLog> => {
   const sanitisationEvents = events.filter((event) => event.eventCode === EventCode.Sanitised)
   if (sanitisationEvents.length > 0) {
-    return { isSanitised: 1 }
+    return { isSanitised: 1, nextSanitiseCheck: undefined }
   }
 
   return {}

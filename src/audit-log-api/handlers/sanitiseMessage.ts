@@ -2,12 +2,10 @@ import type { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda"
 import type { Duration } from "date-fns"
 import { add } from "date-fns"
 import { BichardPostgresGateway, createS3Config, HttpStatusCode, S3Gateway } from "src/shared"
-import type { DynamoAuditLog } from "src/shared/types"
 import { isError } from "src/shared/types"
 import createAuditLogDynamoDbConfig from "../createAuditLogDynamoDbConfig"
 import createBichardPostgresGatewayConfig from "../createBichardPostgresGatewayConfig"
 import { AuditLogDynamoGateway } from "../gateways/dynamo"
-import { auditLogDynamoConfig } from "../test"
 import DeleteArchivedErrorsUseCase from "../use-cases/DeleteArchivedErrorsUseCase"
 import DeleteMessageObjectsFromS3UseCase from "../use-cases/DeleteMessageObjectsFromS3UseCase"
 import SanitiseAuditLogEventsUseCase from "../use-cases/SanitiseAuditLogEventsUseCase"
@@ -51,20 +49,14 @@ export default async function sanitiseMessage(event: APIGatewayProxyEvent): Prom
     })
   }
 
-  const messageResult = await auditLogGateway.getOne(
-    auditLogDynamoConfig.auditLogTableName,
-    auditLogGateway.auditLogTableKey,
-    messageId
-  )
+  const message = await auditLogGateway.fetchOne(messageId, { includeColumns: ["version"] })
 
-  if (isError(messageResult)) {
+  if (isError(message)) {
     return createJsonApiResult({
       statusCode: HttpStatusCode.internalServerError,
-      body: messageResult.message
+      body: message.message
     })
   }
-
-  const message = messageResult?.Item as DynamoAuditLog
 
   if (!message) {
     return createJsonApiResult({
@@ -74,6 +66,7 @@ export default async function sanitiseMessage(event: APIGatewayProxyEvent): Prom
   }
 
   const shouldSanitise = await shouldSanitiseMessage(awsBichardPostgresGateway, message, sanitiseConfig.sanitiseAfter)
+  console.log(`shouldSanitise: ${shouldSanitise}`)
   if (isError(shouldSanitise)) {
     return createJsonApiResult({
       statusCode: HttpStatusCode.internalServerError,
@@ -82,7 +75,15 @@ export default async function sanitiseMessage(event: APIGatewayProxyEvent): Prom
   }
 
   if (!shouldSanitise) {
-    await auditLogGateway.updateSanitiseCheck(message, add(new Date(), sanitiseConfig.checkFrequency))
+    const result = await auditLogGateway.updateSanitiseCheck(message, add(new Date(), sanitiseConfig.checkFrequency))
+    console.log(`result: ${result}`)
+    if (isError(result)) {
+      return createJsonApiResult({
+        statusCode: HttpStatusCode.internalServerError,
+        body: result.message
+      })
+    }
+
     return createJsonApiResult({
       statusCode: HttpStatusCode.ok,
       body: "Message not sanitised."
