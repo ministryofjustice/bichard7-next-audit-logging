@@ -22,14 +22,6 @@ describe("CreateEventUseCase", () => {
     expect(result).toBeUndefined()
   })
 
-  it("should fail when audit log API fails to create message", async () => {
-    const expectedError = new Error("Create audit log failed")
-    fakeApiClient.setErrorReturnedByFunctions(expectedError, ["createAuditLog"])
-    const result = await useCase.execute("DummyMessageId", {} as AuditLogEvent)
-
-    expect(result).toBeError(expectedError.message)
-  })
-
   it("should fail when audit log API fails to create event", async () => {
     const expectedError = new Error("Create event failed")
     fakeApiClient.setErrorReturnedByFunctions(expectedError, ["createEvent"])
