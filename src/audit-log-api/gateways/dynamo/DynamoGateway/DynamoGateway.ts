@@ -81,6 +81,22 @@ export default class DynamoGateway {
       })
   }
 
+  replaceMany<T>(tableName: string, records: T[], keyName: string): PromiseResult<void> {
+    const dynamoQueries = []
+
+    for (const record of records) {
+      dynamoQueries.push({
+        Put: {
+          TableName: tableName,
+          Item: { _: "_", ...record },
+          ConditionExpression: `attribute_exists(${keyName})`
+        }
+      })
+    }
+
+    return this.executeTransaction(dynamoQueries)
+  }
+
   replaceOne<T>(tableName: string, record: T, keyName: string, version: number): PromiseResult<void> {
     const params: DocumentClient.PutItemInput = {
       TableName: tableName,

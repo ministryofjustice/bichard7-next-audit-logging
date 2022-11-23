@@ -1,5 +1,5 @@
 /* eslint-disable class-methods-use-this */
-import type { DynamoAuditLog, PromiseResult } from "src/shared/types"
+import type { DynamoAuditLog, DynamoAuditLogEvent, PromiseResult } from "src/shared/types"
 import type { AuditLogDynamoGatewayInterface, DynamoUpdate } from "../gateways/dynamo"
 import type {
   FetchByStatusOptions,
@@ -100,6 +100,10 @@ export default class FakeAuditLogDynamoGateway implements AuditLogDynamoGatewayI
   }
 
   replaceAuditLog(_: DynamoAuditLog, __: number): PromiseResult<void> {
+    throw new Error("Method not implemented.")
+  }
+
+  replaceAuditLogEvents(_: DynamoAuditLogEvent[]): PromiseResult<void> {
     throw new Error("Method not implemented.")
   }
 

@@ -22,6 +22,7 @@ export default interface AuditLogDynamoGateway {
   fetchUnsanitised(options?: FetchUnsanitisedOptions): PromiseResult<DynamoAuditLog[]>
   fetchVersion(messageId: string): PromiseResult<number | null>
   replaceAuditLog(message: DynamoAuditLog, version: number): PromiseResult<void>
+  replaceAuditLogEvents(events: DynamoAuditLogEvent[]): PromiseResult<void>
   update(
     existing: DynamoAuditLog,
     updates: Partial<DynamoAuditLog>,

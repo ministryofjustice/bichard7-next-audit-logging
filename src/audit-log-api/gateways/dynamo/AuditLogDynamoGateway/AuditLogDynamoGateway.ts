@@ -131,10 +131,24 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
 
     const items = <DynamoAuditLog[]>result?.Items
     if (!options.excludeColumns || !options.excludeColumns.includes("events")) {
-      await this.mergeEventsFromEventsTable(items as DynamoAuditLog[])
+      await this.addEventsFromEventsTable(items)
     }
 
     return items[0]
+  }
+
+  private async addEventsFromEventsTable(
+    auditLogs: DynamoAuditLog[],
+    options: EventsFilterOptions = {}
+  ): PromiseResult<void> {
+    for (const auditLog of auditLogs) {
+      const result = await this.getEvents(auditLog.messageId, options)
+      if (isError(result)) {
+        return result
+      }
+
+      auditLog.events = result
+    }
   }
 
   async fetchByHash(hash: string): PromiseResult<DynamoAuditLog | null> {
@@ -156,7 +170,7 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
     }
 
     const items = <DynamoAuditLog[]>result?.Items
-    await this.mergeEventsFromEventsTable(items as DynamoAuditLog[])
+    await this.addEventsFromEventsTable(items)
 
     return items[0]
   }
@@ -174,7 +188,7 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
     }
 
     if (!options.excludeColumns || !options.excludeColumns.includes("events")) {
-      await this.mergeEventsFromEventsTable(result as DynamoAuditLog[])
+      await this.addEventsFromEventsTable(result as DynamoAuditLog[])
     }
 
     return <DynamoAuditLog[]>result
@@ -193,7 +207,7 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
     }
 
     if (!options.excludeColumns || !options.excludeColumns.includes("events")) {
-      await this.mergeEventsFromEventsTable(result as DynamoAuditLog[])
+      await this.addEventsFromEventsTable(result as DynamoAuditLog[])
     }
 
     return result as DynamoAuditLog[]
@@ -213,7 +227,7 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
 
     const item = result?.Item as DynamoAuditLog
     if (item && (!options.excludeColumns || !options.excludeColumns.includes("events"))) {
-      await this.mergeEventsFromEventsTable([item])
+      await this.addEventsFromEventsTable([item])
     }
 
     return item
@@ -233,7 +247,7 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
     }
 
     if (!options.excludeColumns || !options.excludeColumns.includes("events")) {
-      await this.mergeEventsFromEventsTable(result as DynamoAuditLog[], { eventsFilter: options.eventsFilter })
+      await this.addEventsFromEventsTable(result as DynamoAuditLog[], { eventsFilter: options.eventsFilter })
     }
 
     return <DynamoAuditLog[]>result
@@ -253,7 +267,7 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
     }
 
     if (!options.excludeColumns || !options.excludeColumns.includes("events")) {
-      await this.mergeEventsFromEventsTable(result as DynamoAuditLog[])
+      await this.addEventsFromEventsTable(result as DynamoAuditLog[])
     }
 
     return <DynamoAuditLog[]>result
@@ -428,49 +442,45 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
     return event
   }
 
-  private async mergeEventsFromEventsTable(
-    auditLogs: DynamoAuditLog[],
-    options: EventsFilterOptions = {}
-  ): PromiseResult<void> {
-    for (const auditLog of auditLogs) {
-      const indexSearcher = new IndexSearcher<DynamoAuditLogEvent[]>(
-        this,
-        this.config.eventsTableName,
-        this.eventsTableKey
-      ).setProjection({
-        expression:
-          "attributes,category,eventSource,eventSourceQueueName,eventType,eventXml,#timestamp,eventCode,#user",
-        attributeNames: { "#timestamp": "timestamp", "#user": "user" }
-      })
+  async replaceAuditLogEvents(events: DynamoAuditLogEvent[]): PromiseResult<void> {
+    return this.replaceMany(this.config.eventsTableName, events, this.eventsTableKey)
+  }
 
-      if (options.eventsFilter) {
-        indexSearcher
-          .useIndex(`${options.eventsFilter}Index`)
-          .setIndexKeys("_messageId", auditLog.messageId, `_${options.eventsFilter}`)
-          .setRangeKey(1, KeyComparison.Equals)
-      } else {
-        indexSearcher.useIndex("messageIdIndex").setIndexKeys("_messageId", auditLog.messageId, "timestamp")
-      }
+  async getEvents(messageId: string, options: EventsFilterOptions = {}): PromiseResult<DynamoAuditLogEvent[]> {
+    const indexSearcher = new IndexSearcher<DynamoAuditLogEvent[]>(
+      this,
+      this.config.eventsTableName,
+      this.eventsTableKey
+    ).setProjection({
+      expression: "attributes,category,eventSource,eventSourceQueueName,eventType,eventXml,#timestamp,eventCode,#user",
+      attributeNames: { "#timestamp": "timestamp", "#user": "user" }
+    })
 
-      const events = (await indexSearcher.execute()) ?? []
-
-      if (isError(events)) {
-        return events
-      }
-
-      for (let i = 0; i < events.length; i++) {
-        const decompressedEvent = await this.decompressEventValues(events[i])
-        if (isError(decompressedEvent)) {
-          return decompressedEvent
-        }
-
-        events[i] = decompressedEvent
-      }
-
-      auditLog.events = (auditLog.events ?? [])
-        .concat(events ?? [])
-        .sort((a, b) => (a.timestamp > b.timestamp ? 1 : b.timestamp > a.timestamp ? -1 : 0))
+    if (options.eventsFilter) {
+      indexSearcher
+        .useIndex(`${options.eventsFilter}Index`)
+        .setIndexKeys("_messageId", messageId, `_${options.eventsFilter}`)
+        .setRangeKey(1, KeyComparison.Equals)
+    } else {
+      indexSearcher.useIndex("messageIdIndex").setIndexKeys("_messageId", messageId, "timestamp")
     }
+
+    const events = (await indexSearcher.execute()) ?? []
+
+    if (isError(events)) {
+      return events
+    }
+
+    for (let i = 0; i < events.length; i++) {
+      const decompressedEvent = await this.decompressEventValues(events[i])
+      if (isError(decompressedEvent)) {
+        return decompressedEvent
+      }
+
+      events[i] = decompressedEvent
+    }
+
+    return events.sort((a, b) => (a.timestamp > b.timestamp ? 1 : b.timestamp > a.timestamp ? -1 : 0))
   }
 
   private async prepareStoreEvents(messageId: string, events: DynamoAuditLogEvent[]): PromiseResult<DynamoUpdate[]> {

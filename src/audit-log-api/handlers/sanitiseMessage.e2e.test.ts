@@ -2,9 +2,14 @@ jest.setTimeout(15000)
 import axios from "axios"
 import { addDays } from "date-fns"
 import { BichardPostgresGateway, createS3Config, HttpStatusCode, TestPostgresGateway, TestS3Gateway } from "src/shared"
-import { mockDynamoAuditLog, setEnvironmentVariables } from "src/shared/testing"
+import {
+  createMockAuditLog,
+  createMockAuditLogEvent,
+  mockDynamoAuditLog,
+  mockDynamoAuditLogEvent,
+  setEnvironmentVariables
+} from "src/shared/testing"
 import type { DynamoAuditLog } from "src/shared/types"
-import { AuditLogEvent } from "src/shared/types"
 import createBichardPostgresGatewayConfig from "../createBichardPostgresGatewayConfig"
 import { auditLogDynamoConfig, TestDynamoGateway } from "../test"
 
@@ -26,25 +31,6 @@ const testDynamoGateway = new TestDynamoGateway(auditLogDynamoConfig)
 const testPostgresGateway = new TestPostgresGateway(postgresConfig)
 const errorListTestPostgresGateway = new TestPostgresGateway(errorListPostgresConfig)
 
-const createAuditLogEvent = (eventS3Path: string): AuditLogEvent => {
-  const event = new AuditLogEvent({
-    eventSourceQueueName: "dummy event source queue name",
-    eventSource: "dummy event source",
-    category: "information",
-    eventType: "Hearing Outcome marked as resolved by user",
-    timestamp: new Date()
-  })
-  event.addAttribute("Trigger 2 Details", "TRPR0004")
-  event.addAttribute("Original Hearing Outcome / PNC Update Dataset", "<?xml><dummy></dummy>")
-  event.addAttribute("OriginalHearingOutcome", "<?xml><dummy></dummy>")
-  event.addAttribute("OriginalPNCUpdateDataset", "<?xml><dummy></dummy>")
-  event.addAttribute("PNCUpdateDataset", "<?xml><dummy></dummy>")
-  event.addAttribute("AmendedHearingOutcome", "<?xml><dummy></dummy>")
-  event.addAttribute("AmendedPNCUpdateDataset", "<?xml><dummy></dummy>")
-
-  return { ...event, s3Path: eventS3Path } as unknown as AuditLogEvent
-}
-
 describe("sanitiseMessage", () => {
   beforeEach(async () => {
     await eventsS3Gateway.deleteAll()
@@ -61,20 +47,32 @@ describe("sanitiseMessage", () => {
   })
 
   it("should return Ok status when message has been sanitised successfully", async () => {
-    const message = mockDynamoAuditLog({ receivedDate: new Date("2020-01-01").toISOString() })
-    message.s3Path = "message.xml"
-    const event1 = createAuditLogEvent("event1.xml") as AuditLogEvent & { s3Path: string }
-    const event2 = new AuditLogEvent({
-      eventSource: "dummy event source",
-      category: "information",
-      eventType: "dummy event type",
-      timestamp: new Date()
+    const s3Path = "message.xml"
+    const message = mockDynamoAuditLog({
+      receivedDate: new Date("2020-01-01").toISOString(),
+      s3Path
     })
-    message.events = [event1, event2]
 
-    await messagesS3Gateway.upload(message.s3Path, "dummy")
-    await eventsS3Gateway.upload(event1.s3Path, "dummy")
+    createMockAuditLog(message)
 
+    const event1 = mockDynamoAuditLogEvent({
+      attributes: {
+        "Trigger 2 Details": "TRPR0004",
+        "Original Hearing Outcome / PNC Update Dataset": "<?xml><dummy></dummy>",
+        OriginalHearingOutcome: "<?xml><dummy></dummy>",
+        OriginalPNCUpdateDataset: "<?xml><dummy></dummy>",
+        PNCUpdateDataset: "<?xml><dummy></dummy>",
+        AmendedHearingOutcome: "<?xml><dummy></dummy>",
+        AmendedPNCUpdateDataset: "<?xml><dummy></dummy>"
+      }
+    })
+
+    const event2 = mockDynamoAuditLogEvent()
+
+    createMockAuditLogEvent(message.messageId, event1)
+    createMockAuditLogEvent(message.messageId, event2)
+
+    await messagesS3Gateway.upload(s3Path, "dummy")
     await testDynamoGateway.insertOne(auditLogTableName, message, "messageId")
 
     const otherMessageId = "otherMessageID"
