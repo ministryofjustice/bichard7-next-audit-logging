@@ -3,7 +3,7 @@ import { DocumentClient } from "aws-sdk/clients/dynamodb"
 import fs from "fs"
 import { AuditLogDynamoGateway, DynamoDbConfig } from "../src/audit-log-api/gateways/dynamo"
 import { IndexSearcher } from "../src/audit-log-api/gateways/dynamo/DynamoGateway"
-import { AuditLogEvent, isError, PromiseResult } from "../src/shared/types"
+import { AuditLogEvent, DynamoAuditLogEvent, isError, PromiseResult } from "../src/shared/types"
 
 let dynamoConfig: DynamoDbConfig
 let dynamoGateway: AuditLogDynamoGateway
@@ -60,6 +60,17 @@ const fetchRange = async (start: string, end: string, lastItem?: AuditLogEvent):
   return result as AuditLogEvent[]
 }
 
+const codeLookup = {
+  "Message Sent to Bichard": "hearing-outcome.received-incoming",
+  "Court Result Input Queue Failure": "failure.court-result-input",
+  "Data Set PNC Update Queue Failure": "failure.data-set-pnc-update",
+  "Hearing Outcome Input Queue Failure": "failure.hearing-outcome-input",
+  "Hearing Outcome PNC Update Queue Failure": "failure.hearing-outcome-pnc-update",
+  "PNC Update Request Queue Failure": "failure.pnc-update-request"
+}
+
+const getEventCode = (event: DynamoAuditLogEvent): string => codeLookup[event.eventType] ?? "unknown"
+
 const main = async (args) => {
   let count = 0
   await setup()
@@ -80,7 +91,8 @@ const main = async (args) => {
       }
 
       for (const event of auditEvents) {
-        if (!event.eventCode) {
+        const newCode = getEventCode(event)
+        if ((!event.eventCode || event.eventCode === "unknown") && newCode !== event.eventCode) {
           // console.log(`Fixing: ${event._id}`)
           dynamoUpdates.push({
             Update: {
@@ -89,7 +101,9 @@ const main = async (args) => {
                 _id: event._id
               },
               UpdateExpression: "SET eventCode = :eventCode",
-              ExpressionAttributeValues: { ":eventCode": "unknown" }
+              ExpressionAttributeValues: {
+                ":eventCode": newCode
+              }
             }
           })
 
