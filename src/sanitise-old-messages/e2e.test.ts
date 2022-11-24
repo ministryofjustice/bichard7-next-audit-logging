@@ -112,7 +112,6 @@ describe("Sanitise Old Messages e2e", () => {
     const messageResult = await api.getMessage(messageIds.message_1, { includeColumns: ["isSanitised"] })
 
     expect(messageResult).toNotBeError()
-    console.log(messageResult)
     const message = messageResult as OutputApiAuditLog
     expect(message.isSanitised).toBeTruthy()
   })

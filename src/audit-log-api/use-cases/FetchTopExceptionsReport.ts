@@ -12,9 +12,7 @@ export default class FetchTopExceptionsReport implements MessageFetcher {
     let lastMessage: DynamoAuditLog | undefined
 
     if (this.options.lastMessageId) {
-      const result = await this.gateway.fetchOne(this.options.lastMessageId, {
-        includeColumns: ["isSanitised", "nextSanitiseCheck"]
-      })
+      const result = await this.gateway.fetchOne(this.options.lastMessageId)
 
       if (isError(result)) {
         return result
@@ -25,7 +23,6 @@ export default class FetchTopExceptionsReport implements MessageFetcher {
 
     const records = await this.gateway.fetchRange({
       ...this.options,
-      includeColumns: ["automationReport"],
       lastMessage,
       eventsFilter: "topExceptionsReport"
     })

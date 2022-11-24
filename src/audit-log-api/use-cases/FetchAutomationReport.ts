@@ -23,7 +23,6 @@ export default class FetchAutomationReport implements MessageFetcher {
 
     const records = await this.gateway.fetchRange({
       ...this.options,
-      includeColumns: ["automationReport"],
       lastMessage,
       eventsFilter: "automationReport"
     })
