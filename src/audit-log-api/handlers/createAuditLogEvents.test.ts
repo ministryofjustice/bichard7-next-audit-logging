@@ -1,7 +1,7 @@
 import type { APIGatewayProxyEvent } from "aws-lambda"
 import { HttpStatusCode } from "src/shared"
 import { mockApiAuditLogEvent } from "src/shared/testing"
-import { ApiAuditLogEvent } from "src/shared/types"
+import type { ApiAuditLogEvent } from "src/shared/types"
 import "../testConfig"
 import { CreateAuditLogEventsUseCase } from "../use-cases"
 import createAuditLogEvents from "./createAuditLogEvents"

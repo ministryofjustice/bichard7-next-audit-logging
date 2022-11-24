@@ -1,4 +1,5 @@
-import { ApiAuditLogEvent, EventCode } from "src/shared/types"
+import type { ApiAuditLogEvent } from "src/shared/types"
+import { EventCode } from "src/shared/types"
 
 const eventCodeLookup: { [k: string]: EventCode } = {
   "Trigger generated": EventCode.TriggersGenerated,

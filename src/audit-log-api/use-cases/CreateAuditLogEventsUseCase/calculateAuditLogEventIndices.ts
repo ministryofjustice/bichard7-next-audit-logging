@@ -1,6 +1,6 @@
 import shouldLogForAutomationReport from "src/audit-log-api/gateways/dynamo/AuditLogDynamoGateway/shouldLogForAutomationReport"
 import shouldLogForTopExceptionsReport from "src/audit-log-api/gateways/dynamo/AuditLogDynamoGateway/shouldLogForTopExceptionsReport"
-import { ApiAuditLogEvent, DynamoAuditLogEvent } from "src/shared/types"
+import type { ApiAuditLogEvent, DynamoAuditLogEvent } from "src/shared/types"
 
 const calculateAuditLogEventIndices = (
   event: ApiAuditLogEvent

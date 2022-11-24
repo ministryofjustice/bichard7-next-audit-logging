@@ -1,4 +1,4 @@
-import { ApiAuditLogEvent } from "src/shared/types"
+import type { ApiAuditLogEvent } from "src/shared/types"
 import { validateAuditLogEvent } from "../utils"
 
 export interface EventValidationResult {

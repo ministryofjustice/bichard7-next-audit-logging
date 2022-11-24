@@ -1,7 +1,13 @@
 import { addDays } from "date-fns"
 import { compress, decompress } from "src/shared"
-import type { DynamoAuditLog, DynamoAuditLogEvent, KeyValuePair, PromiseResult } from "src/shared/types"
-import { ApiAuditLogEvent, isError } from "src/shared/types"
+import type {
+  ApiAuditLogEvent,
+  DynamoAuditLog,
+  DynamoAuditLogEvent,
+  KeyValuePair,
+  PromiseResult
+} from "src/shared/types"
+import { isError } from "src/shared/types"
 import { v4 as uuid } from "uuid"
 import type {
   EventsFilterOptions,
@@ -448,7 +454,7 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
     return event
   }
 
-  async replaceAuditLogEvents(events: DynamoAuditLogEvent[]): PromiseResult<void> {
+  replaceAuditLogEvents(events: DynamoAuditLogEvent[]): PromiseResult<void> {
     return this.replaceMany(this.config.eventsTableName, events, this.eventsTableKey)
   }
 

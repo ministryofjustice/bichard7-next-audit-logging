@@ -1,5 +1,5 @@
 import type { EventCategory } from "src/shared/types"
-import { ApiAuditLogEvent } from "src/shared/types"
+import type { ApiAuditLogEvent } from "src/shared/types"
 import type { EventDetails } from "../../types"
 
 const mapEventCategory = (category: string): EventCategory => {

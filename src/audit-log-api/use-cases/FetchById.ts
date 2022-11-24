@@ -1,4 +1,5 @@
-import { isError, OutputApiAuditLog, PromiseResult } from "src/shared/types"
+import type { OutputApiAuditLog, PromiseResult } from "src/shared/types"
+import { isError } from "src/shared/types"
 import type { AuditLogDynamoGatewayInterface } from "../gateways/dynamo"
 import type { ProjectionOptions } from "../types/queryParams"
 import convertDynamoAuditLogToOutputApi from "../utils/convertDynamoAuditLogToOutputApi"

@@ -1,5 +1,5 @@
 import { FakeApiClient } from "src/shared/testing"
-import { ApiAuditLogEvent } from "src/shared/types"
+import type { ApiAuditLogEvent } from "src/shared/types"
 import CreateEventUseCase from "./CreateEventUseCase"
 
 const fakeApiClient = new FakeApiClient()

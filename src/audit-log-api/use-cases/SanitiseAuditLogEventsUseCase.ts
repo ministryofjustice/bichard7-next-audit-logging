@@ -1,11 +1,5 @@
-import {
-  ApiAuditLogEvent,
-  DynamoAuditLog,
-  DynamoAuditLogEvent,
-  EventCode,
-  isError,
-  PromiseResult
-} from "src/shared/types"
+import type { ApiAuditLogEvent, DynamoAuditLog, DynamoAuditLogEvent, PromiseResult } from "src/shared/types"
+import { EventCode, isError } from "src/shared/types"
 import type { AuditLogDynamoGatewayInterface } from "../gateways/dynamo"
 import { CreateAuditLogEventsUseCase } from "./CreateAuditLogEventsUseCase"
 

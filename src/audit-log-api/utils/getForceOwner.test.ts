@@ -1,4 +1,5 @@
-import { ApiAuditLogEvent, EventCode } from "src/shared/types"
+import type { ApiAuditLogEvent } from "src/shared/types"
+import { EventCode } from "src/shared/types"
 import getForceOwner from "./getForceOwner"
 
 it("should return the force owner when message type is correct", () => {

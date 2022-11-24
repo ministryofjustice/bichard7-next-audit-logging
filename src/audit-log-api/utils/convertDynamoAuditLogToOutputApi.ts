@@ -1,4 +1,4 @@
-import { ApiAuditLogEvent, DynamoAuditLog, DynamoAuditLogEvent, OutputApiAuditLog } from "src/shared/types"
+import type { ApiAuditLogEvent, DynamoAuditLog, DynamoAuditLogEvent, OutputApiAuditLog } from "src/shared/types"
 
 const convertDynamoAuditLogEventToApi = (event: DynamoAuditLogEvent): ApiAuditLogEvent => ({
   attributes: event.attributes,
