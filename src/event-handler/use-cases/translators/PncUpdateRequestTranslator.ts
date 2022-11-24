@@ -19,6 +19,7 @@ const PncUpdateRequestTranslator: Translator = async (input: EventInput): Promis
     systemID: "Audit Logging Event Handler",
     componentID: "Translate Event",
     eventType: "PNC Update Request Queue Failure",
+    eventCode: "failure.pnc-update-request",
     eventCategory: "error",
     correlationID: inputItem.PNCUpdateDataset.AnnotatedHearingOutcome.HearingOutcome.Hearing.SourceReference.UniqueID,
     eventDateTime: new Date().toISOString()

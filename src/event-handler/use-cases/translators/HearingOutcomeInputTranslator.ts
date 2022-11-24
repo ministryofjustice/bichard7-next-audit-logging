@@ -19,6 +19,7 @@ const HearingOutcomeInputTranslator: Translator = async (input: EventInput): Pro
     systemID: "Audit Logging Event Handler",
     componentID: "Translate Event",
     eventType: "Hearing Outcome Input Queue Failure",
+    eventCode: "failure.hearing-outcome-input",
     eventCategory: "error",
     correlationID: inputItem.HearingOutcome.Hearing.SourceReference.UniqueID,
     eventDateTime: new Date().toISOString()
