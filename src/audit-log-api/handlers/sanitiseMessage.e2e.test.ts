@@ -141,4 +141,40 @@ describe("sanitiseMessage", () => {
 
     expect(response.status).toBe(HttpStatusCode.notFound)
   })
+
+  it("should automatically delete sensitive attributes", async () => {
+    const s3Path = "message.xml"
+    const message = (await createMockAuditLog({
+      receivedDate: new Date("2020-01-01").toISOString(),
+      s3Path
+    })) as OutputApiAuditLog
+
+    await createMockAuditLogEvent(message.messageId, {
+      attributes: {
+        "Trigger 2 Details": "TRPR0004",
+        sensitiveAttributes: "attr1,attr2",
+        attr1: "to delete",
+        attr2: "to delete"
+      }
+    })
+
+    await messagesS3Gateway.upload(s3Path, "dummy")
+
+    const response = await axios.post(`http://localhost:3010/messages/${message.messageId}/sanitise`, null, {
+      validateStatus: undefined
+    })
+
+    expect(response.status).toBe(HttpStatusCode.noContent)
+
+    const actualMessage = (await auditLogDynamoGateway.fetchOne(message.messageId)) as DynamoAuditLog
+    const triggerEvent = actualMessage.events.find((event) =>
+      Object.keys(event.attributes ?? {}).includes("Trigger 2 Details")
+    )
+    const triggerEventAttributes = triggerEvent?.attributes ?? {}
+    expect(Object.keys(triggerEventAttributes)).toHaveLength(2)
+    expect(triggerEventAttributes).toHaveProperty("Trigger 2 Details", "TRPR0004")
+    expect(triggerEventAttributes).toHaveProperty("sensitiveAttributes", "attr1,attr2")
+    expect(triggerEventAttributes).not.toHaveProperty("attr1")
+    expect(triggerEventAttributes).not.toHaveProperty("attr2")
+  })
 })

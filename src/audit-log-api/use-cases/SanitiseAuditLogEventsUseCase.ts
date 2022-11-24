@@ -25,6 +25,13 @@ export default class SanitiseAuditLogUseCase {
           delete event.attributes.PNCUpdateDataset
         ]
 
+        if (event.attributes.sensitiveAttributes && typeof event.attributes.sensitiveAttributes === "string") {
+          const sensitive = event.attributes.sensitiveAttributes.split(",")
+          for (const attr of sensitive) {
+            deleted.push(delete event.attributes[attr])
+          }
+        }
+
         if (deleted.filter((d) => d).length > 0) {
           updatedEvents.push(event)
         }
