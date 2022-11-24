@@ -2,8 +2,7 @@ import type { AxiosError } from "axios"
 import axios from "axios"
 import * as https from "https"
 import { HttpStatusCode } from "src/shared"
-import { mockApiAuditLogEvent } from "src/shared/testing"
-import type { PromiseResult, SendToBichardOutput } from "src/shared/types"
+import type { ApiAuditLogEvent, PromiseResult, SendToBichardOutput } from "src/shared/types"
 
 const httpsAgent = new https.Agent({
   rejectUnauthorized: false
@@ -13,12 +12,13 @@ export default class CreateSentToBichardEventUseCase {
   constructor(private readonly apiUrl: string, private readonly apiKey: string) {}
 
   create(message: SendToBichardOutput): PromiseResult<void> {
-    const event = mockApiAuditLogEvent({
+    const event: ApiAuditLogEvent = {
       category: "information",
-      timestamp: message.sentAt,
+      eventCode: "hearing-outcome.received-incoming",
+      eventSource: "Incoming Message Handler",
       eventType: "Message Sent to Bichard",
-      eventSource: "Incoming Message Handler"
-    })
+      timestamp: message.sentAt
+    }
 
     return axios
       .post(`${this.apiUrl}/messages/${message.auditLog.messageId}/events`, event, {
