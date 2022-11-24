@@ -2,6 +2,7 @@ import { Lambda } from "aws-sdk"
 import { DocumentClient } from "aws-sdk/clients/dynamodb"
 import fs from "fs"
 import { AuditLogDynamoGateway, DynamoDbConfig } from "../src/audit-log-api/gateways/dynamo"
+import { IndexSearcher } from "../src/audit-log-api/gateways/dynamo/DynamoGateway"
 import { AuditLogEvent, isError, PromiseResult } from "../src/shared/types"
 
 let dynamoConfig: DynamoDbConfig
@@ -40,20 +41,23 @@ async function setup() {
   dynamoGateway = new AuditLogDynamoGateway(dynamoConfig as DynamoDbConfig)
 }
 
-const fetchBatch = async (lastItem?: AuditLogEvent): Promise<AuditLogEvent[]> => {
-  const pagination = lastItem ? { ExclusiveStartKey: { _id: lastItem._id } } : {}
-  const result = await dynamoGateway.client
-    .scan({
-      TableName: dynamoConfig.eventsTableName,
-      ...pagination
-    })
-    .promise()
+const fetchRange = async (start: string, end: string, lastItem?: AuditLogEvent): Promise<AuditLogEvent[]> => {
+  const result = await new IndexSearcher<AuditLogEvent[]>(
+    dynamoGateway,
+    dynamoConfig.eventsTableName,
+    dynamoGateway.eventsTableKey
+  )
+    .useIndex(`timestampIndex`)
+    .setIndexKeys("_", "_", "timestamp")
+    .setBetweenKey(start, end)
+    .paginate(10000, lastItem, true)
+    .execute()
 
   if (isError(result)) {
     throw result
   }
 
-  return result.Items as AuditLogEvent[]
+  return result as AuditLogEvent[]
 }
 
 const main = async (args) => {
@@ -64,65 +68,70 @@ const main = async (args) => {
   let dynamoUpdates: DocumentClient.TransactWriteItem[] = []
   const updatePromises: PromiseResult<void>[] = []
 
-  while (true) {
-    const auditEvents = await fetchBatch(lastItem)
-    count += auditEvents.length
-    if (auditEvents.length === 0) {
-      break
-    }
+  if (args.length === 4) {
+    const start = args[2]
+    const end = args[3]
 
-    for (const event of auditEvents) {
-      if (!event.eventCode) {
-        // console.log(`Fixing: ${event._id}`)
-        dynamoUpdates.push({
-          Update: {
-            TableName: dynamoConfig.eventsTableName,
-            Key: {
-              _id: event._id
-            },
-            UpdateExpression: "SET eventCode = :eventCode",
-            ExpressionAttributeValues: { ":eventCode": "unknown" }
-          }
-        })
-
-        if (dynamoUpdates.length >= 25) {
-          updatePromises.push(dynamoGateway.executeTransaction(dynamoUpdates.slice(0, 25)))
-          // updatePromises.push(Promise.resolve())
-          dynamoUpdates = dynamoUpdates.slice(25)
-        }
+    while (true) {
+      const auditEvents = await fetchRange(start, end, lastItem)
+      count += auditEvents.length
+      if (auditEvents.length === 0) {
+        break
       }
 
-      if (event.attributes) {
-        Object.values(event.attributes).forEach((value: any) => {
-          if (value === null) {
-            fs.appendFileSync(`${WORKSPACE}-event-null-values.txt`, `${event._id}\n`)
-          } else if (typeof value === "object" && "valueLookup" in value) {
+      for (const event of auditEvents) {
+        if (!event.eventCode) {
+          // console.log(`Fixing: ${event._id}`)
+          dynamoUpdates.push({
+            Update: {
+              TableName: dynamoConfig.eventsTableName,
+              Key: {
+                _id: event._id
+              },
+              UpdateExpression: "SET eventCode = :eventCode",
+              ExpressionAttributeValues: { ":eventCode": "unknown" }
+            }
+          })
+
+          if (dynamoUpdates.length >= 25) {
+            updatePromises.push(dynamoGateway.executeTransaction(dynamoUpdates.slice(0, 25)))
+            dynamoUpdates = dynamoUpdates.slice(25)
+          }
+        }
+
+        if (event.attributes) {
+          Object.values(event.attributes).forEach((value: any) => {
+            if (value === null) {
+              fs.appendFileSync(`${WORKSPACE}-event-null-values.txt`, `${event._id}\n`)
+            } else if (typeof value === "object" && "valueLookup" in value) {
+              fs.appendFileSync(`${WORKSPACE}-event-lookup-values.txt`, `${event._id}\n`)
+            }
+          })
+        } else {
+          fs.appendFileSync(`${WORKSPACE}-event-no-attributes.txt`, `${event._id}\n`)
+        }
+
+        if (typeof event.eventXml === "object") {
+          if ("valueLookup" in (event.eventXml as any)) {
             fs.appendFileSync(`${WORKSPACE}-event-lookup-values.txt`, `${event._id}\n`)
           }
-        })
-      } else {
-        fs.appendFileSync(`${WORKSPACE}-event-no-attributes.txt`, `${event._id}\n`)
-      }
-
-      if (typeof event.eventXml === "object") {
-        if ("valueLookup" in (event.eventXml as any)) {
-          fs.appendFileSync(`${WORKSPACE}-event-lookup-values.txt`, `${event._id}\n`)
         }
+
+        lastItem = auditEvents[auditEvents.length - 1]
       }
 
-      lastItem = auditEvents[auditEvents.length - 1]
+      console.log(
+        `${auditEvents[0].timestamp}: ${count} events processed\tDynamo Updates:${dynamoUpdates.length}\tUpdate promises:${updatePromises.length}`
+      )
     }
 
-    console.log(
-      `${auditEvents[0].timestamp}: ${count} events processed\tDynamo Updates:${dynamoUpdates.length}\tUpdate promises:${updatePromises.length}`
-    )
+    updatePromises.push(dynamoGateway.executeTransaction(dynamoUpdates))
+
+    await Promise.all(updatePromises)
+    console.log("Done.")
+  } else {
+    console.error("Unsupported number of arguments!")
   }
-
-  updatePromises.push(dynamoGateway.executeTransaction(dynamoUpdates))
-  // updatePromises.push(Promise.resolve())
-
-  await Promise.all(updatePromises)
-  console.log("Done.")
 }
 
 main(process.argv)
