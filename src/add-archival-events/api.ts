@@ -1,5 +1,4 @@
 import { logger } from "src/shared"
-import { mockApiAuditLogEvent } from "src/shared/testing"
 import type { ApiAuditLogEvent, ApiClient, InputApiAuditLog, OutputApiAuditLog } from "src/shared/types"
 import { EventCode, isError } from "src/shared/types"
 import type { BichardRecord } from "./db"
@@ -33,14 +32,14 @@ export default class ArchivalEventsApiClient {
   }
 
   public createArchivalEventInAuditLog = async (bichardRecord: BichardRecord): Promise<boolean> => {
-    const auditLogEvent = mockApiAuditLogEvent({
+    const auditLogEvent: ApiAuditLogEvent = {
       eventSource: bichardRecord.archivedBy,
       category: "information",
       eventType: "Error record archival",
       eventCode: EventCode.ErrorRecordArchived,
       timestamp: bichardRecord.archivedAt.toISOString(),
       attributes: { "Record ID": bichardRecord.recordId }
-    })
+    }
 
     logger.debug({ message: "Audit logging the archival of an error record", record: bichardRecord })
     const response = await this.api.createEvent(bichardRecord.messageId, auditLogEvent)

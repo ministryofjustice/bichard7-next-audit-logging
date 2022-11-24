@@ -16,7 +16,6 @@ export default class RetryMessageUseCase {
 
   async retry(messageId: string): PromiseResult<void> {
     logger.info(`Retrying message ${messageId}`)
-    // TODO: Should get full message with events
     const event = await this.getLastFailedMessageEventUseCase.get(messageId)
 
     if (isError(event)) {

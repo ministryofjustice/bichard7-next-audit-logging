@@ -6,7 +6,7 @@ import partition from "lodash.partition"
 import { Client } from "pg"
 import { AuditLogApiClient, logger } from "src/shared"
 import { clearDynamoTable, createMockAuditLog, mockApiAuditLogEvent, mockInputApiAuditLog } from "src/shared/testing"
-import type { ApiClient, InputApiAuditLog, OutputApiAuditLog } from "src/shared/types"
+import type { ApiAuditLogEvent, ApiClient, InputApiAuditLog, OutputApiAuditLog } from "src/shared/types"
 import { EventCode, isSuccess } from "src/shared/types"
 import addArchivalEvents from "."
 
@@ -127,15 +127,16 @@ describe("Add Error Records e2e", () => {
     await createMockAuditLog({ messageId: "message_1" })
 
     // Insert testdata into audit log
-    const existingEvent = mockApiAuditLogEvent({
+    const existingEvent: ApiAuditLogEvent = {
       eventSource: "me",
       category: "information",
+      eventCode: EventCode.ErrorRecordArchived,
       eventType: "Error record archival",
       timestamp: "2022-04-26T12:53:55.000Z",
       attributes: {
         "Record ID": 1
       }
-    })
+    }
     await api.createEvent("message_1", existingEvent)
 
     // Invoke lambda

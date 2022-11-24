@@ -56,7 +56,6 @@ beforeEach(async () => {
 })
 
 test.each<TestInput>([
-  { eventFilename: "audit-event", messageFormat: "AuditEvent" },
   { eventFilename: "general-event", messageFormat: "GeneralEvent" },
   { eventFilename: "court-result-input", messageFormat: "CourtResultInput" },
   { eventFilename: "data-set-pnc-update", messageFormat: "DataSetPncUpdate" },

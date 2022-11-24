@@ -37,9 +37,11 @@ export default class SanitiseAuditLogUseCase {
       }
     }
 
-    const replaceResult = await this.auditLogDynamoGateway.replaceAuditLogEvents(updatedEvents)
-    if (isError(replaceResult)) {
-      return replaceResult
+    if (updatedEvents.length > 0) {
+      const replaceResult = await this.auditLogDynamoGateway.replaceAuditLogEvents(updatedEvents)
+      if (isError(replaceResult)) {
+        return replaceResult
+      }
     }
 
     const sanitiseEvent: ApiAuditLogEvent = {
@@ -52,7 +54,6 @@ export default class SanitiseAuditLogUseCase {
 
     const createResult = await this.createAuditLogEventsUseCase.create(auditLog.messageId, [sanitiseEvent])
     if (createResult.resultType !== "success") {
-      console.log(createResult)
       return Error("Failed to add sanitised audit log event")
     }
   }

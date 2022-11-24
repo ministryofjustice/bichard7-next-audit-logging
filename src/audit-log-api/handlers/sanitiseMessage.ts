@@ -66,7 +66,6 @@ export default async function sanitiseMessage(event: APIGatewayProxyEvent): Prom
   }
 
   const shouldSanitise = await shouldSanitiseMessage(awsBichardPostgresGateway, message, sanitiseConfig.sanitiseAfter)
-  console.log(`shouldSanitise: ${shouldSanitise}`)
   if (isError(shouldSanitise)) {
     return createJsonApiResult({
       statusCode: HttpStatusCode.internalServerError,
@@ -76,7 +75,6 @@ export default async function sanitiseMessage(event: APIGatewayProxyEvent): Prom
 
   if (!shouldSanitise) {
     const result = await auditLogGateway.updateSanitiseCheck(message, add(new Date(), sanitiseConfig.checkFrequency))
-    console.log(`result: ${result}`)
     if (isError(result)) {
       return createJsonApiResult({
         statusCode: HttpStatusCode.internalServerError,

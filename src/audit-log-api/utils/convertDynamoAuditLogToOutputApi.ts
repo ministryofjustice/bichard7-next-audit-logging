@@ -15,7 +15,7 @@ const convertDynamoAuditLogEventToApi = (event: DynamoAuditLogEvent): ApiAuditLo
 const convertDynamoAuditLogToOutputApi = (auditLog: DynamoAuditLog): OutputApiAuditLog => ({
   caseId: auditLog.caseId,
   createdBy: auditLog.createdBy,
-  events: auditLog.events.map(convertDynamoAuditLogEventToApi),
+  events: auditLog.events?.map(convertDynamoAuditLogEventToApi),
   externalCorrelationId: auditLog.externalCorrelationId,
   externalId: auditLog.externalId,
   forceOwner: auditLog.forceOwner,

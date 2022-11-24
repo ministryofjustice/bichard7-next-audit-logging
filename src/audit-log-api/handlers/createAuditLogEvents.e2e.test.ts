@@ -1,48 +1,13 @@
 import axios from "axios"
 import { HttpStatusCode } from "src/shared"
 import { mockApiAuditLogEvent, mockInputApiAuditLog } from "src/shared/testing"
-import { ApiAuditLogEvent, DynamoAuditLog, EventCode } from "src/shared/types"
+import { ApiAuditLogEvent, DynamoAuditLog, EventCode, OutputApiAuditLog } from "src/shared/types"
 import { AuditLogDynamoGateway } from "../gateways/dynamo"
-import { auditLogDynamoConfig, TestDynamoGateway } from "../test"
-const testGateway = new TestDynamoGateway(auditLogDynamoConfig)
+import { auditLogDynamoConfig } from "../test"
+
 const gateway = new AuditLogDynamoGateway(auditLogDynamoConfig)
 
 describe("Creating multiple Audit Log events", () => {
-  beforeEach(async () => {
-    await testGateway.deleteAll(auditLogDynamoConfig.auditLogTableName, "messageId")
-  })
-
-  it("should create a single new audit log event for an existing audit log record", async () => {
-    const auditLog = mockInputApiAuditLog()
-    const result1 = await axios.post("http://localhost:3010/messages", auditLog)
-    expect(result1.status).toEqual(HttpStatusCode.created)
-
-    const event = mockApiAuditLogEvent()
-    const result2 = await axios.post(`http://localhost:3010/messages/${auditLog.messageId}/events`, [event])
-    expect(result2.status).toEqual(HttpStatusCode.created)
-
-    const record = (await gateway.fetchOne(auditLog.messageId)) as DynamoAuditLog
-
-    expect(record).not.toBeNull()
-
-    const { messageId, events } = record!
-    expect(messageId).toEqual(auditLog.messageId)
-
-    expect(events).toHaveLength(1)
-
-    const actualEvent = events[0] as ApiAuditLogEvent
-    expect(actualEvent).toStrictEqual({
-      category: event.category,
-      eventCode: event.eventCode,
-      eventSource: event.eventSource,
-      eventSourceQueueName: event.eventSourceQueueName,
-      eventType: event.eventType,
-      eventXml: event.eventXml,
-      timestamp: event.timestamp,
-      attributes: event.attributes
-    } as ApiAuditLogEvent)
-  })
-
   it("should create many new audit log events for an existing audit log record", async () => {
     const auditLog = mockInputApiAuditLog()
     const result1 = await axios.post("http://localhost:3010/messages", auditLog)
@@ -66,16 +31,17 @@ describe("Creating multiple Audit Log events", () => {
 })
 
 describe("Creating a single Audit Log event", () => {
-  it("should create a new audit log event for an existing audit log record", async () => {
+  it("should create a single new audit log event for an existing audit log record", async () => {
     const auditLog = mockInputApiAuditLog()
     const result1 = await axios.post("http://localhost:3010/messages", auditLog)
     expect(result1.status).toEqual(HttpStatusCode.created)
 
-    const event = mockApiAuditLogEvent({ eventType: "Dummy event type" })
-    const result2 = await axios.post(`http://localhost:3010/messages/${auditLog.messageId}/events`, event)
+    const event = mockApiAuditLogEvent()
+    const result2 = await axios.post(`http://localhost:3010/messages/${auditLog.messageId}/events`, [event])
     expect(result2.status).toEqual(HttpStatusCode.created)
 
-    const record = (await gateway.fetchOne(auditLog.messageId)) as DynamoAuditLog
+    const records = (await axios.get<OutputApiAuditLog[]>(`http://localhost:3010/messages/${auditLog.messageId}`)).data
+    const record = records[0]
 
     expect(record).not.toBeNull()
 
@@ -84,9 +50,8 @@ describe("Creating a single Audit Log event", () => {
 
     expect(events).toHaveLength(1)
 
-    const actualEvent = events[0] as ApiAuditLogEvent
-
-    expect(actualEvent).toEqual({
+    const actualEvent = events[0]
+    expect(actualEvent).toStrictEqual({
       category: event.category,
       eventCode: event.eventCode,
       eventSource: event.eventSource,
@@ -95,7 +60,7 @@ describe("Creating a single Audit Log event", () => {
       eventXml: event.eventXml,
       timestamp: event.timestamp,
       attributes: event.attributes
-    } as ApiAuditLogEvent)
+    })
   })
 
   it("should transform the audit log event before saving", async () => {

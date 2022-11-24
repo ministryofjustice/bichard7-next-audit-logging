@@ -1,15 +1,8 @@
 import type { AxiosError } from "axios"
 import axios from "axios"
 import { addQueryParams, HttpStatusCode } from "src/shared"
-import {
-  createMockAuditLog,
-  createMockAuditLogEvent,
-  createMockAuditLogs,
-  createMockError,
-  mockDynamoAuditLog,
-  mockDynamoAuditLogEvent
-} from "src/shared/testing"
-import type { DynamoAuditLog, OutputApiAuditLog } from "src/shared/types"
+import { createMockAuditLog, createMockAuditLogEvent, createMockAuditLogs, createMockError } from "src/shared/testing"
+import type { OutputApiAuditLog } from "src/shared/types"
 import { EventCode, isError } from "src/shared/types"
 import { auditLogDynamoConfig, TestDynamoGateway } from "../test"
 
@@ -288,18 +281,16 @@ describe("Getting Audit Logs", () => {
 
         const defaultResult = await axios.get<OutputApiAuditLog[]>(baseUrl(auditLog))
         expect(defaultResult.status).toEqual(HttpStatusCode.ok)
-        expect(defaultResult.data[0]).not.toHaveProperty("version")
         expect(defaultResult.data[0]).not.toHaveProperty("messageHash")
         const defaultKeys = Object.keys(defaultResult.data[0])
 
         const includedResult = await axios.get<OutputApiAuditLog[]>(
-          addQueryParams(baseUrl(auditLog), { includeColumns: "version,messageHash" })
+          addQueryParams(baseUrl(auditLog), { includeColumns: "messageHash" })
         )
 
         expect(includedResult.status).toEqual(HttpStatusCode.ok)
-        expect(includedResult.data[0]).toHaveProperty("version")
         expect(includedResult.data[0]).toHaveProperty("messageHash")
-        expect(Object.keys(includedResult.data[0])).toHaveLength(defaultKeys.length + 2)
+        expect(Object.keys(includedResult.data[0])).toHaveLength(defaultKeys.length + 1)
       })
 
       it("should work with excluded and included columns", async () => {
@@ -310,20 +301,18 @@ describe("Getting Audit Logs", () => {
 
         const defaultResult = await axios.get<OutputApiAuditLog[]>(baseUrl(auditLog))
         expect(defaultResult.status).toEqual(HttpStatusCode.ok)
-        expect(defaultResult.data[0]).not.toHaveProperty("version")
         expect(defaultResult.data[0]).not.toHaveProperty("messageHash")
         expect(defaultResult.data[0]).toHaveProperty("events")
         expect(defaultResult.data[0]).toHaveProperty("receivedDate")
 
         const filteredResult = await axios.get<OutputApiAuditLog[]>(
           addQueryParams(baseUrl(auditLog), {
-            includeColumns: "version,messageHash",
+            includeColumns: "messageHash",
             excludeColumns: "receivedDate,events"
           })
         )
 
         expect(filteredResult.status).toEqual(HttpStatusCode.ok)
-        expect(filteredResult.data[0]).toHaveProperty("version")
         expect(filteredResult.data[0]).toHaveProperty("messageHash")
         expect(filteredResult.data[0]).not.toHaveProperty("events")
         expect(filteredResult.data[0]).not.toHaveProperty("receivedDate")
@@ -370,43 +359,6 @@ describe("Getting Audit Logs", () => {
         expect(result.data[0].messageId).toBe(auditLogs[keys[0]].messageId)
         expect(result.data[1].messageId).toBe(auditLogs[keys[1]].messageId)
       })
-    })
-  })
-
-  // TODO: Move transformation into the event handler and not in the API
-  describe("transformation for old-style events", () => {
-    let auditLog: DynamoAuditLog
-
-    beforeEach(async () => {
-      auditLog = mockDynamoAuditLog({
-        events: [
-          mockDynamoAuditLogEvent({
-            attributes: {
-              eventCode: "dummy.event",
-              user: "dummy.user"
-            }
-          })
-        ]
-      })
-
-      await testDynamoGateway.insertOne(auditLogDynamoConfig.auditLogTableName, auditLog, "messageId")
-    })
-
-    it("should add user and event code when retrieving old-style event if they're set in the attributes for multiple messages", async () => {
-      const result = await axios.get<OutputApiAuditLog[]>("http://localhost:3010/messages")
-
-      expect(result.data).toHaveLength(1)
-      expect(result.data[0].events[0].eventCode).toBe("dummy.event")
-      expect(result.data[0].events[0].user).toBe("dummy.user")
-    })
-
-    it("should add user and event code when retrieving old-style event if they're set in attributes for single message", async () => {
-      const result = await axios.get<OutputApiAuditLog[]>(`http://localhost:3010/messages/${auditLog.messageId}`)
-
-      expect(result.data).toHaveLength(1)
-
-      expect(result.data[0].events[0].eventCode).toBe("dummy.event")
-      expect(result.data[0].events[0].user).toBe("dummy.user")
     })
   })
 })

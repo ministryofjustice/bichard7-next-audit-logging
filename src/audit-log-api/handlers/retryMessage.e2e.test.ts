@@ -2,8 +2,8 @@ jest.setTimeout(15000)
 
 import axios from "axios"
 import { HttpStatusCode, TestMqGateway, TestS3Gateway } from "src/shared"
-import { auditLogEventsS3Config, mockDynamoAuditLog, mockDynamoAuditLogEvent } from "src/shared/testing"
-import type { MqConfig } from "src/shared/types"
+import { auditLogEventsS3Config, createMockAuditLog, createMockAuditLogEvent } from "src/shared/testing"
+import type { MqConfig, OutputApiAuditLog } from "src/shared/types"
 import { v4 as uuid } from "uuid"
 import { auditLogDynamoConfig, TestDynamoGateway } from "../test"
 
@@ -25,19 +25,15 @@ describe("retryMessage", () => {
 
   it("should return Ok status when message contains eventXml and has been retried successfully", async () => {
     const eventXml = `<Xml>${uuid()}</Xml>`
-    const message = mockDynamoAuditLog({
-      events: [
-        mockDynamoAuditLogEvent({
-          eventSource: "Dummy Event Source",
-          eventSourceQueueName: "RETRY_DUMMY_QUEUE",
-          eventType: "Dummy Failed Message",
-          category: "error",
-          eventXml
-        })
-      ]
-    })
+    const message = (await createMockAuditLog()) as OutputApiAuditLog
 
-    await testAuditLogDynamoGateway.insertOne(auditLogDynamoConfig.auditLogTableName, message, "messageId")
+    await createMockAuditLogEvent(message.messageId, {
+      eventSource: "Dummy Event Source",
+      eventSourceQueueName: "RETRY_DUMMY_QUEUE",
+      eventType: "Dummy Failed Message",
+      category: "error",
+      eventXml
+    })
 
     const response = await axios.post(`http://localhost:3010/messages/${message.messageId}/retry`, null)
 
