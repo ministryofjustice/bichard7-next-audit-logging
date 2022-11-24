@@ -1,4 +1,4 @@
-import type AuditLogEvent from "./AuditLogEvent"
+import type { ApiAuditLogEvent, DynamoAuditLogEvent } from "./AuditLogEvent"
 import type AuditLogStatus from "./AuditLogStatus"
 
 export type InputApiAuditLog = {
@@ -17,18 +17,17 @@ export type InputApiAuditLog = {
 }
 
 export type OutputApiAuditLog = InputApiAuditLog & {
-  events: AuditLogEvent[]
+  events: ApiAuditLogEvent[]
   forceOwner?: number
   pncStatus: string
   status: AuditLogStatus
   triggerStatus: string
 }
 
-export type DynamoAuditLog = OutputApiAuditLog & {
+export type DynamoAuditLog = Omit<OutputApiAuditLog, "events"> & {
   errorRecordArchivalDate?: string
+  events: DynamoAuditLogEvent[]
   expiryTime?: string
   retryCount?: number
   version: number
-  automationReport?: { events: AuditLogEvent[]; forceOwner: string }
-  topExceptionsReport?: { events: AuditLogEvent[] }
 }

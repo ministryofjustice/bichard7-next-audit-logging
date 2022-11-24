@@ -1,10 +1,10 @@
 import { logger } from "src/shared"
-import type { ApiClient, AuditLogEvent, PromiseResult } from "src/shared/types"
+import type { ApiAuditLogEvent, ApiClient, PromiseResult } from "src/shared/types"
 
 export default class {
   constructor(private readonly api: ApiClient) {}
 
-  execute(messageId: string, event: AuditLogEvent): PromiseResult<void> {
+  execute(messageId: string, event: ApiAuditLogEvent): PromiseResult<void> {
     if (!messageId) {
       logger.info(`No messageId: ${JSON.stringify(event)}`)
       return Promise.resolve(undefined)

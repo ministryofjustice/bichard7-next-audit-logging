@@ -2,16 +2,20 @@ jest.setTimeout(15000)
 import axios from "axios"
 import { addDays } from "date-fns"
 import { BichardPostgresGateway, createS3Config, HttpStatusCode, TestPostgresGateway, TestS3Gateway } from "src/shared"
-import { mockDynamoAuditLog, setEnvironmentVariables } from "src/shared/testing"
-import type { DynamoAuditLog } from "src/shared/types"
-import { AuditLogEvent, AuditLogLookup } from "src/shared/types"
+import {
+  createMockAuditLog,
+  createMockAuditLogEvent,
+  mockDynamoAuditLog,
+  setEnvironmentVariables
+} from "src/shared/testing"
+import type { DynamoAuditLog, OutputApiAuditLog } from "src/shared/types"
 import createBichardPostgresGatewayConfig from "../createBichardPostgresGatewayConfig"
+import { AuditLogDynamoGateway } from "../gateways/dynamo"
 import { auditLogDynamoConfig, TestDynamoGateway } from "../test"
 
 setEnvironmentVariables()
 
 const auditLogTableName = "auditLogTable"
-const auditLogLookupTableName = "auditLogLookupTable"
 
 const postgresConfig = createBichardPostgresGatewayConfig()
 const errorListPostgresConfig = {
@@ -23,35 +27,16 @@ const postgresGateway = new BichardPostgresGateway(postgresConfig)
 const messagesS3Gateway = new TestS3Gateway(createS3Config("INTERNAL_INCOMING_MESSAGES_BUCKET"))
 const eventsS3Gateway = new TestS3Gateway(createS3Config("AUDIT_LOG_EVENTS_BUCKET"))
 
+const auditLogDynamoGateway = new AuditLogDynamoGateway(auditLogDynamoConfig)
 const testDynamoGateway = new TestDynamoGateway(auditLogDynamoConfig)
 const testPostgresGateway = new TestPostgresGateway(postgresConfig)
 const errorListTestPostgresGateway = new TestPostgresGateway(errorListPostgresConfig)
-
-const createAuditLogEvent = (eventS3Path: string): AuditLogEvent => {
-  const event = new AuditLogEvent({
-    eventSourceQueueName: "dummy event source queue name",
-    eventSource: "dummy event source",
-    category: "information",
-    eventType: "Hearing Outcome marked as resolved by user",
-    timestamp: new Date()
-  })
-  event.addAttribute("Trigger 2 Details", "TRPR0004")
-  event.addAttribute("Original Hearing Outcome / PNC Update Dataset", "<?xml><dummy></dummy>")
-  event.addAttribute("OriginalHearingOutcome", "<?xml><dummy></dummy>")
-  event.addAttribute("OriginalPNCUpdateDataset", "<?xml><dummy></dummy>")
-  event.addAttribute("PNCUpdateDataset", "<?xml><dummy></dummy>")
-  event.addAttribute("AmendedHearingOutcome", "<?xml><dummy></dummy>")
-  event.addAttribute("AmendedPNCUpdateDataset", "<?xml><dummy></dummy>")
-
-  return { ...event, s3Path: eventS3Path } as unknown as AuditLogEvent
-}
 
 describe("sanitiseMessage", () => {
   beforeEach(async () => {
     await eventsS3Gateway.deleteAll()
     await messagesS3Gateway.deleteAll()
     await testDynamoGateway.deleteAll(auditLogTableName, "messageId")
-    await testDynamoGateway.deleteAll(auditLogLookupTableName, "id")
     await testPostgresGateway.truncateTable()
     await errorListTestPostgresGateway.truncateTable()
   })
@@ -62,37 +47,31 @@ describe("sanitiseMessage", () => {
     await postgresGateway.dispose()
   })
 
-  it("should return Ok status when message has been sanitised successfully", async () => {
-    const message = mockDynamoAuditLog({ receivedDate: new Date("2020-01-01").toISOString() })
-    message.s3Path = "message.xml"
-    const event1 = createAuditLogEvent("event1.xml") as AuditLogEvent & { s3Path: string }
-    const event2 = new AuditLogEvent({
-      eventSource: "dummy event source",
-      category: "information",
-      eventType: "dummy event type",
-      timestamp: new Date()
+  it("should fully sanitise message and return successfully", async () => {
+    const s3Path = "message.xml"
+    const message = (await createMockAuditLog({
+      receivedDate: new Date("2020-01-01").toISOString(),
+      s3Path
+    })) as OutputApiAuditLog
+
+    await createMockAuditLogEvent(message.messageId, {
+      attributes: {
+        "Trigger 2 Details": "TRPR0004",
+        "Original Hearing Outcome / PNC Update Dataset": "<?xml><dummy></dummy>",
+        OriginalHearingOutcome: "<?xml><dummy></dummy>",
+        OriginalPNCUpdateDataset: "<?xml><dummy></dummy>",
+        PNCUpdateDataset: "<?xml><dummy></dummy>",
+        AmendedHearingOutcome: "<?xml><dummy></dummy>",
+        AmendedPNCUpdateDataset: "<?xml><dummy></dummy>"
+      }
     })
-    message.events = [event1, event2]
 
-    await messagesS3Gateway.upload(message.s3Path, "dummy")
-    await eventsS3Gateway.upload(event1.s3Path, "dummy")
+    await createMockAuditLogEvent(message.messageId)
 
-    await testDynamoGateway.insertOne(auditLogTableName, message, "messageId")
-
-    await Promise.all(
-      [...Array(2).keys()].map((index) => {
-        const item = new AuditLogLookup(`Record to delete ${index}`, message.messageId)
-        return testDynamoGateway.insertOne(auditLogLookupTableName, { ...item, id: `ID-${index}` }, "id")
-      })
-    )
+    await messagesS3Gateway.upload(s3Path, "dummy")
 
     const otherMessageId = "otherMessageID"
-    const records = [
-      { message_id: message.messageId },
-      { message_id: message.messageId },
-      { message_id: otherMessageId }
-    ]
-    await testPostgresGateway.insertRecords(records)
+    await testPostgresGateway.insertRecords([{ message_id: message.messageId }, { message_id: otherMessageId }])
 
     const response = await axios.post(`http://localhost:3010/messages/${message.messageId}/sanitise`, null, {
       validateStatus: undefined
@@ -103,21 +82,13 @@ describe("sanitiseMessage", () => {
     const actualMessageS3Objects = await messagesS3Gateway.getAll()
     expect(actualMessageS3Objects).toEqual([])
 
-    const actualEventS3Objects = await eventsS3Gateway.getAll()
-    expect(actualEventS3Objects).toEqual([])
-
-    const actualMessage = await testDynamoGateway.getOne<DynamoAuditLog>(
-      auditLogTableName,
-      "messageId",
-      message.messageId
+    const actualMessage = (await auditLogDynamoGateway.fetchOne(message.messageId)) as DynamoAuditLog
+    const triggerEvent = actualMessage.events.find((event) =>
+      Object.keys(event.attributes ?? {}).includes("Trigger 2 Details")
     )
-
-    const attributes = actualMessage?.events.find((event) => "s3Path" in event)?.attributes ?? {}
-    expect(Object.keys(attributes)).toHaveLength(1)
-    expect(attributes["Trigger 2 Details"]).toBe("TRPR0004")
-
-    const lookupItems = await testDynamoGateway.getAll(auditLogLookupTableName)
-    expect(lookupItems.Items).toHaveLength(0)
+    const triggerEventAttributes = triggerEvent?.attributes ?? {}
+    expect(Object.keys(triggerEventAttributes)).toHaveLength(1)
+    expect(triggerEventAttributes["Trigger 2 Details"]).toBe("TRPR0004")
 
     const allResults = await testPostgresGateway.findAll()
     expect(allResults).toHaveLength(1)
@@ -169,5 +140,41 @@ describe("sanitiseMessage", () => {
     })
 
     expect(response.status).toBe(HttpStatusCode.notFound)
+  })
+
+  it("should automatically delete sensitive attributes", async () => {
+    const s3Path = "message.xml"
+    const message = (await createMockAuditLog({
+      receivedDate: new Date("2020-01-01").toISOString(),
+      s3Path
+    })) as OutputApiAuditLog
+
+    await createMockAuditLogEvent(message.messageId, {
+      attributes: {
+        "Trigger 2 Details": "TRPR0004",
+        sensitiveAttributes: "attr1,attr2",
+        attr1: "to delete",
+        attr2: "to delete"
+      }
+    })
+
+    await messagesS3Gateway.upload(s3Path, "dummy")
+
+    const response = await axios.post(`http://localhost:3010/messages/${message.messageId}/sanitise`, null, {
+      validateStatus: undefined
+    })
+
+    expect(response.status).toBe(HttpStatusCode.noContent)
+
+    const actualMessage = (await auditLogDynamoGateway.fetchOne(message.messageId)) as DynamoAuditLog
+    const triggerEvent = actualMessage.events.find((event) =>
+      Object.keys(event.attributes ?? {}).includes("Trigger 2 Details")
+    )
+    const triggerEventAttributes = triggerEvent?.attributes ?? {}
+    expect(Object.keys(triggerEventAttributes)).toHaveLength(2)
+    expect(triggerEventAttributes).toHaveProperty("Trigger 2 Details", "TRPR0004")
+    expect(triggerEventAttributes).toHaveProperty("sensitiveAttributes", "attr1,attr2")
+    expect(triggerEventAttributes).not.toHaveProperty("attr1")
+    expect(triggerEventAttributes).not.toHaveProperty("attr2")
   })
 })

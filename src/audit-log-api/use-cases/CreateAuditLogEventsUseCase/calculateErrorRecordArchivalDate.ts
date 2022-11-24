@@ -1,8 +1,8 @@
 import minBy from "lodash.minby"
-import type { AuditLogEvent, DynamoAuditLog } from "src/shared/types"
+import type { DynamoAuditLog, DynamoAuditLogEvent } from "src/shared/types"
 import { EventCode } from "src/shared/types"
 
-export default (events: AuditLogEvent[]): Partial<DynamoAuditLog> => {
+export default (events: DynamoAuditLogEvent[]): Partial<DynamoAuditLog> => {
   const archivalEvents = events.filter((event) => event.eventCode === EventCode.ErrorRecordArchived)
   if (archivalEvents.length > 0) {
     return {

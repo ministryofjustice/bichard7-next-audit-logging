@@ -1,4 +1,4 @@
-import type { AuditLogEvent } from "src/shared/types"
+import type { ApiAuditLogEvent } from "src/shared/types"
 import { EventCode } from "src/shared/types"
 
 export const parseForceOwner = (forceOwner: string): number | undefined => {
@@ -8,9 +8,9 @@ export const parseForceOwner = (forceOwner: string): number | undefined => {
   return undefined
 }
 
-export default (event: AuditLogEvent): number | undefined => {
+export default (event: ApiAuditLogEvent): number | undefined => {
   if (event.eventCode === EventCode.HearingOutcomeDetails) {
-    const forceOwner = event.attributes["Force Owner"] as string
+    const forceOwner = event.attributes?.["Force Owner"] as string
     return parseForceOwner(forceOwner)
   }
 

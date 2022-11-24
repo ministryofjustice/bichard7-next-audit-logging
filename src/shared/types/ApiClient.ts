@@ -1,4 +1,4 @@
-import type { AuditLogEvent, InputApiAuditLog, OutputApiAuditLog, PromiseResult } from "."
+import type { ApiAuditLogEvent, InputApiAuditLog, OutputApiAuditLog, PromiseResult } from "."
 
 export type GetMessagesOptions = {
   status?: string
@@ -17,7 +17,7 @@ export default interface ApiClient {
   getMessages(options?: GetMessagesOptions): PromiseResult<OutputApiAuditLog[]>
   getMessage(messageId: string, options?: GetMessageOptions): PromiseResult<OutputApiAuditLog>
   createAuditLog(auditLog: InputApiAuditLog): PromiseResult<void>
-  createEvent(messageId: string, event: AuditLogEvent): PromiseResult<void>
+  createEvent(messageId: string, event: ApiAuditLogEvent): PromiseResult<void>
   retryEvent(messageId: string): PromiseResult<void>
   sanitiseMessage(messageId: string): PromiseResult<void>
   fetchUnsanitised(options?: GetMessageOptions): PromiseResult<OutputApiAuditLog[]>

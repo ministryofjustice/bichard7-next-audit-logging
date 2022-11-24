@@ -19,6 +19,7 @@ const CourtResultInputTranslator: Translator = async (input: EventInput): Promis
     systemID: "Audit Logging Event Handler",
     componentID: "Translate Event",
     eventType: "Court Result Input Queue Failure",
+    eventCode: "failure.court-result-input",
     eventCategory: "error",
     correlationID: inputItem.DeliverRequest.MessageIdentifier,
     eventDateTime: new Date().toISOString()

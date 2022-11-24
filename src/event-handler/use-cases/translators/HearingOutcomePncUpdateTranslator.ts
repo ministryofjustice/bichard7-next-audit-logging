@@ -19,6 +19,7 @@ const HearingOutcomePncUpdateTranslator: Translator = async (input: EventInput):
     systemID: "Audit Logging Event Handler",
     componentID: "Translate Event",
     eventType: "Hearing Outcome PNC Update Queue Failure",
+    eventCode: "failure.hearing-outcome-pnc-update",
     eventCategory: "error",
     correlationID: inputItem.AnnotatedHearingOutcome.HearingOutcome.Hearing.SourceReference.UniqueID,
     eventDateTime: new Date().toISOString()

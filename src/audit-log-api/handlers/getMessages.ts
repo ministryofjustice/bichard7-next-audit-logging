@@ -3,21 +3,15 @@ import { HttpStatusCode, logger } from "src/shared"
 import type { PromiseResult } from "src/shared/types"
 import { isError } from "src/shared/types"
 import createAuditLogDynamoDbConfig from "../createAuditLogDynamoDbConfig"
-import { AuditLogDynamoGateway, AwsAuditLogLookupDynamoGateway } from "../gateways/dynamo"
+import { AuditLogDynamoGateway } from "../gateways/dynamo"
 import createMessageFetcher from "../use-cases/createMessageFetcher"
-import LookupEventValuesUseCase from "../use-cases/LookupEventValuesUseCase"
-import LookupMessageValuesUseCase from "../use-cases/LookupMessageValuesUseCase"
-import { createJsonApiResult, shouldFetchLargeObjects, transformAuditLogEvent } from "../utils"
+import { createJsonApiResult } from "../utils"
 
 const auditLogConfig = createAuditLogDynamoDbConfig()
 const auditLogGateway = new AuditLogDynamoGateway(auditLogConfig)
-const auditLogLookupGateway = new AwsAuditLogLookupDynamoGateway(auditLogConfig, auditLogConfig.lookupTableName)
-const lookupEventValuesUseCase = new LookupEventValuesUseCase(auditLogLookupGateway)
-const lookupMessageValuesUseCase = new LookupMessageValuesUseCase(lookupEventValuesUseCase)
 
 export default async function getMessages(event: APIGatewayProxyEvent): PromiseResult<APIGatewayProxyResult> {
   const messageFetcher = createMessageFetcher(event, auditLogGateway)
-  const fetchLargeObjects = shouldFetchLargeObjects(event.queryStringParameters?.largeObjects)
 
   if (isError(messageFetcher)) {
     logger.error(`Error fetching messages: ${messageFetcher.message}`)
@@ -45,26 +39,6 @@ export default async function getMessages(event: APIGatewayProxyEvent): PromiseR
   }
 
   const messages = Array.isArray(messageFetcherResult) ? messageFetcherResult : [messageFetcherResult]
-  messages.forEach((m) => {
-    if (m.events) {
-      m.events = m.events.map(transformAuditLogEvent)
-    }
-  })
-
-  if (fetchLargeObjects) {
-    for (let index = 0; index < messages.length; index++) {
-      const lookupMessageValuesResult = await lookupMessageValuesUseCase.execute(messages[index])
-
-      if (isError(lookupMessageValuesResult)) {
-        return createJsonApiResult({
-          statusCode: HttpStatusCode.internalServerError,
-          body: String(lookupMessageValuesResult)
-        })
-      }
-
-      messages[index] = lookupMessageValuesResult
-    }
-  }
 
   return createJsonApiResult({
     statusCode: HttpStatusCode.ok,

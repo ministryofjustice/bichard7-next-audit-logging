@@ -1,5 +1,5 @@
 import type { EventCategory } from "src/shared/types"
-import { AuditLogEvent } from "src/shared/types"
+import type { ApiAuditLogEvent } from "src/shared/types"
 import type { EventDetails } from "../../types"
 
 const mapEventCategory = (category: string): EventCategory => {
@@ -15,23 +15,32 @@ const mapEventCategory = (category: string): EventCategory => {
   }
 }
 
-export default (eventDetails: EventDetails, eventXml: string, eventSourceQueueName: string): AuditLogEvent => {
+export default (eventDetails: EventDetails, eventXml: string, eventSourceQueueName: string): ApiAuditLogEvent => {
   const { eventCategory, eventDateTime, eventType, componentID, nameValuePairs } = eventDetails
   const category = mapEventCategory(eventCategory)
-  const timestamp = new Date(eventDateTime)
 
-  const event = new AuditLogEvent({
+  const event: ApiAuditLogEvent = {
     eventSource: componentID,
     category,
     eventType,
-    timestamp,
+    timestamp: new Date(eventDateTime).toISOString(),
     eventSourceQueueName,
-    ...(category === "error" ? { eventXml } : {})
-  })
+    ...(category === "error" ? { eventXml } : {}),
+    attributes: {},
+    eventCode: "unknown"
+  }
 
   const attributes = nameValuePairs?.nameValuePair
+
   if (attributes && Array.isArray(attributes)) {
-    attributes.forEach((attribute) => event.addAttribute(attribute.name, attribute.value))
+    attributes.forEach((attribute) => {
+      if (attribute.name === "eventCode") {
+        event.eventCode = attribute.value
+      } else if (attribute.name.toLowerCase() === "user") {
+        event.eventCode = attribute.value
+      }
+      event.attributes![attribute.name] = attribute.value
+    })
   }
 
   return event

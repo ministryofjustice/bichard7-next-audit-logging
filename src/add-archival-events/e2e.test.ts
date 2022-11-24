@@ -5,9 +5,9 @@ import { execute } from "lambda-local"
 import partition from "lodash.partition"
 import { Client } from "pg"
 import { AuditLogApiClient, logger } from "src/shared"
-import { clearDynamoTable, createMockAuditLog, mockInputApiAuditLog } from "src/shared/testing"
-import type { ApiClient, InputApiAuditLog, OutputApiAuditLog } from "src/shared/types"
-import { AuditLogEvent, EventCode, isSuccess } from "src/shared/types"
+import { clearDynamoTable, createMockAuditLog, mockApiAuditLogEvent, mockInputApiAuditLog } from "src/shared/testing"
+import type { ApiAuditLogEvent, ApiClient, InputApiAuditLog, OutputApiAuditLog } from "src/shared/types"
+import { EventCode, isSuccess } from "src/shared/types"
 import addArchivalEvents from "."
 
 logger.level = "debug"
@@ -127,13 +127,16 @@ describe("Add Error Records e2e", () => {
     await createMockAuditLog({ messageId: "message_1" })
 
     // Insert testdata into audit log
-    const existingEvent = new AuditLogEvent({
+    const existingEvent: ApiAuditLogEvent = {
       eventSource: "me",
       category: "information",
+      eventCode: EventCode.ErrorRecordArchived,
       eventType: "Error record archival",
-      timestamp: new Date("2022-04-26T12:53:55.000Z")
-    })
-    existingEvent.addAttribute("Record ID", 1)
+      timestamp: "2022-04-26T12:53:55.000Z",
+      attributes: {
+        "Record ID": 1
+      }
+    }
     await api.createEvent("message_1", existingEvent)
 
     // Invoke lambda
@@ -200,7 +203,7 @@ describe("Add Error Records e2e", () => {
 
       expect(message.events).toHaveLength(1)
       expect(message.events[0].eventType).toBe("Error record archival")
-      expect(message.events[0].attributes["Record ID"]).toBe(index + 1)
+      expect(message.events[0].attributes?.["Record ID"]).toBe(index + 1)
     }
 
     // Assert postgres results
@@ -254,7 +257,7 @@ describe("Add Error Records e2e", () => {
 
       expect(message.events).toHaveLength(1)
       expect(message.events[0].eventType).toBe("Error record archival")
-      expect(message.events[0].attributes["Record ID"]).toBe(index + 1)
+      expect(message.events[0].attributes?.["Record ID"]).toBe(index + 1)
     }
 
     // Assert postgres results
@@ -376,22 +379,22 @@ describe("Add Error Records e2e", () => {
       })
     )
 
-    const existingEvent2 = new AuditLogEvent({
+    const existingEvent2 = mockApiAuditLogEvent({
       eventSource: "you",
       category: "information",
       eventType: "Error record archival",
-      timestamp: new Date("2022-05-26T12:53:55.000Z")
+      timestamp: "2022-05-26T12:53:55.000Z",
+      attributes: { "Record ID": 2 }
     })
-    existingEvent2.addAttribute("Record ID", 2)
     await api.createEvent("message_2", existingEvent2)
 
-    const existingEvent3 = new AuditLogEvent({
+    const existingEvent3 = mockApiAuditLogEvent({
       eventSource: "you",
       category: "information",
       eventType: "Error record archival",
-      timestamp: new Date("2022-05-26T12:53:55.000Z")
+      timestamp: "2022-05-26T12:53:55.000Z",
+      attributes: { "Record ID": 3 }
     })
-    existingEvent3.addAttribute("Record ID", 3)
     await api.createEvent("message_3", existingEvent3)
 
     // Invoke lambda
@@ -404,7 +407,7 @@ describe("Add Error Records e2e", () => {
       expect(isSuccess(message)).toBeTruthy()
       expect(message.events).toHaveLength(1)
       expect(message.events[0].eventType).toBe("Error record archival")
-      expect(message.events[0].attributes["Record ID"]).toBe(i + 1)
+      expect(message.events[0].attributes?.["Record ID"]).toBe(i + 1)
     }
 
     // Assert postgres results

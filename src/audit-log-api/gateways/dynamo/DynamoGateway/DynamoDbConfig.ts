@@ -3,7 +3,6 @@ type DynamoDbConfig = {
   region: string
   auditLogTableName: string
   eventsTableName: string
-  lookupTableName: string
   accessKeyId?: string
   secretAccessKey?: string
 }

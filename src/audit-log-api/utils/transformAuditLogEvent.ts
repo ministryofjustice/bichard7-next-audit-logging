@@ -1,4 +1,4 @@
-import type { AuditLogEvent } from "src/shared/types"
+import type { ApiAuditLogEvent } from "src/shared/types"
 import { EventCode } from "src/shared/types"
 
 const eventCodeLookup: { [k: string]: EventCode } = {
@@ -28,7 +28,7 @@ const eventCodeLookup: { [k: string]: EventCode } = {
   "PNC Update added to Error List (PNC message construction)": EventCode.ExceptionsGenerated
 }
 
-const transformAuditLogEvent = (event: AuditLogEvent): AuditLogEvent => {
+const transformAuditLogEvent = (event: ApiAuditLogEvent): ApiAuditLogEvent => {
   if (event.attributes?.eventCode && typeof event.attributes.eventCode === "string") {
     event.eventCode = event.attributes.eventCode
     delete event.attributes.eventCode
@@ -41,8 +41,8 @@ const transformAuditLogEvent = (event: AuditLogEvent): AuditLogEvent => {
   const user = event.attributes?.user ?? event.attributes?.User
   if (typeof user === "string") {
     event.user = user
-    delete event.attributes.user
-    delete event.attributes.User
+    delete event.attributes?.user
+    delete event.attributes?.User
   }
 
   return event

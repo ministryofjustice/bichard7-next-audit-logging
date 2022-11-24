@@ -3,6 +3,7 @@ export default interface EventDetails {
   componentID: string
   eventCategory: string
   eventType: string
+  eventCode: string
   correlationID: string
   eventDateTime: string
   nameValuePairs?: {

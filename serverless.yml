@@ -9,7 +9,6 @@ provider:
     AWS_URL: http://localhost:8000
     DYNAMO_REGION: eu-west-2
     AUDIT_LOG_TABLE_NAME: auditLogTable
-    AUDIT_LOG_LOOKUP_TABLE_NAME: auditLogLookupTable
     AUDIT_LOG_EVENTS_TABLE_NAME: auditLogEventsTable
     MQ_USER: admin
     MQ_PASSWORD: admin
@@ -270,31 +269,6 @@ resources:
                 KeyType: HASH
               - AttributeName: nextSanitiseCheck
                 KeyType: RANGE
-            Projection:
-              ProjectionType: "ALL"
-            ProvisionedThroughput:
-              ReadCapacityUnits: 1
-              WriteCapacityUnits: 1
-        ProvisionedThroughput:
-          ReadCapacityUnits: 1
-          WriteCapacityUnits: 1
-    auditLogLookupTable:
-      Type: AWS::DynamoDB::Table
-      Properties:
-        TableName: auditLogLookupTable
-        AttributeDefinitions:
-          - AttributeName: id
-            AttributeType: S
-          - AttributeName: messageId
-            AttributeType: S
-        KeySchema:
-          - AttributeName: id
-            KeyType: HASH
-        GlobalSecondaryIndexes:
-          - IndexName: messageIdIndex
-            KeySchema:
-              - AttributeName: messageId
-                KeyType: HASH
             Projection:
               ProjectionType: "ALL"
             ProvisionedThroughput:

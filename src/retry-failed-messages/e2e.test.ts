@@ -8,7 +8,7 @@ import {
   createMockAuditLogEvent,
   setEnvironmentVariables
 } from "src/shared/testing"
-import type { AuditLogEventOptions } from "src/shared/types"
+import type { ApiAuditLogEvent } from "src/shared/types"
 import { isError } from "src/shared/types"
 import { v4 as uuid } from "uuid"
 
@@ -19,7 +19,6 @@ process.env.BUCKET_NAME = "auditLogEventsBucket"
 import handler from "./index"
 
 const auditLogTableName = "auditLogTable"
-const auditLogLookupTableName = "auditLogLookupTable"
 
 const s3Gateway = new TestS3Gateway(auditLogEventsS3Config)
 
@@ -27,7 +26,6 @@ describe("Retry Failed Messages", () => {
   beforeEach(async () => {
     await s3Gateway.deleteAll()
     await clearDynamoTable(auditLogTableName, "messageId")
-    await clearDynamoTable(auditLogLookupTableName, "id")
   })
 
   it("should retry the correct messages using eventXml for the first time", async () => {
@@ -38,13 +36,15 @@ describe("Retry Failed Messages", () => {
       throw new Error("Unexpected error")
     }
 
-    const auditLogEvent: AuditLogEventOptions = {
+    const auditLogEvent: ApiAuditLogEvent = {
       eventSource: "Dummy Event Source",
       eventSourceQueueName: "DUMMY_QUEUE",
       eventType: "Dummy Failed Message",
       category: "error",
-      timestamp: new Date(),
-      eventXml: messageXml
+      timestamp: new Date().toISOString(),
+      eventXml: messageXml,
+      attributes: {},
+      eventCode: "failed.message"
     }
 
     const event = await createMockAuditLogEvent(auditLog.messageId, auditLogEvent)

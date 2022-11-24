@@ -2,35 +2,23 @@ import type { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda"
 import type { Duration } from "date-fns"
 import { add } from "date-fns"
 import { BichardPostgresGateway, createS3Config, HttpStatusCode, S3Gateway } from "src/shared"
-import type { DynamoAuditLog } from "src/shared/types"
 import { isError } from "src/shared/types"
 import createAuditLogDynamoDbConfig from "../createAuditLogDynamoDbConfig"
 import createBichardPostgresGatewayConfig from "../createBichardPostgresGatewayConfig"
-import { AuditLogDynamoGateway, AwsAuditLogLookupDynamoGateway } from "../gateways/dynamo"
-import { auditLogDynamoConfig } from "../test"
+import { AuditLogDynamoGateway } from "../gateways/dynamo"
 import DeleteArchivedErrorsUseCase from "../use-cases/DeleteArchivedErrorsUseCase"
-import DeleteAuditLogLookupItemsUseCase from "../use-cases/DeleteAuditLogLookupItemsUseCase"
 import DeleteMessageObjectsFromS3UseCase from "../use-cases/DeleteMessageObjectsFromS3UseCase"
-import SanitiseAuditLogUseCase from "../use-cases/SanitiseAuditLogUseCase"
+import SanitiseAuditLogEventsUseCase from "../use-cases/SanitiseAuditLogEventsUseCase"
 import shouldSanitiseMessage from "../use-cases/shouldSanitiseMessage"
 import { createJsonApiResult } from "../utils"
 
 const auditLogDynamoDbConfig = createAuditLogDynamoDbConfig()
 const auditLogGateway = new AuditLogDynamoGateway(auditLogDynamoDbConfig)
-const auditLogLookupDynamoGateway = new AwsAuditLogLookupDynamoGateway(
-  auditLogDynamoDbConfig,
-  auditLogDynamoDbConfig.lookupTableName
-)
 const postgresConfig = createBichardPostgresGatewayConfig()
 const awsBichardPostgresGateway = new BichardPostgresGateway(postgresConfig)
 const awsMessagesS3Gateway = new S3Gateway(createS3Config("INTERNAL_INCOMING_MESSAGES_BUCKET"))
-const awsEventsS3Gateway = new S3Gateway(createS3Config("AUDIT_LOG_EVENTS_BUCKET"))
-const deleteMessageObjectsFromS3UseCase = new DeleteMessageObjectsFromS3UseCase(
-  awsMessagesS3Gateway,
-  awsEventsS3Gateway
-)
-const sanitiseAuditLogUseCase = new SanitiseAuditLogUseCase(auditLogGateway)
-const deleteAuditLogLookupItems = new DeleteAuditLogLookupItemsUseCase(auditLogLookupDynamoGateway)
+const deleteMessageObjectsFromS3UseCase = new DeleteMessageObjectsFromS3UseCase(awsMessagesS3Gateway)
+const sanitiseAuditLogEventsUseCase = new SanitiseAuditLogEventsUseCase(auditLogGateway)
 const deleteArchivedErrorsUseCase = new DeleteArchivedErrorsUseCase(awsBichardPostgresGateway)
 
 type SanitiseConfig = {
@@ -61,20 +49,14 @@ export default async function sanitiseMessage(event: APIGatewayProxyEvent): Prom
     })
   }
 
-  const messageResult = await auditLogGateway.getOne(
-    auditLogDynamoConfig.auditLogTableName,
-    auditLogGateway.auditLogTableKey,
-    messageId
-  )
+  const message = await auditLogGateway.fetchOne(messageId, { includeColumns: ["version"] })
 
-  if (isError(messageResult)) {
+  if (isError(message)) {
     return createJsonApiResult({
       statusCode: HttpStatusCode.internalServerError,
-      body: messageResult.message
+      body: message.message
     })
   }
-
-  const message = messageResult?.Item as DynamoAuditLog
 
   if (!message) {
     return createJsonApiResult({
@@ -92,7 +74,14 @@ export default async function sanitiseMessage(event: APIGatewayProxyEvent): Prom
   }
 
   if (!shouldSanitise) {
-    await auditLogGateway.updateSanitiseCheck(message, add(new Date(), sanitiseConfig.checkFrequency))
+    const result = await auditLogGateway.updateSanitiseCheck(message, add(new Date(), sanitiseConfig.checkFrequency))
+    if (isError(result)) {
+      return createJsonApiResult({
+        statusCode: HttpStatusCode.internalServerError,
+        body: result.message
+      })
+    }
+
     return createJsonApiResult({
       statusCode: HttpStatusCode.ok,
       body: "Message not sanitised."
@@ -107,15 +96,6 @@ export default async function sanitiseMessage(event: APIGatewayProxyEvent): Prom
     })
   }
 
-  const deleteAuditLogLookupResult = await deleteAuditLogLookupItems.call(message.messageId)
-
-  if (isError(deleteAuditLogLookupResult)) {
-    return createJsonApiResult({
-      statusCode: HttpStatusCode.internalServerError,
-      body: deleteAuditLogLookupResult.message
-    })
-  }
-
   const deleteArchivedErrorsResult = await deleteArchivedErrorsUseCase.call(message.messageId)
 
   if (isError(deleteArchivedErrorsResult)) {
@@ -125,7 +105,7 @@ export default async function sanitiseMessage(event: APIGatewayProxyEvent): Prom
     })
   }
 
-  const sanitiseAuditLogResult = await sanitiseAuditLogUseCase.call(message)
+  const sanitiseAuditLogResult = await sanitiseAuditLogEventsUseCase.call(message)
   if (isError(sanitiseAuditLogResult)) {
     return createJsonApiResult({
       statusCode: HttpStatusCode.internalServerError,

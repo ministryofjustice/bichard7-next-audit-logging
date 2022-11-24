@@ -19,7 +19,7 @@ describe("StoreInS3UseCase", () => {
   it("receive message, store raw data in S3 and return S3 path", async () => {
     const message: EventMessage = {
       messageData: "DummyXML",
-      messageFormat: "AuditEvent",
+      messageFormat: "GeneralEvent",
       eventSourceArn: "DummyArn",
       eventSourceQueueName: "DummyQueueName"
     }

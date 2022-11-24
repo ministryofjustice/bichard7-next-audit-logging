@@ -8,7 +8,7 @@ import {
   parseCreateAuditLogEventsRequest,
   validateCreateAuditLogEvents
 } from "../use-cases"
-import { addAuditLogEventIndices, createJsonApiResult, statusCodeLookup, transformAuditLogEvent } from "../utils"
+import { createJsonApiResult, statusCodeLookup, transformAuditLogEvent } from "../utils"
 
 const auditLogConfig = createAuditLogDynamoDbConfig()
 const auditLogGateway = new AuditLogDynamoGateway(auditLogConfig)
@@ -36,9 +36,9 @@ export default async function createAuditLogEvents(event: APIGatewayProxyEvent):
   }
 
   const auditLogEvents = eventValidationResults.map((result) => result.auditLogEvent)
+  // TODO: Eventually do transformation in event handler, and remove from use case
   const transformedAuditLogEvents = auditLogEvents.map(transformAuditLogEvent)
-  const indexedAuditLogEvents = transformedAuditLogEvents.map(addAuditLogEventIndices)
-  const result = await createAuditLogEventUseCase.create(request.messageId, indexedAuditLogEvents)
+  const result = await createAuditLogEventUseCase.create(request.messageId, transformedAuditLogEvents)
 
   if (result.resultType === "success") {
     return createJsonApiResult({

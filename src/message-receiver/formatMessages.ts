@@ -25,7 +25,6 @@ const decodeMessagePayload = (message: JmsTextMessage): unknown => {
 }
 
 const messageFormatters: Record<MessageFormat, MessageFormatter> = {
-  AuditEvent: annotateWithMqDetails,
   GeneralEvent: annotateWithMqDetails,
   CourtResultInput: annotateWithMqDetails,
   DataSetPncUpdate: annotateWithMqDetails,

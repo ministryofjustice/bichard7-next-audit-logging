@@ -1,4 +1,4 @@
-import type { AuditLogEvent } from "src/shared/types"
+import type { ApiAuditLogEvent } from "src/shared/types"
 import { EventCode } from "src/shared/types"
 import getForceOwner from "./getForceOwner"
 
@@ -8,7 +8,7 @@ it("should return the force owner when message type is correct", () => {
     attributes: {
       "Force Owner": "010000"
     }
-  } as unknown as AuditLogEvent
+  } as unknown as ApiAuditLogEvent
 
   const result = getForceOwner(event)
 
@@ -21,7 +21,7 @@ it("should return the force owner for the correct V2 message type", () => {
     attributes: {
       "Force Owner": "010000"
     }
-  } as unknown as AuditLogEvent
+  } as unknown as ApiAuditLogEvent
 
   const result = getForceOwner(event)
 
@@ -34,7 +34,7 @@ it("should return undefined when message type is incorrect", () => {
     attributes: {
       "Force Owner": "010000"
     }
-  } as unknown as AuditLogEvent
+  } as unknown as ApiAuditLogEvent
 
   const result = getForceOwner(event)
 

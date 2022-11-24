@@ -22,6 +22,10 @@ export default class RetryMessageUseCase {
       return event
     }
 
+    if (typeof event === "undefined") {
+      return Error("Couldn't find message to retry")
+    }
+
     const { s3Path } = event as unknown as { s3Path: string }
     if (!event.eventXml && !s3Path) {
       return new Error("Failed to retrieve the source event, so unable to retry")

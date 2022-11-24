@@ -1,22 +1,22 @@
-import type { AuditLogEvent } from "src/shared/types"
+import type { DynamoAuditLogEvent } from "src/shared/types"
 import { EventCode } from "src/shared/types"
 import calculateErrorRecordArchivalDate from "./calculateErrorRecordArchivalDate"
 
-const archivalTime = Date.now()
+const archivalTime = new Date().toISOString()
 
-const archivalEvent = (): AuditLogEvent => {
+const archivalEvent = (): DynamoAuditLogEvent => {
   return {
-    eventCode: EventCode.ErrorRecordArchived,
     attributes: {},
+    eventCode: EventCode.ErrorRecordArchived,
     timestamp: archivalTime
-  } as unknown as AuditLogEvent
+  } as DynamoAuditLogEvent
 }
 
-const nonArchivalEvent = (): AuditLogEvent => {
+const nonArchivalEvent = (): DynamoAuditLogEvent => {
   return {
     eventType: "Something else",
     attributes: {}
-  } as unknown as AuditLogEvent
+  } as DynamoAuditLogEvent
 }
 
 describe("calculateErrorRecordArchivalDate", () => {

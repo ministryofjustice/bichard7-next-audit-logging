@@ -1,21 +1,18 @@
-import type { AuditLogEvent, PromiseResult } from "src/shared/types"
+import type { PromiseResult } from "src/shared/types"
 import { isError } from "src/shared/types"
 import type AuditLogErrorEvent from "src/shared/types/AuditLogErrorEvent"
 import type { AuditLogDynamoGatewayInterface } from "../gateways/dynamo"
-import type LookupEventValuesUseCase from "./LookupEventValuesUseCase"
 
 export default class GetLastFailedMessageEventUseCase {
-  constructor(
-    private readonly auditLogDynamoGateway: AuditLogDynamoGatewayInterface,
-    private readonly lookupEventValues: LookupEventValuesUseCase
-  ) {}
+  constructor(private readonly auditLogDynamoGateway: AuditLogDynamoGatewayInterface) {}
 
-  async get(messageId: string): PromiseResult<AuditLogErrorEvent> {
-    const events = (await this.auditLogDynamoGateway.fetchEvents(messageId)) as AuditLogEvent[]
-
-    if (isError(events)) {
-      return events
+  async get(messageId: string): PromiseResult<AuditLogErrorEvent | undefined> {
+    const result = await this.auditLogDynamoGateway.fetchOne(messageId)
+    if (isError(result) || typeof result === "undefined") {
+      return result
     }
+
+    const { events } = result
 
     const failedEvents = events.filter(
       (event) => event.category === "error" && (event.eventXml || "s3Path" in event) && event.eventSourceQueueName
@@ -27,6 +24,6 @@ export default class GetLastFailedMessageEventUseCase {
 
     const failedEvent = failedEvents.slice(-1)[0]
 
-    return this.lookupEventValues.execute(failedEvent) as PromiseResult<AuditLogErrorEvent>
+    return failedEvent as AuditLogErrorEvent
   }
 }

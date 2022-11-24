@@ -19,7 +19,7 @@ describe("Retrieve event from S3 end-to-end", () => {
     const s3ObjectKey = "dummy-event.json"
     const S3ObjectContent = JSON.stringify(<EventMessage>{
       messageData: "DummyData",
-      messageFormat: "AuditEvent",
+      messageFormat: "GeneralEvent",
       eventSourceArn: "DummyArn",
       eventSourceQueueName: "DummyQueueName"
     })
