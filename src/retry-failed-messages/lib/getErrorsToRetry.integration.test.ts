@@ -17,6 +17,7 @@ const apiClient = new AuditLogApiClient("http://localhost:3010", "DUMMY")
 describe("getErrorsToRetry", () => {
   beforeEach(async () => {
     await clearDynamoTable("auditLogTable", "messageId")
+    await clearDynamoTable("auditLogEventsTable", "_id")
   })
 
   it("should get all errors, paginating where necessary", async () => {
