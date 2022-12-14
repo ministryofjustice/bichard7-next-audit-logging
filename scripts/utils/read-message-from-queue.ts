@@ -18,18 +18,12 @@ If you are clearing a failure queue, you should manually add an event to the aud
  Which will ensure it gets included in the Common Platform report
  */
 
-import type MqConfig from "../../src/shared-types/src/MqConfig"
-import TestMqGateway from "../../src/shared/src/MqGateway/TestMqGateway"
-
-const config: MqConfig = {
-  url: process.env.MQ_URL ?? "stomp://localhost:61613",
-  username: process.env.MQ_USER ?? "admin",
-  password: process.env.MQ_PASSWORD ?? "admin"
-}
+import createMqConfig from "../../src/shared/MqGateway/createMqConfig"
+import TestMqGateway from "../../src/shared/MqGateway/TestMqGateway"
 
 const queueName = process.env.MQ_QUEUE ?? "COURT_RESULT_INPUT_QUEUE.FAILURE"
 
-const mq = new TestMqGateway(config)
+const mq = new TestMqGateway(createMqConfig())
 
 const main = async () => {
   const message = await mq.getMessage(queueName)
