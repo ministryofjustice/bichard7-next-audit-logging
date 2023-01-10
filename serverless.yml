@@ -315,3 +315,9 @@ functions:
       - httpApi:
           path: /messages/{messageId}/sanitise
           method: post
+  createAuditLogUserEvents:
+    handler: src/audit-log-api/handlers/createAuditLogUserEvents.default
+    events:
+      - httpApi:
+          path: /users/{username}
+          method: post

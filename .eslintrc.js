@@ -1,7 +1,8 @@
 module.exports = {
   root: true,
   env: {
-    es6: true
+    es6: true,
+    jest: true
   },
   rules: {
     semi: [2, "never"],
