@@ -31,3 +31,8 @@ export type DynamoAuditLogEvent = ApiAuditLogEvent & {
   _messageId: string
   _topExceptionsReport: number
 }
+
+export type DynamoAuditLogUserEvent = ApiAuditLogEvent & {
+  _automationReport: number
+  _topExceptionsReport: number
+}

@@ -4,6 +4,7 @@ import type {
   ApiAuditLogEvent,
   DynamoAuditLog,
   DynamoAuditLogEvent,
+  DynamoAuditLogUserEvent,
   KeyValuePair,
   PromiseResult
 } from "src/shared/types"
@@ -28,6 +29,7 @@ const maxAttributeValueLength = 1000
 
 type InternalDynamoAuditLog = Omit<DynamoAuditLog, "events">
 type InternalDynamoAuditLogEvent = DynamoAuditLogEvent & { _id: string }
+type InternalDynamoAuditLogUserEvent = DynamoAuditLogUserEvent & { _id: string }
 
 const convertDynamoAuditLogToInternal = (
   input: InternalDynamoAuditLog & { events?: ApiAuditLogEvent[] }
@@ -111,6 +113,20 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
     }
 
     return messages
+  }
+
+  async createManyUserEvents(events: DynamoAuditLogUserEvent[]): PromiseResult<void> {
+    const dynamoUpdates = await this.prepareStoreUserEvents(events)
+
+    if (isError(dynamoUpdates)) {
+      return dynamoUpdates
+    }
+
+    if (dynamoUpdates.length === 0) {
+      return Promise.resolve()
+    }
+
+    return this.executeTransaction(dynamoUpdates)
   }
 
   async fetchByExternalCorrelationId(
@@ -396,7 +412,9 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
     }
   }
 
-  private async compressEventValues(event: DynamoAuditLogEvent): PromiseResult<DynamoAuditLogEvent> {
+  private async compressEventValues<TEvent extends DynamoAuditLogEvent | DynamoAuditLogUserEvent>(
+    event: TEvent
+  ): PromiseResult<TEvent> {
     if (!event.attributes) {
       return event
     }
@@ -501,6 +519,28 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
       }
 
       const eventToInsert: InternalDynamoAuditLogEvent = { ...compressedEvent, _id: uuid(), _messageId: messageId }
+      dynamoUpdates.push({
+        Put: {
+          Item: { ...eventToInsert, _: "_" },
+          TableName: this.config.eventsTableName,
+          ExpressionAttributeNames: { "#id": this.eventsTableKey },
+          ConditionExpression: `attribute_not_exists(#id)`
+        }
+      })
+    }
+
+    return dynamoUpdates
+  }
+
+  private async prepareStoreUserEvents(events: DynamoAuditLogUserEvent[]): PromiseResult<DynamoUpdate[]> {
+    const dynamoUpdates: DynamoUpdate[] = []
+    for (const event of events) {
+      const compressedEvent = await this.compressEventValues(event)
+      if (isError(compressedEvent)) {
+        return compressedEvent
+      }
+
+      const eventToInsert: InternalDynamoAuditLogUserEvent = { ...compressedEvent, _id: uuid() }
       dynamoUpdates.push({
         Put: {
           Item: { ...eventToInsert, _: "_" },
