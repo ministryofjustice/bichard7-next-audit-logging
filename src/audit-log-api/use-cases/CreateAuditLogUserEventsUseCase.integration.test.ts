@@ -3,7 +3,7 @@ import { AuditLogDynamoGateway } from "../gateways/dynamo"
 import { mockApiAuditLogEvent } from "src/shared/testing"
 import CreateAuditLogUserEventsUseCase from "./CreateAuditLogUserEventsUseCase"
 import { TestDynamoGateway, auditLogDynamoConfig } from "../test"
-import { DynamoAuditLogEvent } from "src/shared/types"
+import type { DynamoAuditLogEvent } from "src/shared/types"
 
 type EventRecordType = DynamoAuditLogEvent & { _id: string }
 const gateway = new AuditLogDynamoGateway(auditLogDynamoConfig)

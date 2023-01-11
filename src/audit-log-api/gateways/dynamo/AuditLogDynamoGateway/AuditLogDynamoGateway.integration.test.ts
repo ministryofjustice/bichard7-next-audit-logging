@@ -143,7 +143,7 @@ describe("AuditLogDynamoGateway", () => {
       expect(actualEvents).toBeDefined()
       expect(actualEvents).toHaveLength(2)
 
-      const { _id: actualEvent1Id, ...actualEvent1 } = actualEvents![0]
+      const { _id: actualEvent1Id, ...actualEvent1 } = actualEvents!.find((x) => x.user == "User 1")!
       expect(actualEvent1Id).toBeDefined()
       expect(actualEvent1).toStrictEqual({
         _: "_",
@@ -165,7 +165,7 @@ describe("AuditLogDynamoGateway", () => {
         user: "User 1"
       })
 
-      const { _id: actualEvent2Id, ...actualEvent2 } = actualEvents![1]
+      const { _id: actualEvent2Id, ...actualEvent2 } = actualEvents!.find((x) => x.user == "User 2")!
       expect(actualEvent2Id).toBeDefined()
       expect(actualEvent2).toStrictEqual({
         _: "_",
