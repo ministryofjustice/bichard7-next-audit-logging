@@ -319,5 +319,5 @@ functions:
     handler: src/audit-log-api/handlers/createAuditLogUserEvents.default
     events:
       - httpApi:
-          path: /users/{username}
+          path: /users/{userName}/events
           method: post
