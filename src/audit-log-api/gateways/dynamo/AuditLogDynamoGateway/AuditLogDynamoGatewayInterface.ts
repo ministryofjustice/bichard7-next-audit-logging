@@ -5,11 +5,12 @@ import type {
   FetchUnsanitisedOptions,
   ProjectionOptions
 } from "src/audit-log-api/types/queryParams"
-import type { DynamoAuditLog, DynamoAuditLogEvent, PromiseResult } from "src/shared/types"
+import type { DynamoAuditLog, DynamoAuditLogEvent, DynamoAuditLogUserEvent, PromiseResult } from "src/shared/types"
 
 export default interface AuditLogDynamoGateway {
   create(message: DynamoAuditLog): PromiseResult<DynamoAuditLog>
   createMany(messages: DynamoAuditLog[]): PromiseResult<DynamoAuditLog[]>
+  createManyUserEvents(events: DynamoAuditLogUserEvent[]): PromiseResult<void>
   fetchByExternalCorrelationId(
     externalCorrelationId: string,
     options?: ProjectionOptions

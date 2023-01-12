@@ -15,7 +15,8 @@ require("esbuild")
       "src/message-receiver/index.ts",
       "src/retry-failed-messages/index.ts",
       "src/sanitise-old-messages/index.ts",
-      "src/transfer-messages/index.ts"
+      "src/transfer-messages/index.ts",
+      "src/audit-log-api/handlers/createAuditLogUserEvents.ts"
     ],
     bundle: true,
     logLevel: "info",

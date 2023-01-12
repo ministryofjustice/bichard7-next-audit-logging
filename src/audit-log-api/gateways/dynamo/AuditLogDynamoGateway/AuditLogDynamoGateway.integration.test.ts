@@ -1,4 +1,5 @@
 import type { DocumentClient } from "aws-sdk/clients/dynamodb"
+import MockDate from "mockdate"
 import { addDays } from "date-fns"
 import { auditLogDynamoConfig } from "src/audit-log-api/test"
 import { compress, decompress } from "src/shared"
@@ -7,7 +8,8 @@ import {
   createMockAuditLog,
   mockApiAuditLogEvent,
   mockDynamoAuditLog,
-  mockDynamoAuditLogEvent
+  mockDynamoAuditLogEvent,
+  mockDynamoAuditLogUserEvent
 } from "src/shared/testing"
 import type { ApiAuditLogEvent, DynamoAuditLog, KeyValuePair } from "src/shared/types"
 import { AuditLogStatus, isError } from "src/shared/types"
@@ -21,6 +23,7 @@ const primaryKey = "messageId"
 
 describe("AuditLogDynamoGateway", () => {
   beforeEach(async () => {
+    MockDate.reset()
     await testGateway.deleteAll(auditLogDynamoConfig.auditLogTableName, primaryKey)
     await testGateway.deleteAll(auditLogDynamoConfig.eventsTableName, "_id")
   })
@@ -118,6 +121,35 @@ describe("AuditLogDynamoGateway", () => {
       const oneDayInSecs = 24 * 60 * 60
       expect(secondsToExpiry).toBeLessThanOrEqual(8 * oneDayInSecs)
       expect(secondsToExpiry).toBeGreaterThanOrEqual(6 * oneDayInSecs)
+    })
+  })
+
+  describe("createManyUserEvents", () => {
+    it("should insert multiple user events", async () => {
+      MockDate.set(new Date("2023-01-11T12:51:49.678Z"))
+
+      const userEvents = [
+        mockDynamoAuditLogUserEvent({ user: "User 1" }),
+        mockDynamoAuditLogUserEvent({ user: "User 2" })
+      ]
+
+      const result = await gateway.createManyUserEvents(userEvents)
+
+      expect(result).toNotBeError()
+
+      const actualEventsResult = await testGateway.getAll(auditLogDynamoConfig.eventsTableName)
+      const actualEvents = actualEventsResult.Items
+
+      expect(actualEvents).toBeDefined()
+      expect(actualEvents).toHaveLength(2)
+
+      const { _id: actualEvent1Id, ...actualEvent1 } = actualEvents!.find((x) => x.user == "User 1")!
+      expect(actualEvent1Id).toBeDefined()
+      expect(actualEvent1).toMatchSnapshot()
+
+      const { _id: actualEvent2Id, ...actualEvent2 } = actualEvents!.find((x) => x.user == "User 2")!
+      expect(actualEvent2Id).toBeDefined()
+      expect(actualEvent2).toMatchSnapshot()
     })
   })
 
