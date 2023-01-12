@@ -145,47 +145,11 @@ describe("AuditLogDynamoGateway", () => {
 
       const { _id: actualEvent1Id, ...actualEvent1 } = actualEvents!.find((x) => x.user == "User 1")!
       expect(actualEvent1Id).toBeDefined()
-      expect(actualEvent1).toStrictEqual({
-        _: "_",
-        _automationReport: 0,
-        _topExceptionsReport: 0,
-        attributes: {
-          "Attribute 1": {
-            _compressedValue: "eJztxzENACAMADArs4AEpIzAwUuGf4TQfu1VZ49bK1rMrOzu7u7u7u7u7u7u7u7u7u4f/gG7Ejmy"
-          },
-          "Attribute 2": "Attribute 2 data"
-        },
-        category: "information",
-        eventCode: "dummy.event.code",
-        eventSource: "Test",
-        eventSourceQueueName: "Test event source queue name",
-        eventType: "Test event",
-        eventXml: { _compressedValue: "eJztxzENACAMADArEzUL+4CHhSAfA0hov2btjjq1Ou4caWZmZmZmZmZmZmZmZmafPZI4ZrM=" },
-        timestamp: "2023-01-11T12:51:49.678Z",
-        user: "User 1"
-      })
+      expect(actualEvent1).toMatchSnapshot()
 
       const { _id: actualEvent2Id, ...actualEvent2 } = actualEvents!.find((x) => x.user == "User 2")!
       expect(actualEvent2Id).toBeDefined()
-      expect(actualEvent2).toStrictEqual({
-        _: "_",
-        _automationReport: 0,
-        _topExceptionsReport: 0,
-        attributes: {
-          "Attribute 1": {
-            _compressedValue: "eJztxzENACAMADArs4AEpIzAwUuGf4TQfu1VZ49bK1rMrOzu7u7u7u7u7u7u7u7u7u4f/gG7Ejmy"
-          },
-          "Attribute 2": "Attribute 2 data"
-        },
-        category: "information",
-        eventCode: "dummy.event.code",
-        eventSource: "Test",
-        eventSourceQueueName: "Test event source queue name",
-        eventType: "Test event",
-        eventXml: { _compressedValue: "eJztxzENACAMADArEzUL+4CHhSAfA0hov2btjjq1Ou4caWZmZmZmZmZmZmZmZmafPZI4ZrM=" },
-        timestamp: "2023-01-11T12:51:49.678Z",
-        user: "User 2"
-      })
+      expect(actualEvent2).toMatchSnapshot()
     })
   })
 
