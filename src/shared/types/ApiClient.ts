@@ -18,6 +18,7 @@ export default interface ApiClient {
   getMessage(messageId: string, options?: GetMessageOptions): PromiseResult<OutputApiAuditLog>
   createAuditLog(auditLog: InputApiAuditLog): PromiseResult<void>
   createEvent(messageId: string, event: ApiAuditLogEvent): PromiseResult<void>
+  createUserEvent(userName: string, event: ApiAuditLogEvent): PromiseResult<void>
   retryEvent(messageId: string): PromiseResult<void>
   sanitiseMessage(messageId: string): PromiseResult<void>
   fetchUnsanitised(options?: GetMessageOptions): PromiseResult<OutputApiAuditLog[]>

@@ -202,6 +202,44 @@ describe("createEvent()", () => {
   })
 })
 
+describe("createUserEvent()", () => {
+  it("should return Created http status code", async () => {
+    jest.spyOn(axios, "post").mockResolvedValue({ status: 201 })
+
+    const result = await apiClient.createUserEvent("User A", event)
+
+    expect(result).toNotBeError()
+  })
+
+  it("should fail when the error is unknown", async () => {
+    const expectedError = <AxiosError>new Error("An unknown error")
+    jest.spyOn(axios, "post").mockRejectedValue(expectedError)
+
+    const result = await apiClient.createUserEvent("User B", event)
+
+    expect(result).toBeError(`Error creating event: ${expectedError.message}`)
+  })
+
+  it("should pass through the api key as a header", async () => {
+    const mockPost = jest.spyOn(axios, "post").mockResolvedValue({ status: 201 })
+
+    const result = await apiClient.createUserEvent("User C", event)
+
+    expect(result).toNotBeError()
+    expect(mockPost.mock?.calls?.[0]?.[2]?.headers?.["X-API-Key"]).toBe("dummy")
+  })
+
+  it("should fail when the api request times out", async () => {
+    const timedOutResponse = <AxiosError>{ code: "ECONNABORTED" }
+    const expectedErrorMsg = `Timed out creating event for user 'User D'.`
+    jest.spyOn(axios, "post").mockRejectedValue(timedOutResponse)
+
+    const result = await apiClient.createUserEvent("User D", event)
+
+    expect(result).toBeError(expectedErrorMsg)
+  })
+})
+
 describe("retryEvent()", () => {
   it("should succeed when the message exists", async () => {
     jest.spyOn(axios, "post").mockResolvedValue({ status: 204 })

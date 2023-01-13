@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<logEvent xmlns="http://www.example.org/GeneralEventLogMessage" xmlns:ds="http://schemas.cjse.gov.uk/datastandards/2006-10" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <systemID>BR7</systemID>
+    <componentID>Reporting Screen Flow</componentID>
+    <eventCategory>information</eventCategory>
+    <eventType>Report run</eventType>
+    <correlationID/>
+    <eventDateTime>2021-11-10T10:40:16.388+00:00</eventDateTime>
+    <nameValuePairs>
+        <nameValuePair>
+            <name>Report ID</name>
+            <value>br7.report.live.status.summary</value>
+        </nameValuePair>
+        <nameValuePair>
+            <name>Output Format</name>
+            <value>Downloaded as CSV</value>
+        </nameValuePair>
+        <nameValuePair>
+            <name>Number of Records Returned</name>
+            <value>0</value>
+        </nameValuePair>
+        <nameValuePair>
+            <name>Time Taken</name>
+            <value>17 ms</value>
+        </nameValuePair>
+    </nameValuePairs>
+</logEvent>

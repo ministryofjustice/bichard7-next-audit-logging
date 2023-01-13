@@ -4,7 +4,12 @@ import fs from "fs"
 import { AuditLogApiClient, encodeBase64, TestS3Gateway } from "src/shared"
 import "src/shared/testing"
 import { clearDynamoTable, createMockAuditLog, setEnvironmentVariables } from "src/shared/testing"
-import type { AmazonMqEventSourceRecordEvent, ApiAuditLogEvent, OutputApiAuditLog } from "src/shared/types"
+import type {
+  AmazonMqEventSourceRecordEvent,
+  ApiAuditLogEvent,
+  DynamoAuditLogEvent,
+  OutputApiAuditLog
+} from "src/shared/types"
 import { isError } from "src/shared/types"
 import { v4 as uuid } from "uuid"
 setEnvironmentVariables()
@@ -15,6 +20,8 @@ process.env.MESSAGE_FORMAT = "DUMMY"
 process.env.EVENTS_BUCKET_NAME = "auditLogEventsBucket"
 
 import messageReceiver from "src/message-receiver/index"
+import { TestDynamoGateway } from "src/audit-log-api/test"
+import createAdutiLogDynamoDbConfig from "src/audit-log-api/createAuditLogDynamoDbConfig"
 
 const s3Gateway = new TestS3Gateway({
   url: "http://localhost:4569",
@@ -23,9 +30,10 @@ const s3Gateway = new TestS3Gateway({
   accessKeyId: "S3RVER",
   secretAccessKey: "S3RVER"
 })
-const auditLogTableName = "auditLogTable"
 const auditLogApi = new AuditLogApiClient("http://localhost:3010", "Api-key")
 const eventHandlerSimulator = new EventHandlerSimulator()
+const dynamoDbConfig = createAdutiLogDynamoDbConfig()
+const testDynamoGateway = new TestDynamoGateway(dynamoDbConfig)
 
 const getEvents = async (messageId1: string, messageId2: string): Promise<ApiPollResult> => {
   const message1 = await auditLogApi.getMessage(messageId1)
@@ -51,7 +59,8 @@ type ApiPollResult = {
 }
 
 beforeEach(async () => {
-  await clearDynamoTable(auditLogTableName, "messageId")
+  await clearDynamoTable(dynamoDbConfig.auditLogTableName, "messageId")
+  await clearDynamoTable(dynamoDbConfig.eventsTableName, "_id")
   await s3Gateway.deleteAll()
 })
 
@@ -126,8 +135,44 @@ test.each<TestInput>([
   }
 )
 
-test("Event with no MesageId should not fail to be processed by the audit logger", async () => {
+test("Event with only user should be stored in dynamodb", async () => {
   const rawMessage = fs.readFileSync(`events/report-run-event.xml`).toString()
+  const messageData = encodeBase64(rawMessage.replace("{MESSAGE_ID}", uuid()))
+  const event: AmazonMqEventSourceRecordEvent = {
+    eventSource: "general-event",
+    eventSourceArn: "general-event",
+    messages: [
+      {
+        messageID: "",
+        messageType: "messageType",
+        data: messageData,
+        destination: {
+          physicalName: ""
+        }
+      }
+    ]
+  }
+
+  process.env.MESSAGE_FORMAT = "GeneralEvent"
+  const messageReceiverResult = await messageReceiver(event)
+  expect(messageReceiverResult).toNotBeError()
+
+  // Simulating EventBridge rule for triggering state machine for the uploaded object to S3 bucket
+  const s3Objects = (await s3Gateway.getAll()) ?? []
+  const objectKey = s3Objects.map((s3Object) => s3Object.Key)[0]
+  const eventHandlerResult = await eventHandlerSimulator.start(objectKey!, uuid()).catch((error) => error)
+
+  expect(eventHandlerResult).toNotBeError()
+
+  const eventsResult = await testDynamoGateway.getAll(dynamoDbConfig.eventsTableName)
+  const events = eventsResult.Items as DynamoAuditLogEvent[]
+
+  expect(events).toHaveLength(1)
+  expect(events[0].user).toBe("supervisor")
+})
+
+test("Event with no MesageId and User should not fail to be processed by the audit logger", async () => {
+  const rawMessage = fs.readFileSync(`events/no-messageid-and-user.xml`).toString()
   const messageData = encodeBase64(rawMessage.replace("{MESSAGE_ID}", uuid()))
 
   const event: AmazonMqEventSourceRecordEvent = {

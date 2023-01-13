@@ -56,6 +56,16 @@ export default class FakeApiClient implements ApiClient {
 
   // @ts-ignore
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  createUserEvent(userName: string, event: ApiAuditLogEvent): PromiseResult<void> {
+    if (this.shouldFunctionReturnError("createUserEvent")) {
+      return Promise.resolve(this.error!)
+    }
+
+    return Promise.resolve()
+  }
+
+  // @ts-ignore
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   sanitiseMessage(messageId: string): PromiseResult<void> {
     return Promise.resolve(Error("sanitiseMessage not implemented"))
   }
