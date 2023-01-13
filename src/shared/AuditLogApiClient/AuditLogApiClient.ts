@@ -132,6 +132,39 @@ export default class AuditLogApiClient implements ApiClient {
       })
   }
 
+  createUserEvent(userName: string, event: ApiAuditLogEvent): PromiseResult<void> {
+    return axios
+      .post(`${this.apiUrl}/users/${userName}/events`, event, {
+        httpsAgent,
+        headers: {
+          "X-API-Key": this.apiKey
+        },
+        timeout: this.timeout
+      })
+      .then((result) => {
+        switch (result.status) {
+          case HttpStatusCode.created:
+            return undefined
+          case HttpStatusCode.gatewayTimeout:
+            return Error(`Timed out creating event for user '${userName}'.`)
+          default:
+            return Error(`Error ${result.status}: Could not create audit log event.`)
+        }
+      })
+      .catch((error: AxiosError) => {
+        switch (error.code) {
+          case "ECONNABORTED":
+            return Error(`Timed out creating event for user '${userName}'.`)
+          default:
+            logger.error(`Error creating event", ${this.stringify(error.response?.data)}`)
+            return new ApplicationError(
+              `Error creating event: ${this.stringify(error.response?.data) ?? error.message}`,
+              error
+            )
+        }
+      })
+  }
+
   retryEvent(messageId: string): PromiseResult<void> {
     return axios
       .post(
