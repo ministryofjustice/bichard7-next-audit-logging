@@ -2,7 +2,7 @@ import type { AxiosError } from "axios"
 import axios from "axios"
 import "src/shared/testing"
 import { mockApiAuditLogEvent, mockOutputApiAuditLog } from "src/shared/testing"
-import type { OutputApiAuditLog } from "src/shared/types"
+import type { KeyValuePair, OutputApiAuditLog } from "src/shared/types"
 import AuditLogApiClient from "./AuditLogApiClient"
 
 const apiClient = new AuditLogApiClient("http://localhost", "dummy")
@@ -115,7 +115,9 @@ describe("getMessage()", () => {
     const result = await apiClient.getMessage(message.messageId)
 
     expect(result).toNotBeError()
-    expect(mockGet.mock?.calls?.[0]?.[1]?.headers?.["X-API-Key"]).toBe("dummy")
+
+    const headers = mockGet.mock.calls[0][1]?.headers as KeyValuePair<string, string>
+    expect(headers["X-API-Key"]).toBe("dummy")
   })
 })
 
@@ -152,7 +154,9 @@ describe("createAuditLog()", () => {
     const result = await apiClient.createAuditLog(message)
 
     expect(result).toNotBeError()
-    expect(mockPost.mock?.calls?.[0]?.[2]?.headers?.["X-API-Key"]).toBe("dummy")
+
+    const headers = mockPost.mock.calls[0][2]?.headers as KeyValuePair<string, string>
+    expect(headers["X-API-Key"]).toBe("dummy")
   })
 })
 
@@ -188,7 +192,9 @@ describe("createEvent()", () => {
     const result = await apiClient.createEvent(message.messageId, event)
 
     expect(result).toNotBeError()
-    expect(mockPost.mock?.calls?.[0]?.[2]?.headers?.["X-API-Key"]).toBe("dummy")
+
+    const headers = mockPost.mock.calls[0][2]?.headers as KeyValuePair<string, string>
+    expect(headers["X-API-Key"]).toBe("dummy")
   })
 
   it("should fail when the api request times out", async () => {
@@ -226,7 +232,9 @@ describe("createUserEvent()", () => {
     const result = await apiClient.createUserEvent("User C", event)
 
     expect(result).toNotBeError()
-    expect(mockPost.mock?.calls?.[0]?.[2]?.headers?.["X-API-Key"]).toBe("dummy")
+
+    const headers = mockPost.mock.calls[0][2]?.headers as KeyValuePair<string, string>
+    expect(headers["X-API-Key"]).toBe("dummy")
   })
 
   it("should fail when the api request times out", async () => {
@@ -272,7 +280,9 @@ describe("retryEvent()", () => {
     const result = await apiClient.retryEvent(message.messageId)
 
     expect(result).toNotBeError()
-    expect(mockPost.mock?.calls?.[0]?.[2]?.headers?.["X-API-Key"]).toBe("dummy")
+
+    const headers = mockPost.mock.calls[0][2]?.headers as KeyValuePair<string, string>
+    expect(headers["X-API-Key"]).toBe("dummy")
   })
 })
 
