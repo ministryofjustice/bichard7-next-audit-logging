@@ -11,7 +11,11 @@ validate:
 
 .PHONY: run-mq
 run-mq:
-	docker-compose -f environment/docker-compose.yml up -d mq
+	@( \
+		if [ "${SKIP_MQ}" != "true" ]; then \
+			docker-compose -f environment/docker-compose.yml up -d mq; \
+		fi; \
+  )
 
 .PHONY: stop-mq
 stop-mq:
@@ -19,7 +23,11 @@ stop-mq:
 
 .PHONY: run-pg
 run-pg:
-	docker-compose -f environment/docker-compose.yml up -d pg
+	@( \
+		if [ "${SKIP_PG}" != "true" ]; then \
+			docker-compose -f environment/docker-compose.yml up -d pg; \
+		fi; \
+  )
 
 .PHONY: stop-pg
 stop-pg:
