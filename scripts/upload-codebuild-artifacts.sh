@@ -12,8 +12,14 @@ function upload_to_s3 {
   fi
 
   sourceHash=$(openssl dgst -binary -sha256 "$sourceFilename" | openssl base64)
+  commitHashInPath="/$CODEBUILD_RESOLVED_SOURCE_VERSION"
+
+  if [[ -z "$IS_CD" ]]; then
+    commitHashInPath=""
+  fi
+
   aws s3 cp "$sourceFilename" \
-    "s3://$ARTIFACT_BUCKET/audit-logging/$CODEBUILD_RESOLVED_SOURCE_VERSION/$destinationFilename" \
+    "s3://$ARTIFACT_BUCKET/audit-logging$commitHashInPath/$destinationFilename" \
     --content-type "$contentType" \
     --acl bucket-owner-full-control \
     --metadata hash="$sourceHash"
