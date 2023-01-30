@@ -135,6 +135,14 @@ this as a volume in your container
 
 ie `docker run --rm -v /path/to/your/certificates:/certs -p 80:80 -p 443:443 -e API_URL=xxx audit-logging-portal:latest`
 
+## Summarising an audit log record
+
+Sometimes if we receive requests fo rinformation about how a message was handled it's useful to be able to export an audit log record in a format that can be shared. You can use the `summarise-record.ts` script for this:
+
+```
+aws-vault exec qsolution-production -- npx ts-node -T ./scripts/utils/summarise-record.ts <message ID>
+```
+
 ## Authors
 
 This repository is developed and managed by the Made Tech team working on the Bichard7 project.
