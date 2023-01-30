@@ -481,7 +481,7 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
       this,
       this.config.eventsTableName,
       this.eventsTableKey
-    )
+    ).paginate(100)
 
     if (options.eventsFilter) {
       indexSearcher
