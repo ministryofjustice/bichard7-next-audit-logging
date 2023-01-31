@@ -60,7 +60,7 @@
     "test:unit:watch": "jest --watchAll --testPathIgnorePatterns='integration' 'e2e'",
     "test:unit": "jest --testPathIgnorePatterns='integration' 'e2e'",
     "test": "jest --runInBand  --namePattern=",
-    "update-deps": "ncu -u && npm install",
+    "update-deps": "ncu -x esbuild -u && npm install",
     "wait-for-api": "wait-on tcp:3010"
   },
   "lint-staged": {
