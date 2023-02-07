@@ -153,7 +153,10 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
 
     const items = <DynamoAuditLog[]>result?.Items
     if (!options.excludeColumns || !options.excludeColumns.includes("events")) {
-      await this.addEventsFromEventsTable(items)
+      const addEventsResult = await this.addEventsFromEventsTable(items)
+      if (isError(addEventsResult)) {
+        return addEventsResult
+      }
     }
 
     return items[0]
@@ -173,15 +176,17 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
     }
   }
 
-  async fetchByHash(hash: string): PromiseResult<DynamoAuditLog | null> {
-    const options: FetchByIndexOptions = {
+  async fetchByHash(hash: string, options: ProjectionOptions = {}): PromiseResult<DynamoAuditLog | null> {
+    const includeColumns = ["messageHash", ...(options?.includeColumns ?? [])]
+    const fetchByIndexOptions: FetchByIndexOptions = {
       indexName: "messageHashIndex",
       hashKeyName: "messageHash",
       hashKeyValue: hash,
-      pagination: { limit: 1 }
+      pagination: { limit: 1 },
+      projection: this.getProjectionExpression(includeColumns, options?.excludeColumns)
     }
 
-    const result = await this.fetchByIndex(this.config.auditLogTableName, options)
+    const result = await this.fetchByIndex(this.config.auditLogTableName, fetchByIndexOptions)
 
     if (isError(result)) {
       return result
@@ -192,7 +197,12 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
     }
 
     const items = <DynamoAuditLog[]>result?.Items
-    await this.addEventsFromEventsTable(items)
+    if (!options.excludeColumns || !options.excludeColumns.includes("events")) {
+      const addEventsResult = await this.addEventsFromEventsTable(items)
+      if (isError(addEventsResult)) {
+        return addEventsResult
+      }
+    }
 
     return items[0]
   }
@@ -210,7 +220,10 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
     }
 
     if (!options.excludeColumns || !options.excludeColumns.includes("events")) {
-      await this.addEventsFromEventsTable(result as DynamoAuditLog[])
+      const addEventsResult = await this.addEventsFromEventsTable(result as DynamoAuditLog[])
+      if (isError(addEventsResult)) {
+        return addEventsResult
+      }
     }
 
     return <DynamoAuditLog[]>result
@@ -229,7 +242,10 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
     }
 
     if (!options.excludeColumns || !options.excludeColumns.includes("events")) {
-      await this.addEventsFromEventsTable(result as DynamoAuditLog[])
+      const addEventsResult = await this.addEventsFromEventsTable(result as DynamoAuditLog[])
+      if (isError(addEventsResult)) {
+        return addEventsResult
+      }
     }
 
     return result as DynamoAuditLog[]
@@ -249,7 +265,10 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
 
     const item = result?.Item as DynamoAuditLog
     if (item && (!options.excludeColumns || !options.excludeColumns.includes("events"))) {
-      await this.addEventsFromEventsTable([item])
+      const addEventsResult = await this.addEventsFromEventsTable([item])
+      if (isError(addEventsResult)) {
+        return addEventsResult
+      }
     }
 
     return item
@@ -269,7 +288,12 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
     }
 
     if (!options.excludeColumns || !options.excludeColumns.includes("events")) {
-      await this.addEventsFromEventsTable(result as DynamoAuditLog[], { eventsFilter: options.eventsFilter })
+      const addEventsResult = await this.addEventsFromEventsTable(result as DynamoAuditLog[], {
+        eventsFilter: options.eventsFilter
+      })
+      if (isError(addEventsResult)) {
+        return addEventsResult
+      }
     }
 
     return <DynamoAuditLog[]>result
@@ -289,7 +313,10 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
     }
 
     if (!options.excludeColumns || !options.excludeColumns.includes("events")) {
-      await this.addEventsFromEventsTable(result as DynamoAuditLog[])
+      const addEventsResult = await this.addEventsFromEventsTable(result as DynamoAuditLog[])
+      if (isError(addEventsResult)) {
+        return addEventsResult
+      }
     }
 
     return <DynamoAuditLog[]>result

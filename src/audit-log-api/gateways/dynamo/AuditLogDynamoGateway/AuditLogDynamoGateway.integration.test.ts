@@ -154,9 +154,15 @@ describe("AuditLogDynamoGateway", () => {
   })
 
   describe("fetchOne", () => {
-    it("should return the matching AuditLog", async () => {
+    it("should return the matching AuditLog and no AuditLogEvent when message does not have any event", async () => {
       const expectedAuditLog = mockDynamoAuditLog()
       await gateway.create(expectedAuditLog)
+
+      const expectedAuditLogEvents = [
+        mockDynamoAuditLogEvent({ _messageId: expectedAuditLog.messageId }),
+        mockDynamoAuditLogEvent({ _messageId: expectedAuditLog.messageId })
+      ]
+      await gateway.createManyUserEvents(expectedAuditLogEvents)
 
       const result = await gateway.fetchOne(expectedAuditLog.messageId)
 
@@ -167,7 +173,47 @@ describe("AuditLogDynamoGateway", () => {
       expect(actualAuditLog.externalCorrelationId).toBe(expectedAuditLog.externalCorrelationId)
       expect(actualAuditLog.messageId).toBe(expectedAuditLog.messageId)
       expect(actualAuditLog.receivedDate).toBe(expectedAuditLog.receivedDate)
-      expect(actualAuditLog.events).toHaveLength(0)
+      expect(actualAuditLog.events).toHaveLength(2)
+    })
+
+    it("should not return events when events column is excluded", async () => {
+      const expectedAuditLog = mockDynamoAuditLog()
+      await gateway.create(expectedAuditLog)
+
+      const expectedAuditLogEvents = [
+        mockDynamoAuditLogEvent({ _messageId: expectedAuditLog.messageId }),
+        mockDynamoAuditLogEvent({ _messageId: expectedAuditLog.messageId })
+      ]
+      await gateway.createManyUserEvents(expectedAuditLogEvents)
+
+      const result = await gateway.fetchOne(expectedAuditLog.messageId, { excludeColumns: ["events"] })
+
+      expect(isError(result)).toBe(false)
+
+      const actualAuditLog = <DynamoAuditLog>result
+      expect(actualAuditLog.caseId).toBe(expectedAuditLog.caseId)
+      expect(actualAuditLog.externalCorrelationId).toBe(expectedAuditLog.externalCorrelationId)
+      expect(actualAuditLog.messageId).toBe(expectedAuditLog.messageId)
+      expect(actualAuditLog.receivedDate).toBe(expectedAuditLog.receivedDate)
+      expect(actualAuditLog.events).toBeUndefined()
+    })
+
+    it("should return error when it fails to get events", async () => {
+      const expectedError = Error("Dummy error")
+      const expectedAuditLog = mockDynamoAuditLog()
+      await gateway.create(expectedAuditLog)
+
+      const expectedAuditLogEvents = [
+        mockDynamoAuditLogEvent({ _messageId: expectedAuditLog.messageId }),
+        mockDynamoAuditLogEvent({ _messageId: expectedAuditLog.messageId })
+      ]
+      await gateway.createManyUserEvents(expectedAuditLogEvents)
+      jest.spyOn(gateway, "getEvents").mockResolvedValueOnce(expectedError)
+
+      const result = await gateway.fetchOne(expectedAuditLog.messageId)
+
+      expect(isError(result)).toBe(true)
+      expect(result).toBeError(expectedError.message)
     })
 
     it("should return null when no AuditLog matches the given messageId", async () => {
@@ -200,16 +246,50 @@ describe("AuditLogDynamoGateway", () => {
 
   describe("fetchMany", () => {
     it("should return limited amount of AuditLogs", async () => {
-      await Promise.allSettled(
-        [...Array(3).keys()].map(async () => {
-          await gateway.create(mockDynamoAuditLog())
-        })
+      const auditLogs = [...Array(3).keys()].map(() => mockDynamoAuditLog())
+      await Promise.allSettled(auditLogs.map((auditLog) => gateway.create(auditLog)))
+      await gateway.createManyUserEvents(
+        auditLogs.map((auditLog) => mockDynamoAuditLogEvent({ _messageId: auditLog.messageId }))
       )
 
       const result = await gateway.fetchMany({ limit: 1 })
 
       expect(isError(result)).toBe(false)
-      expect(result).toHaveLength(1)
+
+      const items = result as DynamoAuditLog[]
+      expect(items).toHaveLength(1)
+      expect(items[0].events).toHaveLength(1)
+    })
+
+    it("should not return events when events column is excluded", async () => {
+      const auditLogs = [...Array(3).keys()].map(() => mockDynamoAuditLog())
+      await Promise.allSettled(auditLogs.map((auditLog) => gateway.create(auditLog)))
+      await gateway.createManyUserEvents(
+        auditLogs.map((auditLog) => mockDynamoAuditLogEvent({ _messageId: auditLog.messageId }))
+      )
+
+      const result = await gateway.fetchMany({ limit: 1, excludeColumns: ["events"] })
+
+      expect(isError(result)).toBe(false)
+
+      const items = result as DynamoAuditLog[]
+      expect(items).toHaveLength(1)
+      expect(items[0].events).toBeUndefined()
+    })
+
+    it("should return error when it fails to get events", async () => {
+      const auditLogs = [...Array(3).keys()].map(() => mockDynamoAuditLog())
+      await Promise.allSettled(auditLogs.map((auditLog) => gateway.create(auditLog)))
+      await gateway.createManyUserEvents(
+        auditLogs.map((auditLog) => mockDynamoAuditLogEvent({ _messageId: auditLog.messageId }))
+      )
+
+      const expectedError = new Error("fetch many dummy error")
+      jest.spyOn(gateway, "getEvents").mockResolvedValueOnce(expectedError)
+      const result = await gateway.fetchMany({ limit: 1 })
+
+      expect(isError(result)).toBe(true)
+      expect(result).toBeError(expectedError.message)
     })
 
     it("should return AuditLogs ordered by receivedDate", async () => {
@@ -241,16 +321,75 @@ describe("AuditLogDynamoGateway", () => {
 
   describe("fetchRange", () => {
     it("should return limited amount of AuditLogs", async () => {
+      const auditLogs = [...Array(3).keys()].map(() => mockDynamoAuditLog())
       await Promise.allSettled(
-        [...Array(3).keys()].map(async () => {
-          await gateway.create(mockDynamoAuditLog())
+        auditLogs.map(async (auditLog) => {
+          await gateway.create(auditLog)
         })
+      )
+
+      await gateway.createManyUserEvents(
+        auditLogs.map((auditLog) => mockDynamoAuditLogEvent({ _messageId: auditLog.messageId }))
       )
 
       const result = await gateway.fetchRange({ limit: 1, start: new Date("2020-01-01"), end: new Date("2100-01-01") })
 
       expect(isError(result)).toBe(false)
-      expect(result).toHaveLength(1)
+
+      const actualAuditLogs = result as DynamoAuditLog[]
+      expect(actualAuditLogs).toHaveLength(1)
+      expect(actualAuditLogs[0].events).toHaveLength(1)
+    })
+
+    it("should not return events when events column is excluded", async () => {
+      const auditLogs = [...Array(3).keys()].map(() => mockDynamoAuditLog())
+      await Promise.allSettled(
+        auditLogs.map(async (auditLog) => {
+          await gateway.create(auditLog)
+        })
+      )
+
+      await gateway.createManyUserEvents(
+        auditLogs.map((auditLog) => mockDynamoAuditLogEvent({ _messageId: auditLog.messageId }))
+      )
+
+      const result = await gateway.fetchRange({
+        limit: 1,
+        start: new Date("2020-01-01"),
+        end: new Date("2100-01-01"),
+        excludeColumns: ["events"]
+      })
+
+      expect(isError(result)).toBe(false)
+
+      const actualAuditLogs = result as DynamoAuditLog[]
+      expect(actualAuditLogs).toHaveLength(1)
+      expect(actualAuditLogs[0].events).toBeUndefined()
+    })
+
+    it("should return error when it fails to get events", async () => {
+      const auditLogs = [...Array(3).keys()].map(() => mockDynamoAuditLog())
+      await Promise.allSettled(
+        auditLogs.map(async (auditLog) => {
+          await gateway.create(auditLog)
+        })
+      )
+
+      await gateway.createManyUserEvents(
+        auditLogs.map((auditLog) => mockDynamoAuditLogEvent({ _messageId: auditLog.messageId }))
+      )
+
+      const expectedError = new Error("fetch range dummy error")
+      jest.spyOn(gateway, "getEvents").mockResolvedValueOnce(expectedError)
+
+      const result = await gateway.fetchRange({
+        limit: 1,
+        start: new Date("2020-01-01"),
+        end: new Date("2100-01-01")
+      })
+
+      expect(isError(result)).toBe(true)
+      expect(result).toBeError(expectedError.message)
     })
 
     it("should return AuditLogs ordered by receivedDate", async () => {
@@ -331,10 +470,12 @@ describe("AuditLogDynamoGateway", () => {
 
   describe("fetchByExternalCorrelationId", () => {
     it("should return one AuditLog when external correlation id exists in the table", async () => {
-      await Promise.allSettled(
-        [...Array(3).keys()].map(async (i: number) => {
-          await gateway.create(mockDynamoAuditLog({ externalCorrelationId: `External correlation id ${i}` }))
-        })
+      const auditLogs = [...Array(3).keys()].map((i: number) =>
+        mockDynamoAuditLog({ externalCorrelationId: `External correlation id ${i}` })
+      )
+      await Promise.allSettled(auditLogs.map((auditLog) => gateway.create(auditLog)))
+      await gateway.createManyUserEvents(
+        auditLogs.map((auditLog) => mockDynamoAuditLogEvent({ _messageId: auditLog.messageId }))
       )
 
       const correlationId = "External correlation id 2"
@@ -345,6 +486,45 @@ describe("AuditLogDynamoGateway", () => {
 
       const item = <DynamoAuditLog>result
       expect(item.externalCorrelationId).toBe(correlationId)
+      expect(item.events).toHaveLength(1)
+    })
+
+    it("should not return events when events column is excluded", async () => {
+      const auditLogs = [...Array(3).keys()].map((i: number) =>
+        mockDynamoAuditLog({ externalCorrelationId: `External correlation id ${i}` })
+      )
+      await Promise.allSettled(auditLogs.map((auditLog) => gateway.create(auditLog)))
+      await gateway.createManyUserEvents(
+        auditLogs.map((auditLog) => mockDynamoAuditLogEvent({ _messageId: auditLog.messageId }))
+      )
+
+      const correlationId = "External correlation id 2"
+      const result = await gateway.fetchByExternalCorrelationId(correlationId, { excludeColumns: ["events"] })
+
+      expect(isError(result)).toBe(false)
+      expect(result).toBeDefined()
+
+      const item = <DynamoAuditLog>result
+      expect(item.externalCorrelationId).toBe(correlationId)
+      expect(item.events).toBeUndefined()
+    })
+
+    it("should return error it fails to get events", async () => {
+      const expectedError = new Error("fetch by external correlation id dummy error")
+      const auditLogs = [...Array(3).keys()].map((i: number) =>
+        mockDynamoAuditLog({ externalCorrelationId: `External correlation id ${i}` })
+      )
+      await Promise.allSettled(auditLogs.map((auditLog) => gateway.create(auditLog)))
+      await gateway.createManyUserEvents(
+        auditLogs.map((auditLog) => mockDynamoAuditLogEvent({ _messageId: auditLog.messageId }))
+      )
+
+      jest.spyOn(gateway, "getEvents").mockResolvedValueOnce(expectedError)
+      const correlationId = "External correlation id 2"
+      const result = await gateway.fetchByExternalCorrelationId(correlationId)
+
+      expect(isError(result)).toBe(true)
+      expect(result).toBeError(expectedError.message)
     })
 
     it("should throw error when external correlation id does not exist in the table", async () => {
@@ -364,10 +544,10 @@ describe("AuditLogDynamoGateway", () => {
 
   describe("fetchByHash", () => {
     it("should return one AuditLog when hash exists in the table", async () => {
-      await Promise.allSettled(
-        [...Array(3).keys()].map(async (i: number) => {
-          await gateway.create(mockDynamoAuditLog({ messageHash: `hash-${i}` }))
-        })
+      const auditLogs = [...Array(3).keys()].map((i: number) => mockDynamoAuditLog({ messageHash: `hash-${i}` }))
+      await Promise.allSettled(auditLogs.map((auditLog) => gateway.create(auditLog)))
+      await gateway.createManyUserEvents(
+        auditLogs.map((auditLog) => mockDynamoAuditLogEvent({ _messageId: auditLog.messageId }))
       )
 
       const hash = "hash-2"
@@ -378,6 +558,41 @@ describe("AuditLogDynamoGateway", () => {
 
       const item = <DynamoAuditLog>result
       expect(item.messageHash).toBe(hash)
+      expect(item.events).toHaveLength(1)
+    })
+
+    it("should not return events when events column is excluded", async () => {
+      const auditLogs = [...Array(3).keys()].map((i: number) => mockDynamoAuditLog({ messageHash: `hash-${i}` }))
+      await Promise.allSettled(auditLogs.map((auditLog) => gateway.create(auditLog)))
+      await gateway.createManyUserEvents(
+        auditLogs.map((auditLog) => mockDynamoAuditLogEvent({ _messageId: auditLog.messageId }))
+      )
+
+      const hash = "hash-2"
+      const result = await gateway.fetchByHash(hash, { excludeColumns: ["events"] })
+
+      expect(isError(result)).toBe(false)
+      expect(result).toBeDefined()
+
+      const item = <DynamoAuditLog>result
+      expect(item.messageHash).toBe(hash)
+      expect(item.events).toBeUndefined()
+    })
+
+    it("should return error when it fails to get events", async () => {
+      const auditLogs = [...Array(3).keys()].map((i: number) => mockDynamoAuditLog({ messageHash: `hash-${i}` }))
+      await Promise.allSettled(auditLogs.map((auditLog) => gateway.create(auditLog)))
+      await gateway.createManyUserEvents(
+        auditLogs.map((auditLog) => mockDynamoAuditLogEvent({ _messageId: auditLog.messageId }))
+      )
+
+      const expectedError = new Error("fetch by hash dummy error")
+      jest.spyOn(gateway, "getEvents").mockResolvedValueOnce(expectedError)
+      const hash = "hash-2"
+      const result = await gateway.fetchByHash(hash)
+
+      expect(isError(result)).toBe(true)
+      expect(result).toBeError(expectedError.message)
     })
 
     it("should return null when hash does not exist in the table", async () => {
@@ -397,13 +612,14 @@ describe("AuditLogDynamoGateway", () => {
 
   describe("fetchByStatus", () => {
     it("should return one AuditLog when there is a record with Completed status", async () => {
-      await Promise.allSettled(
-        [...Array(3).keys()].map(async () => {
-          await gateway.create(mockDynamoAuditLog())
-        })
-      )
+      const auditLogs = [...Array(3).keys()].map(() => mockDynamoAuditLog())
+      await Promise.allSettled(auditLogs.map((auditLog) => gateway.create(auditLog)))
       const expectedAuditLog = mockDynamoAuditLog({ status: AuditLogStatus.completed })
       await gateway.create(expectedAuditLog)
+
+      await gateway.createManyUserEvents(
+        [...auditLogs, expectedAuditLog].map((auditLog) => mockDynamoAuditLogEvent({ _messageId: auditLog.messageId }))
+      )
 
       const result = await gateway.fetchByStatus(AuditLogStatus.completed)
 
@@ -415,21 +631,60 @@ describe("AuditLogDynamoGateway", () => {
 
       const item = items[0]
       expect(item.status).toBe(expectedAuditLog.status)
+      expect(item.events).toHaveLength(1)
+    })
+
+    it("should not return events when events column is excluded", async () => {
+      const auditLogs = [...Array(3).keys()].map(() => mockDynamoAuditLog())
+      await Promise.allSettled(auditLogs.map((auditLog) => gateway.create(auditLog)))
+      const expectedAuditLog = mockDynamoAuditLog({ status: AuditLogStatus.completed })
+      await gateway.create(expectedAuditLog)
+
+      await gateway.createManyUserEvents(
+        [...auditLogs, expectedAuditLog].map((auditLog) => mockDynamoAuditLogEvent({ _messageId: auditLog.messageId }))
+      )
+
+      const result = await gateway.fetchByStatus(AuditLogStatus.completed, { excludeColumns: ["events"] })
+
+      expect(isError(result)).toBe(false)
+      expect(result).toBeDefined()
+
+      const items = <DynamoAuditLog[]>result
+      expect(items).toHaveLength(1)
+
+      const item = items[0]
+      expect(item.status).toBe(expectedAuditLog.status)
+      expect(item.events).toBeUndefined()
+    })
+
+    it("should return error when it fails to get events", async () => {
+      const auditLogs = [...Array(3).keys()].map(() => mockDynamoAuditLog())
+      await Promise.allSettled(auditLogs.map((auditLog) => gateway.create(auditLog)))
+      const expectedAuditLog = mockDynamoAuditLog({ status: AuditLogStatus.completed })
+      await gateway.create(expectedAuditLog)
+
+      await gateway.createManyUserEvents(
+        [...auditLogs, expectedAuditLog].map((auditLog) => mockDynamoAuditLogEvent({ _messageId: auditLog.messageId }))
+      )
+
+      const expectedError = new Error("fetch by status dummy error")
+      jest.spyOn(gateway, "getEvents").mockResolvedValueOnce(expectedError)
+      const result = await gateway.fetchByStatus(AuditLogStatus.completed)
+
+      expect(isError(result)).toBe(true)
+      expect(result).toBeError(expectedError.message)
     })
   })
 
   describe("fetchUnsanitised", () => {
     it("should return one AuditLog when there is an unsanitised record to check", async () => {
-      await Promise.allSettled(
-        [...Array(3).keys()].map(async () => {
-          const auditLog = mockDynamoAuditLog({ isSanitised: 1 })
-          auditLog.isSanitised = 1
-          await gateway.create(auditLog)
-        })
-      )
-
+      const auditLogs = [...Array(3).keys()].map(() => mockDynamoAuditLog({ isSanitised: 1 }))
+      await Promise.allSettled(auditLogs.map((auditLog) => gateway.create(auditLog)))
       const expectedAuditLog = mockDynamoAuditLog({ status: AuditLogStatus.completed })
       await gateway.create(expectedAuditLog)
+      await gateway.createManyUserEvents(
+        [...auditLogs, expectedAuditLog].map((auditLog) => mockDynamoAuditLogEvent({ _messageId: auditLog.messageId }))
+      )
 
       const result = await gateway.fetchUnsanitised()
 
@@ -442,6 +697,45 @@ describe("AuditLogDynamoGateway", () => {
       const item = items[0]
       expect(item.isSanitised).toBeFalsy()
       expect(item.externalCorrelationId).toBe(expectedAuditLog.externalCorrelationId)
+      expect(item.events).toHaveLength(1)
+    })
+
+    it("should return error when it fails to get events", async () => {
+      const auditLogs = [...Array(3).keys()].map(() => mockDynamoAuditLog({ isSanitised: 1 }))
+      await Promise.allSettled(auditLogs.map((auditLog) => gateway.create(auditLog)))
+      await gateway.createManyUserEvents(
+        auditLogs.map((auditLog) => mockDynamoAuditLogEvent({ _messageId: auditLog.messageId }))
+      )
+
+      const expectedAuditLog = mockDynamoAuditLog({ status: AuditLogStatus.completed })
+      await gateway.create(expectedAuditLog)
+
+      const expectedError = new Error("fetch unsanitised dummy error")
+      jest.spyOn(gateway, "getEvents").mockResolvedValueOnce(expectedError)
+      const result = await gateway.fetchUnsanitised()
+
+      expect(isError(result)).toBe(true)
+      expect(result).toBeError(expectedError.message)
+    })
+
+    it("should not return events when events column is excluded", async () => {
+      const auditLogs = [...Array(3).keys()].map(() => mockDynamoAuditLog({ isSanitised: 1 }))
+      await Promise.allSettled(auditLogs.map((auditLog) => gateway.create(auditLog)))
+      await gateway.createManyUserEvents(
+        auditLogs.map((auditLog) => mockDynamoAuditLogEvent({ _messageId: auditLog.messageId }))
+      )
+
+      const expectedAuditLog = mockDynamoAuditLog({ status: AuditLogStatus.completed })
+      await gateway.create(expectedAuditLog)
+
+      const result = await gateway.fetchUnsanitised({ excludeColumns: ["events"] })
+
+      expect(isError(result)).toBe(false)
+      expect(result).toBeDefined()
+
+      const items = <DynamoAuditLog[]>result
+      expect(items).toHaveLength(1)
+      expect(items[0].events).toBeUndefined()
     })
 
     it("shouldn't return any AuditLogs with unsanitised records not due to be checked", async () => {
