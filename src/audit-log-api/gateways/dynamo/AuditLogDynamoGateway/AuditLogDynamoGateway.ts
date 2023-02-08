@@ -504,37 +504,48 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
   }
 
   async getEvents(messageId: string, options: EventsFilterOptions = {}): PromiseResult<DynamoAuditLogEvent[]> {
-    const indexSearcher = new IndexSearcher<DynamoAuditLogEvent[]>(
-      this,
-      this.config.eventsTableName,
-      this.eventsTableKey
-    ).paginate(100)
+    let lastMessage: DynamoAuditLogEvent | undefined
+    let allEvents: DynamoAuditLogEvent[] = []
 
-    if (options.eventsFilter) {
-      indexSearcher
-        .useIndex(`${options.eventsFilter}Index`)
-        .setIndexKeys("_messageId", messageId, `_${options.eventsFilter}`)
-        .setRangeKey(1, KeyComparison.Equals)
-    } else {
-      indexSearcher.useIndex("messageIdIndex").setIndexKeys("_messageId", messageId, "timestamp")
-    }
+    while (true) {
+      const indexSearcher = new IndexSearcher<DynamoAuditLogEvent[]>(
+        this,
+        this.config.eventsTableName,
+        this.eventsTableKey
+      ).paginate(100, lastMessage)
 
-    const events = (await indexSearcher.execute()) ?? []
-
-    if (isError(events)) {
-      return events
-    }
-
-    for (let i = 0; i < events.length; i++) {
-      const decompressedEvent = await this.decompressEventValues(events[i])
-      if (isError(decompressedEvent)) {
-        return decompressedEvent
+      if (options.eventsFilter) {
+        indexSearcher
+          .useIndex(`${options.eventsFilter}Index`)
+          .setIndexKeys("_messageId", messageId, `_${options.eventsFilter}`)
+          .setRangeKey(1, KeyComparison.Equals)
+      } else {
+        indexSearcher.useIndex("messageIdIndex").setIndexKeys("_messageId", messageId, "timestamp")
       }
 
-      events[i] = decompressedEvent
-    }
+      const events = (await indexSearcher.execute()) ?? []
 
-    return events.sort((a, b) => (a.timestamp > b.timestamp ? 1 : b.timestamp > a.timestamp ? -1 : 0))
+      if (isError(events)) {
+        return events
+      }
+
+      if (events.length === 0) {
+        return allEvents.sort((a, b) => (a.timestamp > b.timestamp ? 1 : b.timestamp > a.timestamp ? -1 : 0))
+      }
+
+      for (let i = 0; i < events.length; i++) {
+        const decompressedEvent = await this.decompressEventValues(events[i])
+        if (isError(decompressedEvent)) {
+          return decompressedEvent
+        }
+
+        events[i] = decompressedEvent
+      }
+
+      lastMessage = events[events.length - 1]
+
+      allEvents = allEvents.concat(events)
+    }
   }
 
   private async prepareStoreEvents(messageId: string, events: DynamoAuditLogEvent[]): PromiseResult<DynamoUpdate[]> {

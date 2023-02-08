@@ -117,15 +117,16 @@ describe("DynamoGateway", () => {
     })
 
     it("should return an error when attempting to insert more records than is supported", async () => {
-      const records = new Array(50).fill(0).map((_, idx) => {
+      const records = new Array(101).fill(0).map((_, idx) => {
         return {
           id: `123${idx}`
         }
       })
+
       const result = await gateway.insertMany(auditLogDynamoConfig.auditLogTableName, records, "id")
       expect(result).toBeTruthy()
       expect(isError(result)).toBe(true)
-      expect((<Error>result).message).toBe("Member must have length less than or equal to 25")
+      expect((<Error>result).message).toBe("Member must have length less than or equal to 100")
     })
   })
 

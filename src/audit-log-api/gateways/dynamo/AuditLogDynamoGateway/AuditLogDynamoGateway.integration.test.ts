@@ -11,11 +11,13 @@ import {
   mockDynamoAuditLogEvent,
   mockDynamoAuditLogUserEvent
 } from "src/shared/testing"
-import type { ApiAuditLogEvent, DynamoAuditLog, KeyValuePair } from "src/shared/types"
+import type { ApiAuditLogEvent, DynamoAuditLog, DynamoAuditLogEvent, KeyValuePair } from "src/shared/types"
 import { AuditLogStatus, isError } from "src/shared/types"
 import { v4 as uuid } from "uuid"
 import TestDynamoGateway from "../../../test/TestDynamoGateway"
 import AuditLogDynamoGateway from "./AuditLogDynamoGateway"
+import { randomInt } from "crypto"
+import { IndexSearcher } from "../DynamoGateway"
 
 const gateway = new AuditLogDynamoGateway(auditLogDynamoConfig)
 const testGateway = new TestDynamoGateway(auditLogDynamoConfig)
@@ -150,6 +152,51 @@ describe("AuditLogDynamoGateway", () => {
       const { _id: actualEvent2Id, ...actualEvent2 } = actualEvents!.find((x) => x.user == "User 2")!
       expect(actualEvent2Id).toBeDefined()
       expect(actualEvent2).toMatchSnapshot()
+    })
+  })
+
+  describe("getEvents", () => {
+    const generateAuditLogEvents = (numberOfEvents: number) =>
+      [...Array(numberOfEvents).keys()].map(() =>
+        mockDynamoAuditLogEvent({
+          _messageId: "dummy-id",
+          timestamp: new Date(Date.now() - randomInt(1000000)).toISOString()
+        })
+      )
+
+    it("should return all events sorted for the specified message ID", async () => {
+      let expectedEvents: DynamoAuditLogEvent[] = []
+
+      await Promise.all(
+        [...Array(5).keys()].map(() => {
+          const events = generateAuditLogEvents(50)
+          expectedEvents = expectedEvents.concat(events)
+          return gateway.createManyUserEvents(events)
+        })
+      )
+
+      expectedEvents = expectedEvents.sort((a, b) =>
+        a.timestamp > b.timestamp ? 1 : b.timestamp > a.timestamp ? -1 : 0
+      )
+
+      const result = await gateway.getEvents("dummy-id")
+
+      expect(isError(result)).toBe(false)
+
+      const items = result as DynamoAuditLogEvent[]
+      expect(items).toHaveLength(250)
+      expect(items.map((item) => item.timestamp)).toStrictEqual(expectedEvents.map((event) => event.timestamp))
+    })
+
+    it("should return error when it fails to get result from DynamoDB", async () => {
+      await gateway.createManyUserEvents(generateAuditLogEvents(1))
+
+      const expectedError = new Error("get events dummy error")
+      jest.spyOn(IndexSearcher.prototype, "execute").mockResolvedValueOnce(expectedError)
+      const result = await gateway.getEvents("dummy-id")
+
+      expect(isError(result)).toBe(true)
+      expect(result).toBeError(expectedError.message)
     })
   })
 
