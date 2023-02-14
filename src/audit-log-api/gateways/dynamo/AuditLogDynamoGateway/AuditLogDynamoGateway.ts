@@ -1,3 +1,4 @@
+import type { DocumentClient } from "aws-sdk/clients/dynamodb"
 import { addDays } from "date-fns"
 import { compress, decompress } from "src/shared"
 import type {
@@ -340,7 +341,10 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
     return this.replaceOne(this.config.auditLogTableName, replacement, this.auditLogTableKey, version)
   }
 
-  async update(existing: DynamoAuditLog, updates: Partial<DynamoAuditLog>): PromiseResult<void> {
+  async prepareUpdate(
+    existing: DynamoAuditLog,
+    updates: Partial<DynamoAuditLog>
+  ): PromiseResult<DocumentClient.TransactWriteItem[]> {
     const updateExpression = []
     let removeExpression = ""
     const expressionAttributeNames: KeyValuePair<string, string> = {}
@@ -416,6 +420,15 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
           ConditionExpression: `attribute_exists(${this.auditLogTableKey}) AND version = :version`
         }
       })
+    }
+
+    return dynamoUpdates
+  }
+
+  async update(existing: DynamoAuditLog, updates: Partial<DynamoAuditLog>): PromiseResult<void> {
+    const dynamoUpdates = await this.prepareUpdate(existing, updates)
+    if (isError(dynamoUpdates)) {
+      return dynamoUpdates
     }
 
     if (dynamoUpdates.length === 0) {
