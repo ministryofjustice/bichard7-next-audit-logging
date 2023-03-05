@@ -23,6 +23,13 @@ const gateway = new AuditLogDynamoGateway(auditLogDynamoConfig)
 const testGateway = new TestDynamoGateway(auditLogDynamoConfig)
 const primaryKey = "messageId"
 
+const createMockDynamoAuditLog = async () => {
+  const apiAuditLog = (await createMockAuditLog()) as DynamoAuditLog
+  return (await gateway.fetchOne(apiAuditLog.messageId, {
+    includeColumns: ["version", "eventsCode"]
+  })) as DynamoAuditLog
+}
+
 describe("AuditLogDynamoGateway", () => {
   beforeEach(async () => {
     MockDate.reset()
@@ -490,7 +497,7 @@ describe("AuditLogDynamoGateway", () => {
     })
 
     it("should allow events to be filtered for the automation report", async () => {
-      const auditLog = (await createMockAuditLog()) as DynamoAuditLog
+      const auditLog = await createMockDynamoAuditLog()
 
       await gateway.update(auditLog, {
         events: [
@@ -905,9 +912,69 @@ describe("AuditLogDynamoGateway", () => {
       ).Item!
 
       expect(updated.events).toBeUndefined()
+      expect(updated.eventsCount).toBe(1)
 
-      const allEvents = await (await testGateway.getAll(auditLogDynamoConfig.eventsTableName)).Items
+      const allEvents = (await testGateway.getAll(auditLogDynamoConfig.eventsTableName)).Items
       expect(allEvents).toHaveLength(1)
+    })
+
+    it("should increase eventsCount by number of events passed in", async () => {
+      let result = await gateway.update(auditLog, { events: [mockDynamoAuditLogEvent(), mockDynamoAuditLogEvent()] })
+      expect(result).toNotBeError()
+
+      let updated = (await gateway.fetchOne(auditLog.messageId, {
+        includeColumns: ["version", "eventsCount"]
+      })) as DynamoAuditLog
+
+      expect(updated.events).toHaveLength(2)
+      expect(updated.eventsCount).toBe(2)
+
+      let allEvents = (await testGateway.getAll(auditLogDynamoConfig.eventsTableName)).Items
+      expect(allEvents).toHaveLength(2)
+
+      result = await gateway.update(updated, { events: [mockDynamoAuditLogEvent(), mockDynamoAuditLogEvent()] })
+      expect(result).toNotBeError()
+
+      updated = (await gateway.fetchOne(auditLog.messageId, {
+        includeColumns: ["version", "eventsCount"]
+      })) as DynamoAuditLog
+
+      expect(updated.events).toHaveLength(4)
+      expect(updated.eventsCount).toBe(4)
+
+      allEvents = (await testGateway.getAll(auditLogDynamoConfig.eventsTableName)).Items
+      expect(allEvents).toHaveLength(4)
+    })
+
+    it("should fail when eventsCount is less than number of events in events table", async () => {
+      const untrackedEvent = { ...mockDynamoAuditLogEvent({ _messageId: auditLog.messageId }), _id: "event-0" }
+      await testGateway.insertOne(auditLogDynamoConfig.eventsTableName, untrackedEvent, "_id")
+
+      auditLog = (await gateway.fetchOne(auditLog.messageId, {
+        includeColumns: ["eventsCount", "version"]
+      })) as DynamoAuditLog
+
+      const result = await gateway.update(auditLog, { events: [mockDynamoAuditLogEvent()] })
+      expect(result).toBeError(
+        "Transaction cancelled, please refer cancellation reasons for specific reasons [None, ConditionalCheckFailed]"
+      )
+    })
+
+    it("should fail when eventsCount is greater than number of events in events table", async () => {
+      await testGateway.updateEntry(auditLogDynamoConfig.auditLogTableName, {
+        updateExpression: "SET eventsCount = :eventsCount",
+        updateExpressionValues: {
+          ":eventsCount": 1
+        },
+        keyName: "messageId",
+        keyValue: auditLog.messageId,
+        currentVersion: 0
+      })
+
+      const result = await gateway.update(auditLog, { events: [mockDynamoAuditLogEvent()] })
+      expect(result).toBeError(
+        "Transaction cancelled, please refer cancellation reasons for specific reasons [None, ConditionalCheckFailed]"
+      )
     })
   })
 
@@ -915,7 +982,7 @@ describe("AuditLogDynamoGateway", () => {
     let auditLog: DynamoAuditLog
 
     beforeEach(async () => {
-      auditLog = (await createMockAuditLog()) as DynamoAuditLog
+      auditLog = await createMockDynamoAuditLog()
     })
 
     it("should compress attribute values", async () => {

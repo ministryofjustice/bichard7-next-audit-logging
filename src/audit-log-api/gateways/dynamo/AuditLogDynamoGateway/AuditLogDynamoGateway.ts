@@ -15,6 +15,7 @@ import type {
   EventsFilterOptions,
   FetchByStatusOptions,
   FetchManyOptions,
+  FetchOneOptions,
   FetchRangeOptions,
   FetchUnsanitisedOptions,
   ProjectionOptions
@@ -252,12 +253,13 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
     return result as DynamoAuditLog[]
   }
 
-  async fetchOne(messageId: string, options: ProjectionOptions = {}): PromiseResult<DynamoAuditLog | undefined> {
+  async fetchOne(messageId: string, options: FetchOneOptions = {}): PromiseResult<DynamoAuditLog | undefined> {
     const result = await this.getOne(
       this.config.auditLogTableName,
       this.auditLogTableKey,
       messageId,
-      this.getProjectionExpression(options?.includeColumns, options?.excludeColumns)
+      this.getProjectionExpression(options?.includeColumns, options?.excludeColumns),
+      options?.stronglyConsistentRead
     )
 
     if (isError(result)) {
@@ -347,8 +349,10 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
   ): PromiseResult<DocumentClient.TransactWriteItem[]> {
     const updateExpression = []
     let removeExpression = ""
+    const addExpression: string[] = []
+    const conditionExpression: string[] = []
     const expressionAttributeNames: KeyValuePair<string, string> = {}
-    const updateExpressionValues: KeyValuePair<string, unknown> = {}
+    const expressionValues: KeyValuePair<string, unknown> = {}
 
     const dynamoUpdates: DynamoUpdate[] = []
 
@@ -359,37 +363,44 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
       }
 
       dynamoUpdates.push(...events)
+
+      if (typeof existing.eventsCount !== "undefined") {
+        addExpression.push("eventsCount :eventsCount_increment")
+        conditionExpression.push("eventsCount = :eventsCount")
+        expressionValues[":eventsCount_increment"] = events.length
+        expressionValues[":eventsCount"] = existing.events?.length ?? 0
+      }
     }
 
     if (updates.forceOwner) {
-      updateExpressionValues[":forceOwner"] = updates.forceOwner
+      expressionValues[":forceOwner"] = updates.forceOwner
       updateExpression.push("forceOwner = :forceOwner")
     }
 
     if (updates.status) {
       expressionAttributeNames["#status"] = "status"
-      updateExpressionValues[":status"] = updates.status
+      expressionValues[":status"] = updates.status
       updateExpression.push("#status = :status")
     }
 
     if (updates.pncStatus) {
-      updateExpressionValues[":pncStatus"] = updates.pncStatus
+      expressionValues[":pncStatus"] = updates.pncStatus
       updateExpression.push("pncStatus = :pncStatus")
     }
 
     if (updates.triggerStatus) {
-      updateExpressionValues[":triggerStatus"] = updates.triggerStatus
+      expressionValues[":triggerStatus"] = updates.triggerStatus
       updateExpression.push("triggerStatus = :triggerStatus")
     }
 
     if (updates.errorRecordArchivalDate) {
       updateExpression.push("errorRecordArchivalDate = :errorRecordArchivalDate")
-      updateExpressionValues[":errorRecordArchivalDate"] = updates.errorRecordArchivalDate
+      expressionValues[":errorRecordArchivalDate"] = updates.errorRecordArchivalDate
     }
 
     if (updates.isSanitised) {
       updateExpression.push("isSanitised = :isSanitised")
-      updateExpressionValues[":isSanitised"] = updates.isSanitised
+      expressionValues[":isSanitised"] = updates.isSanitised
     }
 
     if (updates.nextSanitiseCheck === undefined) {
@@ -398,26 +409,31 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
 
     if (updates.retryCount) {
       updateExpression.push("retryCount = :retryCount")
-      updateExpressionValues[":retryCount"] = updates.retryCount
+      expressionValues[":retryCount"] = updates.retryCount
     }
 
-    if (updateExpression.length > 0) {
+    if (updateExpression.length > 0 || addExpression.length > 0) {
+      const setExpression = updateExpression.length > 0 ? `SET ${updateExpression.join(",")}` : ""
+      addExpression.push("version :version_increment")
+      conditionExpression.push(`attribute_exists(${this.auditLogTableKey})`)
+      conditionExpression.push("version = :version")
+
       dynamoUpdates.push({
         Update: {
           TableName: this.config.auditLogTableName,
           Key: {
             messageId: existing.messageId
           },
-          UpdateExpression: `SET ${updateExpression.join(",")} ${removeExpression} ADD version :version_increment`,
+          UpdateExpression: `${setExpression} ${removeExpression} ADD ${addExpression.join(",")}`,
           ...(Object.keys(expressionAttributeNames).length > 0
             ? { ExpressionAttributeNames: expressionAttributeNames }
             : {}),
           ExpressionAttributeValues: {
-            ...updateExpressionValues,
+            ...expressionValues,
             ":version": existing.version,
             ":version_increment": 1
           },
-          ConditionExpression: `attribute_exists(${this.auditLogTableKey}) AND version = :version`
+          ConditionExpression: conditionExpression.join(" AND ")
         }
       })
     }

@@ -11,6 +11,10 @@ export type ProjectionOptions = {
   excludeColumns?: string[]
 }
 
+export type ReadConsistency = {
+  stronglyConsistentRead?: boolean
+}
+
 export type RangeQueryOptions = {
   start: Date
   end: Date
@@ -20,6 +24,7 @@ export type EventsFilterOptions = {
   eventsFilter?: "automationReport" | "topExceptionsReport"
 }
 
+export type FetchOneOptions = ProjectionOptions & ReadConsistency
 export type FetchManyOptions = PaginationOptions & ProjectionOptions
 export type FetchUnsanitisedOptions = PaginationOptions & ProjectionOptions
 export type FetchByStatusOptions = PaginationOptions & ProjectionOptions

@@ -95,6 +95,7 @@ describe("Sanitise Old Messages e2e", () => {
     await db.query(`DELETE FROM br7own.archive_log`)
 
     await clearDynamoTable("auditLogTable", "messageId")
+    await clearDynamoTable("auditLogEventsTable", "_id")
   })
 
   afterAll(async () => {

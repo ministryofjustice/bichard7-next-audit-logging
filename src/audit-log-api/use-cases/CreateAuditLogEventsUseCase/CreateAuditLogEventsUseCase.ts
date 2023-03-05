@@ -76,7 +76,10 @@ export default class CreateAuditLogEventsUseCase {
     attempts = retryAttempts
   ): Promise<CreateAuditLogEventsResult> {
     const newEvents = Array.isArray(events) ? events : [events]
-    const message = await this.auditLogGateway.fetchOne(messageId, { includeColumns: ["version"] })
+    const message = await this.auditLogGateway.fetchOne(messageId, {
+      includeColumns: ["version", "eventsCount"],
+      stronglyConsistentRead: true
+    })
 
     if (isError(message)) {
       return {

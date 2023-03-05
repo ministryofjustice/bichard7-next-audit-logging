@@ -219,7 +219,8 @@ export default class DynamoGateway {
     tableName: string,
     keyName: string,
     keyValue: unknown,
-    projection?: Projection
+    projection?: Projection,
+    stronglyConsistentRead = false
   ): PromiseResult<DocumentClient.GetItemOutput | Error | null> {
     const { expression, attributeNames } = projection ?? {}
 
@@ -230,7 +231,8 @@ export default class DynamoGateway {
           [keyName]: keyValue
         },
         ProjectionExpression: expression,
-        ExpressionAttributeNames: attributeNames
+        ExpressionAttributeNames: attributeNames,
+        ConsistentRead: stronglyConsistentRead
       })
       .promise()
       .catch((error) => <Error>error)
@@ -247,7 +249,8 @@ export default class DynamoGateway {
         Key: {
           [keyName]: keyValue
         },
-        ProjectionExpression: "version"
+        ProjectionExpression: "version",
+        ConsistentRead: true
       })
       .promise()
       .catch((error) => <Error>error)
@@ -304,7 +307,7 @@ export default class DynamoGateway {
       .on("extractError", (response) => {
         // Error when we perform more actions than dynamodb supports
         // see https://docs.aws.amazon.com/amazondynamodb/latest/APIReference/API_TransactWriteItems.html
-        if (response.error && response.error.message.startsWith("Member must have length less than or equal to")) {
+        if (response.error && response.error.message?.startsWith("Member must have length less than or equal to")) {
           failureReasons.push({
             Code: "TooManyItems",
             Message: response.error.message

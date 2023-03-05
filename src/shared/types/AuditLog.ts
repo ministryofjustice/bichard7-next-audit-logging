@@ -28,6 +28,7 @@ export type DynamoAuditLog = Omit<OutputApiAuditLog, "events"> & {
   errorRecordArchivalDate?: string
   events: DynamoAuditLogEvent[]
   expiryTime?: string
+  eventsCount: number
   retryCount?: number
   version: number
 }
