@@ -10,6 +10,7 @@ interface CreateAuditLogResult {
 
 const transformInput = (input: InputApiAuditLog): DynamoAuditLog => ({
   events: [],
+  eventsCount: 0,
   pncStatus: PncStatus.Processing,
   status: AuditLogStatus.processing,
   triggerStatus: TriggerStatus.NoTriggers,

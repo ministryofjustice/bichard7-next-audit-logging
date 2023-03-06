@@ -1,3 +1,4 @@
+import "src/shared/testing"
 import type { DocumentClient, GetItemOutput } from "aws-sdk/clients/dynamodb"
 import type { TransactionFailedError } from "src/shared/types"
 import { isError } from "src/shared/types"
@@ -501,6 +502,78 @@ describe("DynamoGateway", () => {
 
       const actualError = deleteResult as Error
       expect(actualError.message).toBe("One of the required keys was not given a value")
+    })
+  })
+
+  describe("executeTransaction", () => {
+    it("should commit all actions in the transaction", async () => {
+      const dynamoQueries = [
+        {
+          Put: {
+            TableName: auditLogDynamoConfig.auditLogTableName,
+            Item: { _: "_", id: "test-1" },
+            ConditionExpression: "attribute_not_exists(#keyName)",
+            ExpressionAttributeNames: {
+              "#keyName": "id"
+            }
+          }
+        },
+        {
+          Put: {
+            TableName: auditLogDynamoConfig.auditLogTableName,
+            Item: { _: "_", id: "test-2" },
+            ConditionExpression: "attribute_not_exists(#keyName)",
+            ExpressionAttributeNames: {
+              "#keyName": "id"
+            }
+          }
+        }
+      ]
+
+      const result = await gateway.executeTransaction(dynamoQueries)
+
+      expect(result).toNotBeError()
+
+      const records = await testGateway.getAll(auditLogDynamoConfig.auditLogTableName)
+      expect(records.Items).toHaveLength(2)
+      expect(records.Items).toStrictEqual([
+        { _: "_", id: "test-1" },
+        { _: "_", id: "test-2" }
+      ])
+    })
+
+    it("should roll back when an action fails in the transaction", async () => {
+      const dynamoQueries = [
+        {
+          Put: {
+            TableName: auditLogDynamoConfig.auditLogTableName,
+            Item: { _: "_", id: "test-1" },
+            ConditionExpression: "attribute_not_exists(#keyName)",
+            ExpressionAttributeNames: {
+              "#keyName": "id"
+            }
+          }
+        },
+        {
+          Put: {
+            TableName: auditLogDynamoConfig.auditLogTableName,
+            Item: { _: "_", id: "test-2" },
+            ConditionExpression: "attribute_exists(#keyName)",
+            ExpressionAttributeNames: {
+              "#keyName": "id"
+            }
+          }
+        }
+      ]
+
+      const result = await gateway.executeTransaction(dynamoQueries)
+
+      expect(result).toBeError(
+        "Transaction cancelled, please refer cancellation reasons for specific reasons [None, ConditionalCheckFailed]"
+      )
+
+      const records = await testGateway.getAll(auditLogDynamoConfig.auditLogTableName)
+      expect(records.Items).toHaveLength(0)
     })
   })
 })

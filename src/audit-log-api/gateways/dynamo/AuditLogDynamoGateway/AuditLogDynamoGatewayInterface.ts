@@ -1,6 +1,7 @@
 import type {
   FetchByStatusOptions,
   FetchManyOptions,
+  FetchOneOptions,
   FetchRangeOptions,
   FetchUnsanitisedOptions,
   ProjectionOptions
@@ -18,7 +19,7 @@ export default interface AuditLogDynamoGateway {
   fetchByHash(hash: string): PromiseResult<DynamoAuditLog | null>
   fetchByStatus(status: string, options?: FetchByStatusOptions): PromiseResult<DynamoAuditLog[]>
   fetchMany(options?: FetchManyOptions): PromiseResult<DynamoAuditLog[]>
-  fetchOne(messageId: string, options?: ProjectionOptions): PromiseResult<DynamoAuditLog | undefined>
+  fetchOne(messageId: string, options?: FetchOneOptions): PromiseResult<DynamoAuditLog | undefined>
   fetchRange(options: FetchRangeOptions): PromiseResult<DynamoAuditLog[]>
   fetchUnsanitised(options?: FetchUnsanitisedOptions): PromiseResult<DynamoAuditLog[]>
   fetchVersion(messageId: string): PromiseResult<number | null>
