@@ -51,7 +51,7 @@
     "build": "node build.js",
     "check": "tsc --noEmit",
     "hook:before:offline:start:init": "make run-mq run-pg",
-    "install-dynamo": "if [ ! -d ./.dynamodb ]; then sls dynamodb install; fi",
+    "install-dynamo": "./scripts/install-dynamodb-local.sh",
     "lint:fix": "eslint . --fix",
     "lint": "eslint .",
     "start-api": "npm run install-dynamo && sls offline start --httpPort 3010",
