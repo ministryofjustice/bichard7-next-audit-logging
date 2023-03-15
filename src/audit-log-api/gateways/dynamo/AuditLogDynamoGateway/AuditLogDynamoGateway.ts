@@ -28,6 +28,8 @@ import type DynamoUpdate from "../DynamoGateway/DynamoUpdate"
 import type AuditLogDynamoGatewayInterface from "./AuditLogDynamoGatewayInterface"
 
 const maxAttributeValueLength = 1000
+const getEventsPageLimit = 100
+const eventsFetcherParallelism = 20
 
 type InternalDynamoAuditLog = Omit<DynamoAuditLog, "events">
 type InternalDynamoAuditLogEvent = DynamoAuditLogEvent & { _id: string }
@@ -39,8 +41,6 @@ const convertDynamoAuditLogToInternal = (
   delete input.events
   return input
 }
-
-const getEventsPageLimit = 100
 
 export default class AuditLogDynamoGateway extends DynamoGateway implements AuditLogDynamoGatewayInterface {
   readonly auditLogTableKey: string = "messageId"
@@ -170,7 +170,7 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
     auditLogs: DynamoAuditLog[],
     options: EventsFilterOptions = {}
   ): PromiseResult<void> {
-    const numberOfFetchers = Math.min(auditLogs.length, 20)
+    const numberOfFetchers = Math.min(auditLogs.length, eventsFetcherParallelism)
     const indexes = [...Array(auditLogs.length).keys()]
 
     const eventsFetcher = async () => {
