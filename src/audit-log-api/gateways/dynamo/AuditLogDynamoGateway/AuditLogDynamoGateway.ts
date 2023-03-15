@@ -40,6 +40,8 @@ const convertDynamoAuditLogToInternal = (
   return input
 }
 
+const getEventsPageLimit = 100
+
 export default class AuditLogDynamoGateway extends DynamoGateway implements AuditLogDynamoGatewayInterface {
   readonly auditLogTableKey: string = "messageId"
 
@@ -168,13 +170,30 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
     auditLogs: DynamoAuditLog[],
     options: EventsFilterOptions = {}
   ): PromiseResult<void> {
-    for (const auditLog of auditLogs) {
-      const result = await this.getEvents(auditLog.messageId, options)
-      if (isError(result)) {
-        return result
-      }
+    const numberOfFetchers = Math.min(auditLogs.length, 20)
+    const indexes = [...Array(auditLogs.length).keys()]
 
-      auditLog.events = result
+    const eventsFetcher = async () => {
+      while (indexes.length > 0) {
+        const index = indexes.shift()
+        if (typeof index !== "number") {
+          return
+        }
+
+        const result = await this.getEvents(auditLogs[index].messageId, options)
+        if (isError(result)) {
+          throw result
+        }
+
+        auditLogs[index].events = result
+      }
+    }
+
+    const allResult = await Promise.all([...Array(numberOfFetchers).keys()].map(() => eventsFetcher())).catch(
+      (error) => error as Error
+    )
+    if (isError(allResult)) {
+      return allResult
     }
   }
 
@@ -541,7 +560,7 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
         this,
         this.config.eventsTableName,
         this.eventsTableKey
-      ).paginate(100, lastMessage)
+      ).paginate(getEventsPageLimit, lastMessage)
 
       if (options.eventsFilter) {
         indexSearcher
@@ -558,10 +577,6 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
         return events
       }
 
-      if (events.length === 0) {
-        return allEvents.sort((a, b) => (a.timestamp > b.timestamp ? 1 : b.timestamp > a.timestamp ? -1 : 0))
-      }
-
       for (let i = 0; i < events.length; i++) {
         const decompressedEvent = await this.decompressEventValues(events[i])
         if (isError(decompressedEvent)) {
@@ -571,9 +586,13 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
         events[i] = decompressedEvent
       }
 
-      lastMessage = events[events.length - 1]
-
       allEvents = allEvents.concat(events)
+
+      if (events.length < getEventsPageLimit) {
+        return allEvents.sort((a, b) => (a.timestamp > b.timestamp ? 1 : b.timestamp > a.timestamp ? -1 : 0))
+      }
+
+      lastMessage = events[events.length - 1]
     }
   }
 
@@ -621,3 +640,5 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
     return dynamoUpdates
   }
 }
+
+export { getEventsPageLimit }
