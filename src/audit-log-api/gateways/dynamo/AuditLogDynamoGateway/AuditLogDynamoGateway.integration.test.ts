@@ -15,7 +15,7 @@ import type { ApiAuditLogEvent, DynamoAuditLog, DynamoAuditLogEvent, KeyValuePai
 import { AuditLogStatus, isError } from "src/shared/types"
 import { v4 as uuid } from "uuid"
 import TestDynamoGateway from "../../../test/TestDynamoGateway"
-import AuditLogDynamoGateway from "./AuditLogDynamoGateway"
+import AuditLogDynamoGateway, { getEventsPageLimit } from "./AuditLogDynamoGateway"
 import { randomInt } from "crypto"
 import { IndexSearcher } from "../DynamoGateway"
 
@@ -192,6 +192,26 @@ describe("AuditLogDynamoGateway", () => {
 
       const items = result as DynamoAuditLogEvent[]
       expect(items).toHaveLength(250)
+      expect(items.map((item) => item.timestamp)).toStrictEqual(expectedEvents.map((event) => event.timestamp))
+    })
+
+    it(`should return all events when a message has ${getEventsPageLimit} events as the page limit in the query`, async () => {
+      let expectedEvents: DynamoAuditLogEvent[] = []
+
+      const events = generateAuditLogEvents(getEventsPageLimit)
+      expectedEvents = expectedEvents.concat(events)
+      await gateway.createManyUserEvents(events)
+
+      expectedEvents = expectedEvents.sort((a, b) =>
+        a.timestamp > b.timestamp ? 1 : b.timestamp > a.timestamp ? -1 : 0
+      )
+
+      const result = await gateway.getEvents("dummy-id")
+
+      expect(isError(result)).toBe(false)
+
+      const items = result as DynamoAuditLogEvent[]
+      expect(items).toHaveLength(getEventsPageLimit)
       expect(items.map((item) => item.timestamp)).toStrictEqual(expectedEvents.map((event) => event.timestamp))
     })
 
@@ -1023,7 +1043,7 @@ describe("AuditLogDynamoGateway", () => {
         attributes: {
           "Attribute 1": { _compressedValue: (await compress("Attribute 1 data".repeat(500))) as string }
         }
-      } as any)
+      })
 
       await testGateway.insertOne(auditLogDynamoConfig.eventsTableName, externalEvent, gateway.eventsTableKey)
 

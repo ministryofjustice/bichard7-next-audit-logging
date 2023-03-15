@@ -59,7 +59,9 @@ export const mockApiAuditLogEvent = (overrides: Partial<ApiAuditLogEvent> = {}):
   ...overrides
 })
 
-export const mockDynamoAuditLogEvent = (overrides: Partial<DynamoAuditLogEvent> = {}): DynamoAuditLogEvent => ({
+export const mockDynamoAuditLogEvent = (
+  overrides: Partial<DynamoAuditLogEvent & { _id?: string }> = {}
+): DynamoAuditLogEvent => ({
   ...mockApiAuditLogEvent(overrides),
   _automationReport: 0,
   _topExceptionsReport: 0,
