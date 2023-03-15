@@ -1043,7 +1043,7 @@ describe("AuditLogDynamoGateway", () => {
         attributes: {
           "Attribute 1": { _compressedValue: (await compress("Attribute 1 data".repeat(500))) as string }
         }
-      } as any)
+      })
 
       await testGateway.insertOne(auditLogDynamoConfig.eventsTableName, externalEvent, gateway.eventsTableKey)
 

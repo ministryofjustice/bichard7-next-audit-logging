@@ -357,8 +357,8 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
   }
 
   replaceAuditLog(auditLog: DynamoAuditLog, version: number): PromiseResult<void> {
-    const replacement = { ...auditLog, version: version + 1 }
-    delete (replacement as any).events
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { events, ...replacement } = { ...auditLog, version: version + 1 }
     return this.replaceOne(this.config.auditLogTableName, replacement, this.auditLogTableKey, version)
   }
 
