@@ -1,9 +1,21 @@
 import { S3Gateway } from "src/shared"
 import { StepFunctionSimulator } from "src/shared/testing"
+import type { KeyValuePair } from "src/shared/types"
 import { isError } from "src/shared/types"
 import recordSentToBichardEvent from "../handlers/recordSentToBichardEvent"
 import sendToBichard from "../handlers/sendToBichard"
 import storeMessage from "../handlers/storeMessage"
+
+const validateStoreMessage = (input: KeyValuePair<string, unknown>) => {
+  if ("validationResult" in input) {
+    const { isValid, isDuplicate } = input.validationResult as { isValid: boolean; isDuplicate: boolean }
+    if (isValid === false && isDuplicate === true) {
+      return { __next_step: null }
+    }
+  }
+
+  return input
+}
 
 export default class IncomingMessageSimulator {
   private readonly s3Gateway: S3Gateway
@@ -19,7 +31,12 @@ export default class IncomingMessageSimulator {
       secretAccessKey: "S3RVER"
     })
 
-    this.stateMachine = new StepFunctionSimulator([storeMessage, sendToBichard, recordSentToBichardEvent])
+    this.stateMachine = new StepFunctionSimulator([
+      storeMessage,
+      validateStoreMessage,
+      sendToBichard,
+      recordSentToBichardEvent
+    ])
   }
 
   async start(fileName: string, message: string, executionId: string): Promise<void> {

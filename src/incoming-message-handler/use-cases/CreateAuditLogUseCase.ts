@@ -12,6 +12,7 @@ export default class {
       if (/Message hash already exists/i.test(result.message)) {
         return {
           isValid: false,
+          isDuplicate: true,
           message: `There is a message with the same hash in the database (${auditLog.messageHash})`
         }
       }

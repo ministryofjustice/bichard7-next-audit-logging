@@ -3,6 +3,7 @@ import axios from "axios"
 import * as https from "https"
 import { HttpStatusCode } from "src/shared"
 import type { ApiAuditLogEvent, PromiseResult, SendToBichardOutput } from "src/shared/types"
+import { EventCode } from "src/shared/types"
 
 const httpsAgent = new https.Agent({
   rejectUnauthorized: false
@@ -14,7 +15,7 @@ export default class CreateSentToBichardEventUseCase {
   create(message: SendToBichardOutput): PromiseResult<void> {
     const event: ApiAuditLogEvent = {
       category: "information",
-      eventCode: "hearing-outcome.received-incoming",
+      eventCode: EventCode.ReceivedIncomingHearingOutcome,
       eventSource: "Incoming Message Handler",
       eventType: "Message Sent to Bichard",
       timestamp: message.sentAt
