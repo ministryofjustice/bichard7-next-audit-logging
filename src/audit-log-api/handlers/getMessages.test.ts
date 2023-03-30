@@ -141,3 +141,37 @@ test("should return a single message when the externalCorrelationId is given and
   expect(actualMessage.caseId).toBe(log1.caseId)
   expect(actualMessage.receivedDate).toBe(log1.receivedDate)
 })
+
+test("should return an empty array when messageHash is specified and no messages are found", async () => {
+  mockCreateMessageFetcher.mockReturnValue(createDummyMessageFetcher(null))
+
+  const event = createEvent(undefined, { messageHash: "SomeMessageHash" })
+  const messages = await getMessages(event)
+
+  const actualResponse = <APIGatewayProxyResult>messages
+  expect(actualResponse.statusCode).toBe(HttpStatusCode.notFound)
+
+  const actualMessages: OutputApiAuditLog[] = JSON.parse(actualResponse.body)
+  expect(actualMessages).toBeDefined()
+  expect(actualMessages).toHaveLength(0)
+})
+
+test("should return a single message when the messageHash is given and a match is found", async () => {
+  mockCreateMessageFetcher.mockReturnValue(createDummyMessageFetcher(log1))
+
+  const event = createEvent(undefined, { messageHash: "SomeMessageHash" })
+  const messages = await getMessages(event)
+
+  const actualResponse = <APIGatewayProxyResult>messages
+  expect(actualResponse.statusCode).toBe(HttpStatusCode.ok)
+
+  const actualMessages: OutputApiAuditLog[] = JSON.parse(actualResponse.body)
+  expect(actualMessages).toBeDefined()
+  expect(actualMessages).toHaveLength(1)
+
+  const actualMessage = actualMessages[0]
+  expect(actualMessage.messageId).toBe(log1.messageId)
+  expect(actualMessage.externalCorrelationId).toBe(log1.externalCorrelationId)
+  expect(actualMessage.caseId).toBe(log1.caseId)
+  expect(actualMessage.receivedDate).toBe(log1.receivedDate)
+})

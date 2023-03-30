@@ -3,6 +3,7 @@ import type { AuditLogDynamoGatewayInterface } from "../gateways/dynamo"
 import FetchAll from "./FetchAll"
 import FetchAutomationReport from "./FetchAutomationReport"
 import FetchByExternalCorrelationId from "./FetchByExternalCorrelationId"
+import FetchByHash from "./FetchByHash"
 import FetchById from "./FetchById"
 import FetchByStatus from "./FetchByStatus"
 import FetchTopExceptionsReport from "./FetchTopExceptionsReport"
@@ -14,6 +15,7 @@ const createMessageFetcher = (
   auditLogGateway: AuditLogDynamoGatewayInterface
 ): MessageFetcher | Error => {
   const messageId = event.pathParameters?.messageId
+  const messageHash = event.queryStringParameters?.messageHash
   const externalCorrelationId = event.queryStringParameters?.externalCorrelationId
   const status = event.queryStringParameters?.status
   const lastMessageId = event.queryStringParameters?.lastMessageId
@@ -53,6 +55,10 @@ const createMessageFetcher = (
 
   if (messageId) {
     return new FetchById(auditLogGateway, messageId, projection)
+  }
+
+  if (messageHash) {
+    return new FetchByHash(auditLogGateway, messageHash, projection)
   }
 
   if (externalCorrelationId) {

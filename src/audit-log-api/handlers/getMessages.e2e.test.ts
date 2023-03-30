@@ -70,6 +70,26 @@ describe("Getting Audit Logs", () => {
     expect(messageIds).toContain(auditLog2.messageId)
   })
 
+  it("should filter by hash", async () => {
+    const auditLog = await createMockAuditLog()
+    if (isError(auditLog)) {
+      throw new Error("Unexpected error")
+    }
+
+    const auditLog2 = await createMockError()
+    if (isError(auditLog2)) {
+      throw new Error("Unexpected error")
+    }
+
+    const result = await axios.get<OutputApiAuditLog[]>(
+      `http://localhost:3010/messages?messageHash=${auditLog2.messageHash}`
+    )
+    expect(result.status).toEqual(HttpStatusCode.ok)
+
+    expect(result.data).toHaveLength(1)
+    expect(result.data[0].messageId).toBe(auditLog2.messageId)
+  })
+
   it("should get message by external correlation ID", async () => {
     const auditLog = await createMockAuditLog()
     if (isError(auditLog)) {
@@ -244,13 +264,14 @@ describe("Getting Audit Logs", () => {
     describe.each(
       // prettier-ignore
       [
-        ["fetchAll",                     createMockAuditLog, (_: OutputApiAuditLog) => "http://localhost:3010/messages"],
-        ["fetchUnsanitised",             createMockAuditLog, (_: OutputApiAuditLog) => "http://localhost:3010/messages?unsanitised=true"],
-        ["fetchById",                    createMockAuditLog, (l: OutputApiAuditLog) => `http://localhost:3010/messages/${l.messageId}`],
-        ["fetchByExternalCorrelationId", createMockAuditLog, (l: OutputApiAuditLog) => `http://localhost:3010/messages?externalCorrelationId=${l.externalCorrelationId}`],
-        ["fetchByStatus",                createMockError,    (_: OutputApiAuditLog) => "http://localhost:3010/messages?status=Error"]
+        ["fetchAll",                     createMockAuditLog, (_: OutputApiAuditLog) => "http://localhost:3010/messages", undefined],
+        ["fetchUnsanitised",             createMockAuditLog, (_: OutputApiAuditLog) => "http://localhost:3010/messages?unsanitised=true", undefined],
+        ["fetchById",                    createMockAuditLog, (l: OutputApiAuditLog) => `http://localhost:3010/messages/${l.messageId}`, undefined],
+        ["fetchByHash",                  createMockAuditLog, (l: OutputApiAuditLog) => `http://localhost:3010/messages?messageHash=${l.messageHash}`, "messageHash"],
+        ["fetchByExternalCorrelationId", createMockAuditLog, (l: OutputApiAuditLog) => `http://localhost:3010/messages?externalCorrelationId=${l.externalCorrelationId}`, undefined],
+        ["fetchByStatus",                createMockError,    (_: OutputApiAuditLog) => "http://localhost:3010/messages?status=Error", undefined]
       ]
-    )("from %s", (_, newAuditLog, baseUrl) => {
+    )("from %s", (_, newAuditLog, baseUrl, indexKey) => {
       it("should not show excluded columns", async () => {
         const auditLog = await newAuditLog()
         if (isError(auditLog)) {
@@ -281,16 +302,20 @@ describe("Getting Audit Logs", () => {
 
         const defaultResult = await axios.get<OutputApiAuditLog[]>(baseUrl(auditLog))
         expect(defaultResult.status).toEqual(HttpStatusCode.ok)
-        expect(defaultResult.data[0]).not.toHaveProperty("messageHash")
-        const defaultKeys = Object.keys(defaultResult.data[0])
+        expect("messageHash" in defaultResult.data[0]).toBe(indexKey === "messageHash")
+        const expectedKeys = new Set(Object.keys(defaultResult.data[0]))
+        if (indexKey) {
+          expectedKeys.add(indexKey)
+        }
 
         const includedResult = await axios.get<OutputApiAuditLog[]>(
           addQueryParams(baseUrl(auditLog), { includeColumns: "messageHash" })
         )
 
+        expectedKeys.add("messageHash")
         expect(includedResult.status).toEqual(HttpStatusCode.ok)
         expect(includedResult.data[0]).toHaveProperty("messageHash")
-        expect(Object.keys(includedResult.data[0])).toHaveLength(defaultKeys.length + 1)
+        expect(Object.keys(includedResult.data[0])).toHaveLength([...expectedKeys].length)
       })
 
       it("should work with excluded and included columns", async () => {
@@ -301,7 +326,7 @@ describe("Getting Audit Logs", () => {
 
         const defaultResult = await axios.get<OutputApiAuditLog[]>(baseUrl(auditLog))
         expect(defaultResult.status).toEqual(HttpStatusCode.ok)
-        expect(defaultResult.data[0]).not.toHaveProperty("messageHash")
+        expect("messageHash" in defaultResult.data[0]).toBe(indexKey === "messageHash")
         expect(defaultResult.data[0]).toHaveProperty("events")
         expect(defaultResult.data[0]).toHaveProperty("receivedDate")
 
