@@ -20,6 +20,10 @@ export default class StepFunctionSimulator {
         console.log(step, inputValue)
       }
       inputValue = await step(flatten(inputValue))
+      if (typeof inputValue === "object" && "__next_step" in inputValue && inputValue.__next_step === null) {
+        break
+      }
+
       this.outputs.push(inputValue)
     }
     return inputValue
