@@ -3,6 +3,7 @@ import { FakeAuditLogDynamoGateway } from "../test"
 import createMessageFetcher from "./createMessageFetcher"
 import FetchAll from "./FetchAll"
 import FetchByExternalCorrelationId from "./FetchByExternalCorrelationId"
+import FetchByHash from "./FetchByHash"
 import FetchById from "./FetchById"
 import FetchByStatus from "./FetchByStatus"
 
@@ -27,6 +28,18 @@ describe("createMessageFetcher()", () => {
     const messageFetcher = createMessageFetcher(event, gateway)
 
     expect(messageFetcher instanceof FetchById).toBe(true)
+  })
+
+  it("should return FetchByHash when messageHash exists in the query", () => {
+    const event = <APIGatewayProxyEvent>(<unknown>{
+      queryStringParameters: {
+        messageHash: "1"
+      }
+    })
+
+    const messageFetcher = createMessageFetcher(event, gateway)
+
+    expect(messageFetcher instanceof FetchByHash).toBe(true)
   })
 
   it("should return FetchByExternalCorrelationId when externalCorrelationId exists in the query string", () => {
