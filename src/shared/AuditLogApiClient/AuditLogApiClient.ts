@@ -71,6 +71,38 @@ export default class AuditLogApiClient implements ApiClient {
       })
   }
 
+  getMessageByHash(messageHash: string, options: GetMessageOptions = {}): PromiseResult<OutputApiAuditLog> {
+    const queryParams: string[] = [`messageHash=${messageHash}`]
+
+    if (options?.includeColumns) {
+      queryParams.push(`includeColumns=${options.includeColumns.join(",")}`)
+    }
+    if (options?.excludeColumns) {
+      queryParams.push(`includeColumns=${options.excludeColumns.join(",")}`)
+    }
+
+    const queryString = `?${queryParams.join("&")}`
+
+    return axios
+      .get(`${this.apiUrl}/messages${queryString}`, {
+        headers: { "X-API-Key": this.apiKey },
+        timeout: this.timeout
+      })
+      .then((response) => response.data)
+      .then((result) => result[0])
+      .catch((error: AxiosError) => {
+        if (error.response?.status === HttpStatusCode.notFound) {
+          return undefined
+        }
+
+        logger.error(`Error getting message by hash: ${this.stringify(error.response?.data)}`)
+        return new ApplicationError(
+          `Error getting message by hash: ${this.stringify(error.response?.data) ?? error.message}`,
+          error
+        )
+      })
+  }
+
   createAuditLog(auditLog: InputApiAuditLog): PromiseResult<void> {
     return axios
       .post(`${this.apiUrl}/messages`, this.stringify(auditLog), {

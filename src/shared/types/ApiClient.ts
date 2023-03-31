@@ -16,6 +16,7 @@ export type GetMessageOptions = {
 export default interface ApiClient {
   getMessages(options?: GetMessagesOptions): PromiseResult<OutputApiAuditLog[]>
   getMessage(messageId: string, options?: GetMessageOptions): PromiseResult<OutputApiAuditLog>
+  getMessageByHash(messageHash: string, options?: GetMessageOptions): PromiseResult<OutputApiAuditLog>
   createAuditLog(auditLog: InputApiAuditLog): PromiseResult<void>
   createEvent(messageId: string, event: ApiAuditLogEvent): PromiseResult<void>
   createUserEvent(userName: string, event: ApiAuditLogEvent): PromiseResult<void>

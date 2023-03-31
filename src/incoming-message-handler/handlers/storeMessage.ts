@@ -3,6 +3,7 @@ import type { InputApiAuditLog, S3PutObjectEvent } from "src/shared/types"
 import { isError } from "src/shared/types"
 import { getApiKey, getApiUrl } from "../configs"
 import CreateAuditLogUseCase from "../use-cases/CreateAuditLogUseCase"
+import CreateDuplicateMessageEvent from "../use-cases/CreateDuplicateMessageEvent"
 import formatMessage from "../use-cases/formatMessage"
 import logBadUnicode from "../use-cases/logBadUnicode"
 import readMessage from "../use-cases/readMessage"
@@ -16,6 +17,7 @@ interface StoreMessageResult {
 export interface ValidationResult {
   isValid: boolean
   message?: string
+  isDuplicate?: boolean
 }
 
 interface StoreMessageValidationResult {
@@ -27,6 +29,7 @@ interface StoreMessageValidationResult {
 const s3Gateway = new S3Gateway(createS3Config())
 const apiClient = new AuditLogApiClient(getApiUrl(), getApiKey())
 const createAuditLogUseCase = new CreateAuditLogUseCase(apiClient)
+const createDuplicateMessageEvent = new CreateDuplicateMessageEvent(apiClient)
 
 const createValidationResult = (validationResult: ValidationResult, event: S3PutObjectEvent) => ({
   validationResult,
@@ -69,6 +72,13 @@ export default async function storeMessage(
   }
 
   if (!createAuditLogResult.isValid) {
+    if (createAuditLogResult.isDuplicate === true) {
+      const createDuplicateMessageEventResult = await createDuplicateMessageEvent.execute(auditLog)
+      if (isError(createDuplicateMessageEventResult)) {
+        throw Error(`Error while creating duplicate message event: ${createDuplicateMessageEventResult.message}`)
+      }
+    }
+
     logger.info(JSON.stringify(createAuditLogResult))
     return createValidationResult(createAuditLogResult, event)
   }
