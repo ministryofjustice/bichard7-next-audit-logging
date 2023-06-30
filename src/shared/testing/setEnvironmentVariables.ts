@@ -1,7 +1,7 @@
 import type { KeyValuePair } from "src/shared/types"
 
 export default (additionalVariables?: KeyValuePair<string, string>): void => {
-  process.env.AWS_URL = "http://localhost:8000"
+  process.env.AWS_URL = "http://localhost:9000"
   process.env.AWS_REGION = "eu-west-2"
   process.env.S3_URL = "http://localhost:4569"
   process.env.S3_REGION = "eu-west-2"

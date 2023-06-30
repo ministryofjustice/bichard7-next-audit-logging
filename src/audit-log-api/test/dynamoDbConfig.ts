@@ -1,7 +1,7 @@
 import type { DynamoDbConfig } from "../gateways/dynamo"
 
 const auditLogDynamoConfig: DynamoDbConfig = {
-  endpoint: "http://localhost:8000",
+  endpoint: "http://localhost:9000",
   region: "eu-west-2",
   auditLogTableName: "auditLogTable",
   eventsTableName: "auditLogEventsTable",

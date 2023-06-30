@@ -15,7 +15,7 @@ const clearDynamoTable = async (
   attempts = 5
 ) => {
   const dynamoConfig = config ?? {
-    endpoint: "http://localhost:8000",
+    endpoint: "http://localhost:9000",
     region: "eu-west-2",
     accessKeyId: "DUMMY",
     secretAccessKey: "DUMMY"

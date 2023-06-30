@@ -6,7 +6,7 @@ provider:
   runtime: nodejs14.x
   timeout: 200
   environment:
-    AWS_URL: http://localhost:8000
+    AWS_URL: http://localhost:9000
     DYNAMO_REGION: eu-west-2
     AUDIT_LOG_TABLE_NAME: auditLogTable
     AUDIT_LOG_EVENTS_TABLE_NAME: auditLogEventsTable
@@ -52,7 +52,7 @@ custom:
     stages:
       - dev
     start:
-      port: 8000
+      port: 9000
       inMemory: true
       heapInitial: 200m
       heapMax: 1g

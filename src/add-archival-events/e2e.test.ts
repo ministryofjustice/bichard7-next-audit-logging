@@ -60,14 +60,14 @@ describe("Add Error Records e2e", () => {
     await pg.query(`DELETE FROM br7own.archive_log`)
 
     await clearDynamoTable("auditLogTable", "messageId", {
-      endpoint: "http://localhost:8000",
+      endpoint: "http://localhost:9000",
       region: "eu-west-2",
       accessKeyId: "DUMMY",
       secretAccessKey: "DUMMY"
     })
 
     await clearDynamoTable("auditLogEventsTable", "_id", {
-      endpoint: "http://localhost:8000",
+      endpoint: "http://localhost:9000",
       region: "eu-west-2",
       accessKeyId: "DUMMY",
       secretAccessKey: "DUMMY"
