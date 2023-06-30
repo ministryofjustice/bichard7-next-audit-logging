@@ -11,3 +11,7 @@ RUN make && make install && \
     apt-get autoremove --purge -y && \
     apt-get clean && \
     apt-get purge
+
+WORKDIR /
+
+COPY docker /docker-entrypoint-initdb.d
