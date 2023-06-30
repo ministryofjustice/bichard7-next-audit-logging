@@ -35,7 +35,7 @@
     "mockdate": "^3.0.5",
     "npm-check-updates": "^16.10.12",
     "prettier": "^2.8.8",
-    "serverless": "^3.32.2",
+    "serverless": "^3.33.0",
     "serverless-dynamodb-local": "1.0.0",
     "serverless-esbuild": "^1.45.1",
     "serverless-hooks": "^1.0.0",
