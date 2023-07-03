@@ -33,6 +33,12 @@ run-pg:
 stop-pg:
 	docker-compose -f environment/docker-compose.yml stop pg
 
+# https://github.com/99x/serverless-dynamodb-local/pull/298
+.PHONY: fix-serverless-dynamodb-local
+fix-serverless-dynamodb-local:
+	cd ./node_modules/serverless-dynamodb-local && \
+	npx -y replace-in-file "MOCK_ACCESS_KEY_ID" "MOCKACCESSKEYID" index.js && \
+	npx -y replace-in-file "MOCK_SECRET_ACCESS_KEY" "MOCKSECRETACCESSKEY" index.js
 
 ########################################
 # Destroy Commands
