@@ -51,7 +51,7 @@ jobs:
   build-test-lambdas:
     machine:
       image: ubuntu-2004:202104-01
-      docker_layer_caching: true
+      docker_layer_caching: false
     resource_class: xlarge
     working_directory: ~
     steps:
