@@ -1,37 +1,36 @@
 ---
-
 version: 2.1
 
 commands:
-    restore_all_caches:
-        description: Restore all of the node_modules directories
-        steps:
-            - run:
-                name: Hash package locks
-                command: bash ./scripts/hash-package-locks.sh
-            - restore_cache:
-                key: v1-npm-deps-{{ checksum "package-lock.json.md5" }}
+  restore_all_caches:
+    description: Restore all of the node_modules directories
+    steps:
+      - run:
+          name: Hash package locks
+          command: bash ./scripts/hash-package-locks.sh
+      - restore_cache:
+          key: v1-npm-deps-{{ checksum "package-lock.json.md5" }}
 
-    save_all_caches:
-        description: Save all of the node_modules directories
-        steps:
-            - save_cache:
-                key: v1-npm-deps-{{ checksum "package-lock.json.md5" }}
-                paths: node_modules
+  save_all_caches:
+    description: Save all of the node_modules directories
+    steps:
+      - save_cache:
+          key: v1-npm-deps-{{ checksum "package-lock.json.md5" }}
+          paths: node_modules
 
-    persist_build_dirs:
-        description: Save all of the build directories
-        steps:
-            - persist_to_workspace:
-                root: .
-                paths:
-                    - build
+  persist_build_dirs:
+    description: Save all of the build directories
+    steps:
+      - persist_to_workspace:
+          root: .
+          paths:
+            - build
 
-    store_results:
-        description: "Store the test output"
-        steps:
-            - store_test_results:
-                path: ./test-results/jest/
+  store_results:
+    description: "Store the test output"
+    steps:
+      - store_test_results:
+          path: ./test-results/jest/
 
 jobs:
   build:
