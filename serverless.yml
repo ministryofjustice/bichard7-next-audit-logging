@@ -40,6 +40,8 @@ plugins:
   - serverless-s3-local
 
 custom:
+  serverless-offline:
+    host: 0.0.0.0
   esbuild:
     bundle: true
     minify: false
