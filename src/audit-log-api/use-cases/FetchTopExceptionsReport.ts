@@ -6,7 +6,10 @@ import convertDynamoAuditLogToOutputApi from "../utils/convertDynamoAuditLogToOu
 import type MessageFetcher from "./MessageFetcher"
 
 export default class FetchTopExceptionsReport implements MessageFetcher {
-  constructor(private readonly gateway: AuditLogDynamoGatewayInterface, private readonly options: FetchReportOptions) {}
+  constructor(
+    private readonly gateway: AuditLogDynamoGatewayInterface,
+    private readonly options: FetchReportOptions
+  ) {}
 
   async fetch(): PromiseResult<OutputApiAuditLog[]> {
     let lastMessage: DynamoAuditLog | undefined

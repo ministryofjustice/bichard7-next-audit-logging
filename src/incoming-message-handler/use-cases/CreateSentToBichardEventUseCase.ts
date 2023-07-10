@@ -10,7 +10,10 @@ const httpsAgent = new https.Agent({
 })
 
 export default class CreateSentToBichardEventUseCase {
-  constructor(private readonly apiUrl: string, private readonly apiKey: string) {}
+  constructor(
+    private readonly apiUrl: string,
+    private readonly apiKey: string
+  ) {}
 
   create(message: SendToBichardOutput): PromiseResult<void> {
     const event: ApiAuditLogEvent = {

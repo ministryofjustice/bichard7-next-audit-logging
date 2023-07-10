@@ -7,7 +7,10 @@ import type { BichardRecord, DatabaseClient } from "./db"
 export default class AddArchivalEvents {
   private api: ArchivalEventsApiClient
 
-  constructor(apiClient: AuditLogApiClient, private db: DatabaseClient) {
+  constructor(
+    apiClient: AuditLogApiClient,
+    private db: DatabaseClient
+  ) {
     this.api = new ArchivalEventsApiClient(apiClient)
   }
 

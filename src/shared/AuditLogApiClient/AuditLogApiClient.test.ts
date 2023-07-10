@@ -20,7 +20,7 @@ const createErrorResponse = (errorCode: number, errorMessage: string): AxiosErro
   ({
     message: `Axios error: ${errorMessage}`,
     response: { status: errorCode, data: errorMessage }
-  } as unknown as AxiosError)
+  }) as unknown as AxiosError
 
 describe("getMessages()", () => {
   beforeEach(() => {

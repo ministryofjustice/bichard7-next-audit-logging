@@ -9,7 +9,11 @@ import type KeyComparison from "./KeyComparison"
 import type Pagination from "./Pagination"
 
 export default class IndexSearcher<TResult> {
-  constructor(private gateway: DynamoGateway, private tableName: string, private partitionKey: string) {}
+  constructor(
+    private gateway: DynamoGateway,
+    private tableName: string,
+    private partitionKey: string
+  ) {}
 
   private indexName: string
 
