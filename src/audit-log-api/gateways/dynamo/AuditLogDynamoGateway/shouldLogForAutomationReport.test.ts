@@ -1,7 +1,7 @@
 import type { ApiAuditLogEvent } from "src/shared/types"
 import shouldLogForAutomationReport, { automationReportEventCodes } from "./shouldLogForAutomationReport"
 
-const automationReportEvents = automationReportEventCodes.map((eventCode) => ({ eventCode } as ApiAuditLogEvent))
+const automationReportEvents = automationReportEventCodes.map((eventCode) => ({ eventCode }) as ApiAuditLogEvent)
 
 it.each(automationReportEvents)(
   "should return true when event type is an automation report event type: %s",
