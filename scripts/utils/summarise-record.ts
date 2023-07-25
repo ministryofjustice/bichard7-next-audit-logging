@@ -1,7 +1,7 @@
 import { Lambda } from "aws-sdk"
 import { AuditLogDynamoGateway, DynamoDbConfig } from "../../src/audit-log-api/gateways/dynamo"
-import { AuditLogEvent, DynamoAuditLog, isError } from "../../src/shared/types"
-import { AuditLogEventAttributes } from "../../src/shared/types/AuditLogEvent"
+import { DynamoAuditLog, isError } from "../../src/shared/types"
+import { AuditLogEventAttributes, DynamoAuditLogEvent } from "../../src/shared/types/AuditLogEvent"
 
 const outDir = "pnc-status-debugging"
 
@@ -12,7 +12,6 @@ const dynamoConfig: DynamoDbConfig = {
   auditLogTableName: "Will be retrieved from Retry Message lambda environment variable",
   endpoint: "Will be retrieved from Retry Message lambda environment variable",
   eventsTableName: "Not needed",
-  lookupTableName: "Not needed",
   region: "eu-west-2"
 }
 
@@ -50,16 +49,16 @@ const getTriggersFromAttributes = (attributes: AuditLogEventAttributes): string[
   }, [])
 }
 
-const formatEvent = (event: AuditLogEvent): string => {
+const formatEvent = (event: DynamoAuditLogEvent): string => {
   const output: string[] = []
   output.push(`${event.timestamp} - ${event.eventType}`)
-  if (event.eventCode === "triggers.generated") {
+  if (event.eventCode === "triggers.generated" && event.attributes) {
     output.push(`${" ".repeat(27)}${getTriggersFromAttributes(event.attributes).sort().join(", ")}`)
   }
   if (event.eventCode === "triggers.locked") {
     output.push(`${" ".repeat(27)}User: ${event.user}`)
   }
-  if (event.eventCode === "triggers.resolved") {
+  if (event.eventCode === "triggers.resolved" && event.attributes) {
     output.push(`${" ".repeat(27)}${getTriggersFromAttributes(event.attributes).sort().join(", ")}`)
     output.push(`${" ".repeat(27)}User: ${event.user}`)
   }
@@ -96,8 +95,9 @@ const run = async () => {
   if (isError(record)) {
     throw record
   }
-
-  console.log(formatAuditLog(record))
+  if (record) {
+    console.log(formatAuditLog(record))
+  }
 }
 
 async function main() {
