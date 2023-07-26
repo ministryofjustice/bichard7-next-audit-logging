@@ -66,3 +66,7 @@ run-transfer-messages:
 .PHONY: retry-execution
 retry-execution:
 	scripts/retry-execution.sh "${EXECUTION_ID}"
+
+.PHONY: build-api-server
+build-api-server:
+	docker build -f src/audit-log-api/Dockerfile -t audit-log-api .

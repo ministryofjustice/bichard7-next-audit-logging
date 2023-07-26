@@ -2,13 +2,15 @@ Dockerfile
 .dockerignore
 .gitignore
 
-*node_modules
+*node_modules*
 npm-debug.log
 README.md
 
-src/shared-testing
-src/message-receiver
-src/transfer-messages
+src/add-archival-events
+src/archive-user-logs
 src/event-handler
 src/incoming-message-handler
-src/audit-log-api
+src/message-receiver
+src/retry-failed-messages
+src/sanitise-old-messages
+src/transfer-messages

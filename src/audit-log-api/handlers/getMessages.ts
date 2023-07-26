@@ -1,6 +1,5 @@
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda"
 import { HttpStatusCode, logger } from "src/shared"
-import type { PromiseResult } from "src/shared/types"
 import { isError } from "src/shared/types"
 import createAuditLogDynamoDbConfig from "../createAuditLogDynamoDbConfig"
 import { AuditLogDynamoGateway } from "../gateways/dynamo"
@@ -10,7 +9,7 @@ import { createJsonApiResult } from "../utils"
 const auditLogConfig = createAuditLogDynamoDbConfig()
 const auditLogGateway = new AuditLogDynamoGateway(auditLogConfig)
 
-export default async function getMessages(event: APIGatewayProxyEvent): PromiseResult<APIGatewayProxyResult> {
+export default async function getMessages(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
   const messageFetcher = createMessageFetcher(event, auditLogGateway)
 
   if (isError(messageFetcher)) {
