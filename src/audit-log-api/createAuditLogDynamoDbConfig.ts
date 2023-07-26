@@ -14,10 +14,6 @@ export default function createAdutiLogDynamoDbConfig(): DynamoDbConfig {
     throw Error("AWS_URL environment variable must have value.")
   }
 
-  if (!AWS_REGION) {
-    throw Error("AWS_REGION environment variable must have value.")
-  }
-
   if (!AUDIT_LOG_TABLE_NAME) {
     throw Error("AUDIT_LOG_TABLE_NAME environment variable must have value.")
   }
@@ -28,7 +24,7 @@ export default function createAdutiLogDynamoDbConfig(): DynamoDbConfig {
 
   const config: DynamoDbConfig = {
     endpoint: AWS_URL,
-    region: AWS_REGION,
+    region: AWS_REGION ?? "eu-west-2",
     auditLogTableName: AUDIT_LOG_TABLE_NAME,
     eventsTableName: AUDIT_LOG_EVENTS_TABLE_NAME
   }
