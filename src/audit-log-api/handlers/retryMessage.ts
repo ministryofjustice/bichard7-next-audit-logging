@@ -1,20 +1,19 @@
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda"
 import {
   AuditLogApiClient,
+  HttpStatusCode,
+  MqGateway,
+  S3Gateway,
   createMqConfig,
   createS3Config,
-  HttpStatusCode,
-  logger,
-  MqGateway,
-  S3Gateway
+  logger
 } from "src/shared"
-import type { PromiseResult } from "src/shared/types"
 import { isError } from "src/shared/types"
 import createAuditLogDynamoDbConfig from "../createAuditLogDynamoDbConfig"
 import { AuditLogDynamoGateway } from "../gateways/dynamo"
 import getApiKey from "../getApiKey"
 import getApiUrl from "../getApiUrl"
-import { parseRetryMessageRequest, RetryMessageUseCase } from "../use-cases"
+import { RetryMessageUseCase, parseRetryMessageRequest } from "../use-cases"
 import CreateRetryingEventUseCase from "../use-cases/CreateRetryingEventUseCase"
 import GetLastFailedMessageEventUseCase from "../use-cases/GetLastEventUseCase"
 import RetrieveEventXmlFromS3UseCase from "../use-cases/RetrieveEventXmlFromS3UseCase"
@@ -43,7 +42,7 @@ const retryMessageUseCase = new RetryMessageUseCase(
   createRetryingEventUseCase
 )
 
-export default async function retryMessage(event: APIGatewayProxyEvent): PromiseResult<APIGatewayProxyResult> {
+export default async function retryMessage(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
   const messageId = parseRetryMessageRequest(event)
 
   if (isError(messageId)) {

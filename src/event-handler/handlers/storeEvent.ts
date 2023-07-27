@@ -1,21 +1,13 @@
 import { AuditLogApiClient, createS3Config, logger, S3Gateway } from "src/shared"
 import type { S3PutObjectEvent } from "src/shared/types"
 import { isError } from "src/shared/types"
+import createApiConfig from "../lib/createApiConfig"
 import CreateEventUseCase from "../use-cases/CreateEventUseCase"
 import DoesS3ObjectExist from "../use-cases/DoesS3ObjectExist"
 import RetrieveEventFromS3UseCase from "../use-cases/RetrieveEventFromS3UseCase"
 import translateEvent from "../use-cases/translateEvent"
 
-const apiUrl = process.env.API_URL
-if (!apiUrl) {
-  throw new Error("API_URL environment variable is not set")
-}
-
-const apiKey = process.env.API_KEY
-if (!apiKey) {
-  throw new Error("API_KEY environment variable is not set")
-}
-
+const { apiUrl, apiKey } = createApiConfig()
 const s3Gateway = new S3Gateway(createS3Config())
 const doesS3ObjectExistUseCase = new DoesS3ObjectExist(s3Gateway)
 const retrieveEventFromS3UseCase = new RetrieveEventFromS3UseCase(s3Gateway)

@@ -96,7 +96,7 @@ it("should be invalid when a single audit log event fields have incorrect format
   const errors = eventValidationResults[0].errors
   expect(errors).toHaveLength(7)
   expect(errors).toContain("Attributes must be key/value object")
-  expect(errors).toContain("Category can be either information, error, or warning")
+  expect(errors).toContain("Category can be either information, error, warning or debug")
   expect(errors).toContain("Event source must be string")
   expect(errors).toContain("Event source queue name must be string")
   expect(errors).toContain("Event type must be string")
@@ -111,7 +111,9 @@ it("should be invalid when a single audit log event category is invalid", () => 
   expect(isValid).toBe(false)
   expect(eventValidationResults).toBeDefined()
   expect(eventValidationResults).toHaveLength(1)
-  expect(eventValidationResults[0].errors).toStrictEqual(["Category can be either information, error, or warning"])
+  expect(eventValidationResults[0].errors).toStrictEqual([
+    "Category can be either information, error, warning or debug"
+  ])
 })
 
 it("should attribute validation errors to the correct event", () => {

@@ -25,8 +25,8 @@ export default ({
 
   if (!category) {
     errors.push("Category is mandatory")
-  } else if (!["information", "error", "warning"].includes(category)) {
-    errors.push("Category can be either information, error, or warning")
+  } else if (!["information", "error", "warning", "debug"].includes(category)) {
+    errors.push("Category can be either information, error, warning or debug")
   }
 
   if (eventCode && typeof eventCode !== "string") {

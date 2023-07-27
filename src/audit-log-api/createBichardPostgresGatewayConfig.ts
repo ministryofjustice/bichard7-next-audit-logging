@@ -19,17 +19,15 @@ export default function createBichardPostgresGatewayConfig(): PostgresConfig {
     throw Error("DB_PASSWORD environment variable must have value.")
   }
 
-  if (!DB_NAME) {
-    throw Error("DB_NAME environment variable must have value.")
-  }
+  const dbSchema = DB_SCHEMA ?? "br7own"
 
   const config: PostgresConfig = {
     HOST: DB_HOST,
     PORT: parseInt(DB_PORT, 10),
     USERNAME: DB_USER,
     PASSWORD: DB_PASSWORD,
-    DATABASE_NAME: DB_NAME,
-    TABLE_NAME: DB_SCHEMA ? `${DB_SCHEMA}.archive_error_list` : "archive_error_list",
+    DATABASE_NAME: DB_NAME ?? "bichard",
+    TABLE_NAME: dbSchema ? `${dbSchema}.archive_error_list` : "archive_error_list",
     SSL: DB_SSL === "true"
   }
 
