@@ -70,3 +70,7 @@ retry-execution:
 .PHONY: build-api-server
 build-api-server:
 	docker build -f src/audit-log-api/Dockerfile -t audit-log-api .
+
+.PHONY: build-event-handler-server
+build-event-handler-server:
+	docker build -f src/event-handler/Dockerfile -t event-handler .
