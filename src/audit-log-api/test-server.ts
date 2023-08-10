@@ -1,5 +1,4 @@
 /* eslint-disable import/no-extraneous-dependencies */
-import bodyParser from "body-parser"
 import type { WrapperOptions } from "convert-lambda-to-express"
 import { wrapLambda } from "convert-lambda-to-express"
 import express from "express"
@@ -18,7 +17,15 @@ const options: WrapperOptions = {
 }
 
 const app = express()
-app.use(bodyParser.json())
+app.use(
+  express.json({
+    strict: false, // accept anything JSON.parse will accept
+    type: () => true // accept any type
+  })
+)
+// API gateway defaults everything with no
+// explicit Content-Type header to application/json
+// Above config does something similar.
 
 // getMessages:
 //   handler: src/audit-log-api/handlers/getMessages.default
