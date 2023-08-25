@@ -1,5 +1,4 @@
-import type { EventCategory } from "src/shared/types"
-import type { ApiAuditLogEvent } from "src/shared/types"
+import type { ApiAuditLogEvent, EventCategory } from "src/shared/types"
 import type { EventDetails } from "../../types"
 
 const mapEventCategory = (category: string): EventCategory => {
@@ -37,7 +36,7 @@ export default (eventDetails: EventDetails, eventXml: string, eventSourceQueueNa
       if (attribute.name === "eventCode") {
         event.eventCode = attribute.value
       } else if (attribute.name.toLowerCase() === "user") {
-        event.eventCode = attribute.value
+        event.user = attribute.value
       }
       event.attributes![attribute.name] = attribute.value
     })
