@@ -8,7 +8,7 @@
     <eventDateTime>2021-11-10T10:40:16.388+00:00</eventDateTime>
     <nameValuePairs>
         <nameValuePair>
-            <name>User ID</name>
+            <name>user</name>
             <value>supervisor</value>
         </nameValuePair>
         <nameValuePair>

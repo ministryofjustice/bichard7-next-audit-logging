@@ -9,7 +9,7 @@ export default class {
       return this.api.createEvent(messageId, event)
     }
 
-    const userName = event.attributes?.["User ID"]
+    const userName = event.attributes?.user || event.attributes?.["User ID"]
     if (userName) {
       return this.api.createUserEvent(String(userName), event)
     }
