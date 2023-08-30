@@ -1,4 +1,3 @@
-import { logger } from "src/shared"
 import type { ApiAuditLogEvent, ApiClient, PromiseResult } from "src/shared/types"
 
 export default class {
@@ -14,7 +13,6 @@ export default class {
       return this.api.createUserEvent(String(userName), event)
     }
 
-    logger.info(`No messageId or userName: ${JSON.stringify(event)}`)
-    return Promise.resolve(undefined)
+    throw Error(`No messageId or userName: ${JSON.stringify(event)}`)
   }
 }

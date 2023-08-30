@@ -33,12 +33,11 @@ describe("CreateEventUseCase", () => {
     expect(mockedCreateUserEvent).toHaveBeenCalledTimes(1)
   })
 
-  it("should be successful when messageId and user are not provided", async () => {
-    const result = await useCase.execute("", {} as ApiAuditLogEvent)
-
-    expect(result).toBeUndefined()
-    expect(mockedCreateEvent).not.toHaveBeenCalled()
-    expect(mockedCreateUserEvent).not.toHaveBeenCalled()
+  it("should throw an error when messageId and user are not provided", async () => {
+    const invalidMessage = { category: "information" } as ApiAuditLogEvent
+    await expect(async () => {
+      await useCase.execute("", invalidMessage)
+    }).rejects.toThrow(`No messageId or userName: ${JSON.stringify(invalidMessage)}`)
   })
 
   it("should fail when audit log API fails to create event when messageId has value", async () => {
