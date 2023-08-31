@@ -171,7 +171,7 @@ test("Event with only user should be stored in dynamodb", async () => {
   expect(events[0].user).toBe("supervisor")
 })
 
-test("Event with no MesageId and User should not fail to be processed by the audit logger", async () => {
+test("Event with no MesageId and User should fail to be processed by the audit logger", async () => {
   const rawMessage = fs.readFileSync(`events/no-messageid-and-user.xml`).toString()
   const messageData = encodeBase64(rawMessage.replace("{MESSAGE_ID}", uuid()))
 
@@ -199,7 +199,7 @@ test("Event with no MesageId and User should not fail to be processed by the aud
   const objectKey = s3Objects.map((s3Object) => s3Object.Key)[0]
   const eventHandlerResult = await eventHandlerSimulator.start(objectKey!, uuid()).catch((error) => error)
 
-  expect(eventHandlerResult).toNotBeError()
+  expect((eventHandlerResult as Error).message).toContain("No messageId or userName:")
 })
 
 test("Event should fail the validation when S3 object does not exist", async () => {
