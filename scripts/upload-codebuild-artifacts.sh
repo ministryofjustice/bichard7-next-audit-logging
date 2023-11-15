@@ -74,8 +74,6 @@ upload_to_s3 storeMessage.zip storeMessage.zip
 
 cd -
 
-upload_to_s3 "./src/incoming-message-handler/scripts/state-machine.json.tpl" "incoming-message-handler-state-machine.json.tpl" "application/json"
-
 ############################################
 # Audit Log API
 ############################################
@@ -111,8 +109,6 @@ zip storeEvent.zip storeEvent.js
 upload_to_s3 storeEvent.zip storeEvent.zip
 
 cd -
-
-upload_to_s3 "src/event-handler/scripts/state-machine.json.tpl" "event-handler-state-machine.json.tpl" "application/json"
 
 ############################################
 # Retry Failed Messages
