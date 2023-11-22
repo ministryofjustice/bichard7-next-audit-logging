@@ -1,7 +1,7 @@
 import type { AxiosError } from "axios"
 import axios from "axios"
 import * as https from "https"
-import { HttpStatusCode } from "src/shared"
+import { HttpStatusCode, logger } from "src/shared"
 import type { ApiAuditLogEvent, PromiseResult, SendToBichardOutput } from "src/shared/types"
 import { EventCode } from "src/shared/types"
 
@@ -32,6 +32,12 @@ export default class CreateSentToBichardEventUseCase {
       .then((result) => {
         switch (result.status) {
           case HttpStatusCode.created:
+            logger.info({
+              message: "Audit Log event created",
+              correlationId: message.auditLog.messageId,
+              eventCode: event.eventCode,
+              eventType: event.eventType
+            })
             return undefined
           case HttpStatusCode.notFound:
             return Error(`The message with Id ${message.auditLog.messageId} does not exist.`)
