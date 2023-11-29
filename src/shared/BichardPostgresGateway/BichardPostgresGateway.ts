@@ -22,6 +22,6 @@ export default class BichardPostgresGateway extends PostgresGateway {
       return result
     }
 
-    return result.rowCount > 0
+    return Number(result.rowCount) > 0
   }
 }
