@@ -24,4 +24,12 @@ const internalIncomingS3Config: S3Config = {
   secretAccessKey: "S3RVER"
 }
 
-export { auditLogEventsS3Config, externalIncomingS3Config, internalIncomingS3Config }
+const conductorIncomingS3Config: S3Config = {
+  url: "http://localhost:4569",
+  region: "eu-west-2",
+  bucketName: "conductorIncomingBucket",
+  accessKeyId: "S3RVER",
+  secretAccessKey: "S3RVER"
+}
+
+export { auditLogEventsS3Config, conductorIncomingS3Config, externalIncomingS3Config, internalIncomingS3Config }
