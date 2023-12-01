@@ -3,8 +3,8 @@ import { isError } from "src/shared/types"
 import TransferMessagesUseCase from "./TransferMessagesUseCase"
 import type { TransferMessagesInput, TransferMessagesOptions, TransferMessagesResult } from "./types"
 
-const { CONDUCTOR_INCOMING_MESSAGE_BUCKET, INTERNAL_INCOMING_MESSAGES_BUCKET } = process.env
-if (!CONDUCTOR_INCOMING_MESSAGE_BUCKET || !INTERNAL_INCOMING_MESSAGES_BUCKET) {
+const { CONDUCTOR_INCOMING_MESSAGES_BUCKET, INTERNAL_INCOMING_MESSAGES_BUCKET } = process.env
+if (!CONDUCTOR_INCOMING_MESSAGES_BUCKET || !INTERNAL_INCOMING_MESSAGES_BUCKET) {
   throw new Error("INCOMING_MESSAGE_BUCKET_NAME environment variables must have values")
 }
 
@@ -18,7 +18,7 @@ export default async ({
   const transferMessages = new TransferMessagesUseCase(
     externalBucketGateway,
     INTERNAL_INCOMING_MESSAGES_BUCKET,
-    CONDUCTOR_INCOMING_MESSAGE_BUCKET,
+    CONDUCTOR_INCOMING_MESSAGES_BUCKET,
     canaryRatio,
     destinationBucket
   )

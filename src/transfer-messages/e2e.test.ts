@@ -12,26 +12,26 @@ setEnvironmentVariables()
 
 process.env.EXTERNAL_INCOMING_MESSAGES_BUCKET = externalIncomingS3Config.bucketName
 process.env.INTERNAL_INCOMING_MESSAGES_BUCKET = internalIncomingS3Config.bucketName
-process.env.CONDUCTOR_INCOMING_MESSAGES_BUCKET = internalIncomingS3Config.bucketName
+process.env.CONDUCTOR_INCOMING_MESSAGES_BUCKET = conductorIncomingS3Config.bucketName
 
 import transferMessages from "."
 import { Destination } from "./types/TransferMessagesInput"
 
+const externalGateway = new TestS3Gateway(externalIncomingS3Config)
 const internalGateway = new TestS3Gateway(internalIncomingS3Config)
 const conductorGateway = new TestS3Gateway(conductorIncomingS3Config)
-const externalGateway = new TestS3Gateway(externalIncomingS3Config)
 
 describe("Transfer Messages end-to-end", () => {
   beforeAll(async () => {
+    await externalGateway.createBucket(true)
     await internalGateway.createBucket(true)
     await conductorGateway.createBucket(true)
-    await externalGateway.createBucket(true)
   })
 
   beforeEach(async () => {
+    await externalGateway.deleteAll()
     await internalGateway.deleteAll()
     await conductorGateway.deleteAll()
-    await externalGateway.deleteAll()
 
     process.env.CANARY_RATIO = "0.0"
   })
