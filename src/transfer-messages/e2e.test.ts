@@ -180,7 +180,7 @@ describe("Transfer Messages end-to-end", () => {
     expect(conductorBucketObjects[0].Key).toBe(fileName)
   })
 
-  it.only("should deliver messages to the specified bucket when the destination override is provided", async () => {
+  it("should deliver messages to the specified bucket when the destination override is provided", async () => {
     const fileName = "2021/11/18/12/06/123456.xml"
     await externalGateway.upload(fileName, "Dummy content")
 
