@@ -82,6 +82,10 @@ resources:
       Type: AWS::S3::Bucket
       Properties:
         BucketName: internalIncomingBucket
+    conductorIncomingBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: conductorIncomingBucket
     auditLogEventsTable:
       Type: AWS::DynamoDB::Table
       Properties:

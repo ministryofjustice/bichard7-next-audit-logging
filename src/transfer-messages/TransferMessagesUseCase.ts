@@ -2,11 +2,15 @@ import type { S3 } from "aws-sdk"
 import type { PromiseResult, S3GatewayInterface } from "src/shared/types"
 import { isError } from "src/shared/types"
 import type { FailedItem, TransferMessageResult, TransferMessagesOptions, TransferMessagesResult } from "./types"
+import { Destination } from "./types/TransferMessagesInput"
 
 export default class TransferMessagesUseCase {
   constructor(
     private readonly externalBucketGateway: S3GatewayInterface,
-    private readonly internalS3BucketName: string
+    private readonly internalS3BucketName: string,
+    private readonly conductorS3BucketName: string,
+    private readonly canaryRatio: number = 0.0,
+    private readonly s3BucketDestinationOverride?: string
   ) {}
 
   async getMessages(numberOfMessagesToReturn?: number): PromiseResult<S3.Object[]> {
@@ -27,8 +31,22 @@ export default class TransferMessagesUseCase {
     return sortedMessages
   }
 
+  selectBucket(): string {
+    if (this.s3BucketDestinationOverride !== undefined) {
+      return this.s3BucketDestinationOverride == Destination.CORE
+        ? this.conductorS3BucketName
+        : this.internalS3BucketName
+    }
+
+    const random = Math.random()
+    if (this.canaryRatio > random) {
+      return this.conductorS3BucketName
+    }
+    return this.internalS3BucketName
+  }
+
   async transferMessage(message: S3.Object): Promise<TransferMessageResult> {
-    const copyItemResult = await this.externalBucketGateway.copyItemTo(message.Key!, this.internalS3BucketName)
+    const copyItemResult = await this.externalBucketGateway.copyItemTo(message.Key!, this.selectBucket())
 
     if (isError(copyItemResult)) {
       return { failedToCopyError: copyItemResult }
