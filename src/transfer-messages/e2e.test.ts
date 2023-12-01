@@ -24,11 +24,8 @@ const conductorGateway = new TestS3Gateway(conductorIncomingS3Config)
 describe("Transfer Messages end-to-end", () => {
   beforeAll(async () => {
     await externalGateway.createBucket(true)
-    console.log("external gateway created")
     await internalGateway.createBucket(true)
-    console.log("internal gateway created")
     await conductorGateway.createBucket(true)
-    console.log("conductor gateway created")
   })
 
   beforeEach(async () => {
