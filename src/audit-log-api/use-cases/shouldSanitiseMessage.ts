@@ -1,4 +1,4 @@
-import { add } from "date-fns"
+import { add, type Duration } from "date-fns"
 import type { BichardPostgresGateway } from "src/shared"
 import type { DynamoAuditLog, PromiseResult } from "src/shared/types"
 import { isError } from "src/shared/types"
