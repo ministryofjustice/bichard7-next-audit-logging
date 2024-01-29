@@ -15,8 +15,9 @@ it("should return one message when messageHash exists", async () => {
 
   expect(isError(result)).toBe(false)
 
-  const actualMessage = <DynamoAuditLog>result
-  expect(actualMessage.messageId).toBe(expectedMessage.messageId)
+  const actualMessage = <DynamoAuditLog[]>result
+  expect(actualMessage).toHaveLength(1)
+  expect(actualMessage[0].messageId).toBe(expectedMessage.messageId)
 })
 
 it("should return an error when fetchOne fails", async () => {

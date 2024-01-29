@@ -12,12 +12,12 @@ export default class FetchByHash implements MessageFetcher {
     private readonly options?: ProjectionOptions
   ) {}
 
-  async fetch(): PromiseResult<OutputApiAuditLog | undefined> {
-    const record = await this.gateway.fetchByHash(this.messageId, this.options)
-    if (isError(record) || typeof record === "undefined" || record === null) {
-      return record ?? undefined
+  async fetch(): PromiseResult<OutputApiAuditLog[]> {
+    const records = await this.gateway.fetchByHash(this.messageId, this.options)
+    if (isError(records)) {
+      return records
     }
 
-    return convertDynamoAuditLogToOutputApi(record)
+    return records.map(convertDynamoAuditLogToOutputApi)
   }
 }

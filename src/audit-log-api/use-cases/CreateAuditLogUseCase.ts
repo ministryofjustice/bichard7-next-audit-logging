@@ -1,5 +1,5 @@
 import type { DynamoAuditLog, InputApiAuditLog } from "src/shared/types"
-import { AuditLogStatus, isError, PncStatus, TriggerStatus } from "src/shared/types"
+import { AuditLogStatus, PncStatus, TriggerStatus, isError } from "src/shared/types"
 import type { AuditLogDynamoGatewayInterface } from "../gateways/dynamo"
 import { isConditionalExpressionViolationError } from "../gateways/dynamo"
 
@@ -11,9 +11,8 @@ interface CreateAuditLogResult {
 const transformInput = (input: InputApiAuditLog): DynamoAuditLog => ({
   events: [],
   eventsCount: 0,
-  pncStatus: PncStatus.Processing,
-  status: AuditLogStatus.processing,
-  triggerStatus: TriggerStatus.NoTriggers,
+  pncStatus: input.status === AuditLogStatus.duplicate ? PncStatus.Duplicate : PncStatus.Processing,
+  triggerStatus: input.status === AuditLogStatus.duplicate ? TriggerStatus.Duplicate : TriggerStatus.NoTriggers,
   version: 0,
   ...input
 })

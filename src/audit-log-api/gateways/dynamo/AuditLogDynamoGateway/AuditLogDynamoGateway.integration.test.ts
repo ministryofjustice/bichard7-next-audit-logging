@@ -617,7 +617,7 @@ describe("AuditLogDynamoGateway", () => {
   })
 
   describe("fetchByHash", () => {
-    it("should return one AuditLog when hash exists in the table", async () => {
+    it("should return at least one AuditLog when hash exists in the table", async () => {
       const auditLogs = [...Array(3).keys()].map((i: number) => mockDynamoAuditLog({ messageHash: `hash-${i}` }))
       await Promise.allSettled(auditLogs.map((auditLog) => gateway.create(auditLog)))
       await gateway.createManyUserEvents(

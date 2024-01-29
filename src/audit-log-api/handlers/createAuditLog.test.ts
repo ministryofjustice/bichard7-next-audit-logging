@@ -18,8 +18,15 @@ const createHandlerEvent = (items?: InputApiAuditLog[]): APIGatewayProxyEvent =>
 }
 
 describe("createAuditlog()", () => {
+  beforeEach(() => {
+    mockedValidateCreateAuditLog.mockResolvedValue({
+      isValid: true,
+      errors: [],
+      auditLog: { messageId: "dummy 1" } as InputApiAuditLog
+    })
+  })
+
   it("should return 201 Created status code when Audit Log Id does not exist in the database", async () => {
-    mockedValidateCreateAuditLog.mockResolvedValue({ isValid: true, errors: [], auditLog: {} as InputApiAuditLog })
     jest.spyOn(CreateAuditLogUseCase.prototype, "create").mockReturnValue(
       Promise.resolve({
         resultType: "success"
@@ -30,7 +37,7 @@ describe("createAuditlog()", () => {
     const actualResponse = await createAuditLog(event)
 
     expect(actualResponse.statusCode).toBe(HttpStatusCode.created)
-    expect(actualResponse.body).toBe("Created")
+    expect(JSON.parse(actualResponse.body)).toStrictEqual({ messageId: "dummy 1" })
   })
 
   it("should return 400 Bad request status code when Audit Log validation fails", async () => {

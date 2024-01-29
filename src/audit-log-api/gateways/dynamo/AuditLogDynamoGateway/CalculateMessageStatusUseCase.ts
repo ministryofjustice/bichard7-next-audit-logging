@@ -10,13 +10,24 @@ export type MessageStatus = {
 export default class CalculateMessageStatusUseCase {
   private readonly events: ApiAuditLogEvent[] = []
 
-  constructor(...allEvents: (ApiAuditLogEvent[] | ApiAuditLogEvent)[]) {
+  constructor(
+    private currentAuditLogStatus: AuditLogStatus | undefined,
+    ...allEvents: (ApiAuditLogEvent[] | ApiAuditLogEvent)[]
+  ) {
     this.events = allEvents
       .flatMap((events: ApiAuditLogEvent[] | ApiAuditLogEvent) => (Array.isArray(events) ? events : [events]))
       .sort((eventA, eventB) => (eventA.timestamp > eventB.timestamp ? 1 : -1))
   }
 
   call(): MessageStatus {
+    if (this.currentAuditLogStatus === AuditLogStatus.duplicate) {
+      return {
+        status: AuditLogStatus.duplicate,
+        pncStatus: PncStatus.Duplicate,
+        triggerStatus: TriggerStatus.Duplicate
+      }
+    }
+
     return { status: this.status, pncStatus: this.pncStatus, triggerStatus: this.triggerStatus }
   }
 

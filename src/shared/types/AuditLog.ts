@@ -14,13 +14,13 @@ export type InputApiAuditLog = {
   s3Path?: string
   stepExecutionId?: string
   systemId?: string
+  status?: AuditLogStatus
 }
 
 export type OutputApiAuditLog = InputApiAuditLog & {
   events: ApiAuditLogEvent[]
   forceOwner?: number
   pncStatus: string
-  status: AuditLogStatus
   triggerStatus: string
 }
 
