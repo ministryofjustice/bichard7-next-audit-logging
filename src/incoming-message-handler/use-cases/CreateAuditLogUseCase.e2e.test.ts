@@ -36,9 +36,7 @@ describe("CreateAuditLogUseCase", () => {
     expect(result2).toBeDefined()
     expect(result2).toNotBeError()
 
-    const { isValid, message } = result2 as ValidationResult
-    expect(isValid).toBe(false)
-    expect(message).toBe(`There is a message with the same hash in the database (${auditLog2.messageHash})`)
+    expect(result2).toEqual({ isValid: false, isDuplicate: true, generateDuplicateEvent: true })
   })
 
   it("should return error when API returns error", async () => {
