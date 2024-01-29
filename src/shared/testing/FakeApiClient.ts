@@ -45,12 +45,12 @@ export default class FakeApiClient implements ApiClient {
 
   // @ts-ignore
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  createAuditLog(auditLog: InputApiAuditLog): PromiseResult<void> {
+  createAuditLog(auditLog: InputApiAuditLog): PromiseResult<OutputApiAuditLog> {
     if (this.shouldFunctionReturnError("createAuditLog")) {
       return Promise.resolve(this.error!)
     }
 
-    return Promise.resolve()
+    return Promise.resolve(auditLog as OutputApiAuditLog)
   }
 
   // @ts-ignore

@@ -4,7 +4,7 @@ import * as https from "https"
 import type { ApiAuditLogEvent, ApiClient, InputApiAuditLog, OutputApiAuditLog, PromiseResult } from "src/shared/types"
 import { ApplicationError } from "src/shared/types"
 import type { GetMessageOptions, GetMessagesOptions } from "src/shared/types/ApiClient"
-import { addQueryParams, HttpStatusCode, logger } from "../utils"
+import { HttpStatusCode, addQueryParams, logger } from "../utils"
 
 const httpsAgent = new https.Agent({
   rejectUnauthorized: false
@@ -107,7 +107,7 @@ export default class AuditLogApiClient implements ApiClient {
       })
   }
 
-  createAuditLog(auditLog: InputApiAuditLog): PromiseResult<void> {
+  createAuditLog(auditLog: InputApiAuditLog): PromiseResult<OutputApiAuditLog> {
     return axios
       .post(`${this.apiUrl}/messages`, this.stringify(auditLog), {
         headers: {
@@ -119,7 +119,7 @@ export default class AuditLogApiClient implements ApiClient {
       .then((result) => {
         switch (result.status) {
           case HttpStatusCode.created:
-            return undefined
+            return result.data as OutputApiAuditLog
           default:
             return Error(`Error ${result.status}: ${result.data}`)
         }
