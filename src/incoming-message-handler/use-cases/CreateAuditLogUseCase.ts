@@ -1,5 +1,5 @@
-import type { ApiClient, InputApiAuditLog, PromiseResult } from "src/shared/types"
-import { isError } from "src/shared/types"
+import type { ApiClient, InputApiAuditLog, OutputApiAuditLog, PromiseResult } from "src/shared/types"
+import { AuditLogStatus, isError } from "src/shared/types"
 import type { ValidationResult } from "../handlers/storeMessage"
 
 export default class {
@@ -13,11 +13,17 @@ export default class {
         return {
           isValid: false,
           isDuplicate: true,
-          message: `There is a message with the same hash in the database (${auditLog.messageHash})`
+          generateDuplicateEvent: true
         }
       }
 
       return result
+    } else if ((result as OutputApiAuditLog)?.status === AuditLogStatus.duplicate) {
+      return {
+        isValid: false,
+        isDuplicate: true,
+        generateDuplicateEvent: false
+      }
     }
 
     return { isValid: true }
