@@ -6,21 +6,24 @@ import FetchByHash from "./FetchByHash"
 
 const gateway = new FakeAuditLogDynamoGateway()
 
-it("should return one message when messageHash exists", async () => {
-  const expectedMessage = mockDynamoAuditLog()
-  gateway.reset([expectedMessage])
+it("should return all messages with the same message hash", async () => {
+  const messageHash = "dummy message hash"
+  const expectedMessages = [mockDynamoAuditLog({ messageHash }), mockDynamoAuditLog({ messageHash })]
+  gateway.reset([...expectedMessages, mockDynamoAuditLog({ messageHash: "different hash" })])
 
-  const messageFetcher = new FetchByHash(gateway, expectedMessage.messageHash)
+  const messageFetcher = new FetchByHash(gateway, messageHash)
   const result = await messageFetcher.fetch()
 
   expect(isError(result)).toBe(false)
 
-  const actualMessage = <DynamoAuditLog[]>result
-  expect(actualMessage).toHaveLength(1)
-  expect(actualMessage[0].messageId).toBe(expectedMessage.messageId)
+  const actualMessages = <DynamoAuditLog[]>result
+  expect(actualMessages).toHaveLength(2)
+  expect(actualMessages.map((message) => message.messageId)).toEqual(
+    expectedMessages.map((expectedMessage) => expectedMessage.messageId)
+  )
 })
 
-it("should return an error when fetchOne fails", async () => {
+it("should return an error when fetchByHash fails", async () => {
   const expectedError = new Error("Results not found")
   gateway.shouldReturnError(expectedError)
 

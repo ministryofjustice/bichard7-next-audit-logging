@@ -8,7 +8,9 @@ export default class TestApi {
 
   getMessages(): Promise<OutputApiAuditLog[]> {
     return axios
-      .get(`${this.apiUrl}/messages?includeColumns=createdBy`, { headers: { "X-API-KEY": "dummydummydummydummy" } })
+      .get(`${this.apiUrl}/messages?includeColumns=messageHash,createdBy`, {
+        headers: { "X-API-KEY": "dummydummydummydummy" }
+      })
       .then((response) => response.data)
       .catch((error) => <AxiosError>error)
   }

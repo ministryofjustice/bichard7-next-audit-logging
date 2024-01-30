@@ -11,10 +11,10 @@ interface CreateAuditLogResult {
 const transformInput = (input: InputApiAuditLog): DynamoAuditLog => ({
   events: [],
   eventsCount: 0,
-  pncStatus: input.status === AuditLogStatus.duplicate ? PncStatus.Duplicate : PncStatus.Processing,
-  triggerStatus: input.status === AuditLogStatus.duplicate ? TriggerStatus.Duplicate : TriggerStatus.NoTriggers,
   version: 0,
-  ...input
+  ...input,
+  pncStatus: input.status === AuditLogStatus.duplicate ? PncStatus.Duplicate : PncStatus.Processing,
+  triggerStatus: input.status === AuditLogStatus.duplicate ? TriggerStatus.Duplicate : TriggerStatus.NoTriggers
 })
 
 export default class CreateAuditLogUseCase {

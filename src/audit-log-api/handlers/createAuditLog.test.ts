@@ -26,7 +26,7 @@ describe("createAuditlog()", () => {
     })
   })
 
-  it("should return 201 Created status code when Audit Log Id does not exist in the database", async () => {
+  it("should return the audit log and status 201 when Audit Log Id does not exist in the database", async () => {
     jest.spyOn(CreateAuditLogUseCase.prototype, "create").mockReturnValue(
       Promise.resolve({
         resultType: "success"

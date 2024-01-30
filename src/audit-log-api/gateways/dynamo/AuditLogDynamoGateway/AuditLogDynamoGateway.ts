@@ -203,7 +203,7 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
       indexName: "messageHashIndex",
       hashKeyName: "messageHash",
       hashKeyValue: hash,
-      pagination: { limit: 1 },
+      pagination: {},
       projection: this.getProjectionExpression(includeColumns, options?.excludeColumns)
     }
 

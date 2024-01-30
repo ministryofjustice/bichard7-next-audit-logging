@@ -393,5 +393,19 @@ describe("CalculateMessageStatusUseCase", () => {
 
       expect(triggerStatus).toBe(TriggerStatus.Generated)
     })
+
+    it("should set all statuses to Duplicate when audit log status is already Duplicate", () => {
+      const result = new CalculateMessageStatusUseCase(
+        AuditLogStatus.duplicate,
+        prePNCUpdateTriggersGeneratedEvent(),
+        postPNCUpdateTriggersGeneratedEvent()
+      ).call()
+
+      expect(result).toEqual({
+        status: AuditLogStatus.duplicate,
+        triggerStatus: TriggerStatus.Duplicate,
+        pncStatus: PncStatus.Duplicate
+      })
+    })
   })
 })

@@ -1,5 +1,11 @@
 import { mockDynamoAuditLog, mockDynamoAuditLogEvent } from "src/shared/testing"
-import type { DynamoAuditLog, DynamoAuditLogEvent } from "src/shared/types"
+import {
+  AuditLogStatus,
+  TriggerStatus,
+  type DynamoAuditLog,
+  type DynamoAuditLogEvent,
+  PncStatus
+} from "src/shared/types"
 import { AuditLogDynamoGateway } from "../gateways/dynamo"
 import { auditLogDynamoConfig, TestDynamoGateway } from "../test"
 import { CreateAuditLogEventsUseCase } from "./CreateAuditLogEventsUseCase"
@@ -43,6 +49,30 @@ describe("CreateAuditLogEventsUseCase", () => {
 
     const actualAuditLog = await getAuditLog(auditLog.messageId)
     expect(actualAuditLog).toBeDefined()
+    expect(actualAuditLog?.events).toBeDefined()
+    expect(actualAuditLog?.events).toHaveLength(1)
+
+    const actualEvent = actualAuditLog?.events[0]
+    expect(actualEvent?.category).toBe(event.category)
+    expect(actualEvent?.timestamp).toBe(event.timestamp)
+    expect(actualEvent?.eventType).toBe(event.eventType)
+    expect(actualEvent?.eventSource).toBe(event.eventSource)
+  })
+
+  it("should not change the audit log status when audit log status is Duplicate", async () => {
+    const auditLog = mockDynamoAuditLog({ status: AuditLogStatus.duplicate })
+    await auditLogDynamoGateway.create(auditLog)
+
+    const event = mockDynamoAuditLogEvent()
+    const result = await createAuditLogEventsUseCase.create(auditLog.messageId, [event])
+
+    expect(result.resultType).toBe("success")
+
+    const actualAuditLog = await getAuditLog(auditLog.messageId)
+    expect(actualAuditLog).toBeDefined()
+    expect(actualAuditLog?.status).toBe(AuditLogStatus.duplicate)
+    expect(actualAuditLog?.triggerStatus).toBe(TriggerStatus.Duplicate)
+    expect(actualAuditLog?.pncStatus).toBe(PncStatus.Duplicate)
     expect(actualAuditLog?.events).toBeDefined()
     expect(actualAuditLog?.events).toHaveLength(1)
 

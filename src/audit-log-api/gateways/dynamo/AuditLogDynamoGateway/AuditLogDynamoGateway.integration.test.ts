@@ -617,22 +617,27 @@ describe("AuditLogDynamoGateway", () => {
   })
 
   describe("fetchByHash", () => {
-    it("should return at least one AuditLog when hash exists in the table", async () => {
-      const auditLogs = [...Array(3).keys()].map((i: number) => mockDynamoAuditLog({ messageHash: `hash-${i}` }))
-      await Promise.allSettled(auditLogs.map((auditLog) => gateway.create(auditLog)))
+    it("should return all AuditLog records with the same hash", async () => {
+      const messageHash = "same-hash"
+      const auditLogs = Array.from([...Array(3).keys()].map(() => mockDynamoAuditLog({ messageHash })))
+      auditLogs.push(mockDynamoAuditLog({ messageHash: "different-hash" }))
+      await Promise.all(auditLogs.map((auditLog) => gateway.create(auditLog)))
       await gateway.createManyUserEvents(
         auditLogs.map((auditLog) => mockDynamoAuditLogEvent({ _messageId: auditLog.messageId }))
       )
 
-      const hash = "hash-2"
-      const result = await gateway.fetchByHash(hash)
+      const result = await gateway.fetchByHash(messageHash)
 
       expect(isError(result)).toBe(false)
       expect(result).toBeDefined()
 
-      const item = <DynamoAuditLog>result
-      expect(item.messageHash).toBe(hash)
-      expect(item.events).toHaveLength(1)
+      const items = result as unknown as DynamoAuditLog[]
+      expect(items).toHaveLength(3)
+
+      items.forEach((item) => {
+        expect(item.messageHash).toBe(messageHash)
+        expect(item.events).toHaveLength(1)
+      })
     })
 
     it("should not return events when events column is excluded", async () => {
@@ -648,7 +653,10 @@ describe("AuditLogDynamoGateway", () => {
       expect(isError(result)).toBe(false)
       expect(result).toBeDefined()
 
-      const item = <DynamoAuditLog>result
+      const items = result as unknown as DynamoAuditLog[]
+      expect(items).toHaveLength(1)
+
+      const [item] = items
       expect(item.messageHash).toBe(hash)
       expect(item.events).toBeUndefined()
     })
@@ -669,7 +677,7 @@ describe("AuditLogDynamoGateway", () => {
       expect(result).toBeError(expectedError.message)
     })
 
-    it("should return null when hash does not exist in the table", async () => {
+    it("should return empty array when hash does not exist in the table", async () => {
       await Promise.allSettled(
         [...Array(3).keys()].map(async () => {
           await gateway.create(mockDynamoAuditLog())
@@ -680,7 +688,7 @@ describe("AuditLogDynamoGateway", () => {
       const result = await gateway.fetchByHash(hash)
 
       expect(isError(result)).toBe(false)
-      expect(<DynamoAuditLog>result).toBeNull()
+      expect(result).toHaveLength(0)
     })
   })
 
