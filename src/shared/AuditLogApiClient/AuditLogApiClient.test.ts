@@ -122,12 +122,13 @@ describe("getMessage()", () => {
 })
 
 describe("createAuditLog()", () => {
-  it("should return Created http status code when message successfully created", async () => {
-    jest.spyOn(axios, "post").mockResolvedValue({ status: 201 })
+  it("should return the audit log when message successfully created", async () => {
+    jest.spyOn(axios, "post").mockResolvedValue({ status: 201, data: message })
 
     const result = await apiClient.createAuditLog(message)
 
     expect(result).toNotBeError()
+    expect(message).toEqual(message)
   })
 
   it("should fail when message validation fails", async () => {

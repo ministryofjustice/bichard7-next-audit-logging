@@ -1,7 +1,8 @@
 enum TriggerStatus {
   NoTriggers = "NoTriggers",
   Generated = "Generated",
-  Resolved = "Resolved"
+  Resolved = "Resolved",
+  Duplicate = "Duplicate"
 }
 
 export default TriggerStatus
