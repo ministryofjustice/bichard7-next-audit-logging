@@ -108,7 +108,7 @@ export default class CreateAuditLogEventsUseCase {
 
     const updates = {
       ...calculateForceOwner(allEvents),
-      ...calculateStatuses(allEvents),
+      ...calculateStatuses(message, allEvents),
       ...calculateErrorRecordArchivalDate(allEvents),
       ...calculateSanitisation(allEvents),
       ...calculateRetryCount(allEvents),

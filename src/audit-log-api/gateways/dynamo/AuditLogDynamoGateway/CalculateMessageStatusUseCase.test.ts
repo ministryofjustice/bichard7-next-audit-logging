@@ -45,6 +45,7 @@ describe("CalculateMessageStatusUseCase", () => {
   describe("overall message status", () => {
     it("should not affect the status calculation when message has sanitised event", () => {
       const { status, pncStatus, triggerStatus } = new CalculateMessageStatusUseCase(
+        undefined,
         errorEvent(),
         sanitisedEvent(),
         archivedRecordEvent()
@@ -57,6 +58,7 @@ describe("CalculateMessageStatusUseCase", () => {
 
     it("should not affect the status calculation when message has error record archival event", () => {
       const { status, pncStatus, triggerStatus } = new CalculateMessageStatusUseCase(
+        undefined,
         errorEvent(),
         archivedRecordEvent()
       ).call()
@@ -67,7 +69,10 @@ describe("CalculateMessageStatusUseCase", () => {
     })
 
     it("should return Completed status when there are no exceptions and triggers, and PNC is updated", () => {
-      const { status, pncStatus, triggerStatus } = new CalculateMessageStatusUseCase(pncUpdatedEvent()).call()
+      const { status, pncStatus, triggerStatus } = new CalculateMessageStatusUseCase(
+        undefined,
+        pncUpdatedEvent()
+      ).call()
 
       expect(status).toBe(AuditLogStatus.completed)
       expect(pncStatus).toBe(PncStatus.Updated)
@@ -76,6 +81,7 @@ describe("CalculateMessageStatusUseCase", () => {
 
     it("should return Completed status when there are no exceptions and triggers, and record is ignored (no offences)", () => {
       const { status, pncStatus, triggerStatus } = new CalculateMessageStatusUseCase(
+        undefined,
         recordIgnoredNoOffencesEvent()
       ).call()
 
@@ -86,6 +92,7 @@ describe("CalculateMessageStatusUseCase", () => {
 
     it("should return Completed status when there are no exceptions and triggers, and record is ignored (no recordable offences)", () => {
       const { status, pncStatus, triggerStatus } = new CalculateMessageStatusUseCase(
+        undefined,
         recordIgnoredNoRecordableOffencesEvent()
       ).call()
 
@@ -96,6 +103,7 @@ describe("CalculateMessageStatusUseCase", () => {
 
     it("should return Completed status when there are no exceptions, triggers are resolved, and PNC is updated", () => {
       const { status, pncStatus, triggerStatus } = new CalculateMessageStatusUseCase(
+        undefined,
         prePNCUpdateTriggersGeneratedEvent(),
         postPNCUpdateTriggersGeneratedEvent(),
         triggerInstancesResolvedEvent(),
@@ -109,6 +117,7 @@ describe("CalculateMessageStatusUseCase", () => {
 
     it("should return Completed status when there are no exceptions, triggers are resolved, and record is ignored", () => {
       const { status, pncStatus, triggerStatus } = new CalculateMessageStatusUseCase(
+        undefined,
         prePNCUpdateTriggersGeneratedEvent(),
         postPNCUpdateTriggersGeneratedEvent(),
         triggerInstancesResolvedEvent(),
@@ -122,6 +131,7 @@ describe("CalculateMessageStatusUseCase", () => {
 
     it("should return Completed status when exceptions are resolved and resubmitted, there are no triggers, and record is ignored", () => {
       const { status, pncStatus, triggerStatus } = new CalculateMessageStatusUseCase(
+        undefined,
         recordIgnoredNoRecordableOffencesEvent()
       ).call()
 
@@ -132,6 +142,7 @@ describe("CalculateMessageStatusUseCase", () => {
 
     it("should return Completed status when there are no exceptions, all triggers resolved event exists, and PNC is updated", () => {
       const { status, pncStatus, triggerStatus } = new CalculateMessageStatusUseCase(
+        undefined,
         prePNCUpdateTriggersGeneratedEvent(),
         postPNCUpdateTriggersGeneratedEvent(),
         allTriggersResolvedEvent(),
@@ -144,7 +155,10 @@ describe("CalculateMessageStatusUseCase", () => {
     })
 
     it("should return Completed status when exceptions are resolved and resubmitted, there are no triggers, and PNC is updated", () => {
-      const { status, pncStatus, triggerStatus } = new CalculateMessageStatusUseCase(pncUpdatedEvent()).call()
+      const { status, pncStatus, triggerStatus } = new CalculateMessageStatusUseCase(
+        undefined,
+        pncUpdatedEvent()
+      ).call()
 
       expect(status).toBe(AuditLogStatus.completed)
       expect(pncStatus).toBe(PncStatus.Updated)
@@ -153,6 +167,7 @@ describe("CalculateMessageStatusUseCase", () => {
 
     it("should return Completed status when exceptions are manually resolved, there are no triggers, and record is ignored", () => {
       const { status, pncStatus, triggerStatus } = new CalculateMessageStatusUseCase(
+        undefined,
         exceptionsManuallyResolvedEvent(),
         recordIgnoredNoRecordableOffencesEvent()
       ).call()
@@ -164,6 +179,7 @@ describe("CalculateMessageStatusUseCase", () => {
 
     it("should return Completed status when exceptions are manually resolved, there are no triggers, and PNC is updated", () => {
       const { status, pncStatus, triggerStatus } = new CalculateMessageStatusUseCase(
+        undefined,
         exceptionsManuallyResolvedEvent(),
         pncUpdatedEvent()
       ).call()
@@ -175,6 +191,7 @@ describe("CalculateMessageStatusUseCase", () => {
 
     it("should return Completed status when exceptions are resolved and resubmitted, triggers are resolved, and record is ignored", () => {
       const { status, pncStatus, triggerStatus } = new CalculateMessageStatusUseCase(
+        undefined,
         prePNCUpdateTriggersGeneratedEvent(),
         postPNCUpdateTriggersGeneratedEvent(),
         triggerInstancesResolvedEvent(),
@@ -188,6 +205,7 @@ describe("CalculateMessageStatusUseCase", () => {
 
     it("should return Completed status when exceptions are resolved and resubmitted, triggers are resolved, and PNC is updated", () => {
       const { status, pncStatus, triggerStatus } = new CalculateMessageStatusUseCase(
+        undefined,
         prePNCUpdateTriggersGeneratedEvent(),
         postPNCUpdateTriggersGeneratedEvent(),
         triggerInstancesResolvedEvent(),
@@ -201,6 +219,7 @@ describe("CalculateMessageStatusUseCase", () => {
 
     it("should return Completed status when exceptions are manually resolved, triggers are resolved, and record is ignored", () => {
       const { status, pncStatus, triggerStatus } = new CalculateMessageStatusUseCase(
+        undefined,
         exceptionsManuallyResolvedEvent(),
         prePNCUpdateTriggersGeneratedEvent(),
         postPNCUpdateTriggersGeneratedEvent(),
@@ -215,6 +234,7 @@ describe("CalculateMessageStatusUseCase", () => {
 
     it("should return Completed status when exceptions are manually resolved, triggers are resolved, and PNC is updated", () => {
       const { status, pncStatus, triggerStatus } = new CalculateMessageStatusUseCase(
+        undefined,
         exceptionsManuallyResolvedEvent(),
         prePNCUpdateTriggersGeneratedEvent(),
         postPNCUpdateTriggersGeneratedEvent(),
@@ -229,6 +249,7 @@ describe("CalculateMessageStatusUseCase", () => {
 
     it("should return Retrying status when last event type is retrying", () => {
       const { status, pncStatus, triggerStatus } = new CalculateMessageStatusUseCase(
+        undefined,
         prePNCUpdateTriggersGeneratedEvent(),
         errorEvent(),
         retryingEvent(),
@@ -243,6 +264,7 @@ describe("CalculateMessageStatusUseCase", () => {
 
     it("should return Error status when there is an event with category Error", () => {
       const { status, pncStatus, triggerStatus } = new CalculateMessageStatusUseCase(
+        undefined,
         prePNCUpdateTriggersGeneratedEvent(),
         errorEvent(),
         retryingEvent(),
@@ -256,6 +278,7 @@ describe("CalculateMessageStatusUseCase", () => {
 
     it("should return Processing status when triggers are not resolved", () => {
       const { status, pncStatus, triggerStatus } = new CalculateMessageStatusUseCase(
+        undefined,
         prePNCUpdateTriggersGeneratedEvent()
       ).call()
 
@@ -266,6 +289,7 @@ describe("CalculateMessageStatusUseCase", () => {
 
     it("should return Processing status when triggers are partially resolved", () => {
       const { status, pncStatus, triggerStatus } = new CalculateMessageStatusUseCase(
+        undefined,
         prePNCUpdateTriggersGeneratedEvent(),
         postPNCUpdateTriggersGeneratedEvent(),
         triggerInstancesPartiallyResolvedEvent(),
@@ -279,6 +303,7 @@ describe("CalculateMessageStatusUseCase", () => {
 
     it("should return Processing status when exceptions are not resolved", () => {
       const { status, pncStatus, triggerStatus } = new CalculateMessageStatusUseCase(
+        undefined,
         prePNCUpdateTriggersGeneratedEvent(),
         triggerInstancesResolvedEvent(),
         recordIgnoredNoRecordableOffencesEvent()
@@ -291,6 +316,7 @@ describe("CalculateMessageStatusUseCase", () => {
 
     it("should return Processing status when there are no PNC updated or record ignored events", () => {
       const { status, pncStatus, triggerStatus } = new CalculateMessageStatusUseCase(
+        undefined,
         prePNCUpdateTriggersGeneratedEvent(),
         triggerInstancesResolvedEvent()
       ).call()
@@ -303,13 +329,13 @@ describe("CalculateMessageStatusUseCase", () => {
 
   describe("PNC status", () => {
     it("should default to Processing", () => {
-      const { pncStatus } = new CalculateMessageStatusUseCase().call()
+      const { pncStatus } = new CalculateMessageStatusUseCase(undefined).call()
 
       expect(pncStatus).toBe(PncStatus.Processing)
     })
 
     it("should be Updated if the PNC has been updated", () => {
-      const { pncStatus } = new CalculateMessageStatusUseCase(pncUpdatedEvent()).call()
+      const { pncStatus } = new CalculateMessageStatusUseCase(undefined, pncUpdatedEvent()).call()
 
       expect(pncStatus).toBe(PncStatus.Updated)
     })
@@ -322,19 +348,19 @@ describe("CalculateMessageStatusUseCase", () => {
       EventCode.IgnoredNoOffences,
       EventCode.IgnoredNonrecordable
     ])("should be Ignored if the message is ignored (%s)", (eventCode: EventCode) => {
-      const { pncStatus } = new CalculateMessageStatusUseCase(createEvent(eventCode)).call()
+      const { pncStatus } = new CalculateMessageStatusUseCase(undefined, createEvent(eventCode)).call()
 
       expect(pncStatus).toBe(PncStatus.Ignored)
     })
 
     it("should be ManuallyResolved if the exception was manually resolved", () => {
-      const { pncStatus } = new CalculateMessageStatusUseCase(exceptionsManuallyResolvedEvent()).call()
+      const { pncStatus } = new CalculateMessageStatusUseCase(undefined, exceptionsManuallyResolvedEvent()).call()
 
       expect(pncStatus).toBe(PncStatus.ManuallyResolved)
     })
 
     it("should be Exceptions if there were exceptions generated", () => {
-      const { pncStatus } = new CalculateMessageStatusUseCase(exceptionsEvent()).call()
+      const { pncStatus } = new CalculateMessageStatusUseCase(undefined, exceptionsEvent()).call()
 
       expect(pncStatus).toBe(PncStatus.Exceptions)
     })
@@ -342,13 +368,14 @@ describe("CalculateMessageStatusUseCase", () => {
 
   describe("Trigger status", () => {
     it("should default to NoTriggers", () => {
-      const { triggerStatus } = new CalculateMessageStatusUseCase().call()
+      const { triggerStatus } = new CalculateMessageStatusUseCase(undefined).call()
 
       expect(triggerStatus).toBe(TriggerStatus.NoTriggers)
     })
 
     it("should be Resolved if triggers were raised and resolved", () => {
       const { triggerStatus } = new CalculateMessageStatusUseCase(
+        undefined,
         prePNCUpdateTriggersGeneratedEvent(),
         postPNCUpdateTriggersGeneratedEvent(),
         triggerInstancesResolvedEvent()
@@ -359,11 +386,26 @@ describe("CalculateMessageStatusUseCase", () => {
 
     it("should be Generated if triggers were raised and not resolved", () => {
       const { triggerStatus } = new CalculateMessageStatusUseCase(
+        undefined,
         prePNCUpdateTriggersGeneratedEvent(),
         postPNCUpdateTriggersGeneratedEvent()
       ).call()
 
       expect(triggerStatus).toBe(TriggerStatus.Generated)
+    })
+
+    it("should set all statuses to Duplicate when audit log status is already Duplicate", () => {
+      const result = new CalculateMessageStatusUseCase(
+        AuditLogStatus.duplicate,
+        prePNCUpdateTriggersGeneratedEvent(),
+        postPNCUpdateTriggersGeneratedEvent()
+      ).call()
+
+      expect(result).toEqual({
+        status: AuditLogStatus.duplicate,
+        triggerStatus: TriggerStatus.Duplicate,
+        pncStatus: PncStatus.Duplicate
+      })
     })
   })
 })

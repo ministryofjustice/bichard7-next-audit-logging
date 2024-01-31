@@ -36,7 +36,7 @@ describe("CreateAuditLogUseCase", () => {
     expect(result2).toBeDefined()
     expect(result2).toNotBeError()
 
-    expect(result2).toEqual({ isValid: false, isDuplicate: true, generateDuplicateEvent: true })
+    expect(result2).toEqual({ isValid: false, isDuplicate: true, generateDuplicateEvent: false })
   })
 
   it("should return error when API returns error", async () => {

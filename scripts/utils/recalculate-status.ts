@@ -25,10 +25,10 @@
 import { Lambda } from "aws-sdk"
 import fs from "fs"
 import { AuditLogDynamoGateway, DynamoDbConfig } from "../../src/audit-log-api/gateways/dynamo"
-import { DynamoAuditLog, isError, Result } from "../../src/shared/types"
 import CalculateMessageStatusUseCase, {
   MessageStatus
 } from "../../src/audit-log-api/gateways/dynamo/AuditLogDynamoGateway/CalculateMessageStatusUseCase"
+import { AuditLogStatus, DynamoAuditLog, Result, isError } from "../../src/shared/types"
 
 const { MESSAGE_ID, SESSION, WORKSPACE, START, END, NUMBER_OF_CALCULATORS, SKIP_UPDATE_ERRORS, DRY_RUN, LOG_LEVEL } =
   process.env
@@ -198,16 +198,12 @@ async function recalculateStatuses(dynamo: AuditLogDynamoGateway, messages: Dyna
   const statusCalculator = async () => {
     while (true) {
       let message = messages.shift()
-      if (!message) {
-        return
-      }
-
       const events = await dynamo.getEvents(message.messageId)
       if (isError(events)) {
         throw Error(`Couldn't get events for message ${message.messageId}`)
       }
 
-      const recalculatedStatus = new CalculateMessageStatusUseCase(events).call()
+      const recalculatedStatus = new CalculateMessageStatusUseCase(message.status, events).call()
 
       if (
         message.pncStatus === recalculatedStatus.pncStatus &&

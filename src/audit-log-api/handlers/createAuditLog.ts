@@ -12,7 +12,6 @@ const createAuditLogUseCase = new CreateAuditLogUseCase(auditLogGateway)
 
 export default async function createAuditLog(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
   const request = parseCreateAuditLogRequest(event)
-
   if (isError(request)) {
     return createJsonApiResult({
       statusCode: HttpStatusCode.badRequest,
@@ -21,7 +20,6 @@ export default async function createAuditLog(event: APIGatewayProxyEvent): Promi
   }
 
   const { isValid, errors, auditLog } = await validateCreateAuditLog(request, auditLogGateway)
-
   if (!isValid) {
     return createJsonApiResult({
       statusCode: HttpStatusCode.badRequest,
@@ -48,6 +46,6 @@ export default async function createAuditLog(event: APIGatewayProxyEvent): Promi
 
   return createJsonApiResult({
     statusCode: HttpStatusCode.created,
-    body: "Created"
+    body: auditLog
   })
 }

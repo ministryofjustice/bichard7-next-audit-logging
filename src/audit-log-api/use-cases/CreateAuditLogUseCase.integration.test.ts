@@ -1,5 +1,5 @@
 import { mockDynamoAuditLog } from "src/shared/testing"
-import type { DynamoAuditLog } from "src/shared/types"
+import { AuditLogStatus, PncStatus, type DynamoAuditLog, TriggerStatus } from "src/shared/types"
 import { AuditLogDynamoGateway } from "../gateways/dynamo"
 import { auditLogDynamoConfig, TestDynamoGateway } from "../test"
 import CreateAuditLogUseCase from "./CreateAuditLogUseCase"
@@ -54,5 +54,23 @@ describe("CreateAuditLogUseCase", () => {
     expect(actualAuditLog?.externalCorrelationId).toBe(expectedAuditLog.externalCorrelationId)
     expect(actualAuditLog?.caseId).toBe(expectedAuditLog.caseId)
     expect(actualAuditLog?.receivedDate).toBe(expectedAuditLog.receivedDate)
+  })
+
+  it("should set the PNC and trigger statuses to duplicate when audit log status is duplicate", async () => {
+    const expectedAuditLog = mockDynamoAuditLog({ status: AuditLogStatus.duplicate })
+
+    const result = await createAuditLogUseCase.create(expectedAuditLog)
+
+    expect(result.resultType).toBe("success")
+    expect(result.resultDescription).toBeUndefined()
+
+    const actualAuditLog = await getAuditLog(expectedAuditLog.messageId)
+    expect(actualAuditLog?.messageId).toBe(expectedAuditLog.messageId)
+    expect(actualAuditLog?.externalCorrelationId).toBe(expectedAuditLog.externalCorrelationId)
+    expect(actualAuditLog?.caseId).toBe(expectedAuditLog.caseId)
+    expect(actualAuditLog?.receivedDate).toBe(expectedAuditLog.receivedDate)
+    expect(actualAuditLog?.status).toBe(AuditLogStatus.duplicate)
+    expect(actualAuditLog?.pncStatus).toBe(PncStatus.Duplicate)
+    expect(actualAuditLog?.triggerStatus).toBe(TriggerStatus.Duplicate)
   })
 })

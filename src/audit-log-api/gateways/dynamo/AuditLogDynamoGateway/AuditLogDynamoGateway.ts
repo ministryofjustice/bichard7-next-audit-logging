@@ -197,24 +197,19 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
     }
   }
 
-  async fetchByHash(hash: string, options: ProjectionOptions = {}): PromiseResult<DynamoAuditLog | null> {
+  async fetchByHash(hash: string, options: ProjectionOptions = {}): PromiseResult<DynamoAuditLog[]> {
     const includeColumns = ["messageHash", ...(options?.includeColumns ?? [])]
     const fetchByIndexOptions: FetchByIndexOptions = {
       indexName: "messageHashIndex",
       hashKeyName: "messageHash",
       hashKeyValue: hash,
-      pagination: { limit: 1 },
+      pagination: {},
       projection: this.getProjectionExpression(includeColumns, options?.excludeColumns)
     }
 
     const result = await this.fetchByIndex(this.config.auditLogTableName, fetchByIndexOptions)
-
     if (isError(result)) {
       return result
-    }
-
-    if (result.Count === 0) {
-      return null
     }
 
     const items = <DynamoAuditLog[]>result?.Items
@@ -225,7 +220,7 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
       }
     }
 
-    return items[0]
+    return items
   }
 
   async fetchByStatus(status: string, options: FetchByStatusOptions = {}): PromiseResult<DynamoAuditLog[]> {

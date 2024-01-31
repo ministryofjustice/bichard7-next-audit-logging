@@ -1,5 +1,5 @@
 import { mockDynamoAuditLog, mockInputApiAuditLog } from "src/shared/testing"
-import type { InputApiAuditLog } from "src/shared/types"
+import { AuditLogStatus, type InputApiAuditLog } from "src/shared/types"
 import { FakeAuditLogDynamoGateway } from "../test"
 import validateCreateAuditLog from "./validateCreateAuditLog"
 
@@ -51,7 +51,7 @@ describe("validateCreateAuditLog", () => {
     expect(auditLog.systemId).toBe(item.systemId)
     expect(auditLog.externalCorrelationId).toBe(item.externalCorrelationId)
     expect(auditLog.receivedDate).toEqual(item.receivedDate)
-    expect(auditLog).not.toHaveProperty("status")
+    expect(auditLog.status).toBe(AuditLogStatus.processing)
     expect(auditLog).not.toHaveProperty("version")
     expect(auditLog).not.toHaveProperty("events")
     expect(auditLog).not.toHaveProperty("automationReport")
@@ -137,16 +137,16 @@ describe("validateCreateAuditLog", () => {
     expect(auditLog.receivedDate).toHaveLength(24)
   })
 
-  it("should be invalid if message hash exists in the database", async () => {
+  it("should set the audit log status to duplicate when message hash exists in database", async () => {
     const item = mockInputApiAuditLog({ messageHash: "DuplicateHash" })
     const duplicateItem = mockDynamoAuditLog({ messageHash: "DuplicateHash" })
 
     dynamoGateway.reset([duplicateItem])
-    const { errors, isValid } = await validateCreateAuditLog(item, dynamoGateway)
+    const { errors, isValid, auditLog } = await validateCreateAuditLog(item, dynamoGateway)
 
-    expect(isValid).toBe(false)
-    expect(errors).toHaveLength(1)
-    expect(errors).toContain("Message hash already exists")
+    expect(isValid).toBe(true)
+    expect(errors).toHaveLength(0)
+    expect(auditLog.status).toBe(AuditLogStatus.duplicate)
   })
 
   it("should be invalid if couldn't validate message hash", async () => {

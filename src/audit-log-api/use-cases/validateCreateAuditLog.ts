@@ -1,6 +1,6 @@
 import { logger } from "src/shared"
 import type { InputApiAuditLog } from "src/shared/types"
-import { isError } from "src/shared/types"
+import { AuditLogStatus, isError } from "src/shared/types"
 import type { AuditLogDynamoGatewayInterface } from "../gateways/dynamo"
 import { isIsoDate } from "../utils"
 
@@ -30,6 +30,7 @@ export default async (
     externalId,
     messageHash
   } = auditLog
+  let status = AuditLogStatus.processing
 
   if (!caseId) {
     errors.push("Case ID is mandatory")
@@ -85,8 +86,8 @@ export default async (
     if (isError(fetchByHashResult)) {
       logger.error("Error validating message hash", fetchByHashResult)
       errors.push("Couldn't validate message hash")
-    } else if (fetchByHashResult) {
-      errors.push("Message hash already exists")
+    } else if (fetchByHashResult.length) {
+      status = AuditLogStatus.duplicate
     }
   }
 
@@ -114,7 +115,8 @@ export default async (
     receivedDate: formattedReceivedDate,
     s3Path,
     stepExecutionId,
-    systemId
+    systemId,
+    status
   }
 
   return {

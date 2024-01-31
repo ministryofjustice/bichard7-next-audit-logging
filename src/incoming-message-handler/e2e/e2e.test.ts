@@ -107,16 +107,14 @@ describe("e2e tests", () => {
     expect(actualMessage).toNotBeError()
   })
 
-  it("should add duplicate message event to the existing audit log record for a duplicate message when the message is sent to the S3 bucket", async () => {
+  it("should create a new audit log record for a duplicate message when the message is sent to the S3 bucket", async () => {
     const queueName = "2_INCOMING_MESSAGE_HANDLER_QUEUE"
     process.env.MQ_QUEUE = queueName
     const fileName = `2021/03/15/12/28/${externalId}.xml`
-    const expectedReceivedDate = new Date(2021, 2 /* March */, 15, 12, 28)
     const executionId = uuid()
 
     const duplicateMessageExternalId = uuid()
     const duplicateMessageFileName = `2021/03/15/12/29/${duplicateMessageExternalId}.xml`
-    const duplicateMessageReceivedDate = new Date(2021, 2 /* March */, 15, 12, 29)
     const duplicateMessageExecutionId = uuid()
     const duplicateMessageExternalCorrelationId = uuid()
     const dataUniqueValue = uuid()
@@ -131,39 +129,15 @@ describe("e2e tests", () => {
     // Get messages from the API
     const api = new TestApi()
     const persistedMessages = await api.getMessages()
-    expect(persistedMessages).toHaveLength(1)
+    expect(persistedMessages).toHaveLength(2)
 
-    const persistedMessage = persistedMessages[0]
-    expect(persistedMessage.externalCorrelationId).toBe(expectedExternalCorrelationId)
-    expect(persistedMessage.caseId).toBe(expectedCaseId)
-    expect(persistedMessage.createdBy).toBe("Incoming message handler")
-    expect(persistedMessage.externalId).toBe(externalId)
-    expect(persistedMessage.s3Path).toBe(fileName)
-
-    // Received date will be a string as we currently pull it straight from the database without parsing
-    expect(persistedMessage.receivedDate).toBe(expectedReceivedDate.toISOString())
-
-    expect(persistedMessage.events).toBeDefined()
-    expect(persistedMessage.events).toHaveLength(2)
-
-    const messageSentToBichardEvent = persistedMessage.events[0]
-    expect(messageSentToBichardEvent.category).toBe("information")
-    expect(messageSentToBichardEvent.eventCode).toBe("hearing-outcome.received-incoming")
-    expect(messageSentToBichardEvent.eventType).toBe("Message Sent to Bichard")
-    expect(messageSentToBichardEvent.eventSource).toBe("Incoming Message Handler")
-
-    const duplicateMessageEvent = persistedMessage.events[1]
-    expect(duplicateMessageEvent.category).toBe("information")
-    expect(duplicateMessageEvent.eventCode).toBe("audit-log.duplicate-message")
-    expect(duplicateMessageEvent.eventType).toBe("Duplicate message")
-    expect(duplicateMessageEvent.eventSource).toBe("Incoming Message Handler")
-    expect(duplicateMessageEvent.attributes).toStrictEqual({
-      externalId: duplicateMessageExternalId,
-      stepExecutionId: duplicateMessageExecutionId,
-      s3Path: duplicateMessageFileName,
-      receivedDate: duplicateMessageReceivedDate.toISOString(),
-      externalCorrelationId: duplicateMessageExternalCorrelationId
-    })
+    const originalMessage = persistedMessages.find((message) => message.s3Path === fileName)
+    const duplicateMessage = persistedMessages.find((message) => message.s3Path === duplicateMessageFileName)
+    expect(originalMessage).toBeDefined()
+    expect(duplicateMessage).toBeDefined()
+    expect(duplicateMessage?.messageHash).toBeDefined()
+    expect(originalMessage?.messageId).not.toBe(duplicateMessage?.messageId)
+    expect(originalMessage?.messageHash).toBe(duplicateMessage?.messageHash)
 
     const actualMessage = await testMqGateway.getMessage(queueName)
     expect(actualMessage).toNotBeError()

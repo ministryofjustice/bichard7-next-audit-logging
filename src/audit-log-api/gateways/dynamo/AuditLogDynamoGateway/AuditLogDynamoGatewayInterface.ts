@@ -16,7 +16,7 @@ export default interface AuditLogDynamoGateway {
     externalCorrelationId: string,
     options?: ProjectionOptions
   ): PromiseResult<DynamoAuditLog | null>
-  fetchByHash(hash: string, options?: ProjectionOptions): PromiseResult<DynamoAuditLog | null>
+  fetchByHash(hash: string, options?: ProjectionOptions): PromiseResult<DynamoAuditLog[]>
   fetchByStatus(status: string, options?: FetchByStatusOptions): PromiseResult<DynamoAuditLog[]>
   fetchMany(options?: FetchManyOptions): PromiseResult<DynamoAuditLog[]>
   fetchOne(messageId: string, options?: FetchOneOptions): PromiseResult<DynamoAuditLog | undefined>
