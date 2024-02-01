@@ -21,9 +21,8 @@ describe("CreateAuditLogUseCase", () => {
 
     expect(result).toNotBeError()
     expect(result).toEqual({
-      isValid: false,
-      isDuplicate: true,
-      generateDuplicateEvent: false
+      isValid: true,
+      isDuplicate: true
     })
   })
 })

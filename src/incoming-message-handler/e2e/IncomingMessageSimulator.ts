@@ -9,7 +9,7 @@ import storeMessage from "../handlers/storeMessage"
 const validateStoreMessage = (input: KeyValuePair<string, unknown>) => {
   if ("validationResult" in input) {
     const { isValid, isDuplicate } = input.validationResult as { isValid: boolean; isDuplicate: boolean }
-    if (isValid === false && isDuplicate === true) {
+    if (isValid === false || isDuplicate === true) {
       return { __next_step: null }
     }
   }
