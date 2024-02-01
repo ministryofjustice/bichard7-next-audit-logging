@@ -1,4 +1,4 @@
-import type { ApiClient, InputApiAuditLog, OutputApiAuditLog, PromiseResult } from "src/shared/types"
+import type { ApiClient, InputApiAuditLog, PromiseResult } from "src/shared/types"
 import { AuditLogStatus, isError } from "src/shared/types"
 import type { ValidationResult } from "../handlers/storeMessage"
 

@@ -3,7 +3,6 @@ import type { InputApiAuditLog, S3PutObjectEvent } from "src/shared/types"
 import { isError } from "src/shared/types"
 import { getApiKey, getApiUrl } from "../configs"
 import CreateAuditLogUseCase from "../use-cases/CreateAuditLogUseCase"
-import CreateDuplicateMessageEvent from "../use-cases/CreateDuplicateMessageEvent"
 import formatMessage from "../use-cases/formatMessage"
 import logBadUnicode from "../use-cases/logBadUnicode"
 import readMessage from "../use-cases/readMessage"
@@ -29,7 +28,6 @@ interface StoreMessageValidationResult {
 const s3Gateway = new S3Gateway(createS3Config())
 const apiClient = new AuditLogApiClient(getApiUrl(), getApiKey())
 const createAuditLogUseCase = new CreateAuditLogUseCase(apiClient)
-const createDuplicateMessageEvent = new CreateDuplicateMessageEvent(apiClient)
 
 const createValidationResult = (validationResult: ValidationResult, event: S3PutObjectEvent) => ({
   validationResult,

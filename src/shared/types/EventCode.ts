@@ -18,8 +18,7 @@ enum EventCode {
   Sanitised = "sanitised",
   HearingOutcomeDetails = "hearing-outcome.details",
   PncResponseReceived = "pnc.response-received",
-  PncResponseNotReceived = "pnc.response-not-received",
-  DuplicateMessage = "audit-log.duplicate-message"
+  PncResponseNotReceived = "pnc.response-not-received"
 }
 
 export default EventCode
