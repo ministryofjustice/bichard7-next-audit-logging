@@ -18,7 +18,6 @@ export interface ValidationResult {
   isValid: boolean
   message?: string
   isDuplicate?: boolean
-  generateDuplicateEvent?: boolean
 }
 
 interface StoreMessageValidationResult {
@@ -72,14 +71,7 @@ export default async function storeMessage(
     throw createAuditLogResult
   }
 
-  if (!createAuditLogResult.isValid) {
-    if (createAuditLogResult.isDuplicate && createAuditLogResult.generateDuplicateEvent) {
-      const createDuplicateMessageEventResult = await createDuplicateMessageEvent.execute(auditLog)
-      if (isError(createDuplicateMessageEventResult)) {
-        throw Error(`Error while creating duplicate message event. Message hash ${auditLog.messageHash}`)
-      }
-    }
-
+  if (!createAuditLogResult.isValid || createAuditLogResult.isDuplicate) {
     logger.info(JSON.stringify(createAuditLogResult))
     return createValidationResult(createAuditLogResult, event)
   }
