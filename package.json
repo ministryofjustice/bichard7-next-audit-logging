@@ -73,14 +73,7 @@
     "wait-for-api": "wait-on tcp:3010"
   },
   "lint-staged": {
-    "*.{js,ts,tsx}": [
-      "eslint --fix"
-    ]
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged"
-    }
+    "*.{js,ts,tsx}": "eslint --cache --fix --max-warnings 0"
   },
   "dependencies": {
     "aws-lambda": "^1.0.7",
