@@ -18,7 +18,7 @@ module.exports = {
   overrides: [
     {
       files: ["**/*.js"],
-      extends: ["airbnb", "prettier", "plugin:prettier/recommended"],
+      extends: ["airbnb-base", "prettier", "plugin:prettier/recommended"],
       rules: {
         "@typescript-eslint/no-var-requires": "off",
         curly: [2, "all"]
@@ -60,6 +60,12 @@ module.exports = {
         "import/first": "off",
         "import/no-extraneous-dependencies": "off",
         "@typescript-eslint/no-non-null-assertion": "off"
+      }
+    },
+    {
+      files: [".ncurc.js"],
+      rules: {
+        "no-console": "off"
       }
     }
   ]
