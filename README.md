@@ -40,70 +40,31 @@ The majority of code in this repository is written in Typescript. In order to en
 1. Install [`nvm`](https://github.com/nvm-sh/nvm)
 2. In the root of this repository, run:
 
-    ```shell
-    nvm install
-    nvm use
-    ```
+   ```shell
+   nvm install
+   nvm use
+   ```
 
 This will use the version specified in the [`.nvmrc`](.nvmrc) file.
 
-We use `pg-native` library to access PostgreSQL. You need to install the followings before installing node packages:
-
-  ```shell
-  brew install postgresql
-  brew install libpq
-  ```
-
-You can then use the Makefile to get started:
+We use `pg-native` library to access PostgreSQL. You need to install the following before installing node packages:
 
 ```shell
-# Build dependencies
-$ make install
-
-# Build all components
-$ make build-all
-
-# Build a specific component, and any other components it depends on
-$ make audit-log-api
-
-# Run all components
-$ make run-all
-
-# Run all components except the portal
-# (Useful if you want to run the portal separately with `npm run dev`)
-$ make run-all-without-portal
-
-# Stop running all components
-$ make destroy
-
-# Clear the build folders for all components
-$ make clean
-
-# Lint all of the code
-$ make validate
-
-# Auto fix all of the dependencies for all components
-$ make audit-fix
+brew install postgresql
+brew install libpq
 ```
 
-## Development
-
-### Build Order
-
-Since we use shared local modules in these projects, there are some dependencies that denote a build order for dependent projects. The easiest way is to use the preset scripts to build:
+You can then use the npm commands to get started:
 
 ```shell
-make build
-```
+# Running the services for local development
 
-> Check the `scripts/projects` file to see the build order.
+# Spin up the database and mq
+npm run db:mq
 
-### Testing
+# Install dynamo and start the API
+npm run start api
 
-The easiest way to run all tests is with the Make command:
-
-```shell
-make test
 ```
 
 Where applicable, each component has tests that are run by Jest. To run these, simply run `npm test` from within the relevant project folder. Projects may also have different test scripts that you can run with the following commands:
@@ -117,15 +78,7 @@ Where applicable, each component has tests that are run by Jest. To run these, s
 
 All of these approaches will execute tests in a watch mode, which will allow you to make changes to the underlying tests or codebase and then save the files to automatically trigger another test run.
 
-> Note: Before running integration or end-to-end tests, you need to make sure you have rebuilt any changes using `npm run build:dev` in the respective project folder.
-
-### Before Committing / Pushing
-
-Before you commit and push your code, and especially before raising a pull request, make sure you run through the following steps first.
-
-1. You have run `make validate` from the root of the repository and fixed any related errors or warnings.
-2. You have built all projects using `make build`.
-3. You have run `make test` and all tests pass.
+> Note: Before running integration or end-to-end tests, you need to make sure you have rebuilt any changes using `npm run build` in the respective project folder.
 
 ## A note on running the docker container locally
 
