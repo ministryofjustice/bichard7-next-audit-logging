@@ -59,11 +59,14 @@ You can then use the npm commands to get started:
 ```shell
 # Running the services for local development
 
-# Spin up the database and mq
+# Spin up mq and postgres
 npm run db:mq
 
 # Install dynamo and start the API
 npm run start api
+
+# If you want to destory mq and postgres containers
+npm run destory
 
 ```
 
