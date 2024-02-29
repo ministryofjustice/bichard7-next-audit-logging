@@ -59,6 +59,7 @@
     "build": "node build.js",
     "check": "tsc --noEmit",
     "hook:before:offline:start:init": "make run-mq run-pg",
+    "destroy": "docker-compose -f ./environment/docker-compose.yml down",
     "install-dynamo": "./scripts/install-dynamodb-local.sh && make fix-serverless-dynamodb-local",
     "lint:fix": "eslint . --fix",
     "lint": "eslint .",
