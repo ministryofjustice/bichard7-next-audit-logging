@@ -60,7 +60,7 @@ You can then use the npm commands to get started:
 # Running the services for local development
 
 # Spin up mq and postgres
-npm run db:mq
+npm run hook:before:offline:start:init
 
 # Install dynamo and start the API
 npm run start api
