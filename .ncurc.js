@@ -5,7 +5,7 @@
   - @typescript-eslint/parser
     - Another pkg does not yet support the latest version
 */
-const pinned = ["@typescript-eslint/eslint-plugin", "@typescript-eslint/parser"]
+const pinned = []
 const ignored = []
 const skipped = []
 
