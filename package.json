@@ -4,7 +4,7 @@
   "version": "0.0.1",
   "private": true,
   "devDependencies": {
-    "@aws-sdk/client-lambda": "^3.525.0",
+    "@aws-sdk/client-lambda": "^3.529.1",
     "@babel/core": "^7.24.0",
     "@stomp/stompjs": "^7.0.0",
     "@types/aws-lambda": "^8.10.136",
@@ -43,7 +43,7 @@
     "prettier": "^3.2.5",
     "serverless": "^3.38.0",
     "serverless-dynamodb-local": "^0.2.40",
-    "serverless-esbuild": "^1.51.0",
+    "serverless-esbuild": "^1.52.1",
     "serverless-hooks": "^1.0.0",
     "serverless-offline": "^13.3.3",
     "serverless-s3-local": "^0.8.1",
@@ -78,7 +78,7 @@
   },
   "dependencies": {
     "aws-lambda": "^1.0.7",
-    "aws-sdk": "^2.1572.0",
+    "aws-sdk": "^2.1574.0",
     "axios": "^1.6.7",
     "date-fns": "^3.3.1",
     "lodash.groupby": "^4.6.0",
