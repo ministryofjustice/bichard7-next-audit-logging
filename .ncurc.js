@@ -1,21 +1,28 @@
 /*
   Pinned:
-  - @typescript-eslint/eslint-plugin
-    - Another pkg does not yet support the latest version
-  - @typescript-eslint/parser
-    - Another pkg does not yet support the latest version
+  - eslint [???]
+  - esbuild [15/04/24 - breaks serverless-esbuild]
 */
-const pinned = ["eslint"]
+const minor = ["eslint"]
+const patch = ["esbuild"]
+
 const ignored = []
 const skipped = []
 
 module.exports = {
   target: (pkg) => {
-    if (pinned.some((pin) => pin === pkg)) {
+    if (minor.some((pin) => pin === pkg)) {
       const res = "minor"
       console.log(` ${pkg} is pinned to ${res} upgrades only (.ncurc.js)`)
       return res
     }
+
+    if (patch.some((pin) => pin === pkg)) {
+      const res = "patch"
+      console.log(` ${pkg} is pinned to ${res} upgrades only (.ncurc.js)`)
+      return res
+    }
+
     return "latest"
   },
 
