@@ -3,7 +3,12 @@
   - eslint [???]
   - esbuild [15/04/24 - breaks serverless-esbuild]
 */
-const minor = ["eslint"]
+/*
+  Minor:
+  - severless [28/04/24 - major bump breaks dependencies]
+  - serverless-offline [28/04/24 - major bump breaks dependencies]
+*/
+const minor = ["eslint", "serverless", "serverless-offline"]
 const patch = ["esbuild"]
 
 const ignored = []
