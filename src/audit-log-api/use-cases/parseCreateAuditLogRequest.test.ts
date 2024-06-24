@@ -36,5 +36,5 @@ test("should return error when request body is not valid", () => {
   expect(isError(result)).toBe(true)
 
   const error = <Error>result
-  expect(error.message).toBe("Unexpected token I in JSON at position 0")
+  expect(error.message).toBe("Unexpected token 'I', \"Invalid format\" is not valid JSON")
 })
