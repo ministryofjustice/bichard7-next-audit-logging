@@ -1,11 +1,11 @@
 import type { APIGatewayProxyEvent } from "aws-lambda"
+import { HttpStatusCode } from "src/shared"
 import { mockApiAuditLogEvent } from "src/shared/testing"
 import type { ApiAuditLogEvent } from "src/shared/types"
-import { HttpStatusCode } from "src/shared"
 import "../testConfig"
-jest.mock("./src/audit-log-api/use-cases/validateCreateAuditLogEvents.ts")
 import { CreateAuditLogUserEventsUseCase, validateCreateAuditLogEvents } from "../use-cases"
 import createAuditLogUserEvents from "./createAuditLogUserEvents"
+jest.mock("./src/audit-log-api/use-cases/validateCreateAuditLogEvents.ts")
 
 const mockedValidateCreateAuditLogEvents = validateCreateAuditLogEvents as jest.MockedFunction<
   typeof validateCreateAuditLogEvents
@@ -124,7 +124,7 @@ describe("createAuditLogUserEvents", () => {
     const actualResponse = await createAuditLogUserEvents(event)
 
     expect(actualResponse.statusCode).toBe(HttpStatusCode.badRequest)
-    expect(actualResponse.body).toBe("Could not parse body. Unexpected token I in JSON at position 0")
+    expect(actualResponse.body).toBe("Could not parse body. Unexpected token 'I', \"Invalid JSON\" is not valid JSON")
     expect(mockCreateAuditLogUserEventsUseCase).not.toHaveBeenCalled()
   })
 
