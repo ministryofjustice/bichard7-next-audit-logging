@@ -37,8 +37,8 @@ stop-pg:
 .PHONY: fix-serverless-dynamodb-local
 fix-serverless-dynamodb-local:
 	cd ./node_modules/serverless-dynamodb-local && \
-	npx -y replace-in-file "MOCK_ACCESS_KEY_ID" "MOCKACCESSKEYID" index.js && \
-	npx -y replace-in-file "MOCK_SECRET_ACCESS_KEY" "MOCKSECRETACCESSKEY" index.js
+	npx -y replace-in-file@7.2.0 "MOCK_ACCESS_KEY_ID" "MOCKACCESSKEYID" index.js && \
+	npx -y replace-in-file@7.2.0 "MOCK_SECRET_ACCESS_KEY" "MOCKSECRETACCESSKEY" index.js
 
 ########################################
 # Destroy Commands
