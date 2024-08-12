@@ -8,7 +8,13 @@
   - severless [28/04/24 - major bump breaks dependencies]
   - serverless-offline [28/04/24 - major bump breaks dependencies]
 */
-const minor = ["eslint", "serverless", "serverless-offline"]
+const minor = [
+  "eslint",
+  "serverless",
+  "serverless-offline",
+  "@typescript-eslint/parser",
+  "@typescript-eslint/eslint-plugin"
+]
 const patch = ["esbuild"]
 
 const ignored = []
