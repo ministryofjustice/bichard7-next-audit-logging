@@ -40,39 +40,34 @@ async function setup() {
   dynamo = new AuditLogDynamoGateway(dynamoConfig)
 }
 
-const getTriggersFromAttributes = (attributes: AuditLogEventAttributes): string[] => {
-  return Object.entries(attributes).reduce((acc: string[], [key, value]) => {
-    if (key.match(/Trigger \d+ Details/)) {
-      acc.push(value.toString())
-    }
-    return acc
-  }, [])
-}
+const triggerRegex = /Trigger \d+ Details/
+const exceptionRegex = /Exception Type/
 
-const getExceptionsFromAttributes = (attributes: AuditLogEventAttributes): string[] => {
+const getErrorsFromAttributes = (attributes: AuditLogEventAttributes, errorType?: RegExp): string[] => {
   return Object.entries(attributes).reduce((acc: string[], [key, value]) => {
-    if (key.match(/Exception Type/)) {
-      acc.push(value.toString())
-    }
-    return acc
-  }, [])
+    if (errorType) {
+      if (key.match(errorType)) {
+        acc.push(value.toString());
+      }
+    } return acc
+  }, []);
 }
 
 const formatEvent = (event: DynamoAuditLogEvent): string => {
   const output: string[] = []
   output.push(`${event.timestamp} - ${event.eventType}`)
   if (event.eventCode === "triggers.generated" && event.attributes) {
-    output.push(`${" ".repeat(27)}${getTriggersFromAttributes(event.attributes).sort().join(", ")}`)
+    output.push(`${" ".repeat(27)}${getErrorsFromAttributes(event.attributes, triggerRegex).sort().join(", ")}`)
   }
   if (event.eventCode === "triggers.locked") {
     output.push(`${" ".repeat(27)}User: ${event.user}`)
   }
   if (event.eventCode === "triggers.resolved" && event.attributes) {
-    output.push(`${" ".repeat(27)}${getTriggersFromAttributes(event.attributes).sort().join(", ")}`)
+    output.push(`${" ".repeat(27)}${getErrorsFromAttributes(event.attributes).sort().join(", ")}`)
     output.push(`${" ".repeat(27)}User: ${event.user}`)
   }
   if (event.eventCode === "exceptions.generated" && event.attributes) {
-    output.push(`${" ".repeat(27)}${getExceptionsFromAttributes(event.attributes).sort().join(", ")}`)
+    output.push(`${" ".repeat(27)}${getErrorsFromAttributes(event.attributes, exceptionRegex).sort().join(", ")}`)
   }
   return output.join("\n")
 }
