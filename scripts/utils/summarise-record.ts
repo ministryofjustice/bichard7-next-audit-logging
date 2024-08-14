@@ -49,6 +49,15 @@ const getTriggersFromAttributes = (attributes: AuditLogEventAttributes): string[
   }, [])
 }
 
+const getExceptionsFromAttributes = (attributes: AuditLogEventAttributes): string[] => {
+  return Object.entries(attributes).reduce((acc: string[], [key, value]) => {
+    if (key.match(/Exception Type/)) {
+      acc.push(value.toString())
+    }
+    return acc
+  }, [])
+}
+
 const formatEvent = (event: DynamoAuditLogEvent): string => {
   const output: string[] = []
   output.push(`${event.timestamp} - ${event.eventType}`)
@@ -61,6 +70,9 @@ const formatEvent = (event: DynamoAuditLogEvent): string => {
   if (event.eventCode === "triggers.resolved" && event.attributes) {
     output.push(`${" ".repeat(27)}${getTriggersFromAttributes(event.attributes).sort().join(", ")}`)
     output.push(`${" ".repeat(27)}User: ${event.user}`)
+  }
+  if (event.eventCode === "exceptions.generated" && event.attributes) {
+    output.push(`${" ".repeat(27)}${getExceptionsFromAttributes(event.attributes).sort().join(", ")}`)
   }
   return output.join("\n")
 }
