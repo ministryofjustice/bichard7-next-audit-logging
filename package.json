@@ -74,7 +74,7 @@
     "wait-for-api": "wait-on tcp:3010"
   },
   "lint-staged": {
-    "*.{js,ts}": "eslint --cache --fix --max-warnings 0 --ignore-pattern !.ncurc.js"
+    "src/**/*.{js,ts}": "eslint --cache --fix --max-warnings 0 --ignore-pattern !.ncurc.js"
   },
   "dependencies": {
     "aws-lambda": "^1.0.7",
