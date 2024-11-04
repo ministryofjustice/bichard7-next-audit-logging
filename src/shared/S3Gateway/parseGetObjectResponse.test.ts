@@ -24,7 +24,7 @@ it("should convert bytes to string when response body has value", () => {
   const expectedResponse = "String format"
 
   const response = <PromiseResult<S3.GetObjectOutput, AWSError>>(<unknown>{
-    Body: Buffer.from(expectedResponse, "utf-8")
+    Body: Buffer.from(new TextEncoder().encode(expectedResponse))
   })
 
   const result = parseGetObjectResponse(response, objectKey)

@@ -34,7 +34,7 @@ it("should format the message XML when the message XML is correct", async () => 
     messageXml: unwrappedMessage
   } as ReceivedMessage
   const mockedUuidV4 = uuidv4 as jest.MockedFunction<typeof uuidv4>
-  mockedUuidV4.mockReturnValue("MESSAGE_ID")
+  mockedUuidV4.mockReturnValue(new TextEncoder().encode("MESSAGE_ID"))
   const result = await formatMessage(receivedMessage)
 
   expect(result).toNotBeError()
@@ -64,7 +64,7 @@ it("should have the same hash for both wrapped and unwrapped messages", async ()
     messageXml: getWrappedMessage()
   } as ReceivedMessage
   const mockedUuidV4 = uuidv4 as jest.MockedFunction<typeof uuidv4>
-  mockedUuidV4.mockReturnValue("MESSAGE_ID")
+  mockedUuidV4.mockReturnValue(new TextEncoder().encode("MESSAGE_ID"))
   const resultForWrappedMessage = await formatMessage(wrappedReceivedMessage)
   const resultForUnwrappedMessage = await formatMessage(unwrappedReceivedMessage)
 
