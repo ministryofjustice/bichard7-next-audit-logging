@@ -13,7 +13,8 @@ const minor = [
   "serverless",
   "serverless-offline",
   "@typescript-eslint/parser",
-  "@typescript-eslint/eslint-plugin"
+  "@typescript-eslint/eslint-plugin",
+  "uuid"
 ]
 const patch = ["esbuild"]
 
