@@ -1,4 +1,5 @@
 import type { DocumentClient } from "aws-sdk/clients/dynamodb"
+import { randomUUID } from "crypto"
 import { addDays } from "date-fns"
 import { compress, decompress } from "src/shared"
 import type {
@@ -10,7 +11,6 @@ import type {
   PromiseResult
 } from "src/shared/types"
 import { isError } from "src/shared/types"
-import { v4 as uuid } from "uuid"
 import type {
   EventsFilterOptions,
   FetchByStatusOptions,
@@ -599,7 +599,11 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
         return compressedEvent
       }
 
-      const eventToInsert: InternalDynamoAuditLogEvent = { ...compressedEvent, _id: uuid(), _messageId: messageId }
+      const eventToInsert: InternalDynamoAuditLogEvent = {
+        ...compressedEvent,
+        _id: randomUUID(),
+        _messageId: messageId
+      }
       dynamoUpdates.push({
         Put: {
           Item: { ...eventToInsert, _: "_" },
@@ -621,7 +625,7 @@ export default class AuditLogDynamoGateway extends DynamoGateway implements Audi
         return compressedEvent
       }
 
-      const eventToInsert: InternalDynamoAuditLogUserEvent = { ...compressedEvent, _id: uuid() }
+      const eventToInsert: InternalDynamoAuditLogUserEvent = { ...compressedEvent, _id: randomUUID() }
       dynamoUpdates.push({
         Put: {
           Item: { ...eventToInsert, _: "_" },

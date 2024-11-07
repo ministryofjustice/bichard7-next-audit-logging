@@ -1,13 +1,13 @@
+import { randomUUID } from "crypto"
 import "src/shared/testing"
 import { FakeS3Gateway } from "src/shared/testing"
 import type { ApplicationError, S3PutObjectEvent } from "src/shared/types"
-import { v4 as uuid } from "uuid"
 import type { ReceivedMessage } from "../entities"
 import type { ValidationResult } from "../handlers/storeMessage"
 import retrieveMessageFromS3 from "./retrieveMessageFromS3"
 
-const expectedExternalCorrelationId = uuid()
-const externalId = uuid()
+const expectedExternalCorrelationId = randomUUID()
+const externalId = randomUUID()
 const expectedCaseId = "41BP0510007"
 const originalXml = `
   <?xml version="1.0" encoding="UTF-8"?>

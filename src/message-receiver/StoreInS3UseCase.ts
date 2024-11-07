@@ -1,6 +1,6 @@
+import { randomUUID } from "crypto"
 import type { MessageFormat, PromiseResult, S3GatewayInterface } from "src/shared/types"
 import { isError } from "src/shared/types"
-import { v4 as uuid } from "uuid"
 
 export type StoreInS3Result = {
   s3Path: string
@@ -30,6 +30,6 @@ export default class StoreInS3UseCase {
     const hour = now.getHours().toString().padStart(2, "0")
     const minute = now.getMinutes().toString().padStart(2, "0")
 
-    return `${year}/${month}/${day}/${hour}/${minute}/${messageFormat}-${uuid()}.json`
+    return `${year}/${month}/${day}/${hour}/${minute}/${messageFormat}-${randomUUID()}.json`
   }
 }

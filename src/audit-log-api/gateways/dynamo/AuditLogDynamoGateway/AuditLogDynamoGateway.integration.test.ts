@@ -1,6 +1,7 @@
 import type { DocumentClient } from "aws-sdk/clients/dynamodb"
-import MockDate from "mockdate"
+import { randomInt, randomUUID } from "crypto"
 import { addDays } from "date-fns"
+import MockDate from "mockdate"
 import { auditLogDynamoConfig } from "src/audit-log-api/test"
 import { compress, decompress } from "src/shared"
 import "src/shared/testing"
@@ -13,11 +14,9 @@ import {
 } from "src/shared/testing"
 import type { ApiAuditLogEvent, DynamoAuditLog, DynamoAuditLogEvent, KeyValuePair } from "src/shared/types"
 import { AuditLogStatus, isError } from "src/shared/types"
-import { v4 as uuid } from "uuid"
 import TestDynamoGateway from "../../../test/TestDynamoGateway"
-import AuditLogDynamoGateway, { getEventsPageLimit } from "./AuditLogDynamoGateway"
-import { randomInt } from "crypto"
 import { IndexSearcher } from "../DynamoGateway"
+import AuditLogDynamoGateway, { getEventsPageLimit } from "./AuditLogDynamoGateway"
 
 const gateway = new AuditLogDynamoGateway(auditLogDynamoConfig)
 const testGateway = new TestDynamoGateway(auditLogDynamoConfig)
@@ -1046,7 +1045,7 @@ describe("AuditLogDynamoGateway", () => {
       await testGateway.insertOne(auditLogDynamoConfig.auditLogTableName, auditLog, gateway.auditLogTableKey)
       const externalEvent = mockDynamoAuditLogEvent({
         eventType: "Type 1",
-        _id: uuid(),
+        _id: randomUUID(),
         _messageId: auditLog.messageId,
         attributes: {
           "Attribute 1": { _compressedValue: (await compress("Attribute 1 data".repeat(500))) as string }
@@ -1091,7 +1090,7 @@ describe("AuditLogDynamoGateway", () => {
       await testGateway.insertOne(auditLogDynamoConfig.auditLogTableName, auditLog, gateway.auditLogTableKey)
       const externalEvent = {
         ...mockApiAuditLogEvent(),
-        _id: uuid(),
+        _id: randomUUID(),
         _messageId: auditLog.messageId,
         eventXml: {
           _compressedValue: await compress("really long xml".repeat(500))

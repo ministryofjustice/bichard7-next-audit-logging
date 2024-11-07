@@ -1,7 +1,7 @@
+import { randomUUID } from "crypto"
 import { parseXml } from "src/shared"
 import type { InputApiAuditLog, PromiseResult, Result } from "src/shared/types"
 import { ApplicationError, isError } from "src/shared/types"
-import { v4 as uuid } from "uuid"
 import type { DeliveryMessage, ReceivedMessage } from "../entities"
 
 const getCaseId = (xml: DeliveryMessage): Result<string> => {
@@ -60,7 +60,7 @@ const readMessage = async (message: ReceivedMessage): PromiseResult<InputApiAudi
     externalId: message.externalId,
     isSanitised: 0,
     messageHash: message.hash,
-    messageId: uuid(),
+    messageId: randomUUID(),
     receivedDate: message.receivedDate,
     s3Path: message.s3Path,
     stepExecutionId: message.stepExecutionId,

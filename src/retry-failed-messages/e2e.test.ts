@@ -1,4 +1,5 @@
 //
+import { randomUUID } from "crypto"
 import { TestS3Gateway } from "src/shared"
 import "src/shared/testing"
 import {
@@ -10,7 +11,6 @@ import {
 } from "src/shared/testing"
 import type { ApiAuditLogEvent } from "src/shared/types"
 import { isError } from "src/shared/types"
-import { v4 as uuid } from "uuid"
 
 setEnvironmentVariables()
 process.env.MESSAGE_FORMAT = "AuditEvent"
@@ -29,7 +29,7 @@ describe("Retry Failed Messages", () => {
   })
 
   it("should retry the correct messages using eventXml for the first time", async () => {
-    const messageXml = `<Xml>${uuid()}< /Xml>`
+    const messageXml = `<Xml>${randomUUID()}< /Xml>`
     const auditLog = await createMockAuditLog({ receivedDate: new Date(Date.now() - 3_600_000).toISOString() })
 
     if (isError(auditLog)) {
