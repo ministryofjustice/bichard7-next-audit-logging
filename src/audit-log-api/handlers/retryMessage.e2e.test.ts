@@ -1,10 +1,10 @@
 jest.setTimeout(15000)
 
 import axios from "axios"
+import { randomUUID } from "crypto"
 import { HttpStatusCode, TestMqGateway, TestS3Gateway } from "src/shared"
 import { auditLogEventsS3Config, createMockAuditLog, createMockAuditLogEvent } from "src/shared/testing"
 import type { MqConfig, OutputApiAuditLog } from "src/shared/types"
-import { v4 as uuid } from "uuid"
 import { auditLogDynamoConfig, TestDynamoGateway } from "../test"
 
 const mqConfig: MqConfig = {
@@ -24,7 +24,7 @@ describe("retryMessage", () => {
   })
 
   it("should return Ok status when message contains eventXml and has been retried successfully", async () => {
-    const eventXml = `<Xml>${uuid()}</Xml>`
+    const eventXml = `<Xml>${randomUUID()}</Xml>`
     const message = (await createMockAuditLog()) as OutputApiAuditLog
 
     await createMockAuditLogEvent(message.messageId, {

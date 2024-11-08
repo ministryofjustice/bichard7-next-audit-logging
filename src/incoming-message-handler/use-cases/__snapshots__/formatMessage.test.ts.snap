@@ -4,7 +4,7 @@ exports[`should format the message XML when the message XML is correct 1`] = `
 "<?xml version="1.0" encoding="UTF-8"?>
   <RouteData xmlns="http://schemas.cjse.gov.uk/common/operations" xmlns:cjseEntity="http://schemas.cjse.gov.uk/common/businessentities" xmlns:cjseType="http://schemas.cjse.gov.uk/common/businesstypes" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" VersionNumber="1.0" RequestResponse="Request">
     <RequestFromSystem VersionNumber="1.0">
-      <CorrelationID>MESSAGE_ID</CorrelationID>
+      <CorrelationID>d-u-m-m-y</CorrelationID>
     </RequestFromSystem>
     <DataStream VersionNumber="1.0">
       <DataStreamContent>

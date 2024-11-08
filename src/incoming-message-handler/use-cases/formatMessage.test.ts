@@ -1,6 +1,5 @@
-jest.mock("uuid")
+import crypto from "crypto"
 import "src/shared/testing"
-import { v4 as uuidv4 } from "uuid"
 import type { ReceivedMessage } from "../entities"
 import formatMessage from "./formatMessage"
 
@@ -18,7 +17,7 @@ const unwrappedMessage = `
 const getWrappedMessage = (correlationId?: string) => `<?xml version="1.0" encoding="UTF-8"?>
 <RouteData xmlns="http://schemas.cjse.gov.uk/common/operations" xmlns:cjseEntity="http://schemas.cjse.gov.uk/common/businessentities" xmlns:cjseType="http://schemas.cjse.gov.uk/common/businesstypes" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" VersionNumber="1.0" RequestResponse="Request">
   <RequestFromSystem VersionNumber="1.0">
-    <CorrelationID>${correlationId ?? uuidv4()}</CorrelationID>
+    <CorrelationID>${correlationId ?? crypto.randomUUID()}</CorrelationID>
   </RequestFromSystem>
   <DataStream VersionNumber="1.0">
     <DataStreamContent>${unwrappedMessage}</DataStreamContent>
@@ -33,8 +32,7 @@ it("should format the message XML when the message XML is correct", async () => 
     stepExecutionId: "DUMMY_EXECUTION_ID",
     messageXml: unwrappedMessage
   } as ReceivedMessage
-  const mockedUuidV4 = uuidv4 as jest.MockedFunction<typeof uuidv4>
-  mockedUuidV4.mockReturnValue("MESSAGE_ID")
+  const mockedRandomUuid = jest.spyOn(crypto, "randomUUID").mockReturnValue("d-u-m-m-y")
   const result = await formatMessage(receivedMessage)
 
   expect(result).toNotBeError()
@@ -46,6 +44,7 @@ it("should format the message XML when the message XML is correct", async () => 
   expect(receivedDate).toBe(receivedMessage.receivedDate)
   expect(hash).toBe("44596f3b496f4aa616db7ede7055fab81138ea043e255c25071b3948a66345a2")
   expect(messageXml).toMatchSnapshot()
+  mockedRandomUuid.mockRestore()
 })
 
 it("should have the same hash for both wrapped and unwrapped messages", async () => {
@@ -63,8 +62,7 @@ it("should have the same hash for both wrapped and unwrapped messages", async ()
     stepExecutionId: "DUMMY_EXECUTION_ID_2",
     messageXml: getWrappedMessage()
   } as ReceivedMessage
-  const mockedUuidV4 = uuidv4 as jest.MockedFunction<typeof uuidv4>
-  mockedUuidV4.mockReturnValue("MESSAGE_ID")
+  const mockedRandomUuid = jest.spyOn(crypto, "randomUUID").mockReturnValue("d-u-m-m-y")
   const resultForWrappedMessage = await formatMessage(wrappedReceivedMessage)
   const resultForUnwrappedMessage = await formatMessage(unwrappedReceivedMessage)
 
@@ -74,6 +72,7 @@ it("should have the same hash for both wrapped and unwrapped messages", async ()
   const { hash: hashForUnwrappedMessage } = resultForUnwrappedMessage as ReceivedMessage
   const { hash: hashForWrappedMessage } = resultForWrappedMessage as ReceivedMessage
   expect(hashForUnwrappedMessage).toBe(hashForWrappedMessage)
+  mockedRandomUuid.mockRestore()
 })
 
 it("should generate the same hash for the same wrapped messages with different correlation ID", async () => {

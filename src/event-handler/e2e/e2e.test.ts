@@ -1,5 +1,6 @@
 jest.setTimeout(50000)
 
+import { randomUUID } from "crypto"
 import fs from "fs"
 import { AuditLogApiClient, encodeBase64, TestS3Gateway } from "src/shared"
 import "src/shared/testing"
@@ -11,7 +12,6 @@ import type {
   OutputApiAuditLog
 } from "src/shared/types"
 import { isError } from "src/shared/types"
-import { v4 as uuid } from "uuid"
 setEnvironmentVariables()
 
 import EventHandlerSimulator from "./EventHandlerSimulator"
@@ -19,9 +19,9 @@ import EventHandlerSimulator from "./EventHandlerSimulator"
 process.env.MESSAGE_FORMAT = "DUMMY"
 process.env.EVENTS_BUCKET_NAME = "auditLogEventsBucket"
 
-import messageReceiver from "src/message-receiver/index"
-import { TestDynamoGateway } from "src/audit-log-api/test"
 import createAdutiLogDynamoDbConfig from "src/audit-log-api/createAuditLogDynamoDbConfig"
+import { TestDynamoGateway } from "src/audit-log-api/test"
+import messageReceiver from "src/message-receiver/index"
 
 const s3Gateway = new TestS3Gateway({
   url: "http://localhost:4569",
@@ -125,7 +125,7 @@ test.each<TestInput>([
     // Simulating EventBridge rule for triggering state machine for the uploaded object to S3 bucket
     const s3Objects = (await s3Gateway.getAll()) ?? []
     const objectKeys = s3Objects.map((s3Object) => s3Object.Key)
-    const executions = objectKeys.map((key) => eventHandlerSimulator.start(key!, uuid()))
+    const executions = objectKeys.map((key) => eventHandlerSimulator.start(key!, randomUUID()))
 
     await Promise.all(executions)
 
@@ -137,7 +137,7 @@ test.each<TestInput>([
 
 test("Event with only user should be stored in dynamodb", async () => {
   const rawMessage = fs.readFileSync(`events/report-run-event.xml`).toString()
-  const messageData = encodeBase64(rawMessage.replace("{MESSAGE_ID}", uuid()))
+  const messageData = encodeBase64(rawMessage.replace("{MESSAGE_ID}", randomUUID()))
   const event: AmazonMqEventSourceRecordEvent = {
     eventSource: "general-event",
     eventSourceArn: "general-event",
@@ -160,7 +160,7 @@ test("Event with only user should be stored in dynamodb", async () => {
   // Simulating EventBridge rule for triggering state machine for the uploaded object to S3 bucket
   const s3Objects = (await s3Gateway.getAll()) ?? []
   const objectKey = s3Objects.map((s3Object) => s3Object.Key)[0]
-  const eventHandlerResult = await eventHandlerSimulator.start(objectKey!, uuid()).catch((error) => error)
+  const eventHandlerResult = await eventHandlerSimulator.start(objectKey!, randomUUID()).catch((error) => error)
 
   expect(eventHandlerResult).toNotBeError()
 
@@ -173,7 +173,7 @@ test("Event with only user should be stored in dynamodb", async () => {
 
 test("Event with no MesageId and User should fail to be processed by the audit logger", async () => {
   const rawMessage = fs.readFileSync(`events/no-messageid-and-user.xml`).toString()
-  const messageData = encodeBase64(rawMessage.replace("{MESSAGE_ID}", uuid()))
+  const messageData = encodeBase64(rawMessage.replace("{MESSAGE_ID}", randomUUID()))
 
   const event: AmazonMqEventSourceRecordEvent = {
     eventSource: "general-event",
@@ -197,7 +197,7 @@ test("Event with no MesageId and User should fail to be processed by the audit l
   // Simulating EventBridge rule for triggering state machine for the uploaded object to S3 bucket
   const s3Objects = (await s3Gateway.getAll()) ?? []
   const objectKey = s3Objects.map((s3Object) => s3Object.Key)[0]
-  const eventHandlerResult = await eventHandlerSimulator.start(objectKey!, uuid()).catch((error) => error)
+  const eventHandlerResult = await eventHandlerSimulator.start(objectKey!, randomUUID()).catch((error) => error)
 
   expect((eventHandlerResult as Error).message).toContain("No messageId or userName:")
 })
@@ -205,7 +205,7 @@ test("Event with no MesageId and User should fail to be processed by the audit l
 test("Event should fail the validation when S3 object does not exist", async () => {
   // Simulating EventBridge rule for triggering state machine for the uploaded object to S3 bucket
   const objectKey = "dummy-non-existent-s3-key"
-  const eventHandlerResult = await eventHandlerSimulator.start(objectKey!, uuid()).catch((error) => error)
+  const eventHandlerResult = await eventHandlerSimulator.start(objectKey!, randomUUID()).catch((error) => error)
 
   expect(eventHandlerResult).toNotBeError()
   expect(eventHandlerSimulator.getStoreEventOutput()).toStrictEqual({ validationResult: { s3ObjectNotFound: true } })

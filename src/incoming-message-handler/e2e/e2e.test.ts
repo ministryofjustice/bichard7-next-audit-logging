@@ -1,7 +1,7 @@
+import { randomUUID } from "crypto"
 import { TestS3Gateway } from "src/shared"
 import "src/shared/testing"
 import { clearDynamoTable, setEnvironmentVariables } from "src/shared/testing"
-import { v4 as uuid } from "uuid"
 import format from "xml-formatter"
 import TestMqGateway from "../gateways/MqGateway/TestMqGateway"
 
@@ -13,8 +13,8 @@ import TestApi from "./TestApi"
 
 const formatXml = (xml: string): string => format(xml, { indentation: "  " })
 
-const expectedExternalCorrelationId = uuid()
-const externalId = uuid()
+const expectedExternalCorrelationId = randomUUID()
+const externalId = randomUUID()
 const expectedCaseId = "41BP0510007"
 const getOriginalXml = (externalCorrelationId: string, dataStreamUniqueValue?: string) =>
   formatXml(`
@@ -75,7 +75,7 @@ describe("e2e tests", () => {
     process.env.MQ_QUEUE = queueName
     const fileName = `2021/03/15/12/28/${externalId}.xml`
     const expectedReceivedDate = new Date(2021, 2 /* March */, 15, 12, 28)
-    const executionId = uuid()
+    const executionId = randomUUID()
 
     await getSimulator().start(fileName, getOriginalXml(expectedExternalCorrelationId), executionId)
 
@@ -111,13 +111,13 @@ describe("e2e tests", () => {
     const queueName = "2_INCOMING_MESSAGE_HANDLER_QUEUE"
     process.env.MQ_QUEUE = queueName
     const fileName = `2021/03/15/12/28/${externalId}.xml`
-    const executionId = uuid()
+    const executionId = randomUUID()
 
-    const duplicateMessageExternalId = uuid()
+    const duplicateMessageExternalId = randomUUID()
     const duplicateMessageFileName = `2021/03/15/12/29/${duplicateMessageExternalId}.xml`
-    const duplicateMessageExecutionId = uuid()
-    const duplicateMessageExternalCorrelationId = uuid()
-    const dataUniqueValue = uuid()
+    const duplicateMessageExecutionId = randomUUID()
+    const duplicateMessageExternalCorrelationId = randomUUID()
+    const dataUniqueValue = randomUUID()
 
     await getSimulator().start(fileName, getOriginalXml(expectedExternalCorrelationId, dataUniqueValue), executionId)
     await getSimulator().start(

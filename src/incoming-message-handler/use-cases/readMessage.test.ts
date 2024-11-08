@@ -1,6 +1,6 @@
+import { randomUUID } from "crypto"
 import type { ApplicationError, InputApiAuditLog } from "src/shared/types"
 import { isError } from "src/shared/types"
-import { v4 as uuid } from "uuid"
 import format from "xml-formatter"
 import type { ReceivedMessage } from "../entities"
 import readMessage from "./readMessage"
@@ -10,7 +10,7 @@ const formatXml = (xml: string): string =>
     indentation: "  "
   })
 
-const expectedExternalCorrelationId = uuid()
+const expectedExternalCorrelationId = randomUUID()
 const expectedCaseId = "41BP0510007"
 const expectedSystemId = "DUMMY_SYSTEM_ID"
 const expectedMessage = formatXml(`

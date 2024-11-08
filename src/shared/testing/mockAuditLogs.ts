@@ -1,3 +1,4 @@
+import { randomUUID } from "crypto"
 import type {
   ApiAuditLogEvent,
   DynamoAuditLog,
@@ -8,20 +9,19 @@ import type {
   OutputApiAuditLog
 } from "src/shared/types"
 import { AuditLogStatus, PncStatus, TriggerStatus } from "src/shared/types"
-import { v4 as uuid } from "uuid"
 
 export const mockInputApiAuditLog = (overrides: Partial<InputApiAuditLog> = {}): InputApiAuditLog => ({
   caseId: "Case ID",
   createdBy: "Create audit log test",
-  externalCorrelationId: uuid(),
-  externalId: uuid(),
+  externalCorrelationId: randomUUID(),
+  externalId: randomUUID(),
   isSanitised: 0,
-  messageHash: uuid(),
-  messageId: uuid(),
+  messageHash: randomUUID(),
+  messageId: randomUUID(),
   nextSanitiseCheck: new Date().toISOString(),
   receivedDate: new Date().toISOString(),
   s3Path: "2022/01/18/09/01/message.xml",
-  stepExecutionId: uuid(),
+  stepExecutionId: randomUUID(),
   systemId: "System",
   ...overrides
 })
