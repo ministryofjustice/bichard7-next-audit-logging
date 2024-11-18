@@ -4,7 +4,7 @@
   "version": "0.0.1",
   "private": true,
   "devDependencies": {
-    "@aws-sdk/client-lambda": "^3.688.0",
+    "@aws-sdk/client-lambda": "^3.693.0",
     "@babel/core": "^7.26.0",
     "@stomp/stompjs": "^7.0.0",
     "@types/aws-lambda": "^8.10.145",
@@ -39,7 +39,7 @@
     "lint-staged": "^15.2.10",
     "lodash.partition": "^4.6.0",
     "mockdate": "^3.0.5",
-    "npm-check-updates": "^17.1.10",
+    "npm-check-updates": "^17.1.11",
     "prettier": "^3.3.3",
     "serverless": "^3.39.0",
     "serverless-dynamodb-local": "^0.2.40",
