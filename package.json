@@ -4,7 +4,7 @@
   "version": "0.0.1",
   "private": true,
   "devDependencies": {
-    "@aws-sdk/client-lambda": "^3.721.0",
+    "@aws-sdk/client-lambda": "^3.726.1",
     "@babel/core": "^7.26.0",
     "@stomp/stompjs": "^7.0.0",
     "@types/aws-lambda": "^8.10.147",
@@ -51,8 +51,8 @@
     "ts-jest": "^29.2.5",
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
-    "typescript": "^5.7.2",
-    "wait-on": "^8.0.1",
+    "typescript": "^5.7.3",
+    "wait-on": "^8.0.2",
     "ws": "^8.18.0"
   },
   "scripts": {
