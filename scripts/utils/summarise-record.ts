@@ -55,7 +55,7 @@ const getErrorsFromAttributes = (attributes: AuditLogEventAttributes, errorType?
 
 const formatEvent = (event: DynamoAuditLogEvent): string => {
   const output: string[] = []
-  output.push(`${event.timestamp} - ${event.eventType}`)
+  output.push(`${event.timestamp} - ${event.eventType} (${event.eventSource})`)
   if (event.eventCode === "triggers.generated" && event.attributes) {
     output.push(`${" ".repeat(27)}${getErrorsFromAttributes(event.attributes, triggerRegex).sort().join(", ")}`)
   }
