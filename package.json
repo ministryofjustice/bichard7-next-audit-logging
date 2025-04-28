@@ -4,7 +4,7 @@
   "version": "0.0.1",
   "private": true,
   "devDependencies": {
-    "@aws-sdk/client-lambda": "^3.787.0",
+    "@aws-sdk/client-lambda": "^3.797.0",
     "@babel/core": "^7.26.10",
     "@stomp/stompjs": "^7.1.1",
     "@types/aws-lambda": "^8.10.149",
@@ -14,8 +14,8 @@
     "@types/lodash.maxby": "^4.6.9",
     "@types/lodash.minby": "^4.6.9",
     "@types/lodash.partition": "^4.6.9",
-    "@types/node": "^22.14.1",
-    "@types/pg": "^8.11.12",
+    "@types/node": "^22.15.3",
+    "@types/pg": "^8.11.14",
     "@types/stompit": "^0.26.6",
     "@types/uuid": "^10.0.0",
     "@types/ws": "^8.18.1",
@@ -39,7 +39,7 @@
     "lint-staged": "^15.5.1",
     "lodash.partition": "^4.6.0",
     "mockdate": "^3.0.5",
-    "npm-check-updates": "^17.1.18",
+    "npm-check-updates": "^18.0.1",
     "prettier": "^3.5.3",
     "serverless": "^3.40.0",
     "serverless-dynamodb-local": "^0.2.40",
@@ -79,16 +79,16 @@
   "dependencies": {
     "aws-lambda": "^1.0.7",
     "aws-sdk": "^2.1692.0",
-    "axios": "^1.8.4",
+    "axios": "^1.9.0",
     "date-fns": "^4.1.0",
     "lodash.groupby": "^4.6.0",
     "lodash.maxby": "^4.6.0",
     "lodash.minby": "^4.6.0",
-    "pg": "^8.14.1",
+    "pg": "^8.15.6",
     "pino": "^9.6.0",
     "stompit": "^1.0.0",
     "xml-formatter": "^3.6.5",
     "xml2js": "^0.6.2",
-    "zod": "^3.24.2"
+    "zod": "^3.24.3"
   }
 }
