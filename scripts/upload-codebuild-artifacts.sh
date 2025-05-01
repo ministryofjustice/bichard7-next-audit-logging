@@ -59,22 +59,6 @@ upload_to_s3 archiveUserLogs.zip archiveUserLogs.zip
 cd -
 
 ############################################
-# Incoming Message Handler
-############################################
-
-cd build/incoming-message-handler/handlers
-zip sendToBichard.zip sendToBichard.js
-zip recordSentToBichardEvent.zip recordSentToBichardEvent.js
-zip storeMessage.zip storeMessage.js
-
-# Upload all artifacts to the S3 bucket
-upload_to_s3 sendToBichard.zip sendToBichard.zip
-upload_to_s3 recordSentToBichardEvent.zip recordSentToBichardEvent.zip
-upload_to_s3 storeMessage.zip storeMessage.zip
-
-cd -
-
-############################################
 # Audit Log API
 ############################################
 
