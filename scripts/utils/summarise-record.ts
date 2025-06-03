@@ -63,7 +63,11 @@ const formatEvent = (event: DynamoAuditLogEvent): string => {
     output.push(`${" ".repeat(27)}User: ${event.user}`)
   }
   if (event.eventCode === "triggers.resolved" && event.attributes) {
-    output.push(`${" ".repeat(27)}${getErrorsFromAttributes(event.attributes).sort().join(", ")}`)
+    output.push(`${" ".repeat(27)}${getErrorsFromAttributes(event.attributes, triggerRegex).sort().join(", ")}`)
+    output.push(`${" ".repeat(27)}User: ${event.user}`)
+  }
+  if (event.eventCode === "triggers.deleted" && event.attributes) {
+    output.push(`${" ".repeat(27)}${getErrorsFromAttributes(event.attributes, triggerRegex).sort().join(", ")}`)
     output.push(`${" ".repeat(27)}User: ${event.user}`)
   }
   if (event.eventCode === "exceptions.generated" && event.attributes) {
