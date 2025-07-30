@@ -17,6 +17,7 @@ const minor = [
   "uuid"
   "uuid",
   "eslint-plugin-jest",
+  "zod"
 ]
 const patch = ["esbuild"]
 
