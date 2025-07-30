@@ -15,6 +15,8 @@ const minor = [
   "@typescript-eslint/parser",
   "@typescript-eslint/eslint-plugin",
   "uuid"
+  "uuid",
+  "eslint-plugin-jest",
 ]
 const patch = ["esbuild"]
 
