@@ -61,6 +61,16 @@ const insertAuditLogRecords = async (
   return messageIds
 }
 
+jest.mock("aws-sdk", () => {
+  return {
+    SSM: jest.fn().mockImplementation(() => ({
+      getParameter: jest.fn().mockReturnValue({
+        promise: () => Promise.resolve({ Parameter: { Value: "FAKE_KEY" } })
+      })
+    }))
+  }
+})
+
 const executeLambda = (environment?: any): Promise<unknown> => {
   return execute({
     event: {},
@@ -86,7 +96,7 @@ describe("Sanitise Old Messages e2e", () => {
     })
     await db.connect()
 
-    api = new AuditLogApiClient(process.env.API_URL!, process.env.API_KEY!)
+    api = new AuditLogApiClient(process.env.API_URL!, process.env.API_KEY_ARN!)
   })
 
   beforeEach(async () => {

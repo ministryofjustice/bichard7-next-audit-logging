@@ -26,6 +26,7 @@ export default (additionalVariables?: KeyValuePair<string, string>): void => {
   process.env.INTERNAL_INCOMING_MESSAGES_BUCKET = "internalIncomingBucket"
   process.env.CONDUCTOR_INCOMING_MESSAGE_BUCKET = "conductorIncomingBucket"
   process.env.AUDIT_LOG_EVENTS_BUCKET = "auditLogEventsBucket"
+  process.env.API_KEY_ARN = "/mock/api-key"
 
   if (additionalVariables) {
     Object.keys(additionalVariables).forEach((key) => {
