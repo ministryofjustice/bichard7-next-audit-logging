@@ -96,7 +96,7 @@ describe("Sanitise Old Messages e2e", () => {
     })
     await db.connect()
 
-    api = new AuditLogApiClient(process.env.API_URL!, process.env.API_KEY_ARN!)
+    api = new AuditLogApiClient(process.env.API_URL!, process.env.API_KEY!)
   })
 
   beforeEach(async () => {
