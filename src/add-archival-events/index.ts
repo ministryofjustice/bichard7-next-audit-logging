@@ -2,9 +2,12 @@ import { AuditLogApiClient, logger } from "src/shared"
 import AddArchivalEvents from "./addArchivalEvents"
 import getConfig from "./config"
 import { DatabaseClient } from "./db"
+import { SSM } from "aws-sdk"
+
+const ssm = new SSM()
 
 export default async function addArchivalEvents(): Promise<void> {
-  const config = getConfig()
+  const config = await getConfig(ssm)
 
   const db = new DatabaseClient(
     config.dbHost,
