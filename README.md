@@ -63,7 +63,7 @@ You can then use the npm commands to get started:
 npm run hook:before:offline:start:init
 
 # Install dynamo and start the API
-npm run start api
+npm run start-api
 
 # If you want to destory mq and postgres containers
 npm run destory

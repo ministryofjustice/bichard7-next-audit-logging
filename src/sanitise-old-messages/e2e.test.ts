@@ -61,6 +61,16 @@ const insertAuditLogRecords = async (
   return messageIds
 }
 
+jest.mock("aws-sdk", () => {
+  return {
+    SSM: jest.fn().mockImplementation(() => ({
+      getParameter: jest.fn().mockReturnValue({
+        promise: () => Promise.resolve({ Parameter: { Value: "FAKE_KEY" } })
+      })
+    }))
+  }
+})
+
 const executeLambda = (environment?: any): Promise<unknown> => {
   return execute({
     event: {},

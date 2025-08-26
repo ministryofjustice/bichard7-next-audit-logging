@@ -1,3 +1,6 @@
+import type { SSM } from "aws-sdk"
+import { isError } from "src/shared/types"
+
 export type ApiConfig = {
   API_URL: string
   API_KEY: string
@@ -23,19 +26,37 @@ export const getSanitiseConfig = (): SanitiseOldMessagesConfig => {
   }
 }
 
-export const getApiConfig = (): ApiConfig => {
-  const { API_URL, API_KEY } = process.env
+let apiKey: string | undefined
+
+export const getApiConfig = async (ssm: SSM): Promise<ApiConfig> => {
+  const { API_URL, API_KEY_ARN } = process.env
+
+  if (!API_KEY_ARN) {
+    throw Error("API_KEY_ARN environment variable must have value.")
+  }
 
   if (!API_URL) {
     throw Error("API_URL environment variable must have value.")
   }
 
-  if (!API_KEY) {
-    throw Error("API_KEY environment variable must have value.")
+  if (apiKey) {
+    return { API_URL, API_KEY: apiKey }
   }
 
-  return {
-    API_URL,
-    API_KEY
-  } as ApiConfig
+  const apiKeyResult = await ssm
+    .getParameter({ Name: API_KEY_ARN, WithDecryption: true })
+    .promise()
+    .catch((error: Error) => error)
+
+  if (isError(apiKeyResult)) {
+    throw apiKeyResult
+  }
+
+  if (!apiKeyResult.Parameter?.Value) {
+    throw Error("Couldn't retrieve API Key from SSM")
+  }
+
+  apiKey = apiKeyResult.Parameter.Value
+
+  return { API_URL, API_KEY: apiKey }
 }

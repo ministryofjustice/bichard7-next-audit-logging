@@ -1,9 +1,12 @@
 import { AuditLogApiClient, logger } from "src/shared"
 import { isError } from "src/shared/types"
 import { getApiConfig, getSanitiseConfig } from "./config"
+import { SSM } from "aws-sdk"
+
+const ssm = new SSM()
 
 export default async (): Promise<void> => {
-  const apiConfig = getApiConfig()
+  const apiConfig = await getApiConfig(ssm)
   const config = getSanitiseConfig()
 
   const api = new AuditLogApiClient(apiConfig.API_URL, apiConfig.API_KEY)
