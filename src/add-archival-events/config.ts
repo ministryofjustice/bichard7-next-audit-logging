@@ -22,15 +22,24 @@ export default async (ssm: SSM) => {
   }
 
   const apiKey = await getSSMParameter(ssm, process.env.API_KEY_ARN, "API key")
+
+  if (apiKey.error) {
+    throw apiKey.error
+  }
+
   const dbPassword = await getSSMParameter(ssm, process.env.DB_PASSWORD_ARN, "DB password")
+
+  if (dbPassword.error) {
+    throw dbPassword.error
+  }
 
   return {
     apiUrl: process.env.API_URL,
-    apiKey,
+    apiKey: apiKey.value!,
     dbHost: process.env.DB_HOST,
     dbPort: process.env.DB_PORT ? Number(process.env.DB_PORT) : 5432,
     dbUser: process.env.DB_USER,
-    dbPassword,
+    dbPassword: dbPassword.value!,
     dbSsl: !!process.env.DB_SSL,
     dbName: process.env.DB_NAME,
     dbSchema: process.env.DB_SCHEMA || "br7own",

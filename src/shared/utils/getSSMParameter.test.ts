@@ -14,20 +14,20 @@ jest.mock("aws-sdk", () => {
 describe("getSSMParameter", () => {
   const paramString = "API_KEY_ARN"
   const paramDescription = "API key"
+  const ssm = new SSM()
 
   beforeEach(() => {
     mockGetParameter.mockReset()
   })
 
   it("fetches API_KEY from SSM", async () => {
-    const ssm = new SSM()
     mockGetParameter.mockReturnValue({
       promise: () => Promise.resolve({ Parameter: { Value: "fakeApiKey" } })
     })
 
     const result = await getSSMParameter(ssm, paramString, paramDescription)
 
-    expect(result).toBe("fakeApiKey")
+    expect(result.value).toBe("fakeApiKey")
     expect(ssm.getParameter).toHaveBeenCalledWith({
       Name: paramString,
       WithDecryption: true
@@ -35,22 +35,22 @@ describe("getSSMParameter", () => {
   })
 
   it("throws if SSM rejects with an error", async () => {
-    const ssm = new SSM()
     mockGetParameter.mockReturnValue({
       promise: () => Promise.reject(new Error("SSM error"))
     })
 
-    await expect(getSSMParameter(ssm, paramString, paramDescription)).rejects.toThrow("SSM error")
+    const result = await getSSMParameter(ssm, paramString, paramDescription)
+
+    expect(result.error?.message).toBe("SSM error")
   })
 
   it("throws if SSM parameter value is missing", async () => {
-    const ssm = new SSM()
     mockGetParameter.mockReturnValue({
       promise: () => Promise.resolve({ Parameter: { Value: undefined } })
     })
 
-    await expect(getSSMParameter(ssm, paramString, paramDescription)).rejects.toThrow(
-      "Couldn't retrieve API key from SSM"
-    )
+    const result = await getSSMParameter(ssm, paramString, paramDescription)
+
+    expect(result.error?.message).toBe("Couldn't retrieve API key from SSM")
   })
 })
