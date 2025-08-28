@@ -9,18 +9,37 @@ import { clearDynamoTable, createMockAuditLog, mockApiAuditLogEvent, mockInputAp
 import type { ApiAuditLogEvent, ApiClient, InputApiAuditLog, OutputApiAuditLog } from "src/shared/types"
 import { EventCode, isSuccess } from "src/shared/types"
 import addArchivalEvents from "."
+import { SSM } from "aws-sdk"
 
 logger.level = "debug"
 
 const lambdaEnvironment = {
   API_URL: "http://localhost:3010",
-  API_KEY: "apiKey",
+  API_KEY_ARN: "apiKeyArn",
   DB_HOST: "localhost",
   DB_PORT: "5433",
   DB_USER: "bichard",
-  DB_PASSWORD: "password",
+  DB_PASSWORD_ARN: "dbPasswordArn",
   DB_NAME: "bichard"
 }
+
+jest.mock("aws-sdk", () => {
+  return {
+    SSM: jest.fn().mockImplementation(() => ({
+      getParameter: jest.fn(({ Name }) => ({
+        promise: () => {
+          if (Name === "apiKeyArn") {
+            return Promise.resolve({ Parameter: { Value: "apiKey" } })
+          }
+          if (Name === "dbPasswordArn") {
+            return Promise.resolve({ Parameter: { Value: "password" } })
+          }
+          return Promise.reject(new Error("Unknown parameter: " + Name))
+        }
+      }))
+    }))
+  }
+})
 
 const executeLambda = (environment?: any): Promise<unknown> =>
   execute({
@@ -36,11 +55,14 @@ describe("Add Error Records e2e", () => {
   let api: ApiClient
 
   beforeAll(async () => {
+    const ssm = new SSM()
+    const { Parameter } = await ssm.getParameter({ Name: lambdaEnvironment.DB_PASSWORD_ARN }).promise()
+
     pg = new Client({
       host: "localhost",
       port: 5433,
       user: "bichard",
-      password: "password",
+      password: Parameter?.Value,
       ssl: false,
       database: "bichard"
     })
