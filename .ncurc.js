@@ -14,7 +14,6 @@ const minor = [
   "serverless-offline",
   "@typescript-eslint/parser",
   "@typescript-eslint/eslint-plugin",
-  "uuid"
   "uuid",
   "eslint-plugin-jest",
   "zod"
