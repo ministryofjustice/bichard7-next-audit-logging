@@ -67,7 +67,7 @@
     "test:e2e": "jest --runInBand --testPathPattern=e2e",
     "test:integration": "jest --runInBand --testPathPattern=integration --testPathIgnorePatterns='e2e'",
     "test:unit:watch": "jest --watchAll --testPathIgnorePatterns='integration' 'e2e'",
-    "test:unit": "jest --testPathIgnorePatterns='integration' 'e2e'",
+    "test:unit": "jest --update-snapshot --testPathIgnorePatterns='integration' 'e2e'",
     "test": "jest --runInBand  --namePattern=",
     "update-deps": "ncu -u && npm install",
     "prepare": "husky",
