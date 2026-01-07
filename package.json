@@ -65,7 +65,7 @@
     "lint": "eslint .",
     "start-api": "npm run install-dynamo && sls offline start --httpPort 3010",
     "test:e2e": "jest --runInBand --testPathPattern=e2e",
-    "test:integration": "jest --runInBand --testPathPattern=integration --testPathIgnorePatterns='e2e'",
+    "test:integration": "jest --runInBand --testPathPatterns=integration --testPathIgnorePatterns='e2e'",
     "test:unit:watch": "jest --watchAll --testPathIgnorePatterns='integration' 'e2e'",
     "test:unit": "jest --update-snapshot --testPathIgnorePatterns='integration' 'e2e'",
     "test": "jest --runInBand  --namePattern=",
