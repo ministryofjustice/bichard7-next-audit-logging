@@ -37,7 +37,7 @@ export default async function createAuditLog(event: APIGatewayProxyEvent): Promi
   }
 
   if (result.resultType === "error") {
-    logger.error("Error creating audit log", result.resultDescription)
+    logger.error({ err: result.resultDescription }, "Error creating audit log")
     return createJsonApiResult({
       statusCode: HttpStatusCode.internalServerError,
       body: result.resultDescription

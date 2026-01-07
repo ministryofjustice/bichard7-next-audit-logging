@@ -84,7 +84,7 @@ export default async (
     const fetchByHashResult = await dynamoGateway.fetchByHash(messageHash)
 
     if (isError(fetchByHashResult)) {
-      logger.error("Error validating message hash", fetchByHashResult)
+      logger.error({ err: fetchByHashResult }, "Error validating message hash")
       errors.push("Couldn't validate message hash")
     } else if (fetchByHashResult.length) {
       status = AuditLogStatus.duplicate
