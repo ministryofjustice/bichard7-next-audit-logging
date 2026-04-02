@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "rootDir": "./",
     "esModuleInterop": true,
     "module": "CommonJS",
     "moduleResolution": "bundler",
