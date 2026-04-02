@@ -7,7 +7,12 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "outDir": "build",
-    "paths": {},
+    "paths": {
+      "src/shared": ["./src/shared/index.ts"],
+      "src/shared/*": ["./src/shared/*"],
+      "src/audit-log-api/*": ["./src/audit-log-api/*"],
+      "src/message-receiver/*": ["./src/message-receiver/*"]
+    },
     "preserveConstEnums": true,
     "preserveSymlinks": false,
     "resolveJsonModule": true,
