@@ -40,7 +40,7 @@
     "lodash.partition": "^4.6.0",
     "mockdate": "^3.0.5",
     "npm-check-updates": "^20.0.1",
-    "prettier": "^3.8.2",
+    "prettier": "^3.8.3",
     "serverless": "^3.40.0",
     "serverless-dynamodb-local": "^0.2.40",
     "serverless-esbuild": "^1.57.0",
