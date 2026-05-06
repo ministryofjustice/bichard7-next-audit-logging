@@ -79,7 +79,7 @@
   "dependencies": {
     "aws-lambda": "^1.0.7",
     "aws-sdk": "^2.1693.0",
-    "axios": "^1.15.2",
+    "axios": "^1.16.0",
     "date-fns": "^4.1.0",
     "lodash.groupby": "^4.6.0",
     "lodash.maxby": "^4.6.0",
