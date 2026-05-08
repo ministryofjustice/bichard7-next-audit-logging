@@ -5,7 +5,7 @@
 */
 /*
   Minor:
-  - severless [28/04/24 - major bump breaks dependencies]
+  - serverless [28/04/24 - major bump breaks dependencies]
   - serverless-offline [28/04/24 - major bump breaks dependencies]
 */
 const minor = [
