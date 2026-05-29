@@ -43,7 +43,7 @@
     "prettier": "^3.8.3",
     "serverless": "^4.37.0",
     "serverless-dynamodb-local": "^0.2.40",
-    "serverless-esbuild": "^1.57.1",
+    "serverless-esbuild": "^1.57.2",
     "serverless-hooks": "^1.0.0",
     "serverless-offline": "^14.7.1",
     "serverless-s3-local": "^0.8.5",
