@@ -39,6 +39,11 @@ fix-serverless-dynamodb-local:
 	cd ./node_modules/serverless-dynamodb-local && \
 	npx -y replace-in-file@7.2.0 "MOCK_ACCESS_KEY_ID" "MOCKACCESSKEYID" index.js && \
 	npx -y replace-in-file@7.2.0 "MOCK_SECRET_ACCESS_KEY" "MOCKSECRETACCESSKEY" index.js
+	
+.PHONY: fix-serverless-s3-local
+fix-serverless-s3-local:
+	cd ./node_modules/serverless-s3-local && \
+	npx -y replace-in-file@7.2.0 'import { Server } from "@hapi/hapi"' "import pkg from '@hapi/hapi'; const { Server } = pkg;" ./node_modules/serverless-offline/src/lambda/HttpServer.js
 
 ########################################
 # Destroy Commands
