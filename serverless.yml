@@ -3,7 +3,7 @@ frameworkVersion: "3"
 
 provider:
   name: aws
-  runtime: nodejs14.x
+  runtime: nodejs24.x
   timeout: 200
   environment:
     AWS_URL: http://localhost:8000
