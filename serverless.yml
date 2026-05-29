@@ -37,7 +37,7 @@ plugins:
   - serverless-hooks
   - serverless-esbuild
   - serverless-dynamodb-local
-#  - serverless-s3-local
+  - serverless-s3-local
 
 custom:
   serverless-offline:
@@ -58,9 +58,9 @@ custom:
       migrate: true
       seed: true
       convertEmptyValues: true
-#  s3:
-#    host: 0.0.0.0
-#    directory: /tmp
+  s3:
+    host: 0.0.0.0
+    directory: /tmp
   serverless-hooks:
     hookPrefix: hook
     runAllOptions:
