@@ -19,7 +19,7 @@ require("esbuild")
     logLevel: "info",
     outdir: "build",
     minify: true,
-    target: "node20",
+    target: "node24",
     platform: "node",
     external: ["pg-native"]
   })
