@@ -5,7 +5,7 @@ import express from "express"
 import createAuditLog from "./handlers/createAuditLog"
 import createAuditLogEvents from "./handlers/createAuditLogEvents"
 import createAuditLogUserEvents from "./handlers/createAuditLogUserEvents"
-import getMessages from "./handlers/getMessages"
+import { handler as getMessages } from "./handlers/getMessages"
 import retryMessage from "./handlers/retryMessage"
 import sanitiseMessage from "./handlers/sanitiseMessage"
 

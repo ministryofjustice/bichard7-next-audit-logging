@@ -9,7 +9,7 @@ import { createJsonApiResult } from "../utils"
 const auditLogConfig = createAuditLogDynamoDbConfig()
 const auditLogGateway = new AuditLogDynamoGateway(auditLogConfig)
 
-export default async function getMessages(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
+export const handler = async function getMessages(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
   const messageFetcher = createMessageFetcher(event, auditLogGateway)
 
   if (isError(messageFetcher)) {

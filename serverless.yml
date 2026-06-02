@@ -286,13 +286,13 @@ resources:
 
 functions:
   getMessages:
-    handler: src/audit-log-api/handlers/getMessages.default
+    handler: src/audit-log-api/handlers/getMessages.handler
     events:
       - httpApi:
           path: /messages
           method: get
   getMessage:
-    handler: src/audit-log-api/handlers/getMessages.default
+    handler: src/audit-log-api/handlers/getMessages.handler
     events:
       - httpApi:
           path: /messages/{messageId}
