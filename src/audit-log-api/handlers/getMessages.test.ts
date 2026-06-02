@@ -12,7 +12,7 @@ import type { DynamoAuditLog, OutputApiAuditLog, Result } from "src/shared/types
 import "../testConfig"
 import { createMessageFetcher } from "../use-cases"
 import type MessageFetcher from "../use-cases/MessageFetcher"
-import getMessages from "./getMessages"
+import { handler as getMessages } from "./getMessages"
 
 const mockCreateMessageFetcher = createMessageFetcher as jest.MockedFunction<typeof createMessageFetcher>
 
