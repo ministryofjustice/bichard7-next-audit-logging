@@ -14,7 +14,7 @@ process.env.EXTERNAL_INCOMING_MESSAGES_BUCKET = externalIncomingS3Config.bucketN
 process.env.INTERNAL_INCOMING_MESSAGES_BUCKET = internalIncomingS3Config.bucketName
 process.env.CONDUCTOR_INCOMING_MESSAGES_BUCKET = conductorIncomingS3Config.bucketName
 
-import transferMessages from "."
+import { handler as transferMessages } from "."
 import { Destination } from "./types/TransferMessagesInput"
 
 const externalGateway = new TestS3Gateway(externalIncomingS3Config)

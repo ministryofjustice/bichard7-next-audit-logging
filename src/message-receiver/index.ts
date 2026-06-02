@@ -36,7 +36,7 @@ const logEvent = (message: EventMessage): void => {
   }
 }
 
-export default async (event: AmazonMqEventSourceRecordEvent): Promise<void> => {
+export const handler = async (event: AmazonMqEventSourceRecordEvent): Promise<void> => {
   if (!event.messages || event.messages.length === 0) {
     throw new Error("No messages were found in the event")
   }

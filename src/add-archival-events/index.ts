@@ -6,7 +6,7 @@ import { SSM } from "aws-sdk"
 
 const ssm = new SSM()
 
-export default async function addArchivalEvents(): Promise<void> {
+export const handler = async function addArchivalEvents(): Promise<void> {
   const config = await getConfig(ssm)
 
   const db = new DatabaseClient(

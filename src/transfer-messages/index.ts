@@ -8,7 +8,7 @@ if (!CONDUCTOR_INCOMING_MESSAGES_BUCKET || !INTERNAL_INCOMING_MESSAGES_BUCKET) {
   throw new Error("INCOMING_MESSAGE_BUCKET_NAME environment variables must have values")
 }
 
-export default async ({
+export const handler = async ({
   numberOfObjectsToTransfer,
   destinationBucket
 }: TransferMessagesInput): Promise<TransferMessagesResult> => {

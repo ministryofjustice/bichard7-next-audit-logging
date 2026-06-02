@@ -1,6 +1,6 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { StepFunctionSimulator } from "src/shared/testing"
-import storeEvent from "../handlers/storeEvent"
+import { handler as storeEvent } from "../handlers/storeEvent"
 
 export default class {
   private readonly stateMachine: StepFunctionSimulator
