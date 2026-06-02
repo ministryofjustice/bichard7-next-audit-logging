@@ -4,7 +4,7 @@ import { mockApiAuditLogEvent } from "src/shared/testing"
 import type { ApiAuditLogEvent } from "src/shared/types"
 import "../testConfig"
 import { CreateAuditLogUserEventsUseCase, validateCreateAuditLogEvents } from "../use-cases"
-import createAuditLogUserEvents from "./createAuditLogUserEvents"
+import { handler as createAuditLogUserEvents } from "./createAuditLogUserEvents"
 jest.mock("./src/audit-log-api/use-cases/validateCreateAuditLogEvents.ts")
 
 const mockedValidateCreateAuditLogEvents = validateCreateAuditLogEvents as jest.MockedFunction<
