@@ -5,7 +5,7 @@ import type { InputApiAuditLog } from "src/shared/types"
 import "../testConfig"
 import { validateCreateAuditLog } from "../use-cases"
 import CreateAuditLogUseCase from "../use-cases/CreateAuditLogUseCase"
-import createAuditLog from "./createAuditLog"
+import { handler as createAuditLog } from "./createAuditLog"
 
 jest.mock("../use-cases/validateCreateAuditLog")
 

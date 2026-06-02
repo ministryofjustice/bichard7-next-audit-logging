@@ -298,31 +298,31 @@ functions:
           path: /messages/{messageId}
           method: get
   createAuditLog:
-    handler: src/audit-log-api/handlers/createAuditLog.default
+    handler: src/audit-log-api/handlers/createAuditLog.handler
     events:
       - httpApi:
           path: /messages
           method: post
   createAuditLogEvents:
-    handler: src/audit-log-api/handlers/createAuditLogEvents.default
+    handler: src/audit-log-api/handlers/createAuditLogEvents.handler
     events:
       - httpApi:
           path: /messages/{messageId}/events
           method: post
   retryMessage:
-    handler: src/audit-log-api/handlers/retryMessage.default
+    handler: src/audit-log-api/handlers/retryMessage.handler
     events:
       - httpApi:
           path: /messages/{messageId}/retry
           method: post
   sanitiseMessage:
-    handler: src/audit-log-api/handlers/sanitiseMessage.default
+    handler: src/audit-log-api/handlers/sanitiseMessage.handler
     events:
       - httpApi:
           path: /messages/{messageId}/sanitise
           method: post
   createAuditLogUserEvents:
-    handler: src/audit-log-api/handlers/createAuditLogUserEvents.default
+    handler: src/audit-log-api/handlers/createAuditLogUserEvents.handler
     events:
       - httpApi:
           path: /users/{userName}/events

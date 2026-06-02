@@ -7,7 +7,7 @@ import { DynamoGateway } from "../gateways/dynamo/DynamoGateway"
 import "../testConfig"
 setEnvironmentVariables()
 
-import sanitiseMessage from "./sanitiseMessage"
+import { handler as sanitiseMessage } from "./sanitiseMessage"
 
 const createProxyEvent = (messageId?: string): APIGatewayProxyEvent => {
   return <APIGatewayProxyEvent>JSON.parse(

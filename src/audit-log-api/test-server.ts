@@ -2,12 +2,12 @@
 import type { WrapperOptions } from "convert-lambda-to-express"
 import { wrapLambda } from "convert-lambda-to-express"
 import express from "express"
-import createAuditLog from "./handlers/createAuditLog"
-import createAuditLogEvents from "./handlers/createAuditLogEvents"
-import createAuditLogUserEvents from "./handlers/createAuditLogUserEvents"
+import { handler as createAuditLog } from "./handlers/createAuditLog"
+import { handler as createAuditLogEvents } from "./handlers/createAuditLogEvents"
+import { handler as createAuditLogUserEvents } from "./handlers/createAuditLogUserEvents"
 import { handler as getMessages } from "./handlers/getMessages"
-import retryMessage from "./handlers/retryMessage"
-import sanitiseMessage from "./handlers/sanitiseMessage"
+import { handler as retryMessage } from "./handlers/retryMessage"
+import { handler as sanitiseMessage } from "./handlers/sanitiseMessage"
 
 const port = process.env.PORT ? Number(process.env.PORT) : 7000
 
