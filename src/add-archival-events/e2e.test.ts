@@ -8,7 +8,7 @@ import { AuditLogApiClient, logger } from "src/shared"
 import { clearDynamoTable, createMockAuditLog, mockApiAuditLogEvent, mockInputApiAuditLog } from "src/shared/testing"
 import type { ApiAuditLogEvent, ApiClient, InputApiAuditLog, OutputApiAuditLog } from "src/shared/types"
 import { EventCode, isSuccess } from "src/shared/types"
-import addArchivalEvents from "."
+import { handler as addArchivalEvents } from "."
 import { SSM } from "aws-sdk"
 
 logger.level = "debug"

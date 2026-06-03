@@ -9,7 +9,7 @@ import "src/shared/testing"
 import { clearDynamoTable, createMockAuditLog, setEnvironmentVariables } from "src/shared/testing"
 import type { ApiClient, KeyValuePair, OutputApiAuditLog } from "src/shared/types"
 import { isError } from "src/shared/types"
-import sanitiseOldMessages from "./index"
+import { handler as sanitiseOldMessages } from "./index"
 
 setEnvironmentVariables({
   SANITISE_AFTER_DAYS: "90",
