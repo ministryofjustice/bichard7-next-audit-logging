@@ -39,7 +39,7 @@
     "lint-staged": "^17.0.7",
     "lodash.partition": "^4.6.0",
     "mockdate": "^3.0.5",
-    "npm-check-updates": "^22.2.2",
+    "npm-check-updates": "^22.2.3",
     "osls": "^3.73.0",
     "prettier": "^3.8.3",
     "serverless-dynamodb-local": "^0.2.40",
