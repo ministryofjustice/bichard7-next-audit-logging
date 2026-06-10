@@ -14,7 +14,9 @@ const auditLogConfig = createAuditLogDynamoDbConfig()
 const auditLogGateway = new AuditLogDynamoGateway(auditLogConfig)
 const createAuditLogEventUseCase = new CreateAuditLogEventsUseCase(auditLogGateway)
 
-export default async function createAuditLogEvents(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
+export const handler = async function createAuditLogEvents(
+  event: APIGatewayProxyEvent
+): Promise<APIGatewayProxyResult> {
   const request = parseCreateAuditLogEventsRequest(event)
 
   if (isError(request)) {

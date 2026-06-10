@@ -42,7 +42,7 @@ const retryMessageUseCase = new RetryMessageUseCase(
   createRetryingEventUseCase
 )
 
-export default async function retryMessage(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
+export const handler = async function retryMessage(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
   const messageId = parseRetryMessageRequest(event)
 
   if (isError(messageId)) {

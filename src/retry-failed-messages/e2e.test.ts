@@ -16,7 +16,7 @@ setEnvironmentVariables()
 process.env.MESSAGE_FORMAT = "AuditEvent"
 process.env.BUCKET_NAME = "auditLogEventsBucket"
 
-import handler from "./index"
+import { handler } from "./index"
 
 const auditLogTableName = "auditLogTable"
 

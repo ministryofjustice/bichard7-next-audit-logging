@@ -38,7 +38,7 @@ const getSanitiseConfig = (): SanitiseConfig => {
   }
 }
 
-export default async function sanitiseMessage(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
+export const handler = async function sanitiseMessage(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
   const sanitiseConfig = getSanitiseConfig()
   const messageId = event.pathParameters?.messageId
 

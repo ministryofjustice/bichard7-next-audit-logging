@@ -4,7 +4,7 @@ import { ZodError } from "zod"
 import { uploadToS3 } from "./utils/uploadToS3"
 setEnvironmentVariables()
 
-import { default as handler } from "."
+import { handler } from "."
 
 jest.mock("./utils/uploadToS3")
 

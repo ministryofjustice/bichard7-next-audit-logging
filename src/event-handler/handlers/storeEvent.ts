@@ -25,7 +25,7 @@ interface StoreEventValidationResult {
   }
 }
 
-export default async function storeEvent(
+export const handler = async function storeEvent(
   event: S3PutObjectEvent
 ): Promise<StoreEventResult | StoreEventValidationResult> {
   const { key: s3Path, bucketName } = event.detail.requestParameters

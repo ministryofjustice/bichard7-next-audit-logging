@@ -21,7 +21,7 @@ process.env.EVENTS_BUCKET_NAME = "auditLogEventsBucket"
 
 import createAdutiLogDynamoDbConfig from "src/audit-log-api/createAuditLogDynamoDbConfig"
 import { TestDynamoGateway } from "src/audit-log-api/test"
-import messageReceiver from "src/message-receiver/index"
+import { handler as messageReceiver } from "src/message-receiver/index"
 
 const s3Gateway = new TestS3Gateway({
   url: "http://localhost:4569",

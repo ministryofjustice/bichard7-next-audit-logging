@@ -5,7 +5,7 @@ import { SSM } from "aws-sdk"
 
 const ssm = new SSM()
 
-export default async (): Promise<void> => {
+export const handler = async (): Promise<void> => {
   const apiConfig = await getApiConfig(ssm)
   const config = getSanitiseConfig()
 

@@ -4,7 +4,7 @@ import { mockApiAuditLogEvent } from "src/shared/testing"
 import type { ApiAuditLogEvent } from "src/shared/types"
 import "../testConfig"
 import { CreateAuditLogEventsUseCase } from "../use-cases"
-import createAuditLogEvents from "./createAuditLogEvents"
+import { handler as createAuditLogEvents } from "./createAuditLogEvents"
 
 const createHandlerEvent = (...auditLogEvents: ApiAuditLogEvent[]): APIGatewayProxyEvent => {
   const events = auditLogEvents || [mockApiAuditLogEvent()]
