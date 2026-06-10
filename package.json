@@ -45,7 +45,7 @@
     "serverless-dynamodb-local": "^0.2.40",
     "serverless-esbuild": "^1.57.2",
     "serverless-hooks": "^1.0.0",
-    "serverless-offline": "^14.7.1",
+    "serverless-offline": "^14.7.2",
     "serverless-s3-local": "^0.8.5",
     "shelljs": "^0.10.0",
     "ts-jest": "^29.4.11",
