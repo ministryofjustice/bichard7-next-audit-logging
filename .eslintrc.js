@@ -18,7 +18,7 @@ module.exports = {
   overrides: [
     {
       files: ["**/*.js"],
-      extends: ["airbnb-base", "prettier", "plugin:prettier/recommended"],
+      extends: ["prettier", "plugin:prettier/recommended"],
       rules: {
         "@typescript-eslint/no-var-requires": "off",
         curly: [2, "all"]
@@ -29,7 +29,6 @@ module.exports = {
       parser: "@typescript-eslint/parser",
       plugins: ["@typescript-eslint", "jest"],
       extends: [
-        "airbnb-typescript",
         "plugin:@typescript-eslint/recommended",
         "plugin:jest/recommended",
         "plugin:jest/style",
