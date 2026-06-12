@@ -16,7 +16,10 @@ jobs:
       - name: Setup node version
         uses: actions/setup-node@8f152de45cc393bb48ce5d89d36b731f54556e65 # v4
         with:
-          node-version: 20.18.0
+          node-version-file: '.nvmrc'
+          
+      - name: Print node version
+        run: node -v
           
       - name: ⛓️ SLSA Supply Chain Security
         uses: ministryofjustice/devsecops-actions/sca/slsa@8c77d3a65a46d1d4b5416eafae5b84371ecd797d # v1.5.0
