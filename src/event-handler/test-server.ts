@@ -1,4 +1,3 @@
-/* eslint-disable import/no-extraneous-dependencies */
 import type { Message } from "@stomp/stompjs"
 import { Client } from "@stomp/stompjs"
 import { AuditLogApiClient, encodeBase64 } from "src/shared"

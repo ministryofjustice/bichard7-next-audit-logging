@@ -1,4 +1,3 @@
-// eslint-disable-next-line import/prefer-default-export
 export { default as createJsonApiResult } from "./createJsonApiResult"
 export { default as getForceOwner, parseForceOwner } from "./getForceOwner"
 export { default as isIsoDate } from "./isIsoDate"
