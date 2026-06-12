@@ -1,4 +1,3 @@
-/* eslint-disable import/no-extraneous-dependencies */
 import type { WrapperOptions } from "convert-lambda-to-express"
 import { wrapLambda } from "convert-lambda-to-express"
 import express from "express"
