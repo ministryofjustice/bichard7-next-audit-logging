@@ -1,4 +1,3 @@
-// eslint-disable-next-line import/no-extraneous-dependencies
 import { StepFunctionSimulator } from "src/shared/testing"
 import { handler as storeEvent } from "../handlers/storeEvent"
 

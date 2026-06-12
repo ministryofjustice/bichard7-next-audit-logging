@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/ban-types, @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-function-type */
 
 const flatten = (input: any): any => JSON.parse(JSON.stringify(input))
 
