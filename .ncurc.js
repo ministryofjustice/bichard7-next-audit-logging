@@ -2,8 +2,11 @@
   Pinned:
   - eslint [???]
   - esbuild [15/04/24 - breaks serverless-esbuild]
+  - @babel/core
+    - v8 has breaking changes in ts-jest
 */
 const minor = [
+  "@babel/core",
   "eslint",
   "@typescript-eslint/parser",
   "@typescript-eslint/eslint-plugin",
