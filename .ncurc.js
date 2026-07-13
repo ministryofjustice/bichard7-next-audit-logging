@@ -4,6 +4,8 @@
   - esbuild [15/04/24 - breaks serverless-esbuild]
   - @babel/core
     - v8 has breaking changes in ts-jest
+  - TypeScript
+    - v7 breaks @typescript-eslint
 */
 const minor = [
   "@babel/core",
@@ -12,6 +14,7 @@ const minor = [
   "@typescript-eslint/eslint-plugin",
   "uuid",
   "eslint-plugin-jest",
+  "typescript",
   "zod"
 ]
 const patch = ["esbuild"]
