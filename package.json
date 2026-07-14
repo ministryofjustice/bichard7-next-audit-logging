@@ -67,7 +67,7 @@
     "test:integration": "jest --update-snapshot --runInBand --testPathPatterns=integration --testPathIgnorePatterns='e2e'",
     "test:unit": "jest --update-snapshot --testPathIgnorePatterns='integration' 'e2e'",
     "test": "jest --runInBand  --namePattern=",
-    "update-deps": "ncu -u && npm install",
+    "update-deps": "ncu -u --cooldown 3d && npm install",
     "prepare": "husky",
     "wait-for-api": "wait-on tcp:3010"
   },
