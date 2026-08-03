@@ -1,6 +1,6 @@
 import type { WrapperOptions } from "convert-lambda-to-express"
 import { wrapLambda } from "convert-lambda-to-express"
-import express from "express"
+import express, { type RequestHandler } from "express"
 import { handler as createAuditLog } from "./handlers/createAuditLog"
 import { handler as createAuditLogEvents } from "./handlers/createAuditLogEvents"
 import { handler as createAuditLogUserEvents } from "./handlers/createAuditLogUserEvents"
@@ -32,7 +32,7 @@ app.use(
 //     - httpApi:
 //         path: /messages
 //         method: get
-app.get("/messages", wrapLambda(getMessages, options))
+app.get("/messages", wrapLambda(getMessages, options) as unknown as RequestHandler)
 
 // getMessage:
 //   handler: src/audit-log-api/handlers/getMessages.default
@@ -40,7 +40,7 @@ app.get("/messages", wrapLambda(getMessages, options))
 //     - httpApi:
 //         path: /messages/{messageId}
 //         method: get
-app.get("/messages/:messageId", wrapLambda(getMessages, options))
+app.get("/messages/:messageId", wrapLambda(getMessages, options) as unknown as RequestHandler)
 
 // createAuditLog:
 //   handler: src/audit-log-api/handlers/createAuditLog.default
@@ -48,7 +48,7 @@ app.get("/messages/:messageId", wrapLambda(getMessages, options))
 //     - httpApi:
 //         path: /messages
 //         method: post
-app.post("/messages", wrapLambda(createAuditLog, options))
+app.post("/messages", wrapLambda(createAuditLog, options) as unknown as RequestHandler)
 
 // createAuditLogEvents:
 //   handler: src/audit-log-api/handlers/createAuditLogEvents.default
@@ -56,7 +56,7 @@ app.post("/messages", wrapLambda(createAuditLog, options))
 //     - httpApi:
 //         path: /messages/{messageId}/events
 //         method: post
-app.post("/messages/:messageId/events", wrapLambda(createAuditLogEvents, options))
+app.post("/messages/:messageId/events", wrapLambda(createAuditLogEvents, options) as unknown as RequestHandler)
 
 // retryMessage:
 //   handler: src/audit-log-api/handlers/retryMessage.default
@@ -64,7 +64,7 @@ app.post("/messages/:messageId/events", wrapLambda(createAuditLogEvents, options
 //     - httpApi:
 //         path: /messages/{messageId}/retry
 //         method: post
-app.post("/messages/:messageId/retry", wrapLambda(retryMessage, options))
+app.post("/messages/:messageId/retry", wrapLambda(retryMessage, options) as unknown as RequestHandler)
 
 // sanitiseMessage:
 //   handler: src/audit-log-api/handlers/sanitiseMessage.default
@@ -72,7 +72,7 @@ app.post("/messages/:messageId/retry", wrapLambda(retryMessage, options))
 //     - httpApi:
 //         path: /messages/{messageId}/sanitise
 //         method: post
-app.post("/messages/:messageId/sanitise", wrapLambda(sanitiseMessage, options))
+app.post("/messages/:messageId/sanitise", wrapLambda(sanitiseMessage, options) as unknown as RequestHandler)
 
 // createAuditLogUserEvents:
 //   handler: src/audit-log-api/handlers/createAuditLogUserEvents.default
@@ -80,7 +80,7 @@ app.post("/messages/:messageId/sanitise", wrapLambda(sanitiseMessage, options))
 //     - httpApi:
 //         path: /users/{userName}/events
 //         method: post
-app.post("/users/:userName/events", wrapLambda(createAuditLogUserEvents, options))
+app.post("/users/:userName/events", wrapLambda(createAuditLogUserEvents, options) as unknown as RequestHandler)
 
 app.get("/health", (_, res) => {
   res.status(204).send()
