@@ -43,3 +43,6 @@ jobs:
         
       - name: Run end-to-end tests
         run: npm run test:e2e
+
+      - name: Stop Audit Log API
+        cancel: audit-log-api
