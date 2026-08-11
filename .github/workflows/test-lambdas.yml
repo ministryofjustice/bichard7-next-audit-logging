@@ -1,4 +1,4 @@
-name: Build and test lambdas
+name: Test lambdas
 
 on:
   workflow_dispatch:
@@ -6,7 +6,7 @@ on:
 
 jobs:
   build:
-    name: Build
+    name: Test lambdas
     runs-on: ubuntu-latest
 
     steps:
