@@ -13,7 +13,7 @@ validate:
 run-mq:
 	@( \
 		if [ "${SKIP_MQ}" != "true" ]; then \
-			docker-compose -f environment/docker-compose.yml up -d mq; \
+			docker compose -f environment/docker-compose.yml up -d mq; \
 		fi; \
   )
 
@@ -25,7 +25,7 @@ stop-mq:
 run-pg:
 	@( \
 		if [ "${SKIP_PG}" != "true" ]; then \
-			docker-compose -f environment/docker-compose.yml up -d pg; \
+			docker compose -f environment/docker-compose.yml up -d pg; \
 		fi; \
   )
 
