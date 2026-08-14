@@ -1,4 +1,4 @@
-name: Build
+name: Lint and Build
 
 on:
   workflow_dispatch:
@@ -6,7 +6,7 @@ on:
 
 jobs:
   build:
-    name: Build
+    name: Lint and build
     runs-on: ubuntu-latest
 
     steps:
@@ -21,13 +21,13 @@ jobs:
       - name: ⛓️ SLSA Supply Chain Security
         uses: ministryofjustice/devsecops-actions/sca/slsa@805c9da24fe7083e24b8435a626463b25951d278 # v1.4.0
 
-      - name: Install dependencies
-        run: npm i
+      - name: Install NPM packages
+        run: npm ci --ignore-scripts
 
       - name: Run check
         run: npm run check
         
-      - name: Run lint
+      - name: Run linting
         run: npm run lint
 
       - name: Run build
