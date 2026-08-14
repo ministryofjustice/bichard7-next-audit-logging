@@ -1,0 +1,48 @@
+name: Test lambdas
+
+on:
+  workflow_dispatch:
+  push:
+
+jobs:
+  build:
+    name: Test lambdas
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@1e31de5234b9f8995739874a8ce0492dc87873e2 # v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@2028fbc5c25fe9cf00d9f06a71cc4710d4507903 # v6
+        with:
+          node-version-file: .nvmrc
+
+      - name: Install NPM packages
+        run: npm install
+      
+      - name: Install Java
+        run: sudo apt-get update && sudo apt-get install openjdk-17-jre
+
+      - name: Install Dynamo
+        run: npm run install-dynamo
+
+      - name: Start Audit Log API
+        id: audit-log-api
+        run: npm run start-api
+        background: true
+
+      - name: Wait for Audit Log API
+        run: npm run wait-for-api
+
+      - name: Run unit tests
+        run: npm run test:unit
+
+      - name: Run integration tests
+        run: npm run test:integration
+        
+      - name: Run end-to-end tests
+        run: npm run test:e2e
+
+      - name: Stop Audit Log API
+        cancel: audit-log-api
