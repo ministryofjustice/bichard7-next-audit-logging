@@ -24,7 +24,7 @@
     "@typescript-eslint/parser": "^8.63.0",
     "body-parser": "^2.3.0",
     "convert-lambda-to-express": "^1.3.1",
-    "esbuild": "^0.28.1",
+    "esbuild": "^0.28.2",
     "eslint": "^8.57.1",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-import": "^2.32.0",
