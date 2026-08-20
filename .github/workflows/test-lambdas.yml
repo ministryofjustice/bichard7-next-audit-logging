@@ -3,6 +3,8 @@ name: Test lambdas
 on:
   workflow_dispatch:
   push:
+  pull_request:
+    types: [opened, synchronize, reopened]
 
 jobs:
   build:
