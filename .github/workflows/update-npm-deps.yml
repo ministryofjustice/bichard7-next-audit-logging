@@ -53,7 +53,7 @@ jobs:
 
       - name: Create pull request
         id: cpr
-        uses: ministryofjustice/bichard7-next-core/.github/actions/create-pull-request@77e14c87788f26f250a55cd92f7828af5f33a28d
+        uses: ministryofjustice/bichard7-next-core/.github/actions/create-pull-request@main
         with:
           github_token: ${{ github.token }}
           branch: "auto/update-npm-deps"
