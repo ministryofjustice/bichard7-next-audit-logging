@@ -32,7 +32,7 @@
     "eslint-plugin-prettier": "^5.5.6",
     "express": "^5.2.1",
     "husky": "^9.1.7",
-    "jest": "^30.4.2",
+    "jest": "^30.5.0",
     "lambda-local": "^2.2.0",
     "lint-staged": "^17.4.1",
     "lodash.partition": "^4.6.0",
