@@ -40,7 +40,7 @@
     "npm-check-updates": "^23.1.0",
     "osls": "^4.2.0",
     "prettier": "^3.9.6",
-    "serverless-dynamodb-local": "^0.2.40",
+    "serverless-dynamodb-local": "^1.0.2",
     "serverless-esbuild": "^1.57.2",
     "serverless-hooks": "^1.0.0",
     "serverless-offline": "^14.8.0",
