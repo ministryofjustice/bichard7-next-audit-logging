@@ -36,6 +36,7 @@ jobs:
         background: true
 
       - name: Wait for Audit Log API
+        timeout-minutes: 5
         run: npm run wait-for-api
 
       - name: Run unit tests
