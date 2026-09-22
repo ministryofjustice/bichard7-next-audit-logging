@@ -4,7 +4,7 @@
   "version": "0.0.1",
   "private": true,
   "devDependencies": {
-    "@aws-sdk/client-lambda": "^3.1132.0",
+    "@aws-sdk/client-lambda": "^3.1135.0",
     "@babel/core": "^7.29.7",
     "@stomp/stompjs": "^7.3.0",
     "@types/aws-lambda": "^8.10.163",
@@ -39,7 +39,7 @@
     "mockdate": "^3.0.5",
     "npm-check-updates": "^23.1.0",
     "osls": "^4.3.1",
-    "prettier": "^3.9.6",
+    "prettier": "^3.9.8",
     "serverless-dynamodb-local": "^0.2.40",
     "serverless-esbuild": "^1.57.2",
     "serverless-hooks": "^1.0.0",
