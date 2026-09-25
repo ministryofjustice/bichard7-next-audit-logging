@@ -9,43 +9,29 @@
 */
 const minor = [
   "@babel/core",
-  "eslint",
   "@typescript-eslint/parser",
   "@typescript-eslint/eslint-plugin",
   "uuid",
   "eslint-plugin-jest",
-  "typescript",
-  "zod"
+  "typescript"
 ]
+
 const patch = ["esbuild"]
 
-const ignored = []
-const skipped = []
-
 module.exports = {
+  reject: ["eslint", "zod"],
+
   target: (pkg) => {
-    if (minor.some((pin) => pin === pkg)) {
-      const res = "minor"
-      console.log(` ${pkg} is pinned to ${res} upgrades only (.ncurc.js)`)
-      return res
+    if (minor.includes(pkg)) {
+      console.log(` ${pkg} is pinned to minor upgrades only (.ncurc.js)`)
+      return "minor"
     }
 
-    if (patch.some((pin) => pin === pkg)) {
-      const res = "patch"
-      console.log(` ${pkg} is pinned to ${res} upgrades only (.ncurc.js)`)
-      return res
+    if (patch.includes(pkg)) {
+      console.log(` ${pkg} is pinned to patch upgrades only (.ncurc.js)`)
+      return "patch"
     }
 
     return "latest"
-  },
-
-  filterResults: (pkg, { upgradedVersion }) => {
-    if (ignored.some((ignore) => ignore.pkg === pkg)) {
-      return false
-    }
-    if (skipped.some((skip) => skip.pkg === pkg && skip.version === upgradedVersion)) {
-      return false
-    }
-    return true
   }
 }
