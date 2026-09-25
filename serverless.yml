@@ -33,10 +33,10 @@ provider:
     DB_SCHEMA: "br7own"
 
 plugins:
+  - serverless-dynamodb
   - serverless-offline
   - serverless-hooks
   - serverless-esbuild
-  - serverless-dynamodb-local
   - serverless-s3-local
 
 custom:
@@ -47,7 +47,7 @@ custom:
     minify: false
     external:
       - pg-native
-  dynamodb:
+  serverless-dynamodb:
     stages:
       - dev
     start:
