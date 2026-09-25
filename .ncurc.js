@@ -9,17 +9,15 @@
 */
 const minor = [
   "@babel/core",
-  "eslint",
   "@typescript-eslint/parser",
   "@typescript-eslint/eslint-plugin",
   "uuid",
   "eslint-plugin-jest",
-  "typescript",
-  "zod"
+  "typescript"
 ]
 const patch = ["esbuild"]
 
-const ignored = []
+const ignored = ["eslint", "zod"]
 const skipped = []
 
 module.exports = {
@@ -40,7 +38,7 @@ module.exports = {
   },
 
   filterResults: (pkg, { upgradedVersion }) => {
-    if (ignored.some((ignore) => ignore.pkg === pkg)) {
+    if (ignored.some((ignore) => ignore === pkg)) {
       return false
     }
     if (skipped.some((skip) => skip.pkg === pkg && skip.version === upgradedVersion)) {
