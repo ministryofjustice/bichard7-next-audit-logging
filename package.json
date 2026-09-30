@@ -51,7 +51,7 @@
     "tsconfig-paths": "^4.2.0",
     "typescript": "^6.0.3",
     "wait-on": "^9.1.0",
-    "ws": "^8.21.3"
+    "ws": "^8.22.0"
   },
   "scripts": {
     "build": "node build.js",
