@@ -13,13 +13,12 @@ const minor = [
   "@typescript-eslint/eslint-plugin",
   "uuid",
   "eslint-plugin-jest",
-  "typescript"
 ]
 
 const patch = ["esbuild"]
 
 module.exports = {
-  reject: ["eslint", "zod"],
+  reject: ["eslint", "zod", "typescript"],
 
   target: (pkg) => {
     if (minor.includes(pkg)) {
