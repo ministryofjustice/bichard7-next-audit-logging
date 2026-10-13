@@ -14,12 +14,10 @@ import { createJsonApiResult } from "../utils"
 
 const auditLogDynamoDbConfig = createAuditLogDynamoDbConfig()
 const auditLogGateway = new AuditLogDynamoGateway(auditLogDynamoDbConfig)
-const postgresConfig = createBichardPostgresGatewayConfig()
-const awsBichardPostgresGateway = new BichardPostgresGateway(postgresConfig)
+
 const awsMessagesS3Gateway = new S3Gateway(createS3Config("INTERNAL_INCOMING_MESSAGES_BUCKET"))
 const deleteMessageObjectsFromS3UseCase = new DeleteMessageObjectsFromS3UseCase(awsMessagesS3Gateway)
 const sanitiseAuditLogEventsUseCase = new SanitiseAuditLogEventsUseCase(auditLogGateway)
-const deleteArchivedErrorsUseCase = new DeleteArchivedErrorsUseCase(awsBichardPostgresGateway)
 
 type SanitiseConfig = {
   checkFrequency: Duration
@@ -39,6 +37,10 @@ const getSanitiseConfig = (): SanitiseConfig => {
 }
 
 export const handler = async function sanitiseMessage(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
+  const postgresConfig = await createBichardPostgresGatewayConfig()
+  const awsBichardPostgresGateway = new BichardPostgresGateway(postgresConfig)
+  const deleteArchivedErrorsUseCase = new DeleteArchivedErrorsUseCase(awsBichardPostgresGateway)
+
   const sanitiseConfig = getSanitiseConfig()
   const messageId = event.pathParameters?.messageId
 

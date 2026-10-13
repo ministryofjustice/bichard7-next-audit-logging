@@ -1,9 +1,7 @@
 import { Lambda } from "aws-sdk"
 import { AuditLogDynamoGateway, DynamoDbConfig } from "../../src/audit-log-api/gateways/dynamo"
 import { DynamoAuditLog, isError } from "../../src/shared/types"
-import { AuditLogEventAttributes, DynamoAuditLogEvent } from "../../src/shared/types/AuditLogEvent"
-
-const outDir = "pnc-status-debugging"
+import { AuditLogEventAttributes, DynamoAuditLogEvent } from "../../src/shared/types"
 
 const WORKSPACE = process.env.WORKSPACE ?? "production"
 let dynamo: AuditLogDynamoGateway | undefined
@@ -91,6 +89,7 @@ const formatAuditLog = (auditLog: DynamoAuditLog): string => {
 
   keys.forEach((key) => {
     const [index, name] = Object.entries(key)[0]
+    // @ts-ignore
     output.push(`${name.padEnd(22)}: ${auditLog[index]}`)
   })
   output.push("\nEvents:\n")

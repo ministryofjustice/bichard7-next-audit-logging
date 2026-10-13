@@ -8,31 +8,41 @@ import {
   mockDynamoAuditLog,
   setEnvironmentVariables
 } from "src/shared/testing"
-import type { DynamoAuditLog, OutputApiAuditLog } from "src/shared/types"
+import type { DynamoAuditLog, OutputApiAuditLog, PostgresConfig } from "src/shared/types"
 import createBichardPostgresGatewayConfig from "../createBichardPostgresGatewayConfig"
 import { AuditLogDynamoGateway } from "../gateways/dynamo"
 import { auditLogDynamoConfig, TestDynamoGateway } from "../test"
 
 setEnvironmentVariables()
 
-const auditLogTableName = "auditLogTable"
-
-const postgresConfig = createBichardPostgresGatewayConfig()
-const errorListPostgresConfig = {
-  ...postgresConfig,
-  TABLE_NAME: postgresConfig.TABLE_NAME?.replace("archive_", "")
-}
-const postgresGateway = new BichardPostgresGateway(postgresConfig)
-
-const messagesS3Gateway = new TestS3Gateway(createS3Config("INTERNAL_INCOMING_MESSAGES_BUCKET"))
-const eventsS3Gateway = new TestS3Gateway(createS3Config("AUDIT_LOG_EVENTS_BUCKET"))
-
-const auditLogDynamoGateway = new AuditLogDynamoGateway(auditLogDynamoConfig)
-const testDynamoGateway = new TestDynamoGateway(auditLogDynamoConfig)
-const testPostgresGateway = new TestPostgresGateway(postgresConfig)
-const errorListTestPostgresGateway = new TestPostgresGateway(errorListPostgresConfig)
-
 describe("sanitiseMessage", () => {
+  const auditLogTableName = "auditLogTable"
+
+  let postgresConfig: PostgresConfig
+  let postgresGateway: BichardPostgresGateway
+  let messagesS3Gateway: TestS3Gateway
+  let eventsS3Gateway: TestS3Gateway
+  let auditLogDynamoGateway: AuditLogDynamoGateway
+  let testDynamoGateway: TestDynamoGateway
+  let testPostgresGateway: TestPostgresGateway
+  let errorListTestPostgresGateway: TestPostgresGateway
+
+  beforeAll(async () => {
+    postgresConfig = await createBichardPostgresGatewayConfig()
+    const errorListPostgresConfig = {
+      ...postgresConfig,
+      TABLE_NAME: postgresConfig.TABLE_NAME?.replace("archive_", "")
+    }
+
+    postgresGateway = new BichardPostgresGateway(postgresConfig)
+    messagesS3Gateway = new TestS3Gateway(createS3Config("INTERNAL_INCOMING_MESSAGES_BUCKET"))
+    eventsS3Gateway = new TestS3Gateway(createS3Config("AUDIT_LOG_EVENTS_BUCKET"))
+    auditLogDynamoGateway = new AuditLogDynamoGateway(auditLogDynamoConfig)
+    testDynamoGateway = new TestDynamoGateway(auditLogDynamoConfig)
+    testPostgresGateway = new TestPostgresGateway(postgresConfig)
+    errorListTestPostgresGateway = new TestPostgresGateway(errorListPostgresConfig)
+  })
+
   beforeEach(async () => {
     await eventsS3Gateway.deleteAll()
     await messagesS3Gateway.deleteAll()
