@@ -89,7 +89,6 @@ const formatAuditLog = (auditLog: DynamoAuditLog): string => {
 
   keys.forEach((key) => {
     const [index, name] = Object.entries(key)[0]
-    // @ts-ignore
     output.push(`${name.padEnd(22)}: ${auditLog[index]}`)
   })
   output.push("\nEvents:\n")
