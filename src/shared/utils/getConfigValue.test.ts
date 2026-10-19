@@ -18,7 +18,13 @@ describe("getConfigValue", () => {
     expect(result).toBe("expected")
   })
 
-  it("should return the value from SSM if an SSM arm is specified", async () => {
+  it("should return the raw value if it is not an SSM arn", async () => {
+    const result = await getConfigValue(ssm, "plain_text_value", "expected")
+
+    expect(result).toBe("plain_text_value")
+  })
+
+  it("should return the value from SSM if an SSM arn is specified", async () => {
     send.mockResolvedValueOnce({
       Parameter: { Value: "secret-value" }
     })
