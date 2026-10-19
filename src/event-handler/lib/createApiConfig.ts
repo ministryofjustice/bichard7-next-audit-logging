@@ -13,8 +13,5 @@ export default async function getConfig(ssm: SSMClient): Promise<ApiConfig> {
     throw Error("Could not read API_KEY from configuration")
   }
 
-  return {
-    apiUrl: apiUrl,
-    apiKey: apiKey
-  }
+  return { apiUrl, apiKey }
 }
