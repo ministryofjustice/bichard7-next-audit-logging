@@ -8,10 +8,11 @@ import createMqConfig from "./lib/createMqConfig"
 import type { EventInput } from "./types"
 import CreateEventUseCase from "./use-cases/CreateEventUseCase"
 import translateEvent from "./use-cases/translateEvent"
+import { SSMClient } from "@aws-sdk/client-ssm"
 Object.assign(global, { WebSocket })
 
+const ssm = new SSMClient()
 const mqConfig = createMqConfig()
-const { apiUrl, apiKey } = createApiConfig()
 const sourceQueue = process.env.SOURCE_QUEUE ?? "GENERAL_EVENT_QUEUE"
 
 const client = new Client({
@@ -22,14 +23,15 @@ const client = new Client({
   }
 })
 
-const api = new AuditLogApiClient(apiUrl, apiKey, 5_000)
-const createEventUseCase = new CreateEventUseCase(api)
-
 console.log(`Connecting to ${mqConfig.url}`)
 client.onConnect = () => {
   console.log("Connected")
   client.subscribe(sourceQueue, async (message: Message): Promise<void> => {
     console.log("Received message")
+
+    const { apiUrl, apiKey } = await createApiConfig(ssm)
+    const api = new AuditLogApiClient(apiUrl, apiKey, 5_000)
+    const createEventUseCase = new CreateEventUseCase(api)
 
     const eventInput: EventInput = {
       s3Path: "",

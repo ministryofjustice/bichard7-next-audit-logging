@@ -1,18 +1,17 @@
 import { AuditLogApiClient, createS3Config, logger, S3Gateway } from "src/shared"
 import type { S3PutObjectEvent } from "src/shared/types"
 import { isError } from "src/shared/types"
-import createApiConfig from "../lib/createApiConfig"
 import CreateEventUseCase from "../use-cases/CreateEventUseCase"
 import DoesS3ObjectExist from "../use-cases/DoesS3ObjectExist"
 import RetrieveEventFromS3UseCase from "../use-cases/RetrieveEventFromS3UseCase"
 import translateEvent from "../use-cases/translateEvent"
+import getConfig from "../lib/createApiConfig"
+import { SSMClient } from "@aws-sdk/client-ssm"
 
-const { apiUrl, apiKey } = createApiConfig()
+const ssm = new SSMClient()
 const s3Gateway = new S3Gateway(createS3Config())
 const doesS3ObjectExistUseCase = new DoesS3ObjectExist(s3Gateway)
 const retrieveEventFromS3UseCase = new RetrieveEventFromS3UseCase(s3Gateway)
-const api = new AuditLogApiClient(apiUrl, apiKey, 5_000)
-const createEventUseCase = new CreateEventUseCase(api)
 
 interface StoreEventResult {
   bucketName: string
@@ -28,6 +27,10 @@ interface StoreEventValidationResult {
 export const handler = async function storeEvent(
   event: S3PutObjectEvent
 ): Promise<StoreEventResult | StoreEventValidationResult> {
+  const { apiUrl, apiKey } = await getConfig(ssm)
+  const api = new AuditLogApiClient(apiUrl, apiKey, 5_000)
+  const createEventUseCase = new CreateEventUseCase(api)
+
   const { key: s3Path, bucketName } = event.detail.requestParameters
   const s3ObjectExists = await doesS3ObjectExistUseCase.execute(event)
 
