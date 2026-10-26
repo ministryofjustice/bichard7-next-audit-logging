@@ -1,13 +1,17 @@
 import { AuditLogApiClient, logger } from "src/shared"
 import { isError } from "src/shared/types"
-import config from "./config"
 import getErrorsToRetry from "./lib/getErrorsToRetry"
+import { SSMClient } from "@aws-sdk/client-ssm"
+import getConfig from "./config"
 
-const apiClient = new AuditLogApiClient(config.apiUrl, config.apiKey)
+const ssm = new SSMClient()
 
 type OutputType = { retried: string[]; errored: string[] }
 
 export const handler = async (): Promise<OutputType> => {
+  const config = await getConfig(ssm)
+  const apiClient = new AuditLogApiClient(config.apiUrl, config.apiKey)
+
   logger.info("Fetching messages to retry")
   const messages = await getErrorsToRetry(apiClient, config.errorsToRetry)
   const output: OutputType = { retried: [], errored: [] }
