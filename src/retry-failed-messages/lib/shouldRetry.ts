@@ -1,7 +1,9 @@
 import type { ApiAuditLogEvent, OutputApiAuditLog, Result } from "src/shared/types"
-import config from "../config"
 
-export default (message: OutputApiAuditLog): Result<boolean> => {
+export default (
+  config: { maxRetryAttempts: number; initialRetryDelay: number; retryDelay: number },
+  message: OutputApiAuditLog
+): Result<boolean> => {
   let retryTime: number
 
   const hasFailedEvent = (message.events as ApiAuditLogEvent[]).some(
