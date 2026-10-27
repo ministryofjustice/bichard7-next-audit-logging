@@ -1,6 +1,8 @@
 import type { MqConfig } from "src/shared/types"
+import type { SSMClient } from "@aws-sdk/client-ssm"
+import getConfigValue from "src/shared/utils/getConfigValue"
 
-export default (): MqConfig => {
+export default async function (ssm: SSMClient): Promise<MqConfig> {
   const { MQ_USER, MQ_PASSWORD, MQ_URL } = process.env
 
   if (!MQ_USER || !MQ_PASSWORD || !MQ_URL) {
@@ -9,7 +11,7 @@ export default (): MqConfig => {
 
   return {
     url: MQ_URL,
-    username: MQ_USER,
-    password: MQ_PASSWORD
+    username: await getConfigValue(ssm, MQ_USER, ""),
+    password: await getConfigValue(ssm, MQ_PASSWORD, "")
   }
 }
