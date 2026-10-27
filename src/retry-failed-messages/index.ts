@@ -13,7 +13,7 @@ export const handler = async (): Promise<OutputType> => {
   const apiClient = new AuditLogApiClient(config.apiUrl, config.apiKey)
 
   logger.info("Fetching messages to retry")
-  const messages = await getErrorsToRetry(apiClient, config.errorsToRetry)
+  const messages = await getErrorsToRetry(apiClient, config)
   const output: OutputType = { retried: [], errored: [] }
 
   if (isError(messages)) {

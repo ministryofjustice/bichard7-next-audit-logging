@@ -11,6 +11,12 @@ const moreThanInitialRetryDelay = generateDateInThePast(0, 30, 1)
 const lessThanRetryDelay = generateDateInThePast(23, 59, 59)
 const moreThanRetryDelay = generateDateInThePast(24, 0, 1)
 
+const config = {
+  maxRetryAttempts: 3,
+  initialRetryDelay: 1_800_000,
+  retryDelay: 86_400_000
+}
+
 describe("shouldRetry", () => {
   it("should not retry new messages too early", () => {
     const receivedDate = lessThanInitialRetryDelay
@@ -21,7 +27,7 @@ describe("shouldRetry", () => {
       timestamp: lessThanInitialRetryDelay
     })
     message.events.push(event)
-    expect(shouldRetry(message)).toBeFalsy()
+    expect(shouldRetry(config, message)).toBeFalsy()
   })
 
   it("should correctly retry new messages after an initial wait", () => {
@@ -33,7 +39,7 @@ describe("shouldRetry", () => {
       timestamp: receivedDate
     })
     message.events.push(event)
-    expect(shouldRetry(message)).toBeTruthy()
+    expect(shouldRetry(config, message)).toBeTruthy()
   })
 
   it("should correctly handle messages that have already been retried", () => {
@@ -50,7 +56,7 @@ describe("shouldRetry", () => {
       timestamp: moreThanRetryDelay
     })
     message.events.push(retryEvent)
-    expect(shouldRetry(message)).toBeTruthy()
+    expect(shouldRetry(config, message)).toBeTruthy()
   })
 
   it("shouldn't retry messages too often that have already been retried", () => {
@@ -68,7 +74,7 @@ describe("shouldRetry", () => {
       timestamp: lessThanRetryDelay
     })
     message.events.push(retryEvent)
-    expect(shouldRetry(message)).toBeFalsy()
+    expect(shouldRetry(config, message)).toBeFalsy()
   })
 
   it("shouldn't retry messages too many times", () => {
@@ -98,6 +104,6 @@ describe("shouldRetry", () => {
     message.events.push(retryEvent1)
     message.events.push(retryEvent2)
     message.events.push(retryEvent3)
-    expect(shouldRetry(message)).toBeFalsy()
+    expect(shouldRetry(config, message)).toBeFalsy()
   })
 })

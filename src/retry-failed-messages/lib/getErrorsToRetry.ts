@@ -3,7 +3,12 @@ import type { OutputApiAuditLog, PromiseResult } from "src/shared/types"
 import { isError } from "src/shared/types"
 import shouldRetry from "./shouldRetry"
 
-export default async function (apiClient: AuditLogApiClient, errorCount: number): PromiseResult<OutputApiAuditLog[]> {
+export default async function (
+  apiClient: AuditLogApiClient,
+  config: { maxRetryAttempts: number; initialRetryDelay: number; retryDelay: number; errorsToRetry: number }
+): PromiseResult<OutputApiAuditLog[]> {
+  const errorCount = config.errorsToRetry
+
   let errors: OutputApiAuditLog[] = []
   let lastMessageId: string | undefined
 
@@ -17,7 +22,7 @@ export default async function (apiClient: AuditLogApiClient, errorCount: number)
       return errors
     }
 
-    const errorsToRetry = errorBatch.filter((e) => shouldRetry(e))
+    const errorsToRetry = errorBatch.filter((e) => shouldRetry(config, e))
 
     errors = errors.concat(errorsToRetry)
     if (errors.length >= errorCount) {
