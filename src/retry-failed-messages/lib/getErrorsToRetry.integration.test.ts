@@ -32,7 +32,6 @@ describe("getErrorsToRetry", () => {
     const count = 102
     await createMockErrors(count, { receivedDate: new Date(Date.now() - 3600000).toISOString() })
     await createMockAuditLogs(1)
-
     const errors = await getErrorsToRetry(apiClient, { ...baseConfig, errorsToRetry: 103 })
     expect(errors).toHaveLength(count)
   })
@@ -45,7 +44,6 @@ describe("getErrorsToRetry", () => {
     await createMockRetriedError()
     await createMockAuditLog()
     await createMockError()
-
     const errors = await getErrorsToRetry(apiClient, { ...baseConfig, errorsToRetry: 3 })
     if (isError(errors)) {
       throw new Error("Error getting errors to retry")
@@ -56,7 +54,6 @@ describe("getErrorsToRetry", () => {
 
   it("should only fetch the requested number of errors", async () => {
     await createMockErrors(2, { receivedDate: new Date(Date.now() - 3600000).toISOString() })
-
     const errors = await getErrorsToRetry(apiClient, { ...baseConfig, errorsToRetry: 1 })
     expect(errors).toHaveLength(1)
   })
