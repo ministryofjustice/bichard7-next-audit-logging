@@ -4,7 +4,7 @@
   "version": "0.0.1",
   "private": true,
   "devDependencies": {
-    "@aws-sdk/client-lambda": "^3.1161.0",
+    "@aws-sdk/client-lambda": "^3.1163.0",
     "@babel/core": "^8.1.0",
     "@stomp/stompjs": "^7.5.0",
     "@types/aws-lambda": "^8.10.164",
@@ -75,7 +75,7 @@
     "src/**/*.{js,ts}": "eslint --cache --fix --max-warnings 0 --ignore-pattern !.ncurc.js"
   },
   "dependencies": {
-    "@aws-sdk/client-ssm": "^3.1161.0",
+    "@aws-sdk/client-ssm": "^3.1163.0",
     "aws-lambda": "^1.0.7",
     "aws-sdk": "^2.1693.0",
     "axios": "^1.21.0",
