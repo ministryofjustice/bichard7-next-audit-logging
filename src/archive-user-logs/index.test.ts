@@ -87,7 +87,7 @@ describe("GIVEN Arhive User Logs Lambda", () => {
         expect(error).toBeInstanceOf(ZodError)
         expect((error as ZodError).issues[0].code).toBe("invalid_type")
         // @ts-ignore
-        expect((error as ZodError).issues[0].received).toBe("undefined")
+        expect((error as ZodError).issues[0].received).toBeUndefined()
       }
     })
 
@@ -114,7 +114,7 @@ describe("GIVEN Arhive User Logs Lambda", () => {
         expect(error).toBeInstanceOf(ZodError)
         expect((error as ZodError).issues[0].path[0]).toBe("owner")
         // @ts-ignore
-        expect((error as ZodError).issues[0].received).toBe("undefined")
+        expect((error as ZodError).issues[0].received).toBeUndefined()
       }
     })
 
